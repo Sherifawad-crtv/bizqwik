@@ -18,11 +18,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    api.me().then((me) => {
-      setProfile(me.profile);
-      setTier(me.tier);
-      setReady(true);
-    });
+    api
+      .me()
+      .then((me) => {
+        setProfile(me.profile);
+        setTier(me.tier);
+      })
+      .catch(() => {
+        setProfile(null);
+        setTier(null);
+      })
+      .finally(() => setReady(true));
   }, []);
 
   const login = async (email: string, password: string) => {
