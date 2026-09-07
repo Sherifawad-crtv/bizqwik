@@ -1,0 +1,149 @@
+:root {
+  /* ===== Bizqwik Foundation tokens ===== */
+  --paper: #f3f2ee;
+  --surface: #fbfaf7;
+  --sunken: #ecebe5;
+  --line: #e3e1da;
+  --ink: #1a1726;
+  --ink-muted: #6c687a;
+  --ink-faint: #9a96a6;
+  --primary: #5a41ff;
+  --primary-pressed: #4832d6;
+  --primary-tint: rgba(90, 65, 255, 0.1);
+  --primary-tint-strong: rgba(90, 65, 255, 0.12);
+  --avatar-grad: linear-gradient(135deg, #7b5cff, #4a2fe0);
+
+  --logging-fg: #946200;
+  --logging-bg: #f6e7c4;
+  --settled-fg: #4832d6;
+  --settled-bg: rgba(90, 65, 255, 0.12);
+  --paid-fg: #177a4b;
+  --paid-bg: #d8efe0;
+  --danger-fg: #b23a3a;
+  --danger-bg: #f6dedc;
+
+  --r-tile: 16px;
+  --r-input: 20px;
+  --r-button: 24px;
+  --r-card: 28px;
+
+  --font-body: "Urbanist", system-ui, sans-serif;
+  --font-mono: "Space Mono", ui-monospace, monospace;
+
+  --shadow-float: 0 14px 34px rgba(26, 23, 38, 0.18);
+  --shadow-card: 0 24px 60px rgba(26, 23, 38, 0.1);
+
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+
+  color-scheme: light;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  overscroll-behavior-y: none;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+#root {
+  min-height: 100svh;
+}
+
+a {
+  color: var(--primary);
+  text-decoration: none;
+}
+a:hover {
+  color: var(--primary-pressed);
+}
+
+button {
+  font-family: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+[role="button"],
+.no-select {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+input,
+select,
+textarea {
+  font-family: inherit;
+  font-size: 16px; /* prevents iOS focus auto-zoom */
+}
+
+[data-sq] {
+  corner-shape: squircle;
+}
+
+[data-scroll] {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+@keyframes bqSheetIn {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+@keyframes bqFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes bqPop {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
