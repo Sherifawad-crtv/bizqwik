@@ -51,7 +51,7 @@ export function Shell() {
         </div>
 
         <main style={{ position: "relative", height: "100svh", overflow: "hidden" }}>
-          <RouteTransition />
+          <RouteTransition tabs={NAV[profile.role]} />
         </main>
 
         <div

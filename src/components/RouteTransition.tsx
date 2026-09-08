@@ -1,24 +1,27 @@
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { useLocation, useOutlet } from "react-router-dom";
+import { matchTabIndex, type NavItem } from "../lib/nav";
 
-/** Routes reached by drilling in from a tab, not by switching tabs — these get
- * an iOS-style push/pop slide. Tab-to-tab switches stay instant, matching how
- * a real iOS tab bar behaves (it never animates). */
+/** Routes reached by drilling in from a tab, not by switching tabs. */
 function isPushRoute(pathname: string): boolean {
   return pathname === "/account" || /^\/coaches\/[^/]+$/.test(pathname);
 }
 
-interface Slot {
+interface Layer {
   pathname: string;
   outlet: ReactNode;
+  kind: "tab" | "push";
+  index: number; // tab position, -1 for push routes
 }
 
-interface PushSlot extends Slot {
-  entered: boolean;
-  leaving: boolean;
-}
+type Anim = { type: "none" } | { type: "push-in" | "push-out" } | { type: "tab-slide"; dir: 1 | -1 };
 
-const EXIT_MS = 340;
+const PUSH_MS = 340;
+const PUSH_EASE = "cubic-bezier(.32,.72,0,1)";
+// Same duration/easing as the bottom nav's sliding pill (BottomNav.tsx), so
+// the content and the pill read as one connected motion.
+const TAB_MS = 320;
+const TAB_EASE = "cubic-bezier(.22,1,.36,1)";
 
 const layerStyle: CSSProperties = {
   position: "absolute",
@@ -29,77 +32,146 @@ const layerStyle: CSSProperties = {
   background: "var(--paper)",
 };
 
-export function RouteTransition() {
+export function RouteTransition({ tabs }: { tabs: NavItem[] }) {
   const location = useLocation();
   const outlet = useOutlet();
 
-  const [tab, setTab] = useState<Slot>(() => ({ pathname: location.pathname, outlet }));
-  const [push, setPush] = useState<PushSlot | null>(null);
-  const exitTimer = useRef<number | undefined>(undefined);
-  const enterFrame = useRef<number | undefined>(undefined);
+  const makeLayer = (pathname: string, node: ReactNode): Layer =>
+    isPushRoute(pathname)
+      ? { pathname, outlet: node, kind: "push", index: -1 }
+      : { pathname, outlet: node, kind: "tab", index: matchTabIndex(pathname, tabs) };
+
+  const [current, setCurrent] = useState<Layer>(() => makeLayer(location.pathname, outlet));
+  const [previous, setPrevious] = useState<Layer | null>(null);
+  const [anim, setAnim] = useState<Anim>({ type: "none" });
+  const [entered, setEntered] = useState(false);
+
+  const timer = useRef<number | undefined>(undefined);
+  const frame1 = useRef<number | undefined>(undefined);
+  const frame2 = useRef<number | undefined>(undefined);
 
   useEffect(() => {
     const path = location.pathname;
 
-    if (isPushRoute(path)) {
-      clearTimeout(exitTimer.current);
-      setPush({ pathname: path, outlet, entered: false, leaving: false });
+    if (path === current.pathname) {
+      setCurrent(makeLayer(path, outlet));
       return;
     }
 
-    setTab({ pathname: path, outlet });
-    setPush((p) => (p ? { ...p, leaving: true } : null));
+    const next = makeLayer(path, outlet);
+    let nextAnim: Anim;
+    if (next.kind === "push") nextAnim = { type: "push-in" };
+    else if (current.kind === "push") nextAnim = { type: "push-out" };
+    else nextAnim = { type: "tab-slide", dir: next.index >= current.index ? 1 : -1 };
+
+    setPrevious(current);
+    setCurrent(next);
+    setAnim(nextAnim);
+    setEntered(false);
+
+    cancelAnimationFrame(frame1.current!);
+    cancelAnimationFrame(frame2.current!);
+    frame1.current = requestAnimationFrame(() => {
+      frame2.current = requestAnimationFrame(() => setEntered(true));
+    });
+
+    clearTimeout(timer.current);
+    const duration = nextAnim.type === "tab-slide" ? TAB_MS : PUSH_MS;
+    timer.current = window.setTimeout(() => {
+      setPrevious(null);
+      setAnim({ type: "none" });
+    }, duration);
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname]);
 
-  useEffect(() => {
-    if (!push || push.entered || push.leaving) return;
-    cancelAnimationFrame(enterFrame.current!);
-    enterFrame.current = requestAnimationFrame(() => {
-      enterFrame.current = requestAnimationFrame(() => {
-        setPush((p) => (p && !p.leaving ? { ...p, entered: true } : p));
-      });
-    });
-    return () => cancelAnimationFrame(enterFrame.current!);
-  }, [push]);
-
-  useEffect(() => {
-    if (!push?.leaving) return;
-    exitTimer.current = window.setTimeout(() => setPush(null), EXIT_MS);
-    return () => clearTimeout(exitTimer.current);
-  }, [push?.leaving]);
-
-  if (!push) return <div data-scroll style={layerStyle}>{tab.outlet}</div>;
-
-  const shown = push.entered && !push.leaving;
-
-  return (
-    <div style={{ position: "relative", height: "100%", overflow: "hidden" }}>
-      <div data-scroll style={layerStyle}>
-        {tab.outlet}
-      </div>
-      <div
-        aria-hidden
-        style={{
-          position: "absolute",
-          inset: 0,
-          background: "rgba(0,0,0,.14)",
-          opacity: shown ? 1 : 0,
-          transition: "opacity .34s cubic-bezier(.32,.72,0,1)",
-          pointerEvents: "none",
-        }}
-      />
-      <div
-        data-scroll
-        style={{
-          ...layerStyle,
-          boxShadow: shown ? "-8px 0 24px rgba(0,0,0,.12)" : "none",
-          transform: shown ? "translateX(0)" : "translateX(100%)",
-          transition: "transform .34s cubic-bezier(.32,.72,0,1)",
-        }}
-      >
-        {push.outlet}
-      </div>
-    </div>
+  useEffect(
+    () => () => {
+      clearTimeout(timer.current);
+      cancelAnimationFrame(frame1.current!);
+      cancelAnimationFrame(frame2.current!);
+    },
+    [],
   );
+
+  if (!previous) {
+    return (
+      <div data-scroll style={layerStyle}>
+        {current.outlet}
+      </div>
+    );
+  }
+
+  switch (anim.type) {
+    case "none":
+      return (
+        <div data-scroll style={layerStyle}>
+          {current.outlet}
+        </div>
+      );
+
+    case "push-in":
+    case "push-out": {
+      const overLayer = anim.type === "push-in" ? current : previous;
+      const underLayer = anim.type === "push-in" ? previous : current;
+      const overShown = anim.type === "push-in" ? entered : !entered;
+      return (
+        <div style={{ position: "relative", height: "100%", overflow: "hidden" }}>
+          <div data-scroll style={layerStyle}>
+            {underLayer.outlet}
+          </div>
+          <div
+            aria-hidden
+            style={{
+              position: "absolute",
+              inset: 0,
+              background: "rgba(0,0,0,.14)",
+              opacity: overShown ? 1 : 0,
+              transition: `opacity ${PUSH_MS}ms ${PUSH_EASE}`,
+              pointerEvents: "none",
+            }}
+          />
+          <div
+            data-scroll
+            style={{
+              ...layerStyle,
+              boxShadow: overShown ? "-8px 0 24px rgba(0,0,0,.12)" : "none",
+              transform: overShown ? "translateX(0)" : "translateX(100%)",
+              transition: `transform ${PUSH_MS}ms ${PUSH_EASE}`,
+            }}
+          >
+            {overLayer.outlet}
+          </div>
+        </div>
+      );
+    }
+
+    case "tab-slide": {
+      const dir = anim.dir;
+      return (
+        <div style={{ position: "relative", height: "100%", overflow: "hidden" }}>
+          <div
+            data-scroll
+            style={{
+              ...layerStyle,
+              transform: entered ? `translateX(${-dir * 100}%)` : "translateX(0)",
+              transition: `transform ${TAB_MS}ms ${TAB_EASE}`,
+            }}
+          >
+            {previous.outlet}
+          </div>
+          <div
+            data-scroll
+            style={{
+              ...layerStyle,
+              transform: entered ? "translateX(0)" : `translateX(${dir * 100}%)`,
+              transition: `transform ${TAB_MS}ms ${TAB_EASE}`,
+            }}
+          >
+            {current.outlet}
+          </div>
+        </div>
+      );
+    }
+  }
 }

@@ -1,6 +1,6 @@
 import { NavLink, useLocation } from "react-router-dom";
 import { Icon } from "./Icon";
-import type { NavItem } from "../lib/nav";
+import { matchTabIndex, type NavItem } from "../lib/nav";
 
 const ITEM = 52;
 const GAP = 2;
@@ -8,7 +8,7 @@ const PAD = 6;
 
 export function BottomNav({ items }: { items: NavItem[] }) {
   const { pathname } = useLocation();
-  const activeIndex = items.findIndex((t) => (t.path === "/" ? pathname === "/" : pathname.startsWith(t.path)));
+  const activeIndex = matchTabIndex(pathname, items);
 
   return (
     <div
