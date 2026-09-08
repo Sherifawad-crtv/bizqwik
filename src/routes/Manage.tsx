@@ -263,22 +263,19 @@ function InviteSheet({ open, tiers, onClose, onSaved }: { open: boolean; tiers: 
       <div style={{ font: "800 26px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 16px" }}>Invite someone</div>
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
         <TextField label="EMAIL" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@bizqwik.app" />
-        <SelectField label="ROLE" value={role} onChange={(e) => setRole(e.target.value as Role)}>
-          {INVITABLE_ROLES.map((r) => (
-            <option key={r} value={r}>
-              {ROLE_LABELS[r]}
-            </option>
-          ))}
-        </SelectField>
+        <SelectField
+          label="ROLE"
+          value={role}
+          onChange={(v) => setRole(v as Role)}
+          options={INVITABLE_ROLES.map((r) => ({ value: r, label: ROLE_LABELS[r] }))}
+        />
         {role !== "accountant" && (
-          <SelectField label="TIER" value={tierId} onChange={(e) => setTierId(e.target.value)}>
-            <option value="">No tier yet</option>
-            {tiers.map((t) => (
-              <option key={t.id} value={t.id}>
-                {t.name}
-              </option>
-            ))}
-          </SelectField>
+          <SelectField
+            label="TIER"
+            value={tierId}
+            onChange={setTierId}
+            options={[{ value: "", label: "No tier yet" }, ...tiers.map((t) => ({ value: t.id, label: t.name }))]}
+          />
         )}
       </div>
       {error && (
@@ -401,14 +398,13 @@ function PersonSheet({
             <div style={{ font: "600 16px var(--font-body)" }}>{ROLE_LABELS[profile.role]}</div>
           </div>
           {profile.role !== "accountant" && (
-            <SelectField label="TIER" value={tierId} onChange={(e) => saveTier(e.target.value)} disabled={busy}>
-              <option value="">Not assigned</option>
-              {tiers.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.name}
-                </option>
-              ))}
-            </SelectField>
+            <SelectField
+              label="TIER"
+              value={tierId}
+              onChange={saveTier}
+              disabled={busy}
+              options={[{ value: "", label: "Not assigned" }, ...tiers.map((t) => ({ value: t.id, label: t.name }))]}
+            />
           )}
         </div>
 

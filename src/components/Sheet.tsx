@@ -1,4 +1,5 @@
 import { useRef, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { useIsMobile } from "../lib/useIsMobile";
 
 interface SheetProps {
@@ -36,7 +37,7 @@ export function Sheet({ open, onClose, children, width = 460 }: SheetProps) {
   };
 
   if (isMobile) {
-    return (
+    return createPortal(
       <div
         onClick={onClose}
         style={{
@@ -74,11 +75,12 @@ export function Sheet({ open, onClose, children, width = 460 }: SheetProps) {
             {children}
           </div>
         </div>
-      </div>
+      </div>,
+      document.body,
     );
   }
 
-  return (
+  return createPortal(
     <div
       onClick={onClose}
       style={{
@@ -108,6 +110,7 @@ export function Sheet({ open, onClose, children, width = 460 }: SheetProps) {
       >
         {children}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
