@@ -1,9 +1,11 @@
+import { useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./lib/auth";
 import { HeaderProvider } from "./lib/header";
 import { OwnMonthProvider } from "./lib/ownMonth";
 import { RequireAuth, RequireRole } from "./lib/guards";
 import { Shell } from "./components/Shell";
+import { initSquirclePolyfill } from "./lib/squircle";
 
 import { Login } from "./routes/Login";
 import { Home } from "./routes/Home";
@@ -16,6 +18,10 @@ import { PayHistory } from "./routes/PayHistory";
 import { Account } from "./routes/Account";
 
 export default function App() {
+  useEffect(() => {
+    initSquirclePolyfill();
+  }, []);
+
   return (
     <BrowserRouter>
       <AuthProvider>
