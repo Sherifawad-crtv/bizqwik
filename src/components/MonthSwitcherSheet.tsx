@@ -20,12 +20,15 @@ export function MonthSwitcherSheet({ open, onClose, coachId, month, onChange }: 
 
   if (!open) return null;
 
+  const months = MOCK.MONTHS.slice().reverse();
+
   return (
     <Sheet open={open} onClose={onClose}>
       <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>MONTH</div>
       <div style={{ font: "800 30px/1.1 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 16px" }}>Pick a month</div>
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-        {(data ?? []).slice().reverse().map(({ month: m, row }) => {
+        {months.map((m) => {
+          const row = data?.find((d) => d.month === m)?.row ?? null;
           const on = m === month;
           return (
             <button
