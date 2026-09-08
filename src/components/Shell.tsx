@@ -60,7 +60,7 @@ export function Shell() {
             right: 0,
             bottom: 0,
             zIndex: 55,
-            padding: "0 16px calc(30px + var(--safe-bottom))",
+            padding: "0 16px calc(12px + var(--safe-bottom))",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
