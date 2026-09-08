@@ -1,13 +1,12 @@
-import { Navigate, Outlet, useLocation } from "react-router-dom";
+import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "./auth";
 import type { Role } from "./types";
 
 export function RequireAuth() {
   const { profile, ready } = useAuth();
-  const location = useLocation();
 
   if (!ready) return null;
-  if (!profile) return <Navigate to="/login" replace state={{ from: location }} />;
+  if (!profile) return <Navigate to="/login" replace />;
   return <Outlet />;
 }
 

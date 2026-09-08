@@ -1,20 +1,18 @@
 import { useState } from "react";
-import { Navigate, useLocation } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import { useAuth } from "../lib/auth";
 import { Button } from "../components/Button";
 
 export function Login() {
   const { profile, ready, login } = useAuth();
-  const location = useLocation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  if (ready && profile) {
-    const from = (location.state as { from?: Location })?.from?.pathname ?? "/";
-    return <Navigate to={from} replace />;
-  }
+  // Always land on the role's default screen after signing in — not
+  // wherever a lapsed session happened to leave off (e.g. Manage).
+  if (ready && profile) return <Navigate to="/" replace />;
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
