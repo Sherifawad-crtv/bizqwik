@@ -16,16 +16,16 @@ export function matchTabIndex(pathname: string, items: NavItem[]): number {
 }
 
 export const NAV: Record<Role, NavItem[]> = {
-  coach: [{ key: "mine", path: "/", label: "My Month", icon: "mine" }],
+  coach: [{ key: "mine", path: "/", label: "My Month", icon: "wallet" }],
   head_coach: [
     { key: "coaches", path: "/coaches", label: "Coaches", icon: "coaches" },
-    { key: "mine", path: "/", label: "My Month", icon: "mine" },
+    { key: "mine", path: "/", label: "My Month", icon: "wallet" },
   ],
   dept_head: [
     { key: "coaches", path: "/coaches", label: "Coaches", icon: "coaches" },
-    { key: "mine", path: "/", label: "My Month", icon: "mine" },
+    { key: "mine", path: "/", label: "My Month", icon: "wallet" },
     { key: "oversight", path: "/oversight", label: "Oversight", icon: "oversight" },
-    { key: "manage", path: "/manage", label: "Tiers & People", icon: "manage" },
+    { key: "manage", path: "/manage", label: "Tiers & People", icon: "settings" },
   ],
   accountant: [
     { key: "topay", path: "/pay", label: "To Pay", icon: "topay" },

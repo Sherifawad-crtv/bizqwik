@@ -47,7 +47,7 @@ export function Sidebar() {
                   font: "600 16px var(--font-body)",
                 }}
               >
-                <span style={{ width: 8, height: 8, borderRadius: 999, flex: "none", background: isActive ? "var(--primary)" : "var(--line)" }} />
+                <Icon name={t.icon} size={19} />
                 {t.label}
               </div>
             )}
