@@ -7,17 +7,18 @@ import { MoneyHero } from "../components/MoneyHero";
 import { MonthPicker } from "../components/MonthPicker";
 import { RollupTable, type ListRow } from "../components/RollupTable";
 import { ConfirmSheet } from "../components/ConfirmSheet";
+import { Spinner } from "../components/Spinner";
 import { canLog, type Rollup } from "../lib/types";
 
 export function Pay() {
   const [month, setMonth] = useState(MOCK.CURRENT_MONTH);
   const [paying, setPaying] = useState<Rollup | null>(null);
 
-  const { data, loading, refetch } = useAsync(() => api.month(month), [month]);
+  const { data, refetch } = useAsync(() => api.month(month), [month]);
 
   useSetHeader({ kicker: "SETTLED · READY", title: "To Pay", right: <MonthPicker month={month} onChange={setMonth} /> }, [month]);
 
-  if (loading || !data) return null;
+  if (!data) return <Spinner />;
   const rows = data.rows.filter((r) => canLog(r.role) && r.state === "settled");
 
   const rowItems: ListRow[] = rows.map((r) => ({

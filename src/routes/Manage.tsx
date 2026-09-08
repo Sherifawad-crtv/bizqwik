@@ -11,6 +11,7 @@ import { Sheet } from "../components/Sheet";
 import { ConfirmSheet } from "../components/ConfirmSheet";
 import { TextField, SelectField } from "../components/FormField";
 import { Avatar } from "../components/Avatar";
+import { Spinner } from "../components/Spinner";
 import { useAuth } from "../lib/auth";
 
 type Tab = "tiers" | "invites" | "people";
@@ -45,11 +46,11 @@ export function Manage() {
 // ---------- Tiers ----------
 
 function TiersPanel() {
-  const { data, loading, refetch } = useAsync(() => api.tiers(), []);
+  const { data, refetch } = useAsync(() => api.tiers(), []);
   const [editing, setEditing] = useState<Tier | "new" | null>(null);
   const [deleting, setDeleting] = useState<Tier | null>(null);
 
-  if (loading || !data) return null;
+  if (!data) return <Spinner />;
 
   return (
     <div>
@@ -164,12 +165,12 @@ function TierSheet({ open, tier, onClose, onSaved }: { open: boolean; tier: Tier
 const INVITABLE_ROLES: Role[] = ["coach", "head_coach", "dept_head", "accountant"];
 
 function InvitesPanel() {
-  const { data, loading, refetch } = useAsync(() => api.invites(), []);
+  const { data, refetch } = useAsync(() => api.invites(), []);
   const { data: tierData } = useAsync(() => api.tiers(), []);
   const [open, setOpen] = useState(false);
   const [deleting, setDeleting] = useState<Invite | null>(null);
 
-  if (loading || !data) return null;
+  if (!data) return <Spinner />;
   const tiers = tierData?.tiers ?? [];
 
   return (
@@ -297,11 +298,11 @@ function InviteSheet({ open, tiers, onClose, onSaved }: { open: boolean; tiers: 
 
 function PeoplePanel() {
   const { profile: me } = useAuth();
-  const { data, loading, refetch } = useAsync(() => api.profiles(), []);
+  const { data, refetch } = useAsync(() => api.profiles(), []);
   const { data: tierData } = useAsync(() => api.tiers(), []);
   const [editing, setEditing] = useState<Profile | null>(null);
 
-  if (loading || !data) return null;
+  if (!data) return <Spinner />;
   const tiers = tierData?.tiers ?? [];
 
   return (

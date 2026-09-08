@@ -13,6 +13,7 @@ import { AddSessionSheet } from "../components/AddSessionSheet";
 import { Avatar } from "../components/Avatar";
 import { Button } from "../components/Button";
 import { Icon } from "../components/Icon";
+import { Spinner } from "../components/Spinner";
 
 export function CoachDetail() {
   const { id } = useParams<{ id: string }>();
@@ -27,7 +28,7 @@ export function CoachDetail() {
 
   const coachId = id ?? "";
 
-  const { data, loading, refetch } = useAsync(async () => {
+  const { data, refetch } = useAsync(async () => {
     const [monthRes, sessionsRes] = await Promise.all([api.month(month), api.sessions(coachId, month)]);
     return { row: monthRes.rows.find((r) => r.coachId === coachId) ?? null, sessions: sessionsRes.sessions };
   }, [coachId, month]);
@@ -49,7 +50,8 @@ export function CoachDetail() {
     [month, data?.row?.name],
   );
 
-  if (loading || !data || !data.row) return null;
+  if (!data) return <Spinner />;
+  if (!data.row) return null;
   const { row, sessions } = data;
   const editable = row.state === "logging";
   const dayGroup = dayDate ? sessions.filter((s) => s.date === dayDate) : [];

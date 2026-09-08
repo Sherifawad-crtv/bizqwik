@@ -7,17 +7,18 @@ import { fmt } from "../lib/format";
 import { MoneyHero } from "../components/MoneyHero";
 import { MonthPicker } from "../components/MonthPicker";
 import { RollupTable, type ListRow } from "../components/RollupTable";
+import { Spinner } from "../components/Spinner";
 import { canLog } from "../lib/types";
 
 export function Oversight() {
   const [month, setMonth] = useState(MOCK.CURRENT_MONTH);
   const navigate = useNavigate();
 
-  const { data, loading } = useAsync(() => api.month(month), [month]);
+  const { data } = useAsync(() => api.month(month), [month]);
 
   useSetHeader({ kicker: "DEPARTMENT", title: "Oversight", right: <MonthPicker month={month} onChange={setMonth} /> }, [month]);
 
-  if (loading || !data) return null;
+  if (!data) return <Spinner />;
   const rows = data.rows.filter((r) => canLog(r.role));
   const closed = rows.filter((r) => r.state !== "logging").length;
   const progressPct = rows.length ? Math.round((closed / rows.length) * 100) : 0;

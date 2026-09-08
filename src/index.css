@@ -146,6 +146,11 @@ textarea {
     transform: scale(1);
   }
 }
+@keyframes bqSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
 
 @media (prefers-reduced-motion: reduce) {
   *,

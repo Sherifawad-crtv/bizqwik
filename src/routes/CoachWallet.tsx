@@ -13,6 +13,7 @@ import { DaySessionsSheet } from "../components/DaySessionsSheet";
 import { MonthSwitcherSheet } from "../components/MonthSwitcherSheet";
 import { Button } from "../components/Button";
 import { Icon } from "../components/Icon";
+import { Spinner } from "../components/Spinner";
 
 export function CoachWallet() {
   const { profile } = useAuth();
@@ -22,7 +23,7 @@ export function CoachWallet() {
   const [busyAction, setBusyAction] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
 
-  const { data, loading, refetch } = useAsync(async () => {
+  const { data, refetch } = useAsync(async () => {
     if (!profile) return null;
     const [monthRes, sessionsRes] = await Promise.all([api.month(month), api.sessions(profile.id, month)]);
     return { row: monthRes.rows.find((r) => r.coachId === profile.id) ?? null, sessions: sessionsRes.sessions };
@@ -45,7 +46,9 @@ export function CoachWallet() {
     [month],
   );
 
-  if (!profile || loading || !data || !data.row) return null;
+  if (!profile) return null;
+  if (!data) return <Spinner />;
+  if (!data.row) return null;
   const { row, sessions } = data;
   const editable = row.state === "logging";
   const dayGroup = dayDate ? sessions.filter((s) => s.date === dayDate) : [];
