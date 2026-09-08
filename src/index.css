@@ -73,6 +73,7 @@ body {
 a {
   color: var(--primary);
   text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
 }
 a:hover {
   color: var(--primary-pressed);
