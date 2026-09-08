@@ -28,6 +28,7 @@ export function BottomNav({ items }: { items: NavItem[] }) {
           end={t.path === "/"}
           title={t.label}
           aria-label={t.label}
+          data-nav-item
           style={{ flex: "none", width: 52, height: 52, background: "none", border: 0, padding: 0, display: "flex", alignItems: "center", justifyContent: "center" }}
         >
           {({ isActive }) => (
@@ -41,6 +42,7 @@ export function BottomNav({ items }: { items: NavItem[] }) {
                 justifyContent: "center",
                 background: isActive ? "var(--primary-tint-strong)" : "transparent",
                 color: isActive ? "var(--primary-pressed)" : "var(--ink-muted)",
+                transition: "background-color .2s ease, color .2s ease",
               }}
             >
               <Icon name={t.icon} />

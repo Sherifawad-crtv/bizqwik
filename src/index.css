@@ -108,6 +108,13 @@ textarea {
   scrollbar-width: thin;
 }
 
+[data-nav-item] {
+  transition: transform 0.12s ease;
+}
+[data-nav-item]:active {
+  transform: scale(0.88);
+}
+
 .tabular {
   font-variant-numeric: tabular-nums;
 }
