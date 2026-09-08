@@ -6,6 +6,7 @@ import { fmt, formatDateTime } from "../lib/format";
 import { MoneyHero } from "../components/MoneyHero";
 import { MonthPicker } from "../components/MonthPicker";
 import { RollupTable, type ListRow } from "../components/RollupTable";
+import { canLog } from "../lib/types";
 
 export function PayHistory() {
   const [month, setMonth] = useState(MOCK.CURRENT_MONTH);
@@ -14,7 +15,7 @@ export function PayHistory() {
   useSetHeader({ kicker: "LEDGER", title: "History", right: <MonthPicker month={month} onChange={setMonth} /> }, [month]);
 
   if (loading || !data) return null;
-  const rows = data.rows.filter((r) => r.role === "coach" && r.state === "paid");
+  const rows = data.rows.filter((r) => canLog(r.role) && r.state === "paid");
 
   const rowItems: ListRow[] = rows.map((r) => ({
     id: r.coachId,

@@ -7,6 +7,7 @@ import { fmt } from "../lib/format";
 import { MoneyHero } from "../components/MoneyHero";
 import { MonthPicker } from "../components/MonthPicker";
 import { RollupTable, type ListRow } from "../components/RollupTable";
+import { canLog } from "../lib/types";
 
 export function CoachesOverview() {
   const [month, setMonth] = useState(MOCK.CURRENT_MONTH);
@@ -17,7 +18,7 @@ export function CoachesOverview() {
   useSetHeader({ kicker: "CALISTHENICS DEPT", title: "Coaches", right: <MonthPicker month={month} onChange={setMonth} /> }, [month]);
 
   if (loading || !data) return null;
-  const rows = data.rows.filter((r) => r.role === "coach");
+  const rows = data.rows.filter((r) => canLog(r.role));
 
   const rowItems: ListRow[] = rows.map((r) => ({
     id: r.coachId,
