@@ -28,7 +28,7 @@ export function BottomNav({ items }: { items: NavItem[] }) {
           end={t.path === "/"}
           title={t.label}
           aria-label={t.label}
-          data-nav-item
+          data-tap
           style={{ flex: "none", width: 52, height: 52, background: "none", border: 0, padding: 0, display: "flex", alignItems: "center", justifyContent: "center" }}
         >
           {({ isActive }) => (

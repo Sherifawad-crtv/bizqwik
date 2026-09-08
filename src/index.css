@@ -108,10 +108,10 @@ textarea {
   scrollbar-width: thin;
 }
 
-[data-nav-item] {
+[data-tap] {
   transition: transform 0.12s ease;
 }
-[data-nav-item]:active {
+[data-tap]:active {
   transform: scale(0.88);
 }
 

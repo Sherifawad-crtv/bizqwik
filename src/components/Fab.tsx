@@ -49,6 +49,7 @@ export function Fab({ size = 64, fixedDesktop = false }: { size?: number; fixedD
         title="Log session"
         aria-label="Log session"
         onClick={() => (enabled ? setOpen(true) : showHint())}
+        data-tap
         style={{
           flex: "none",
           width: size,
