@@ -100,7 +100,7 @@ export function Shell() {
           </div>
           {header.right && <div style={{ marginLeft: "auto" }}>{header.right}</div>}
         </div>
-        <div style={{ padding: "24px 30px 60px", maxWidth: 1180 }}>
+        <div style={{ padding: "24px 30px 60px" }}>
           <Outlet />
         </div>
       </div>
