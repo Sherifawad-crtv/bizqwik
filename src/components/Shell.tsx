@@ -1,6 +1,7 @@
 import { Outlet, NavLink } from "react-router-dom";
 import { Avatar } from "./Avatar";
 import { BottomNav } from "./BottomNav";
+import { RouteTransition } from "./RouteTransition";
 import { Sidebar } from "./Sidebar";
 import { Fab } from "./Fab";
 import { useAuth } from "../lib/auth";
@@ -49,8 +50,8 @@ export function Shell() {
           {header.right && <div style={{ marginLeft: "auto", flex: "none" }}>{header.right}</div>}
         </div>
 
-        <main data-scroll style={{ minHeight: "100svh", padding: "calc(86px + var(--safe-top)) 16px calc(150px + var(--safe-bottom))" }}>
-          <Outlet />
+        <main style={{ position: "relative", height: "100svh", overflow: "hidden" }}>
+          <RouteTransition />
         </main>
 
         <div
