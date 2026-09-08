@@ -47,7 +47,7 @@ export function Sidebar() {
                   font: "600 16px var(--font-body)",
                 }}
               >
-                <Icon name={t.icon} size={19} />
+                <Icon name={t.icon} size={19} solid={isActive} />
                 {t.label}
               </div>
             )}

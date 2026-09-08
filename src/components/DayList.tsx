@@ -1,5 +1,6 @@
 import type { Session } from "../lib/types";
 import { StatePill } from "./StatePill";
+import { Icon } from "./Icon";
 import { dateLabel, egp } from "../lib/format";
 import type { State } from "../lib/types";
 
@@ -35,7 +36,8 @@ export function DayList({
 
   if (groups.length === 0) {
     return (
-      <div data-sq style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-tile)", padding: "22px 16px", textAlign: "center", color: "var(--ink-faint)", font: "500 14px var(--font-body)" }}>
+      <div data-sq style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-tile)", padding: "32px 16px", display: "flex", flexDirection: "column", alignItems: "center", gap: 8, color: "var(--ink-faint)", font: "500 14px var(--font-body)" }}>
+        <Icon name="calendar" size={26} />
         No sessions logged yet.
       </div>
     );

@@ -77,7 +77,12 @@ function TiersPanel() {
             </button>
           </div>
         ))}
-        {data.tiers.length === 0 && <div style={{ padding: 20, textAlign: "center", color: "var(--ink-faint)", font: "500 14px var(--font-body)" }}>No tiers yet.</div>}
+        {data.tiers.length === 0 && (
+          <div style={{ padding: "28px 20px", display: "flex", flexDirection: "column", alignItems: "center", gap: 8, color: "var(--ink-faint)", font: "500 14px var(--font-body)" }}>
+            <Icon name="tag" size={26} />
+            No tiers yet.
+          </div>
+        )}
       </div>
 
       <TierSheet open={editing !== null} tier={editing === "new" ? null : editing} onClose={() => setEditing(null)} onSaved={refetch} />
@@ -198,7 +203,12 @@ function InvitesPanel() {
             </button>
           </div>
         ))}
-        {data.invites.length === 0 && <div style={{ padding: 20, textAlign: "center", color: "var(--ink-faint)", font: "500 14px var(--font-body)" }}>No pending invites.</div>}
+        {data.invites.length === 0 && (
+          <div style={{ padding: "28px 20px", display: "flex", flexDirection: "column", alignItems: "center", gap: 8, color: "var(--ink-faint)", font: "500 14px var(--font-body)" }}>
+            <Icon name="envelope" size={26} />
+            No pending invites.
+          </div>
+        )}
       </div>
 
       <InviteSheet open={open} tiers={tiers} onClose={() => setOpen(false)} onSaved={refetch} />

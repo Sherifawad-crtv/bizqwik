@@ -68,7 +68,7 @@ export function BottomNav({ items }: { items: NavItem[] }) {
                 transition: "color .2s ease",
               }}
             >
-              <Icon name={t.icon} />
+              <Icon name={t.icon} solid={isActive} />
             </span>
           )}
         </NavLink>
