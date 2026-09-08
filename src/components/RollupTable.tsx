@@ -1,5 +1,6 @@
 import { Avatar } from "./Avatar";
 import { StatePill } from "./StatePill";
+import { Icon } from "./Icon";
 import { useIsMobile } from "../lib/useIsMobile";
 import type { State } from "../lib/types";
 import { egp } from "../lib/format";
@@ -49,6 +50,11 @@ export function RollupTable({ colA, colB, rows }: { colA: string; colB: string; 
               <div className="tabular" style={{ font: "800 20px var(--font-body)", letterSpacing: "-.01em" }}>{egp(r.amount).split(" ")[0]}</div>
               <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>EGP</div>
             </div>
+            {r.onClick && (
+              <span style={{ flex: "none", color: "var(--ink-faint)", display: "flex" }}>
+                <Icon name="chevron-right" size={16} />
+              </span>
+            )}
           </div>
         ))}
       </div>
@@ -57,17 +63,18 @@ export function RollupTable({ colA, colB, rows }: { colA: string; colB: string; 
 
   return (
     <div data-sq style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", overflow: "hidden" }}>
-      <div style={{ display: "grid", gridTemplateColumns: "2fr 1.3fr 1fr 1.1fr", gap: 12, padding: "10px 20px", background: "var(--sunken)", font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-muted)" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "2fr 1.3fr 1fr 1.1fr 20px", gap: 12, padding: "10px 20px", background: "var(--sunken)", font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-muted)" }}>
         <span>{colA}</span>
         <span>{colB}</span>
         <span>STATUS</span>
         <span style={{ textAlign: "right" }}>AMOUNT</span>
+        <span />
       </div>
       {rows.map((r) => (
         <div
           key={r.id}
           onClick={r.onClick}
-          style={{ display: "grid", gridTemplateColumns: "2fr 1.3fr 1fr 1.1fr", gap: 12, padding: "14px 20px", borderBottom: "1px solid var(--line)", alignItems: "center", cursor: r.onClick ? "pointer" : "default" }}
+          style={{ display: "grid", gridTemplateColumns: "2fr 1.3fr 1fr 1.1fr 20px", gap: 12, padding: "14px 20px", borderBottom: "1px solid var(--line)", alignItems: "center", cursor: r.onClick ? "pointer" : "default" }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
             <Avatar name={r.name} size={32} />
@@ -79,6 +86,9 @@ export function RollupTable({ colA, colB, rows }: { colA: string; colB: string; 
           <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-muted)", minWidth: 0, overflow: "hidden", textOverflow: "ellipsis" }}>{r.meta}</div>
           <div>{r.state && <StatePill state={r.state} />}</div>
           <div className="tabular" style={{ textAlign: "right", font: "800 20px var(--font-body)", letterSpacing: "-.01em" }}>{egp(r.amount)}</div>
+          <div style={{ display: "flex", justifyContent: "flex-end", color: "var(--ink-faint)" }}>
+            {r.onClick && <Icon name="chevron-right" size={16} />}
+          </div>
         </div>
       ))}
     </div>
