@@ -25,7 +25,7 @@ export function Sidebar() {
         height: "100svh",
       }}
     >
-      <div style={{ font: "800 20px var(--font-body)", letterSpacing: "-.01em", padding: "0 8px 4px" }}>BIZQWIK</div>
+      <img src="/wordmark.png" alt="Bizqwik" style={{ height: 24, width: "auto", margin: "0 8px 12px", display: "block" }} />
       <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", padding: "0 8px 20px" }}>
         {ROLE_LABELS[profile.role].toUpperCase()}
       </div>

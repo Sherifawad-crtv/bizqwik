@@ -39,9 +39,7 @@ export function Login() {
       }}
     >
       <div data-sq style={{ width: "min(420px, 100%)", background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: 30 }}>
-        <div style={{ width: 44, height: 44, borderRadius: "var(--r-tile)", background: "var(--primary)", color: "var(--surface)", display: "flex", alignItems: "center", justifyContent: "center", font: "800 18px var(--font-body)", marginBottom: 18 }} data-sq>
-          B
-        </div>
+        <img src="/mark.png" alt="Bizqwik" style={{ height: 44, width: "auto", marginBottom: 18, display: "block" }} />
         <div style={{ font: "800 30px/1.1 var(--font-body)", letterSpacing: "-.02em" }}>Sign in to Bizqwik</div>
         <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-muted)", marginTop: 6, marginBottom: 22 }}>
           ATTENDANCE &amp; PAYOUT PORTAL
