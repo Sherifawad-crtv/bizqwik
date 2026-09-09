@@ -42,7 +42,7 @@ export function Login() {
     >
       <img src="/wordmark.png" alt="Bizqwik" style={{ height: "clamp(26px, 6vw, 38px)", width: "auto", display: "block" }} />
       <div data-sq style={{ width: "min(420px, 100%)", background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: 30 }}>
-        <div style={{ font: "800 30px/1.1 var(--font-body)", letterSpacing: "-.02em" }}>Sign in to Bizqwik</div>
+        <div style={{ font: "800 30px/1.1 var(--font-body)", letterSpacing: "-.02em" }}>Sign in</div>
         <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-muted)", marginTop: 6, marginBottom: 22 }}>
           ATTENDANCE &amp; PAYOUT PORTAL
         </div>
