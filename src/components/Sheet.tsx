@@ -1,4 +1,4 @@
-import { useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { useIsMobile } from "../lib/useIsMobile";
 
@@ -9,13 +9,50 @@ interface SheetProps {
   width?: number;
 }
 
+// Settle covers both the entrance arriving at rest and a drag-dismiss
+// snapping back — both are "coming to a stop" motions. Exit covers both a
+// drag past the threshold and a programmatic close (backdrop tap, Cancel,
+// a save action) — both are the sheet leaving.
+const SETTLE_MS = 340;
+const SETTLE_EASE = "cubic-bezier(.16,1,.3,1)";
+const EXIT_MS = 260;
+const EXIT_EASE = "cubic-bezier(.4,0,1,1)";
+
+type Phase = "opening" | "open" | "closing";
+
 export function Sheet({ open, onClose, children, width = 460 }: SheetProps) {
   const isMobile = useIsMobile();
+  const [visible, setVisible] = useState(open);
+  const [phase, setPhase] = useState<Phase>(open ? "opening" : "closing");
   const [dragY, setDragY] = useState(0);
   const [dragging, setDragging] = useState(false);
   const y0 = useRef(0);
 
-  if (!open) return null;
+  useEffect(() => {
+    if (open) {
+      setVisible(true);
+      setDragY(0);
+      setPhase("opening");
+      // A single rAF can still land in the same paint as this render (React
+      // batches them), so the "opening" transform never actually hits the
+      // screen to transition from. Nesting a second rAF guarantees a real
+      // paint happens first.
+      let raf2 = 0;
+      const raf1 = requestAnimationFrame(() => {
+        raf2 = requestAnimationFrame(() => setPhase("open"));
+      });
+      return () => {
+        cancelAnimationFrame(raf1);
+        cancelAnimationFrame(raf2);
+      };
+    }
+    setPhase("closing");
+    const t = window.setTimeout(() => setVisible(false), EXIT_MS);
+    return () => window.clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
+  if (!visible) return null;
 
   const stop = (e: React.MouseEvent) => e.stopPropagation();
 
@@ -30,13 +67,24 @@ export function Sheet({ open, onClose, children, width = 460 }: SheetProps) {
     setDragY(d > 0 ? d : d / 6);
   };
   const dragEnd = () => {
-    const close = dragY > 150;
     setDragging(false);
-    setDragY(0);
-    if (close) onClose();
+    if (dragY > 150) {
+      onClose(); // sheet keeps sliding from its dragged position to fully off-screen
+    } else {
+      setDragY(0);
+    }
   };
 
   if (isMobile) {
+    const transform = dragging ? `translateY(${dragY}px)` : phase === "open" ? "translateY(0)" : "translateY(100%)";
+    const transition = dragging
+      ? "none"
+      : phase === "opening"
+        ? "none"
+        : phase === "closing"
+          ? `transform ${EXIT_MS}ms ${EXIT_EASE}`
+          : `transform ${SETTLE_MS}ms ${SETTLE_EASE}`;
+
     return createPortal(
       <div
         onClick={onClose}
@@ -45,7 +93,8 @@ export function Sheet({ open, onClose, children, width = 460 }: SheetProps) {
           inset: 0,
           zIndex: 200,
           background: "rgba(26,23,38,.34)",
-          animation: "bqFade .2s ease",
+          opacity: phase === "open" ? 1 : 0,
+          transition: `opacity ${phase === "closing" ? EXIT_MS : SETTLE_MS}ms ease`,
         }}
       >
         <div
@@ -64,9 +113,8 @@ export function Sheet({ open, onClose, children, width = 460 }: SheetProps) {
             border: "1px solid var(--line)",
             boxShadow: "var(--shadow-float)",
             padding: "10px 20px 20px",
-            transform: `translateY(${dragY}px)`,
-            transition: dragging ? "none" : "transform .28s cubic-bezier(.22,1,.36,1)",
-            animation: "bqSheetIn .28s cubic-bezier(.22,1,.36,1)",
+            transform,
+            transition,
             touchAction: "none",
           }}
         >
