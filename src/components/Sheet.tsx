@@ -12,11 +12,13 @@ interface SheetProps {
 // Settle covers both the entrance arriving at rest and a drag-dismiss
 // snapping back — both are "coming to a stop" motions. Exit covers both a
 // drag past the threshold and a programmatic close (backdrop tap, Cancel,
-// a save action) — both are the sheet leaving.
-const SETTLE_MS = 340;
-const SETTLE_EASE = "cubic-bezier(.16,1,.3,1)";
-const EXIT_MS = 260;
-const EXIT_EASE = "cubic-bezier(.4,0,1,1)";
+// a save action) — both are the sheet leaving. Plain ease-out/ease-in
+// (not an aggressive expo-style curve) so the motion reads as gentle
+// rather than snappy.
+const SETTLE_MS = 380;
+const SETTLE_EASE = "ease-out";
+const EXIT_MS = 320;
+const EXIT_EASE = "ease-in";
 
 type Phase = "opening" | "open" | "closing";
 
@@ -27,6 +29,7 @@ export function Sheet({ open, onClose, children, width = 460 }: SheetProps) {
   const [dragY, setDragY] = useState(0);
   const [dragging, setDragging] = useState(false);
   const y0 = useRef(0);
+  const panelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (open) {
@@ -47,8 +50,26 @@ export function Sheet({ open, onClose, children, width = 460 }: SheetProps) {
       };
     }
     setPhase("closing");
-    const t = window.setTimeout(() => setVisible(false), EXIT_MS);
-    return () => window.clearTimeout(t);
+    // Unmount exactly when the close transition actually finishes, rather
+    // than guessing a fixed delay that can cut it off a frame early (reads
+    // as an abrupt pop) — with a fallback timer in case the event is ever
+    // missed (e.g. the transition gets interrupted).
+    let done = false;
+    const finish = () => {
+      if (done) return;
+      done = true;
+      setVisible(false);
+    };
+    const el = panelRef.current;
+    const onEnd = (e: TransitionEvent) => {
+      if (e.propertyName === "transform") finish();
+    };
+    el?.addEventListener("transitionend", onEnd);
+    const fallback = window.setTimeout(finish, EXIT_MS + 150);
+    return () => {
+      el?.removeEventListener("transitionend", onEnd);
+      window.clearTimeout(fallback);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
@@ -96,6 +117,7 @@ export function Sheet({ open, onClose, children, width = 460 }: SheetProps) {
         }}
       >
         <div
+          ref={panelRef}
           onClick={stop}
           data-sq
           style={{
