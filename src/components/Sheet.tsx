@@ -102,7 +102,7 @@ export function Sheet({ open, onClose, children, width = 460 }: SheetProps) {
             position: "absolute",
             left: "calc(8px + var(--safe-left))",
             right: "calc(8px + var(--safe-right))",
-            bottom: "calc(8px + var(--safe-bottom))",
+            bottom: "8px",
             maxHeight: "calc(88svh - 16px)",
             display: "flex",
             flexDirection: "column",
