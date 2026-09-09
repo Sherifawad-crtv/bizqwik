@@ -33,13 +33,15 @@ export function Login() {
         minHeight: "100svh",
         background: "var(--paper)",
         display: "flex",
+        flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
+        gap: "clamp(20px, 4vh, 32px)",
         padding: 20,
       }}
     >
+      <img src="/wordmark.png" alt="Bizqwik" style={{ height: "clamp(26px, 6vw, 38px)", width: "auto", display: "block" }} />
       <div data-sq style={{ width: "min(420px, 100%)", background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: 30 }}>
-        <img src="/mark.png" alt="Bizqwik" style={{ height: 44, width: "auto", marginBottom: 18, display: "block" }} />
         <div style={{ font: "800 30px/1.1 var(--font-body)", letterSpacing: "-.02em" }}>Sign in to Bizqwik</div>
         <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-muted)", marginTop: 6, marginBottom: 22 }}>
           ATTENDANCE &amp; PAYOUT PORTAL
