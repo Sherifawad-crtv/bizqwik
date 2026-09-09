@@ -50,18 +50,20 @@ export function Sheet({ open, onClose, children, width = 460 }: SheetProps) {
       >
         <div
           onClick={stop}
+          data-sq
           style={{
             position: "absolute",
-            left: 0,
-            right: 0,
-            bottom: 0,
-            maxHeight: "88svh",
+            left: "calc(12px + var(--safe-left))",
+            right: "calc(12px + var(--safe-right))",
+            bottom: "calc(12px + var(--safe-bottom))",
+            maxHeight: "calc(88svh - 24px)",
             display: "flex",
             flexDirection: "column",
             background: "var(--surface)",
-            borderRadius: "28px 28px 0 0",
-            borderTop: "1px solid var(--line)",
-            padding: "10px 20px calc(28px + var(--safe-bottom))",
+            borderRadius: "var(--r-card)",
+            border: "1px solid var(--line)",
+            boxShadow: "var(--shadow-float)",
+            padding: "10px 20px 20px",
             transform: `translateY(${dragY}px)`,
             transition: dragging ? "none" : "transform .28s cubic-bezier(.22,1,.36,1)",
             animation: "bqSheetIn .28s cubic-bezier(.22,1,.36,1)",
