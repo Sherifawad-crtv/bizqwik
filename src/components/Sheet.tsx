@@ -93,8 +93,6 @@ export function Sheet({ open, onClose, children, width = 460 }: SheetProps) {
           inset: 0,
           zIndex: 200,
           background: "rgba(26,23,38,.34)",
-          opacity: phase === "open" ? 1 : 0,
-          transition: `opacity ${phase === "closing" ? EXIT_MS : SETTLE_MS}ms ease`,
         }}
       >
         <div
@@ -102,10 +100,10 @@ export function Sheet({ open, onClose, children, width = 460 }: SheetProps) {
           data-sq
           style={{
             position: "absolute",
-            left: "calc(12px + var(--safe-left))",
-            right: "calc(12px + var(--safe-right))",
-            bottom: "calc(12px + var(--safe-bottom))",
-            maxHeight: "calc(88svh - 24px)",
+            left: "calc(8px + var(--safe-left))",
+            right: "calc(8px + var(--safe-right))",
+            bottom: "calc(8px + var(--safe-bottom))",
+            maxHeight: "calc(88svh - 16px)",
             display: "flex",
             flexDirection: "column",
             background: "var(--surface)",
