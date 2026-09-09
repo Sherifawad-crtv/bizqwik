@@ -23,10 +23,18 @@ const PUSH_EASE = "cubic-bezier(.32,.72,0,1)";
 const TAB_MS = 320;
 const TAB_EASE = "cubic-bezier(.22,1,.36,1)";
 
+// Bottom clearance for the fixed bottom-nav bar (BottomNav.tsx: 64px icons +
+// 12px padding = ~76px real footprint) needs real headroom beyond that, not
+// just enough to clear it at rest: iOS Safari's toolbar (address bar, often
+// bottom-positioned since iOS 15) collapses/expands as you scroll, which
+// can shift the fixed nav bar by 80-100px relative to already-scrolled
+// content — on a small screen that's most of a tight margin, and the last
+// row of a list can end up at the same screen position as the nav icons,
+// so a tap meant for the nav registers on the row underneath instead.
 const layerStyle: CSSProperties = {
   position: "absolute",
   inset: 0,
-  padding: "calc(86px + var(--safe-top)) 16px calc(150px + var(--safe-bottom))",
+  padding: "calc(86px + var(--safe-top)) 16px calc(230px + var(--safe-bottom))",
   overflowY: "auto",
   WebkitOverflowScrolling: "touch",
   background: "var(--paper)",
