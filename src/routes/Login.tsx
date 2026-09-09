@@ -1,10 +1,22 @@
 import { useState } from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../lib/auth";
+import { useIsMobile } from "../lib/useIsMobile";
+import { useKeyboardInset } from "../lib/useKeyboardInset";
 import { Button } from "../components/Button";
+
+const KEYBOARD_THRESHOLD = 80; // ignore small viewport jitter from browser chrome
+
+function focusIntoView(e: React.FocusEvent<HTMLInputElement>) {
+  const el = e.target;
+  window.setTimeout(() => el.scrollIntoView({ block: "center", behavior: "smooth" }), 300);
+}
 
 export function Login() {
   const { profile, ready, login } = useAuth();
+  const isMobile = useIsMobile();
+  const keyboardInset = useKeyboardInset(isMobile);
+  const keyboardOpen = keyboardInset > KEYBOARD_THRESHOLD;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -35,9 +47,11 @@ export function Login() {
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        justifyContent: "center",
+        justifyContent: keyboardOpen ? "flex-start" : "center",
         gap: "clamp(20px, 4vh, 32px)",
         padding: 20,
+        paddingBottom: keyboardOpen ? keyboardInset + 20 : 20,
+        overflowY: isMobile ? "auto" : undefined,
       }}
     >
       <img src="/wordmark.png" alt="Bizqwik" style={{ height: "clamp(34px, 8vw, 42px)", width: "auto", display: "block" }} />
@@ -56,6 +70,7 @@ export function Login() {
               autoComplete="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              onFocus={focusIntoView}
               style={{ display: "block", width: "100%", border: 0, background: "none", outline: "none", font: "600 16px var(--font-body)", color: "var(--ink)", padding: "2px 0 0" }}
             />
           </label>
@@ -67,6 +82,7 @@ export function Login() {
               autoComplete="current-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              onFocus={focusIntoView}
               style={{ display: "block", width: "100%", border: 0, background: "none", outline: "none", font: "600 16px var(--font-body)", color: "var(--ink)", padding: "2px 0 0" }}
             />
           </label>
