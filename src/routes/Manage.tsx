@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useSetHeader } from "../lib/header";
 import { useAsync } from "../lib/useAsync";
+import { useLatch } from "../lib/useLatch";
 import { api } from "../lib/backend";
 import type { Invite, Profile, Role, Tier } from "../lib/types";
 import { ROLE_LABELS } from "../lib/types";
@@ -49,6 +50,7 @@ function TiersPanel() {
   const { data, refetch } = useAsync(() => api.tiers(), []);
   const [editing, setEditing] = useState<Tier | "new" | null>(null);
   const [deleting, setDeleting] = useState<Tier | null>(null);
+  const shownDeleting = useLatch(deleting);
 
   if (!data) return <Spinner />;
 
@@ -86,17 +88,17 @@ function TiersPanel() {
       </div>
 
       <TierSheet open={editing !== null} tier={editing === "new" ? null : editing} onClose={() => setEditing(null)} onSaved={refetch} />
-      {deleting && (
+      {shownDeleting && (
         <ConfirmSheet
           open={!!deleting}
           onClose={() => setDeleting(null)}
           kicker="DELETE TIER"
-          title={`Delete ${deleting.name}?`}
+          title={`Delete ${shownDeleting.name}?`}
           sub="Coaches on this tier will need a new one assigned."
           confirmLabel="Delete tier"
           danger
           onConfirm={async () => {
-            await api.deleteTier(deleting.id);
+            await api.deleteTier(shownDeleting.id);
             refetch();
           }}
         />
@@ -174,6 +176,7 @@ function InvitesPanel() {
   const { data: tierData } = useAsync(() => api.tiers(), []);
   const [open, setOpen] = useState(false);
   const [deleting, setDeleting] = useState<Invite | null>(null);
+  const shownDeleting = useLatch(deleting);
 
   if (!data) return <Spinner />;
   const tiers = tierData?.tiers ?? [];
@@ -212,16 +215,16 @@ function InvitesPanel() {
       </div>
 
       <InviteSheet open={open} tiers={tiers} onClose={() => setOpen(false)} onSaved={refetch} />
-      {deleting && (
+      {shownDeleting && (
         <ConfirmSheet
           open={!!deleting}
           onClose={() => setDeleting(null)}
           kicker="CANCEL INVITE"
-          title={`Cancel invite for ${deleting.email}?`}
+          title={`Cancel invite for ${shownDeleting.email}?`}
           confirmLabel="Cancel invite"
           danger
           onConfirm={async () => {
-            await api.deleteInvite(deleting.email);
+            await api.deleteInvite(shownDeleting.email);
             refetch();
           }}
         />
@@ -362,6 +365,7 @@ function PersonSheet({
   onClose: () => void;
   onSaved: () => void;
 }) {
+  const shown = useLatch(profile);
   const [tierId, setTierId] = useState(profile?.tierId ?? "");
   const [confirmRemove, setConfirmRemove] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -376,14 +380,17 @@ function PersonSheet({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, profile]);
 
-  if (!open || !profile) return null;
+  // Only blocks the true "nothing has ever been selected" state — once a
+  // profile has been shown, `shown` keeps it so the sheet can close with a
+  // real slide-out instead of unmounting the instant `profile` goes null.
+  if (!shown) return null;
 
   const saveTier = async (value: string) => {
     setTierId(value);
     setBusy(true);
     setError(null);
     try {
-      await api.assignTier(profile.id, value || null);
+      await api.assignTier(shown.id, value || null);
       onSaved();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
@@ -396,19 +403,19 @@ function PersonSheet({
     <>
       <Sheet open={open} onClose={onClose}>
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 18 }}>
-          <Avatar name={profile.name} size={44} />
+          <Avatar name={shown.name} size={44} />
           <div>
-            <div style={{ font: "800 22px var(--font-body)", letterSpacing: "-.01em" }}>{profile.name}</div>
-            <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>{profile.email}</div>
+            <div style={{ font: "800 22px var(--font-body)", letterSpacing: "-.01em" }}>{shown.name}</div>
+            <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>{shown.email}</div>
           </div>
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           <div data-sq style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "12px 16px" }}>
             <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>ROLE</div>
-            <div style={{ font: "600 16px var(--font-body)" }}>{ROLE_LABELS[profile.role]}</div>
+            <div style={{ font: "600 16px var(--font-body)" }}>{ROLE_LABELS[shown.role]}</div>
           </div>
-          {profile.role !== "accountant" && (
+          {shown.role !== "accountant" && (
             <SelectField
               label="TIER"
               value={tierId}
@@ -439,12 +446,12 @@ function PersonSheet({
         open={confirmRemove}
         onClose={() => setConfirmRemove(false)}
         kicker="REMOVE PROFILE"
-        title={`Remove ${profile.name}?`}
+        title={`Remove ${shown.name}?`}
         sub="They'll lose access to Bizqwik immediately. Their past records stay in the ledger."
         confirmLabel="Remove profile"
         danger
         onConfirm={async () => {
-          await api.removeProfile(profile.id);
+          await api.removeProfile(shown.id);
           onSaved();
           onClose();
         }}

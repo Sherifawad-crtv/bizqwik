@@ -15,9 +15,9 @@ interface SheetProps {
 // a save action) — both are the sheet leaving. Plain ease-out/ease-in
 // (not an aggressive expo-style curve) so the motion reads as gentle
 // rather than snappy.
-const SETTLE_MS = 380;
+const SETTLE_MS = 280;
 const SETTLE_EASE = "ease-out";
-const EXIT_MS = 320;
+const EXIT_MS = 240;
 const EXIT_EASE = "ease-in";
 
 type Phase = "opening" | "open" | "closing";

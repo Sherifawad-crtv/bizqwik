@@ -4,6 +4,7 @@ import { Button } from "./Button";
 import { Icon } from "./Icon";
 import { DateField } from "./DateField";
 import { ConfirmSheet } from "./ConfirmSheet";
+import { useLatch } from "../lib/useLatch";
 import { api } from "../lib/backend";
 import type { Session } from "../lib/types";
 import { dateLabelFull, daysInMonth, egp, isoDate } from "../lib/format";
@@ -27,8 +28,6 @@ export function DaySessionsSheet({ open, onClose, coachId, month, date, sessions
   const [error, setError] = useState<string | null>(null);
   const min = isoDate(month, 1);
   const max = isoDate(month, daysInMonth(month));
-
-  if (!open) return null;
 
   const move = async (id: string, newDate: string) => {
     setBusyId(id);
@@ -55,6 +54,7 @@ export function DaySessionsSheet({ open, onClose, coachId, month, date, sessions
   };
 
   const removingIndex = sessions.findIndex((s) => s.id === removingId);
+  const shownRemovingIndex = useLatch(removingId ? removingIndex : null);
 
   return (
     <>
@@ -119,7 +119,7 @@ export function DaySessionsSheet({ open, onClose, coachId, month, date, sessions
         open={!!removingId}
         onClose={() => setRemovingId(null)}
         kicker="REMOVE SESSION"
-        title={`Remove session ${removingIndex + 1}?`}
+        title={`Remove session ${(shownRemovingIndex ?? -1) + 1}?`}
         sub="This can't be undone."
         confirmLabel="Remove session"
         danger

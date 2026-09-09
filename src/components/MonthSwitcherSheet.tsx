@@ -18,8 +18,6 @@ export function MonthSwitcherSheet({ open, onClose, coachId, month, onChange }: 
     return MOCK.MONTHS.map((m, i) => ({ month: m, row: rollups[i].rows.find((r) => r.coachId === coachId) ?? null }));
   }, [coachId, open]);
 
-  if (!open) return null;
-
   const months = MOCK.MONTHS.slice().reverse();
 
   return (

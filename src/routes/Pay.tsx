@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useSetHeader } from "../lib/header";
 import { useAsync } from "../lib/useAsync";
+import { useLatch } from "../lib/useLatch";
 import { api, MOCK } from "../lib/backend";
 import { fmt } from "../lib/format";
 import { MoneyHero } from "../components/MoneyHero";
@@ -13,6 +14,7 @@ import { canLog, type Rollup } from "../lib/types";
 export function Pay() {
   const [month, setMonth] = useState(MOCK.CURRENT_MONTH);
   const [paying, setPaying] = useState<Rollup | null>(null);
+  const shownPaying = useLatch(paying);
 
   const { data, refetch } = useAsync(() => api.month(month), [month]);
 
@@ -52,16 +54,16 @@ export function Pay() {
         Paying moves a coach to PAID — irreversible without a head reopen.
       </div>
 
-      {paying && (
+      {shownPaying && (
         <ConfirmSheet
           open={!!paying}
           onClose={() => setPaying(null)}
           kicker="MARK PAID"
-          title={`Pay ${paying.name}?`}
-          sub={`${fmt(paying.total)} EGP · ${paying.count} sessions · ${month}. This records the payout as made in cash — it can't be undone from here.`}
-          confirmLabel={`Mark paid · ${fmt(paying.total)} EGP`}
+          title={`Pay ${shownPaying.name}?`}
+          sub={`${fmt(shownPaying.total)} EGP · ${shownPaying.count} sessions · ${month}. This records the payout as made in cash — it can't be undone from here.`}
+          confirmLabel={`Mark paid · ${fmt(shownPaying.total)} EGP`}
           onConfirm={async () => {
-            await api.pay(paying.coachId, month);
+            await api.pay(shownPaying.coachId, month);
             refetch();
           }}
         />

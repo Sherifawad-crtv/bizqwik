@@ -17,8 +17,6 @@ export function ConfirmSheet({ open, onClose, kicker, title, sub, confirmLabel, 
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  if (!open) return null;
-
   const go = async () => {
     setBusy(true);
     setError(null);

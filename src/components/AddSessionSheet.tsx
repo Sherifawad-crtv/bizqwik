@@ -40,8 +40,6 @@ export function AddSessionSheet({ open, onClose, coachId, coachName, month, rate
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, month]);
 
-  if (!open) return null;
-
   const confirm = async () => {
     setSaving(true);
     setError(null);
