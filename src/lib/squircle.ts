@@ -5,7 +5,10 @@ import { getSvgPath } from "figma-squircle";
 // property at all, so [data-sq] elements there fall back to plain rounded
 // corners. This clips the same elements to an equivalent superellipse path
 // in JS, driven off each element's own `border-radius` and measured size.
-const CORNER_SMOOTHING = 0.6;
+// 1 = maximum curvature. At the radius-to-size ratios used across this UI
+// (16-28px radii on much larger boxes), anything lower reads as visually
+// identical to a plain border-radius.
+const CORNER_SMOOTHING = 1;
 
 function nativeSquircleSupported(): boolean {
   return typeof CSS !== "undefined" && !!CSS.supports && CSS.supports("corner-shape", "squircle");
