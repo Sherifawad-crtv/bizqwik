@@ -3,13 +3,15 @@
 // needed to change: swap this one file to point elsewhere and everything
 // keeps working (see supabaseClient.ts for which project it targets).
 import { FN_SLUG, supabase } from "./supabaseClient";
+import { bump } from "./bus";
 import type { Invite, Profile, Role, Rollup, Session, Tier } from "./types";
 
 type Method = "GET" | "POST";
 
 async function callFn<T>(path: string, opts?: { method?: Method; body?: Record<string, unknown> }): Promise<T> {
+  const method = opts?.method ?? "GET";
   const { data, error } = await supabase.functions.invoke(`${FN_SLUG}/${path}`, {
-    method: opts?.method ?? "GET",
+    method,
     body: opts?.body,
   });
   if (error) {
@@ -25,6 +27,9 @@ async function callFn<T>(path: string, opts?: { method?: Method; body?: Record<s
     }
     throw new Error(message);
   }
+  // POSTs are the app's only mutations — bump so every mounted useAsync
+  // screen revalidates, not just whichever one happened to trigger this.
+  if (method === "POST") bump();
   return data as T;
 }
 
