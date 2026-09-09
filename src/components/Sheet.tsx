@@ -107,7 +107,7 @@ export function Sheet({ open, onClose, children, width = 460 }: SheetProps) {
             display: "flex",
             flexDirection: "column",
             background: "var(--surface)",
-            borderRadius: "var(--r-card)",
+            borderRadius: 36,
             border: "1px solid var(--line)",
             boxShadow: "var(--shadow-float)",
             padding: "10px 20px 20px",
