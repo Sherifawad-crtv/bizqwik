@@ -53,7 +53,7 @@ function Row({ k, v, last }: { k: string; v: string; last?: boolean }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 16px", borderBottom: last ? "none" : "1px solid var(--line)" }}>
       <span style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", width: 90, flex: "none" }}>{k}</span>
-      <span style={{ font: "600 15px var(--font-body)", color: "var(--ink)" }}>{v}</span>
+      <span style={{ font: "600 15px var(--font-body)", color: "var(--ink)", flex: 1, minWidth: 0 }}>{v}</span>
     </div>
   );
 }

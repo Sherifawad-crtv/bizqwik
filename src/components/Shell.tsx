@@ -41,13 +41,13 @@ export function Shell() {
           <NavLink to="/account" aria-label="Account">
             <Avatar name={profile.name} size={40} />
           </NavLink>
-          <div style={{ minWidth: 0 }}>
+          <div style={{ minWidth: 48, flex: "1 1 auto" }}>
             <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>{header.kicker}</div>
             <div style={{ font: "800 20px/1.15 var(--font-body)", letterSpacing: "-.01em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
               {header.title}
             </div>
           </div>
-          {header.right && <div style={{ marginLeft: "auto", flex: "none" }}>{header.right}</div>}
+          {header.right && <div style={{ marginLeft: "auto", flex: "0 1 auto", minWidth: 0 }}>{header.right}</div>}
         </div>
 
         <main style={{ position: "relative", height: "100svh", overflow: "hidden" }}>

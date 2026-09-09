@@ -3,8 +3,15 @@ import { Icon } from "./Icon";
 import { matchTabIndex, type NavItem } from "../lib/nav";
 
 const ITEM = 52;
-const GAP = 2;
+const GAP = 6;
 const PAD = 6;
+// Real hit area extends past the visible ITEM box using space that already
+// exists but is otherwise unused: the bar's own vertical padding (64px bar,
+// 52px icon), and half the gap on each side horizontally (so two adjacent
+// items' hit zones meet exactly at the gap's midpoint — full coverage,
+// no overlap). Purely invisible; the icons themselves never change size.
+const HIT_SLOP_Y = (64 - ITEM) / 2;
+const HIT_SLOP_X = GAP / 2;
 
 export function BottomNav({ items }: { items: NavItem[] }) {
   const { pathname } = useLocation();
@@ -56,20 +63,23 @@ export function BottomNav({ items }: { items: NavItem[] }) {
           style={{ position: "relative", zIndex: 1, flex: "none", width: ITEM, height: ITEM, background: "none", border: 0, padding: 0, display: "flex", alignItems: "center", justifyContent: "center" }}
         >
           {({ isActive }) => (
-            <span
-              style={{
-                width: ITEM,
-                height: ITEM,
-                borderRadius: 999,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: isActive ? "var(--primary-pressed)" : "var(--ink-muted)",
-                transition: "color .2s ease",
-              }}
-            >
-              <Icon name={t.icon} solid={isActive} />
-            </span>
+            <>
+              <span aria-hidden style={{ position: "absolute", inset: `${-HIT_SLOP_Y}px ${-HIT_SLOP_X}px` }} />
+              <span
+                style={{
+                  width: ITEM,
+                  height: ITEM,
+                  borderRadius: 999,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: isActive ? "var(--primary-pressed)" : "var(--ink-muted)",
+                  transition: "color .2s ease",
+                }}
+              >
+                <Icon name={t.icon} solid={isActive} />
+              </span>
+            </>
           )}
         </NavLink>
       ))}
