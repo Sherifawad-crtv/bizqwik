@@ -1,50 +1,46 @@
 import type { SVGProps } from "react";
-import {
-  WalletIcon,
-  UserGroupIcon,
-  MagnifyingGlassIcon,
-  Cog6ToothIcon,
-  BanknotesIcon,
-  ClockIcon,
-  PlusIcon,
-  MinusIcon,
-  XMarkIcon,
-  ChevronDownIcon,
-  ChevronRightIcon,
-  ChevronLeftIcon,
-  CalendarIcon,
-  ArrowRightOnRectangleIcon,
-  CheckIcon,
-  TrashIcon,
-  PencilIcon,
-  UserCircleIcon,
-  InboxIcon,
-  TagIcon,
-  EnvelopeIcon,
-} from "@heroicons/react/24/outline";
-import {
-  WalletIcon as WalletIconSolid,
-  UserGroupIcon as UserGroupIconSolid,
-  MagnifyingGlassIcon as MagnifyingGlassIconSolid,
-  Cog6ToothIcon as Cog6ToothIconSolid,
-  BanknotesIcon as BanknotesIconSolid,
-  ClockIcon as ClockIconSolid,
-  PlusIcon as PlusIconSolid,
-  MinusIcon as MinusIconSolid,
-  XMarkIcon as XMarkIconSolid,
-  ChevronDownIcon as ChevronDownIconSolid,
-  ChevronRightIcon as ChevronRightIconSolid,
-  ChevronLeftIcon as ChevronLeftIconSolid,
-  CalendarIcon as CalendarIconSolid,
-  ArrowRightOnRectangleIcon as ArrowRightOnRectangleIconSolid,
-  CheckIcon as CheckIconSolid,
-  TrashIcon as TrashIconSolid,
-  PencilIcon as PencilIconSolid,
-  UserCircleIcon as UserCircleIconSolid,
-  InboxIcon as InboxIconSolid,
-  TagIcon as TagIconSolid,
-  EnvelopeIcon as EnvelopeIconSolid,
-} from "@heroicons/react/24/solid";
+import { WalletIcon } from "@solar-icons/react/linear/wallet";
+import { UsersGroupRoundedIcon } from "@solar-icons/react/linear/users-group-rounded";
+import { MagnifierIcon } from "@solar-icons/react/linear/magnifier";
+import { SettingsIcon } from "@solar-icons/react/linear/settings";
+import { BanknoteIcon } from "@solar-icons/react/linear/banknote";
+import { HistoryIcon } from "@solar-icons/react/linear/history";
+import { AddIcon } from "@solar-icons/react/linear/add";
+import { MinusIcon } from "@solar-icons/react/linear/minus";
+import { CloseIcon } from "@solar-icons/react/linear/close";
+import { AltArrowDownIcon } from "@solar-icons/react/linear/alt-arrow-down";
+import { AltArrowRightIcon } from "@solar-icons/react/linear/alt-arrow-right";
+import { AltArrowLeftIcon } from "@solar-icons/react/linear/alt-arrow-left";
+import { CalendarIcon } from "@solar-icons/react/linear/calendar";
+import { LogoutIcon } from "@solar-icons/react/linear/logout";
+import { CheckCircleIcon } from "@solar-icons/react/linear/check-circle";
+import { TrashBinTrashIcon } from "@solar-icons/react/linear/trash-bin-trash";
+import { PenIcon } from "@solar-icons/react/linear/pen";
+import { UserCircleIcon } from "@solar-icons/react/linear/user-circle";
+import { InboxIcon } from "@solar-icons/react/linear/inbox";
+import { TagIcon } from "@solar-icons/react/linear/tag";
+import { LetterIcon } from "@solar-icons/react/linear/letter";
+import { WalletIcon as WalletIconBold } from "@solar-icons/react/bold/wallet";
+import { UsersGroupRoundedIcon as UsersGroupRoundedIconBold } from "@solar-icons/react/bold/users-group-rounded";
+import { MagnifierIcon as MagnifierIconBold } from "@solar-icons/react/bold/magnifier";
+import { SettingsIcon as SettingsIconBold } from "@solar-icons/react/bold/settings";
+import { BanknoteIcon as BanknoteIconBold } from "@solar-icons/react/bold/banknote";
+import { HistoryIcon as HistoryIconBold } from "@solar-icons/react/bold/history";
+import { AddIcon as AddIconBold } from "@solar-icons/react/bold/add";
+import { MinusIcon as MinusIconBold } from "@solar-icons/react/bold/minus";
+import { CloseIcon as CloseIconBold } from "@solar-icons/react/bold/close";
+import { AltArrowDownIcon as AltArrowDownIconBold } from "@solar-icons/react/bold/alt-arrow-down";
+import { AltArrowRightIcon as AltArrowRightIconBold } from "@solar-icons/react/bold/alt-arrow-right";
+import { AltArrowLeftIcon as AltArrowLeftIconBold } from "@solar-icons/react/bold/alt-arrow-left";
+import { CalendarIcon as CalendarIconBold } from "@solar-icons/react/bold/calendar";
+import { LogoutIcon as LogoutIconBold } from "@solar-icons/react/bold/logout";
+import { CheckCircleIcon as CheckCircleIconBold } from "@solar-icons/react/bold/check-circle";
+import { TrashBinTrashIcon as TrashBinTrashIconBold } from "@solar-icons/react/bold/trash-bin-trash";
+import { PenIcon as PenIconBold } from "@solar-icons/react/bold/pen";
+import { UserCircleIcon as UserCircleIconBold } from "@solar-icons/react/bold/user-circle";
+import { InboxIcon as InboxIconBold } from "@solar-icons/react/bold/inbox";
+import { TagIcon as TagIconBold } from "@solar-icons/react/bold/tag";
+import { LetterIcon as LetterIconBold } from "@solar-icons/react/bold/letter";
 
 export type IconName =
   | "wallet"
@@ -69,53 +65,53 @@ export type IconName =
   | "tag"
   | "envelope";
 
-const OUTLINE = {
+const LINEAR = {
   wallet: WalletIcon,
-  coaches: UserGroupIcon,
-  oversight: MagnifyingGlassIcon,
-  settings: Cog6ToothIcon,
-  topay: BanknotesIcon,
-  history: ClockIcon,
-  plus: PlusIcon,
+  coaches: UsersGroupRoundedIcon,
+  oversight: MagnifierIcon,
+  settings: SettingsIcon,
+  topay: BanknoteIcon,
+  history: HistoryIcon,
+  plus: AddIcon,
   minus: MinusIcon,
-  close: XMarkIcon,
-  "chevron-down": ChevronDownIcon,
-  "chevron-right": ChevronRightIcon,
-  "chevron-left": ChevronLeftIcon,
+  close: CloseIcon,
+  "chevron-down": AltArrowDownIcon,
+  "chevron-right": AltArrowRightIcon,
+  "chevron-left": AltArrowLeftIcon,
   calendar: CalendarIcon,
-  logout: ArrowRightOnRectangleIcon,
-  check: CheckIcon,
-  trash: TrashIcon,
-  pencil: PencilIcon,
+  logout: LogoutIcon,
+  check: CheckCircleIcon,
+  trash: TrashBinTrashIcon,
+  pencil: PenIcon,
   account: UserCircleIcon,
   inbox: InboxIcon,
   tag: TagIcon,
-  envelope: EnvelopeIcon,
+  envelope: LetterIcon,
 } satisfies Record<IconName, typeof WalletIcon>;
 
-const SOLID = {
-  wallet: WalletIconSolid,
-  coaches: UserGroupIconSolid,
-  oversight: MagnifyingGlassIconSolid,
-  settings: Cog6ToothIconSolid,
-  topay: BanknotesIconSolid,
-  history: ClockIconSolid,
-  plus: PlusIconSolid,
-  minus: MinusIconSolid,
-  close: XMarkIconSolid,
-  "chevron-down": ChevronDownIconSolid,
-  "chevron-right": ChevronRightIconSolid,
-  "chevron-left": ChevronLeftIconSolid,
-  calendar: CalendarIconSolid,
-  logout: ArrowRightOnRectangleIconSolid,
-  check: CheckIconSolid,
-  trash: TrashIconSolid,
-  pencil: PencilIconSolid,
-  account: UserCircleIconSolid,
-  inbox: InboxIconSolid,
-  tag: TagIconSolid,
-  envelope: EnvelopeIconSolid,
-} satisfies Record<IconName, typeof WalletIconSolid>;
+const BOLD = {
+  wallet: WalletIconBold,
+  coaches: UsersGroupRoundedIconBold,
+  oversight: MagnifierIconBold,
+  settings: SettingsIconBold,
+  topay: BanknoteIconBold,
+  history: HistoryIconBold,
+  plus: AddIconBold,
+  minus: MinusIconBold,
+  close: CloseIconBold,
+  "chevron-down": AltArrowDownIconBold,
+  "chevron-right": AltArrowRightIconBold,
+  "chevron-left": AltArrowLeftIconBold,
+  calendar: CalendarIconBold,
+  logout: LogoutIconBold,
+  check: CheckCircleIconBold,
+  trash: TrashBinTrashIconBold,
+  pencil: PenIconBold,
+  account: UserCircleIconBold,
+  inbox: InboxIconBold,
+  tag: TagIconBold,
+  envelope: LetterIconBold,
+} satisfies Record<IconName, typeof WalletIconBold>;
 
 export function Icon({
   name,
@@ -125,9 +121,9 @@ export function Icon({
   ...rest
 }: { name: IconName; size?: number; solid?: boolean } & SVGProps<SVGSVGElement>) {
   if (solid) {
-    const Glyph = SOLID[name];
-    return <Glyph width={size} height={size} {...rest} />;
+    const Glyph = BOLD[name];
+    return <Glyph size={size} {...rest} />;
   }
-  const Glyph = OUTLINE[name];
-  return <Glyph width={size} height={size} strokeWidth={strokeWidth} {...rest} />;
+  const Glyph = LINEAR[name];
+  return <Glyph size={size} strokeWidth={strokeWidth} {...rest} />;
 }
