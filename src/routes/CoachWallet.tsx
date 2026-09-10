@@ -3,6 +3,7 @@ import { useAuth } from "../lib/auth";
 import { useSetHeader } from "../lib/header";
 import { useOwnMonth } from "../lib/ownMonth";
 import { useAsync } from "../lib/useAsync";
+import { useIsMobile } from "../lib/useIsMobile";
 import { api } from "../lib/backend";
 import { isHead } from "../lib/types";
 import { fmt, monthShort } from "../lib/format";
@@ -11,6 +12,7 @@ import { LockedBanner } from "../components/LockedBanner";
 import { DayList } from "../components/DayList";
 import { DaySessionsSheet } from "../components/DaySessionsSheet";
 import { MonthSwitcherSheet } from "../components/MonthSwitcherSheet";
+import { AddSessionSheet } from "../components/AddSessionSheet";
 import { Button } from "../components/Button";
 import { Icon } from "../components/Icon";
 import { Spinner } from "../components/Spinner";
@@ -18,7 +20,9 @@ import { Spinner } from "../components/Spinner";
 export function CoachWallet() {
   const { profile } = useAuth();
   const { month, setMonth } = useOwnMonth();
+  const isMobile = useIsMobile();
   const [monthSheet, setMonthSheet] = useState(false);
+  const [addOpen, setAddOpen] = useState(false);
   const [dayDate, setDayDate] = useState<string | null>(null);
   const [busyAction, setBusyAction] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -80,14 +84,19 @@ export function CoachWallet() {
         ]}
       />
 
-      {isHead(profile.role) && (
+      {((editable && !isMobile) || isHead(profile.role)) && (
         <div style={{ display: "flex", gap: 10, marginBottom: 18, flexWrap: "wrap" }}>
-          {row.state === "logging" && row.count > 0 && (
+          {editable && !isMobile && (
+            <Button variant="secondary" onClick={() => setAddOpen(true)}>
+              + Add session
+            </Button>
+          )}
+          {isHead(profile.role) && row.state === "logging" && row.count > 0 && (
             <Button variant="secondary" disabled={busyAction} onClick={() => runAction(() => api.settle(profile.id, month))}>
               Settle my month
             </Button>
           )}
-          {row.state === "settled" && (
+          {isHead(profile.role) && row.state === "settled" && (
             <Button variant="danger" disabled={busyAction} onClick={() => runAction(() => api.reopen(profile.id, month))}>
               Reopen
             </Button>
@@ -127,6 +136,7 @@ export function CoachWallet() {
         onChanged={refetch}
       />
       <MonthSwitcherSheet open={monthSheet} onClose={() => setMonthSheet(false)} coachId={profile.id} month={month} onChange={setMonth} />
+      <AddSessionSheet open={addOpen} onClose={() => setAddOpen(false)} coachId={profile.id} month={month} rate={row.rate} onSaved={refetch} />
     </div>
   );
 }

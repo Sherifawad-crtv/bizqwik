@@ -7,7 +7,7 @@ import { useAsync } from "../lib/useAsync";
 import { api } from "../lib/backend";
 import { monthLabel } from "../lib/format";
 
-export function Fab({ size = 64, fixedDesktop = false }: { size?: number; fixedDesktop?: boolean }) {
+export function Fab({ size = 64 }: { size?: number }) {
   const { profile } = useAuth();
   const { month } = useOwnMonth();
   const [open, setOpen] = useState(false);
@@ -29,9 +29,9 @@ export function Fab({ size = 64, fixedDesktop = false }: { size?: number; fixedD
       {hint && (
         <div
           style={{
-            position: fixedDesktop ? "fixed" : "absolute",
-            right: fixedDesktop ? "calc(24px + var(--safe-right))" : 0,
-            bottom: fixedDesktop ? 108 : size + 14,
+            position: "absolute",
+            right: 0,
+            bottom: size + 14,
             zIndex: 60,
             maxWidth: 240,
             background: "var(--ink)",
@@ -56,10 +56,6 @@ export function Fab({ size = 64, fixedDesktop = false }: { size?: number; fixedD
           height: size,
           borderRadius: 999,
           border: 0,
-          position: fixedDesktop ? "fixed" : undefined,
-          right: fixedDesktop ? "calc(24px + var(--safe-right))" : undefined,
-          bottom: fixedDesktop ? "calc(24px + var(--safe-bottom))" : undefined,
-          zIndex: fixedDesktop ? 60 : undefined,
           background: "var(--primary)",
           color: "var(--surface)",
           cursor: "pointer",

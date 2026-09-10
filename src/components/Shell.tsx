@@ -104,7 +104,6 @@ export function Shell() {
           <Outlet />
         </div>
       </div>
-      {showFab && <Fab fixedDesktop />}
     </div>
   );
 }
