@@ -4,6 +4,7 @@ import { useSetHeader } from "../lib/header";
 import { useAsync } from "../lib/useAsync";
 import { api, MOCK } from "../lib/backend";
 import { fmt, monthShort } from "../lib/format";
+import type { Session } from "../lib/types";
 import { MoneyHero } from "../components/MoneyHero";
 import { LockedBanner } from "../components/LockedBanner";
 import { DayList } from "../components/DayList";
@@ -28,7 +29,7 @@ export function CoachDetail() {
 
   const coachId = id ?? "";
 
-  const { data } = useAsync(async () => {
+  const { data, mutate } = useAsync(async () => {
     const [monthRes, sessionsRes] = await Promise.all([api.month(month), api.sessions(coachId, month)]);
     return { row: monthRes.rows.find((r) => r.coachId === coachId) ?? null, sessions: sessionsRes.sessions };
   }, [coachId, month]);
@@ -66,6 +67,24 @@ export function CoachDetail() {
     } finally {
       setBusyAction(false);
     }
+  };
+
+  const handleOptimisticAdd = (addedDate: string, qty: number) => {
+    mutate((prev) => {
+      if (!prev || !prev.row) return prev ?? { row: null, sessions: [] };
+      const now = Date.now();
+      const newSessions: Session[] = Array.from({ length: qty }, (_, i) => ({
+        id: `optimistic-${now}-${i}`,
+        coachId,
+        month,
+        date: addedDate,
+        createdBy: coachId,
+      }));
+      return {
+        row: { ...prev.row, count: prev.row.count + qty, total: prev.row.total + qty * prev.row.rate },
+        sessions: [...prev.sessions, ...newSessions],
+      };
+    });
   };
 
   return (
@@ -138,8 +157,17 @@ export function CoachDetail() {
         sessions={dayGroup}
         rate={row.rate}
         editable={editable}
+        onOptimisticAdd={(d) => handleOptimisticAdd(d, 1)}
       />
-      <AddSessionSheet open={addOpen} onClose={() => setAddOpen(false)} coachId={coachId} coachName={row.name} month={month} rate={row.rate} />
+      <AddSessionSheet
+        open={addOpen}
+        onClose={() => setAddOpen(false)}
+        coachId={coachId}
+        coachName={row.name}
+        month={month}
+        rate={row.rate}
+        onOptimisticAdd={handleOptimisticAdd}
+      />
       <MonthSwitcherSheet open={monthSheet} onClose={() => setMonthSheet(false)} coachId={coachId} month={month} onChange={setMonth} />
     </div>
   );

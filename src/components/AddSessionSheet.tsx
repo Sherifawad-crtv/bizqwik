@@ -13,9 +13,13 @@ interface AddSessionSheetProps {
   coachName?: string;
   month: string;
   rate: number;
+  /** Called synchronously the moment the user confirms, before the network
+   * calls — lets the caller show the new session(s) instantly instead of
+   * waiting on a round-trip. The following refetch reconciles it for real. */
+  onOptimisticAdd?: (date: string, qty: number) => void;
 }
 
-export function AddSessionSheet({ open, onClose, coachId, coachName, month, rate }: AddSessionSheetProps) {
+export function AddSessionSheet({ open, onClose, coachId, coachName, month, rate, onOptimisticAdd }: AddSessionSheetProps) {
   const min = isoDate(month, 1);
   const max = isoDate(month, daysInMonth(month));
   const defaultDate = () => {
@@ -43,6 +47,7 @@ export function AddSessionSheet({ open, onClose, coachId, coachName, month, rate
     setSaving(true);
     setError(null);
     let done = 0;
+    onOptimisticAdd?.(date, qty);
     try {
       for (let i = 0; i < qty; i++) {
         await api.addSession(coachId, month, date);

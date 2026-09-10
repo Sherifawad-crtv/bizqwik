@@ -18,9 +18,12 @@ interface DaySessionsSheetProps {
   sessions: Session[];
   rate: number;
   editable: boolean;
+  /** Called synchronously right when "add another" is tapped, before the
+   * network call — lets the caller show the new session instantly. */
+  onOptimisticAdd?: (date: string) => void;
 }
 
-export function DaySessionsSheet({ open, onClose, coachId, month, date, sessions, rate, editable }: DaySessionsSheetProps) {
+export function DaySessionsSheet({ open, onClose, coachId, month, date, sessions, rate, editable, onOptimisticAdd }: DaySessionsSheetProps) {
   const [busyId, setBusyId] = useState<string | null>(null);
   const [movingId, setMovingId] = useState<string | null>(null);
   const [removingId, setRemovingId] = useState<string | null>(null);
@@ -49,6 +52,7 @@ export function DaySessionsSheet({ open, onClose, coachId, month, date, sessions
 
   const addAnother = async () => {
     setError(null);
+    onOptimisticAdd?.(date);
     try {
       await api.addSession(coachId, month, date);
     } catch (err) {

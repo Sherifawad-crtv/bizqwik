@@ -5,7 +5,7 @@ import { useOwnMonth } from "../lib/ownMonth";
 import { useAsync } from "../lib/useAsync";
 import { useIsMobile } from "../lib/useIsMobile";
 import { api } from "../lib/backend";
-import { isHead } from "../lib/types";
+import { isHead, type Session } from "../lib/types";
 import { fmt, monthShort } from "../lib/format";
 import { MoneyHero } from "../components/MoneyHero";
 import { LockedBanner } from "../components/LockedBanner";
@@ -27,7 +27,7 @@ export function CoachWallet() {
   const [busyAction, setBusyAction] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
 
-  const { data } = useAsync(async () => {
+  const { data, mutate } = useAsync(async () => {
     if (!profile) return null;
     const [monthRes, sessionsRes] = await Promise.all([api.month(month), api.sessions(profile.id, month)]);
     return { row: monthRes.rows.find((r) => r.coachId === profile.id) ?? null, sessions: sessionsRes.sessions };
@@ -67,6 +67,24 @@ export function CoachWallet() {
     } finally {
       setBusyAction(false);
     }
+  };
+
+  const handleOptimisticAdd = (addedDate: string, qty: number) => {
+    mutate((prev) => {
+      if (!prev || !prev.row) return prev;
+      const now = Date.now();
+      const newSessions: Session[] = Array.from({ length: qty }, (_, i) => ({
+        id: `optimistic-${now}-${i}`,
+        coachId: profile.id,
+        month,
+        date: addedDate,
+        createdBy: profile.id,
+      }));
+      return {
+        row: { ...prev.row, count: prev.row.count + qty, total: prev.row.total + qty * prev.row.rate },
+        sessions: [...prev.sessions, ...newSessions],
+      };
+    });
   };
 
   return (
@@ -130,9 +148,17 @@ export function CoachWallet() {
         sessions={dayGroup}
         rate={row.rate}
         editable={editable}
+        onOptimisticAdd={(d) => handleOptimisticAdd(d, 1)}
       />
       <MonthSwitcherSheet open={monthSheet} onClose={() => setMonthSheet(false)} coachId={profile.id} month={month} onChange={setMonth} />
-      <AddSessionSheet open={addOpen} onClose={() => setAddOpen(false)} coachId={profile.id} month={month} rate={row.rate} />
+      <AddSessionSheet
+        open={addOpen}
+        onClose={() => setAddOpen(false)}
+        coachId={profile.id}
+        month={month}
+        rate={row.rate}
+        onOptimisticAdd={handleOptimisticAdd}
+      />
     </div>
   );
 }
