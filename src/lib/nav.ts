@@ -22,9 +22,9 @@ export const NAV: Record<Role, NavItem[]> = {
     { key: "mine", path: "/", label: "My Month", icon: "wallet" },
   ],
   dept_head: [
+    { key: "oversight", path: "/oversight", label: "Oversight", icon: "insights" },
     { key: "coaches", path: "/coaches", label: "Coaches", icon: "coaches" },
-    { key: "mine", path: "/", label: "My Month", icon: "wallet" },
-    { key: "oversight", path: "/oversight", label: "Oversight", icon: "oversight" },
+    { key: "mine", path: "/mine", label: "My Month", icon: "wallet" },
     { key: "manage", path: "/manage", label: "Tiers & People", icon: "settings" },
   ],
   accountant: [

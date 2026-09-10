@@ -1,5 +1,6 @@
 import type { SVGProps } from "react";
 import { WalletIcon } from "@solar-icons/react/linear/wallet";
+import { ChartSquareIcon } from "@solar-icons/react/linear/chart-square";
 import { UsersGroupRoundedIcon } from "@solar-icons/react/linear/users-group-rounded";
 import { MagnifierIcon } from "@solar-icons/react/linear/magnifier";
 import { SettingsIcon } from "@solar-icons/react/linear/settings";
@@ -21,6 +22,7 @@ import { InboxIcon } from "@solar-icons/react/linear/inbox";
 import { TagIcon } from "@solar-icons/react/linear/tag";
 import { LetterIcon } from "@solar-icons/react/linear/letter";
 import { WalletIcon as WalletIconBold } from "@solar-icons/react/bold/wallet";
+import { ChartSquareIcon as ChartSquareIconBold } from "@solar-icons/react/bold/chart-square";
 import { UsersGroupRoundedIcon as UsersGroupRoundedIconBold } from "@solar-icons/react/bold/users-group-rounded";
 import { MagnifierIcon as MagnifierIconBold } from "@solar-icons/react/bold/magnifier";
 import { SettingsIcon as SettingsIconBold } from "@solar-icons/react/bold/settings";
@@ -46,6 +48,7 @@ export type IconName =
   | "wallet"
   | "coaches"
   | "oversight"
+  | "insights"
   | "settings"
   | "topay"
   | "history"
@@ -69,6 +72,7 @@ const LINEAR = {
   wallet: WalletIcon,
   coaches: UsersGroupRoundedIcon,
   oversight: MagnifierIcon,
+  insights: ChartSquareIcon,
   settings: SettingsIcon,
   topay: BanknoteIcon,
   history: HistoryIcon,
@@ -93,6 +97,7 @@ const BOLD = {
   wallet: WalletIconBold,
   coaches: UsersGroupRoundedIconBold,
   oversight: MagnifierIconBold,
+  insights: ChartSquareIconBold,
   settings: SettingsIconBold,
   topay: BanknoteIconBold,
   history: HistoryIconBold,

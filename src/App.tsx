@@ -9,6 +9,7 @@ import { initSquirclePolyfill } from "./lib/squircle";
 
 import { Login } from "./routes/Login";
 import { Home } from "./routes/Home";
+import { CoachWallet } from "./routes/CoachWallet";
 import { CoachesOverview } from "./routes/CoachesOverview";
 import { CoachDetail } from "./routes/CoachDetail";
 import { Oversight } from "./routes/Oversight";
@@ -33,6 +34,7 @@ export default function App() {
               <Route element={<RequireAuth />}>
                 <Route element={<Shell />}>
                   <Route path="/" element={<Home />} />
+                  <Route path="/mine" element={<CoachWallet />} />
                   <Route path="/account" element={<Account />} />
 
                   <Route element={<RequireRole roles={["head_coach", "dept_head"]} />}>
