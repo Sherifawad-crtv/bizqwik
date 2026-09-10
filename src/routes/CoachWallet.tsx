@@ -86,11 +86,6 @@ export function CoachWallet() {
 
       {((editable && !isMobile) || isHead(profile.role)) && (
         <div style={{ display: "flex", gap: 10, marginBottom: 18, flexWrap: "wrap" }}>
-          {editable && !isMobile && (
-            <Button variant="secondary" onClick={() => setAddOpen(true)}>
-              + Add session
-            </Button>
-          )}
           {isHead(profile.role) && row.state === "logging" && row.count > 0 && (
             <Button variant="secondary" disabled={busyAction} onClick={() => runAction(() => api.settle(profile.id, month))}>
               Settle my month
@@ -99,6 +94,11 @@ export function CoachWallet() {
           {isHead(profile.role) && row.state === "settled" && (
             <Button variant="danger" disabled={busyAction} onClick={() => runAction(() => api.reopen(profile.id, month))}>
               Reopen
+            </Button>
+          )}
+          {editable && !isMobile && (
+            <Button onClick={() => setAddOpen(true)} style={{ marginLeft: "auto" }}>
+              + Add session
             </Button>
           )}
         </div>
