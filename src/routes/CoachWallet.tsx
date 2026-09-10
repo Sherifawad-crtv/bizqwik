@@ -97,9 +97,7 @@ export function CoachWallet() {
             </Button>
           )}
           {editable && !isMobile && (
-            <Button onClick={() => setAddOpen(true)} style={{ marginLeft: "auto" }}>
-              + Add session
-            </Button>
+            <Button onClick={() => setAddOpen(true)}>+ Add session</Button>
           )}
         </div>
       )}
