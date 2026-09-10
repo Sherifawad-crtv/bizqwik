@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSetHeader } from "../lib/header";
 import { useAsync } from "../lib/useAsync";
@@ -77,12 +77,28 @@ function CoachSessionBars({ rows }: { rows: Rollup[] }) {
   );
 }
 
+function useMeasuredWidth(fallback: number) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [w, setW] = useState(fallback);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const ro = new ResizeObserver(([entry]) => setW(entry.contentRect.width));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  return [ref, w] as const;
+}
+
 function TrendChart({ points }: { points: { month: string; label: string; total: number }[] }) {
-  const W = 320;
+  const [ref, W] = useMeasuredWidth(320);
   const H = 132;
   const top = 24;
   const bottom = 96;
-  const xs = [8, 160, 312];
+  const pad = 8;
+  const xs = [pad, W / 2, W - pad];
   const max = Math.max(...points.map((p) => p.total), 1) * 1.2;
   const y = (v: number) => bottom - (v / max) * (bottom - top);
   const ys = points.map((p) => y(p.total));
@@ -91,30 +107,32 @@ function TrendChart({ points }: { points: { month: string; label: string; total:
   const last = points[points.length - 1];
 
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} style={{ width: "100%", height: "auto", display: "block", overflow: "visible" }}>
-      {[top, (top + bottom) / 2, bottom].map((gy, i) => (
-        <line key={i} x1={0} y1={gy} x2={W} y2={gy} stroke="var(--line)" strokeWidth={1} />
-      ))}
-      <path d={areaPath} fill="var(--primary)" opacity={0.1} />
-      <path d={linePath} fill="none" stroke="var(--primary)" strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
-      {xs.map((x, i) => (
-        <circle key={i} cx={x} cy={ys[i]} r={5} fill="var(--primary)" stroke="var(--surface)" strokeWidth={2} />
-      ))}
-      <text x={xs[2]} y={top - 8} textAnchor="end" style={{ font: "800 13px var(--font-body)", fill: "var(--ink)" }}>
-        {fmt(last.total)}
-      </text>
-      {points.map((p, i) => (
-        <text
-          key={p.month}
-          x={xs[i]}
-          y={H - 4}
-          textAnchor={i === 0 ? "start" : i === points.length - 1 ? "end" : "middle"}
-          style={{ font: "700 10px var(--font-mono)", letterSpacing: ".06em", fill: "var(--ink-faint)" }}
-        >
-          {p.label}
+    <div ref={ref} style={{ width: "100%" }}>
+      <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={{ display: "block", overflow: "visible" }}>
+        {[top, (top + bottom) / 2, bottom].map((gy, i) => (
+          <line key={i} x1={0} y1={gy} x2={W} y2={gy} stroke="var(--line)" strokeWidth={1} />
+        ))}
+        <path d={areaPath} fill="var(--primary)" opacity={0.1} />
+        <path d={linePath} fill="none" stroke="var(--primary)" strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
+        {xs.map((x, i) => (
+          <circle key={i} cx={x} cy={ys[i]} r={5} fill="var(--primary)" stroke="var(--surface)" strokeWidth={2} />
+        ))}
+        <text x={xs[2]} y={top - 8} textAnchor="end" style={{ font: "800 13px var(--font-body)", fill: "var(--ink)" }}>
+          {fmt(last.total)}
         </text>
-      ))}
-    </svg>
+        {points.map((p, i) => (
+          <text
+            key={p.month}
+            x={xs[i]}
+            y={H - 4}
+            textAnchor={i === 0 ? "start" : i === points.length - 1 ? "end" : "middle"}
+            style={{ font: "700 10px var(--font-mono)", letterSpacing: ".06em", fill: "var(--ink-faint)" }}
+          >
+            {p.label}
+          </text>
+        ))}
+      </svg>
+    </div>
   );
 }
 
