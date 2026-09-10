@@ -47,7 +47,7 @@ export function Manage() {
 // ---------- Tiers ----------
 
 function TiersPanel() {
-  const { data, refetch } = useAsync(() => api.tiers(), []);
+  const { data } = useAsync(() => api.tiers(), []);
   const [editing, setEditing] = useState<Tier | "new" | null>(null);
   const [deleting, setDeleting] = useState<Tier | null>(null);
   const shownDeleting = useLatch(deleting);
@@ -87,7 +87,7 @@ function TiersPanel() {
         )}
       </div>
 
-      <TierSheet open={editing !== null} tier={editing === "new" ? null : editing} onClose={() => setEditing(null)} onSaved={refetch} />
+      <TierSheet open={editing !== null} tier={editing === "new" ? null : editing} onClose={() => setEditing(null)} />
       {shownDeleting && (
         <ConfirmSheet
           open={!!deleting}
@@ -99,7 +99,6 @@ function TiersPanel() {
           danger
           onConfirm={async () => {
             await api.deleteTier(shownDeleting.id);
-            refetch();
           }}
         />
       )}
@@ -107,7 +106,7 @@ function TiersPanel() {
   );
 }
 
-function TierSheet({ open, tier, onClose, onSaved }: { open: boolean; tier: Tier | null; onClose: () => void; onSaved: () => void }) {
+function TierSheet({ open, tier, onClose }: { open: boolean; tier: Tier | null; onClose: () => void }) {
   const [name, setName] = useState(tier?.name ?? "");
   const [rate, setRate] = useState(String(tier?.rate ?? ""));
   const [error, setError] = useState<string | null>(null);
@@ -135,7 +134,6 @@ function TierSheet({ open, tier, onClose, onSaved }: { open: boolean; tier: Tier
     try {
       if (tier) await api.updateTier(tier.id, name.trim(), rateNum);
       else await api.createTier(name.trim(), rateNum);
-      onSaved();
       onClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
@@ -172,7 +170,7 @@ function TierSheet({ open, tier, onClose, onSaved }: { open: boolean; tier: Tier
 const INVITABLE_ROLES: Role[] = ["coach", "head_coach", "dept_head", "accountant"];
 
 function InvitesPanel() {
-  const { data, refetch } = useAsync(() => api.invites(), []);
+  const { data } = useAsync(() => api.invites(), []);
   const { data: tierData } = useAsync(() => api.tiers(), []);
   const [open, setOpen] = useState(false);
   const [deleting, setDeleting] = useState<Invite | null>(null);
@@ -214,7 +212,7 @@ function InvitesPanel() {
         )}
       </div>
 
-      <InviteSheet open={open} tiers={tiers} onClose={() => setOpen(false)} onSaved={refetch} />
+      <InviteSheet open={open} tiers={tiers} onClose={() => setOpen(false)} />
       {shownDeleting && (
         <ConfirmSheet
           open={!!deleting}
@@ -225,7 +223,6 @@ function InvitesPanel() {
           danger
           onConfirm={async () => {
             await api.deleteInvite(shownDeleting.email);
-            refetch();
           }}
         />
       )}
@@ -233,7 +230,7 @@ function InvitesPanel() {
   );
 }
 
-function InviteSheet({ open, tiers, onClose, onSaved }: { open: boolean; tiers: Tier[]; onClose: () => void; onSaved: () => void }) {
+function InviteSheet({ open, tiers, onClose }: { open: boolean; tiers: Tier[]; onClose: () => void }) {
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<Role>("coach");
   const [tierId, setTierId] = useState<string>("");
@@ -260,7 +257,6 @@ function InviteSheet({ open, tiers, onClose, onSaved }: { open: boolean; tiers: 
     setError(null);
     try {
       await api.createInvite(email.trim(), role, role === "accountant" ? null : tierId || null);
-      onSaved();
       onClose();
       setEmail("");
       setTierId("");
@@ -311,7 +307,7 @@ function InviteSheet({ open, tiers, onClose, onSaved }: { open: boolean; tiers: 
 
 function PeoplePanel() {
   const { profile: me } = useAuth();
-  const { data, refetch } = useAsync(() => api.profiles(), []);
+  const { data } = useAsync(() => api.profiles(), []);
   const { data: tierData } = useAsync(() => api.tiers(), []);
   const [editing, setEditing] = useState<Profile | null>(null);
 
@@ -345,7 +341,7 @@ function PeoplePanel() {
         ))}
       </div>
 
-      <PersonSheet open={!!editing} profile={editing} tiers={tiers} isSelf={editing?.id === me?.id} onClose={() => setEditing(null)} onSaved={refetch} />
+      <PersonSheet open={!!editing} profile={editing} tiers={tiers} isSelf={editing?.id === me?.id} onClose={() => setEditing(null)} />
     </div>
   );
 }
@@ -356,14 +352,12 @@ function PersonSheet({
   tiers,
   isSelf,
   onClose,
-  onSaved,
 }: {
   open: boolean;
   profile: Profile | null;
   tiers: Tier[];
   isSelf?: boolean;
   onClose: () => void;
-  onSaved: () => void;
 }) {
   const shown = useLatch(profile);
   const [tierId, setTierId] = useState(profile?.tierId ?? "");
@@ -391,7 +385,6 @@ function PersonSheet({
     setError(null);
     try {
       await api.assignTier(shown.id, value || null);
-      onSaved();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
@@ -452,7 +445,6 @@ function PersonSheet({
         danger
         onConfirm={async () => {
           await api.removeProfile(shown.id);
-          onSaved();
           onClose();
         }}
       />

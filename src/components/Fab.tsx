@@ -13,7 +13,7 @@ export function Fab({ size = 64 }: { size?: number }) {
   const [open, setOpen] = useState(false);
   const [hint, setHint] = useState<string | null>(null);
 
-  const { data, refetch } = useAsync(() => api.month(month), [month, profile?.id]);
+  const { data } = useAsync(() => api.month(month), [month, profile?.id]);
   const own = data?.rows.find((r) => r.coachId === profile?.id);
   const enabled = own ? own.state === "logging" : true;
 
@@ -75,7 +75,6 @@ export function Fab({ size = 64 }: { size?: number }) {
           coachId={profile.id}
           month={month}
           rate={own?.rate ?? 0}
-          onSaved={refetch}
         />
       )}
     </>

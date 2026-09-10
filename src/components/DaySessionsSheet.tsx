@@ -18,10 +18,9 @@ interface DaySessionsSheetProps {
   sessions: Session[];
   rate: number;
   editable: boolean;
-  onChanged: () => void;
 }
 
-export function DaySessionsSheet({ open, onClose, coachId, month, date, sessions, rate, editable, onChanged }: DaySessionsSheetProps) {
+export function DaySessionsSheet({ open, onClose, coachId, month, date, sessions, rate, editable }: DaySessionsSheetProps) {
   const [busyId, setBusyId] = useState<string | null>(null);
   const [movingId, setMovingId] = useState<string | null>(null);
   const [removingId, setRemovingId] = useState<string | null>(null);
@@ -29,12 +28,17 @@ export function DaySessionsSheet({ open, onClose, coachId, month, date, sessions
   const min = isoDate(month, 1);
   const max = isoDate(month, daysInMonth(month));
 
+  // The parent clears its "selected day" state as soon as onClose fires, so
+  // date/sessions go blank while this sheet is still playing its close
+  // animation — latch them so the content doesn't glitch to "undefined" /
+  // empty mid-exit.
+  const shown = useLatch(date ? { date, sessions } : null);
+
   const move = async (id: string, newDate: string) => {
     setBusyId(id);
     setError(null);
     try {
       await api.editSession(id, coachId, month, newDate);
-      onChanged();
       setMovingId(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Couldn't move that session.");
@@ -47,26 +51,31 @@ export function DaySessionsSheet({ open, onClose, coachId, month, date, sessions
     setError(null);
     try {
       await api.addSession(coachId, month, date);
-      onChanged();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Couldn't add a session.");
     }
   };
 
+  // computed against the raw prop (not `shown`) so it stays correct even on
+  // the render where `shown` hasn't caught up yet; useLatch itself must run
+  // unconditionally on every render, before any early return below.
   const removingIndex = sessions.findIndex((s) => s.id === removingId);
   const shownRemovingIndex = useLatch(removingId ? removingIndex : null);
+
+  if (!shown) return null;
+  const { sessions: shownSessions } = shown;
 
   return (
     <>
       <Sheet open={open} onClose={onClose}>
         <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>{editable ? "EDIT DAY" : "DAY"}</div>
-        <div style={{ font: "800 30px/1.1 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 4px" }}>{dateLabelFull(date)}</div>
+        <div style={{ font: "800 30px/1.1 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 4px" }}>{dateLabelFull(shown.date)}</div>
         <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-muted)", marginBottom: 16 }}>
-          {sessions.length} {sessions.length === 1 ? "session" : "sessions"} · {egp(sessions.length * rate)}
+          {shownSessions.length} {shownSessions.length === 1 ? "session" : "sessions"} · {egp(shownSessions.length * rate)}
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          {sessions.map((s, i) => (
+          {shownSessions.map((s, i) => (
             <div key={s.id} data-sq style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "10px 14px" }}>
               {movingId === s.id ? (
                 <DateField value={s.date} min={min} max={max} onChange={(d) => move(s.id, d)} />
@@ -126,7 +135,6 @@ export function DaySessionsSheet({ open, onClose, coachId, month, date, sessions
         onConfirm={async () => {
           if (!removingId) return;
           await api.removeSession(removingId, coachId, month);
-          onChanged();
         }}
       />
     </>

@@ -16,7 +16,7 @@ export function Pay() {
   const [paying, setPaying] = useState<Rollup | null>(null);
   const shownPaying = useLatch(paying);
 
-  const { data, refetch } = useAsync(() => api.month(month), [month]);
+  const { data } = useAsync(() => api.month(month), [month]);
 
   useSetHeader({ kicker: "SETTLED · READY", title: "To Pay", right: <MonthPicker month={month} onChange={setMonth} /> }, [month]);
 
@@ -64,7 +64,6 @@ export function Pay() {
           confirmLabel={`Mark paid · ${fmt(shownPaying.total)} EGP`}
           onConfirm={async () => {
             await api.pay(shownPaying.coachId, month);
-            refetch();
           }}
         />
       )}

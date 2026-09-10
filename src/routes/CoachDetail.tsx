@@ -28,7 +28,7 @@ export function CoachDetail() {
 
   const coachId = id ?? "";
 
-  const { data, refetch } = useAsync(async () => {
+  const { data } = useAsync(async () => {
     const [monthRes, sessionsRes] = await Promise.all([api.month(month), api.sessions(coachId, month)]);
     return { row: monthRes.rows.find((r) => r.coachId === coachId) ?? null, sessions: sessionsRes.sessions };
   }, [coachId, month]);
@@ -61,7 +61,6 @@ export function CoachDetail() {
     setActionError(null);
     try {
       await fn();
-      refetch();
     } catch (err) {
       setActionError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
@@ -139,9 +138,8 @@ export function CoachDetail() {
         sessions={dayGroup}
         rate={row.rate}
         editable={editable}
-        onChanged={refetch}
       />
-      <AddSessionSheet open={addOpen} onClose={() => setAddOpen(false)} coachId={coachId} coachName={row.name} month={month} rate={row.rate} onSaved={refetch} />
+      <AddSessionSheet open={addOpen} onClose={() => setAddOpen(false)} coachId={coachId} coachName={row.name} month={month} rate={row.rate} />
       <MonthSwitcherSheet open={monthSheet} onClose={() => setMonthSheet(false)} coachId={coachId} month={month} onChange={setMonth} />
     </div>
   );

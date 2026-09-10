@@ -27,7 +27,7 @@ export function CoachWallet() {
   const [busyAction, setBusyAction] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
 
-  const { data, refetch } = useAsync(async () => {
+  const { data } = useAsync(async () => {
     if (!profile) return null;
     const [monthRes, sessionsRes] = await Promise.all([api.month(month), api.sessions(profile.id, month)]);
     return { row: monthRes.rows.find((r) => r.coachId === profile.id) ?? null, sessions: sessionsRes.sessions };
@@ -62,7 +62,6 @@ export function CoachWallet() {
     setActionError(null);
     try {
       await fn();
-      refetch();
     } catch (err) {
       setActionError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
@@ -131,10 +130,9 @@ export function CoachWallet() {
         sessions={dayGroup}
         rate={row.rate}
         editable={editable}
-        onChanged={refetch}
       />
       <MonthSwitcherSheet open={monthSheet} onClose={() => setMonthSheet(false)} coachId={profile.id} month={month} onChange={setMonth} />
-      <AddSessionSheet open={addOpen} onClose={() => setAddOpen(false)} coachId={profile.id} month={month} rate={row.rate} onSaved={refetch} />
+      <AddSessionSheet open={addOpen} onClose={() => setAddOpen(false)} coachId={profile.id} month={month} rate={row.rate} />
     </div>
   );
 }

@@ -13,10 +13,9 @@ interface AddSessionSheetProps {
   coachName?: string;
   month: string;
   rate: number;
-  onSaved: () => void;
 }
 
-export function AddSessionSheet({ open, onClose, coachId, coachName, month, rate, onSaved }: AddSessionSheetProps) {
+export function AddSessionSheet({ open, onClose, coachId, coachName, month, rate }: AddSessionSheetProps) {
   const min = isoDate(month, 1);
   const max = isoDate(month, daysInMonth(month));
   const defaultDate = () => {
@@ -49,7 +48,6 @@ export function AddSessionSheet({ open, onClose, coachId, coachName, month, rate
         await api.addSession(coachId, month, date);
         done += 1;
       }
-      onSaved();
       onClose();
     } catch (err) {
       setSavedCount(done);
