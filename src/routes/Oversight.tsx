@@ -127,7 +127,12 @@ function TrendChart({ points }: { points: { month: string; label: string; total:
 
   return (
     <div ref={ref} style={{ width: "100%" }}>
-      <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={{ display: "block", overflow: "visible" }}>
+      <svg
+        width={W}
+        height={H}
+        viewBox={`0 0 ${W} ${H}`}
+        style={{ display: "block", overflow: "visible", opacity: 0, animation: "bqRise .45s ease-out forwards" }}
+      >
         {[top, (top + bottom) / 2, bottom].map((gy, i) => (
           <line key={i} x1={0} y1={gy} x2={W} y2={gy} stroke="var(--line)" strokeWidth={1} />
         ))}

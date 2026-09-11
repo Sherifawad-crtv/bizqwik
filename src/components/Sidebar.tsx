@@ -1,9 +1,38 @@
+import { useState } from "react";
 import { NavLink } from "react-router-dom";
 import { Avatar } from "./Avatar";
 import { Icon } from "./Icon";
 import { useAuth } from "../lib/auth";
-import { NAV } from "../lib/nav";
+import { NAV, type NavItem } from "../lib/nav";
 import { ROLE_LABELS } from "../lib/types";
+
+function SidebarItem({ item }: { item: NavItem }) {
+  const [hovered, setHovered] = useState(false);
+  return (
+    <NavLink to={item.path} end={item.path === "/"} style={{ textDecoration: "none" }} onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}>
+      {({ isActive }) => (
+        <div
+          data-sq
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
+            padding: "11px 12px",
+            borderRadius: "var(--r-tile)",
+            cursor: "pointer",
+            background: isActive ? "var(--primary-tint)" : hovered ? "var(--sunken)" : "transparent",
+            color: isActive ? "var(--primary-pressed)" : hovered ? "var(--ink)" : "var(--ink-muted)",
+            font: "600 16px var(--font-body)",
+            transition: "background .15s ease, color .15s ease",
+          }}
+        >
+          <Icon name={item.icon} size={19} solid={isActive} />
+          {item.label}
+        </div>
+      )}
+    </NavLink>
+  );
+}
 
 export function Sidebar() {
   const { profile } = useAuth();
@@ -31,27 +60,7 @@ export function Sidebar() {
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
         {items.map((t) => (
-          <NavLink key={t.key} to={t.path} end={t.path === "/"} style={{ textDecoration: "none" }}>
-            {({ isActive }) => (
-              <div
-                data-sq
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 12,
-                  padding: "11px 12px",
-                  borderRadius: "var(--r-tile)",
-                  cursor: "pointer",
-                  background: isActive ? "var(--primary-tint)" : "transparent",
-                  color: isActive ? "var(--primary-pressed)" : "var(--ink-muted)",
-                  font: "600 16px var(--font-body)",
-                }}
-              >
-                <Icon name={t.icon} size={19} solid={isActive} />
-                {t.label}
-              </div>
-            )}
-          </NavLink>
+          <SidebarItem key={t.key} item={t} />
         ))}
       </div>
       <NavLink to="/account" style={{ marginTop: "auto", textDecoration: "none" }}>

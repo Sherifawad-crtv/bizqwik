@@ -21,6 +21,7 @@ export function Button({ variant = "primary", fullWidth, size = "md", style, dis
   return (
     <button
       data-sq
+      data-hover-fx
       disabled={disabled}
       style={{
         height,
