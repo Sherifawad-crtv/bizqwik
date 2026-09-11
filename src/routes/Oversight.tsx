@@ -111,19 +111,29 @@ function TrendChartPlaceholder() {
   );
 }
 
+/** A bar's outline: rounded top corners (the "data end"), square at the baseline. */
+function roundedTopBarPath(x: number, yTop: number, w: number, yBottom: number, r: number): string {
+  const rr = Math.min(r, w / 2, yBottom - yTop);
+  return [
+    `M${x},${yBottom}`,
+    `L${x},${yTop + rr}`,
+    `Q${x},${yTop} ${x + rr},${yTop}`,
+    `L${x + w - rr},${yTop}`,
+    `Q${x + w},${yTop} ${x + w},${yTop + rr}`,
+    `L${x + w},${yBottom}`,
+    "Z",
+  ].join(" ");
+}
+
 function TrendChart({ points }: { points: { month: string; label: string; total: number }[] }) {
   const [ref, W] = useMeasuredWidth(320);
   const H = TREND_H;
   const top = 32;
   const bottom = 176;
-  const pad = 8;
-  const xs = [pad, W / 2, W - pad];
+  const barW = 22;
+  const xs = points.map((_, i) => ((i + 0.5) / points.length) * W);
   const max = Math.max(...points.map((p) => p.total), 1) * 1.2;
   const y = (v: number) => bottom - (v / max) * (bottom - top);
-  const ys = points.map((p) => y(p.total));
-  const linePath = xs.map((x, i) => `${i === 0 ? "M" : "L"}${x},${ys[i]}`).join(" ");
-  const areaPath = `M${xs[0]},${bottom} L${xs[0]},${ys[0]} L${xs[1]},${ys[1]} L${xs[2]},${ys[2]} L${xs[2]},${bottom} Z`;
-  const last = points[points.length - 1];
 
   return (
     <div ref={ref} style={{ width: "100%" }}>
@@ -136,20 +146,23 @@ function TrendChart({ points }: { points: { month: string; label: string; total:
         {[top, (top + bottom) / 2, bottom].map((gy, i) => (
           <line key={i} x1={0} y1={gy} x2={W} y2={gy} stroke="var(--line)" strokeWidth={1} />
         ))}
-        <path d={areaPath} fill="var(--primary)" opacity={0.1} />
-        <path d={linePath} fill="none" stroke="var(--primary)" strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
-        {xs.map((x, i) => (
-          <circle key={i} cx={x} cy={ys[i]} r={5} fill="var(--primary)" stroke="var(--surface)" strokeWidth={2} />
+        {points.map((p, i) => {
+          const barTop = y(p.total);
+          return (
+            <path key={p.month} d={roundedTopBarPath(xs[i] - barW / 2, barTop, barW, bottom, 4)} fill="var(--primary)" />
+          );
+        })}
+        {points.map((p, i) => (
+          <text key={`v-${p.month}`} x={xs[i]} y={y(p.total) - 10} textAnchor="middle" style={{ font: "800 13px var(--font-body)", fill: "var(--ink)" }}>
+            {fmt(p.total)}
+          </text>
         ))}
-        <text x={xs[2]} y={top - 8} textAnchor="end" style={{ font: "800 13px var(--font-body)", fill: "var(--ink)" }}>
-          {fmt(last.total)}
-        </text>
         {points.map((p, i) => (
           <text
             key={p.month}
             x={xs[i]}
             y={H - 4}
-            textAnchor={i === 0 ? "start" : i === points.length - 1 ? "end" : "middle"}
+            textAnchor="middle"
             style={{ font: "700 10px var(--font-mono)", letterSpacing: ".06em", fill: "var(--ink-faint)" }}
           >
             {p.label}
