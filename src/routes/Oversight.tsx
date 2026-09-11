@@ -94,9 +94,9 @@ function useMeasuredWidth(fallback: number) {
 
 function TrendChart({ points }: { points: { month: string; label: string; total: number }[] }) {
   const [ref, W] = useMeasuredWidth(320);
-  const H = 132;
-  const top = 24;
-  const bottom = 96;
+  const H = 220;
+  const top = 32;
+  const bottom = 176;
   const pad = 8;
   const xs = [pad, W / 2, W - pad];
   const max = Math.max(...points.map((p) => p.total), 1) * 1.2;
@@ -176,6 +176,12 @@ export function Oversight() {
         ]}
       />
 
+      {trend && (
+        <Card title="PAYOUT TREND" sub="LAST 3 MONTHS · EGP">
+          <TrendChart points={trend} />
+        </Card>
+      )}
+
       <Card title="SETTLEMENT STATUS" sub="THIS MONTH">
         <StatusBreakdown rows={rows} />
       </Card>
@@ -187,12 +193,6 @@ export function Oversight() {
           <div style={{ font: "500 13px var(--font-body)", color: "var(--ink-faint)" }}>No sessions logged yet.</div>
         )}
       </Card>
-
-      {trend && (
-        <Card title="PAYOUT TREND" sub="LAST 3 MONTHS · EGP">
-          <TrendChart points={trend} />
-        </Card>
-      )}
 
       <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", margin: "22px 0 10px" }}>
         COACHES · {rows.length}
