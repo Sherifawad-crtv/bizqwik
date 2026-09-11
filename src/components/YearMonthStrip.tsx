@@ -20,6 +20,7 @@ export function YearMonthStrip({ months, value, onChange }: { months: string[]; 
         background: "var(--sunken)",
         borderRadius: 999,
         padding: 4,
+        width: "fit-content",
         maxWidth: "100%",
         overflowX: "auto",
         marginBottom: 18,
@@ -35,7 +36,6 @@ export function YearMonthStrip({ months, value, onChange }: { months: string[]; 
             ref={on ? selectedRef : undefined}
             onClick={() => !future && onChange(m)}
             disabled={future}
-            data-sq
             style={{
               border: 0,
               cursor: future ? "default" : "pointer",
