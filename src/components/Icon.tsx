@@ -5,7 +5,7 @@ import { UsersGroupRoundedIcon } from "@solar-icons/react/linear/users-group-rou
 import { MagnifierIcon } from "@solar-icons/react/linear/magnifier";
 import { SettingsIcon } from "@solar-icons/react/linear/settings";
 import { BanknoteIcon } from "@solar-icons/react/linear/banknote";
-import { HistoryIcon } from "@solar-icons/react/linear/history";
+import { ClockCircleIcon } from "@solar-icons/react/linear/clock-circle";
 import { AddIcon } from "@solar-icons/react/linear/add";
 import { MinusIcon } from "@solar-icons/react/linear/minus";
 import { CloseIcon } from "@solar-icons/react/linear/close";
@@ -27,7 +27,7 @@ import { UsersGroupRoundedIcon as UsersGroupRoundedIconBold } from "@solar-icons
 import { MagnifierIcon as MagnifierIconBold } from "@solar-icons/react/bold/magnifier";
 import { SettingsIcon as SettingsIconBold } from "@solar-icons/react/bold/settings";
 import { BanknoteIcon as BanknoteIconBold } from "@solar-icons/react/bold/banknote";
-import { HistoryIcon as HistoryIconBold } from "@solar-icons/react/bold/history";
+import { ClockCircleIcon as ClockCircleIconBold } from "@solar-icons/react/bold/clock-circle";
 import { AddIcon as AddIconBold } from "@solar-icons/react/bold/add";
 import { MinusIcon as MinusIconBold } from "@solar-icons/react/bold/minus";
 import { CloseIcon as CloseIconBold } from "@solar-icons/react/bold/close";
@@ -75,7 +75,7 @@ const LINEAR = {
   insights: ChartSquareIcon,
   settings: SettingsIcon,
   topay: BanknoteIcon,
-  history: HistoryIcon,
+  history: ClockCircleIcon,
   plus: AddIcon,
   minus: MinusIcon,
   close: CloseIcon,
@@ -100,7 +100,7 @@ const BOLD = {
   insights: ChartSquareIconBold,
   settings: SettingsIconBold,
   topay: BanknoteIconBold,
-  history: HistoryIconBold,
+  history: ClockCircleIconBold,
   plus: AddIconBold,
   minus: MinusIconBold,
   close: CloseIconBold,
