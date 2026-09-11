@@ -3,7 +3,7 @@ import { useSetHeader } from "../lib/header";
 import { useAsync } from "../lib/useAsync";
 import { useLatch } from "../lib/useLatch";
 import { api } from "../lib/backend";
-import type { Invite, Profile, Role, Tier } from "../lib/types";
+import type { BundleType, Invite, Profile, Role, Tier } from "../lib/types";
 import { ROLE_LABELS } from "../lib/types";
 import { Segmented } from "../components/Segmented";
 import { Button } from "../components/Button";
@@ -15,7 +15,7 @@ import { Avatar } from "../components/Avatar";
 import { Spinner } from "../components/Spinner";
 import { useAuth } from "../lib/auth";
 
-type Tab = "tiers" | "invites" | "people";
+type Tab = "tiers" | "bundles" | "invites" | "people";
 
 export function Manage() {
   const [tab, setTab] = useState<Tab>("tiers");
@@ -30,6 +30,7 @@ export function Manage() {
           onChange={setTab}
           options={[
             { value: "tiers", label: "TIERS" },
+            { value: "bundles", label: "BUNDLES" },
             { value: "invites", label: "INVITES" },
             { value: "people", label: "PEOPLE" },
           ]}
@@ -40,6 +41,7 @@ export function Manage() {
   );
 
   if (tab === "tiers") return <TiersPanel />;
+  if (tab === "bundles") return <BundlesPanel />;
   if (tab === "invites") return <InvitesPanel />;
   return <PeoplePanel />;
 }
@@ -69,7 +71,7 @@ function TiersPanel() {
           <div key={t.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "16px 20px", borderBottom: i === data.tiers.length - 1 ? "none" : "1px solid var(--line)" }}>
             <div style={{ minWidth: 0, flex: 1 }}>
               <div style={{ font: "700 16px var(--font-body)" }}>{t.name}</div>
-              <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>{t.rate} EGP / session</div>
+              <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>{t.rate} EGP / session · {t.privateCutPct}% private cut</div>
             </div>
             <button onClick={() => setEditing(t)} aria-label="Edit tier" style={{ width: 36, height: 36, borderRadius: 999, border: 0, background: "var(--primary-tint)", color: "var(--primary-pressed)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <Icon name="pencil" size={15} />
@@ -109,6 +111,7 @@ function TiersPanel() {
 function TierSheet({ open, tier, onClose }: { open: boolean; tier: Tier | null; onClose: () => void }) {
   const [name, setName] = useState(tier?.name ?? "");
   const [rate, setRate] = useState(String(tier?.rate ?? ""));
+  const [privateCutPct, setPrivateCutPct] = useState(String(tier?.privateCutPct ?? ""));
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -116,6 +119,7 @@ function TierSheet({ open, tier, onClose }: { open: boolean; tier: Tier | null; 
     if (open) {
       setName(tier?.name ?? "");
       setRate(String(tier?.rate ?? ""));
+      setPrivateCutPct(String(tier?.privateCutPct ?? ""));
       setError(null);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -125,15 +129,20 @@ function TierSheet({ open, tier, onClose }: { open: boolean; tier: Tier | null; 
 
   const save = async () => {
     const rateNum = Number(rate);
+    const cutNum = privateCutPct === "" ? 0 : Number(privateCutPct);
     if (!name.trim() || !Number.isFinite(rateNum) || rateNum <= 0) {
       setError("Enter a name and a rate greater than 0.");
+      return;
+    }
+    if (!Number.isFinite(cutNum) || cutNum < 0 || cutNum > 100) {
+      setError("Private cut % must be between 0 and 100.");
       return;
     }
     setBusy(true);
     setError(null);
     try {
-      if (tier) await api.updateTier(tier.id, name.trim(), rateNum);
-      else await api.createTier(name.trim(), rateNum);
+      if (tier) await api.updateTier(tier.id, name.trim(), rateNum, cutNum);
+      else await api.createTier(name.trim(), rateNum, cutNum);
       onClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
@@ -149,6 +158,7 @@ function TierSheet({ open, tier, onClose }: { open: boolean; tier: Tier | null; 
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
         <TextField label="NAME" value={name} onChange={(e) => setName(e.target.value)} placeholder="Tier 2 · Intermediate" />
         <TextField label="RATE · EGP / SESSION" type="number" min={1} value={rate} onChange={(e) => setRate(e.target.value)} />
+        <TextField label="PRIVATE TRAINING CUT · %" type="number" min={0} max={100} value={privateCutPct} onChange={(e) => setPrivateCutPct(e.target.value)} placeholder="50" />
       </div>
       {error && (
         <div style={{ marginTop: 12, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>
@@ -157,6 +167,137 @@ function TierSheet({ open, tier, onClose }: { open: boolean; tier: Tier | null; 
       )}
       <Button fullWidth size="lg" style={{ marginTop: 16 }} disabled={busy} onClick={save}>
         {busy ? "Saving…" : tier ? "Save changes" : "Create tier"}
+      </Button>
+      <Button variant="secondary" fullWidth style={{ marginTop: 8 }} onClick={onClose} disabled={busy}>
+        Cancel
+      </Button>
+    </Sheet>
+  );
+}
+
+// ---------- Bundles (private training) ----------
+
+function BundlesPanel() {
+  const { data } = useAsync(() => api.bundleTypes(), []);
+  const [editing, setEditing] = useState<BundleType | "new" | null>(null);
+  const [deleting, setDeleting] = useState<BundleType | null>(null);
+  const shownDeleting = useLatch(deleting);
+
+  if (!data) return <Spinner />;
+
+  return (
+    <div>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
+        <span style={{ font: "700 20px var(--font-body)", letterSpacing: "-.01em" }}>Bundle types</span>
+        <span style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>{data.bundleTypes.length}</span>
+        <Button size="md" style={{ marginLeft: "auto", height: 40, padding: "0 16px" }} onClick={() => setEditing("new")}>
+          + New bundle
+        </Button>
+      </div>
+
+      <div data-sq style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", overflow: "hidden" }}>
+        {data.bundleTypes.map((b, i) => (
+          <div key={b.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "16px 20px", borderBottom: i === data.bundleTypes.length - 1 ? "none" : "1px solid var(--line)" }}>
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <div style={{ font: "700 16px var(--font-body)" }}>{b.name}</div>
+              <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>
+                {b.price} EGP · {b.sessionsIncluded} sessions · {b.expiryDays} days
+              </div>
+            </div>
+            <button onClick={() => setEditing(b)} aria-label="Edit bundle" style={{ width: 36, height: 36, borderRadius: 999, border: 0, background: "var(--primary-tint)", color: "var(--primary-pressed)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <Icon name="pencil" size={15} />
+            </button>
+            <button onClick={() => setDeleting(b)} aria-label="Delete bundle" style={{ width: 36, height: 36, borderRadius: 999, border: 0, background: "var(--danger-bg)", color: "var(--danger-fg)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <Icon name="trash" size={15} />
+            </button>
+          </div>
+        ))}
+        {data.bundleTypes.length === 0 && (
+          <div style={{ padding: "28px 20px", display: "flex", flexDirection: "column", alignItems: "center", gap: 8, color: "var(--ink-faint)", font: "500 14px var(--font-body)" }}>
+            <Icon name="tag" size={26} />
+            No bundle types yet.
+          </div>
+        )}
+      </div>
+
+      <BundleSheet open={editing !== null} bundleType={editing === "new" ? null : editing} onClose={() => setEditing(null)} />
+      {shownDeleting && (
+        <ConfirmSheet
+          open={!!deleting}
+          onClose={() => setDeleting(null)}
+          kicker="DELETE BUNDLE"
+          title={`Delete ${shownDeleting.name}?`}
+          sub="Existing sold packages keep their own snapshot — this only removes it from future sales."
+          confirmLabel="Delete bundle"
+          danger
+          onConfirm={async () => {
+            await api.deleteBundleType(shownDeleting.id);
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+function BundleSheet({ open, bundleType, onClose }: { open: boolean; bundleType: BundleType | null; onClose: () => void }) {
+  const [name, setName] = useState(bundleType?.name ?? "");
+  const [price, setPrice] = useState(String(bundleType?.price ?? ""));
+  const [sessionsIncluded, setSessionsIncluded] = useState(String(bundleType?.sessionsIncluded ?? ""));
+  const [expiryDays, setExpiryDays] = useState(String(bundleType?.expiryDays ?? ""));
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      setName(bundleType?.name ?? "");
+      setPrice(String(bundleType?.price ?? ""));
+      setSessionsIncluded(String(bundleType?.sessionsIncluded ?? ""));
+      setExpiryDays(String(bundleType?.expiryDays ?? ""));
+      setError(null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, bundleType]);
+
+  if (!open) return null;
+
+  const save = async () => {
+    const priceNum = Number(price);
+    const sessionsNum = Number(sessionsIncluded);
+    const expiryNum = Number(expiryDays);
+    if (!name.trim() || !Number.isFinite(priceNum) || priceNum <= 0 || !Number.isInteger(sessionsNum) || sessionsNum <= 0 || !Number.isInteger(expiryNum) || expiryNum <= 0) {
+      setError("Enter a name, a price, whole-number sessions, and whole-number expiry days — all greater than 0.");
+      return;
+    }
+    setBusy(true);
+    setError(null);
+    try {
+      if (bundleType) await api.updateBundleType(bundleType.id, name.trim(), priceNum, sessionsNum, expiryNum);
+      else await api.createBundleType(name.trim(), priceNum, sessionsNum, expiryNum);
+      onClose();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <Sheet open={open} onClose={onClose}>
+      <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>{bundleType ? "EDIT BUNDLE" : "NEW BUNDLE"}</div>
+      <div style={{ font: "800 26px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 16px" }}>{bundleType ? bundleType.name : "New bundle"}</div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        <TextField label="NAME" value={name} onChange={(e) => setName(e.target.value)} placeholder="24-Session Pack" />
+        <TextField label="PRICE · EGP" type="number" min={1} value={price} onChange={(e) => setPrice(e.target.value)} />
+        <TextField label="SESSIONS INCLUDED" type="number" min={1} value={sessionsIncluded} onChange={(e) => setSessionsIncluded(e.target.value)} placeholder="24" />
+        <TextField label="EXPIRES AFTER · DAYS" type="number" min={1} value={expiryDays} onChange={(e) => setExpiryDays(e.target.value)} placeholder="45" />
+      </div>
+      {error && (
+        <div style={{ marginTop: 12, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>
+          {error}
+        </div>
+      )}
+      <Button fullWidth size="lg" style={{ marginTop: 16 }} disabled={busy} onClick={save}>
+        {busy ? "Saving…" : bundleType ? "Save changes" : "Create bundle"}
       </Button>
       <Button variant="secondary" fullWidth style={{ marginTop: 8 }} onClick={onClose} disabled={busy}>
         Cancel

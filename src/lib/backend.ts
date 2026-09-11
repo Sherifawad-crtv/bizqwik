@@ -4,7 +4,7 @@
 // keeps working (see supabaseClient.ts for which project it targets).
 import { FN_SLUG, supabase } from "./supabaseClient";
 import { bump } from "./bus";
-import type { Invite, Profile, Role, Rollup, Session, Tier } from "./types";
+import type { BundleType, ClientWithPackage, Invite, PackageInstance, Profile, Role, Rollup, Session, Tier } from "./types";
 
 type Method = "GET" | "POST";
 
@@ -47,9 +47,28 @@ export const api = {
   me: () => callFn<{ profile: Profile; tier: Tier | null }>("me"),
 
   tiers: () => callFn<{ tiers: Tier[] }>("tiers"),
-  createTier: (name: string, rate: number) => callFn<{ tier: Tier }>("tiers", { method: "POST", body: { name, rate } }),
-  updateTier: (id: string, name: string, rate: number) => callFn<void>("tiers/update", { method: "POST", body: { id, name, rate } }),
+  createTier: (name: string, rate: number, privateCutPct: number) =>
+    callFn<{ tier: Tier }>("tiers", { method: "POST", body: { name, rate, privateCutPct } }),
+  updateTier: (id: string, name: string, rate: number, privateCutPct: number) =>
+    callFn<void>("tiers/update", { method: "POST", body: { id, name, rate, privateCutPct } }),
   deleteTier: (id: string) => callFn<void>("tiers/delete", { method: "POST", body: { id } }),
+
+  bundleTypes: () => callFn<{ bundleTypes: BundleType[] }>("bundle-types"),
+  createBundleType: (name: string, price: number, sessionsIncluded: number, expiryDays: number) =>
+    callFn<{ bundleType: BundleType }>("bundle-types", { method: "POST", body: { name, price, sessionsIncluded, expiryDays } }),
+  updateBundleType: (id: string, name: string, price: number, sessionsIncluded: number, expiryDays: number) =>
+    callFn<void>("bundle-types/update", { method: "POST", body: { id, name, price, sessionsIncluded, expiryDays } }),
+  deleteBundleType: (id: string) => callFn<void>("bundle-types/delete", { method: "POST", body: { id } }),
+
+  clients: () => callFn<{ clients: ClientWithPackage[] }>("clients"),
+  createClient: (name: string, age: number | null, conditions: string | null) =>
+    callFn<{ client: ClientWithPackage }>("clients", { method: "POST", body: { name, age, conditions } }),
+  assignCoach: (clientId: string, coachId: string) =>
+    callFn<void>("clients/assign-coach", { method: "POST", body: { clientId, coachId } }),
+  sellPackage: (clientId: string, bundleTypeId: string, coachId: string) =>
+    callFn<{ package: PackageInstance }>("packages", { method: "POST", body: { clientId, bundleTypeId, coachId } }),
+  deliverSession: (packageInstanceId: string) =>
+    callFn<{ package: PackageInstance }>("packages/deliver", { method: "POST", body: { packageInstanceId } }),
 
   invites: () => callFn<{ invites: Invite[] }>("invites"),
   createInvite: (email: string, role: Role, tierId: string | null) =>

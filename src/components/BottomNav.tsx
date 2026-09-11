@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { Icon } from "./Icon";
 import { matchTabIndex, type NavItem } from "../lib/nav";
@@ -16,9 +17,19 @@ const HIT_SLOP_X = GAP / 2;
 export function BottomNav({ items }: { items: NavItem[] }) {
   const { pathname } = useLocation();
   const activeIndex = matchTabIndex(pathname, items);
+  const activeRef = useRef<HTMLAnchorElement>(null);
+
+  // When there are more items than fit (a wide roster of tabs on a narrow
+  // phone), the bar scrolls internally instead of overflowing past the FAB —
+  // and the active tab scrolls into view on its own so switching to an
+  // off-screen tab never leaves you looking at the wrong page silently.
+  useEffect(() => {
+    activeRef.current?.scrollIntoView({ inline: "nearest", block: "nearest", behavior: "smooth" });
+  }, [activeIndex]);
 
   return (
     <div
+      data-hide-scrollbar
       style={{
         position: "relative",
         flex: "0 1 auto",
@@ -34,6 +45,9 @@ export function BottomNav({ items }: { items: NavItem[] }) {
         alignItems: "center",
         gap: GAP,
         padding: `0 ${PAD}px`,
+        overflowX: "auto",
+        WebkitOverflowScrolling: "touch",
+        scrollbarWidth: "none",
       }}
     >
       {activeIndex >= 0 && (
@@ -52,9 +66,10 @@ export function BottomNav({ items }: { items: NavItem[] }) {
           }}
         />
       )}
-      {items.map((t) => (
+      {items.map((t, i) => (
         <NavLink
           key={t.key}
+          ref={i === activeIndex ? activeRef : undefined}
           to={t.path}
           end={t.path === "/"}
           title={t.label}

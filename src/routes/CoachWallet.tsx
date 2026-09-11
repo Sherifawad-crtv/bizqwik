@@ -80,8 +80,9 @@ export function CoachWallet() {
         date: addedDate,
         createdBy: profile.id,
       }));
+      const addedAmount = qty * prev.row.rate;
       return {
-        row: { ...prev.row, count: prev.row.count + qty, total: prev.row.total + qty * prev.row.rate },
+        row: { ...prev.row, count: prev.row.count + qty, groupTotal: prev.row.groupTotal + addedAmount, total: prev.row.total + addedAmount },
         sessions: [...prev.sessions, ...newSessions],
       };
     });
@@ -96,7 +97,8 @@ export function CoachWallet() {
         value={fmt(row.total)}
         stats={[
           { k: "SESSIONS", v: `${row.count} ${row.count === 1 ? "session" : "sessions"}` },
-          { k: row.tierName ? row.tierName.toUpperCase() : "RATE", v: `${row.rate} / session` },
+          { k: "GROUP", v: `${fmt(row.groupTotal)} EGP` },
+          { k: "PRIVATE", v: `${fmt(row.privateTotal)} EGP` },
           { k: "STATE", v: row.state.toUpperCase() },
         ]}
       />

@@ -60,7 +60,7 @@ export function Pay() {
           onClose={() => setPaying(null)}
           kicker="MARK PAID"
           title={`Pay ${shownPaying.name}?`}
-          sub={`${fmt(shownPaying.total)} EGP · ${shownPaying.count} sessions · ${month}. This records the payout as made in cash — it can't be undone from here.`}
+          sub={`${fmt(shownPaying.groupTotal)} EGP group + ${fmt(shownPaying.privateTotal)} EGP private = ${fmt(shownPaying.total)} EGP · ${month}. This records the payout as made in cash — it can't be undone from here.`}
           confirmLabel={`Mark paid · ${fmt(shownPaying.total)} EGP`}
           onConfirm={async () => {
             await api.pay(shownPaying.coachId, month);

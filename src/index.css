@@ -109,6 +109,10 @@ textarea {
   scrollbar-width: thin;
 }
 
+[data-hide-scrollbar]::-webkit-scrollbar {
+  display: none;
+}
+
 [data-tap] {
   transition: transform 0.12s ease;
 }

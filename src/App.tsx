@@ -16,6 +16,7 @@ import { Oversight } from "./routes/Oversight";
 import { Manage } from "./routes/Manage";
 import { Pay } from "./routes/Pay";
 import { History } from "./routes/History";
+import { Clients } from "./routes/Clients";
 import { Account } from "./routes/Account";
 
 export default function App() {
@@ -41,6 +42,10 @@ export default function App() {
                   <Route element={<RequireRole roles={["head_coach", "dept_head"]} />}>
                     <Route path="/coaches" element={<CoachesOverview />} />
                     <Route path="/coaches/:id" element={<CoachDetail />} />
+                  </Route>
+
+                  <Route element={<RequireRole roles={["coach", "head_coach", "dept_head"]} />}>
+                    <Route path="/clients" element={<Clients />} />
                   </Route>
 
                   <Route element={<RequireRole roles={["dept_head"]} />}>

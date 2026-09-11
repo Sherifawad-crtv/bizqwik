@@ -13,6 +13,7 @@ export interface Tier {
   id: string;
   name: string;
   rate: number;
+  privateCutPct: number;
 }
 
 export interface Session {
@@ -39,11 +40,64 @@ export interface Rollup {
   tierName: string | null;
   rate: number;
   count: number;
+  groupTotal: number;
+  privateTotal: number;
+  packageCount: number;
   total: number;
   state: State;
   settledAt: string | null;
   paidAt: string | null;
 }
+
+export interface BundleType {
+  id: string;
+  name: string;
+  price: number;
+  sessionsIncluded: number;
+  expiryDays: number;
+}
+
+export interface Client {
+  id: string;
+  name: string;
+  age: number | null;
+  conditions: string | null;
+  assignedCoachId: string | null;
+}
+
+export type PackageStatus = "active" | "exhausted" | "expired";
+
+export interface PackageInstance {
+  id: string;
+  clientId: string;
+  bundleTypeId: string;
+  coachId: string;
+  purchaseDate: string;
+  expiryDate: string;
+  sessionsIncluded: number;
+  sessionsRemaining: number;
+  priceAtSale: number;
+  coachCutAtSale: number;
+  status: PackageStatus;
+  createdBy: string;
+}
+
+export interface ClientWithPackage extends Client {
+  currentPackage: PackageInstance | null;
+}
+
+export interface DeliveryLog {
+  id: string;
+  packageInstanceId: string;
+  date: string;
+  loggedBy: string;
+}
+
+export const PACKAGE_STATUS_LABELS: Record<PackageStatus, string> = {
+  active: "Active",
+  exhausted: "Exhausted",
+  expired: "Expired",
+};
 
 export const isHead = (r?: Role) => r === "dept_head" || r === "head_coach";
 export const canLog = (r?: Role) => !!r && r !== "accountant";
