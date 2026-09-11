@@ -15,7 +15,7 @@ import { CoachDetail } from "./routes/CoachDetail";
 import { Oversight } from "./routes/Oversight";
 import { Manage } from "./routes/Manage";
 import { Pay } from "./routes/Pay";
-import { PayHistory } from "./routes/PayHistory";
+import { History } from "./routes/History";
 import { Account } from "./routes/Account";
 
 export default function App() {
@@ -35,6 +35,7 @@ export default function App() {
                 <Route element={<Shell />}>
                   <Route path="/" element={<Home />} />
                   <Route path="/mine" element={<CoachWallet />} />
+                  <Route path="/history" element={<History />} />
                   <Route path="/account" element={<Account />} />
 
                   <Route element={<RequireRole roles={["head_coach", "dept_head"]} />}>
@@ -49,7 +50,6 @@ export default function App() {
 
                   <Route element={<RequireRole roles={["accountant"]} />}>
                     <Route path="/pay" element={<Pay />} />
-                    <Route path="/history" element={<PayHistory />} />
                   </Route>
                 </Route>
               </Route>

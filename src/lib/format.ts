@@ -29,6 +29,11 @@ export function monthShort(month: string): string {
   return `${MON[m].toUpperCase()} ${String(y).slice(2)}`;
 }
 
+export function monthAbbr(month: string): string {
+  const [, m] = splitMonth(month);
+  return MON[m].toUpperCase();
+}
+
 export function daysInMonth(month: string): number {
   const [y, m] = splitMonth(month);
   return new Date(y, m + 1, 0).getDate();
