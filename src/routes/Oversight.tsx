@@ -92,9 +92,28 @@ function useMeasuredWidth(fallback: number) {
   return [ref, w] as const;
 }
 
+const TREND_H = 220;
+
+function TrendChartPlaceholder() {
+  return (
+    <div style={{ height: TREND_H, display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div
+        style={{
+          width: 22,
+          height: 22,
+          borderRadius: 999,
+          border: "3px solid var(--primary-tint)",
+          borderTopColor: "var(--primary)",
+          animation: "bqSpin .7s linear infinite",
+        }}
+      />
+    </div>
+  );
+}
+
 function TrendChart({ points }: { points: { month: string; label: string; total: number }[] }) {
   const [ref, W] = useMeasuredWidth(320);
-  const H = 220;
+  const H = TREND_H;
   const top = 32;
   const bottom = 176;
   const pad = 8;
@@ -176,11 +195,9 @@ export function Oversight() {
         ]}
       />
 
-      {trend && (
-        <Card title="PAYOUT TREND" sub="LAST 3 MONTHS · EGP">
-          <TrendChart points={trend} />
-        </Card>
-      )}
+      <Card title="PAYOUT TREND" sub="LAST 3 MONTHS · EGP">
+        {trend ? <TrendChart points={trend} /> : <TrendChartPlaceholder />}
+      </Card>
 
       <Card title="SETTLEMENT STATUS" sub="THIS MONTH">
         <StatusBreakdown rows={rows} />
