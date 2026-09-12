@@ -12,7 +12,8 @@ import { Icon } from "../components/Icon";
 import { Avatar } from "../components/Avatar";
 import { Spinner } from "../components/Spinner";
 import { Sheet } from "../components/Sheet";
-import { TextField, SelectField } from "../components/FormField";
+import { SelectField } from "../components/FormField";
+import { NewClientWizardSheet } from "../components/NewClientWizardSheet";
 
 interface CoachOption {
   id: string;
@@ -186,7 +187,7 @@ function ClientList({
         />
       )}
 
-      {showNewClient && <NewClientSheet open={newClientOpen} onClose={() => setNewClientOpen(false)} />}
+      {showNewClient && <NewClientWizardSheet open={newClientOpen} onClose={() => setNewClientOpen(false)} />}
     </div>
   );
 }
@@ -403,65 +404,6 @@ function ClientDetailSheet({
           </Button>
         </>
       )}
-    </Sheet>
-  );
-}
-
-function NewClientSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const [name, setName] = useState("");
-  const [age, setAge] = useState("");
-  const [conditions, setConditions] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (open) {
-      setName("");
-      setAge("");
-      setConditions("");
-      setError(null);
-    }
-  }, [open]);
-
-  if (!open) return null;
-
-  const save = async () => {
-    if (!name.trim()) {
-      setError("Enter a name.");
-      return;
-    }
-    setBusy(true);
-    setError(null);
-    try {
-      await api.createClient(name.trim(), age.trim() ? Number(age) : null, conditions.trim() || null);
-      onClose();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong.");
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  return (
-    <Sheet open={open} onClose={onClose}>
-      <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>NEW CLIENT</div>
-      <div style={{ font: "800 26px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 16px" }}>New client</div>
-      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-        <TextField label="NAME" value={name} onChange={(e) => setName(e.target.value)} placeholder="Client name" />
-        <TextField label="AGE (OPTIONAL)" type="number" min={0} value={age} onChange={(e) => setAge(e.target.value)} />
-        <TextField label="CONDITIONS (OPTIONAL)" value={conditions} onChange={(e) => setConditions(e.target.value)} placeholder="Only visible to their coach and heads" />
-      </div>
-      {error && (
-        <div style={{ marginTop: 12, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>
-          {error}
-        </div>
-      )}
-      <Button fullWidth size="lg" style={{ marginTop: 16 }} disabled={busy} onClick={save}>
-        {busy ? "Creating…" : "Create client"}
-      </Button>
-      <Button variant="secondary" fullWidth style={{ marginTop: 8 }} onClick={onClose} disabled={busy}>
-        Cancel
-      </Button>
     </Sheet>
   );
 }
