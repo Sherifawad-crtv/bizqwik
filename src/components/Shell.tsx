@@ -6,12 +6,13 @@ import { Sidebar } from "./Sidebar";
 import { Fab } from "./Fab";
 import { useAuth } from "../lib/auth";
 import { useHeader } from "../lib/header";
-import { useIsMobile } from "../lib/useIsMobile";
+import { useIsMobile, useIsNarrowPhone } from "../lib/useIsMobile";
 import { NAV } from "../lib/nav";
 
 export function Shell() {
   const { profile } = useAuth();
   const isMobile = useIsMobile();
+  const narrow = useIsNarrowPhone();
   const header = useHeader();
 
   if (!profile) return null;
@@ -63,11 +64,11 @@ export function Shell() {
             right: 0,
             bottom: 0,
             zIndex: 55,
-            padding: "0 12px calc(12px + var(--safe-bottom))",
+            padding: `0 ${narrow ? 12 : 16}px calc(12px + var(--safe-bottom))`,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            gap: 8,
+            gap: narrow ? 8 : 12,
           }}
         >
           <BottomNav items={NAV[profile.role]} />

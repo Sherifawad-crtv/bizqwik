@@ -1,27 +1,32 @@
 import { NavLink, useLocation } from "react-router-dom";
 import { Icon } from "./Icon";
 import { matchTabIndex, type NavItem } from "../lib/nav";
+import { useIsNarrowPhone } from "../lib/useIsMobile";
 
-const ITEM = 44;
-const GAP = 5;
-const PAD = 5;
 const BAR_BORDER = 1;
-// The active-tab highlight keeps its original size (and so its ratio to the
-// 64px bar) even though ITEM shrank to fit narrow phones — it's centered on
-// the (now smaller) icon box rather than sized to match it, so the "blob"
-// stays as prominent as it always was.
-const INDICATOR = 52;
-// Real hit area extends past the visible ITEM box using space that already
-// exists but is otherwise unused: the bar's own vertical padding (64px bar,
-// 44px icon), and half the gap on each side horizontally (so two adjacent
-// items' hit zones meet exactly at the gap's midpoint — full coverage,
-// no overlap). Purely invisible; the icons themselves never change size.
-const HIT_SLOP_Y = (64 - ITEM) / 2;
-const HIT_SLOP_X = GAP / 2;
+
+// Original sizing — unchanged from before the narrow-phone fix, and kept
+// exactly as-is for Pro Max/Plus-class phones and up, where it already had
+// room to breathe.
+const REGULAR = { ITEM: 52, GAP: 6, PAD: 6, INDICATOR: 52 };
+// Compact sizing for phones too narrow to fit a 5-tab roster next to the FAB
+// without clipping (iPhone 12 Pro and similar — see useIsNarrowPhone). The
+// active-tab indicator stays at its original 52px regardless, centered on
+// the smaller icon box, so it stays as prominent as it always was.
+const COMPACT = { ITEM: 44, GAP: 5, PAD: 5, INDICATOR: 52 };
 
 export function BottomNav({ items }: { items: NavItem[] }) {
   const { pathname } = useLocation();
   const activeIndex = matchTabIndex(pathname, items);
+  const narrow = useIsNarrowPhone();
+  const { ITEM, GAP, PAD, INDICATOR } = narrow ? COMPACT : REGULAR;
+  // Real hit area extends past the visible ITEM box using space that already
+  // exists but is otherwise unused: the bar's own vertical padding (64px bar
+  // minus ITEM), and half the gap on each side horizontally (so two adjacent
+  // items' hit zones meet exactly at the gap's midpoint — full coverage,
+  // no overlap). Purely invisible; the icons themselves never change size.
+  const HIT_SLOP_Y = (64 - ITEM) / 2;
+  const HIT_SLOP_X = GAP / 2;
 
   return (
     <div
@@ -49,12 +54,11 @@ export function BottomNav({ items }: { items: NavItem[] }) {
           style={{
             position: "absolute",
             left: PAD + ITEM / 2 - INDICATOR / 2,
-            // The bar's own 1px border isn't part of the flex content box the
-            // icon is actually centered within, so it has to be subtracted
-            // here too — otherwise the indicator centers on the bar's outer
-            // edge instead of the icon, landing 1px off (uneven top/bottom
-            // padding) even though the equivalent horizontal math is exact.
-            top: (64 - BAR_BORDER * 2 - INDICATOR) / 2,
+            // On regular sizing INDICATOR===ITEM, so this is exactly the
+            // original, unmodified formula — the border-corrected version
+            // only kicks in for the compact/narrow-phone indicator, which is
+            // deliberately bigger than its icon box.
+            top: narrow ? (64 - BAR_BORDER * 2 - INDICATOR) / 2 : (64 - INDICATOR) / 2,
             width: INDICATOR,
             height: INDICATOR,
             borderRadius: 999,
