@@ -5,7 +5,7 @@ import { useAsync } from "../lib/useAsync";
 import { useLatch } from "../lib/useLatch";
 import { api, MOCK } from "../lib/backend";
 import { egp, fmt } from "../lib/format";
-import { canLog, isHead, PACKAGE_STATUS_LABELS } from "../lib/types";
+import { canLog, PACKAGE_STATUS_LABELS } from "../lib/types";
 import type { BundleType, ClientWithPackage, PackageStatus, Role } from "../lib/types";
 import { Segmented } from "../components/Segmented";
 import { Button } from "../components/Button";
@@ -61,18 +61,22 @@ function countdownText(client: ClientWithPackage): string | null {
 
 export function Clients() {
   const { profile } = useAuth();
-  const head = !!profile && isHead(profile.role);
+  // Only dept_head gets department-wide admin capability (create clients,
+  // sell/renew packages, assign/reassign). Head coach's private-training
+  // role is now the same as a plain coach's: view their own assigned
+  // clients and log deliveries against them, nothing more.
+  const isDeptHead = profile?.role === "dept_head";
   const [scope, setScope] = useState<"mine" | "all">("all");
 
   const { data } = useAsync(() => api.clients(), []);
-  const { data: bundleData } = useAsync(() => (head ? api.bundleTypes() : Promise.resolve(null)), [head]);
-  const { data: monthData } = useAsync(() => (head ? api.month(MOCK.CURRENT_MONTH) : Promise.resolve(null)), [head]);
+  const { data: bundleData } = useAsync(() => (isDeptHead ? api.bundleTypes() : Promise.resolve(null)), [isDeptHead]);
+  const { data: monthData } = useAsync(() => (isDeptHead ? api.month(MOCK.CURRENT_MONTH) : Promise.resolve(null)), [isDeptHead]);
 
   useSetHeader(
     {
       kicker: "PRIVATE TRAINING",
       title: "Clients",
-      right: head ? (
+      right: isDeptHead ? (
         <Segmented
           value={scope}
           onChange={setScope}
@@ -83,7 +87,7 @@ export function Clients() {
         />
       ) : undefined,
     },
-    [scope, head],
+    [scope, isDeptHead],
   );
 
   if (!profile) return null;
@@ -91,7 +95,7 @@ export function Clients() {
 
   const coachOptions: CoachOption[] = (monthData?.rows ?? []).filter((r) => canLog(r.role)).map((r) => ({ id: r.coachId, name: r.name }));
   const bundleTypes: BundleType[] = bundleData?.bundleTypes ?? [];
-  const visibleClients = !head || scope === "mine" ? data.clients.filter((c) => c.assignedCoachId === profile.id) : data.clients;
+  const visibleClients = !isDeptHead || scope === "mine" ? data.clients.filter((c) => c.assignedCoachId === profile.id) : data.clients;
   const coachName = (id: string | null) => (id ? (coachOptions.find((c) => c.id === id)?.name ?? "—") : null);
 
   return (
@@ -102,8 +106,8 @@ export function Clients() {
       coachOptions={coachOptions}
       bundleTypes={bundleTypes}
       coachName={coachName}
-      showAssignedCoach={head && scope === "all"}
-      showNewClient={profile.role === "dept_head" && scope === "all"}
+      showAssignedCoach={isDeptHead && scope === "all"}
+      showNewClient={isDeptHead && scope === "all"}
     />
   );
 }
@@ -241,7 +245,7 @@ function ClientDetailSheet({
 
   const pkg = client.currentPackage;
   const canSell = role === "dept_head" && (!pkg || pkg.status !== "active");
-  const canAssign = (role === "dept_head" || role === "head_coach") && client.assignedCoachId === null;
+  const canAssign = role === "dept_head" && client.assignedCoachId === null;
   const canDeliver = role !== "accountant" && client.assignedCoachId === myId && !!pkg && pkg.status === "active";
 
   const sell = async () => {
