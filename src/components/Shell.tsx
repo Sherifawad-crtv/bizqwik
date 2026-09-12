@@ -8,7 +8,6 @@ import { useAuth } from "../lib/auth";
 import { useHeader } from "../lib/header";
 import { useIsMobile } from "../lib/useIsMobile";
 import { NAV } from "../lib/nav";
-import { canLog } from "../lib/types";
 
 export function Shell() {
   const { profile } = useAuth();
@@ -16,7 +15,10 @@ export function Shell() {
   const header = useHeader();
 
   if (!profile) return null;
-  const showFab = canLog(profile.role);
+  // Everyone but accountant gets a FAB — what it does depends on role
+  // (Fab.tsx branches: dept_head gets the client wizard, coach/head_coach
+  // get "log a session").
+  const showFab = profile.role !== "accountant";
 
   if (isMobile) {
     return (

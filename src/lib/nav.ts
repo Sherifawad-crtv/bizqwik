@@ -31,7 +31,6 @@ export const NAV: Record<Role, NavItem[]> = {
     { key: "oversight", path: "/oversight", label: "Oversight", icon: "insights" },
     { key: "coaches", path: "/coaches", label: "Coaches", icon: "coaches" },
     { key: "clients", path: "/clients", label: "Clients", icon: "clients" },
-    { key: "mine", path: "/mine", label: "My Month", icon: "wallet" },
     { key: "manage", path: "/manage", label: "Tiers & People", icon: "settings" },
     { key: "history", path: "/history", label: "History", icon: "history" },
   ],

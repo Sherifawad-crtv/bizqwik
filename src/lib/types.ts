@@ -100,7 +100,11 @@ export const PACKAGE_STATUS_LABELS: Record<PackageStatus, string> = {
 };
 
 export const isHead = (r?: Role) => r === "dept_head" || r === "head_coach";
-export const canLog = (r?: Role) => !!r && r !== "accountant";
+// Who counts as a "coach" — shows up in coach rosters/rollups, gets picked as
+// a private-training coach, etc. dept_head is management-only for now (no
+// personal group sessions, no My Month, not a private-training coach) —
+// revisit if v2 brings that back.
+export const canLog = (r?: Role) => r === "coach" || r === "head_coach";
 
 export const ROLE_LABELS: Record<Role, string> = {
   dept_head: "Department Head",
