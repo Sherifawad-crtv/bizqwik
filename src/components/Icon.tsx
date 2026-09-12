@@ -6,7 +6,7 @@ import { MagnifierIcon } from "@solar-icons/react/linear/magnifier";
 import { SettingsIcon } from "@solar-icons/react/linear/settings";
 import { BanknoteIcon } from "@solar-icons/react/linear/banknote";
 import { ClockCircleIcon } from "@solar-icons/react/linear/clock-circle";
-import { HeartPulseIcon } from "@solar-icons/react/linear/heart-pulse";
+import { UserHeartIcon } from "@solar-icons/react/linear/user-heart";
 import { AddIcon } from "@solar-icons/react/linear/add";
 import { MinusIcon } from "@solar-icons/react/linear/minus";
 import { CloseIcon } from "@solar-icons/react/linear/close";
@@ -30,7 +30,7 @@ import { MagnifierIcon as MagnifierIconBold } from "@solar-icons/react/bold/magn
 import { SettingsIcon as SettingsIconBold } from "@solar-icons/react/bold/settings";
 import { BanknoteIcon as BanknoteIconBold } from "@solar-icons/react/bold/banknote";
 import { ClockCircleIcon as ClockCircleIconBold } from "@solar-icons/react/bold/clock-circle";
-import { HeartPulseIcon as HeartPulseIconBold } from "@solar-icons/react/bold/heart-pulse";
+import { UserHeartIcon as UserHeartIconBold } from "@solar-icons/react/bold/user-heart";
 import { AddIcon as AddIconBold } from "@solar-icons/react/bold/add";
 import { MinusIcon as MinusIconBold } from "@solar-icons/react/bold/minus";
 import { CloseIcon as CloseIconBold } from "@solar-icons/react/bold/close";
@@ -82,7 +82,7 @@ const LINEAR = {
   settings: SettingsIcon,
   topay: BanknoteIcon,
   history: ClockCircleIcon,
-  clients: HeartPulseIcon,
+  clients: UserHeartIcon,
   plus: AddIcon,
   minus: MinusIcon,
   close: CloseIcon,
@@ -109,7 +109,7 @@ const BOLD = {
   settings: SettingsIconBold,
   topay: BanknoteIconBold,
   history: ClockCircleIconBold,
-  clients: HeartPulseIconBold,
+  clients: UserHeartIconBold,
   plus: AddIconBold,
   minus: MinusIconBold,
   close: CloseIconBold,
