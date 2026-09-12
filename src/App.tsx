@@ -14,6 +14,7 @@ import { CoachDetail } from "./routes/CoachDetail";
 import { Oversight } from "./routes/Oversight";
 import { Manage } from "./routes/Manage";
 import { Pay } from "./routes/Pay";
+import { PayeeDetail } from "./routes/PayeeDetail";
 import { History } from "./routes/History";
 import { Clients } from "./routes/Clients";
 import { Account } from "./routes/Account";
@@ -53,6 +54,7 @@ export default function App() {
 
                   <Route element={<RequireRole roles={["accountant"]} />}>
                     <Route path="/pay" element={<Pay />} />
+                    <Route path="/pay/:coachId" element={<PayeeDetail />} />
                   </Route>
                 </Route>
               </Route>

@@ -4,7 +4,7 @@
 // keeps working (see supabaseClient.ts for which project it targets).
 import { FN_SLUG, supabase } from "./supabaseClient";
 import { bump } from "./bus";
-import type { BundleType, Client, ClientWithPackage, Invite, PackageInstance, Profile, Role, Rollup, Session, Tier } from "./types";
+import type { BundleType, Client, ClientWithPackage, Invite, PackageInstance, PackageWithNames, Profile, Role, Rollup, Session, Tier } from "./types";
 
 type Method = "GET" | "POST";
 
@@ -72,6 +72,9 @@ export const api = {
     callFn<{ package: PackageInstance }>("packages", { method: "POST", body: { clientId, bundleTypeId, coachId } }),
   deliverSession: (packageInstanceId: string) =>
     callFn<{ package: PackageInstance }>("packages/deliver", { method: "POST", body: { packageInstanceId } }),
+  // Coach payout drill-down (accountant/dept_head/head_coach): every private
+  // package a coach sold in a given month, with client/bundle names attached.
+  packagesByCoach: (coachId: string, month: string) => callFn<{ packages: PackageWithNames[] }>(`packages/by-coach/${coachId}/${month}`),
 
   invites: () => callFn<{ invites: Invite[] }>("invites"),
   createInvite: (email: string, role: Role, tierId: string | null) =>

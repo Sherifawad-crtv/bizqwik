@@ -86,6 +86,14 @@ export interface ClientWithPackage extends Client {
   currentPackage: PackageInstance | null;
 }
 
+// Coach payout drill-down row — a package plus the names needed to show it
+// without a second lookup. Deliberately excludes Client.conditions: this is
+// a finance view (accountant module), not a client-management one.
+export interface PackageWithNames extends PackageInstance {
+  clientName: string;
+  bundleName: string;
+}
+
 export interface DeliveryLog {
   id: string;
   packageInstanceId: string;

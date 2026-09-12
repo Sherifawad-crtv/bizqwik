@@ -1,20 +1,18 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useSetHeader } from "../lib/header";
 import { useAsync } from "../lib/useAsync";
-import { useLatch } from "../lib/useLatch";
 import { api, MOCK } from "../lib/backend";
 import { fmt } from "../lib/format";
 import { MoneyHero } from "../components/MoneyHero";
 import { MonthPicker } from "../components/MonthPicker";
 import { RollupTable, type ListRow } from "../components/RollupTable";
-import { ConfirmSheet } from "../components/ConfirmSheet";
 import { Spinner } from "../components/Spinner";
-import { canLog, type Rollup } from "../lib/types";
+import { canLog } from "../lib/types";
 
 export function Pay() {
   const [month, setMonth] = useState(MOCK.CURRENT_MONTH);
-  const [paying, setPaying] = useState<Rollup | null>(null);
-  const shownPaying = useLatch(paying);
+  const navigate = useNavigate();
 
   const { data } = useAsync(() => api.month(month), [month]);
 
@@ -31,7 +29,7 @@ export function Pay() {
     sub: r.rate + " EGP/SESSION",
     state: r.state,
     amount: r.total,
-    onClick: () => setPaying(r),
+    onClick: () => navigate(`/pay/${r.coachId}`, { state: { month } }),
   }));
 
   return (
@@ -51,22 +49,8 @@ export function Pay() {
       </div>
       <RollupTable colA="PAYEE" colB="METHOD" rows={rowItems} />
       <div style={{ padding: "18px 4px 0", font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>
-        Paying moves a coach to PAID — irreversible without a head reopen.
+        Tap a payee to see the full breakdown before paying.
       </div>
-
-      {shownPaying && (
-        <ConfirmSheet
-          open={!!paying}
-          onClose={() => setPaying(null)}
-          kicker="MARK PAID"
-          title={`Pay ${shownPaying.name}?`}
-          sub={`${fmt(shownPaying.groupTotal)} EGP group + ${fmt(shownPaying.privateTotal)} EGP private = ${fmt(shownPaying.total)} EGP · ${month}. This records the payout as made in cash — it can't be undone from here.`}
-          confirmLabel={`Mark paid · ${fmt(shownPaying.total)} EGP`}
-          onConfirm={async () => {
-            await api.pay(shownPaying.coachId, month);
-          }}
-        />
-      )}
     </div>
   );
 }

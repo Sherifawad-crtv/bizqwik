@@ -6,8 +6,8 @@ import { useLatch } from "../lib/useLatch";
 import { useIsMobile } from "../lib/useIsMobile";
 import { api, MOCK } from "../lib/backend";
 import { dateLabel, egp, fmt } from "../lib/format";
-import { canLog, PACKAGE_STATUS_LABELS } from "../lib/types";
-import type { BundleType, ClientWithPackage, PackageStatus, Role } from "../lib/types";
+import { canLog } from "../lib/types";
+import type { BundleType, ClientWithPackage, Role } from "../lib/types";
 import { Button } from "../components/Button";
 import { Icon } from "../components/Icon";
 import { Avatar } from "../components/Avatar";
@@ -16,39 +16,11 @@ import { Sheet } from "../components/Sheet";
 import { ConfirmSheet } from "../components/ConfirmSheet";
 import { TextField, SelectField } from "../components/FormField";
 import { NewClientWizardSheet } from "../components/NewClientWizardSheet";
+import { PackageStatusPill } from "../components/PackageStatusPill";
 
 interface CoachOption {
   id: string;
   name: string;
-}
-
-const PKG_COLORS: Record<PackageStatus, { fg: string; bg: string }> = {
-  active: { fg: "var(--paid-fg)", bg: "var(--paid-bg)" },
-  exhausted: { fg: "var(--ink-muted)", bg: "var(--sunken)" },
-  expired: { fg: "var(--danger-fg)", bg: "var(--danger-bg)" },
-};
-
-function PackageStatusPill({ status }: { status: PackageStatus }) {
-  const c = PKG_COLORS[status];
-  return (
-    <span
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 6,
-        padding: "4px 10px",
-        borderRadius: 999,
-        background: c.bg,
-        color: c.fg,
-        font: "700 11px var(--font-mono)",
-        letterSpacing: ".08em",
-        whiteSpace: "nowrap",
-      }}
-    >
-      <i style={{ width: 6, height: 6, borderRadius: 999, background: c.fg, display: "block" }} />
-      {PACKAGE_STATUS_LABELS[status].toUpperCase()}
-    </span>
-  );
 }
 
 function daysLeft(expiryDate: string): number {
