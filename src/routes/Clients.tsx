@@ -156,9 +156,11 @@ function ClientList({
   const [newClientOpen, setNewClientOpen] = useState(false);
   const [editing, setEditing] = useState<ClientWithPackage | null>(null);
   const [deleting, setDeleting] = useState<ClientWithPackage | null>(null);
+  const [actionsFor, setActionsFor] = useState<ClientWithPackage | null>(null);
   const shownSelected = useLatch(selected);
   const shownEditing = useLatch(editing);
   const shownDeleting = useLatch(deleting);
+  const shownActionsFor = useLatch(actionsFor);
 
   return (
     <div>
@@ -185,6 +187,7 @@ function ClientList({
         onSelect={setSelected}
         onEdit={setEditing}
         onDelete={setDeleting}
+        onOpenActions={setActionsFor}
       />
 
       {shownSelected && (
@@ -201,6 +204,25 @@ function ClientList({
       )}
 
       {canManage && <NewClientWizardSheet open={newClientOpen} onClose={() => setNewClientOpen(false)} />}
+
+      {canManage && shownActionsFor && (
+        <ClientActionSheet
+          open={!!actionsFor}
+          client={shownActionsFor}
+          onClose={() => setActionsFor(null)}
+          onEdit={() => {
+            // Let the action sheet's own close animation finish before the
+            // edit sheet opens — both are portaled full-screen overlays, so
+            // opening the next one immediately would flash two backdrops.
+            setActionsFor(null);
+            window.setTimeout(() => setEditing(shownActionsFor), 260);
+          }}
+          onDelete={() => {
+            setActionsFor(null);
+            window.setTimeout(() => setDeleting(shownActionsFor), 260);
+          }}
+        />
+      )}
 
       {canManage && shownEditing && <ClientEditSheet open={!!editing} client={shownEditing} onClose={() => setEditing(null)} />}
 
@@ -234,7 +256,7 @@ function RowActionButton({
   danger,
   onClick,
 }: {
-  icon: "pencil" | "trash";
+  icon: "pencil" | "trash" | "menu";
   label: string;
   danger?: boolean;
   onClick: () => void;
@@ -273,6 +295,7 @@ function ClientRoster({
   onSelect,
   onEdit,
   onDelete,
+  onOpenActions,
 }: {
   clients: ClientWithPackage[];
   showAssignedCoach: boolean;
@@ -281,6 +304,7 @@ function ClientRoster({
   onSelect: (c: ClientWithPackage) => void;
   onEdit: (c: ClientWithPackage) => void;
   onDelete: (c: ClientWithPackage) => void;
+  onOpenActions: (c: ClientWithPackage) => void;
 }) {
   const isMobile = useIsMobile();
   const metaFor = (c: ClientWithPackage) => (showAssignedCoach ? (coachName(c.assignedCoachId) ?? "Unassigned") : packageMetaText(c));
@@ -327,22 +351,21 @@ function ClientRoster({
               <div style={{ marginTop: 8, display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
                 {c.currentPackage && <PackageStatusPill status={c.currentPackage.status} />}
                 {subFor(c) && <span style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>{subFor(c)}</span>}
-                {c.currentPackage && (
-                  <span className="tabular" style={{ marginLeft: "auto", font: "800 14px var(--font-body)", letterSpacing: "-.01em" }}>
-                    {valueFor(c)}
-                  </span>
-                )}
               </div>
             </div>
-            {canManage && (
-              <div style={{ display: "flex", gap: 6, flex: "none" }}>
-                <RowActionButton icon="pencil" label="Edit client" onClick={() => onEdit(c)} />
-                <RowActionButton icon="trash" label="Delete client" danger onClick={() => onDelete(c)} />
+            {c.currentPackage && (
+              <div style={{ textAlign: "right", flex: "none" }}>
+                <div className="tabular" style={{ font: "800 20px var(--font-body)", letterSpacing: "-.01em" }}>{valueFor(c).split(" ")[0]}</div>
+                <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>EGP</div>
               </div>
             )}
-            <span style={{ flex: "none", color: "var(--ink-faint)", display: "flex" }}>
-              <Icon name="chevron-right" size={16} />
-            </span>
+            {canManage && (
+              <RowActionButton
+                icon="menu"
+                label="Client actions"
+                onClick={() => onOpenActions(c)}
+              />
+            )}
           </div>
         ))}
       </div>
@@ -601,6 +624,41 @@ function ClientDetailSheet({
           </Button>
         </>
       )}
+    </Sheet>
+  );
+}
+
+/** Mobile-only quick-actions menu — replaces cramming edit/delete icon
+ * buttons into the already-tight roster card with a single menu button
+ * that opens this choice sheet. */
+function ClientActionSheet({
+  open,
+  client,
+  onClose,
+  onEdit,
+  onDelete,
+}: {
+  open: boolean;
+  client: ClientWithPackage;
+  onClose: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
+}) {
+  return (
+    <Sheet open={open} onClose={onClose}>
+      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 18 }}>
+        <Avatar name={client.name} size={38} />
+        <div style={{ font: "800 20px var(--font-body)", letterSpacing: "-.01em" }}>{client.name}</div>
+      </div>
+      <Button fullWidth size="lg" onClick={onEdit}>
+        Edit client
+      </Button>
+      <Button variant="danger" fullWidth style={{ marginTop: 8 }} onClick={onDelete}>
+        Delete client
+      </Button>
+      <Button variant="quiet" fullWidth style={{ marginTop: 8 }} onClick={onClose}>
+        Cancel
+      </Button>
     </Sheet>
   );
 }
