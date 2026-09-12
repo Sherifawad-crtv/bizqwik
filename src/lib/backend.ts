@@ -4,7 +4,7 @@
 // keeps working (see supabaseClient.ts for which project it targets).
 import { FN_SLUG, supabase } from "./supabaseClient";
 import { bump } from "./bus";
-import type { BundleType, ClientWithPackage, Invite, PackageInstance, Profile, Role, Rollup, Session, Tier } from "./types";
+import type { BundleType, Client, ClientWithPackage, Invite, PackageInstance, Profile, Role, Rollup, Session, Tier } from "./types";
 
 type Method = "GET" | "POST";
 
@@ -62,7 +62,7 @@ export const api = {
 
   clients: () => callFn<{ clients: ClientWithPackage[] }>("clients"),
   createClient: (name: string, age: number | null, conditions: string | null) =>
-    callFn<{ client: ClientWithPackage }>("clients", { method: "POST", body: { name, age, conditions } }),
+    callFn<{ client: Client }>("clients", { method: "POST", body: { name, age, conditions } }),
   assignCoach: (clientId: string, coachId: string) =>
     callFn<void>("clients/assign-coach", { method: "POST", body: { clientId, coachId } }),
   sellPackage: (clientId: string, bundleTypeId: string, coachId: string) =>
