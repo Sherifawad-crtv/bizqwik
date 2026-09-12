@@ -3,8 +3,9 @@ import { useAuth } from "../lib/auth";
 import { useSetHeader } from "../lib/header";
 import { useAsync } from "../lib/useAsync";
 import { useLatch } from "../lib/useLatch";
+import { useIsMobile } from "../lib/useIsMobile";
 import { api, MOCK } from "../lib/backend";
-import { egp, fmt } from "../lib/format";
+import { dateLabel, egp, fmt } from "../lib/format";
 import { canLog, PACKAGE_STATUS_LABELS } from "../lib/types";
 import type { BundleType, ClientWithPackage, PackageStatus, Role } from "../lib/types";
 import { Button } from "../components/Button";
@@ -57,6 +58,36 @@ function countdownText(client: ClientWithPackage): string | null {
   const pkg = client.currentPackage;
   if (!pkg || pkg.status !== "active") return null;
   return `${pkg.sessionsRemaining} of ${pkg.sessionsIncluded} left · ${daysLeft(pkg.expiryDate)} days left`;
+}
+
+/** Own-package meta line: distinguishes "never bought a package" from
+ * "had one, but it's exhausted/expired" — the status pill next to this text
+ * already names which, so this fills in what the pill can't: how long is
+ * left (active) or when it ended. */
+function packageMetaText(client: ClientWithPackage): string {
+  const pkg = client.currentPackage;
+  if (!pkg) return "No package yet";
+  if (pkg.status === "active") return countdownText(client)!;
+  return `Sold ${dateLabel(pkg.purchaseDate)}`;
+}
+
+function OverviewCards({ clients }: { clients: ClientWithPackage[] }) {
+  const stats = [
+    { k: "TOTAL CLIENTS", v: clients.length },
+    { k: "ACTIVE PACKAGES", v: clients.filter((c) => c.currentPackage?.status === "active").length },
+    { k: "NEEDS RENEWAL", v: clients.filter((c) => c.currentPackage && c.currentPackage.status !== "active").length },
+    { k: "UNASSIGNED", v: clients.filter((c) => c.assignedCoachId === null).length },
+  ];
+  return (
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(140px,1fr))", gap: 10, marginBottom: 18 }}>
+      {stats.map((s) => (
+        <div key={s.k} data-sq style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: "16px 18px" }}>
+          <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>{s.k}</div>
+          <div className="tabular" style={{ font: "800 30px var(--font-body)", letterSpacing: "-.02em", marginTop: 6 }}>{s.v}</div>
+        </div>
+      ))}
+    </div>
+  );
 }
 
 export function Clients() {
@@ -121,6 +152,8 @@ function ClientList({
 
   return (
     <div>
+      <OverviewCards clients={clients} />
+
       {showNewClient && (
         <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 14 }}>
           <Button size="md" style={{ height: 40, padding: "0 16px" }} onClick={() => setNewClientOpen(true)}>
@@ -129,50 +162,12 @@ function ClientList({
         </div>
       )}
 
-      {clients.length === 0 ? (
-        <div
-          data-sq
-          style={{
-            background: "var(--surface)",
-            border: "1px solid var(--line)",
-            borderRadius: "var(--r-tile)",
-            padding: "32px 16px",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: 8,
-            color: "var(--ink-faint)",
-            font: "500 14px var(--font-body)",
-          }}
-        >
-          <Icon name="clients" size={26} />
-          Nothing here yet.
-        </div>
-      ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-          {clients.map((c) => (
-            <div
-              key={c.id}
-              data-sq
-              onClick={() => setSelected(c)}
-              style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-tile)", padding: "14px 16px", display: "flex", gap: 14, alignItems: "center", cursor: "pointer" }}
-            >
-              <Avatar name={c.name} size={38} />
-              <div style={{ minWidth: 0, flex: 1 }}>
-                <div style={{ font: "700 16px var(--font-body)", letterSpacing: "-.01em" }}>{c.name}</div>
-                <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-muted)" }}>
-                  {showAssignedCoach ? (coachName(c.assignedCoachId) ?? "UNASSIGNED") : countdownText(c) ?? "No package yet"}
-                </div>
-                {showAssignedCoach && countdownText(c) && (
-                  <div style={{ font: "400 12px var(--font-mono)", color: "var(--ink-faint)", marginTop: 2 }}>{countdownText(c)}</div>
-                )}
-                <div style={{ marginTop: 8 }}>{c.currentPackage ? <PackageStatusPill status={c.currentPackage.status} /> : null}</div>
-              </div>
-              <Icon name="chevron-right" size={16} />
-            </div>
-          ))}
-        </div>
-      )}
+      <div style={{ display: "flex", alignItems: "baseline", gap: 10, padding: "2px 2px 8px" }}>
+        <span style={{ font: "700 20px var(--font-body)", letterSpacing: "-.01em" }}>Roster</span>
+        <span style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>{clients.length} clients</span>
+      </div>
+
+      <ClientRoster clients={clients} showAssignedCoach={showAssignedCoach} coachName={coachName} onSelect={setSelected} />
 
       {shownSelected && (
         <ClientDetailSheet
@@ -188,6 +183,145 @@ function ClientList({
       )}
 
       {showNewClient && <NewClientWizardSheet open={newClientOpen} onClose={() => setNewClientOpen(false)} />}
+    </div>
+  );
+}
+
+const ROSTER_GRID = "2fr 1.3fr 1fr 1.1fr 20px";
+
+function ClientRoster({
+  clients,
+  showAssignedCoach,
+  coachName,
+  onSelect,
+}: {
+  clients: ClientWithPackage[];
+  showAssignedCoach: boolean;
+  coachName: (id: string | null) => string | null;
+  onSelect: (c: ClientWithPackage) => void;
+}) {
+  const isMobile = useIsMobile();
+  const metaFor = (c: ClientWithPackage) => (showAssignedCoach ? (coachName(c.assignedCoachId) ?? "Unassigned") : packageMetaText(c));
+  const subFor = (c: ClientWithPackage) => (showAssignedCoach ? countdownText(c) : null);
+  const valueFor = (c: ClientWithPackage) => (c.currentPackage ? egp(c.currentPackage.priceAtSale) : "—");
+
+  if (clients.length === 0) {
+    return (
+      <div
+        data-sq
+        style={{
+          background: "var(--surface)",
+          border: "1px solid var(--line)",
+          borderRadius: "var(--r-tile)",
+          padding: "32px 16px",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 8,
+          color: "var(--ink-faint)",
+          font: "500 14px var(--font-body)",
+        }}
+      >
+        <Icon name="clients" size={26} />
+        Nothing here yet.
+      </div>
+    );
+  }
+
+  if (isMobile) {
+    return (
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        {clients.map((c) => (
+          <div
+            key={c.id}
+            data-sq
+            onClick={() => onSelect(c)}
+            style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-tile)", padding: "14px 16px", display: "flex", gap: 14, alignItems: "center", cursor: "pointer" }}
+          >
+            <Avatar name={c.name} size={38} />
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <div style={{ font: "700 16px var(--font-body)", letterSpacing: "-.01em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{c.name}</div>
+              <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-muted)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{metaFor(c)}</div>
+              <div style={{ marginTop: 8, display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+                {c.currentPackage && <PackageStatusPill status={c.currentPackage.status} />}
+                {subFor(c) && <span style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>{subFor(c)}</span>}
+              </div>
+            </div>
+            {c.currentPackage && (
+              <div style={{ textAlign: "right", flex: "none" }}>
+                <div className="tabular" style={{ font: "800 20px var(--font-body)", letterSpacing: "-.01em" }}>{valueFor(c).split(" ")[0]}</div>
+                <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>EGP</div>
+              </div>
+            )}
+            <span style={{ flex: "none", color: "var(--ink-faint)", display: "flex" }}>
+              <Icon name="chevron-right" size={16} />
+            </span>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div data-sq style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", overflow: "hidden" }}>
+      <div style={{ display: "grid", gridTemplateColumns: ROSTER_GRID, gap: 12, padding: "10px 20px", background: "var(--sunken)", font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-muted)" }}>
+        <span>CLIENT</span>
+        <span>{showAssignedCoach ? "COACH" : "PACKAGE"}</span>
+        <span>STATUS</span>
+        <span style={{ textAlign: "right" }}>VALUE</span>
+        <span />
+      </div>
+      {clients.map((c) => (
+        <ClientDesktopRow key={c.id} client={c} meta={metaFor(c)} sub={subFor(c)} value={valueFor(c)} onClick={() => onSelect(c)} />
+      ))}
+    </div>
+  );
+}
+
+function ClientDesktopRow({
+  client,
+  meta,
+  sub,
+  value,
+  onClick,
+}: {
+  client: ClientWithPackage;
+  meta: string;
+  sub: string | null;
+  value: string;
+  onClick: () => void;
+}) {
+  const [hovered, setHovered] = useState(false);
+  return (
+    <div
+      onClick={onClick}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        display: "grid",
+        gridTemplateColumns: ROSTER_GRID,
+        gap: 12,
+        padding: "14px 20px",
+        borderBottom: "1px solid var(--line)",
+        alignItems: "center",
+        cursor: "pointer",
+        background: hovered ? "var(--sunken)" : "transparent",
+        transition: "background .15s ease",
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
+        <Avatar name={client.name} size={32} />
+        <div style={{ minWidth: 0 }}>
+          <div style={{ font: "600 16px var(--font-body)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{client.name}</div>
+          {sub && <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>{sub}</div>}
+        </div>
+      </div>
+      <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-muted)", minWidth: 0, overflow: "hidden", textOverflow: "ellipsis" }}>{meta}</div>
+      <div>{client.currentPackage && <PackageStatusPill status={client.currentPackage.status} />}</div>
+      <div className="tabular" style={{ textAlign: "right", font: "800 20px var(--font-body)", letterSpacing: "-.01em" }}>{value}</div>
+      <div style={{ display: "flex", justifyContent: "flex-end", color: "var(--ink-faint)" }}>
+        <Icon name="chevron-right" size={16} />
+      </div>
     </div>
   );
 }
