@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useSetHeader } from "../lib/header";
 import { useAsync } from "../lib/useAsync";
+import { useIsMobile } from "../lib/useIsMobile";
 import { api, MOCK } from "../lib/backend";
 import { dateLabel, egp, fmt, monthShort } from "../lib/format";
 import { MoneyHero } from "../components/MoneyHero";
@@ -37,13 +38,30 @@ export function PayeeDetail() {
   const month = (location.state as { month?: string })?.month ?? MOCK.CURRENT_MONTH;
   const [paying, setPaying] = useState(false);
   const id = coachId ?? "";
+  const isMobile = useIsMobile();
 
   const { data } = useAsync(async () => {
     const [monthRes, packagesRes] = await Promise.all([api.month(month), api.packagesByCoach(id, month)]);
     return { row: monthRes.rows.find((r) => r.coachId === id) ?? null, packages: packagesRes.packages };
   }, [id, month]);
 
-  useSetHeader({ kicker: monthShort(month), title: data?.row?.name ?? "Payee" }, [month, data?.row?.name]);
+  // "Mark paid" lives in the header's top-right on desktop — same slot every
+  // other desktop screen uses for its primary control (MonthPicker, the
+  // month-switcher button on CoachDetail, etc.) — and stays a full-width
+  // body button on mobile, where that header area is too tight for it.
+  useSetHeader(
+    {
+      kicker: monthShort(month),
+      title: data?.row?.name ?? "Payee",
+      right:
+        !isMobile && data?.row?.state === "settled" ? (
+          <Button size="md" style={{ height: 40, padding: "0 16px" }} onClick={() => setPaying(true)}>
+            Mark paid · {fmt(data.row.total)} EGP
+          </Button>
+        ) : undefined,
+    },
+    [month, data?.row?.name, data?.row?.state, data?.row?.total, isMobile],
+  );
 
   if (!data) return <Spinner />;
   if (!data.row) return null;
@@ -92,7 +110,7 @@ export function PayeeDetail() {
         </div>
       </div>
 
-      {row.state === "settled" && (
+      {isMobile && row.state === "settled" && (
         <Button fullWidth size="lg" style={{ marginBottom: 18 }} onClick={() => setPaying(true)}>
           Mark paid · {fmt(row.total)} EGP
         </Button>
