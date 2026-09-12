@@ -13,7 +13,8 @@ import { Icon } from "../components/Icon";
 import { Avatar } from "../components/Avatar";
 import { Spinner } from "../components/Spinner";
 import { Sheet } from "../components/Sheet";
-import { SelectField } from "../components/FormField";
+import { ConfirmSheet } from "../components/ConfirmSheet";
+import { TextField, SelectField } from "../components/FormField";
 import { NewClientWizardSheet } from "../components/NewClientWizardSheet";
 
 interface CoachOption {
@@ -127,7 +128,7 @@ export function Clients() {
       bundleTypes={bundleTypes}
       coachName={coachName}
       showAssignedCoach={isDeptHead}
-      showNewClient={isDeptHead}
+      canManage={isDeptHead}
     />
   );
 }
@@ -140,7 +141,7 @@ function ClientList({
   bundleTypes,
   coachName,
   showAssignedCoach,
-  showNewClient,
+  canManage,
 }: {
   clients: ClientWithPackage[];
   role: Role;
@@ -149,17 +150,21 @@ function ClientList({
   bundleTypes: BundleType[];
   coachName: (id: string | null) => string | null;
   showAssignedCoach: boolean;
-  showNewClient: boolean;
+  canManage: boolean;
 }) {
   const [selected, setSelected] = useState<ClientWithPackage | null>(null);
   const [newClientOpen, setNewClientOpen] = useState(false);
+  const [editing, setEditing] = useState<ClientWithPackage | null>(null);
+  const [deleting, setDeleting] = useState<ClientWithPackage | null>(null);
   const shownSelected = useLatch(selected);
+  const shownEditing = useLatch(editing);
+  const shownDeleting = useLatch(deleting);
 
   return (
     <div>
       <OverviewCards clients={clients} />
 
-      {showNewClient && (
+      {canManage && (
         <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 14 }}>
           <Button size="md" style={{ height: 40, padding: "0 16px" }} onClick={() => setNewClientOpen(true)}>
             + New client
@@ -172,7 +177,15 @@ function ClientList({
         <span style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>{clients.length} clients</span>
       </div>
 
-      <ClientRoster clients={clients} showAssignedCoach={showAssignedCoach} coachName={coachName} onSelect={setSelected} />
+      <ClientRoster
+        clients={clients}
+        showAssignedCoach={showAssignedCoach}
+        canManage={canManage}
+        coachName={coachName}
+        onSelect={setSelected}
+        onEdit={setEditing}
+        onDelete={setDeleting}
+      />
 
       {shownSelected && (
         <ClientDetailSheet
@@ -187,23 +200,87 @@ function ClientList({
         />
       )}
 
-      {showNewClient && <NewClientWizardSheet open={newClientOpen} onClose={() => setNewClientOpen(false)} />}
+      {canManage && <NewClientWizardSheet open={newClientOpen} onClose={() => setNewClientOpen(false)} />}
+
+      {canManage && shownEditing && <ClientEditSheet open={!!editing} client={shownEditing} onClose={() => setEditing(null)} />}
+
+      {canManage && shownDeleting && (
+        <ConfirmSheet
+          open={!!deleting}
+          onClose={() => setDeleting(null)}
+          kicker="DELETE CLIENT"
+          title={`Delete ${shownDeleting.name}?`}
+          sub="This also removes their package and delivery history. This can't be undone."
+          confirmLabel="Delete client"
+          danger
+          onConfirm={async () => {
+            await api.deleteClient(shownDeleting.id);
+          }}
+        />
+      )}
     </div>
   );
 }
 
-const ROSTER_GRID = "2fr 1.3fr 1fr 1.1fr 20px";
+function rosterGrid(canManage: boolean): string {
+  return `2fr 1.3fr 1fr 1.1fr ${canManage ? "84px" : "20px"}`;
+}
+
+/** Small round icon button used for the roster's quick actions — stops the
+ * click from bubbling to the row, which opens the detail sheet. */
+function RowActionButton({
+  icon,
+  label,
+  danger,
+  onClick,
+}: {
+  icon: "pencil" | "trash";
+  label: string;
+  danger?: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick();
+      }}
+      aria-label={label}
+      style={{
+        width: 32,
+        height: 32,
+        flex: "none",
+        borderRadius: 999,
+        border: 0,
+        background: danger ? "var(--danger-bg)" : "var(--primary-tint)",
+        color: danger ? "var(--danger-fg)" : "var(--primary-pressed)",
+        cursor: "pointer",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      <Icon name={icon} size={14} />
+    </button>
+  );
+}
 
 function ClientRoster({
   clients,
   showAssignedCoach,
+  canManage,
   coachName,
   onSelect,
+  onEdit,
+  onDelete,
 }: {
   clients: ClientWithPackage[];
   showAssignedCoach: boolean;
+  canManage: boolean;
   coachName: (id: string | null) => string | null;
   onSelect: (c: ClientWithPackage) => void;
+  onEdit: (c: ClientWithPackage) => void;
+  onDelete: (c: ClientWithPackage) => void;
 }) {
   const isMobile = useIsMobile();
   const metaFor = (c: ClientWithPackage) => (showAssignedCoach ? (coachName(c.assignedCoachId) ?? "Unassigned") : packageMetaText(c));
@@ -250,12 +327,17 @@ function ClientRoster({
               <div style={{ marginTop: 8, display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
                 {c.currentPackage && <PackageStatusPill status={c.currentPackage.status} />}
                 {subFor(c) && <span style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>{subFor(c)}</span>}
+                {c.currentPackage && (
+                  <span className="tabular" style={{ marginLeft: "auto", font: "800 14px var(--font-body)", letterSpacing: "-.01em" }}>
+                    {valueFor(c)}
+                  </span>
+                )}
               </div>
             </div>
-            {c.currentPackage && (
-              <div style={{ textAlign: "right", flex: "none" }}>
-                <div className="tabular" style={{ font: "800 20px var(--font-body)", letterSpacing: "-.01em" }}>{valueFor(c).split(" ")[0]}</div>
-                <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>EGP</div>
+            {canManage && (
+              <div style={{ display: "flex", gap: 6, flex: "none" }}>
+                <RowActionButton icon="pencil" label="Edit client" onClick={() => onEdit(c)} />
+                <RowActionButton icon="trash" label="Delete client" danger onClick={() => onDelete(c)} />
               </div>
             )}
             <span style={{ flex: "none", color: "var(--ink-faint)", display: "flex" }}>
@@ -269,7 +351,7 @@ function ClientRoster({
 
   return (
     <div data-sq style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", overflow: "hidden" }}>
-      <div style={{ display: "grid", gridTemplateColumns: ROSTER_GRID, gap: 12, padding: "10px 20px", background: "var(--sunken)", font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-muted)" }}>
+      <div style={{ display: "grid", gridTemplateColumns: rosterGrid(canManage), gap: 12, padding: "10px 20px", background: "var(--sunken)", font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-muted)" }}>
         <span>CLIENT</span>
         <span>{showAssignedCoach ? "COACH" : "PACKAGE"}</span>
         <span>STATUS</span>
@@ -277,7 +359,17 @@ function ClientRoster({
         <span />
       </div>
       {clients.map((c) => (
-        <ClientDesktopRow key={c.id} client={c} meta={metaFor(c)} sub={subFor(c)} value={valueFor(c)} onClick={() => onSelect(c)} />
+        <ClientDesktopRow
+          key={c.id}
+          client={c}
+          meta={metaFor(c)}
+          sub={subFor(c)}
+          value={valueFor(c)}
+          canManage={canManage}
+          onClick={() => onSelect(c)}
+          onEdit={() => onEdit(c)}
+          onDelete={() => onDelete(c)}
+        />
       ))}
     </div>
   );
@@ -288,13 +380,19 @@ function ClientDesktopRow({
   meta,
   sub,
   value,
+  canManage,
   onClick,
+  onEdit,
+  onDelete,
 }: {
   client: ClientWithPackage;
   meta: string;
   sub: string | null;
   value: string;
+  canManage: boolean;
   onClick: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
 }) {
   const [hovered, setHovered] = useState(false);
   return (
@@ -304,7 +402,7 @@ function ClientDesktopRow({
       onMouseLeave={() => setHovered(false)}
       style={{
         display: "grid",
-        gridTemplateColumns: ROSTER_GRID,
+        gridTemplateColumns: rosterGrid(canManage),
         gap: 12,
         padding: "14px 20px",
         borderBottom: "1px solid var(--line)",
@@ -324,7 +422,13 @@ function ClientDesktopRow({
       <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-muted)", minWidth: 0, overflow: "hidden", textOverflow: "ellipsis" }}>{meta}</div>
       <div>{client.currentPackage && <PackageStatusPill status={client.currentPackage.status} />}</div>
       <div className="tabular" style={{ textAlign: "right", font: "800 20px var(--font-body)", letterSpacing: "-.01em" }}>{value}</div>
-      <div style={{ display: "flex", justifyContent: "flex-end", color: "var(--ink-faint)" }}>
+      <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 6, color: "var(--ink-faint)" }}>
+        {canManage && (
+          <>
+            <RowActionButton icon="pencil" label="Edit client" onClick={onEdit} />
+            <RowActionButton icon="trash" label="Delete client" danger onClick={onDelete} />
+          </>
+        )}
         <Icon name="chevron-right" size={16} />
       </div>
     </div>
@@ -497,6 +601,65 @@ function ClientDetailSheet({
           </Button>
         </>
       )}
+    </Sheet>
+  );
+}
+
+function ClientEditSheet({ open, client, onClose }: { open: boolean; client: ClientWithPackage; onClose: () => void }) {
+  const [name, setName] = useState(client.name);
+  const [age, setAge] = useState(client.age != null ? String(client.age) : "");
+  const [conditions, setConditions] = useState(client.conditions ?? "");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (open) {
+      setName(client.name);
+      setAge(client.age != null ? String(client.age) : "");
+      setConditions(client.conditions ?? "");
+      setError(null);
+    }
+  }, [open, client]);
+
+  if (!open) return null;
+
+  const save = async () => {
+    if (!name.trim()) {
+      setError("Enter a name.");
+      return;
+    }
+    setBusy(true);
+    setError(null);
+    try {
+      await api.updateClient(client.id, name.trim(), age.trim() ? Number(age) : null, conditions.trim() || null);
+      onClose();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <Sheet open={open} onClose={onClose}>
+      <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>EDIT CLIENT</div>
+      <div style={{ font: "800 26px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 16px" }}>{client.name}</div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        <TextField label="NAME" value={name} onChange={(e) => setName(e.target.value)} placeholder="Client name" />
+        <TextField label="AGE (OPTIONAL)" type="number" min={0} value={age} onChange={(e) => setAge(e.target.value)} />
+        <TextField label="CONDITIONS (OPTIONAL)" value={conditions} onChange={(e) => setConditions(e.target.value)} placeholder="Only visible to their coach and heads" />
+      </div>
+      {error && (
+        <div style={{ marginTop: 12, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>
+          {error}
+        </div>
+      )}
+      <Button fullWidth size="lg" style={{ marginTop: 16 }} disabled={busy} onClick={save}>
+        {busy ? "Saving…" : "Save changes"}
+      </Button>
+      <Button variant="secondary" fullWidth style={{ marginTop: 8 }} onClick={onClose} disabled={busy}>
+        Cancel
+      </Button>
     </Sheet>
   );
 }

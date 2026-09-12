@@ -65,6 +65,9 @@ export const api = {
   // never exists without an assigned coach (no orphaned/unassigned clients).
   createClient: (name: string, age: number | null, conditions: string | null, bundleTypeId: string, coachId: string) =>
     callFn<{ client: Client; package: PackageInstance }>("clients", { method: "POST", body: { name, age, conditions, bundleTypeId, coachId } }),
+  updateClient: (id: string, name: string, age: number | null, conditions: string | null) =>
+    callFn<{ client: Client }>("clients/update", { method: "POST", body: { id, name, age, conditions } }),
+  deleteClient: (id: string) => callFn<void>("clients/delete", { method: "POST", body: { id } }),
   sellPackage: (clientId: string, bundleTypeId: string, coachId: string) =>
     callFn<{ package: PackageInstance }>("packages", { method: "POST", body: { clientId, bundleTypeId, coachId } }),
   deliverSession: (packageInstanceId: string) =>
