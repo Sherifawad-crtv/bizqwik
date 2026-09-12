@@ -5,6 +5,7 @@ import { matchTabIndex, type NavItem } from "../lib/nav";
 const ITEM = 44;
 const GAP = 5;
 const PAD = 5;
+const BAR_BORDER = 1;
 // The active-tab highlight keeps its original size (and so its ratio to the
 // 64px bar) even though ITEM shrank to fit narrow phones — it's centered on
 // the (now smaller) icon box rather than sized to match it, so the "blob"
@@ -48,7 +49,12 @@ export function BottomNav({ items }: { items: NavItem[] }) {
           style={{
             position: "absolute",
             left: PAD + ITEM / 2 - INDICATOR / 2,
-            top: (64 - INDICATOR) / 2,
+            // The bar's own 1px border isn't part of the flex content box the
+            // icon is actually centered within, so it has to be subtracted
+            // here too — otherwise the indicator centers on the bar's outer
+            // edge instead of the icon, landing 1px off (uneven top/bottom
+            // padding) even though the equivalent horizontal math is exact.
+            top: (64 - BAR_BORDER * 2 - INDICATOR) / 2,
             width: INDICATOR,
             height: INDICATOR,
             borderRadius: 999,
