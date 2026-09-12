@@ -119,7 +119,6 @@ export function Sheet({ open, onClose, children, width = 460 }: SheetProps) {
         <div
           ref={panelRef}
           onClick={stop}
-          data-sq
           style={{
             position: "absolute",
             left: "calc(8px + var(--safe-left))",
@@ -128,21 +127,30 @@ export function Sheet({ open, onClose, children, width = 460 }: SheetProps) {
             maxHeight: "calc(88svh - 16px)",
             display: "flex",
             flexDirection: "column",
-            background: "var(--surface)",
-            borderRadius: 40,
-            border: "1px solid var(--line)",
-            boxShadow: "var(--shadow-float)",
-            padding: "10px 20px 20px",
+            filter: "var(--shadow-float-filter)",
             transform,
             transition,
             touchAction: "none",
           }}
         >
-          <div onPointerDown={dragStart} onPointerMove={dragMove} onPointerUp={dragEnd} style={{ padding: "8px 0 14px", cursor: "grab", touchAction: "none", flex: "none" }}>
-            <div style={{ width: 44, height: 5, borderRadius: 999, background: "var(--line)", margin: "0 auto" }} />
-          </div>
-          <div data-scroll style={{ overflowY: "auto" }}>
-            {children}
+          <div
+            data-sq
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              minHeight: 0,
+              background: "var(--surface)",
+              borderRadius: 40,
+              border: "1px solid var(--line)",
+              padding: "10px 20px 20px",
+            }}
+          >
+            <div onPointerDown={dragStart} onPointerMove={dragMove} onPointerUp={dragEnd} style={{ padding: "8px 0 14px", cursor: "grab", touchAction: "none", flex: "none" }}>
+              <div style={{ width: 44, height: 5, borderRadius: 999, background: "var(--line)", margin: "0 auto" }} />
+            </div>
+            <div data-scroll style={{ overflowY: "auto" }}>
+              {children}
+            </div>
           </div>
         </div>
       </div>,
