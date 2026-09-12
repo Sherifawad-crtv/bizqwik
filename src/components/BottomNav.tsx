@@ -2,12 +2,12 @@ import { NavLink, useLocation } from "react-router-dom";
 import { Icon } from "./Icon";
 import { matchTabIndex, type NavItem } from "../lib/nav";
 
-const ITEM = 52;
-const GAP = 6;
-const PAD = 6;
+const ITEM = 44;
+const GAP = 5;
+const PAD = 5;
 // Real hit area extends past the visible ITEM box using space that already
 // exists but is otherwise unused: the bar's own vertical padding (64px bar,
-// 52px icon), and half the gap on each side horizontally (so two adjacent
+// 44px icon), and half the gap on each side horizontally (so two adjacent
 // items' hit zones meet exactly at the gap's midpoint — full coverage,
 // no overlap). Purely invisible; the icons themselves never change size.
 const HIT_SLOP_Y = (64 - ITEM) / 2;
