@@ -5,7 +5,6 @@ import { TextField, SelectField } from "./FormField";
 import { useAsync } from "../lib/useAsync";
 import { api, MOCK } from "../lib/backend";
 import { canLog } from "../lib/types";
-import type { Client } from "../lib/types";
 import { fmt } from "../lib/format";
 
 interface CoachOption {
@@ -68,7 +67,6 @@ export function NewClientWizardSheet({ open, onClose }: { open: boolean; onClose
   const [name, setName] = useState("");
   const [age, setAge] = useState("");
   const [conditions, setConditions] = useState("");
-  const [client, setClient] = useState<Client | null>(null);
   const [bundleTypeId, setBundleTypeId] = useState("");
   const [coachId, setCoachId] = useState("");
   const [busy, setBusy] = useState(false);
@@ -85,7 +83,6 @@ export function NewClientWizardSheet({ open, onClose }: { open: boolean; onClose
       setName("");
       setAge("");
       setConditions("");
-      setClient(null);
       setBundleTypeId("");
       setCoachId("");
       setError(null);
@@ -94,22 +91,16 @@ export function NewClientWizardSheet({ open, onClose }: { open: boolean; onClose
 
   if (!open) return null;
 
-  const createAndNext = async () => {
+  // Nothing is written to the backend until the final step: a client and its
+  // first package are created together, in one call, so a client can never
+  // end up sitting in the roster without an assigned coach.
+  const toStep2 = () => {
     if (!name.trim()) {
       setError("Enter a name.");
       return;
     }
-    setBusy(true);
     setError(null);
-    try {
-      const { client: created } = await api.createClient(name.trim(), age.trim() ? Number(age) : null, conditions.trim() || null);
-      setClient(created);
-      setStep(2);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong.");
-    } finally {
-      setBusy(false);
-    }
+    setStep(2);
   };
 
   const toStep3 = () => {
@@ -122,7 +113,6 @@ export function NewClientWizardSheet({ open, onClose }: { open: boolean; onClose
   };
 
   const finish = async () => {
-    if (!client) return;
     if (!coachId) {
       setError("Choose a coach.");
       return;
@@ -130,7 +120,7 @@ export function NewClientWizardSheet({ open, onClose }: { open: boolean; onClose
     setBusy(true);
     setError(null);
     try {
-      await api.sellPackage(client.id, bundleTypeId, coachId);
+      await api.createClient(name.trim(), age.trim() ? Number(age) : null, conditions.trim() || null, bundleTypeId, coachId);
       onClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
@@ -153,10 +143,10 @@ export function NewClientWizardSheet({ open, onClose }: { open: boolean; onClose
             <TextField label="CONDITIONS (OPTIONAL)" value={conditions} onChange={(e) => setConditions(e.target.value)} placeholder="Only visible to their coach and heads" />
           </div>
           {error && <ErrorBanner text={error} />}
-          <Button fullWidth size="lg" style={{ marginTop: 16 }} disabled={busy} onClick={createAndNext}>
-            {busy ? "Creating…" : "Next: choose bundle"}
+          <Button fullWidth size="lg" style={{ marginTop: 16 }} onClick={toStep2}>
+            Next: choose bundle
           </Button>
-          <Button variant="secondary" fullWidth style={{ marginTop: 8 }} onClick={onClose} disabled={busy}>
+          <Button variant="secondary" fullWidth style={{ marginTop: 8 }} onClick={onClose}>
             Cancel
           </Button>
         </>

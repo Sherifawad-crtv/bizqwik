@@ -61,10 +61,10 @@ export const api = {
   deleteBundleType: (id: string) => callFn<void>("bundle-types/delete", { method: "POST", body: { id } }),
 
   clients: () => callFn<{ clients: ClientWithPackage[] }>("clients"),
-  createClient: (name: string, age: number | null, conditions: string | null) =>
-    callFn<{ client: Client }>("clients", { method: "POST", body: { name, age, conditions } }),
-  assignCoach: (clientId: string, coachId: string) =>
-    callFn<void>("clients/assign-coach", { method: "POST", body: { clientId, coachId } }),
+  // Creation and coach assignment happen atomically, in one call — a client
+  // never exists without an assigned coach (no orphaned/unassigned clients).
+  createClient: (name: string, age: number | null, conditions: string | null, bundleTypeId: string, coachId: string) =>
+    callFn<{ client: Client; package: PackageInstance }>("clients", { method: "POST", body: { name, age, conditions, bundleTypeId, coachId } }),
   sellPackage: (clientId: string, bundleTypeId: string, coachId: string) =>
     callFn<{ package: PackageInstance }>("packages", { method: "POST", body: { clientId, bundleTypeId, coachId } }),
   deliverSession: (packageInstanceId: string) =>

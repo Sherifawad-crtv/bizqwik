@@ -71,12 +71,17 @@ function packageMetaText(client: ClientWithPackage): string {
   return `Sold ${dateLabel(pkg.purchaseDate)}`;
 }
 
+const EXPIRING_SOON_DAYS = 7;
+
 function OverviewCards({ clients }: { clients: ClientWithPackage[] }) {
   const stats = [
     { k: "TOTAL CLIENTS", v: clients.length },
     { k: "ACTIVE PACKAGES", v: clients.filter((c) => c.currentPackage?.status === "active").length },
     { k: "NEEDS RENEWAL", v: clients.filter((c) => c.currentPackage && c.currentPackage.status !== "active").length },
-    { k: "UNASSIGNED", v: clients.filter((c) => c.assignedCoachId === null).length },
+    {
+      k: "EXPIRING SOON",
+      v: clients.filter((c) => c.currentPackage?.status === "active" && daysLeft(c.currentPackage.expiryDate) <= EXPIRING_SOON_DAYS).length,
+    },
   ];
   return (
     <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(140px,1fr))", gap: 10, marginBottom: 18 }}>
@@ -345,7 +350,7 @@ function ClientDetailSheet({
   coachName: (id: string | null) => string | null;
   onClose: () => void;
 }) {
-  const [mode, setMode] = useState<"view" | "sell" | "assign">("view");
+  const [mode, setMode] = useState<"view" | "sell">("view");
   const [bundleTypeId, setBundleTypeId] = useState("");
   const [coachId, setCoachId] = useState("");
   const [busy, setBusy] = useState(false);
@@ -363,7 +368,6 @@ function ClientDetailSheet({
 
   const pkg = client.currentPackage;
   const canSell = role === "dept_head" && (!pkg || pkg.status !== "active");
-  const canAssign = role === "dept_head" && client.assignedCoachId === null;
   const canDeliver = role !== "accountant" && client.assignedCoachId === myId && !!pkg && pkg.status === "active";
 
   const sell = async () => {
@@ -375,23 +379,6 @@ function ClientDetailSheet({
     setError(null);
     try {
       await api.sellPackage(client.id, bundleTypeId, coachId);
-      onClose();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong.");
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const assign = async () => {
-    if (!coachId) {
-      setError("Pick a coach.");
-      return;
-    }
-    setBusy(true);
-    setError(null);
-    try {
-      await api.assignCoach(client.id, coachId);
       onClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
@@ -473,11 +460,6 @@ function ClientDetailSheet({
               {pkg ? "Sell / renew package" : "Sell package"}
             </Button>
           )}
-          {canAssign && (
-            <Button fullWidth size="lg" style={{ marginTop: 6 }} onClick={() => setMode("assign")}>
-              Assign a coach
-            </Button>
-          )}
           <Button variant="quiet" fullWidth style={{ marginTop: 8 }} onClick={onClose}>
             Close
           </Button>
@@ -509,29 +491,6 @@ function ClientDetailSheet({
           )}
           <Button fullWidth size="lg" style={{ marginTop: 16 }} disabled={busy} onClick={sell}>
             {busy ? "Selling…" : "Confirm sale"}
-          </Button>
-          <Button variant="secondary" fullWidth style={{ marginTop: 8 }} onClick={() => setMode("view")} disabled={busy}>
-            Back
-          </Button>
-        </>
-      )}
-
-      {mode === "assign" && (
-        <>
-          <SelectField
-            label="COACH"
-            value={coachId}
-            onChange={setCoachId}
-            placeholder="Choose a coach"
-            options={coachOptions.map((c) => ({ value: c.id, label: c.name }))}
-          />
-          {error && (
-            <div style={{ marginTop: 12, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>
-              {error}
-            </div>
-          )}
-          <Button fullWidth size="lg" style={{ marginTop: 16 }} disabled={busy} onClick={assign}>
-            {busy ? "Assigning…" : "Confirm assignment"}
           </Button>
           <Button variant="secondary" fullWidth style={{ marginTop: 8 }} onClick={() => setMode("view")} disabled={busy}>
             Back
