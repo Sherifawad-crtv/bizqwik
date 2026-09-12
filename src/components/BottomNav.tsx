@@ -5,6 +5,11 @@ import { matchTabIndex, type NavItem } from "../lib/nav";
 const ITEM = 44;
 const GAP = 5;
 const PAD = 5;
+// The active-tab highlight keeps its original size (and so its ratio to the
+// 64px bar) even though ITEM shrank to fit narrow phones — it's centered on
+// the (now smaller) icon box rather than sized to match it, so the "blob"
+// stays as prominent as it always was.
+const INDICATOR = 52;
 // Real hit area extends past the visible ITEM box using space that already
 // exists but is otherwise unused: the bar's own vertical padding (64px bar,
 // 44px icon), and half the gap on each side horizontally (so two adjacent
@@ -42,10 +47,10 @@ export function BottomNav({ items }: { items: NavItem[] }) {
           aria-hidden
           style={{
             position: "absolute",
-            left: PAD,
-            top: (64 - ITEM) / 2,
-            width: ITEM,
-            height: ITEM,
+            left: PAD + ITEM / 2 - INDICATOR / 2,
+            top: (64 - INDICATOR) / 2,
+            width: INDICATOR,
+            height: INDICATOR,
             borderRadius: 999,
             background: "var(--primary-tint-strong)",
             transform: `translateX(${activeIndex * (ITEM + GAP)}px)`,
