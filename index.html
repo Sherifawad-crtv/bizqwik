@@ -7,6 +7,12 @@
       content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content"
     />
     <meta name="theme-color" content="#F3F2EE" />
+    <!-- Standard Web App Manifest — the spec-compliant way to register as an
+         installable, chrome-less app. The apple-mobile-web-app-* tags below
+         are kept alongside it (older iOS versions still look for them, and
+         they're harmless when a manifest is also present) but the manifest
+         is now the primary mechanism, not the only one. -->
+    <link rel="manifest" href="/manifest.webmanifest" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
