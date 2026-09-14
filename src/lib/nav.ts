@@ -15,6 +15,14 @@ export function matchTabIndex(pathname: string, items: NavItem[]): number {
   return items.findIndex((t) => (t.path === "/" ? pathname === "/" : pathname.startsWith(t.path)));
 }
 
+/** Routes whose own content already leads with an avatar/identity — the
+ * Shell's sticky mobile header (itself just a small avatar + title) would
+ * only duplicate it directly above, so it's hidden there. */
+const NO_STICKY_HEADER_ROUTES = new Set(["/account/profile"]);
+export function hasStickyHeader(pathname: string): boolean {
+  return !NO_STICKY_HEADER_ROUTES.has(pathname);
+}
+
 export const NAV: Record<Role, NavItem[]> = {
   coach: [
     { key: "mine", path: "/", label: "My Month", icon: "wallet" },

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { useLocation, useOutlet } from "react-router-dom";
-import { matchTabIndex, type NavItem } from "../lib/nav";
+import { matchTabIndex, hasStickyHeader, type NavItem } from "../lib/nav";
 
 /** How many levels deep a route sits, for push-transition purposes: 0 is a
  * tab-level route (switched via tab-slide); 1+ is reached by drilling in
@@ -39,14 +39,19 @@ const TAB_EASE = "cubic-bezier(.22,1,.36,1)";
 // content — on a small screen that's most of a tight margin, and the last
 // row of a list can end up at the same screen position as the nav icons,
 // so a tap meant for the nav registers on the row underneath instead.
-const layerStyle: CSSProperties = {
-  position: "absolute",
-  inset: 0,
-  padding: "calc(86px + var(--safe-top)) 16px calc(230px + var(--safe-bottom))",
-  overflowY: "auto",
-  WebkitOverflowScrolling: "touch",
-  background: "var(--paper)",
-};
+// Top padding clears the fixed sticky header (Shell.tsx) — routes that hide
+// it (hasStickyHeader) only need enough to clear the safe area, not the
+// header's own height too.
+function layerStyle(pathname: string): CSSProperties {
+  return {
+    position: "absolute",
+    inset: 0,
+    padding: `calc(${hasStickyHeader(pathname) ? 86 : 20}px + var(--safe-top)) 16px calc(230px + var(--safe-bottom))`,
+    overflowY: "auto",
+    WebkitOverflowScrolling: "touch",
+    background: "var(--paper)",
+  };
+}
 
 export function RouteTransition({ tabs }: { tabs: NavItem[] }) {
   const location = useLocation();
@@ -124,7 +129,7 @@ export function RouteTransition({ tabs }: { tabs: NavItem[] }) {
 
   if (!previous) {
     return (
-      <div data-scroll style={layerStyle}>
+      <div data-scroll style={layerStyle(current.pathname)}>
         {current.outlet}
       </div>
     );
@@ -133,7 +138,7 @@ export function RouteTransition({ tabs }: { tabs: NavItem[] }) {
   switch (anim.type) {
     case "none":
       return (
-        <div data-scroll style={layerStyle}>
+        <div data-scroll style={layerStyle(current.pathname)}>
           {current.outlet}
         </div>
       );
@@ -145,7 +150,7 @@ export function RouteTransition({ tabs }: { tabs: NavItem[] }) {
       const overShown = anim.type === "push-in" ? entered : !entered;
       return (
         <div style={{ position: "relative", height: "100%", overflow: "hidden" }}>
-          <div data-scroll style={layerStyle}>
+          <div data-scroll style={layerStyle(underLayer.pathname)}>
             {underLayer.outlet}
           </div>
           <div
@@ -162,7 +167,7 @@ export function RouteTransition({ tabs }: { tabs: NavItem[] }) {
           <div
             data-scroll
             style={{
-              ...layerStyle,
+              ...layerStyle(overLayer.pathname),
               boxShadow: overShown ? "-8px 0 24px rgba(0,0,0,.12)" : "none",
               transform: overShown ? "translateX(0)" : "translateX(100%)",
               transition: `transform ${PUSH_MS}ms ${PUSH_EASE}`,
@@ -181,7 +186,7 @@ export function RouteTransition({ tabs }: { tabs: NavItem[] }) {
           <div
             data-scroll
             style={{
-              ...layerStyle,
+              ...layerStyle(previous.pathname),
               transform: entered ? `translateX(${-dir * 100}%)` : "translateX(0)",
               transition: `transform ${TAB_MS}ms ${TAB_EASE}`,
             }}
@@ -191,7 +196,7 @@ export function RouteTransition({ tabs }: { tabs: NavItem[] }) {
           <div
             data-scroll
             style={{
-              ...layerStyle,
+              ...layerStyle(current.pathname),
               transform: entered ? "translateX(0)" : `translateX(${dir * 100}%)`,
               transition: `transform ${TAB_MS}ms ${TAB_EASE}`,
             }}

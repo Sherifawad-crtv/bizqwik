@@ -1,4 +1,4 @@
-import { Outlet, NavLink } from "react-router-dom";
+import { Outlet, NavLink, useLocation } from "react-router-dom";
 import { Avatar } from "./Avatar";
 import { BottomNav } from "./BottomNav";
 import { RouteTransition } from "./RouteTransition";
@@ -7,13 +7,14 @@ import { Fab } from "./Fab";
 import { useAuth } from "../lib/auth";
 import { useHeader } from "../lib/header";
 import { useIsMobile, useIsNarrowPhone } from "../lib/useIsMobile";
-import { NAV } from "../lib/nav";
+import { NAV, hasStickyHeader } from "../lib/nav";
 
 export function Shell() {
   const { profile } = useAuth();
   const isMobile = useIsMobile();
   const narrow = useIsNarrowPhone();
   const header = useHeader();
+  const { pathname } = useLocation();
 
   if (!profile) return null;
   // Everyone but accountant gets a FAB — what it does depends on role
@@ -24,34 +25,36 @@ export function Shell() {
   if (isMobile) {
     return (
       <div style={{ minHeight: "100svh", background: "var(--paper)", position: "relative", overflow: "hidden" }}>
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            zIndex: 50,
-            background: "rgba(251,250,247,.78)",
-            backdropFilter: "blur(20px)",
-            WebkitBackdropFilter: "blur(20px)",
-            borderBottom: "1px solid var(--line)",
-            padding: "calc(12px + var(--safe-top)) 18px 12px",
-            display: "flex",
-            alignItems: "center",
-            gap: 12,
-          }}
-        >
-          <NavLink to="/account" aria-label="Account">
-            <Avatar name={profile.name} size={40} src={profile.avatarUrl} />
-          </NavLink>
-          <div style={{ minWidth: 48, flex: "1 1 auto" }}>
-            <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>{header.kicker}</div>
-            <div style={{ font: "800 20px/1.15 var(--font-body)", letterSpacing: "-.01em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-              {header.title}
+        {hasStickyHeader(pathname) && (
+          <div
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              right: 0,
+              zIndex: 50,
+              background: "rgba(251,250,247,.78)",
+              backdropFilter: "blur(20px)",
+              WebkitBackdropFilter: "blur(20px)",
+              borderBottom: "1px solid var(--line)",
+              padding: "calc(12px + var(--safe-top)) 18px 12px",
+              display: "flex",
+              alignItems: "center",
+              gap: 12,
+            }}
+          >
+            <NavLink to="/account" aria-label="Account">
+              <Avatar name={profile.name} size={40} src={profile.avatarUrl} />
+            </NavLink>
+            <div style={{ minWidth: 48, flex: "1 1 auto" }}>
+              <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>{header.kicker}</div>
+              <div style={{ font: "800 20px/1.15 var(--font-body)", letterSpacing: "-.01em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                {header.title}
+              </div>
             </div>
+            {header.right && <div style={{ marginLeft: "auto", flex: "0 1 auto", minWidth: 0 }}>{header.right}</div>}
           </div>
-          {header.right && <div style={{ marginLeft: "auto", flex: "0 1 auto", minWidth: 0 }}>{header.right}</div>}
-        </div>
+        )}
 
         <main style={{ position: "relative", height: "100svh", overflow: "hidden" }}>
           <RouteTransition tabs={NAV[profile.role]} />
