@@ -1,15 +1,15 @@
-// Matches the curvature of the native `corner-shape: squircle` used on
-// Chromium — WebKit (Safari, iOS + macOS) and Firefox don't implement that
-// property at all, so [data-sq] elements there fall back to plain rounded
-// corners. This clips the same elements to an equivalent curve in JS,
-// driven off each element's own `border-radius` and measured size.
+// Matches the curvature of the native `corner-shape: superellipse(6)` used
+// on Chromium (see index.css) — WebKit (Safari, iOS + macOS) and Firefox
+// don't implement `corner-shape` at all, so [data-sq] elements there fall
+// back to plain rounded corners. This clips the same elements to an
+// equivalent curve in JS, driven off each element's own `border-radius`
+// and measured size.
 //
-// The CSS spec defines `squircle` as `superellipse(2)` — a curve of
-// |x/r|^n + |y/r|^n = 1 with n = 2*2 = 4, swapped in for the plain
-// circular arc (n = 2) a normal border-radius corner uses. That's the
-// exact math below, not an approximation, so it matches Chromium's
-// rendering rather than some other "squircle-ish" curve family.
-const SUPERELLIPSE_N = 4;
+// The underlying curve is a superellipse |x/r|^n + |y/r|^n = 1 — the
+// `superellipse(N)` CSS function's argument is directly that exponent N
+// (confirmed empirically: superellipse(2) renders as a plain circular
+// corner, matching n=2). Must stay equal to the exponent used in index.css.
+const SUPERELLIPSE_N = 6;
 const STEPS_PER_CORNER = 14;
 
 function superellipsePoint(cx: number, cy: number, r: number, theta: number): [number, number] {
@@ -47,7 +47,7 @@ function squirclePolygon(width: number, height: number, r: number): string {
 }
 
 function nativeSquircleSupported(): boolean {
-  return typeof CSS !== "undefined" && !!CSS.supports && CSS.supports("corner-shape", "squircle");
+  return typeof CSS !== "undefined" && !!CSS.supports && CSS.supports("corner-shape", `superellipse(${SUPERELLIPSE_N})`);
 }
 
 function applyTo(el: HTMLElement) {
