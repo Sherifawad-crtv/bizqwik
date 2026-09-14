@@ -18,7 +18,7 @@ export function matchTabIndex(pathname: string, items: NavItem[]): number {
 /** Routes whose own content already leads with an avatar/identity — the
  * Shell's sticky mobile header (itself just a small avatar + title) would
  * only duplicate it directly above, so it's hidden there. */
-const NO_STICKY_HEADER_ROUTES = new Set(["/account/profile"]);
+const NO_STICKY_HEADER_ROUTES = new Set(["/account", "/account/profile"]);
 export function hasStickyHeader(pathname: string): boolean {
   return !NO_STICKY_HEADER_ROUTES.has(pathname);
 }
