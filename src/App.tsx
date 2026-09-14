@@ -20,6 +20,8 @@ import { PayeeDetail } from "./routes/PayeeDetail";
 import { History } from "./routes/History";
 import { Clients } from "./routes/Clients";
 import { Account } from "./routes/Account";
+import { AccountProfile } from "./routes/AccountProfile";
+import { AccountPassword } from "./routes/AccountPassword";
 
 export default function App() {
   useEffect(() => {
@@ -41,6 +43,8 @@ export default function App() {
                   <Route path="/" element={<Home />} />
                   <Route path="/history" element={<History />} />
                   <Route path="/account" element={<Account />} />
+                  <Route path="/account/profile" element={<AccountProfile />} />
+                  <Route path="/account/password" element={<AccountPassword />} />
 
                   <Route element={<RequireRole roles={["head_coach", "dept_head"]} />}>
                     <Route path="/coaches" element={<CoachesOverview />} />

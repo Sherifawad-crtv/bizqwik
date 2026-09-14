@@ -8,6 +8,7 @@ interface AuthState {
   ready: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  refreshProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthState | null>(null);
@@ -44,7 +45,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setTier(null);
   };
 
-  return <AuthContext.Provider value={{ profile, tier, ready, login, logout }}>{children}</AuthContext.Provider>;
+  const refreshProfile = async () => {
+    const me = await api.me();
+    setProfile(me.profile);
+    setTier(me.tier);
+  };
+
+  return <AuthContext.Provider value={{ profile, tier, ready, login, logout, refreshProfile }}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth(): AuthState {

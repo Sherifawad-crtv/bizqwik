@@ -55,6 +55,7 @@ export const auth = {
 
 export const api = {
   me: () => callFn<{ profile: Profile; tier: Tier | null }>("me"),
+  updateMe: (name: string) => callFn<{ profile: Profile }>("me/update", { method: "POST", body: { name } }),
 
   tiers: () => callFn<{ tiers: Tier[] }>("tiers"),
   createTier: (name: string, rate: number, privateCutPct: number) =>
