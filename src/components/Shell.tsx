@@ -51,19 +51,24 @@ export function Shell() {
                 </button>
               )}
             </div>
-            <div
-              style={{
-                flex: 1,
-                minWidth: 0,
-                textAlign: "center",
-                font: "800 17px var(--font-body)",
-                letterSpacing: "-.01em",
-                whiteSpace: "nowrap",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-              }}
-            >
-              {header.title}
+            <div style={{ flex: 1, minWidth: 0, display: "flex", justifyContent: "center" }}>
+              <div
+                style={{
+                  maxWidth: "100%",
+                  padding: "8px 18px",
+                  borderRadius: 999,
+                  background: "rgba(243,242,238,.82)",
+                  backdropFilter: "blur(18px) saturate(180%)",
+                  WebkitBackdropFilter: "blur(18px) saturate(180%)",
+                  font: "800 17px var(--font-body)",
+                  letterSpacing: "-.01em",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}
+              >
+                {header.title}
+              </div>
             </div>
             <div style={{ width: 30, flex: "none" }} />
           </div>

@@ -44,7 +44,7 @@ const TAB_EASE = "cubic-bezier(.22,1,.36,1)";
 // none at all (just breathing room below the safe area), everything else
 // gets the thin centered-title row's real height.
 function layerStyle(pathname: string, role: Role): CSSProperties {
-  const top = headerMode(pathname, role) === "home" ? 20 : 50;
+  const top = headerMode(pathname, role) === "home" ? 20 : 80;
   return {
     position: "absolute",
     inset: 0,
