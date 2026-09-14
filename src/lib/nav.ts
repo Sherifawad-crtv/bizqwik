@@ -50,6 +50,8 @@ export function accountBackTarget(pathname: string, role: Role): string {
   return "/account";
 }
 
+// The home-tab entry (icon: "home") is always placed first in each role's
+// array, so it renders as the leftmost tab for every role, consistently.
 export const NAV: Record<Role, NavItem[]> = {
   coach: [
     { key: "mine", path: "/", label: "My Month", icon: "home" },
@@ -57,9 +59,9 @@ export const NAV: Record<Role, NavItem[]> = {
     { key: "history", path: "/history", label: "History", icon: "history" },
   ],
   head_coach: [
+    { key: "mine", path: "/", label: "My Month", icon: "home" },
     { key: "coaches", path: "/coaches", label: "Coaches", icon: "coaches" },
     { key: "clients", path: "/clients", label: "Clients", icon: "clients" },
-    { key: "mine", path: "/", label: "My Month", icon: "home" },
     { key: "history", path: "/history", label: "History", icon: "history" },
   ],
   dept_head: [
