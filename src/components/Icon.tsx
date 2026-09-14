@@ -19,6 +19,7 @@ import { CheckCircleIcon } from "@solar-icons/react/linear/check-circle";
 import { TrashBinTrashIcon } from "@solar-icons/react/linear/trash-bin-trash";
 import { PenIcon } from "@solar-icons/react/linear/pen";
 import { UserCircleIcon } from "@solar-icons/react/linear/user-circle";
+import { LockKeyholeIcon } from "@solar-icons/react/linear/lock-keyhole";
 import { InboxIcon } from "@solar-icons/react/linear/inbox";
 import { TagIcon } from "@solar-icons/react/linear/tag";
 import { LetterIcon } from "@solar-icons/react/linear/letter";
@@ -43,6 +44,7 @@ import { CheckCircleIcon as CheckCircleIconBold } from "@solar-icons/react/bold-
 import { TrashBinTrashIcon as TrashBinTrashIconBold } from "@solar-icons/react/bold-duotone/trash-bin-trash";
 import { PenIcon as PenIconBold } from "@solar-icons/react/bold-duotone/pen";
 import { UserCircleIcon as UserCircleIconBold } from "@solar-icons/react/bold-duotone/user-circle";
+import { LockKeyholeIcon as LockKeyholeIconBold } from "@solar-icons/react/bold-duotone/lock-keyhole";
 import { InboxIcon as InboxIconBold } from "@solar-icons/react/bold-duotone/inbox";
 import { TagIcon as TagIconBold } from "@solar-icons/react/bold-duotone/tag";
 import { LetterIcon as LetterIconBold } from "@solar-icons/react/bold-duotone/letter";
@@ -69,6 +71,7 @@ export type IconName =
   | "trash"
   | "pencil"
   | "account"
+  | "lock"
   | "inbox"
   | "tag"
   | "envelope"
@@ -95,6 +98,7 @@ const LINEAR = {
   trash: TrashBinTrashIcon,
   pencil: PenIcon,
   account: UserCircleIcon,
+  lock: LockKeyholeIcon,
   inbox: InboxIcon,
   tag: TagIcon,
   envelope: LetterIcon,
@@ -122,6 +126,7 @@ const BOLD = {
   trash: TrashBinTrashIconBold,
   pencil: PenIconBold,
   account: UserCircleIconBold,
+  lock: LockKeyholeIconBold,
   inbox: InboxIconBold,
   tag: TagIconBold,
   envelope: LetterIconBold,
