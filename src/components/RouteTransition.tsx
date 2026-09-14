@@ -2,9 +2,16 @@ import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 
 import { useLocation, useOutlet } from "react-router-dom";
 import { matchTabIndex, type NavItem } from "../lib/nav";
 
-/** Routes reached by drilling in from a tab, not by switching tabs. */
-function isPushRoute(pathname: string): boolean {
-  return pathname === "/account" || /^\/coaches\/[^/]+$/.test(pathname);
+/** How many levels deep a route sits, for push-transition purposes: 0 is a
+ * tab-level route (switched via tab-slide); 1+ is reached by drilling in
+ * from a shallower route, one level at a time — direction is decided by
+ * comparing depth, not just "is this a push route", so a route that's
+ * itself a push destination (e.g. /account) can still have its own deeper
+ * children (/account/profile) without the two directions flipping. */
+function pushDepth(pathname: string): number {
+  if (pathname === "/account/profile" || pathname === "/account/password") return 2;
+  if (pathname === "/account" || /^\/coaches\/[^/]+$/.test(pathname)) return 1;
+  return 0;
 }
 
 interface Layer {
@@ -12,6 +19,7 @@ interface Layer {
   outlet: ReactNode;
   kind: "tab" | "push";
   index: number; // tab position, -1 for push routes
+  depth: number;
 }
 
 type Anim = { type: "none" } | { type: "push-in" | "push-out" } | { type: "tab-slide"; dir: 1 | -1 };
@@ -44,10 +52,12 @@ export function RouteTransition({ tabs }: { tabs: NavItem[] }) {
   const location = useLocation();
   const outlet = useOutlet();
 
-  const makeLayer = (pathname: string, node: ReactNode): Layer =>
-    isPushRoute(pathname)
-      ? { pathname, outlet: node, kind: "push", index: -1 }
-      : { pathname, outlet: node, kind: "tab", index: matchTabIndex(pathname, tabs) };
+  const makeLayer = (pathname: string, node: ReactNode): Layer => {
+    const depth = pushDepth(pathname);
+    return depth > 0
+      ? { pathname, outlet: node, kind: "push", index: -1, depth }
+      : { pathname, outlet: node, kind: "tab", index: matchTabIndex(pathname, tabs), depth: 0 };
+  };
 
   const [current, setCurrent] = useState<Layer>(() => makeLayer(location.pathname, outlet));
   const [previous, setPrevious] = useState<Layer | null>(null);
@@ -68,9 +78,19 @@ export function RouteTransition({ tabs }: { tabs: NavItem[] }) {
 
     const next = makeLayer(path, outlet);
     let nextAnim: Anim;
-    if (next.kind === "push") nextAnim = { type: "push-in" };
-    else if (current.kind === "push") nextAnim = { type: "push-out" };
-    else nextAnim = { type: "tab-slide", dir: next.index >= current.index ? 1 : -1 };
+    if (next.depth === 0 && current.depth === 0) {
+      nextAnim = { type: "tab-slide", dir: next.index >= current.index ? 1 : -1 };
+    } else if (next.depth > current.depth) {
+      nextAnim = { type: "push-in" };
+    } else if (next.depth < current.depth) {
+      nextAnim = { type: "push-out" };
+    } else {
+      // Same nonzero depth, different route — a lateral move between two
+      // push destinations. Not reachable through this app's UI today (every
+      // push route is left via its own "‹ back" link, one level at a time),
+      // but push-in is the sane default if it ever is.
+      nextAnim = { type: "push-in" };
+    }
 
     setPrevious(current);
     setCurrent(next);
