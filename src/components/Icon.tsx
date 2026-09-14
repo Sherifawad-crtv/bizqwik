@@ -1,5 +1,6 @@
 import type { SVGProps } from "react";
 import { WalletIcon } from "@solar-icons/react/linear/wallet";
+import { HomeSmileIcon } from "@solar-icons/react/linear/home-smile";
 import { ChartSquareIcon } from "@solar-icons/react/linear/chart-square";
 import { UsersGroupRoundedIcon } from "@solar-icons/react/linear/users-group-rounded";
 import { MagnifierIcon } from "@solar-icons/react/linear/magnifier";
@@ -25,6 +26,7 @@ import { TagIcon } from "@solar-icons/react/linear/tag";
 import { LetterIcon } from "@solar-icons/react/linear/letter";
 import { MenuDotsIcon } from "@solar-icons/react/linear/menu-dots";
 import { WalletIcon as WalletIconBold } from "@solar-icons/react/bold-duotone/wallet";
+import { HomeSmileIcon as HomeSmileIconBold } from "@solar-icons/react/bold-duotone/home-smile";
 import { ChartSquareIcon as ChartSquareIconBold } from "@solar-icons/react/bold-duotone/chart-square";
 import { UsersGroupRoundedIcon as UsersGroupRoundedIconBold } from "@solar-icons/react/bold-duotone/users-group-rounded";
 import { MagnifierIcon as MagnifierIconBold } from "@solar-icons/react/bold-duotone/magnifier";
@@ -51,6 +53,7 @@ import { LetterIcon as LetterIconBold } from "@solar-icons/react/bold-duotone/le
 import { MenuDotsIcon as MenuDotsIconBold } from "@solar-icons/react/bold-duotone/menu-dots";
 
 export type IconName =
+  | "home"
   | "wallet"
   | "coaches"
   | "oversight"
@@ -78,6 +81,7 @@ export type IconName =
   | "menu";
 
 const LINEAR = {
+  home: HomeSmileIcon,
   wallet: WalletIcon,
   coaches: UsersGroupRoundedIcon,
   oversight: MagnifierIcon,
@@ -106,6 +110,7 @@ const LINEAR = {
 } satisfies Record<IconName, typeof WalletIcon>;
 
 const BOLD = {
+  home: HomeSmileIconBold,
   wallet: WalletIconBold,
   coaches: UsersGroupRoundedIconBold,
   oversight: MagnifierIconBold,
