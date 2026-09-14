@@ -1,13 +1,13 @@
-import { Outlet, NavLink, useLocation } from "react-router-dom";
-import { Avatar } from "./Avatar";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { BottomNav } from "./BottomNav";
 import { RouteTransition } from "./RouteTransition";
 import { Sidebar } from "./Sidebar";
 import { Fab } from "./Fab";
+import { Icon } from "./Icon";
 import { useAuth } from "../lib/auth";
 import { useHeader } from "../lib/header";
 import { useIsMobile, useIsNarrowPhone } from "../lib/useIsMobile";
-import { NAV, hasStickyHeader } from "../lib/nav";
+import { NAV, headerMode, accountBackTarget } from "../lib/nav";
 
 export function Shell() {
   const { profile } = useAuth();
@@ -15,6 +15,7 @@ export function Shell() {
   const narrow = useIsNarrowPhone();
   const header = useHeader();
   const { pathname } = useLocation();
+  const navigate = useNavigate();
 
   if (!profile) return null;
   // Everyone but accountant gets a FAB — what it does depends on role
@@ -23,9 +24,10 @@ export function Shell() {
   const showFab = profile.role !== "accountant";
 
   if (isMobile) {
+    const mode = headerMode(pathname, profile.role);
     return (
       <div style={{ minHeight: "100svh", background: "var(--paper)", position: "relative", overflow: "hidden" }}>
-        {hasStickyHeader(pathname) && (
+        {mode !== "home" && (
           <div
             style={{
               position: "fixed",
@@ -33,31 +35,42 @@ export function Shell() {
               left: 0,
               right: 0,
               zIndex: 50,
-              background: "rgba(251,250,247,.78)",
-              backdropFilter: "blur(20px)",
-              WebkitBackdropFilter: "blur(20px)",
-              borderBottom: "1px solid var(--line)",
-              padding: "calc(12px + var(--safe-top)) 18px 12px",
+              padding: "calc(14px + var(--safe-top)) 16px 10px",
               display: "flex",
               alignItems: "center",
-              gap: 12,
             }}
           >
-            <NavLink to="/account" aria-label="Account">
-              <Avatar name={profile.name} size={40} src={profile.avatarUrl} />
-            </NavLink>
-            <div style={{ minWidth: 48, flex: "1 1 auto" }}>
-              <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>{header.kicker}</div>
-              <div style={{ font: "800 20px/1.15 var(--font-body)", letterSpacing: "-.01em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                {header.title}
-              </div>
+            <div style={{ width: 30, flex: "none", display: "flex" }}>
+              {mode === "account" && (
+                <button
+                  onClick={() => navigate(accountBackTarget(pathname, profile.role))}
+                  aria-label="Back"
+                  style={{ border: 0, background: "none", padding: 4, margin: -4, cursor: "pointer", color: "var(--ink)", display: "flex" }}
+                >
+                  <Icon name="chevron-left" size={22} />
+                </button>
+              )}
             </div>
-            {header.right && <div style={{ marginLeft: "auto", flex: "0 1 auto", minWidth: 0 }}>{header.right}</div>}
+            <div
+              style={{
+                flex: 1,
+                minWidth: 0,
+                textAlign: "center",
+                font: "800 17px var(--font-body)",
+                letterSpacing: "-.01em",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+              }}
+            >
+              {header.title}
+            </div>
+            <div style={{ width: 30, flex: "none" }} />
           </div>
         )}
 
         <main style={{ position: "relative", height: "100svh", overflow: "hidden" }}>
-          <RouteTransition tabs={NAV[profile.role]} />
+          <RouteTransition tabs={NAV[profile.role]} role={profile.role} />
         </main>
 
         <div

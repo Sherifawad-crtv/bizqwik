@@ -9,7 +9,6 @@ import { MoneyHero } from "../components/MoneyHero";
 import { LockedBanner } from "../components/LockedBanner";
 import { DayList } from "../components/DayList";
 import { DaySessionsSheet } from "../components/DaySessionsSheet";
-import { MonthSwitcherSheet } from "../components/MonthSwitcherSheet";
 import { AddSessionSheet } from "../components/AddSessionSheet";
 import { Avatar } from "../components/Avatar";
 import { Button } from "../components/Button";
@@ -20,8 +19,7 @@ export function CoachDetail() {
   const { id } = useParams<{ id: string }>();
   const location = useLocation();
   const navigate = useNavigate();
-  const [month, setMonth] = useState((location.state as { month?: string })?.month ?? MOCK.CURRENT_MONTH);
-  const [monthSheet, setMonthSheet] = useState(false);
+  const month = (location.state as { month?: string })?.month ?? MOCK.CURRENT_MONTH;
   const [addOpen, setAddOpen] = useState(false);
   const [dayDate, setDayDate] = useState<string | null>(null);
   const [busyAction, setBusyAction] = useState(false);
@@ -34,22 +32,7 @@ export function CoachDetail() {
     return { row: monthRes.rows.find((r) => r.coachId === coachId) ?? null, sessions: sessionsRes.sessions };
   }, [coachId, month]);
 
-  useSetHeader(
-    {
-      kicker: monthShort(month),
-      title: data?.row?.name ?? "Coach",
-      right: (
-        <button
-          onClick={() => setMonthSheet(true)}
-          data-sq
-          style={{ padding: "8px 12px", borderRadius: 16, border: 0, background: "var(--primary-tint)", font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--primary-pressed)", cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}
-        >
-          {monthShort(month)} <Icon name="chevron-down" size={13} />
-        </button>
-      ),
-    },
-    [month, data?.row?.name],
-  );
+  useSetHeader({ kicker: monthShort(month), title: data?.row?.name ?? "Coach" }, [month, data?.row?.name]);
 
   if (!data) return <Spinner />;
   if (!data.row) return null;
@@ -170,7 +153,6 @@ export function CoachDetail() {
         rate={row.rate}
         onOptimisticAdd={handleOptimisticAdd}
       />
-      <MonthSwitcherSheet open={monthSheet} onClose={() => setMonthSheet(false)} coachId={coachId} month={month} onChange={setMonth} />
     </div>
   );
 }

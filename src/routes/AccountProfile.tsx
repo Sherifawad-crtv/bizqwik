@@ -1,5 +1,4 @@
 import { useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { useAuth } from "../lib/auth";
 import { useSetHeader } from "../lib/header";
 import { api } from "../lib/backend";
@@ -55,7 +54,6 @@ async function uploadAvatar(userId: string, blob: Blob): Promise<string> {
 
 export function AccountProfile() {
   const { profile, tier, refreshProfile } = useAuth();
-  const navigate = useNavigate();
   const [name, setName] = useState(profile?.name ?? "");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -124,13 +122,6 @@ export function AccountProfile() {
 
   return (
     <div>
-      <button
-        onClick={() => navigate("/account")}
-        style={{ display: "flex", alignItems: "center", gap: 4, border: 0, background: "none", cursor: "pointer", color: "var(--ink-muted)", font: "600 13px var(--font-body)", padding: "0 0 14px" }}
-      >
-        <Icon name="chevron-left" size={16} /> Account
-      </button>
-
       <div data-sq style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: 20, marginBottom: 16, display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
         <input ref={fileInput} type="file" accept="image/*" onChange={onPhotoSelected} style={{ display: "none" }} />
         <button

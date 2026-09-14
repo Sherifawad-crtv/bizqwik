@@ -15,12 +15,39 @@ export function matchTabIndex(pathname: string, items: NavItem[]): number {
   return items.findIndex((t) => (t.path === "/" ? pathname === "/" : pathname.startsWith(t.path)));
 }
 
-/** Routes whose own content already leads with an avatar/identity — the
- * Shell's sticky mobile header (itself just a small avatar + title) would
- * only duplicate it directly above, so it's hidden there. */
-const NO_STICKY_HEADER_ROUTES = new Set(["/account", "/account/profile"]);
-export function hasStickyHeader(pathname: string): boolean {
-  return !NO_STICKY_HEADER_ROUTES.has(pathname);
+/** Where "/" actually lands a given role — dept_head and accountant are
+ * redirected elsewhere by Home.tsx, so their real landing screen is the
+ * redirect target, not "/" itself. This is each role's one "home" screen:
+ * the only place with no screen-name text and no back button, where the
+ * avatar lives blended into the page instead of in any bar. */
+export function homePathForRole(role: Role): string {
+  if (role === "dept_head") return "/oversight";
+  if (role === "accountant") return "/pay";
+  return "/";
+}
+
+/** The account section reached by tapping the home screen's avatar — the
+ * only place that gets a back button, one level at a time. */
+const ACCOUNT_ROUTES = new Set(["/account", "/account/profile", "/account/password"]);
+
+export type HeaderMode = "home" | "account" | "plain";
+
+/** "home": no top chrome at all (avatar lives in the page itself).
+ * "account": centered screen name + a back button (the avatar's own stack).
+ * "plain": centered screen name only — every other screen, including ones
+ * drilled into from within a tab (e.g. a coach's detail page), which keep
+ * their own existing in-body back link untouched. */
+export function headerMode(pathname: string, role: Role): HeaderMode {
+  if (ACCOUNT_ROUTES.has(pathname)) return "account";
+  if (pathname === homePathForRole(role)) return "home";
+  return "plain";
+}
+
+/** Where the account stack's back button goes: /account itself returns to
+ * the role's home screen; its children return to /account. */
+export function accountBackTarget(pathname: string, role: Role): string {
+  if (pathname === "/account") return homePathForRole(role);
+  return "/account";
 }
 
 export const NAV: Record<Role, NavItem[]> = {

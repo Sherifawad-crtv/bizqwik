@@ -20,11 +20,11 @@ type Tab = "tiers" | "bundles" | "invites" | "people";
 export function Manage() {
   const [tab, setTab] = useState<Tab>("tiers");
 
-  useSetHeader(
-    {
-      kicker: "MANAGE",
-      title: "Tiers & People",
-      right: (
+  useSetHeader({ kicker: "MANAGE", title: "Tiers & People" }, []);
+
+  return (
+    <div>
+      <div style={{ display: "flex", justifyContent: "center", marginBottom: 18 }}>
         <Segmented
           value={tab}
           onChange={setTab}
@@ -35,15 +35,13 @@ export function Manage() {
             { value: "people", label: "PEOPLE" },
           ]}
         />
-      ),
-    },
-    [tab],
+      </div>
+      {tab === "tiers" && <TiersPanel />}
+      {tab === "bundles" && <BundlesPanel />}
+      {tab === "invites" && <InvitesPanel />}
+      {tab === "people" && <PeoplePanel />}
+    </div>
   );
-
-  if (tab === "tiers") return <TiersPanel />;
-  if (tab === "bundles") return <BundlesPanel />;
-  if (tab === "invites") return <InvitesPanel />;
-  return <PeoplePanel />;
 }
 
 // ---------- Tiers ----------

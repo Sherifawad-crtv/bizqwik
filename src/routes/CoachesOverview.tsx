@@ -1,22 +1,20 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSetHeader } from "../lib/header";
 import { useAsync } from "../lib/useAsync";
 import { api, MOCK } from "../lib/backend";
 import { fmt } from "../lib/format";
 import { MoneyHero } from "../components/MoneyHero";
-import { MonthPicker } from "../components/MonthPicker";
 import { RollupTable, type ListRow } from "../components/RollupTable";
 import { Spinner } from "../components/Spinner";
 import { canLog } from "../lib/types";
 
 export function CoachesOverview() {
-  const [month, setMonth] = useState(MOCK.CURRENT_MONTH);
+  const month = MOCK.CURRENT_MONTH;
   const navigate = useNavigate();
 
   const { data } = useAsync(() => api.month(month), [month]);
 
-  useSetHeader({ kicker: "CALISTHENICS DEPT", title: "Coaches", right: <MonthPicker month={month} onChange={setMonth} /> }, [month]);
+  useSetHeader({ kicker: "CALISTHENICS DEPT", title: "Coaches" }, []);
 
   if (!data) return <Spinner />;
   const rows = data.rows.filter((r) => canLog(r.role));

@@ -4,7 +4,6 @@ import { useAuth } from "../lib/auth";
 import { useSetHeader } from "../lib/header";
 import { auth } from "../lib/backend";
 import { Button } from "../components/Button";
-import { Icon } from "../components/Icon";
 import { TextField } from "../components/FormField";
 
 export function AccountPassword() {
@@ -47,13 +46,6 @@ export function AccountPassword() {
 
   return (
     <div>
-      <button
-        onClick={() => navigate("/account")}
-        style={{ display: "flex", alignItems: "center", gap: 4, border: 0, background: "none", cursor: "pointer", color: "var(--ink-muted)", font: "600 13px var(--font-body)", padding: "0 0 14px" }}
-      >
-        <Icon name="chevron-left" size={16} /> Account
-      </button>
-
       <div data-sq style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: 20 }}>
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           <TextField

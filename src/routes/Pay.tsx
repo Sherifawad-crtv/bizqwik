@@ -1,23 +1,25 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../lib/auth";
 import { useSetHeader } from "../lib/header";
 import { useAsync } from "../lib/useAsync";
 import { api, MOCK } from "../lib/backend";
 import { fmt } from "../lib/format";
+import { HomeAvatar } from "../components/HomeAvatar";
 import { MoneyHero } from "../components/MoneyHero";
-import { MonthPicker } from "../components/MonthPicker";
 import { RollupTable, type ListRow } from "../components/RollupTable";
 import { Spinner } from "../components/Spinner";
 import { canLog } from "../lib/types";
 
 export function Pay() {
-  const [month, setMonth] = useState(MOCK.CURRENT_MONTH);
+  const { profile } = useAuth();
+  const month = MOCK.CURRENT_MONTH;
   const navigate = useNavigate();
 
   const { data } = useAsync(() => api.month(month), [month]);
 
-  useSetHeader({ kicker: "SETTLED · READY", title: "To Pay", right: <MonthPicker month={month} onChange={setMonth} /> }, [month]);
+  useSetHeader({ kicker: "SETTLED · READY", title: "To Pay" }, []);
 
+  if (!profile) return null;
   if (!data) return <Spinner />;
   const rows = data.rows.filter((r) => canLog(r.role) && r.state === "settled");
 
@@ -35,6 +37,8 @@ export function Pay() {
 
   return (
     <div>
+      <HomeAvatar name={profile.name} avatarUrl={profile.avatarUrl} />
+
       <MoneyHero
         label="DUE NOW · EGP"
         value={fmt(rows.reduce((s, r) => s + r.total, 0))}

@@ -1,27 +1,24 @@
 import { useState } from "react";
 import { useAuth } from "../lib/auth";
-import { useSetHeader } from "../lib/header";
 import { useOwnMonth } from "../lib/ownMonth";
 import { useAsync } from "../lib/useAsync";
 import { useIsMobile } from "../lib/useIsMobile";
 import { api } from "../lib/backend";
 import { isHead, type Session } from "../lib/types";
-import { fmt, monthShort } from "../lib/format";
+import { fmt } from "../lib/format";
+import { HomeAvatar } from "../components/HomeAvatar";
 import { MoneyHero } from "../components/MoneyHero";
 import { LockedBanner } from "../components/LockedBanner";
 import { DayList } from "../components/DayList";
 import { DaySessionsSheet } from "../components/DaySessionsSheet";
-import { MonthSwitcherSheet } from "../components/MonthSwitcherSheet";
 import { AddSessionSheet } from "../components/AddSessionSheet";
 import { Button } from "../components/Button";
-import { Icon } from "../components/Icon";
 import { Spinner } from "../components/Spinner";
 
 export function CoachWallet() {
   const { profile } = useAuth();
-  const { month, setMonth } = useOwnMonth();
+  const { month } = useOwnMonth();
   const isMobile = useIsMobile();
-  const [monthSheet, setMonthSheet] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
   const [dayDate, setDayDate] = useState<string | null>(null);
   const [busyAction, setBusyAction] = useState(false);
@@ -32,23 +29,6 @@ export function CoachWallet() {
     const [monthRes, sessionsRes] = await Promise.all([api.month(month), api.sessions(profile.id, month)]);
     return { row: monthRes.rows.find((r) => r.coachId === profile.id) ?? null, sessions: sessionsRes.sessions };
   }, [profile?.id, month]);
-
-  useSetHeader(
-    {
-      kicker: monthShort(month),
-      title: "My Month",
-      right: (
-        <button
-          onClick={() => setMonthSheet(true)}
-          data-sq
-          style={{ padding: "8px 12px", borderRadius: 16, border: 0, background: "var(--primary-tint)", font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--primary-pressed)", cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}
-        >
-          {monthShort(month)} <Icon name="chevron-down" size={13} />
-        </button>
-      ),
-    },
-    [month],
-  );
 
   if (!profile) return null;
   if (!data) return <Spinner />;
@@ -90,6 +70,8 @@ export function CoachWallet() {
 
   return (
     <div>
+      <HomeAvatar name={profile.name} avatarUrl={profile.avatarUrl} />
+
       <LockedBanner state={row.state} />
 
       <MoneyHero
@@ -152,7 +134,6 @@ export function CoachWallet() {
         editable={editable}
         onOptimisticAdd={(d) => handleOptimisticAdd(d, 1)}
       />
-      <MonthSwitcherSheet open={monthSheet} onClose={() => setMonthSheet(false)} coachId={profile.id} month={month} onChange={setMonth} />
       <AddSessionSheet
         open={addOpen}
         onClose={() => setAddOpen(false)}
