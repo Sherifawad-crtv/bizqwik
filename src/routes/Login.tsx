@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Navigate } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "../lib/auth";
 import { useIsMobile } from "../lib/useIsMobile";
 import { useKeyboardInset } from "../lib/useKeyboardInset";
@@ -96,6 +96,12 @@ export function Login() {
           <Button type="submit" fullWidth size="lg" disabled={busy} style={{ marginTop: 4 }}>
             {busy ? "Signing in…" : "Sign in"}
           </Button>
+          <Link
+            to="/forgot-password"
+            style={{ textAlign: "center", font: "700 13px var(--font-body)", color: "var(--ink-muted)", marginTop: 4 }}
+          >
+            Forgot password?
+          </Link>
         </form>
       </div>
     </div>

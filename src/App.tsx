@@ -8,6 +8,8 @@ import { Shell } from "./components/Shell";
 import { initSquirclePolyfill } from "./lib/squircle";
 
 import { Login } from "./routes/Login";
+import { ForgotPassword } from "./routes/ForgotPassword";
+import { ResetPassword } from "./routes/ResetPassword";
 import { Home } from "./routes/Home";
 import { CoachesOverview } from "./routes/CoachesOverview";
 import { CoachDetail } from "./routes/CoachDetail";
@@ -31,6 +33,8 @@ export default function App() {
           <OwnMonthProvider>
             <Routes>
               <Route path="/login" element={<Login />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
 
               <Route element={<RequireAuth />}>
                 <Route element={<Shell />}>

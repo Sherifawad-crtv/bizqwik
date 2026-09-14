@@ -41,6 +41,16 @@ export const auth = {
   async signOut(): Promise<void> {
     await supabase.auth.signOut();
   },
+  async sendPasswordReset(email: string): Promise<void> {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    if (error) throw new Error(error.message);
+  },
+  async updatePassword(password: string): Promise<void> {
+    const { error } = await supabase.auth.updateUser({ password });
+    if (error) throw new Error(error.message);
+  },
 };
 
 export const api = {
