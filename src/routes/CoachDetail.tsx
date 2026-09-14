@@ -32,7 +32,7 @@ export function CoachDetail() {
     return { row: monthRes.rows.find((r) => r.coachId === coachId) ?? null, sessions: sessionsRes.sessions };
   }, [coachId, month]);
 
-  useSetHeader({ kicker: monthShort(month), title: data?.row?.name ?? "Coach" }, [month, data?.row?.name]);
+  useSetHeader({ kicker: monthShort(month), title: "Coach" }, [month]);
 
   if (!data) return <Spinner />;
   if (!data.row) return null;
