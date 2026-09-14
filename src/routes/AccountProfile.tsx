@@ -9,6 +9,10 @@ import { Icon } from "../components/Icon";
 import { TextField } from "../components/FormField";
 import { ROLE_LABELS } from "../lib/types";
 
+// Self-service photo upload/removal is turned off for the time being —
+// avatars are being set manually. Flip this back on to restore it.
+const PHOTO_EDIT_ENABLED = false;
+
 // Center-crop to a square, then downscale — every avatar in the app is
 // rendered as a circle via object-fit: cover, so a square source is all
 // that's ever needed regardless of the uploaded photo's original aspect.
@@ -123,53 +127,59 @@ export function AccountProfile() {
   return (
     <div>
       <div data-sq style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: 20, marginBottom: 16, display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
-        <input ref={fileInput} type="file" accept="image/*" onChange={onPhotoSelected} style={{ display: "none" }} />
-        <button
-          onClick={pickPhoto}
-          disabled={photoBusy}
-          aria-label="Change photo"
-          style={{ position: "relative", border: 0, background: "none", padding: 0, cursor: photoBusy ? "default" : "pointer", borderRadius: 999 }}
-        >
+        {PHOTO_EDIT_ENABLED ? (
+          <>
+            <input ref={fileInput} type="file" accept="image/*" onChange={onPhotoSelected} style={{ display: "none" }} />
+            <button
+              onClick={pickPhoto}
+              disabled={photoBusy}
+              aria-label="Change photo"
+              style={{ position: "relative", border: 0, background: "none", padding: 0, cursor: photoBusy ? "default" : "pointer", borderRadius: 999 }}
+            >
+              <Avatar name={profile.name} size={84} src={profile.avatarUrl} />
+              <span
+                aria-hidden
+                style={{
+                  position: "absolute",
+                  right: -2,
+                  bottom: -2,
+                  width: 30,
+                  height: 30,
+                  borderRadius: 999,
+                  background: "var(--primary)",
+                  color: "var(--surface)",
+                  border: "2px solid var(--surface)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Icon name="pencil" size={14} />
+              </span>
+            </button>
+            <button
+              onClick={pickPhoto}
+              disabled={photoBusy}
+              style={{ border: 0, background: "none", padding: 0, cursor: photoBusy ? "default" : "pointer", font: "700 13px var(--font-body)", color: "var(--primary-pressed)" }}
+            >
+              {photoBusy ? "Uploading…" : "Change photo"}
+            </button>
+            {profile.avatarUrl && !photoBusy && (
+              <button
+                onClick={removePhoto}
+                style={{ border: 0, background: "none", padding: 0, cursor: "pointer", font: "600 13px var(--font-body)", color: "var(--ink-faint)" }}
+              >
+                Remove photo
+              </button>
+            )}
+            {photoError && (
+              <div style={{ width: "100%", font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>
+                {photoError}
+              </div>
+            )}
+          </>
+        ) : (
           <Avatar name={profile.name} size={84} src={profile.avatarUrl} />
-          <span
-            aria-hidden
-            style={{
-              position: "absolute",
-              right: -2,
-              bottom: -2,
-              width: 30,
-              height: 30,
-              borderRadius: 999,
-              background: "var(--primary)",
-              color: "var(--surface)",
-              border: "2px solid var(--surface)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Icon name="pencil" size={14} />
-          </span>
-        </button>
-        <button
-          onClick={pickPhoto}
-          disabled={photoBusy}
-          style={{ border: 0, background: "none", padding: 0, cursor: photoBusy ? "default" : "pointer", font: "700 13px var(--font-body)", color: "var(--primary-pressed)" }}
-        >
-          {photoBusy ? "Uploading…" : "Change photo"}
-        </button>
-        {profile.avatarUrl && !photoBusy && (
-          <button
-            onClick={removePhoto}
-            style={{ border: 0, background: "none", padding: 0, cursor: "pointer", font: "600 13px var(--font-body)", color: "var(--ink-faint)" }}
-          >
-            Remove photo
-          </button>
-        )}
-        {photoError && (
-          <div style={{ width: "100%", font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>
-            {photoError}
-          </div>
         )}
       </div>
 
