@@ -5,9 +5,9 @@ import { Avatar } from "./Avatar";
  * screen instead of a persistent header bar. Taps into the account stack. */
 export function HomeAvatar({ name, avatarUrl }: { name: string; avatarUrl: string | null }) {
   return (
-    <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 8 }}>
+    <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 28 }}>
       <NavLink to="/account" aria-label="Account">
-        <Avatar name={name} size={40} src={avatarUrl} />
+        <Avatar name={name} size={64} src={avatarUrl} />
       </NavLink>
     </div>
   );

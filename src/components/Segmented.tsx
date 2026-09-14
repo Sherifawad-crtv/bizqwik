@@ -8,7 +8,7 @@ export function Segmented<T extends string>({
   onChange: (v: T) => void;
 }) {
   return (
-    <div style={{ display: "flex", gap: 4, background: "var(--sunken)", borderRadius: 999, padding: 4, maxWidth: "100%", overflowX: "auto" }}>
+    <div style={{ display: "flex", gap: 6, background: "var(--sunken)", borderRadius: 999, padding: 4, width: "fit-content", maxWidth: "100%", overflowX: "auto" }}>
       {options.map((o) => {
         const on = o.value === value;
         return (
@@ -19,12 +19,12 @@ export function Segmented<T extends string>({
               border: 0,
               cursor: "pointer",
               flex: "none",
-              padding: "8px 11px",
+              padding: "9px 14px",
               borderRadius: 999,
               background: on ? "var(--surface)" : "transparent",
               color: on ? "var(--ink)" : "var(--ink-muted)",
-              font: "700 11px var(--font-mono)",
-              letterSpacing: ".08em",
+              font: "700 12px var(--font-mono)",
+              letterSpacing: ".06em",
               whiteSpace: "nowrap",
             }}
           >
