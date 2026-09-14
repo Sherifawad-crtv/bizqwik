@@ -70,7 +70,7 @@ export function CoachWallet() {
 
   return (
     <div>
-      <HomeAvatar name={profile.name} avatarUrl={profile.avatarUrl} />
+      <HomeAvatar name={profile.name} avatarUrl={profile.avatarUrl} greeting={`Hi, ${profile.name.split(" ")[0]}`} />
 
       <LockedBanner state={row.state} />
 
