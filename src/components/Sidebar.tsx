@@ -65,7 +65,7 @@ export function Sidebar() {
       </div>
       <NavLink to="/account" style={{ marginTop: "auto", textDecoration: "none" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 8px 0", borderTop: "1px solid var(--line)" }}>
-          <Avatar name={profile.name} size={34} />
+          <Avatar name={profile.name} size={34} src={profile.avatarUrl} />
           <div style={{ minWidth: 0 }}>
             <div style={{ font: "600 16px var(--font-body)", lineHeight: 1.1, color: "var(--ink)" }}>{profile.name}</div>
             <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)", display: "flex", alignItems: "center", gap: 4 }}>

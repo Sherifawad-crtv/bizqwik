@@ -7,6 +7,7 @@ export interface Profile {
   name: string;
   role: Role;
   tierId: string | null;
+  avatarUrl: string | null;
 }
 
 export interface Tier {
@@ -36,6 +37,7 @@ export interface Rollup {
   name: string;
   email: string;
   role: Role;
+  avatarUrl: string | null;
   tierId: string | null;
   tierName: string | null;
   rate: number;

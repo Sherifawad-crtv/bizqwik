@@ -42,7 +42,7 @@ export function Shell() {
           }}
         >
           <NavLink to="/account" aria-label="Account">
-            <Avatar name={profile.name} size={40} />
+            <Avatar name={profile.name} size={40} src={profile.avatarUrl} />
           </NavLink>
           <div style={{ minWidth: 48, flex: "1 1 auto" }}>
             <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>{header.kicker}</div>

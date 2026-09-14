@@ -46,7 +46,7 @@ export function Account() {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 16, padding: 24 }}>
-          <Avatar name={profile.name} size={56} />
+          <Avatar name={profile.name} size={56} src={profile.avatarUrl} />
           <div style={{ minWidth: 0, flex: 1 }}>
             <div style={{ font: "800 22px var(--font-body)", letterSpacing: "-.01em" }}>{profile.name}</div>
             <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)", marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{profile.email}</div>

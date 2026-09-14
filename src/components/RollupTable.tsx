@@ -9,6 +9,7 @@ import { egp } from "../lib/format";
 export interface ListRow {
   id: string;
   name: string;
+  avatarUrl?: string | null;
   title: string;
   meta: string;
   sub?: string;
@@ -37,7 +38,7 @@ function DesktopRow({ r }: { r: ListRow }) {
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
-        <Avatar name={r.name} size={32} />
+        <Avatar name={r.name} size={32} src={r.avatarUrl} />
         <div style={{ minWidth: 0 }}>
           <div style={{ font: "600 16px var(--font-body)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{r.title}</div>
           {r.sub && <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>{r.sub}</div>}
@@ -75,7 +76,7 @@ export function RollupTable({ colA, colB, rows }: { colA: string; colB: string; 
             onClick={r.onClick}
             style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-tile)", padding: "14px 16px", display: "flex", gap: 14, alignItems: "center", cursor: r.onClick ? "pointer" : "default" }}
           >
-            <Avatar name={r.name} size={38} />
+            <Avatar name={r.name} size={38} src={r.avatarUrl} />
             <div style={{ minWidth: 0, flex: 1 }}>
               <div style={{ font: "700 16px var(--font-body)", letterSpacing: "-.01em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{r.title}</div>
               <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-muted)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{r.meta}</div>

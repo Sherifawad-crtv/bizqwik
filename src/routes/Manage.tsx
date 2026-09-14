@@ -469,7 +469,7 @@ function PeoplePanel() {
             onClick={() => setEditing(p)}
             style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 20px", borderBottom: i === data.profiles.length - 1 ? "none" : "1px solid var(--line)", width: "100%", border: 0, background: "none", cursor: "pointer", textAlign: "left" }}
         >
-            <Avatar name={p.name} size={36} />
+            <Avatar name={p.name} size={36} src={p.avatarUrl} />
             <div style={{ minWidth: 0, flex: 1 }}>
               <div style={{ font: "700 16px var(--font-body)" }}>{p.name}</div>
               <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>
@@ -537,7 +537,7 @@ function PersonSheet({
     <>
       <Sheet open={open} onClose={onClose}>
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 18 }}>
-          <Avatar name={shown.name} size={44} />
+          <Avatar name={shown.name} size={44} src={shown.avatarUrl} />
           <div>
             <div style={{ font: "800 22px var(--font-body)", letterSpacing: "-.01em" }}>{shown.name}</div>
             <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>{shown.email}</div>

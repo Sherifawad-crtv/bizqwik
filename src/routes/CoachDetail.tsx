@@ -98,7 +98,7 @@ export function CoachDetail() {
       </button>
 
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 18 }}>
-        <Avatar name={row.name} size={44} />
+        <Avatar name={row.name} size={44} src={row.avatarUrl} />
         <div>
           <div style={{ font: "800 22px var(--font-body)", letterSpacing: "-.01em" }}>{row.name}</div>
           <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>{row.tierName ?? "No tier"} · {row.email}</div>

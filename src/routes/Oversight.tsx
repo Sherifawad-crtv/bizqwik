@@ -194,6 +194,7 @@ export function Oversight() {
   const rowItems: ListRow[] = rows.map((r) => ({
     id: r.coachId,
     name: r.name,
+    avatarUrl: r.avatarUrl,
     title: r.name,
     meta: `${r.count} ${r.count === 1 ? "SESSION" : "SESSIONS"} · ${r.tierName ?? "NO TIER"}`,
     state: r.state,
