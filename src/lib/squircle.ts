@@ -29,7 +29,13 @@ function cornerArc(cx: number, cy: number, r: number, fromDeg: number, toDeg: nu
   return pts;
 }
 
-function squirclePath(width: number, height: number, r: number): string {
+// The curve is already piecewise-linear (straight segments between computed
+// superellipse points, no bezier/arc commands) — so it's expressed as a
+// `polygon()` clip-path, not `path()`. `path()` needs Safari 16.4+ and drops
+// silently (falling back to plain border-radius corners) on anything older;
+// `polygon()` has been supported since Safari 9.1, so it actually renders
+// everywhere the rest of this app needs to run.
+function squirclePolygon(width: number, height: number, r: number): string {
   const points = [
     ...cornerArc(width - r, r, r, -90, 0), // top-right
     ...cornerArc(width - r, height - r, r, 0, 90), // bottom-right
@@ -37,8 +43,7 @@ function squirclePath(width: number, height: number, r: number): string {
     ...cornerArc(r, r, r, 180, 270), // top-left
   ];
   const round = (n: number) => Math.round(n * 100) / 100;
-  const [first, ...rest] = points;
-  return [`M${round(first[0])} ${round(first[1])}`, ...rest.map(([x, y]) => `L${round(x)} ${round(y)}`), "Z"].join(" ");
+  return points.map(([x, y]) => `${round(x)}px ${round(y)}px`).join(", ");
 }
 
 function nativeSquircleSupported(): boolean {
@@ -57,7 +62,7 @@ function applyTo(el: HTMLElement) {
     return;
   }
 
-  el.style.clipPath = `path('${squirclePath(width, height, cornerRadius)}')`;
+  el.style.clipPath = `polygon(${squirclePolygon(width, height, cornerRadius)})`;
 }
 
 const tracked = new Set<HTMLElement>();
