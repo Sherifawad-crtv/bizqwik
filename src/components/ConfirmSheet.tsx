@@ -40,7 +40,7 @@ export function ConfirmSheet({ open, onClose, kicker, title, sub, confirmLabel, 
   return (
     <Sheet open={open} onClose={handleClose}>
       {confirmed ? (
-        <SheetSuccessIcon label={confirmLabel} iconIn={iconIn} danger={danger} />
+        <SheetSuccessIcon label={confirmLabel} iconIn={iconIn} />
       ) : (
         <>
           <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>{kicker}</div>
