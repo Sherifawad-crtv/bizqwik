@@ -6,7 +6,6 @@ import { OwnMonthProvider } from "./lib/ownMonth";
 import { RequireAuth, RequireRole } from "./lib/guards";
 import { Shell } from "./components/Shell";
 import { initSquirclePolyfill } from "./lib/squircle";
-import { SquircleDebugOverlay } from "./components/SquircleDebugOverlay";
 
 import { Login } from "./routes/Login";
 import { ForgotPassword } from "./routes/ForgotPassword";
@@ -28,10 +27,6 @@ export default function App() {
   useEffect(() => {
     initSquirclePolyfill();
   }, []);
-
-  if (typeof window !== "undefined" && new URLSearchParams(window.location.search).has("squircle-debug")) {
-    return <SquircleDebugOverlay />;
-  }
 
   return (
     <BrowserRouter>

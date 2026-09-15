@@ -105,15 +105,6 @@ textarea {
   font-size: 16px; /* prevents iOS focus auto-zoom */
 }
 
-[data-sq] {
-  /* superellipse(6), not the squircle keyword (= superellipse(4)) — the
-     spec default is too subtle at our card sizes to read as a squircle at
-     all; a higher exponent flattens the sides for a visibly distinct
-     shape. Must match SUPERELLIPSE_N in lib/squircle.ts, the JS fallback
-     for browsers that don't support corner-shape at all (WebKit/Firefox). */
-  corner-shape: superellipse(6);
-}
-
 [data-scroll] {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;

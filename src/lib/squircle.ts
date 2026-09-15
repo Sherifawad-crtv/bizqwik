@@ -1,54 +1,16 @@
-// Matches the curvature of the native `corner-shape: superellipse(6)` used
-// on Chromium (see index.css) — WebKit (Safari, iOS + macOS) and Firefox
-// don't implement `corner-shape` at all, so [data-sq] elements there fall
-// back to plain rounded corners. This clips the same elements to an
-// equivalent curve in JS, driven off each element's own `border-radius`
-// and measured size.
+import { getSvgPath } from "figma-squircle";
+
+// Real iOS/Figma-style continuous-curvature corners for every [data-sq]
+// element, driven off each element's own `border-radius` and measured
+// size. No CSS `corner-shape` fast path here — Chromium's native property
+// only supports a plain superellipse exponent, not Figma's G2-continuous
+// smoothing spline, so it can't reproduce this curve; clip-path is applied
+// uniformly in JS on every browser instead, guaranteeing every browser
+// renders pixel-identically.
 //
-// The underlying curve is a superellipse |x/r|^n + |y/r|^n = 1 — the
-// `superellipse(N)` CSS function's argument is directly that exponent N
-// (confirmed empirically: superellipse(2) renders as a plain circular
-// corner, matching n=2). Must stay equal to the exponent used in index.css.
-const SUPERELLIPSE_N = 6;
-const STEPS_PER_CORNER = 14;
-
-function superellipsePoint(cx: number, cy: number, r: number, theta: number): [number, number] {
-  const c = Math.cos(theta);
-  const s = Math.sin(theta);
-  const x = cx + r * Math.sign(c) * Math.abs(c) ** (2 / SUPERELLIPSE_N);
-  const y = cy + r * Math.sign(s) * Math.abs(s) ** (2 / SUPERELLIPSE_N);
-  return [x, y];
-}
-
-function cornerArc(cx: number, cy: number, r: number, fromDeg: number, toDeg: number): [number, number][] {
-  const pts: [number, number][] = [];
-  for (let i = 0; i <= STEPS_PER_CORNER; i++) {
-    const deg = fromDeg + ((toDeg - fromDeg) * i) / STEPS_PER_CORNER;
-    pts.push(superellipsePoint(cx, cy, r, (deg * Math.PI) / 180));
-  }
-  return pts;
-}
-
-// The curve is already piecewise-linear (straight segments between computed
-// superellipse points, no bezier/arc commands) — so it's expressed as a
-// `polygon()` clip-path, not `path()`. `path()` needs Safari 16.4+ and drops
-// silently (falling back to plain border-radius corners) on anything older;
-// `polygon()` has been supported since Safari 9.1, so it actually renders
-// everywhere the rest of this app needs to run.
-function squirclePolygon(width: number, height: number, r: number): string {
-  const points = [
-    ...cornerArc(width - r, r, r, -90, 0), // top-right
-    ...cornerArc(width - r, height - r, r, 0, 90), // bottom-right
-    ...cornerArc(r, height - r, r, 90, 180), // bottom-left
-    ...cornerArc(r, r, r, 180, 270), // top-left
-  ];
-  const round = (n: number) => Math.round(n * 100) / 100;
-  return points.map(([x, y]) => `${round(x)}px ${round(y)}px`).join(", ");
-}
-
-function nativeSquircleSupported(): boolean {
-  return typeof CSS !== "undefined" && !!CSS.supports && CSS.supports("corner-shape", `superellipse(${SUPERELLIPSE_N})`);
-}
+// cornerSmoothing: 0.6 is the value Figma (and most "iOS-style squircle"
+// implementations) use to replicate the native iOS look.
+const CORNER_SMOOTHING = 0.6;
 
 function applyTo(el: HTMLElement) {
   const width = el.offsetWidth;
@@ -62,7 +24,8 @@ function applyTo(el: HTMLElement) {
     return;
   }
 
-  el.style.clipPath = `polygon(${squirclePolygon(width, height, cornerRadius)})`;
+  const path = getSvgPath({ width, height, cornerRadius, cornerSmoothing: CORNER_SMOOTHING });
+  el.style.clipPath = `path('${path}')`;
 }
 
 const tracked = new Set<HTMLElement>();
@@ -98,7 +61,7 @@ function unsweep(root: Element) {
 let started = false;
 
 export function initSquirclePolyfill() {
-  if (started || typeof document === "undefined" || nativeSquircleSupported()) return;
+  if (started || typeof document === "undefined") return;
   started = true;
 
   sweep(document.body);
