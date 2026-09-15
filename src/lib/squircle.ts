@@ -1,16 +1,49 @@
-import { getSvgPath } from "figma-squircle";
-
-// Real iOS/Figma-style continuous-curvature corners for every [data-sq]
-// element, driven off each element's own `border-radius` and measured
-// size. No CSS `corner-shape` fast path here — Chromium's native property
-// only supports a plain superellipse exponent, not Figma's G2-continuous
-// smoothing spline, so it can't reproduce this curve; clip-path is applied
-// uniformly in JS on every browser instead, guaranteeing every browser
-// renders pixel-identically.
+// Matches the curvature of the native `corner-shape: squircle` used on
+// Chromium — WebKit (Safari, iOS + macOS) and Firefox don't implement that
+// property at all, so [data-sq] elements there fall back to plain rounded
+// corners. This clips the same elements to an equivalent curve in JS,
+// driven off each element's own `border-radius` and measured size.
 //
-// cornerSmoothing: 0.6 is the value Figma (and most "iOS-style squircle"
-// implementations) use to replicate the native iOS look.
-const CORNER_SMOOTHING = 0.6;
+// The CSS spec defines `squircle` as `superellipse(2)` — a curve of
+// |x/r|^n + |y/r|^n = 1 with n = 2*2 = 4, swapped in for the plain
+// circular arc (n = 2) a normal border-radius corner uses. That's the
+// exact math below, not an approximation, so it matches Chromium's
+// rendering rather than some other "squircle-ish" curve family.
+const SUPERELLIPSE_N = 4;
+const STEPS_PER_CORNER = 14;
+
+function superellipsePoint(cx: number, cy: number, r: number, theta: number): [number, number] {
+  const c = Math.cos(theta);
+  const s = Math.sin(theta);
+  const x = cx + r * Math.sign(c) * Math.abs(c) ** (2 / SUPERELLIPSE_N);
+  const y = cy + r * Math.sign(s) * Math.abs(s) ** (2 / SUPERELLIPSE_N);
+  return [x, y];
+}
+
+function cornerArc(cx: number, cy: number, r: number, fromDeg: number, toDeg: number): [number, number][] {
+  const pts: [number, number][] = [];
+  for (let i = 0; i <= STEPS_PER_CORNER; i++) {
+    const deg = fromDeg + ((toDeg - fromDeg) * i) / STEPS_PER_CORNER;
+    pts.push(superellipsePoint(cx, cy, r, (deg * Math.PI) / 180));
+  }
+  return pts;
+}
+
+function squirclePath(width: number, height: number, r: number): string {
+  const points = [
+    ...cornerArc(width - r, r, r, -90, 0), // top-right
+    ...cornerArc(width - r, height - r, r, 0, 90), // bottom-right
+    ...cornerArc(r, height - r, r, 90, 180), // bottom-left
+    ...cornerArc(r, r, r, 180, 270), // top-left
+  ];
+  const round = (n: number) => Math.round(n * 100) / 100;
+  const [first, ...rest] = points;
+  return [`M${round(first[0])} ${round(first[1])}`, ...rest.map(([x, y]) => `L${round(x)} ${round(y)}`), "Z"].join(" ");
+}
+
+function nativeSquircleSupported(): boolean {
+  return typeof CSS !== "undefined" && !!CSS.supports && CSS.supports("corner-shape", "squircle");
+}
 
 function applyTo(el: HTMLElement) {
   const width = el.offsetWidth;
@@ -24,8 +57,7 @@ function applyTo(el: HTMLElement) {
     return;
   }
 
-  const path = getSvgPath({ width, height, cornerRadius, cornerSmoothing: CORNER_SMOOTHING });
-  el.style.clipPath = `path('${path}')`;
+  el.style.clipPath = `path('${squirclePath(width, height, cornerRadius)}')`;
 }
 
 const tracked = new Set<HTMLElement>();
@@ -61,7 +93,7 @@ function unsweep(root: Element) {
 let started = false;
 
 export function initSquirclePolyfill() {
-  if (started || typeof document === "undefined") return;
+  if (started || typeof document === "undefined" || nativeSquircleSupported()) return;
   started = true;
 
   sweep(document.body);
