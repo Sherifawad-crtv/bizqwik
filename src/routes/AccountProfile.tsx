@@ -11,7 +11,7 @@ import { ROLE_LABELS } from "../lib/types";
 
 // Self-service photo upload/removal is turned off for the time being —
 // avatars are being set manually. Flip this back on to restore it.
-const PHOTO_EDIT_ENABLED = true;
+const PHOTO_EDIT_ENABLED = false;
 
 // Center-crop to a square, then downscale — every avatar in the app is
 // rendered as a circle via object-fit: cover, so a square source is all
