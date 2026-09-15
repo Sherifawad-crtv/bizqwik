@@ -13,6 +13,8 @@ import { ConfirmSheet } from "../components/ConfirmSheet";
 import { TextField, SelectField } from "../components/FormField";
 import { Avatar } from "../components/Avatar";
 import { Spinner } from "../components/Spinner";
+import { SheetSuccessIcon } from "../components/SheetSuccessIcon";
+import { useSheetSuccess } from "../lib/useSheetSuccess";
 import { useAuth } from "../lib/auth";
 
 type Tab = "tiers" | "bundles" | "invites" | "people";
@@ -112,6 +114,7 @@ function TierSheet({ open, tier, onClose }: { open: boolean; tier: Tier | null; 
   const [privateCutPct, setPrivateCutPct] = useState(String(tier?.privateCutPct ?? ""));
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const { confirmed, iconIn, showSuccess } = useSheetSuccess(open, onClose);
 
   useEffect(() => {
     if (open) {
@@ -141,34 +144,39 @@ function TierSheet({ open, tier, onClose }: { open: boolean; tier: Tier | null; 
     try {
       if (tier) await api.updateTier(tier.id, name.trim(), rateNum, cutNum);
       else await api.createTier(name.trim(), rateNum, cutNum);
-      onClose();
+      showSuccess();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
-    } finally {
       setBusy(false);
     }
   };
 
   return (
     <Sheet open={open} onClose={onClose}>
-      <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>{tier ? "EDIT TIER" : "NEW TIER"}</div>
-      <div style={{ font: "800 26px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 16px" }}>{tier ? tier.name : "New tier"}</div>
-      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-        <TextField label="NAME" value={name} onChange={(e) => setName(e.target.value)} placeholder="Tier 2 · Intermediate" />
-        <TextField label="RATE · EGP / SESSION" type="number" min={1} value={rate} onChange={(e) => setRate(e.target.value)} />
-        <TextField label="PRIVATE TRAINING CUT · %" type="number" min={0} max={100} value={privateCutPct} onChange={(e) => setPrivateCutPct(e.target.value)} placeholder="50" />
-      </div>
-      {error && (
-        <div style={{ marginTop: 12, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>
-          {error}
-        </div>
+      {confirmed ? (
+        <SheetSuccessIcon label={tier ? "Tier updated" : "Tier created"} iconIn={iconIn} />
+      ) : (
+        <>
+          <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>{tier ? "EDIT TIER" : "NEW TIER"}</div>
+          <div style={{ font: "800 26px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 16px" }}>{tier ? tier.name : "New tier"}</div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            <TextField label="NAME" value={name} onChange={(e) => setName(e.target.value)} placeholder="Tier 2 · Intermediate" />
+            <TextField label="RATE · EGP / SESSION" type="number" min={1} value={rate} onChange={(e) => setRate(e.target.value)} />
+            <TextField label="PRIVATE TRAINING CUT · %" type="number" min={0} max={100} value={privateCutPct} onChange={(e) => setPrivateCutPct(e.target.value)} placeholder="50" />
+          </div>
+          {error && (
+            <div style={{ marginTop: 12, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>
+              {error}
+            </div>
+          )}
+          <Button fullWidth size="lg" style={{ marginTop: 16 }} disabled={busy} onClick={save}>
+            {busy ? "Saving…" : tier ? "Save changes" : "Create tier"}
+          </Button>
+          <Button variant="secondary" fullWidth style={{ marginTop: 8 }} onClick={onClose} disabled={busy}>
+            Cancel
+          </Button>
+        </>
       )}
-      <Button fullWidth size="lg" style={{ marginTop: 16 }} disabled={busy} onClick={save}>
-        {busy ? "Saving…" : tier ? "Save changes" : "Create tier"}
-      </Button>
-      <Button variant="secondary" fullWidth style={{ marginTop: 8 }} onClick={onClose} disabled={busy}>
-        Cancel
-      </Button>
     </Sheet>
   );
 }
@@ -244,6 +252,7 @@ function BundleSheet({ open, bundleType, onClose }: { open: boolean; bundleType:
   const [expiryDays, setExpiryDays] = useState(String(bundleType?.expiryDays ?? ""));
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const { confirmed, iconIn, showSuccess } = useSheetSuccess(open, onClose);
 
   useEffect(() => {
     if (open) {
@@ -271,35 +280,40 @@ function BundleSheet({ open, bundleType, onClose }: { open: boolean; bundleType:
     try {
       if (bundleType) await api.updateBundleType(bundleType.id, name.trim(), priceNum, sessionsNum, expiryNum);
       else await api.createBundleType(name.trim(), priceNum, sessionsNum, expiryNum);
-      onClose();
+      showSuccess();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
-    } finally {
       setBusy(false);
     }
   };
 
   return (
     <Sheet open={open} onClose={onClose}>
-      <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>{bundleType ? "EDIT BUNDLE" : "NEW BUNDLE"}</div>
-      <div style={{ font: "800 26px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 16px" }}>{bundleType ? bundleType.name : "New bundle"}</div>
-      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-        <TextField label="NAME" value={name} onChange={(e) => setName(e.target.value)} placeholder="24-Session Pack" />
-        <TextField label="PRICE · EGP" type="number" min={1} value={price} onChange={(e) => setPrice(e.target.value)} />
-        <TextField label="SESSIONS INCLUDED" type="number" min={1} value={sessionsIncluded} onChange={(e) => setSessionsIncluded(e.target.value)} placeholder="24" />
-        <TextField label="EXPIRES AFTER · DAYS" type="number" min={1} value={expiryDays} onChange={(e) => setExpiryDays(e.target.value)} placeholder="45" />
-      </div>
-      {error && (
-        <div style={{ marginTop: 12, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>
-          {error}
-        </div>
+      {confirmed ? (
+        <SheetSuccessIcon label={bundleType ? "Bundle updated" : "Bundle created"} iconIn={iconIn} />
+      ) : (
+        <>
+          <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>{bundleType ? "EDIT BUNDLE" : "NEW BUNDLE"}</div>
+          <div style={{ font: "800 26px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 16px" }}>{bundleType ? bundleType.name : "New bundle"}</div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            <TextField label="NAME" value={name} onChange={(e) => setName(e.target.value)} placeholder="24-Session Pack" />
+            <TextField label="PRICE · EGP" type="number" min={1} value={price} onChange={(e) => setPrice(e.target.value)} />
+            <TextField label="SESSIONS INCLUDED" type="number" min={1} value={sessionsIncluded} onChange={(e) => setSessionsIncluded(e.target.value)} placeholder="24" />
+            <TextField label="EXPIRES AFTER · DAYS" type="number" min={1} value={expiryDays} onChange={(e) => setExpiryDays(e.target.value)} placeholder="45" />
+          </div>
+          {error && (
+            <div style={{ marginTop: 12, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>
+              {error}
+            </div>
+          )}
+          <Button fullWidth size="lg" style={{ marginTop: 16 }} disabled={busy} onClick={save}>
+            {busy ? "Saving…" : bundleType ? "Save changes" : "Create bundle"}
+          </Button>
+          <Button variant="secondary" fullWidth style={{ marginTop: 8 }} onClick={onClose} disabled={busy}>
+            Cancel
+          </Button>
+        </>
       )}
-      <Button fullWidth size="lg" style={{ marginTop: 16 }} disabled={busy} onClick={save}>
-        {busy ? "Saving…" : bundleType ? "Save changes" : "Create bundle"}
-      </Button>
-      <Button variant="secondary" fullWidth style={{ marginTop: 8 }} onClick={onClose} disabled={busy}>
-        Cancel
-      </Button>
     </Sheet>
   );
 }
@@ -375,6 +389,7 @@ function InviteSheet({ open, tiers, onClose }: { open: boolean; tiers: Tier[]; o
   const [tierId, setTierId] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const { confirmed, iconIn, showSuccess } = useSheetSuccess(open, onClose);
 
   useEffect(() => {
     if (open) {
@@ -396,48 +411,51 @@ function InviteSheet({ open, tiers, onClose }: { open: boolean; tiers: Tier[]; o
     setError(null);
     try {
       await api.createInvite(email.trim(), role, role === "accountant" ? null : tierId || null);
-      onClose();
-      setEmail("");
-      setTierId("");
+      showSuccess();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
-    } finally {
       setBusy(false);
     }
   };
 
   return (
     <Sheet open={open} onClose={onClose}>
-      <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>NEW INVITE</div>
-      <div style={{ font: "800 26px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 16px" }}>Invite someone</div>
-      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-        <TextField label="EMAIL" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@bizqwik.app" />
-        <SelectField
-          label="ROLE"
-          value={role}
-          onChange={(v) => setRole(v as Role)}
-          options={INVITABLE_ROLES.map((r) => ({ value: r, label: ROLE_LABELS[r] }))}
-        />
-        {role !== "accountant" && (
-          <SelectField
-            label="TIER"
-            value={tierId}
-            onChange={setTierId}
-            options={[{ value: "", label: "No tier yet" }, ...tiers.map((t) => ({ value: t.id, label: t.name }))]}
-          />
-        )}
-      </div>
-      {error && (
-        <div style={{ marginTop: 12, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>
-          {error}
-        </div>
+      {confirmed ? (
+        <SheetSuccessIcon label="Invite sent" iconIn={iconIn} />
+      ) : (
+        <>
+          <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>NEW INVITE</div>
+          <div style={{ font: "800 26px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 16px" }}>Invite someone</div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            <TextField label="EMAIL" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@bizqwik.app" />
+            <SelectField
+              label="ROLE"
+              value={role}
+              onChange={(v) => setRole(v as Role)}
+              options={INVITABLE_ROLES.map((r) => ({ value: r, label: ROLE_LABELS[r] }))}
+            />
+            {role !== "accountant" && (
+              <SelectField
+                label="TIER"
+                value={tierId}
+                onChange={setTierId}
+                options={[{ value: "", label: "No tier yet" }, ...tiers.map((t) => ({ value: t.id, label: t.name }))]}
+              />
+            )}
+          </div>
+          {error && (
+            <div style={{ marginTop: 12, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>
+              {error}
+            </div>
+          )}
+          <Button fullWidth size="lg" style={{ marginTop: 16 }} disabled={busy} onClick={save}>
+            {busy ? "Sending…" : "Send invite"}
+          </Button>
+          <Button variant="secondary" fullWidth style={{ marginTop: 8 }} onClick={onClose} disabled={busy}>
+            Cancel
+          </Button>
+        </>
       )}
-      <Button fullWidth size="lg" style={{ marginTop: 16 }} disabled={busy} onClick={save}>
-        {busy ? "Sending…" : "Send invite"}
-      </Button>
-      <Button variant="secondary" fullWidth style={{ marginTop: 8 }} onClick={onClose} disabled={busy}>
-        Cancel
-      </Button>
     </Sheet>
   );
 }

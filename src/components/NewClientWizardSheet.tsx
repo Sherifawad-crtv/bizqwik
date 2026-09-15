@@ -2,7 +2,9 @@ import { useEffect, useState } from "react";
 import { Sheet } from "./Sheet";
 import { Button } from "./Button";
 import { TextField, SelectField } from "./FormField";
+import { SheetSuccessIcon } from "./SheetSuccessIcon";
 import { useAsync } from "../lib/useAsync";
+import { useSheetSuccess } from "../lib/useSheetSuccess";
 import { api, MOCK } from "../lib/backend";
 import { canLog } from "../lib/types";
 import { fmt } from "../lib/format";
@@ -71,6 +73,7 @@ export function NewClientWizardSheet({ open, onClose }: { open: boolean; onClose
   const [coachId, setCoachId] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { confirmed, iconIn, showSuccess } = useSheetSuccess(open, onClose);
 
   const { data: bundleData } = useAsync(() => (open ? api.bundleTypes() : Promise.resolve(null)), [open]);
   const { data: monthData } = useAsync(() => (open ? api.month(MOCK.CURRENT_MONTH) : Promise.resolve(null)), [open]);
@@ -121,72 +124,77 @@ export function NewClientWizardSheet({ open, onClose }: { open: boolean; onClose
     setError(null);
     try {
       await api.createClient(name.trim(), age.trim() ? Number(age) : null, conditions.trim() || null, bundleTypeId, coachId);
-      onClose();
+      showSuccess();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
-    } finally {
       setBusy(false);
     }
   };
 
   return (
     <Sheet open={open} onClose={onClose}>
-      <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>STEP {step} OF 3</div>
-      <div style={{ font: "800 26px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 16px" }}>{STEP_TITLES[step - 1]}</div>
-      <StepProgress step={step} />
-
-      {step === 1 && (
+      {confirmed ? (
+        <SheetSuccessIcon label="Client created" iconIn={iconIn} />
+      ) : (
         <>
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            <TextField label="NAME" value={name} onChange={(e) => setName(e.target.value)} placeholder="Client name" />
-            <TextField label="AGE (OPTIONAL)" type="number" min={0} value={age} onChange={(e) => setAge(e.target.value)} />
-            <TextField label="CONDITIONS (OPTIONAL)" value={conditions} onChange={(e) => setConditions(e.target.value)} placeholder="Only visible to their coach and heads" />
-          </div>
-          {error && <ErrorBanner text={error} />}
-          <Button fullWidth size="lg" style={{ marginTop: 16 }} onClick={toStep2}>
-            Next: choose bundle
-          </Button>
-          <Button variant="secondary" fullWidth style={{ marginTop: 8 }} onClick={onClose}>
-            Cancel
-          </Button>
-        </>
-      )}
+          <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>STEP {step} OF 3</div>
+          <div style={{ font: "800 26px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 16px" }}>{STEP_TITLES[step - 1]}</div>
+          <StepProgress step={step} />
 
-      {step === 2 && (
-        <>
-          <SelectField
-            label="BUNDLE"
-            value={bundleTypeId}
-            onChange={setBundleTypeId}
-            placeholder="Choose a bundle"
-            options={bundleTypes.map((b) => ({ value: b.id, label: `${b.name} · ${fmt(b.price)} EGP` }))}
-          />
-          {error && <ErrorBanner text={error} />}
-          <Button fullWidth size="lg" style={{ marginTop: 16 }} onClick={toStep3}>
-            Next: assign coach
-          </Button>
-          <Button variant="secondary" fullWidth style={{ marginTop: 8 }} onClick={onClose}>
-            Cancel
-          </Button>
-        </>
-      )}
+          {step === 1 && (
+            <>
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                <TextField label="NAME" value={name} onChange={(e) => setName(e.target.value)} placeholder="Client name" />
+                <TextField label="AGE (OPTIONAL)" type="number" min={0} value={age} onChange={(e) => setAge(e.target.value)} />
+                <TextField label="CONDITIONS (OPTIONAL)" value={conditions} onChange={(e) => setConditions(e.target.value)} placeholder="Only visible to their coach and heads" />
+              </div>
+              {error && <ErrorBanner text={error} />}
+              <Button fullWidth size="lg" style={{ marginTop: 16 }} onClick={toStep2}>
+                Next: choose bundle
+              </Button>
+              <Button variant="secondary" fullWidth style={{ marginTop: 8 }} onClick={onClose}>
+                Cancel
+              </Button>
+            </>
+          )}
 
-      {step === 3 && (
-        <>
-          <SelectField
-            label="COACH"
-            value={coachId}
-            onChange={setCoachId}
-            placeholder="Choose a coach"
-            options={coachOptions.map((c) => ({ value: c.id, label: c.name }))}
-          />
-          {error && <ErrorBanner text={error} />}
-          <Button fullWidth size="lg" style={{ marginTop: 16 }} disabled={busy} onClick={finish}>
-            {busy ? "Saving…" : "Create & sell package"}
-          </Button>
-          <Button variant="secondary" fullWidth style={{ marginTop: 8 }} onClick={() => setStep(2)} disabled={busy}>
-            Back
-          </Button>
+          {step === 2 && (
+            <>
+              <SelectField
+                label="BUNDLE"
+                value={bundleTypeId}
+                onChange={setBundleTypeId}
+                placeholder="Choose a bundle"
+                options={bundleTypes.map((b) => ({ value: b.id, label: `${b.name} · ${fmt(b.price)} EGP` }))}
+              />
+              {error && <ErrorBanner text={error} />}
+              <Button fullWidth size="lg" style={{ marginTop: 16 }} onClick={toStep3}>
+                Next: assign coach
+              </Button>
+              <Button variant="secondary" fullWidth style={{ marginTop: 8 }} onClick={onClose}>
+                Cancel
+              </Button>
+            </>
+          )}
+
+          {step === 3 && (
+            <>
+              <SelectField
+                label="COACH"
+                value={coachId}
+                onChange={setCoachId}
+                placeholder="Choose a coach"
+                options={coachOptions.map((c) => ({ value: c.id, label: c.name }))}
+              />
+              {error && <ErrorBanner text={error} />}
+              <Button fullWidth size="lg" style={{ marginTop: 16 }} disabled={busy} onClick={finish}>
+                {busy ? "Saving…" : "Create & sell package"}
+              </Button>
+              <Button variant="secondary" fullWidth style={{ marginTop: 8 }} onClick={() => setStep(2)} disabled={busy}>
+                Back
+              </Button>
+            </>
+          )}
         </>
       )}
     </Sheet>

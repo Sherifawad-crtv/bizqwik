@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Sheet } from "./Sheet";
 import { Button } from "./Button";
+import { SheetSuccessIcon } from "./SheetSuccessIcon";
+import { useSheetSuccess } from "../lib/useSheetSuccess";
 
 interface ConfirmSheetProps {
   open: boolean;
@@ -16,36 +18,47 @@ interface ConfirmSheetProps {
 export function ConfirmSheet({ open, onClose, kicker, title, sub, confirmLabel, danger, onConfirm }: ConfirmSheetProps) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { confirmed, iconIn, showSuccess, cancelPending } = useSheetSuccess(open, onClose);
 
   const go = async () => {
     setBusy(true);
     setError(null);
     try {
       await onConfirm();
-      onClose();
+      showSuccess();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
-    } finally {
       setBusy(false);
     }
   };
 
+  const handleClose = () => {
+    cancelPending();
+    onClose();
+  };
+
   return (
-    <Sheet open={open} onClose={onClose}>
-      <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>{kicker}</div>
-      <div style={{ font: "800 26px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 4px" }}>{title}</div>
-      {sub && <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-muted)", marginBottom: 16 }}>{sub}</div>}
-      {error && (
-        <div style={{ marginBottom: 12, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>
-          {error}
-        </div>
+    <Sheet open={open} onClose={handleClose}>
+      {confirmed ? (
+        <SheetSuccessIcon label={confirmLabel} iconIn={iconIn} danger={danger} />
+      ) : (
+        <>
+          <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>{kicker}</div>
+          <div style={{ font: "800 26px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 4px" }}>{title}</div>
+          {sub && <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-muted)", marginBottom: 16 }}>{sub}</div>}
+          {error && (
+            <div style={{ marginBottom: 12, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>
+              {error}
+            </div>
+          )}
+          <Button variant={danger ? "danger" : "primary"} fullWidth size="lg" disabled={busy} onClick={go}>
+            {busy ? "Working…" : confirmLabel}
+          </Button>
+          <Button variant="quiet" fullWidth style={{ marginTop: 8 }} onClick={handleClose} disabled={busy}>
+            Cancel
+          </Button>
+        </>
       )}
-      <Button variant={danger ? "danger" : "primary"} fullWidth size="lg" disabled={busy} onClick={go}>
-        {busy ? "Working…" : confirmLabel}
-      </Button>
-      <Button variant="quiet" fullWidth style={{ marginTop: 8 }} onClick={onClose} disabled={busy}>
-        Cancel
-      </Button>
     </Sheet>
   );
 }

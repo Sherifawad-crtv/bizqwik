@@ -3,6 +3,8 @@ import { Sheet } from "./Sheet";
 import { DateField } from "./DateField";
 import { Stepper } from "./Stepper";
 import { Button } from "./Button";
+import { SheetSuccessIcon } from "./SheetSuccessIcon";
+import { useSheetSuccess } from "../lib/useSheetSuccess";
 import { api } from "../lib/backend";
 import { daysInMonth, egp, isoDate, monthLabel, todayIso } from "../lib/format";
 
@@ -32,6 +34,7 @@ export function AddSessionSheet({ open, onClose, coachId, coachName, month, rate
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [savedCount, setSavedCount] = useState<number | null>(null);
+  const { confirmed, iconIn, showSuccess } = useSheetSuccess(open, onClose);
 
   useEffect(() => {
     if (open) {
@@ -53,7 +56,7 @@ export function AddSessionSheet({ open, onClose, coachId, coachName, month, rate
         await api.addSession(coachId, month, date);
         done += 1;
       }
-      onClose();
+      showSuccess();
     } catch (err) {
       setSavedCount(done);
       setError(
@@ -68,36 +71,42 @@ export function AddSessionSheet({ open, onClose, coachId, coachName, month, rate
 
   return (
     <Sheet open={open} onClose={onClose}>
-      <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>NEW ENTRY</div>
-      <div style={{ font: "800 30px/1.1 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 4px" }}>Log a session</div>
-      <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-muted)", marginBottom: 16 }}>
-        {coachName ? `Adds to ${coachName}'s ${monthLabel(month)} total.` : `Adds to your ${monthLabel(month)} total.`}
-      </div>
+      {confirmed ? (
+        <SheetSuccessIcon label={`Added ${qty} ${qty === 1 ? "session" : "sessions"} · ${egp(qty * rate)}`} iconIn={iconIn} />
+      ) : (
+        <>
+          <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>NEW ENTRY</div>
+          <div style={{ font: "800 30px/1.1 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 4px" }}>Log a session</div>
+          <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-muted)", marginBottom: 16 }}>
+            {coachName ? `Adds to ${coachName}'s ${monthLabel(month)} total.` : `Adds to your ${monthLabel(month)} total.`}
+          </div>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-        <DateField value={date} min={min} max={max} onChange={setDate} />
-        <Stepper value={qty} onChange={setQty} />
-        <div style={{ display: "flex", alignItems: "baseline", gap: 10, padding: "6px 6px 0" }}>
-          <span style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>ADDS</span>
-          <span className="tabular" style={{ marginLeft: "auto", font: "800 30px var(--font-body)", letterSpacing: "-.02em", color: "var(--primary)" }}>
-            +{qty * rate}
-          </span>
-          <span style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--primary)" }}>EGP</span>
-        </div>
-      </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            <DateField value={date} min={min} max={max} onChange={setDate} />
+            <Stepper value={qty} onChange={setQty} />
+            <div style={{ display: "flex", alignItems: "baseline", gap: 10, padding: "6px 6px 0" }}>
+              <span style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>ADDS</span>
+              <span className="tabular" style={{ marginLeft: "auto", font: "800 30px var(--font-body)", letterSpacing: "-.02em", color: "var(--primary)" }}>
+                +{qty * rate}
+              </span>
+              <span style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--primary)" }}>EGP</span>
+            </div>
+          </div>
 
-      {error && (
-        <div style={{ marginTop: 12, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>
-          {error}
-        </div>
+          {error && (
+            <div style={{ marginTop: 12, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>
+              {error}
+            </div>
+          )}
+
+          <Button fullWidth size="lg" style={{ marginTop: 16 }} onClick={confirm} disabled={saving}>
+            {saving ? "Saving…" : `Add ${qty} ${qty === 1 ? "session" : "sessions"} · ${egp(qty * rate)}`}
+          </Button>
+          <Button fullWidth variant="secondary" style={{ marginTop: 8 }} onClick={onClose} disabled={saving}>
+            {savedCount !== null && savedCount > 0 ? "Close" : "Cancel"}
+          </Button>
+        </>
       )}
-
-      <Button fullWidth size="lg" style={{ marginTop: 16 }} onClick={confirm} disabled={saving}>
-        {saving ? "Saving…" : `Add ${qty} ${qty === 1 ? "session" : "sessions"} · ${egp(qty * rate)}`}
-      </Button>
-      <Button fullWidth variant="secondary" style={{ marginTop: 8 }} onClick={onClose} disabled={saving}>
-        {savedCount !== null && savedCount > 0 ? "Close" : "Cancel"}
-      </Button>
     </Sheet>
   );
 }
