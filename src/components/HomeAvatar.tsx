@@ -1,10 +1,17 @@
 import { NavLink } from "react-router-dom";
 import { Avatar } from "./Avatar";
+import { useIsMobile } from "../lib/useIsMobile";
 
-/** The one place the avatar lives now — blended into each role's home
- * screen instead of a persistent header bar. Taps into the account stack.
- * `greeting`, where given, sits opposite the avatar as a big headline. */
+/** The one place the avatar (and its greeting) lives — mobile only, blended
+ * into each role's home screen instead of a persistent header bar, tapping
+ * into the account stack. On desktop the sidebar already shows the avatar
+ * (and links to /account) and the page has its own heading, so this
+ * renders nothing there. `greeting` sits opposite the avatar as a
+ * headline. */
 export function HomeAvatar({ name, avatarUrl, greeting }: { name: string; avatarUrl: string | null; greeting?: string }) {
+  const isMobile = useIsMobile();
+  if (!isMobile) return null;
+
   return (
     <div style={{ display: "flex", alignItems: "center", justifyContent: greeting ? "space-between" : "flex-end", gap: 12, marginBottom: 28 }}>
       {greeting && (
