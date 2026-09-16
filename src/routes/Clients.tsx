@@ -486,6 +486,7 @@ function ClientDetailSheet({
       showSuccess();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
+    } finally {
       setBusy(false);
     }
   };
@@ -500,6 +501,7 @@ function ClientDetailSheet({
       showSuccess();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
+    } finally {
       setBusy(false);
     }
   };
@@ -676,6 +678,7 @@ function ClientEditSheet({ open, client, onClose }: { open: boolean; client: Cli
       showSuccess();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
+    } finally {
       setBusy(false);
     }
   };

@@ -127,6 +127,7 @@ export function NewClientWizardSheet({ open, onClose }: { open: boolean; onClose
       showSuccess();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
+    } finally {
       setBusy(false);
     }
   };

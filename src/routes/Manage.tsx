@@ -147,6 +147,7 @@ function TierSheet({ open, tier, onClose }: { open: boolean; tier: Tier | null; 
       showSuccess();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
+    } finally {
       setBusy(false);
     }
   };
@@ -283,6 +284,7 @@ function BundleSheet({ open, bundleType, onClose }: { open: boolean; bundleType:
       showSuccess();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
+    } finally {
       setBusy(false);
     }
   };
@@ -414,6 +416,7 @@ function InviteSheet({ open, tiers, onClose }: { open: boolean; tiers: Tier[]; o
       showSuccess();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
+    } finally {
       setBusy(false);
     }
   };

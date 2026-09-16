@@ -28,6 +28,7 @@ export function ConfirmSheet({ open, onClose, kicker, title, sub, confirmLabel, 
       showSuccess();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
+    } finally {
       setBusy(false);
     }
   };
