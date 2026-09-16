@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { playSuccessChime } from "./sound";
 
 // How long the success icon holds before the sheet auto-dismisses — long
 // enough to register as a deliberate confirmation, short enough not to feel
@@ -34,6 +35,7 @@ export function useSheetSuccess(open: boolean, onClose: () => void) {
 
   const showSuccess = () => {
     setConfirmed(true);
+    playSuccessChime();
     // Two rAFs so the "scaled down" starting state actually paints before
     // transitioning — same technique used for the route-push animation.
     frame1.current = requestAnimationFrame(() => {
