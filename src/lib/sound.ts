@@ -31,30 +31,35 @@ if (typeof window !== "undefined") {
 }
 
 // A quiet octave-up partial layered under each note's fundamental gives it a
-// soft bell-like warmth without the long single-note "ring" of a struck
-// bell — this is a quick two-note confirmation chime, Apple Pay/App
-// Store-style, not a chapel bell.
+// touch of soft sparkle without the long single-note "ring" of a struck
+// bell. The gentle attack-then-brief-hold (rather than an instant peak) is
+// what keeps the tone feeling warm and inviting instead of a sharp digital
+// beep — this is meant to sound like a friendly nudge, not a bank chime.
 function note(audioCtx: AudioContext, freq: number, start: number, duration: number, peakGain: number) {
   const play = (f: number, gainScale: number, decayScale: number) => {
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
     osc.type = "sine";
     osc.frequency.value = f;
+    const peak = peakGain * gainScale;
     gain.gain.setValueAtTime(0, start);
-    gain.gain.linearRampToValueAtTime(peakGain * gainScale, start + 0.012);
+    gain.gain.linearRampToValueAtTime(peak, start + 0.02);
+    gain.gain.setValueAtTime(peak, start + 0.05);
     gain.gain.exponentialRampToValueAtTime(0.0001, start + duration * decayScale);
     osc.connect(gain).connect(audioCtx.destination);
     osc.start(start);
     osc.stop(start + duration + 0.02);
   };
   play(freq, 1, 1);
-  play(freq * 2, 0.22, 0.55);
+  play(freq * 2, 0.16, 0.5);
 }
 
-/** Plays a soft two-note confirmation chime alongside the sheet success
- * icon. Synthesized with the Web Audio API — no shipped audio asset.
- * Silently no-ops if audio is unavailable or blocked — it's a nice-to-have
- * and must never break the confirmation flow itself. */
+/** Plays a warm, friendly two-note confirmation chime alongside the sheet
+ * success icon. Synthesized with the Web Audio API — no shipped audio
+ * asset. A rising major third (rather than a fifth) is the interval that
+ * reads as cheerful instead of neutral/official. Silently no-ops if audio
+ * is unavailable or blocked — it's a nice-to-have and must never break the
+ * confirmation flow itself. */
 export function playSuccessChime() {
   try {
     const audioCtx = getContext();
@@ -62,8 +67,8 @@ export function playSuccessChime() {
     if (audioCtx.state === "suspended") audioCtx.resume().catch(() => {});
 
     const now = audioCtx.currentTime;
-    note(audioCtx, 830.61, now, 0.16, 0.16); // G#5
-    note(audioCtx, 1244.51, now + 0.085, 0.22, 0.14); // D#6, a fifth up
+    note(audioCtx, 587.33, now, 0.2, 0.15); // D5
+    note(audioCtx, 739.99, now + 0.07, 0.26, 0.15); // F#5, a friendly major third up
   } catch {
     // never let a sound glitch break the confirmation flow
   }
