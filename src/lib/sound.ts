@@ -1,18 +1,4 @@
 type AudioContextCtor = typeof AudioContext;
-type BellPartial = { ratio: number; gain: number; decay: number };
-
-const FUNDAMENTAL = 660; // E5 — soft, not shrill
-
-// A handful of slightly-inharmonic partials, each fading at its own rate, is
-// what makes a struck bell shimmer instead of sounding like a flat test
-// tone — real bells are a fundamental plus overtones that ring out and
-// decay at different speeds, not a single pure sine.
-const BELL_PARTIALS: BellPartial[] = [
-  { ratio: 1, gain: 0.22, decay: 1.1 },
-  { ratio: 2, gain: 0.12, decay: 0.85 },
-  { ratio: 2.76, gain: 0.07, decay: 0.6 },
-  { ratio: 4.07, gain: 0.045, decay: 0.4 },
-];
 
 let ctx: AudioContext | null = null;
 
@@ -44,10 +30,31 @@ if (typeof window !== "undefined") {
   window.addEventListener("pointerdown", tryUnlock, { passive: true });
 }
 
-/** Plays a soft struck-bell chime alongside the sheet success icon.
- * Synthesized with the Web Audio API — no shipped audio asset. Silently
- * no-ops if audio is unavailable or blocked — it's a nice-to-have and must
- * never break the confirmation flow itself. */
+// A quiet octave-up partial layered under each note's fundamental gives it a
+// soft bell-like warmth without the long single-note "ring" of a struck
+// bell — this is a quick two-note confirmation chime, Apple Pay/App
+// Store-style, not a chapel bell.
+function note(audioCtx: AudioContext, freq: number, start: number, duration: number, peakGain: number) {
+  const play = (f: number, gainScale: number, decayScale: number) => {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = "sine";
+    osc.frequency.value = f;
+    gain.gain.setValueAtTime(0, start);
+    gain.gain.linearRampToValueAtTime(peakGain * gainScale, start + 0.012);
+    gain.gain.exponentialRampToValueAtTime(0.0001, start + duration * decayScale);
+    osc.connect(gain).connect(audioCtx.destination);
+    osc.start(start);
+    osc.stop(start + duration + 0.02);
+  };
+  play(freq, 1, 1);
+  play(freq * 2, 0.22, 0.55);
+}
+
+/** Plays a soft two-note confirmation chime alongside the sheet success
+ * icon. Synthesized with the Web Audio API — no shipped audio asset.
+ * Silently no-ops if audio is unavailable or blocked — it's a nice-to-have
+ * and must never break the confirmation flow itself. */
 export function playSuccessChime() {
   try {
     const audioCtx = getContext();
@@ -55,22 +62,8 @@ export function playSuccessChime() {
     if (audioCtx.state === "suspended") audioCtx.resume().catch(() => {});
 
     const now = audioCtx.currentTime;
-    const master = audioCtx.createGain();
-    master.gain.value = 0.5;
-    master.connect(audioCtx.destination);
-
-    for (const { ratio, gain, decay } of BELL_PARTIALS) {
-      const osc = audioCtx.createOscillator();
-      const env = audioCtx.createGain();
-      osc.type = "sine";
-      osc.frequency.value = FUNDAMENTAL * ratio;
-      env.gain.setValueAtTime(0, now);
-      env.gain.linearRampToValueAtTime(gain, now + 0.008);
-      env.gain.exponentialRampToValueAtTime(0.0001, now + decay);
-      osc.connect(env).connect(master);
-      osc.start(now);
-      osc.stop(now + decay + 0.05);
-    }
+    note(audioCtx, 830.61, now, 0.16, 0.16); // G#5
+    note(audioCtx, 1244.51, now + 0.085, 0.22, 0.14); // D#6, a fifth up
   } catch {
     // never let a sound glitch break the confirmation flow
   }
