@@ -48,19 +48,22 @@ export async function currentPushSubscription(): Promise<PushSubscription | null
   return reg.pushManager.getSubscription();
 }
 
-/** Checks the browser-level subscription and, if one exists, re-registers
- * it with the backend under whichever profile is currently signed in.
- * Needed because a push subscription lives at the browser/OS level, scoped
- * to this site — not to which app account is logged in. Without this,
- * switching accounts on the same device (e.g. testing as dept_head, then as
- * a coach) shows the toggle as already "on" while the newly-logged-in
- * profile was never actually registered server-side, so it never receives
- * anything. Cheap to call on every mount — the backend write is a no-op
- * upsert when nothing's changed. */
-export async function syncPushSubscription(): Promise<PushSubscription | null> {
-  const sub = await currentPushSubscription();
-  if (sub) await api.pushSubscribe(sub.toJSON());
-  return sub;
+/** Re-registers the browser-level subscription (if one exists) with the
+ * backend under whichever profile is currently signed in — fired in the
+ * background, never awaited by callers. Needed because a push subscription
+ * lives at the browser/OS level, scoped to this site, not to which app
+ * account is logged in: switching accounts on the same device (e.g. testing
+ * as dept_head, then as a coach) otherwise leaves the newly-logged-in
+ * profile never actually registered server-side, so it never receives
+ * anything. Deliberately not part of the on/off read callers use for the
+ * toggle's initial state — gating that on this network round-trip is what
+ * made the switch visibly flip from off to on a moment after the screen
+ * opened. The backend write is a no-op upsert when nothing's changed, so
+ * firing it on every mount is cheap. */
+export function syncPushSubscriptionInBackground(): void {
+  currentPushSubscription().then((sub) => {
+    if (sub) void api.pushSubscribe(sub.toJSON()).catch(() => {});
+  });
 }
 
 /** Asks for notification permission (if not already decided), subscribes

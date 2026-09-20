@@ -116,7 +116,6 @@ export const api = {
   pushVapidPublicKey: () => callFn<{ publicKey: string }>("push/vapid-public-key"),
   pushSubscribe: (sub: PushSubscriptionJSON) => callFn<void>("push/subscribe", { method: "POST", body: sub as Record<string, unknown> }),
   pushUnsubscribe: (endpoint: string) => callFn<void>("push/unsubscribe", { method: "POST", body: { endpoint } }),
-  pushTest: () => callFn<{ results: { endpoint: string; ok: boolean; statusCode?: number; message?: string }[] }>("push/test", { method: "POST" }),
 };
 
 function monthKey(d: Date): string {

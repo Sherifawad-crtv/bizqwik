@@ -6,8 +6,7 @@ import { Avatar } from "../components/Avatar";
 import { Button } from "../components/Button";
 import { Icon, type IconName } from "../components/Icon";
 import { ROLE_LABELS } from "../lib/types";
-import { disablePush, enablePush, isIOS, isStandalone, pushSupported, syncPushSubscription } from "../lib/push";
-import { api } from "../lib/backend";
+import { currentPushSubscription, disablePush, enablePush, isIOS, isStandalone, pushSupported, syncPushSubscriptionInBackground } from "../lib/push";
 
 export function Account() {
   const { profile, logout } = useAuth();
@@ -45,11 +44,15 @@ export function Account() {
 
 function NotificationsRow() {
   const [on, setOn] = useState(false);
+  // Guards the switch's slide animation from playing on mount — without it,
+  // the initial on/off read (however fast) still lands one render after the
+  // default `false`, and the CSS transition turns that into a visible flip
+  // the instant the screen opens. Once the real state is known, later
+  // transitions are real user-initiated toggles and should animate.
+  const [initialized, setInitialized] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [supported, setSupported] = useState(true);
-  const [testStatus, setTestStatus] = useState<string | null>(null);
-  const [testBusy, setTestBusy] = useState(false);
   const ios = isIOS();
   const standalone = isStandalone();
   const needsHomeScreenInstall = ios && !standalone && !pushSupported();
@@ -64,13 +67,19 @@ function NotificationsRow() {
       setSupported(false);
       return;
     }
-    syncPushSubscription().then((sub) => setOn(!!sub));
+    currentPushSubscription().then((sub) => {
+      setOn(!!sub);
+      setInitialized(true);
+    });
+    // Re-registers this device's subscription under whoever's signed in
+    // right now — fired in the background, not gating the toggle's state
+    // above (that's what used to cause the flicker).
+    syncPushSubscriptionInBackground();
   }, []);
 
   const toggle = async () => {
     setBusy(true);
     setError(null);
-    setTestStatus(null);
     try {
       if (on) {
         await disablePush();
@@ -83,20 +92,6 @@ function NotificationsRow() {
       setError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
       setBusy(false);
-    }
-  };
-
-  const sendTest = async () => {
-    setTestBusy(true);
-    setTestStatus(null);
-    try {
-      const { results } = await api.pushTest();
-      const failed = results.filter((r) => !r.ok);
-      setTestStatus(failed.length === 0 ? "Sent — check your notifications." : `Sent, but ${failed.length} of ${results.length} device(s) failed.`);
-    } catch (err) {
-      setTestStatus(err instanceof Error ? err.message : "Something went wrong.");
-    } finally {
-      setTestBusy(false);
     }
   };
 
@@ -153,7 +148,7 @@ function NotificationsRow() {
             background: on ? "var(--primary)" : "var(--sunken)",
             border: on ? "none" : "1px solid var(--line)",
             position: "relative",
-            transition: "background .2s ease",
+            transition: initialized ? "background .2s ease" : "none",
             opacity: busy ? 0.6 : 1,
           }}
         >
@@ -167,7 +162,7 @@ function NotificationsRow() {
               borderRadius: 999,
               background: "var(--surface)",
               boxShadow: "0 1px 3px rgba(0,0,0,.25)",
-              transition: "left .2s ease",
+              transition: initialized ? "left .2s ease" : "none",
             }}
           />
         </span>
@@ -175,18 +170,6 @@ function NotificationsRow() {
       {error && (
         <div style={{ margin: "0 16px 12px", font: "600 12px/1.4 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 10, padding: "8px 10px" }}>
           {error}
-        </div>
-      )}
-      {on && (
-        <div style={{ padding: "0 16px 12px" }}>
-          <button
-            onClick={sendTest}
-            disabled={testBusy}
-            style={{ border: 0, background: "none", padding: 0, cursor: testBusy ? "default" : "pointer", font: "700 13px var(--font-body)", color: "var(--primary)" }}
-          >
-            {testBusy ? "Sending…" : "Send test notification"}
-          </button>
-          {testStatus && <div style={{ marginTop: 6, font: "500 12px/1.4 var(--font-body)", color: "var(--ink-muted)" }}>{testStatus}</div>}
         </div>
       )}
     </div>
