@@ -25,6 +25,7 @@ import { InboxIcon } from "@solar-icons/react/linear/inbox";
 import { TagIcon } from "@solar-icons/react/linear/tag";
 import { LetterIcon } from "@solar-icons/react/linear/letter";
 import { MenuDotsIcon } from "@solar-icons/react/linear/menu-dots";
+import { BellIcon } from "@solar-icons/react/linear/bell";
 import { WalletIcon as WalletIconBold } from "@solar-icons/react/bold-duotone/wallet";
 import { HomeSmileIcon as HomeSmileIconBold } from "@solar-icons/react/bold-duotone/home-smile";
 import { ChartSquareIcon as ChartSquareIconBold } from "@solar-icons/react/bold-duotone/chart-square";
@@ -51,6 +52,7 @@ import { InboxIcon as InboxIconBold } from "@solar-icons/react/bold-duotone/inbo
 import { TagIcon as TagIconBold } from "@solar-icons/react/bold-duotone/tag";
 import { LetterIcon as LetterIconBold } from "@solar-icons/react/bold-duotone/letter";
 import { MenuDotsIcon as MenuDotsIconBold } from "@solar-icons/react/bold-duotone/menu-dots";
+import { BellIcon as BellIconBold } from "@solar-icons/react/bold-duotone/bell";
 
 export type IconName =
   | "home"
@@ -78,7 +80,8 @@ export type IconName =
   | "inbox"
   | "tag"
   | "envelope"
-  | "menu";
+  | "menu"
+  | "bell";
 
 const LINEAR = {
   home: HomeSmileIcon,
@@ -107,6 +110,7 @@ const LINEAR = {
   tag: TagIcon,
   envelope: LetterIcon,
   menu: MenuDotsIcon,
+  bell: BellIcon,
 } satisfies Record<IconName, typeof WalletIcon>;
 
 const BOLD = {
@@ -136,6 +140,7 @@ const BOLD = {
   tag: TagIconBold,
   envelope: LetterIconBold,
   menu: MenuDotsIconBold,
+  bell: BellIconBold,
 } satisfies Record<IconName, typeof WalletIconBold>;
 
 export function Icon({

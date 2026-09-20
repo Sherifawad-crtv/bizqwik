@@ -8,6 +8,7 @@ import { Shell } from "./components/Shell";
 import { initSquirclePolyfill } from "./lib/squircle";
 
 import { Login } from "./routes/Login";
+import { Signup } from "./routes/Signup";
 import { ForgotPassword } from "./routes/ForgotPassword";
 import { ResetPassword } from "./routes/ResetPassword";
 import { Home } from "./routes/Home";
@@ -35,6 +36,7 @@ export default function App() {
           <OwnMonthProvider>
             <Routes>
               <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/reset-password" element={<ResetPassword />} />
 

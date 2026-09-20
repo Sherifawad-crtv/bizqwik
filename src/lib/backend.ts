@@ -54,6 +54,9 @@ export const auth = {
 };
 
 export const api = {
+  signup: (email: string, password: string) =>
+    callFn<{ profile: Profile }>("signup", { method: "POST", body: { email, password } }),
+
   me: () => callFn<{ profile: Profile; tier: Tier | null }>("me"),
   updateMe: (name: string) => callFn<{ profile: Profile }>("me/update", { method: "POST", body: { name } }),
   updateAvatar: (avatarUrl: string | null) => callFn<{ profile: Profile }>("me/update", { method: "POST", body: { avatarUrl } }),
@@ -109,6 +112,10 @@ export const api = {
   settle: (coachId: string, month: string) => callFn<void>("settle", { method: "POST", body: { coachId, month } }),
   reopen: (coachId: string, month: string) => callFn<void>("reopen", { method: "POST", body: { coachId, month } }),
   pay: (coachId: string, month: string) => callFn<void>("pay", { method: "POST", body: { coachId, month } }),
+
+  pushVapidPublicKey: () => callFn<{ publicKey: string }>("push/vapid-public-key"),
+  pushSubscribe: (sub: PushSubscriptionJSON) => callFn<void>("push/subscribe", { method: "POST", body: sub as Record<string, unknown> }),
+  pushUnsubscribe: (endpoint: string) => callFn<void>("push/unsubscribe", { method: "POST", body: { endpoint } }),
 };
 
 function monthKey(d: Date): string {
