@@ -48,6 +48,21 @@ export async function currentPushSubscription(): Promise<PushSubscription | null
   return reg.pushManager.getSubscription();
 }
 
+/** Checks the browser-level subscription and, if one exists, re-registers
+ * it with the backend under whichever profile is currently signed in.
+ * Needed because a push subscription lives at the browser/OS level, scoped
+ * to this site — not to which app account is logged in. Without this,
+ * switching accounts on the same device (e.g. testing as dept_head, then as
+ * a coach) shows the toggle as already "on" while the newly-logged-in
+ * profile was never actually registered server-side, so it never receives
+ * anything. Cheap to call on every mount — the backend write is a no-op
+ * upsert when nothing's changed. */
+export async function syncPushSubscription(): Promise<PushSubscription | null> {
+  const sub = await currentPushSubscription();
+  if (sub) await api.pushSubscribe(sub.toJSON());
+  return sub;
+}
+
 /** Asks for notification permission (if not already decided), subscribes
  * this device, and registers the subscription with the backend. Throws with
  * a readable message on denial/failure so the caller can surface it. */

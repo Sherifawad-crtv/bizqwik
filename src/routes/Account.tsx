@@ -6,7 +6,8 @@ import { Avatar } from "../components/Avatar";
 import { Button } from "../components/Button";
 import { Icon, type IconName } from "../components/Icon";
 import { ROLE_LABELS } from "../lib/types";
-import { currentPushSubscription, disablePush, enablePush, isIOS, isStandalone, pushSupported } from "../lib/push";
+import { disablePush, enablePush, isIOS, isStandalone, pushSupported, syncPushSubscription } from "../lib/push";
+import { api } from "../lib/backend";
 
 export function Account() {
   const { profile, logout } = useAuth();
@@ -47,6 +48,8 @@ function NotificationsRow() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [supported, setSupported] = useState(true);
+  const [testStatus, setTestStatus] = useState<string | null>(null);
+  const [testBusy, setTestBusy] = useState(false);
   const ios = isIOS();
   const standalone = isStandalone();
   const needsHomeScreenInstall = ios && !standalone && !pushSupported();
@@ -61,12 +64,13 @@ function NotificationsRow() {
       setSupported(false);
       return;
     }
-    currentPushSubscription().then((sub) => setOn(!!sub));
+    syncPushSubscription().then((sub) => setOn(!!sub));
   }, []);
 
   const toggle = async () => {
     setBusy(true);
     setError(null);
+    setTestStatus(null);
     try {
       if (on) {
         await disablePush();
@@ -79,6 +83,20 @@ function NotificationsRow() {
       setError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
       setBusy(false);
+    }
+  };
+
+  const sendTest = async () => {
+    setTestBusy(true);
+    setTestStatus(null);
+    try {
+      const { results } = await api.pushTest();
+      const failed = results.filter((r) => !r.ok);
+      setTestStatus(failed.length === 0 ? "Sent — check your notifications." : `Sent, but ${failed.length} of ${results.length} device(s) failed.`);
+    } catch (err) {
+      setTestStatus(err instanceof Error ? err.message : "Something went wrong.");
+    } finally {
+      setTestBusy(false);
     }
   };
 
@@ -157,6 +175,18 @@ function NotificationsRow() {
       {error && (
         <div style={{ margin: "0 16px 12px", font: "600 12px/1.4 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 10, padding: "8px 10px" }}>
           {error}
+        </div>
+      )}
+      {on && (
+        <div style={{ padding: "0 16px 12px" }}>
+          <button
+            onClick={sendTest}
+            disabled={testBusy}
+            style={{ border: 0, background: "none", padding: 0, cursor: testBusy ? "default" : "pointer", font: "700 13px var(--font-body)", color: "var(--primary)" }}
+          >
+            {testBusy ? "Sending…" : "Send test notification"}
+          </button>
+          {testStatus && <div style={{ marginTop: 6, font: "500 12px/1.4 var(--font-body)", color: "var(--ink-muted)" }}>{testStatus}</div>}
         </div>
       )}
     </div>
