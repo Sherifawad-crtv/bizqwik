@@ -48,6 +48,36 @@ export async function currentPushSubscription(): Promise<PushSubscription | null
   return reg.pushManager.getSubscription();
 }
 
+// Module-level cache of the (inherently async) subscription check. Account
+// unmounts/remounts every time you navigate away and back, which used to
+// mean re-running that check from scratch and re-showing the toggle's
+// default state while it resolved — this survives remounts, so a screen
+// that mounts after the check has already run once gets the right answer
+// on its very first render with nothing left to correct.
+let primed: Promise<PushSubscription | null> | null = null;
+let cachedOn = false;
+
+function prime(): Promise<PushSubscription | null> {
+  if (!primed) {
+    primed = currentPushSubscription().then((sub) => {
+      cachedOn = !!sub;
+      return sub;
+    });
+  }
+  return primed;
+}
+
+/** Kicks off (and memoizes) the subscription check — call this as early as
+ * possible, e.g. right after login, so cachedPushOn() already has the right
+ * answer by the time a toggle needs to render it. */
+export function primePushState(): Promise<PushSubscription | null> {
+  return prime();
+}
+
+export function cachedPushOn(): boolean {
+  return cachedOn;
+}
+
 /** Re-registers the browser-level subscription (if one exists) with the
  * backend under whichever profile is currently signed in — fired in the
  * background, never awaited by callers. Needed because a push subscription
@@ -55,10 +85,7 @@ export async function currentPushSubscription(): Promise<PushSubscription | null
  * account is logged in: switching accounts on the same device (e.g. testing
  * as dept_head, then as a coach) otherwise leaves the newly-logged-in
  * profile never actually registered server-side, so it never receives
- * anything. Deliberately not part of the on/off read callers use for the
- * toggle's initial state — gating that on this network round-trip is what
- * made the switch visibly flip from off to on a moment after the screen
- * opened. The backend write is a no-op upsert when nothing's changed, so
+ * anything. The backend write is a no-op upsert when nothing's changed, so
  * firing it on every mount is cheap. */
 export function syncPushSubscriptionInBackground(): void {
   currentPushSubscription().then((sub) => {
@@ -85,12 +112,33 @@ export async function enablePush(): Promise<void> {
     });
   }
   await api.pushSubscribe(sub.toJSON());
+  cachedOn = true;
 }
 
 export async function disablePush(): Promise<void> {
   const sub = await currentPushSubscription();
-  if (!sub) return;
+  if (!sub) {
+    cachedOn = false;
+    return;
+  }
   const endpoint = sub.endpoint;
   await sub.unsubscribe();
   await api.pushUnsubscribe(endpoint);
+  cachedOn = false;
+}
+
+/** Turns push on automatically as soon as it's allowed to — call this once
+ * the signed-in user's profile is known (app boot and right after login) —
+ * so notifications start flowing without anyone having to find the Account
+ * screen toggle. A no-op when unsupported (e.g. iOS outside an installed
+ * PWA) or once the browser's permission prompt has already been denied —
+ * browsers never re-prompt after a denial, so this never nags, and
+ * re-requesting an already-decided permission just resolves instantly with
+ * that decision, so it's safe to call on every login. */
+export function autoEnablePushIfPossible(): void {
+  if (!pushSupported() || Notification.permission === "denied") return;
+  prime().then((sub) => {
+    if (sub) return;
+    enablePush().catch(() => {});
+  });
 }

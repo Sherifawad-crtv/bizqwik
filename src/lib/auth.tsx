@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { api, auth as authApi } from "./backend";
+import { autoEnablePushIfPossible } from "./push";
 import type { Profile, Tier } from "./types";
 
 interface AuthState {
@@ -31,6 +32,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       })
       .finally(() => setReady(true));
   }, []);
+
+  // Turns push on the moment we know who's signed in — on initial load and
+  // right after login — so notifications start flowing without anyone
+  // having to find the Account screen toggle.
+  useEffect(() => {
+    if (profile) autoEnablePushIfPossible();
+  }, [profile?.id]);
 
   const login = async (email: string, password: string) => {
     await authApi.signInWithPassword(email, password);

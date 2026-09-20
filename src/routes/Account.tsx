@@ -6,7 +6,7 @@ import { Avatar } from "../components/Avatar";
 import { Button } from "../components/Button";
 import { Icon, type IconName } from "../components/Icon";
 import { ROLE_LABELS } from "../lib/types";
-import { currentPushSubscription, disablePush, enablePush, isIOS, isStandalone, pushSupported, syncPushSubscriptionInBackground } from "../lib/push";
+import { cachedPushOn, disablePush, enablePush, isIOS, isStandalone, primePushState, pushSupported, syncPushSubscriptionInBackground } from "../lib/push";
 
 export function Account() {
   const { profile, logout } = useAuth();
@@ -43,13 +43,15 @@ export function Account() {
 }
 
 function NotificationsRow() {
-  const [on, setOn] = useState(false);
-  // Guards the switch's slide animation from playing on mount — without it,
-  // the initial on/off read (however fast) still lands one render after the
-  // default `false`, and the CSS transition turns that into a visible flip
-  // the instant the screen opens. Once the real state is known, later
-  // transitions are real user-initiated toggles and should animate.
-  const [initialized, setInitialized] = useState(false);
+  // Seeded from the cross-screen cache (populated at login, or by a
+  // previous visit to this row) so a remount — which happens every time you
+  // navigate away from Account and back — renders the correct state on its
+  // very first paint instead of the switch's default and then flipping.
+  const [on, setOn] = useState(cachedPushOn);
+  // The switch's slide transition stays off until a frame after mount, so
+  // if this row's own state-correcting check (below) does change `on`, that
+  // correction itself never animates — only a later, real user tap does.
+  const [ready, setReady] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [supported, setSupported] = useState(true);
@@ -67,14 +69,20 @@ function NotificationsRow() {
       setSupported(false);
       return;
     }
-    currentPushSubscription().then((sub) => {
-      setOn(!!sub);
-      setInitialized(true);
-    });
+    primePushState().then((sub) => setOn(!!sub));
     // Re-registers this device's subscription under whoever's signed in
     // right now — fired in the background, not gating the toggle's state
-    // above (that's what used to cause the flicker).
+    // above.
     syncPushSubscriptionInBackground();
+
+    let raf2 = 0;
+    const raf1 = requestAnimationFrame(() => {
+      raf2 = requestAnimationFrame(() => setReady(true));
+    });
+    return () => {
+      cancelAnimationFrame(raf1);
+      if (raf2) cancelAnimationFrame(raf2);
+    };
   }, []);
 
   const toggle = async () => {
@@ -148,7 +156,7 @@ function NotificationsRow() {
             background: on ? "var(--primary)" : "var(--sunken)",
             border: on ? "none" : "1px solid var(--line)",
             position: "relative",
-            transition: initialized ? "background .2s ease" : "none",
+            transition: ready ? "background .2s ease" : "none",
             opacity: busy ? 0.6 : 1,
           }}
         >
@@ -162,7 +170,7 @@ function NotificationsRow() {
               borderRadius: 999,
               background: "var(--surface)",
               boxShadow: "0 1px 3px rgba(0,0,0,.25)",
-              transition: initialized ? "left .2s ease" : "none",
+              transition: ready ? "left .2s ease" : "none",
             }}
           />
         </span>
