@@ -21,6 +21,31 @@ export function isStandalone(): boolean {
   return window.matchMedia("(display-mode: standalone)").matches || (navigator as unknown as { standalone?: boolean }).standalone === true;
 }
 
+// A stable per-browser id, independent of the push subscription itself.
+// iOS/Safari can silently force a resubscribe (issuing a brand-new endpoint
+// token) without the app ever calling disablePush() first — e.g. after a
+// service worker update or an OS-level permission refresh — which used to
+// leave the old endpoint registered server-side as an orphan that keeps
+// receiving pushes alongside the new one until it happens to hard-fail.
+// Keying the backend's subscription record by this id instead of the
+// endpoint means a resubscribe on the same browser overwrites that one row
+// rather than adding another, so one device never ends up with two live
+// registrations. Stored in localStorage rather than generated fresh each
+// time specifically so it survives across those silent resubscribes.
+function getOrCreateDeviceId(): string {
+  const KEY = "bizqwik:pushDeviceId";
+  try {
+    let id = localStorage.getItem(KEY);
+    if (!id) {
+      id = crypto.randomUUID();
+      localStorage.setItem(KEY, id);
+    }
+    return id;
+  } catch {
+    return crypto.randomUUID();
+  }
+}
+
 // The VAPID public key arrives as a base64url string (what pushManager.subscribe
 // actually needs is the raw bytes as a Uint8Array).
 function urlBase64ToUint8Array(base64Url: string): Uint8Array<ArrayBuffer> {
@@ -89,7 +114,7 @@ export function cachedPushOn(): boolean {
  * firing it on every mount is cheap. */
 export function syncPushSubscriptionInBackground(): void {
   currentPushSubscription().then((sub) => {
-    if (sub) void api.pushSubscribe(sub.toJSON()).catch(() => {});
+    if (sub) void api.pushSubscribe(sub.toJSON(), getOrCreateDeviceId()).catch(() => {});
   });
 }
 
@@ -111,7 +136,7 @@ export async function enablePush(): Promise<void> {
       applicationServerKey: urlBase64ToUint8Array(publicKey),
     });
   }
-  await api.pushSubscribe(sub.toJSON());
+  await api.pushSubscribe(sub.toJSON(), getOrCreateDeviceId());
   cachedOn = true;
 }
 
@@ -123,7 +148,7 @@ export async function disablePush(): Promise<void> {
   }
   const endpoint = sub.endpoint;
   await sub.unsubscribe();
-  await api.pushUnsubscribe(endpoint);
+  await api.pushUnsubscribe(endpoint, getOrCreateDeviceId());
   cachedOn = false;
 }
 

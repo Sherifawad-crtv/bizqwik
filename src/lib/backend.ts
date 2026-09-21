@@ -114,8 +114,9 @@ export const api = {
   pay: (coachId: string, month: string) => callFn<void>("pay", { method: "POST", body: { coachId, month } }),
 
   pushVapidPublicKey: () => callFn<{ publicKey: string }>("push/vapid-public-key"),
-  pushSubscribe: (sub: PushSubscriptionJSON) => callFn<void>("push/subscribe", { method: "POST", body: sub as Record<string, unknown> }),
-  pushUnsubscribe: (endpoint: string) => callFn<void>("push/unsubscribe", { method: "POST", body: { endpoint } }),
+  pushSubscribe: (sub: PushSubscriptionJSON, deviceId: string) =>
+    callFn<void>("push/subscribe", { method: "POST", body: { ...sub, deviceId } as Record<string, unknown> }),
+  pushUnsubscribe: (endpoint: string, deviceId: string) => callFn<void>("push/unsubscribe", { method: "POST", body: { endpoint, deviceId } }),
 };
 
 function monthKey(d: Date): string {
