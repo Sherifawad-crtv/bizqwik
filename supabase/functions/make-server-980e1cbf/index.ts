@@ -492,7 +492,17 @@ app.post(`${P}/tiers/delete`, async (c) => {
   const me = user && (await profileOf(user.id));
   if (me?.role !== "dept_head") return c.json({ error: "Forbidden" }, 403);
   const { id } = await c.req.json();
-  await admin().from("tiers").delete().eq("id", id).eq("org_id", me.org_id);
+
+  const [assignedProfiles, pendingInvites] = await Promise.all([
+    admin().from("profiles").select("id").eq("tier_id", id).eq("org_id", me.org_id),
+    admin().from("staff_invitations").select("id").eq("tier_id", id).eq("org_id", me.org_id),
+  ]);
+  if ((assignedProfiles.data?.length ?? 0) > 0 || (pendingInvites.data?.length ?? 0) > 0) {
+    return c.json({ error: "Reassign anyone on this tier (and any pending invites for it) before deleting it." }, 400);
+  }
+
+  const { error } = await admin().from("tiers").delete().eq("id", id).eq("org_id", me.org_id);
+  if (error) throw error;
   return c.json({ ok: true });
 });
 
@@ -541,7 +551,14 @@ app.post(`${P}/bundle-types/delete`, async (c) => {
   const me = user && (await profileOf(user.id));
   if (me?.role !== "dept_head") return c.json({ error: "Forbidden" }, 403);
   const { id } = await c.req.json();
-  await admin().from("bundle_types").delete().eq("id", id).eq("org_id", me.org_id);
+
+  const { data: sold } = await admin().from("package_instances").select("id").eq("bundle_type_id", id).eq("org_id", me.org_id);
+  if ((sold?.length ?? 0) > 0) {
+    return c.json({ error: "This bundle type has already been sold, so it can't be deleted — edit it instead, or leave it in place." }, 400);
+  }
+
+  const { error } = await admin().from("bundle_types").delete().eq("id", id).eq("org_id", me.org_id);
+  if (error) throw error;
   return c.json({ ok: true });
 });
 
