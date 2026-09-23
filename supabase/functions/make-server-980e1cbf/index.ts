@@ -103,6 +103,31 @@ async function materializePackage(pkg: any): Promise<any> {
   return pkg;
 }
 
+// Same lazy-expiry approach as packages: a membership past its end date is
+// flipped to expired the first time anything reads it.
+async function materializeMembership(m: any): Promise<any> {
+  if (m.status === "active" && todayIso() > String(m.expires_at).slice(0, 10)) {
+    const { data: updated, error } = await admin().from("membership_instances").update({ status: "expired" }).eq("id", m.id).select().single();
+    if (error) throw error;
+    return updated;
+  }
+  return m;
+}
+
+async function currentMembershipForClient(clientId: string, orgId: string) {
+  const { data, error } = await admin()
+    .from("membership_instances")
+    .select("*")
+    .eq("client_id", clientId)
+    .eq("org_id", orgId)
+    .order("starts_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (error) throw error;
+  if (!data) return null;
+  return await materializeMembership(data);
+}
+
 // ---- API response mappers (snake_case DB rows -> camelCase JSON, matching
 // src/lib/types.ts exactly so the frontend's contract never changes) -------
 function toProfile(row: any) {
@@ -114,8 +139,38 @@ function toTier(row: any) {
 function toBundleType(row: any) {
   return { id: row.id, name: row.name, price: Number(row.price), sessionsIncluded: row.sessions_included, expiryDays: row.expiry_days };
 }
-function toClient(row: any, conditions: string | null, currentPackage: any) {
-  return { id: row.id, name: row.name, age: row.age, conditions, assignedCoachId: row.assigned_coach_id, currentPackage };
+function toClient(row: any, conditions: string | null, currentPackage: any, currentMembership: any = null) {
+  return {
+    id: row.id,
+    name: row.name,
+    age: row.age,
+    phone: row.phone ?? null,
+    email: row.email ?? null,
+    conditions,
+    assignedCoachId: row.assigned_coach_id,
+    currentPackage,
+    currentMembership,
+  };
+}
+function toMembershipType(row: any) {
+  return {
+    id: row.id,
+    name: row.name,
+    durationDays: row.duration_days,
+    price: Number(row.price),
+    invitationsAllowance: row.invitations_allowance,
+  };
+}
+function toMembershipInstance(row: any) {
+  return {
+    id: row.id,
+    clientId: row.client_id,
+    membershipTypeId: row.membership_type_id,
+    startDate: String(row.starts_at).slice(0, 10),
+    expiryDate: String(row.expires_at).slice(0, 10),
+    status: row.status,
+    invitationsRemaining: row.invitations_remaining,
+  };
 }
 function toPackageInstance(row: any) {
   return {
@@ -412,9 +467,9 @@ app.post(`${P}/push/test-admin`, async (c) => {
 // Fired by a pg_cron job (Sun–Thu, 9:00 PM Cairo time) via pg_net — never by
 // a user, so it's gated by a shared secret instead of a user JWT. Reminds
 // everyone who can log a session (coach, head_coach, dept_head) and hasn't
-// logged one yet today, per organization. Accountant is deliberately
-// excluded — the app gives that role no way to log a session at all, so the
-// reminder would just be noise for them.
+// logged one yet today, per organization. Accountant and front_desk are
+// deliberately excluded — the app gives those roles no way to log a session
+// at all, so the reminder would just be noise for them.
 app.post(`${P}/push/daily-reminder`, async (c) => {
   const provided = c.req.header("x-cron-secret") || "";
   const expected = await getSecret("cron_secret");
@@ -427,7 +482,7 @@ app.post(`${P}/push/daily-reminder`, async (c) => {
   let totalNotified = 0;
   for (const org of orgs ?? []) {
     const [{ data: profiles }, { data: sessions }] = await Promise.all([
-      admin().from("profiles").select("*").eq("org_id", org.id).neq("role", "accountant"),
+      admin().from("profiles").select("*").eq("org_id", org.id).in("role", ["coach", "head_coach", "dept_head"]),
       admin().from("sessions").select("coach_id, date").eq("org_id", org.id).eq("month", month),
     ]);
     const loggedToday = new Set((sessions ?? []).filter((s) => s.date === today).map((s) => s.coach_id));
@@ -560,6 +615,83 @@ app.post(`${P}/bundle-types/delete`, async (c) => {
   const { error } = await admin().from("bundle_types").delete().eq("id", id).eq("org_id", me.org_id);
   if (error) throw error;
   return c.json({ ok: true });
+});
+
+// ---- membership types ----------------------------------------------------
+app.get(`${P}/membership-types`, async (c) => {
+  const user = await requireUser(c);
+  const me = user && (await profileOf(user.id));
+  if (!me) return c.json({ error: "Unauthorized" }, 401);
+  const { data, error } = await admin().from("membership_types").select("*").eq("org_id", me.org_id).order("name");
+  if (error) throw error;
+  return c.json({ membershipTypes: (data ?? []).map(toMembershipType) });
+});
+
+function membershipTypeFields(body: any) {
+  const name = String(body.name ?? "").trim();
+  const durationDays = Number(body.durationDays);
+  const price = Number(body.price);
+  const invitationsAllowance = Number(body.invitationsAllowance ?? 0);
+  if (!name) return { error: "Name is required." } as const;
+  if (!Number.isInteger(durationDays) || durationDays <= 0) return { error: "Duration must be a whole number of days." } as const;
+  if (!Number.isFinite(price) || price < 0) return { error: "Price must be zero or more." } as const;
+  if (!Number.isInteger(invitationsAllowance) || invitationsAllowance < 0) return { error: "Invitations must be a whole number, zero or more." } as const;
+  return { row: { name, duration_days: durationDays, price, invitations_allowance: invitationsAllowance } } as const;
+}
+
+app.post(`${P}/membership-types`, async (c) => {
+  const user = await requireUser(c);
+  const me = user && (await profileOf(user.id));
+  if (me?.role !== "dept_head") return c.json({ error: "Forbidden" }, 403);
+  const parsed = membershipTypeFields(await c.req.json());
+  if ("error" in parsed) return c.json({ error: parsed.error }, 400);
+  const { data, error } = await admin().from("membership_types").insert({ org_id: me.org_id, ...parsed.row }).select().single();
+  if (error) throw error;
+  return c.json({ membershipType: toMembershipType(data) });
+});
+
+app.post(`${P}/membership-types/update`, async (c) => {
+  const user = await requireUser(c);
+  const me = user && (await profileOf(user.id));
+  if (me?.role !== "dept_head") return c.json({ error: "Forbidden" }, 403);
+  const body = await c.req.json();
+  const parsed = membershipTypeFields(body);
+  if ("error" in parsed) return c.json({ error: parsed.error }, 400);
+  const { data, error } = await admin().from("membership_types").update(parsed.row).eq("id", body.id).eq("org_id", me.org_id).select().maybeSingle();
+  if (error) throw error;
+  if (!data) return c.json({ error: "No such membership type" }, 404);
+  return c.json({ membershipType: toMembershipType(data) });
+});
+
+app.post(`${P}/membership-types/delete`, async (c) => {
+  const user = await requireUser(c);
+  const me = user && (await profileOf(user.id));
+  if (me?.role !== "dept_head") return c.json({ error: "Forbidden" }, 403);
+  const { id } = await c.req.json();
+  const { data: sold } = await admin().from("membership_instances").select("id").eq("membership_type_id", id).eq("org_id", me.org_id).limit(1);
+  if ((sold?.length ?? 0) > 0) {
+    return c.json({ error: "This membership has already been sold, so it can't be deleted — edit it instead, or leave it in place." }, 400);
+  }
+  const { error } = await admin().from("membership_types").delete().eq("id", id).eq("org_id", me.org_id);
+  if (error) throw error;
+  return c.json({ ok: true });
+});
+
+// ---- coach picker ----------------------------------------------------------
+// Names only — for roles that assign clients to coaches but must not see
+// payout data (front_desk can't use /month, which carries earnings).
+app.get(`${P}/coaches`, async (c) => {
+  const user = await requireUser(c);
+  const me = user && (await profileOf(user.id));
+  if (me?.role !== "dept_head" && me?.role !== "front_desk") return c.json({ error: "Forbidden" }, 403);
+  const { data, error } = await admin()
+    .from("profiles")
+    .select("id, name, avatar_url")
+    .eq("org_id", me.org_id)
+    .in("role", ["coach", "head_coach"])
+    .order("name");
+  if (error) throw error;
+  return c.json({ coaches: (data ?? []).map((p) => ({ id: p.id, name: p.name, avatarUrl: p.avatar_url ?? null })) });
 });
 
 // ---- invites -------------------------------------------------------------
@@ -709,18 +841,26 @@ app.get(`${P}/clients`, async (c) => {
   if (!me) return c.json({ error: "Unauthorized" }, 401);
   if (me.role === "accountant") return c.json({ error: "Forbidden" }, 403);
 
-  // Only dept_head sees the full roster now — head_coach's private-training
-  // access is limited to their own assigned clients (deliver-only, no
-  // assign/reassign), same scoping as a plain coach.
+  // dept_head and front_desk see the full roster; head_coach's
+  // private-training access is limited to their own assigned clients
+  // (deliver-only, no assign/reassign), same scoping as a plain coach.
+  const fullRoster = me.role === "dept_head" || me.role === "front_desk";
   let query = admin().from("clients").select("*").eq("org_id", me.org_id);
-  if (me.role !== "dept_head") query = query.eq("assigned_coach_id", me.id);
+  if (!fullRoster) query = query.eq("assigned_coach_id", me.id);
   const { data: clients, error } = await query.order("name");
   if (error) throw error;
 
+  // Medical conditions stay with the assigned coach and heads only — for
+  // front_desk they're never even read, not just hidden in the UI.
+  const canSeeConditions = me.role !== "front_desk";
   const rows = await Promise.all(
     (clients ?? []).map(async (cl) => {
-      const [pkg, conditions] = await Promise.all([currentPackageForClient(cl.id, me.org_id), conditionsOf(cl.id)]);
-      return toClient(cl, conditions, pkg ? toPackageInstance(pkg) : null);
+      const [pkg, membership, conditions] = await Promise.all([
+        currentPackageForClient(cl.id, me.org_id),
+        currentMembershipForClient(cl.id, me.org_id),
+        canSeeConditions ? conditionsOf(cl.id) : Promise.resolve(null),
+      ]);
+      return toClient(cl, conditions, pkg ? toPackageInstance(pkg) : null, membership ? toMembershipInstance(membership) : null);
     }),
   );
   return c.json({ clients: rows });
@@ -787,26 +927,38 @@ async function sellPackageTo(clientId: string, bundleTypeId: string, coachId: st
   return { client: { ...client, assigned_coach_id: coachId }, package: pkg } as const;
 }
 
-app.post(`${P}/clients`, async (c) => {
-  const user = await requireUser(c);
-  const me = user && (await profileOf(user.id));
-  if (me?.role !== "dept_head") return c.json({ error: "Forbidden" }, 403);
-  const { name, age, conditions, bundleTypeId, coachId } = await c.req.json();
-  if (!name || !bundleTypeId || !coachId) {
-    return c.json({ error: "Name, bundle, and coach are all required to create a client." }, 400);
-  }
+const blankToNull = (v: unknown) => (v === null || v === undefined || String(v).trim() === "" ? null : String(v).trim());
 
-  const { data: client, error: cErr } = await admin()
+async function insertClient(me: any, fields: { name: string; age?: unknown; phone?: unknown; email?: unknown }) {
+  const { data, error } = await admin()
     .from("clients")
     .insert({
       org_id: me.org_id,
-      name,
-      age: age === null || age === undefined || age === "" ? null : Number(age),
+      name: fields.name.trim(),
+      age: blankToNull(fields.age) === null ? null : Number(fields.age),
+      phone: blankToNull(fields.phone),
+      email: blankToNull(fields.email),
       assigned_coach_id: null,
     })
     .select()
     .single();
-  if (cErr) throw cErr;
+  if (error) throw error;
+  return data;
+}
+
+app.post(`${P}/clients`, async (c) => {
+  const user = await requireUser(c);
+  const me = user && (await profileOf(user.id));
+  if (me?.role !== "dept_head" && me?.role !== "front_desk") return c.json({ error: "Forbidden" }, 403);
+  const body = await c.req.json();
+  const { name, age, phone, email, bundleTypeId, coachId } = body;
+  // front_desk never writes medical conditions, even if a payload carries them.
+  const conditions = me.role === "front_desk" ? null : body.conditions;
+  if (!name || !String(name).trim() || !bundleTypeId || !coachId) {
+    return c.json({ error: "Name, bundle, and coach are all required to create a client." }, 400);
+  }
+
+  const client = await insertClient(me, { name, age, phone, email });
 
   if (conditions) {
     await admin().from("client_notes").insert({ client_id: client.id, org_id: me.org_id, conditions });
@@ -856,13 +1008,25 @@ app.post(`${P}/clients/delete`, async (c) => {
   const { data: client } = await admin().from("clients").select("id").eq("id", id).eq("org_id", me.org_id).maybeSingle();
   if (!client) return c.json({ error: "No such client" }, 404);
 
+  // Every FK into clients is NO ACTION, so each referencing row is cleared by
+  // hand first. Drop-ins are revenue records — they're kept and unlinked
+  // (client_id is nullable) rather than deleted.
   const { data: packages } = await admin().from("package_instances").select("id").eq("client_id", id);
   for (const pkg of packages ?? []) {
     await admin().from("delivery_logs").delete().eq("package_instance_id", pkg.id);
   }
   await admin().from("package_instances").delete().eq("client_id", id);
+  await admin().from("membership_instances").delete().eq("client_id", id);
+  await admin().from("check_ins").delete().eq("client_id", id);
+  await admin().from("invitations").delete().eq("member_id", id);
+  await admin().from("drop_ins").update({ client_id: null }).eq("client_id", id);
+  await admin().from("wallet_transactions").delete().eq("client_id", id);
+  await admin().from("wallets").delete().eq("client_id", id);
+  await admin().from("points_ledger").delete().eq("client_id", id);
+  await admin().from("points_balances").delete().eq("client_id", id);
   await admin().from("client_notes").delete().eq("client_id", id);
-  await admin().from("clients").delete().eq("id", id);
+  const { error } = await admin().from("clients").delete().eq("id", id);
+  if (error) throw error;
   return c.json({ ok: true });
 });
 
@@ -870,11 +1034,240 @@ app.post(`${P}/clients/delete`, async (c) => {
 app.post(`${P}/packages`, async (c) => {
   const user = await requireUser(c);
   const me = user && (await profileOf(user.id));
-  if (me?.role !== "dept_head") return c.json({ error: "Forbidden" }, 403);
+  if (me?.role !== "dept_head" && me?.role !== "front_desk") return c.json({ error: "Forbidden" }, 403);
   const { clientId, bundleTypeId, coachId } = await c.req.json();
   const result = await sellPackageTo(clientId, bundleTypeId, coachId, me);
   if ("error" in result) return c.json({ error: result.error }, result.status);
   return c.json({ package: toPackageInstance(result.package) });
+});
+
+// Assign (or change) a client's coach outside of a package sale — e.g. a
+// membership-only client. Blocked while a package is running: the coach on
+// an active package is locked in until it's finished.
+app.post(`${P}/clients/assign-coach`, async (c) => {
+  const user = await requireUser(c);
+  const me = user && (await profileOf(user.id));
+  if (me?.role !== "dept_head" && me?.role !== "front_desk") return c.json({ error: "Forbidden" }, 403);
+  const { id, coachId } = await c.req.json();
+  const { data: client } = await admin().from("clients").select("*").eq("id", id).eq("org_id", me.org_id).maybeSingle();
+  if (!client) return c.json({ error: "No such client" }, 404);
+  const coach = coachId ? await profileOf(coachId) : null;
+  if (!coach || coach.org_id !== me.org_id || (coach.role !== "coach" && coach.role !== "head_coach")) {
+    return c.json({ error: "No such coach" }, 404);
+  }
+  if (client.assigned_coach_id === coachId) return c.json({ client: toClient(client, null, null) });
+
+  const pkg = await currentPackageForClient(id, me.org_id);
+  if (pkg && pkg.status === "active") {
+    return c.json({ error: "This client is mid-package — their coach can only change once the current package is finished." }, 400);
+  }
+
+  const { data: updated, error } = await admin().from("clients").update({ assigned_coach_id: coachId }).eq("id", id).select().single();
+  if (error) throw error;
+  await sendPushToProfile(me.org_id, coachId, "new_client_assigned", {
+    title: "🎉 New client assigned!",
+    body: `${client.name} was just assigned to you. Welcome them aboard!`,
+    url: "/clients",
+  });
+  return c.json({ client: toClient(updated, null, null) });
+});
+
+// ---- memberships (front desk) ----------------------------------------------
+// Sell a membership to an existing client (renewal) or a brand-new one.
+// Renewal is only allowed once the current membership has ended — the same
+// "only when finished" rule sellPackageTo applies to packages.
+app.post(`${P}/memberships/sell`, async (c) => {
+  const user = await requireUser(c);
+  const me = user && (await profileOf(user.id));
+  if (me?.role !== "front_desk") return c.json({ error: "Forbidden" }, 403);
+  const { clientId, name, age, phone, email, membershipTypeId } = await c.req.json();
+
+  const { data: type } = await admin().from("membership_types").select("*").eq("id", membershipTypeId).eq("org_id", me.org_id).maybeSingle();
+  if (!type) return c.json({ error: "Choose a membership." }, 400);
+
+  let client: any;
+  let createdNow = false;
+  if (clientId) {
+    const { data } = await admin().from("clients").select("*").eq("id", clientId).eq("org_id", me.org_id).maybeSingle();
+    if (!data) return c.json({ error: "No such client" }, 404);
+    client = data;
+    const current = await currentMembershipForClient(clientId, me.org_id);
+    if (current && current.status === "active") {
+      return c.json({ error: `${client.name} already has an active membership until ${String(current.expires_at).slice(0, 10)}.` }, 400);
+    }
+  } else {
+    if (!name || !String(name).trim()) return c.json({ error: "Name is required." }, 400);
+    client = await insertClient(me, { name, age, phone, email });
+    createdNow = true;
+  }
+
+  const start = todayIso();
+  const { data: membership, error } = await admin()
+    .from("membership_instances")
+    .insert({
+      org_id: me.org_id,
+      client_id: client.id,
+      membership_type_id: type.id,
+      starts_at: `${start}T00:00:00Z`,
+      expires_at: `${addDays(start, Number(type.duration_days))}T00:00:00Z`,
+      status: "active",
+      invitations_remaining: Number(type.invitations_allowance ?? 0),
+    })
+    .select()
+    .single();
+  if (error) {
+    if (createdNow) await admin().from("clients").delete().eq("id", client.id);
+    throw error;
+  }
+  return c.json({ client: toClient(client, null, null, toMembershipInstance(membership)), membership: toMembershipInstance(membership) });
+});
+
+// ---- check-ins, drop-ins, invitations (front desk) -------------------------
+async function clientPlanStatus(clientId: string, orgId: string) {
+  const [membership, pkg] = await Promise.all([currentMembershipForClient(clientId, orgId), currentPackageForClient(clientId, orgId)]);
+  const activeMembership = membership && membership.status === "active" ? membership : null;
+  const activePackage = pkg && pkg.status === "active" ? pkg : null;
+  return {
+    membership: membership ? toMembershipInstance(membership) : null,
+    package: pkg ? toPackageInstance(pkg) : null,
+    eligible: !!(activeMembership || activePackage),
+  };
+}
+
+app.get(`${P}/front-desk/client-status/:id`, async (c) => {
+  const user = await requireUser(c);
+  const me = user && (await profileOf(user.id));
+  if (me?.role !== "front_desk") return c.json({ error: "Forbidden" }, 403);
+  const id = c.req.param("id");
+  if (!/^[0-9a-f-]{36}$/i.test(id)) return c.json({ error: "That code isn't a Bizqwik member code." }, 404);
+  const { data: client } = await admin().from("clients").select("*").eq("id", id).eq("org_id", me.org_id).maybeSingle();
+  if (!client) return c.json({ error: "Member not found. Please check the QR code." }, 404);
+  const status = await clientPlanStatus(id, me.org_id);
+  return c.json({ client: toClient(client, null, status.package, status.membership), eligible: status.eligible });
+});
+
+app.post(`${P}/check-ins`, async (c) => {
+  const user = await requireUser(c);
+  const me = user && (await profileOf(user.id));
+  if (me?.role !== "front_desk") return c.json({ error: "Forbidden" }, 403);
+  const { clientId, source } = await c.req.json();
+  if (source !== "qr" && source !== "manual") return c.json({ error: "Invalid check-in source." }, 400);
+  const { data: client } = await admin().from("clients").select("id, name").eq("id", clientId).eq("org_id", me.org_id).maybeSingle();
+  if (!client) return c.json({ error: "No such client" }, 404);
+  const status = await clientPlanStatus(clientId, me.org_id);
+  if (!status.eligible) return c.json({ error: `${client.name} has no active membership or package.` }, 400);
+  const { data, error } = await admin().from("check_ins").insert({ org_id: me.org_id, client_id: clientId, source }).select().single();
+  if (error) throw error;
+  return c.json({ checkIn: { id: data.id, clientId: data.client_id, source: data.source, checkedInAt: data.checked_in_at } });
+});
+
+app.post(`${P}/drop-ins`, async (c) => {
+  const user = await requireUser(c);
+  const me = user && (await profileOf(user.id));
+  if (me?.role !== "front_desk") return c.json({ error: "Forbidden" }, 403);
+  const { clientId, category, price } = await c.req.json();
+  const cat = String(category ?? "").trim();
+  const amount = Number(price);
+  if (!cat) return c.json({ error: "Enter what the drop-in is for." }, 400);
+  if (!Number.isFinite(amount) || amount < 0) return c.json({ error: "Enter a valid price." }, 400);
+  if (clientId) {
+    const { data: client } = await admin().from("clients").select("id").eq("id", clientId).eq("org_id", me.org_id).maybeSingle();
+    if (!client) return c.json({ error: "No such client" }, 404);
+  }
+  const { data, error } = await admin()
+    .from("drop_ins")
+    .insert({ org_id: me.org_id, client_id: clientId || null, category: cat, price: amount })
+    .select()
+    .single();
+  if (error) throw error;
+  return c.json({ dropIn: { id: data.id, clientId: data.client_id, category: data.category, price: Number(data.price), createdAt: data.created_at } });
+});
+
+app.post(`${P}/invitations`, async (c) => {
+  const user = await requireUser(c);
+  const me = user && (await profileOf(user.id));
+  if (me?.role !== "front_desk") return c.json({ error: "Forbidden" }, 403);
+  const { clientId, inviteeName, inviteePhone, visitDate } = await c.req.json();
+  if (!String(inviteeName ?? "").trim() || !String(inviteePhone ?? "").trim() || !visitDate) {
+    return c.json({ error: "Name, phone and visit date are all required." }, 400);
+  }
+  if (String(visitDate) < todayIso()) return c.json({ error: "The visit date can't be in the past." }, 400);
+
+  const { data: client } = await admin().from("clients").select("id, name").eq("id", clientId).eq("org_id", me.org_id).maybeSingle();
+  if (!client) return c.json({ error: "No such client" }, 404);
+  const membership = await currentMembershipForClient(clientId, me.org_id);
+  if (!membership || membership.status !== "active") return c.json({ error: `${client.name} doesn't have an active membership.` }, 400);
+  if (membership.invitations_remaining <= 0) return c.json({ error: `${client.name} has no invitations left on this membership.` }, 400);
+
+  // Compare-and-set on the old count so two simultaneous invites can't both
+  // spend the last one.
+  const { data: spent, error: sErr } = await admin()
+    .from("membership_instances")
+    .update({ invitations_remaining: membership.invitations_remaining - 1 })
+    .eq("id", membership.id)
+    .eq("invitations_remaining", membership.invitations_remaining)
+    .select()
+    .maybeSingle();
+  if (sErr) throw sErr;
+  if (!spent) return c.json({ error: "That invitation was just used — try again." }, 409);
+
+  const { data: invitation, error } = await admin()
+    .from("invitations")
+    .insert({
+      org_id: me.org_id,
+      member_id: clientId,
+      invitee_name: String(inviteeName).trim(),
+      invitee_phone: String(inviteePhone).trim(),
+      visit_date: visitDate,
+    })
+    .select()
+    .single();
+  if (error) {
+    await admin().from("membership_instances").update({ invitations_remaining: membership.invitations_remaining }).eq("id", membership.id);
+    throw error;
+  }
+  return c.json({
+    invitation: {
+      id: invitation.id,
+      memberId: invitation.member_id,
+      inviteeName: invitation.invitee_name,
+      inviteePhone: invitation.invitee_phone,
+      visitDate: invitation.visit_date,
+      createdAt: invitation.created_at,
+    },
+    invitationsRemaining: spent.invitations_remaining,
+  });
+});
+
+// Home-screen numbers from real rows. There's no check-out tracking, so
+// "active now" means checked in (or dropped in) within the last 2 hours.
+app.get(`${P}/front-desk/summary`, async (c) => {
+  const user = await requireUser(c);
+  const me = user && (await profileOf(user.id));
+  if (me?.role !== "front_desk") return c.json({ error: "Forbidden" }, 403);
+  const dayStart = `${todayIso()}T00:00:00Z`;
+  const twoHoursAgo = Date.now() - 2 * 60 * 60 * 1000;
+  const recentEnough = (ts: string) => Date.parse(ts) >= twoHoursAgo;
+  const [checkIns, dropIns] = await Promise.all([
+    admin().from("check_ins").select("id, client_id, checked_in_at, clients(name)").eq("org_id", me.org_id).gte("checked_in_at", dayStart).order("checked_in_at", { ascending: false }),
+    admin().from("drop_ins").select("id, client_id, category, created_at, clients(name)").eq("org_id", me.org_id).gte("created_at", dayStart).order("created_at", { ascending: false }),
+  ]);
+  if (checkIns.error) throw checkIns.error;
+  if (dropIns.error) throw dropIns.error;
+  const ci = checkIns.data ?? [];
+  const di = dropIns.data ?? [];
+  const recent = [
+    ...ci.map((r: any) => ({ id: r.id, kind: "check_in", name: r.clients?.name ?? "Unknown client", detail: "Checked in", at: r.checked_in_at })),
+    ...di.map((r: any) => ({ id: r.id, kind: "drop_in", name: r.clients?.name ?? "Walk-in", detail: `Drop-in · ${r.category}`, at: r.created_at })),
+  ]
+    .sort((a, b) => Date.parse(b.at) - Date.parse(a.at))
+    .slice(0, 8);
+  return c.json({
+    todayCheckIns: ci.length,
+    todayDropIns: di.length,
+    activeNow: ci.filter((r: any) => recentEnough(r.checked_in_at)).length + di.filter((r: any) => recentEnough(r.created_at)).length,
+    recent,
+  });
 });
 
 app.post(`${P}/packages/deliver`, async (c) => {
@@ -1008,13 +1401,19 @@ app.get(`${P}/month/:month`, async (c) => {
   const me = user && (await profileOf(user.id));
   if (!me) return c.json({ error: "Unauthorized" }, 401);
   const month = c.req.param("month");
+  // Payout data — front_desk has no business seeing anyone's earnings.
+  if (me.role === "front_desk") return c.json({ error: "Forbidden" }, 403);
 
   if (me.role === "coach") {
     const [row] = await monthRollups(me.org_id, [me], month);
     return c.json({ rows: [row] });
   }
 
-  const { data: profiles, error } = await admin().from("profiles").select("*").eq("org_id", me.org_id).neq("role", "accountant");
+  const { data: profiles, error } = await admin()
+    .from("profiles")
+    .select("*")
+    .eq("org_id", me.org_id)
+    .in("role", ["coach", "head_coach", "dept_head"]);
   if (error) throw error;
   const rows = await monthRollups(me.org_id, profiles ?? [], month);
   rows.sort((a, b) => a.name.localeCompare(b.name));
@@ -1034,7 +1433,7 @@ app.get(`${P}/sessions/:coachId/:month`, async (c) => {
   const coachId = c.req.param("coachId");
   const month = c.req.param("month");
   if (me.role === "coach" && me.id !== coachId) return c.json({ error: "Forbidden" }, 403);
-  if (me.role === "accountant") return c.json({ error: "Forbidden" }, 403);
+  if (me.role === "accountant" || me.role === "front_desk") return c.json({ error: "Forbidden" }, 403);
   const { data, error } = await admin().from("sessions").select("*").eq("org_id", me.org_id).eq("coach_id", coachId).eq("month", month).order("date");
   if (error) throw error;
   return c.json({ sessions: (data ?? []).map(toSession) });
