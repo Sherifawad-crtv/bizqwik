@@ -13,7 +13,7 @@ function focusIntoView(e: React.FocusEvent<HTMLInputElement>) {
 }
 
 export function Login() {
-  const { profile, ready, login } = useAuth();
+  const { profile, bizqwikTeam, ready, login } = useAuth();
   const isMobile = useIsMobile();
   const keyboardInset = useKeyboardInset(isMobile);
   const keyboardOpen = keyboardInset > KEYBOARD_THRESHOLD;
@@ -23,8 +23,10 @@ export function Login() {
   const [busy, setBusy] = useState(false);
 
   // Always land on the role's default screen after signing in — not
-  // wherever a lapsed session happened to leave off (e.g. Manage).
+  // wherever a lapsed session happened to leave off (e.g. Manage). An org
+  // profile wins at "/"; a profile-less Bizqwik-team member goes to ops.
   if (ready && profile) return <Navigate to="/" replace />;
+  if (ready && bizqwikTeam) return <Navigate to="/bizqwik" replace />;
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();

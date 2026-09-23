@@ -5,6 +5,9 @@
 import { FN_SLUG, supabase } from "./supabaseClient";
 import { bump } from "./bus";
 import type {
+  BizqwikRole,
+  BizqwikTeam,
+  BizqwikTeamInvite,
   BundleType,
   Client,
   ClientWithPackage,
@@ -13,8 +16,13 @@ import type {
   Invite,
   MembershipInstance,
   MembershipType,
+  OpsSummary,
+  OrgDetail,
+  OrgStatus,
+  OrgSummary,
   PackageInstance,
   PackageWithNames,
+  PlanType,
   Profile,
   Role,
   Rollup,
@@ -76,10 +84,12 @@ export const auth = {
 };
 
 export const api = {
+  // Returns { profile } for an org staff signup, or { bizqwikTeam } for a
+  // Bizqwik-team signup — decided by which invite the email matched.
   signup: (name: string, email: string, password: string) =>
-    callFn<{ profile: Profile }>("signup", { method: "POST", body: { name, email, password } }),
+    callFn<{ profile?: Profile; bizqwikTeam?: BizqwikTeam }>("signup", { method: "POST", body: { name, email, password } }),
 
-  me: () => callFn<{ profile: Profile; tier: Tier | null }>("me"),
+  me: () => callFn<{ profile: Profile | null; tier: Tier | null; bizqwikTeam: BizqwikTeam | null }>("me"),
   updateMe: (name: string) => callFn<{ profile: Profile }>("me/update", { method: "POST", body: { name } }),
   updateAvatar: (avatarUrl: string | null) => callFn<{ profile: Profile }>("me/update", { method: "POST", body: { avatarUrl } }),
 
@@ -160,6 +170,34 @@ export const api = {
   pushSubscribe: (sub: PushSubscriptionJSON, deviceId: string) =>
     callFn<void>("push/subscribe", { method: "POST", body: { ...sub, deviceId } as Record<string, unknown> }),
   pushUnsubscribe: (endpoint: string, deviceId: string) => callFn<void>("push/unsubscribe", { method: "POST", body: { endpoint, deviceId } }),
+
+  // ===== Bizqwik ops dashboard (bizqwik_team only) =====
+  ops: {
+    summary: () => callFn<OpsSummary>("ops/summary"),
+    orgs: () => callFn<{ orgs: OrgSummary[] }>("ops/orgs"),
+    createOrg: (name: string, slug: string, deptHeadName: string, deptHeadEmail: string, planId: string | null) =>
+      callFn<{ org: OrgSummary; deptHeadEmail: string }>("ops/orgs", {
+        method: "POST",
+        body: { name, slug, deptHeadName, deptHeadEmail, planId },
+      }),
+    org: (id: string) => callFn<OrgDetail>(`ops/orgs/${id}`),
+    setOrgStatus: (id: string, status: OrgStatus) =>
+      callFn<{ ok: true; status: OrgStatus }>(`ops/orgs/${id}/status`, { method: "POST", body: { status } }),
+    setOrgPlan: (id: string, planId: string | null) =>
+      callFn<{ ok: true; planId: string | null }>(`ops/orgs/${id}/plan`, { method: "POST", body: { planId } }),
+
+    team: () => callFn<{ members: BizqwikTeam[]; invites: BizqwikTeamInvite[] }>("ops/team"),
+    inviteTeam: (name: string, email: string, role: BizqwikRole) =>
+      callFn<{ ok: true }>("ops/team/invite", { method: "POST", body: { name, email, role } }),
+    cancelTeamInvite: (email: string) => callFn<{ ok: true }>("ops/team/cancel-invite", { method: "POST", body: { email } }),
+
+    plans: () => callFn<{ plans: PlanType[] }>("ops/plans"),
+    createPlan: (name: string, price: number, teamSizeLimit: number | null, clientSizeLimit: number | null) =>
+      callFn<{ plan: PlanType }>("ops/plans", { method: "POST", body: { name, price, teamSizeLimit, clientSizeLimit } }),
+    updatePlan: (id: string, name: string, price: number, teamSizeLimit: number | null, clientSizeLimit: number | null) =>
+      callFn<{ plan: PlanType }>("ops/plans/update", { method: "POST", body: { id, name, price, teamSizeLimit, clientSizeLimit } }),
+    deletePlan: (id: string) => callFn<{ ok: true }>("ops/plans/delete", { method: "POST", body: { id } }),
+  },
 };
 
 function monthKey(d: Date): string {

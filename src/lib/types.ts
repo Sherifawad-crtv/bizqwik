@@ -175,3 +175,90 @@ export const STATE_LABELS: Record<State, string> = {
   settled: "Settled",
   paid: "Paid",
 };
+
+// ===== Bizqwik ops (internal, bizqwik_team only) =====
+// A Bizqwik-team member runs the platform itself, across every org. They have
+// no org profile — these types describe the ops dashboard, not any single gym.
+export type BizqwikRole = "founder" | "ops_manager" | "teammate";
+
+export interface BizqwikTeam {
+  id: string;
+  name: string;
+  email: string;
+  role: BizqwikRole;
+}
+
+export type OrgStatus = "trial" | "active" | "paused";
+
+export interface PlanType {
+  id: string;
+  name: string;
+  price: number;
+  // null = unlimited
+  teamSizeLimit: number | null;
+  clientSizeLimit: number | null;
+}
+
+export interface OpsSummary {
+  totalOrgs: number;
+  activeOrgs: number;
+  totalGmv: number;
+  bizqwikRevenue: number;
+}
+
+export interface OrgSummary {
+  id: string;
+  name: string;
+  slug: string;
+  status: OrgStatus;
+  planId: string | null;
+  planName: string | null;
+  staffCount: number;
+  clientCount: number;
+  gmv: number;
+}
+
+export interface OrgUsage {
+  staffCount: number;
+  clientCount: number;
+  sessionsLogged: number;
+  packagesSold: number;
+  membershipsSold: number;
+  dropInsSold: number;
+  gmv: number;
+  lastActivity: string | null;
+}
+
+export interface OrgDetail {
+  org: {
+    id: string;
+    name: string;
+    slug: string;
+    status: OrgStatus;
+    planId: string | null;
+    planName: string | null;
+    createdAt: string;
+  };
+  plan: PlanType | null;
+  staff: Profile[];
+  pendingInvites: { email: string; role: Role }[];
+  usage: OrgUsage;
+}
+
+export interface BizqwikTeamInvite {
+  email: string;
+  name: string | null;
+  role: BizqwikRole;
+}
+
+export const BIZQWIK_ROLE_LABELS: Record<BizqwikRole, string> = {
+  founder: "Founder",
+  ops_manager: "Ops Manager",
+  teammate: "Teammate",
+};
+
+export const ORG_STATUS_LABELS: Record<OrgStatus, string> = {
+  trial: "Trial",
+  active: "Active",
+  paused: "Paused",
+};

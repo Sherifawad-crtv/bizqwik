@@ -15,7 +15,7 @@ function focusIntoView(e: React.FocusEvent<HTMLInputElement>) {
 }
 
 export function Signup() {
-  const { profile, ready, login } = useAuth();
+  const { profile, bizqwikTeam, ready, login } = useAuth();
   const isMobile = useIsMobile();
   const keyboardInset = useKeyboardInset(isMobile);
   const keyboardOpen = keyboardInset > KEYBOARD_THRESHOLD;
@@ -26,6 +26,7 @@ export function Signup() {
   const [busy, setBusy] = useState(false);
 
   if (ready && profile) return <Navigate to="/" replace />;
+  if (ready && bizqwikTeam) return <Navigate to="/bizqwik" replace />;
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();

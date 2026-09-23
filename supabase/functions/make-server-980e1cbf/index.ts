@@ -39,18 +39,6 @@ function ensureVapid(): Promise<void> {
   return vapidReady;
 }
 
-// The whole app is single-org today (Revolt) — there's no platform-admin UI
-// yet to pick an org at signup, so this resolves to "the one org that
-// exists." Revisit once org selection at signup is a real, built UI.
-let cachedOrgId: string | null = null;
-async function defaultOrgId(): Promise<string> {
-  if (cachedOrgId) return cachedOrgId;
-  const { data, error } = await admin().from("organizations").select("id").limit(1).single();
-  if (error || !data) throw new Error("No organization configured");
-  cachedOrgId = data.id;
-  return cachedOrgId;
-}
-
 // ---- helpers -----------------------------------------------------------
 const P = "/make-server-980e1cbf";
 
@@ -87,6 +75,45 @@ async function profileOf(userId: string) {
 async function tierOf(tierId: string) {
   const { data } = await admin().from("tiers").select("*").eq("id", tierId).maybeSingle();
   return data;
+}
+
+// A bizqwik_team member's row is keyed on their auth uid (same id), so this
+// doubles as "is the caller Bizqwik team." They have no org and run the ops
+// dashboard, not any single gym.
+async function bizqwikTeamOf(userId: string) {
+  const { data } = await admin().from("bizqwik_team").select("*").eq("id", userId).maybeSingle();
+  return data;
+}
+function toBizqwikTeam(row: any) {
+  return { id: row.id, name: row.name, email: row.email, role: row.role };
+}
+
+// A SaaS plan caps an org's team size and client count. Null limit (or no plan
+// assigned) = unlimited, so orgs without a plan — like Revolt today — are never
+// blocked. Returns a friendly message when the cap is already reached, else null.
+async function planLimitError(orgId: string, kind: "team" | "client"): Promise<string | null> {
+  const { data: org } = await admin().from("organizations").select("plan_id").eq("id", orgId).maybeSingle();
+  if (!org?.plan_id) return null;
+  const { data: plan } = await admin().from("plan_types").select("*").eq("id", org.plan_id).maybeSingle();
+  if (!plan) return null;
+
+  if (kind === "team") {
+    const limit = plan.team_size_limit;
+    if (limit === null || limit === undefined) return null;
+    const [profiles, invites] = await Promise.all([
+      admin().from("profiles").select("id").eq("org_id", orgId),
+      admin().from("staff_invitations").select("id").eq("org_id", orgId),
+    ]);
+    const used = (profiles.data?.length ?? 0) + (invites.data?.length ?? 0);
+    if (used >= limit) return `This org is on the ${plan.name} plan, which allows up to ${limit} staff. Upgrade the plan to add more.`;
+    return null;
+  }
+
+  const limit = plan.client_size_limit;
+  if (limit === null || limit === undefined) return null;
+  const { data: clients } = await admin().from("clients").select("id").eq("org_id", orgId);
+  if ((clients?.length ?? 0) >= limit) return `This org is on the ${plan.name} plan, which allows up to ${limit} clients. Upgrade the plan to add more.`;
+  return null;
 }
 
 const stateOf = (s: any) => (!s ? "logging" : s.paid_at ? "paid" : "settled") as "logging" | "settled" | "paid";
@@ -294,28 +321,24 @@ app.use(
 app.get(`${P}/health`, (c) => c.json({ status: "ok" }));
 
 // ---- signup (anon) -----------------------------------------------------
-// Locked to invited emails only: the very first-ever account bootstraps as
-// Department Head (there's no one to have invited them yet); every account
-// after that MUST have a matching pending invite, or signup is rejected
-// before any auth user is even created. "First-ever" is scoped per org.
+// Locked to invited emails only, and multi-org aware: the org (or Bizqwik-team
+// membership) a new account joins is decided entirely by which invite their
+// email matches — never by "the one org that exists," since there can now be
+// many. A Bizqwik-team invite creates a team member (no org, no profile); a
+// staff invite creates that org's profile. No match → rejected before any auth
+// user is created.
 app.post(`${P}/signup`, async (c) => {
   try {
     const { name, email, password } = await c.req.json();
     if (!email || !password) return c.json({ error: "Email and password required" }, 400);
     const normalizedEmail = String(email).toLowerCase();
     const displayName = String(name ?? "").trim() || email;
-    const orgId = await defaultOrgId();
 
-    const { data: existing, error: exErr } = await admin().from("profiles").select("id").eq("org_id", orgId);
-    if (exErr) throw exErr;
-    const isFirstEver = (existing?.length ?? 0) === 0;
-
-    let invite: any = null;
-    if (!isFirstEver) {
-      const { data: inv } = await admin().from("staff_invitations").select("*").eq("org_id", orgId).eq("email", normalizedEmail).maybeSingle();
-      invite = inv;
-      if (!invite) return c.json({ error: "You're not part of this organization." }, 403);
-    }
+    const { data: teamInvite } = await admin().from("bizqwik_team_invitations").select("*").eq("email", normalizedEmail).maybeSingle();
+    const { data: staffInvite } = teamInvite
+      ? { data: null }
+      : await admin().from("staff_invitations").select("*").eq("email", normalizedEmail).maybeSingle();
+    if (!teamInvite && !staffInvite) return c.json({ error: "You're not part of this organization." }, 403);
 
     const { data: created, error: cErr } = await admin().auth.admin.createUser({
       email,
@@ -325,30 +348,24 @@ app.post(`${P}/signup`, async (c) => {
     if (cErr || !created?.user) return c.json({ error: cErr?.message || "Sign up failed" }, 400);
     const uid = created.user.id;
 
-    let role = "coach";
-    let tierId: string | null = null;
-
-    if (isFirstEver) {
-      role = "dept_head";
-      const { data: tiers } = await admin().from("tiers").select("id").eq("org_id", orgId);
-      if (!tiers || tiers.length === 0) {
-        await admin().from("tiers").insert([
-          { org_id: orgId, name: "Tier 1", hourly_rate: 150, private_cut_pct: 50 },
-          { org_id: orgId, name: "Tier 2", hourly_rate: 250, private_cut_pct: 50 },
-        ]);
-      }
-    } else {
-      role = invite.role;
-      tierId = invite.tier_id;
-      await admin().from("staff_invitations").delete().eq("id", invite.id);
+    if (teamInvite) {
+      const { data: member, error: mErr } = await admin()
+        .from("bizqwik_team")
+        .insert({ id: uid, name: displayName, email: normalizedEmail, role: teamInvite.role, invited_by: teamInvite.invited_by })
+        .select()
+        .single();
+      if (mErr) throw mErr;
+      await admin().from("bizqwik_team_invitations").delete().eq("id", teamInvite.id);
+      return c.json({ bizqwikTeam: toBizqwikTeam(member) });
     }
 
     const { data: profile, error: pErr } = await admin()
       .from("profiles")
-      .insert({ id: uid, org_id: orgId, role, name: displayName, email, tier_id: tierId, avatar_url: null })
+      .insert({ id: uid, org_id: staffInvite.org_id, role: staffInvite.role, name: displayName, email, tier_id: staffInvite.tier_id, avatar_url: null })
       .select()
       .single();
     if (pErr) throw pErr;
+    await admin().from("staff_invitations").delete().eq("id", staffInvite.id);
 
     return c.json({ profile: toProfile(profile) });
   } catch (e) {
@@ -357,13 +374,19 @@ app.post(`${P}/signup`, async (c) => {
 });
 
 // ---- me ----------------------------------------------------------------
+// Returns whichever identities the caller holds: an org profile (staff) and/or
+// bizqwik_team membership (ops). At least one must exist.
 app.get(`${P}/me`, async (c) => {
   const user = await requireUser(c);
   if (!user) return c.json({ error: "Unauthorized" }, 401);
-  const profile = await profileOf(user.id);
-  if (!profile) return c.json({ error: "No profile" }, 404);
-  const tier = profile.tier_id ? await tierOf(profile.tier_id) : null;
-  return c.json({ profile: toProfile(profile), tier: tier ? toTier(tier) : null });
+  const [profile, team] = await Promise.all([profileOf(user.id), bizqwikTeamOf(user.id)]);
+  if (!profile && !team) return c.json({ error: "No profile" }, 404);
+  const tier = profile?.tier_id ? await tierOf(profile.tier_id) : null;
+  return c.json({
+    profile: profile ? toProfile(profile) : null,
+    tier: tier ? toTier(tier) : null,
+    bizqwikTeam: team ? toBizqwikTeam(team) : null,
+  });
 });
 
 // Self-service: change your own display name and/or avatar photo.
@@ -708,6 +731,8 @@ app.post(`${P}/invites`, async (c) => {
   const user = await requireUser(c);
   const me = user && (await profileOf(user.id));
   if (me?.role !== "dept_head") return c.json({ error: "Forbidden" }, 403);
+  const limitErr = await planLimitError(me.org_id, "team");
+  if (limitErr) return c.json({ error: limitErr }, 400);
   const { email, role, tierId } = await c.req.json();
   const normalizedEmail = String(email).toLowerCase();
   const { data, error } = await admin()
@@ -957,6 +982,8 @@ app.post(`${P}/clients`, async (c) => {
   if (!name || !String(name).trim() || !bundleTypeId || !coachId) {
     return c.json({ error: "Name, bundle, and coach are all required to create a client." }, 400);
   }
+  const limitErr = await planLimitError(me.org_id, "client");
+  if (limitErr) return c.json({ error: limitErr }, 400);
 
   const client = await insertClient(me, { name, age, phone, email });
 
@@ -1097,6 +1124,8 @@ app.post(`${P}/memberships/sell`, async (c) => {
     }
   } else {
     if (!name || !String(name).trim()) return c.json({ error: "Name is required." }, 400);
+    const limitErr = await planLimitError(me.org_id, "client");
+    if (limitErr) return c.json({ error: limitErr }, 400);
     client = await insertClient(me, { name, age, phone, email });
     createdNow = true;
   }
@@ -1567,6 +1596,317 @@ app.post(`${P}/pay`, async (c) => {
     .single();
   if (error) throw error;
   return c.json({ settlement: toSettlement(updated) });
+});
+
+// ================= Bizqwik ops dashboard (bizqwik_team only) =================
+// A bizqwik_team member runs Bizqwik itself, across every org. These endpoints
+// are gated on team membership (not any org role) and use the service-role
+// client to read/write across orgs, the same shape as `is_bizqwik_team()`'s
+// RLS bypass but enforced here in code.
+const OPS_ORG_STATUSES = ["trial", "active", "paused"];
+const OPS_INVITE_ROLES = ["ops_manager", "teammate"];
+
+function toPlanType(row: any) {
+  return { id: row.id, name: row.name, price: Number(row.price), teamSizeLimit: row.team_size_limit, clientSizeLimit: row.client_size_limit };
+}
+
+async function gmvByOrg(): Promise<Map<string, number>> {
+  const [pkgs, mems, memTypes, drops] = await Promise.all([
+    admin().from("package_instances").select("org_id, price_at_sale"),
+    admin().from("membership_instances").select("org_id, membership_type_id"),
+    admin().from("membership_types").select("id, price"),
+    admin().from("drop_ins").select("org_id, price"),
+  ]);
+  const priceOfType = new Map((memTypes.data ?? []).map((t: any) => [t.id, Number(t.price)]));
+  const m = new Map<string, number>();
+  const add = (org: string, v: number) => m.set(org, (m.get(org) ?? 0) + v);
+  for (const p of pkgs.data ?? []) add(p.org_id, Number(p.price_at_sale));
+  for (const mi of mems.data ?? []) add(mi.org_id, priceOfType.get(mi.membership_type_id) ?? 0);
+  for (const d of drops.data ?? []) add(d.org_id, Number(d.price));
+  return m;
+}
+
+async function countsByOrg(): Promise<{ staff: Map<string, number>; clients: Map<string, number> }> {
+  const [profiles, clients] = await Promise.all([
+    admin().from("profiles").select("org_id"),
+    admin().from("clients").select("org_id"),
+  ]);
+  const tally = (rows: any[]) => {
+    const m = new Map<string, number>();
+    for (const r of rows) m.set(r.org_id, (m.get(r.org_id) ?? 0) + 1);
+    return m;
+  };
+  return { staff: tally(profiles.data ?? []), clients: tally(clients.data ?? []) };
+}
+
+app.get(`${P}/ops/summary`, async (c) => {
+  const user = await requireUser(c);
+  const team = user && (await bizqwikTeamOf(user.id));
+  if (!team) return c.json({ error: "Forbidden" }, 403);
+
+  const [{ data: orgs }, { data: plans }, gmv] = await Promise.all([
+    admin().from("organizations").select("id, status, plan_id"),
+    admin().from("plan_types").select("id, price"),
+    gmvByOrg(),
+  ]);
+  const priceOfPlan = new Map((plans ?? []).map((p: any) => [p.id, Number(p.price)]));
+  const activeOrgs = (orgs ?? []).filter((o: any) => o.status === "active");
+  const bizqwikRevenue = activeOrgs.reduce((s: number, o: any) => s + (o.plan_id ? (priceOfPlan.get(o.plan_id) ?? 0) : 0), 0);
+  let totalGmv = 0;
+  for (const v of gmv.values()) totalGmv += v;
+  return c.json({
+    totalOrgs: (orgs ?? []).length,
+    activeOrgs: activeOrgs.length,
+    totalGmv,
+    bizqwikRevenue,
+  });
+});
+
+app.get(`${P}/ops/orgs`, async (c) => {
+  const user = await requireUser(c);
+  const team = user && (await bizqwikTeamOf(user.id));
+  if (!team) return c.json({ error: "Forbidden" }, 403);
+
+  const [{ data: orgs }, { data: plans }, gmv, counts] = await Promise.all([
+    admin().from("organizations").select("*").order("created_at"),
+    admin().from("plan_types").select("id, name"),
+    gmvByOrg(),
+    countsByOrg(),
+  ]);
+  const planName = new Map((plans ?? []).map((p: any) => [p.id, p.name]));
+  return c.json({
+    orgs: (orgs ?? []).map((o: any) => ({
+      id: o.id,
+      name: o.name,
+      slug: o.slug,
+      status: o.status,
+      planId: o.plan_id ?? null,
+      planName: o.plan_id ? (planName.get(o.plan_id) ?? null) : null,
+      staffCount: counts.staff.get(o.id) ?? 0,
+      clientCount: counts.clients.get(o.id) ?? 0,
+      gmv: gmv.get(o.id) ?? 0,
+    })),
+  });
+});
+
+app.post(`${P}/ops/orgs`, async (c) => {
+  const user = await requireUser(c);
+  const team = user && (await bizqwikTeamOf(user.id));
+  if (!team) return c.json({ error: "Forbidden" }, 403);
+
+  const { name, slug, planId, deptHeadName, deptHeadEmail } = await c.req.json();
+  const orgName = String(name ?? "").trim();
+  const orgSlug = String(slug ?? "").trim().toLowerCase().replace(/[^a-z0-9-]/g, "");
+  const headEmail = String(deptHeadEmail ?? "").trim().toLowerCase();
+  if (!orgName) return c.json({ error: "Organization name is required." }, 400);
+  if (!orgSlug) return c.json({ error: "A URL slug (letters, numbers, dashes) is required." }, 400);
+  if (!/^\S+@\S+\.\S+$/.test(headEmail)) return c.json({ error: "A valid department-head email is required." }, 400);
+
+  const { data: clash } = await admin().from("organizations").select("id").eq("slug", orgSlug).maybeSingle();
+  if (clash) return c.json({ error: "That slug is already taken." }, 400);
+
+  const { data: org, error: oErr } = await admin()
+    .from("organizations")
+    .insert({ name: orgName, slug: orgSlug, status: "trial", plan_id: planId || null, created_by: team.id })
+    .select()
+    .single();
+  if (oErr) throw oErr;
+
+  // Same starter tiers the old first-account bootstrap seeded, so a new org's
+  // dept_head lands with something to assign coaches to (all editable).
+  await admin().from("tiers").insert([
+    { org_id: org.id, name: "Tier 1", hourly_rate: 150, private_cut_pct: 50 },
+    { org_id: org.id, name: "Tier 2", hourly_rate: 250, private_cut_pct: 50 },
+  ]);
+
+  // invited_by is left null: staff_invitations.invited_by references
+  // profiles(id), and a bizqwik_team member (the ops actor) has no org profile,
+  // so team.id would violate that FK. Surface any failure instead of swallowing
+  // it — a created org whose dept_head can't sign up is worse than a loud error.
+  const { error: invErr } = await admin().from("staff_invitations").upsert(
+    { org_id: org.id, email: headEmail, role: "dept_head", tier_id: null, invited_by: null },
+    { onConflict: "org_id,email" },
+  );
+  if (invErr) throw invErr;
+
+  return c.json({ org: { id: org.id, name: org.name, slug: org.slug, status: org.status, planId: org.plan_id ?? null }, deptHeadEmail: headEmail });
+});
+
+app.get(`${P}/ops/orgs/:id`, async (c) => {
+  const user = await requireUser(c);
+  const team = user && (await bizqwikTeamOf(user.id));
+  if (!team) return c.json({ error: "Forbidden" }, 403);
+  const id = c.req.param("id");
+
+  const { data: org } = await admin().from("organizations").select("*").eq("id", id).maybeSingle();
+  if (!org) return c.json({ error: "No such organization" }, 404);
+  const plan = org.plan_id ? (await admin().from("plan_types").select("*").eq("id", org.plan_id).maybeSingle()).data : null;
+
+  const [staff, sessions, packages, memberships, dropIns, pendingInvites] = await Promise.all([
+    admin().from("profiles").select("*").eq("org_id", id).order("name"),
+    admin().from("sessions").select("id, created_at").eq("org_id", id),
+    admin().from("package_instances").select("id, price_at_sale, created_at").eq("org_id", id),
+    admin().from("membership_instances").select("id, membership_type_id, created_at").eq("org_id", id),
+    admin().from("drop_ins").select("id, price, created_at").eq("org_id", id),
+    admin().from("staff_invitations").select("email, role").eq("org_id", id),
+  ]);
+  const gmv = (await gmvByOrg()).get(id) ?? 0;
+  const times = [...(sessions.data ?? []), ...(packages.data ?? []), ...(memberships.data ?? []), ...(dropIns.data ?? [])]
+    .map((r: any) => r.created_at)
+    .filter(Boolean)
+    .sort((a: string, b: string) => Date.parse(b) - Date.parse(a));
+
+  return c.json({
+    org: {
+      id: org.id,
+      name: org.name,
+      slug: org.slug,
+      status: org.status,
+      planId: org.plan_id ?? null,
+      planName: plan?.name ?? null,
+      createdAt: org.created_at,
+    },
+    plan: plan ? toPlanType(plan) : null,
+    staff: (staff.data ?? []).map(toProfile),
+    pendingInvites: (pendingInvites.data ?? []).map((i: any) => ({ email: i.email, role: i.role })),
+    usage: {
+      staffCount: (staff.data ?? []).length,
+      clientCount: (await admin().from("clients").select("id").eq("org_id", id)).data?.length ?? 0,
+      sessionsLogged: (sessions.data ?? []).length,
+      packagesSold: (packages.data ?? []).length,
+      membershipsSold: (memberships.data ?? []).length,
+      dropInsSold: (dropIns.data ?? []).length,
+      gmv,
+      lastActivity: times[0] ?? null,
+    },
+  });
+});
+
+app.post(`${P}/ops/orgs/:id/status`, async (c) => {
+  const user = await requireUser(c);
+  const team = user && (await bizqwikTeamOf(user.id));
+  if (!team) return c.json({ error: "Forbidden" }, 403);
+  const id = c.req.param("id");
+  const { status } = await c.req.json();
+  if (!OPS_ORG_STATUSES.includes(status)) return c.json({ error: "Invalid status." }, 400);
+  const { data, error } = await admin().from("organizations").update({ status }).eq("id", id).select().maybeSingle();
+  if (error) throw error;
+  if (!data) return c.json({ error: "No such organization" }, 404);
+  return c.json({ ok: true, status: data.status });
+});
+
+app.post(`${P}/ops/orgs/:id/plan`, async (c) => {
+  const user = await requireUser(c);
+  const team = user && (await bizqwikTeamOf(user.id));
+  if (!team) return c.json({ error: "Forbidden" }, 403);
+  const id = c.req.param("id");
+  const { planId } = await c.req.json();
+  if (planId) {
+    const { data: plan } = await admin().from("plan_types").select("id").eq("id", planId).maybeSingle();
+    if (!plan) return c.json({ error: "No such plan" }, 404);
+  }
+  const { data, error } = await admin().from("organizations").update({ plan_id: planId || null }).eq("id", id).select().maybeSingle();
+  if (error) throw error;
+  if (!data) return c.json({ error: "No such organization" }, 404);
+  return c.json({ ok: true, planId: data.plan_id ?? null });
+});
+
+app.get(`${P}/ops/team`, async (c) => {
+  const user = await requireUser(c);
+  const team = user && (await bizqwikTeamOf(user.id));
+  if (!team) return c.json({ error: "Forbidden" }, 403);
+  const [members, invites] = await Promise.all([
+    admin().from("bizqwik_team").select("*").order("created_at"),
+    admin().from("bizqwik_team_invitations").select("*").order("created_at"),
+  ]);
+  return c.json({
+    members: (members.data ?? []).map(toBizqwikTeam),
+    invites: (invites.data ?? []).map((i: any) => ({ email: i.email, name: i.name, role: i.role })),
+  });
+});
+
+app.post(`${P}/ops/team/invite`, async (c) => {
+  const user = await requireUser(c);
+  const team = user && (await bizqwikTeamOf(user.id));
+  if (!team) return c.json({ error: "Forbidden" }, 403);
+  const { name, email, role } = await c.req.json();
+  const normalizedEmail = String(email ?? "").trim().toLowerCase();
+  if (!/^\S+@\S+\.\S+$/.test(normalizedEmail)) return c.json({ error: "A valid email is required." }, 400);
+  if (!OPS_INVITE_ROLES.includes(role)) return c.json({ error: "Choose a role." }, 400);
+  const { data: existing } = await admin().from("bizqwik_team").select("id").eq("email", normalizedEmail).maybeSingle();
+  if (existing) return c.json({ error: "That person is already on the Bizqwik team." }, 400);
+  const { error } = await admin().from("bizqwik_team_invitations").upsert(
+    { email: normalizedEmail, name: String(name ?? "").trim() || null, role, invited_by: team.id },
+    { onConflict: "email" },
+  );
+  if (error) throw error;
+  return c.json({ ok: true });
+});
+
+app.post(`${P}/ops/team/cancel-invite`, async (c) => {
+  const user = await requireUser(c);
+  const team = user && (await bizqwikTeamOf(user.id));
+  if (!team) return c.json({ error: "Forbidden" }, 403);
+  const { email } = await c.req.json();
+  await admin().from("bizqwik_team_invitations").delete().eq("email", String(email ?? "").trim().toLowerCase());
+  return c.json({ ok: true });
+});
+
+app.get(`${P}/ops/plans`, async (c) => {
+  const user = await requireUser(c);
+  const team = user && (await bizqwikTeamOf(user.id));
+  if (!team) return c.json({ error: "Forbidden" }, 403);
+  const { data, error } = await admin().from("plan_types").select("*").order("price");
+  if (error) throw error;
+  return c.json({ plans: (data ?? []).map(toPlanType) });
+});
+
+function planFields(body: any) {
+  const name = String(body.name ?? "").trim();
+  const price = Number(body.price);
+  const teamSizeLimit = body.teamSizeLimit === null || body.teamSizeLimit === "" || body.teamSizeLimit === undefined ? null : Number(body.teamSizeLimit);
+  const clientSizeLimit = body.clientSizeLimit === null || body.clientSizeLimit === "" || body.clientSizeLimit === undefined ? null : Number(body.clientSizeLimit);
+  if (!name) return { error: "Name is required." } as const;
+  if (!Number.isFinite(price) || price < 0) return { error: "Price must be zero or more." } as const;
+  if (teamSizeLimit !== null && (!Number.isInteger(teamSizeLimit) || teamSizeLimit < 1)) return { error: "Team limit must be a whole number of 1 or more, or blank for unlimited." } as const;
+  if (clientSizeLimit !== null && (!Number.isInteger(clientSizeLimit) || clientSizeLimit < 1)) return { error: "Client limit must be a whole number of 1 or more, or blank for unlimited." } as const;
+  return { row: { name, price, team_size_limit: teamSizeLimit, client_size_limit: clientSizeLimit } } as const;
+}
+
+app.post(`${P}/ops/plans`, async (c) => {
+  const user = await requireUser(c);
+  const team = user && (await bizqwikTeamOf(user.id));
+  if (!team) return c.json({ error: "Forbidden" }, 403);
+  const parsed = planFields(await c.req.json());
+  if ("error" in parsed) return c.json({ error: parsed.error }, 400);
+  const { data, error } = await admin().from("plan_types").insert(parsed.row).select().single();
+  if (error) throw error;
+  return c.json({ plan: toPlanType(data) });
+});
+
+app.post(`${P}/ops/plans/update`, async (c) => {
+  const user = await requireUser(c);
+  const team = user && (await bizqwikTeamOf(user.id));
+  if (!team) return c.json({ error: "Forbidden" }, 403);
+  const body = await c.req.json();
+  const parsed = planFields(body);
+  if ("error" in parsed) return c.json({ error: parsed.error }, 400);
+  const { data, error } = await admin().from("plan_types").update(parsed.row).eq("id", body.id).select().maybeSingle();
+  if (error) throw error;
+  if (!data) return c.json({ error: "No such plan" }, 404);
+  return c.json({ plan: toPlanType(data) });
+});
+
+app.post(`${P}/ops/plans/delete`, async (c) => {
+  const user = await requireUser(c);
+  const team = user && (await bizqwikTeamOf(user.id));
+  if (!team) return c.json({ error: "Forbidden" }, 403);
+  const { id } = await c.req.json();
+  const { data: inUse } = await admin().from("organizations").select("id").eq("plan_id", id).limit(1);
+  if ((inUse?.length ?? 0) > 0) return c.json({ error: "An organization is on this plan — move it to another plan first." }, 400);
+  const { error } = await admin().from("plan_types").delete().eq("id", id);
+  if (error) throw error;
+  return c.json({ ok: true });
 });
 
 Deno.serve(app.fetch);
