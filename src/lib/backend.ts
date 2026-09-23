@@ -4,7 +4,29 @@
 // keeps working (see supabaseClient.ts for which project it targets).
 import { FN_SLUG, supabase } from "./supabaseClient";
 import { bump } from "./bus";
-import type { BundleType, Client, ClientWithPackage, Invite, PackageInstance, PackageWithNames, Profile, Role, Rollup, Session, Tier } from "./types";
+import type {
+  BundleType,
+  Client,
+  ClientWithPackage,
+  CoachOption,
+  FrontDeskSummary,
+  Invite,
+  MembershipInstance,
+  MembershipType,
+  PackageInstance,
+  PackageWithNames,
+  Profile,
+  Role,
+  Rollup,
+  Session,
+  Tier,
+} from "./types";
+
+export interface NewClientFields {
+  name: string;
+  phone: string | null;
+  email: string | null;
+}
 
 type Method = "GET" | "POST";
 
@@ -112,6 +134,28 @@ export const api = {
   settle: (coachId: string, month: string) => callFn<void>("settle", { method: "POST", body: { coachId, month } }),
   reopen: (coachId: string, month: string) => callFn<void>("reopen", { method: "POST", body: { coachId, month } }),
   pay: (coachId: string, month: string) => callFn<void>("pay", { method: "POST", body: { coachId, month } }),
+
+  membershipTypes: () => callFn<{ membershipTypes: MembershipType[] }>("membership-types"),
+  createMembershipType: (name: string, durationDays: number, price: number, invitationsAllowance: number) =>
+    callFn<{ membershipType: MembershipType }>("membership-types", { method: "POST", body: { name, durationDays, price, invitationsAllowance } }),
+  updateMembershipType: (id: string, name: string, durationDays: number, price: number, invitationsAllowance: number) =>
+    callFn<void>("membership-types/update", { method: "POST", body: { id, name, durationDays, price, invitationsAllowance } }),
+  deleteMembershipType: (id: string) => callFn<void>("membership-types/delete", { method: "POST", body: { id } }),
+
+  // Front desk. Coach names only — no payout data, unlike month().
+  coaches: () => callFn<{ coaches: CoachOption[] }>("coaches"),
+  createServiceClient: (fields: NewClientFields, bundleTypeId: string, coachId: string) =>
+    callFn<{ client: Client; package: PackageInstance }>("clients", { method: "POST", body: { ...fields, bundleTypeId, coachId } }),
+  sellMembership: (target: { clientId: string } | NewClientFields, membershipTypeId: string) =>
+    callFn<{ client: ClientWithPackage; membership: MembershipInstance }>("memberships/sell", { method: "POST", body: { ...target, membershipTypeId } }),
+  assignCoach: (id: string, coachId: string) => callFn<{ client: Client }>("clients/assign-coach", { method: "POST", body: { id, coachId } }),
+  frontDeskSummary: () => callFn<FrontDeskSummary>("front-desk/summary"),
+  clientStatus: (id: string) => callFn<{ client: ClientWithPackage; eligible: boolean }>(`front-desk/client-status/${encodeURIComponent(id)}`),
+  checkIn: (clientId: string, source: "qr" | "manual") => callFn<void>("check-ins", { method: "POST", body: { clientId, source } }),
+  dropIn: (clientId: string | null, category: string, price: number) =>
+    callFn<void>("drop-ins", { method: "POST", body: { clientId, category, price } }),
+  invite: (clientId: string, inviteeName: string, inviteePhone: string, visitDate: string) =>
+    callFn<{ invitationsRemaining: number }>("invitations", { method: "POST", body: { clientId, inviteeName, inviteePhone, visitDate } }),
 
   pushVapidPublicKey: () => callFn<{ publicKey: string }>("push/vapid-public-key"),
   pushSubscribe: (sub: PushSubscriptionJSON, deviceId: string) =>

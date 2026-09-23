@@ -1,4 +1,4 @@
-export type Role = "dept_head" | "head_coach" | "coach" | "accountant";
+export type Role = "dept_head" | "head_coach" | "coach" | "accountant" | "front_desk";
 export type State = "logging" | "settled" | "paid";
 
 export interface Profile {
@@ -63,8 +63,51 @@ export interface Client {
   id: string;
   name: string;
   age: number | null;
+  phone?: string | null;
+  email?: string | null;
   conditions: string | null;
   assignedCoachId: string | null;
+}
+
+export interface MembershipType {
+  id: string;
+  name: string;
+  durationDays: number;
+  price: number;
+  invitationsAllowance: number;
+}
+
+export type MembershipStatus = "active" | "expired";
+
+export interface MembershipInstance {
+  id: string;
+  clientId: string;
+  membershipTypeId: string;
+  startDate: string;
+  expiryDate: string;
+  status: MembershipStatus;
+  invitationsRemaining: number;
+}
+
+export interface CoachOption {
+  id: string;
+  name: string;
+  avatarUrl: string | null;
+}
+
+export interface FrontDeskActivity {
+  id: string;
+  kind: "check_in" | "drop_in";
+  name: string;
+  detail: string;
+  at: string;
+}
+
+export interface FrontDeskSummary {
+  todayCheckIns: number;
+  todayDropIns: number;
+  activeNow: number;
+  recent: FrontDeskActivity[];
 }
 
 export type PackageStatus = "active" | "exhausted" | "expired";
@@ -86,6 +129,7 @@ export interface PackageInstance {
 
 export interface ClientWithPackage extends Client {
   currentPackage: PackageInstance | null;
+  currentMembership?: MembershipInstance | null;
 }
 
 // Coach payout drill-down row — a package plus the names needed to show it
@@ -115,12 +159,15 @@ export const isHead = (r?: Role) => r === "dept_head" || r === "head_coach";
 // personal group sessions, no My Month, not a private-training coach) —
 // revisit if v2 brings that back.
 export const canLog = (r?: Role) => r === "coach" || r === "head_coach";
+// Roles paid per session, so a pay tier means something for them.
+export const hasTier = (r?: Role) => r === "coach" || r === "head_coach" || r === "dept_head";
 
 export const ROLE_LABELS: Record<Role, string> = {
   dept_head: "Department Head",
   head_coach: "Head Coach",
   coach: "Coach",
   accountant: "Head Accountant",
+  front_desk: "Front Desk",
 };
 
 export const STATE_LABELS: Record<State, string> = {

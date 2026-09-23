@@ -7,7 +7,7 @@ import { Avatar } from "../components/Avatar";
 import { Button } from "../components/Button";
 import { Icon } from "../components/Icon";
 import { TextField } from "../components/FormField";
-import { ROLE_LABELS } from "../lib/types";
+import { ROLE_LABELS, hasTier } from "../lib/types";
 
 // Self-service photo upload/removal is turned off for the time being —
 // avatars are being set manually. Flip this back on to restore it.
@@ -209,8 +209,8 @@ export function AccountProfile() {
 
       <div data-sq style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: "6px 4px", marginBottom: 12 }}>
         <Row k="EMAIL" v={profile.email} />
-        <Row k="ROLE" v={ROLE_LABELS[profile.role]} last={profile.role === "accountant"} />
-        {profile.role !== "accountant" && (
+        <Row k="ROLE" v={ROLE_LABELS[profile.role]} last={!hasTier(profile.role)} />
+        {hasTier(profile.role) && (
           <Row k="TIER" v={tier ? `${tier.name} · ${tier.rate} EGP / session` : "Not assigned"} last />
         )}
       </div>
