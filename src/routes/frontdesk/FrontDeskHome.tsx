@@ -50,30 +50,34 @@ export function FrontDeskHome() {
       <SectionTitle>Quick actions</SectionTitle>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 24 }}>
         {ACTIONS.map((a) => (
-          <button
-            key={a.key}
-            data-sq
-            data-tap
-            onClick={() => navigate(a.to)}
-            style={{
-              minHeight: 120,
-              borderRadius: "var(--r-card)",
-              border: a.primary ? 0 : "1px solid var(--line)",
-              background: a.primary ? "var(--primary)" : "var(--surface)",
-              color: a.primary ? "var(--surface)" : "var(--ink)",
-              boxShadow: a.primary ? "0 12px 30px rgba(90,65,255,.28)" : "none",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "flex-start",
-              justifyContent: "space-between",
-              padding: 18,
-              cursor: "pointer",
-              textAlign: "left",
-            }}
-          >
-            <Icon name={a.icon} size={28} />
-            <span style={{ font: "700 16px/1.2 var(--font-body)" }}>{a.label}</span>
-          </button>
+          // The shadow lives on this unclipped wrapper as a drop-shadow so it
+          // traces the tile's squircle outline; a box-shadow on the tile
+          // itself keeps plain rounded corners and pokes out past the curve.
+          <div key={a.key} style={{ display: "flex", filter: a.primary ? "drop-shadow(0 12px 22px rgba(90,65,255,.28))" : undefined }}>
+            <button
+              data-sq
+              data-tap
+              onClick={() => navigate(a.to)}
+              style={{
+                flex: 1,
+                minHeight: 120,
+                borderRadius: "var(--r-card)",
+                border: a.primary ? 0 : "1px solid var(--line)",
+                background: a.primary ? "var(--primary)" : "var(--surface)",
+                color: a.primary ? "var(--surface)" : "var(--ink)",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "flex-start",
+                justifyContent: "space-between",
+                padding: 18,
+                cursor: "pointer",
+                textAlign: "left",
+              }}
+            >
+              <Icon name={a.icon} size={28} />
+              <span style={{ font: "700 16px/1.2 var(--font-body)" }}>{a.label}</span>
+            </button>
+          </div>
         ))}
       </div>
 
