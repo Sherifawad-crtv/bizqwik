@@ -486,7 +486,7 @@ function PeoplePanel() {
           <button
             key={p.id}
             onClick={() => setEditing(p)}
-            style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 20px", borderBottom: i === data.profiles.length - 1 ? "none" : "1px solid var(--line)", width: "100%", border: 0, background: "none", cursor: "pointer", textAlign: "left" }}
+            style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 20px", border: 0, borderBottom: i === data.profiles.length - 1 ? "none" : "1px solid var(--line)", width: "100%", background: "none", cursor: "pointer", textAlign: "left" }}
         >
             <Avatar name={p.name} size={36} src={p.avatarUrl} />
             <div style={{ minWidth: 0, flex: 1 }}>
