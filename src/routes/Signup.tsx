@@ -19,6 +19,7 @@ export function Signup() {
   const isMobile = useIsMobile();
   const keyboardInset = useKeyboardInset(isMobile);
   const keyboardOpen = keyboardInset > KEYBOARD_THRESHOLD;
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -39,7 +40,7 @@ export function Signup() {
       // invite (or is the very first account ever) — otherwise it rejects
       // with "You're not part of this organization." Doesn't itself
       // establish a session, so sign in right after, same as the login screen.
-      await api.signup(email.trim(), password);
+      await api.signup(name.trim(), email.trim(), password);
       await login(email.trim(), password);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
@@ -71,6 +72,7 @@ export function Signup() {
         </div>
 
         <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          <TextField label="NAME" type="text" required autoComplete="name" value={name} onChange={(e) => setName(e.target.value)} onFocus={focusIntoView} />
           <TextField label="EMAIL" type="email" required autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} onFocus={focusIntoView} />
           <TextField
             label="PASSWORD"

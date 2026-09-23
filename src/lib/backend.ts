@@ -54,8 +54,8 @@ export const auth = {
 };
 
 export const api = {
-  signup: (email: string, password: string) =>
-    callFn<{ profile: Profile }>("signup", { method: "POST", body: { email, password } }),
+  signup: (name: string, email: string, password: string) =>
+    callFn<{ profile: Profile }>("signup", { method: "POST", body: { name, email, password } }),
 
   me: () => callFn<{ profile: Profile; tier: Tier | null }>("me"),
   updateMe: (name: string) => callFn<{ profile: Profile }>("me/update", { method: "POST", body: { name } }),

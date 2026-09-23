@@ -86,6 +86,12 @@ export function Login() {
               style={{ display: "block", width: "100%", border: 0, background: "none", outline: "none", font: "600 16px var(--font-body)", color: "var(--ink)", padding: "2px 0 0" }}
             />
           </label>
+          <Link
+            to="/forgot-password"
+            style={{ textAlign: "right", font: "700 13px var(--font-body)", color: "var(--ink-muted)" }}
+          >
+            Forgot password?
+          </Link>
 
           {error && (
             <div style={{ font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>
@@ -97,14 +103,8 @@ export function Login() {
             {busy ? "Signing in…" : "Sign in"}
           </Button>
           <Link
-            to="/forgot-password"
-            style={{ textAlign: "center", font: "700 13px var(--font-body)", color: "var(--ink-muted)", marginTop: 4 }}
-          >
-            Forgot password?
-          </Link>
-          <Link
             to="/signup"
-            style={{ textAlign: "center", font: "700 13px var(--font-body)", color: "var(--ink-muted)" }}
+            style={{ textAlign: "center", font: "700 13px var(--font-body)", color: "var(--primary)" }}
           >
             First time? Create an account
           </Link>

@@ -245,9 +245,10 @@ app.get(`${P}/health`, (c) => c.json({ status: "ok" }));
 // before any auth user is even created. "First-ever" is scoped per org.
 app.post(`${P}/signup`, async (c) => {
   try {
-    const { email, password } = await c.req.json();
+    const { name, email, password } = await c.req.json();
     if (!email || !password) return c.json({ error: "Email and password required" }, 400);
     const normalizedEmail = String(email).toLowerCase();
+    const displayName = String(name ?? "").trim() || email;
     const orgId = await defaultOrgId();
 
     const { data: existing, error: exErr } = await admin().from("profiles").select("id").eq("org_id", orgId);
@@ -289,7 +290,7 @@ app.post(`${P}/signup`, async (c) => {
 
     const { data: profile, error: pErr } = await admin()
       .from("profiles")
-      .insert({ id: uid, org_id: orgId, role, name: email, email, tier_id: tierId, avatar_url: null })
+      .insert({ id: uid, org_id: orgId, role, name: displayName, email, tier_id: tierId, avatar_url: null })
       .select()
       .single();
     if (pErr) throw pErr;
