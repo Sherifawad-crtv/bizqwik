@@ -618,15 +618,51 @@ app.post(`${P}/profiles/remove`, async (c) => {
   const profile = await profileOf(id);
   if (!profile || profile.org_id !== me.org_id) return c.json({ error: "No such profile" }, 404);
 
+  // Every FK into profiles is NO ACTION (no cascade), so this has to clear
+  // every reference by hand before the row itself can go. Split into two
+  // buckets: rows that are unambiguously this profile's own (safe to
+  // delete outright) vs. rows where they merely acted on someone ELSE's
+  // record (settled/paid/logged/sold on another coach's behalf) — deleting
+  // those would destroy a different, still-active coach's real history, so
+  // removal is blocked instead, same as the existing "reassign clients
+  // first" rule below.
+  const { data: assignedClients } = await admin().from("clients").select("id").eq("assigned_coach_id", id).eq("org_id", me.org_id);
+  if (assignedClients && assignedClients.length > 0) {
+    return c.json({ error: `Reassign ${assignedClients.length} client(s) to another coach before removing this profile.` }, 400);
+  }
+
+  const [otherSessions, otherSettled, otherPaid, otherPackages] = await Promise.all([
+    admin().from("sessions").select("id").eq("created_by", id).neq("coach_id", id).eq("org_id", me.org_id),
+    admin().from("settlements").select("id").eq("settled_by", id).neq("coach_id", id).eq("org_id", me.org_id),
+    admin().from("settlements").select("id").eq("paid_by", id).neq("coach_id", id).eq("org_id", me.org_id),
+    admin().from("package_instances").select("id").eq("created_by", id).neq("coach_id", id).eq("org_id", me.org_id),
+  ]);
+  const hasOtherRecords =
+    (otherSessions.data?.length ?? 0) > 0 ||
+    (otherSettled.data?.length ?? 0) > 0 ||
+    (otherPaid.data?.length ?? 0) > 0 ||
+    (otherPackages.data?.length ?? 0) > 0;
+  if (hasOtherRecords) {
+    return c.json({ error: "This profile has logged, settled, or sold packages on behalf of other coaches, so it can't be removed while those records exist." }, 400);
+  }
+
+  const { data: ownPackages } = await admin().from("package_instances").select("id").eq("coach_id", id).eq("org_id", me.org_id);
+  for (const pkg of ownPackages ?? []) {
+    await admin().from("delivery_logs").delete().eq("package_instance_id", pkg.id);
+  }
+  await admin().from("package_instances").delete().eq("coach_id", id).eq("org_id", me.org_id);
+  await admin().from("notification_log").delete().eq("profile_id", id);
+  await admin().from("staff_invitations").delete().eq("invited_by", id).eq("org_id", me.org_id);
   await admin().from("sessions").delete().eq("coach_id", id).eq("org_id", me.org_id);
   await admin().from("settlements").delete().eq("coach_id", id).eq("org_id", me.org_id);
   await admin().from("push_subscriptions").delete().eq("profile_id", id);
-  await admin().from("profiles").delete().eq("id", id);
-  try {
-    await admin().auth.admin.deleteUser(id);
-  } catch (_) {
-    // auth user may already be gone; profile removal is what matters
-  }
+
+  const { error: profileErr } = await admin().from("profiles").delete().eq("id", id);
+  if (profileErr) throw profileErr;
+
+  const { error: authErr } = await admin().auth.admin.deleteUser(id);
+  if (authErr) throw authErr;
+
   return c.json({ ok: true });
 });
 
