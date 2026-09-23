@@ -348,6 +348,17 @@ app.post(`${P}/push/subscribe`, async (c) => {
   const { endpoint, keys, deviceId } = await c.req.json();
   if (!endpoint || !keys?.p256dh || !keys?.auth) return c.json({ error: "Invalid subscription." }, 400);
   if (!deviceId) return c.json({ error: "Missing device id." }, 400);
+
+  // A device's endpoint is normally stable across resubscribes (same
+  // deviceId, upsert overwrites in place) — but iOS/Safari can silently
+  // rotate it, and a stale pre-fix row (different id, same endpoint) can
+  // still be sitting around from before deviceId existed. Either way, if
+  // some OTHER row for this profile already points at this endpoint, it's
+  // now stale — clear it first so it can never collide with the
+  // unique(profile_id, endpoint) constraint below, and this profile never
+  // ends up with two rows delivering to the same physical device.
+  await admin().from("push_subscriptions").delete().eq("profile_id", me.id).eq("endpoint", endpoint).neq("id", deviceId);
+
   const { error } = await admin()
     .from("push_subscriptions")
     .upsert({
