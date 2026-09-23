@@ -1,21 +1,7 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
-import QRCode from "qrcode";
-import { Sheet } from "../../components/Sheet";
-import { Button } from "../../components/Button";
+import { useMemo, useState, type ReactNode } from "react";
 import { Icon } from "../../components/Icon";
 import type { BundleType, ClientWithPackage, MembershipType } from "../../lib/types";
 import { dateLabel } from "../../lib/format";
-import { useLatch } from "../../lib/useLatch";
-
-// Same code format as the Figma Make admin prototype, so printed member
-// cards and the scanner agree: BIZQWIK-CLIENT-<client uuid>.
-const CODE_PREFIX = "BIZQWIK-CLIENT-";
-export const memberCode = (clientId: string) => `${CODE_PREFIX}${clientId}`;
-export function parseMemberCode(text: string): string | null {
-  const raw = text.trim();
-  const id = raw.startsWith(CODE_PREFIX) ? raw.slice(CODE_PREFIX.length) : raw;
-  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id) ? id : null;
-}
 
 export type PlanTone = "active" | "expired" | "none";
 
@@ -166,48 +152,5 @@ export function ClientPicker({
         {shown.length === 0 && <div style={{ padding: "22px 18px", textAlign: "center", color: "var(--ink-faint)", font: "500 14px var(--font-body)" }}>{emptyText}</div>}
       </Card>
     </div>
-  );
-}
-
-/** The client's scannable member code, for printing on a card or showing on
- * their phone. Generated on the fly from their id — nothing is stored. */
-export function MemberQrSheet({ client, onClose }: { client: { id: string; name: string } | null; onClose: () => void }) {
-  const [src, setSrc] = useState<string | null>(null);
-  const shown = useLatch(client);
-
-  useEffect(() => {
-    if (!client) return;
-    let alive = true;
-    setSrc(null);
-    QRCode.toDataURL(memberCode(client.id), { width: 480, margin: 1, errorCorrectionLevel: "M" }).then((url) => {
-      if (alive) setSrc(url);
-    });
-    return () => {
-      alive = false;
-    };
-  }, [client]);
-
-  return (
-    <Sheet open={!!client} onClose={onClose}>
-      <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>MEMBER CODE</div>
-      <div style={{ font: "800 26px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 16px" }}>{shown?.name}</div>
-      <div
-        data-sq
-        style={{ background: "#fff", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: 18, display: "flex", alignItems: "center", justifyContent: "center", aspectRatio: "1 / 1", maxWidth: 300, margin: "0 auto" }}
-      >
-        {src ? <img src={src} alt={`QR code for ${shown?.name}`} style={{ width: "100%", height: "auto", imageRendering: "pixelated" }} /> : null}
-      </div>
-      <div style={{ font: "400 13px/1.5 var(--font-mono)", color: "var(--ink-faint)", textAlign: "center", margin: "12px 0 4px" }}>Scan this at the front desk to check in.</div>
-      {src && (
-        <a href={src} download={`${(shown?.name ?? "member").replace(/\s+/g, "-")}-bizqwik-code.png`} style={{ textDecoration: "none" }}>
-          <Button variant="secondary" fullWidth style={{ marginTop: 12 }}>
-            Save image
-          </Button>
-        </a>
-      )}
-      <Button variant="quiet" fullWidth style={{ marginTop: 8 }} onClick={onClose}>
-        Close
-      </Button>
-    </Sheet>
   );
 }

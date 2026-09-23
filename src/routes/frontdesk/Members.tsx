@@ -14,7 +14,7 @@ import { SheetSuccessIcon } from "../../components/SheetSuccessIcon";
 import { TextField, SelectField } from "../../components/FormField";
 import { Spinner } from "../../components/Spinner";
 import { Icon } from "../../components/Icon";
-import { Card, ErrorBanner, MemberQrSheet, PlanPill, SearchField, SectionTitle, matchesClient, planSummary } from "./shared";
+import { Card, ErrorBanner, PlanPill, SearchField, SectionTitle, matchesClient, planSummary } from "./shared";
 
 export function useFrontDeskCatalog() {
   const { data: m } = useAsync(() => api.membershipTypes(), []);
@@ -284,7 +284,6 @@ function ClientSheet({
   const [coachId, setCoachId] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [qrFor, setQrFor] = useState<{ id: string; name: string } | null>(null);
   const open = !!client;
   const { confirmed, iconIn, showSuccess } = useSheetSuccess(open, onClose);
 
@@ -376,10 +375,7 @@ function ClientSheet({
 
             {error && <ErrorBanner text={error} />}
 
-            <Button variant="secondary" fullWidth style={{ marginTop: 16 }} onClick={() => setQrFor({ id: shown.id, name: shown.name })}>
-              Show member QR code
-            </Button>
-            <Button fullWidth style={{ marginTop: 8 }} disabled={membershipActive} onClick={() => setMode("renew-membership")}>
+            <Button fullWidth style={{ marginTop: 16 }} disabled={membershipActive} onClick={() => setMode("renew-membership")}>
               {membershipActive ? "Membership still running" : membership ? "Renew membership" : "Start a membership"}
             </Button>
             <Button fullWidth style={{ marginTop: 8 }} disabled={packageActive} onClick={() => setMode("renew-package")}>
@@ -433,7 +429,6 @@ function ClientSheet({
           </>
         )}
       </Sheet>
-      <MemberQrSheet client={qrFor} onClose={() => setQrFor(null)} />
     </>
   );
 }

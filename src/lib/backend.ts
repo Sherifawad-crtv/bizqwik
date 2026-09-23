@@ -150,7 +150,6 @@ export const api = {
     callFn<{ client: ClientWithPackage; membership: MembershipInstance }>("memberships/sell", { method: "POST", body: { ...target, membershipTypeId } }),
   assignCoach: (id: string, coachId: string) => callFn<{ client: Client }>("clients/assign-coach", { method: "POST", body: { id, coachId } }),
   frontDeskSummary: () => callFn<FrontDeskSummary>("front-desk/summary"),
-  clientStatus: (id: string) => callFn<{ client: ClientWithPackage; eligible: boolean }>(`front-desk/client-status/${encodeURIComponent(id)}`),
   checkIn: (clientId: string, source: "qr" | "manual") => callFn<void>("check-ins", { method: "POST", body: { clientId, source } }),
   dropIn: (clientId: string | null, category: string, price: number) =>
     callFn<void>("drop-ins", { method: "POST", body: { clientId, category, price } }),

@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, type ReactNode } from "react";
+import { useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./lib/auth";
 import { HeaderProvider } from "./lib/header";
@@ -23,15 +23,10 @@ import { Clients } from "./routes/Clients";
 import { Account } from "./routes/Account";
 import { AccountProfile } from "./routes/AccountProfile";
 import { AccountPassword } from "./routes/AccountPassword";
-import { Spinner } from "./components/Spinner";
-
-// Front-desk screens are split out: the QR scanner library is large and no
-// other role should download it.
-const Members = lazy(() => import("./routes/frontdesk/Members").then((m) => ({ default: m.Members })));
-const CheckIn = lazy(() => import("./routes/frontdesk/CheckIn").then((m) => ({ default: m.CheckIn })));
-const DropIn = lazy(() => import("./routes/frontdesk/DropIn").then((m) => ({ default: m.DropIn })));
-const Invitations = lazy(() => import("./routes/frontdesk/Invitations").then((m) => ({ default: m.Invitations })));
-const lazyScreen = (node: ReactNode) => <Suspense fallback={<Spinner />}>{node}</Suspense>;
+import { Members } from "./routes/frontdesk/Members";
+import { CheckIn } from "./routes/frontdesk/CheckIn";
+import { DropIn } from "./routes/frontdesk/DropIn";
+import { Invitations } from "./routes/frontdesk/Invitations";
 
 export default function App() {
   useEffect(() => {
@@ -61,10 +56,10 @@ export default function App() {
                   </Route>
 
                   <Route element={<RequireRole roles={["front_desk"]} />}>
-                    <Route path="/members" element={lazyScreen(<Members />)} />
-                    <Route path="/checkin" element={lazyScreen(<CheckIn />)} />
-                    <Route path="/drop-in" element={lazyScreen(<DropIn />)} />
-                    <Route path="/invitations" element={lazyScreen(<Invitations />)} />
+                    <Route path="/members" element={<Members />} />
+                    <Route path="/checkin" element={<CheckIn />} />
+                    <Route path="/drop-in" element={<DropIn />} />
+                    <Route path="/invitations" element={<Invitations />} />
                   </Route>
 
                   <Route element={<RequireRole roles={["head_coach", "dept_head"]} />}>

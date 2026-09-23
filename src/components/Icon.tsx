@@ -26,11 +26,9 @@ import { TagIcon } from "@solar-icons/react/linear/tag";
 import { LetterIcon } from "@solar-icons/react/linear/letter";
 import { MenuDotsIcon } from "@solar-icons/react/linear/menu-dots";
 import { BellIcon } from "@solar-icons/react/linear/bell";
-import { QrCodeIcon } from "@solar-icons/react/linear/qr-code";
 import { TicketIcon } from "@solar-icons/react/linear/ticket";
 import { GiftIcon } from "@solar-icons/react/linear/gift";
 import { UserPlusIcon } from "@solar-icons/react/linear/user-plus";
-import { QrCodeIcon as QrCodeIconBold } from "@solar-icons/react/bold-duotone/qr-code";
 import { TicketIcon as TicketIconBold } from "@solar-icons/react/bold-duotone/ticket";
 import { GiftIcon as GiftIconBold } from "@solar-icons/react/bold-duotone/gift";
 import { UserPlusIcon as UserPlusIconBold } from "@solar-icons/react/bold-duotone/user-plus";
@@ -90,7 +88,6 @@ export type IconName =
   | "envelope"
   | "menu"
   | "bell"
-  | "qr"
   | "ticket"
   | "gift"
   | "user-plus"
@@ -124,7 +121,6 @@ const LINEAR = {
   envelope: LetterIcon,
   menu: MenuDotsIcon,
   bell: BellIcon,
-  qr: QrCodeIcon,
   ticket: TicketIcon,
   gift: GiftIcon,
   "user-plus": UserPlusIcon,
@@ -159,7 +155,6 @@ const BOLD = {
   envelope: LetterIconBold,
   menu: MenuDotsIconBold,
   bell: BellIconBold,
-  qr: QrCodeIconBold,
   ticket: TicketIconBold,
   gift: GiftIconBold,
   "user-plus": UserPlusIconBold,

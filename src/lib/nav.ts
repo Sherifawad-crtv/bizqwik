@@ -78,7 +78,7 @@ export const NAV: Record<Role, NavItem[]> = {
   front_desk: [
     { key: "desk", path: "/", label: "Front Desk", icon: "home" },
     { key: "members", path: "/members", label: "Clients", icon: "clients" },
-    { key: "checkin", path: "/checkin", label: "Check-In", icon: "qr" },
+    { key: "checkin", path: "/checkin", label: "Check-In", icon: "check" },
     { key: "dropin", path: "/drop-in", label: "Drop-In", icon: "ticket" },
     { key: "invites", path: "/invitations", label: "Invitations", icon: "gift" },
   ],
