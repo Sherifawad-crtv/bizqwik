@@ -95,7 +95,7 @@ export function Signup() {
             {busy ? "Creating account…" : "Create account"}
           </Button>
           <Link to="/login" style={{ textAlign: "center", font: "700 13px var(--font-body)", color: "var(--ink-muted)", marginTop: 4 }}>
-            Already have an account? Sign in
+            Already have an account? <span style={{ color: "var(--primary)" }}>Sign in</span>
           </Link>
         </form>
       </div>

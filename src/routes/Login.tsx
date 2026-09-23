@@ -102,11 +102,8 @@ export function Login() {
           <Button type="submit" fullWidth size="lg" disabled={busy} style={{ marginTop: 4 }}>
             {busy ? "Signing in…" : "Sign in"}
           </Button>
-          <Link
-            to="/signup"
-            style={{ textAlign: "center", font: "700 13px var(--font-body)", color: "var(--primary)" }}
-          >
-            First time? Create an account
+          <Link to="/signup" style={{ textAlign: "center", font: "700 13px var(--font-body)", color: "var(--ink-muted)" }}>
+            First time? <span style={{ color: "var(--primary)" }}>Create an account</span>
           </Link>
         </form>
       </div>
