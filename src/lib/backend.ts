@@ -17,6 +17,8 @@ import type {
   MembershipInstance,
   MembershipType,
   OpsSummary,
+  OrgBrandingConfig,
+  OrgConfig,
   OrgDetail,
   OrgStatus,
   OrgSummary,
@@ -185,6 +187,11 @@ export const api = {
       callFn<{ ok: true; status: OrgStatus }>(`ops/orgs/${id}/status`, { method: "POST", body: { status } }),
     setOrgPlan: (id: string, planId: string | null) =>
       callFn<{ ok: true; planId: string | null }>(`ops/orgs/${id}/plan`, { method: "POST", body: { planId } }),
+    orgConfig: (id: string) => callFn<OrgConfig>(`ops/orgs/${id}/config`),
+    setOrgBranding: (id: string, b: OrgBrandingConfig) =>
+      callFn<{ ok: true }>(`ops/orgs/${id}/branding`, { method: "POST", body: { ...b } }),
+    setOrgSettings: (id: string, pointsPerEgp: number | null, walletCreditTtlMonths: number) =>
+      callFn<{ ok: true }>(`ops/orgs/${id}/settings`, { method: "POST", body: { pointsPerEgp, walletCreditTtlMonths } }),
 
     team: () => callFn<{ members: BizqwikTeam[]; invites: BizqwikTeamInvite[] }>("ops/team"),
     inviteTeam: (name: string, email: string, role: BizqwikRole) =>

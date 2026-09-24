@@ -3,11 +3,12 @@ import { useParams, useNavigate } from "react-router-dom";
 import { api } from "../../lib/backend";
 import { useAsync } from "../../lib/useAsync";
 import { egp, formatDateTime } from "../../lib/format";
-import { ROLE_LABELS, type OrgStatus } from "../../lib/types";
+import { ROLE_LABELS, type OrgStatus, type OrgConfig } from "../../lib/types";
 import { Spinner } from "../../components/Spinner";
 import { Icon } from "../../components/Icon";
 import { Segmented } from "../../components/Segmented";
-import { SelectField } from "../../components/FormField";
+import { SelectField, TextField } from "../../components/FormField";
+import { Button } from "../../components/Button";
 import { Avatar } from "../../components/Avatar";
 import { Card, SectionTitle, ErrorBanner, limitLabel } from "./shared";
 
@@ -15,6 +16,14 @@ const STATUS_OPTIONS: { value: OrgStatus; label: string }[] = [
   { value: "trial", label: "TRIAL" },
   { value: "active", label: "ACTIVE" },
   { value: "paused", label: "PAUSED" },
+];
+
+const POINTS_RATE_OPTIONS = [
+  { value: "", label: "Off — no points" },
+  { value: "5", label: "5 points / EGP" },
+  { value: "10", label: "10 points / EGP" },
+  { value: "15", label: "15 points / EGP" },
+  { value: "20", label: "20 points / EGP" },
 ];
 
 function UsageRow({ label, value }: { label: string; value: string }) {
@@ -101,6 +110,8 @@ export function OrgDetail() {
         </div>
       </div>
 
+      <OrgAppConfig id={id} />
+
       <div style={{ marginTop: 26 }}>
         <SectionTitle>Usage</SectionTitle>
         <Card style={{ overflow: "hidden" }}>
@@ -148,6 +159,103 @@ export function OrgDetail() {
           </Card>
         </div>
       )}
+    </div>
+  );
+}
+
+// The member-app configuration ops sets at onboarding: white-label branding
+// (name/logo/icon/color/onboarding art) and the loyalty economy (points rate +
+// wallet-credit expiry). Loads config, then hands a fresh, seeded form to
+// OrgAppConfigForm — keyed by org id so switching orgs re-seeds cleanly.
+function OrgAppConfig({ id }: { id: string }) {
+  const cfg = useAsync(() => api.ops.orgConfig(id), [id]);
+  return (
+    <div style={{ marginTop: 26 }}>
+      <SectionTitle>Member app</SectionTitle>
+      <Card style={{ padding: 18 }}>
+        {cfg.loading && <div style={{ padding: "6px 0", color: "var(--ink-faint)", font: "500 14px var(--font-body)" }}>Loading…</div>}
+        {cfg.error && <ErrorBanner text={cfg.error} />}
+        {cfg.data && <OrgAppConfigForm key={id} id={id} initial={cfg.data} onSaved={cfg.refetch} />}
+      </Card>
+    </div>
+  );
+}
+
+function OrgAppConfigForm({ id, initial, onSaved }: { id: string; initial: OrgConfig; onSaved: () => void }) {
+  const b = initial.branding;
+  const s = initial.settings;
+  const [appName, setAppName] = useState(b?.appName ?? "");
+  const [logoUrl, setLogoUrl] = useState(b?.logoUrl ?? "");
+  const [iconUrl, setIconUrl] = useState(b?.iconUrl ?? "");
+  const [primaryColor, setPrimaryColor] = useState(b?.primaryColor ?? "");
+  const [asset0, setAsset0] = useState(b?.onboardingAssets?.[0] ?? "");
+  const [asset1, setAsset1] = useState(b?.onboardingAssets?.[1] ?? "");
+  const [asset2, setAsset2] = useState(b?.onboardingAssets?.[2] ?? "");
+  const [pointsPerEgp, setPointsPerEgp] = useState(s?.pointsPerEgp != null ? String(s.pointsPerEgp) : "");
+  const [ttlMonths, setTtlMonths] = useState(String(s?.walletCreditTtlMonths ?? 12));
+
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
+
+  const save = async () => {
+    setError(null);
+    setSaved(false);
+    const months = Number(ttlMonths);
+    if (!Number.isFinite(months) || months < 1) {
+      setError("Wallet credit expiry must be at least 1 month.");
+      return;
+    }
+    setBusy(true);
+    try {
+      const onboardingAssets = [asset0, asset1, asset2].map((a) => a.trim()).filter(Boolean);
+      await api.ops.setOrgBranding(id, {
+        appName: appName.trim() || null,
+        logoUrl: logoUrl.trim() || null,
+        iconUrl: iconUrl.trim() || null,
+        primaryColor: primaryColor.trim() || null,
+        onboardingAssets,
+      });
+      await api.ops.setOrgSettings(id, pointsPerEgp === "" ? null : Number(pointsPerEgp), months);
+      setSaved(true);
+      onSaved();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Couldn't save member-app config.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 12, opacity: busy ? 0.6 : 1, pointerEvents: busy ? "none" : "auto" }}>
+      <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", margin: "2px 2px 0" }}>BRANDING</div>
+      <TextField label="APP NAME" value={appName} onChange={(e) => setAppName(e.target.value)} placeholder="e.g. Revolt" />
+      <TextField label="LOGO URL" value={logoUrl} onChange={(e) => setLogoUrl(e.target.value)} placeholder="https://…" />
+      <TextField label="ICON URL" value={iconUrl} onChange={(e) => setIconUrl(e.target.value)} placeholder="https://… (PWA/home-screen icon)" />
+      <TextField label="PRIMARY COLOR" value={primaryColor} onChange={(e) => setPrimaryColor(e.target.value)} placeholder="#RRGGBB" />
+      <TextField label="ONBOARDING ART 1" value={asset0} onChange={(e) => setAsset0(e.target.value)} placeholder="https://…" />
+      <TextField label="ONBOARDING ART 2" value={asset1} onChange={(e) => setAsset1(e.target.value)} placeholder="https://…" />
+      <TextField label="ONBOARDING ART 3" value={asset2} onChange={(e) => setAsset2(e.target.value)} placeholder="https://…" />
+
+      <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", margin: "10px 2px 0" }}>LOYALTY</div>
+      <SelectField
+        label="POINTS EARN RATE"
+        value={pointsPerEgp}
+        options={POINTS_RATE_OPTIONS}
+        onChange={setPointsPerEgp}
+        placeholder="Off — no points"
+      />
+      <div style={{ font: "500 12px/1.5 var(--font-mono)", color: "var(--ink-faint)", padding: "0 2px" }}>
+        Applies to desk sales; check-ins always earn 1 point. Redemption value = points ÷ rate in EGP.
+      </div>
+      <TextField label="WALLET CREDIT EXPIRY (MONTHS)" value={ttlMonths} onChange={(e) => setTtlMonths(e.target.value)} inputMode="numeric" placeholder="12" />
+
+      {error && <ErrorBanner text={error} />}
+
+      <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 4 }}>
+        <Button onClick={save} disabled={busy}>{busy ? "Saving…" : "Save member app"}</Button>
+        {saved && !busy && <span style={{ font: "600 13px var(--font-body)", color: "var(--paid-fg)" }}>Saved.</span>}
+      </div>
     </div>
   );
 }

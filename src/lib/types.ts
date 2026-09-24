@@ -262,3 +262,20 @@ export const ORG_STATUS_LABELS: Record<OrgStatus, string> = {
   active: "Active",
   paused: "Paused",
 };
+
+// Per-org member-app configuration (set by ops at onboarding).
+export interface OrgBrandingConfig {
+  appName: string | null;
+  logoUrl: string | null;
+  iconUrl: string | null;
+  primaryColor: string | null;
+  onboardingAssets: string[];
+}
+export interface OrgPointsSettings {
+  pointsPerEgp: number | null;
+  walletCreditTtlMonths: number;
+}
+export interface OrgConfig {
+  branding: OrgBrandingConfig | null;
+  settings: OrgPointsSettings | null;
+}
