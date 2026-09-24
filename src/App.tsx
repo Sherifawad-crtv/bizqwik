@@ -16,6 +16,7 @@ import { CoachesOverview } from "./routes/CoachesOverview";
 import { CoachDetail } from "./routes/CoachDetail";
 import { Oversight } from "./routes/Oversight";
 import { ClassesManage } from "./routes/ClassesManage";
+import { Activity } from "./routes/Activity";
 import { Manage } from "./routes/Manage";
 import { Pay } from "./routes/Pay";
 import { PayeeDetail } from "./routes/PayeeDetail";
@@ -85,6 +86,10 @@ export default function App() {
 
                   <Route element={<RequireRole roles={["coach", "head_coach", "dept_head"]} />}>
                     <Route path="/clients" element={<Clients />} />
+                  </Route>
+
+                  <Route element={<RequireRole roles={["dept_head", "front_desk"]} />}>
+                    <Route path="/activity" element={<Activity />} />
                   </Route>
 
                   <Route element={<RequireRole roles={["dept_head"]} />}>

@@ -5,6 +5,7 @@
 import { FN_SLUG, supabase } from "./supabaseClient";
 import { bump } from "./bus";
 import type {
+  ActivityEntry,
   BizqwikRole,
   BizqwikTeam,
   BizqwikTeamInvite,
@@ -176,6 +177,13 @@ export const api = {
   updateClass: (id: string, title: string, description: string | null, startsAt: string, price: number) =>
     callFn<{ class: GymClass }>("classes/update", { method: "POST", body: { id, title, description, startsAt, price } }),
   cancelClass: (id: string) => callFn<{ ok: true }>("classes/cancel", { method: "POST", body: { id } }),
+
+  // ===== Staff activity feed / logs (dept_head + front_desk) =====
+  activity: (limit = 100) => callFn<{ activity: ActivityEntry[] }>(`activity?limit=${limit}`),
+
+  // Invite an existing client to the branded member app (front_desk / dept_head).
+  inviteClient: (clientId: string, email: string) =>
+    callFn<{ ok: true }>("client-invites", { method: "POST", body: { clientId, email } }),
 
   pushVapidPublicKey: () => callFn<{ publicKey: string }>("push/vapid-public-key"),
   pushSubscribe: (sub: PushSubscriptionJSON, deviceId: string) =>

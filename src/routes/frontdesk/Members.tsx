@@ -263,7 +263,7 @@ export function CreateClientSheet({
   );
 }
 
-type Mode = "view" | "renew-membership" | "renew-package" | "assign";
+type Mode = "view" | "renew-membership" | "renew-package" | "assign" | "invite";
 
 function ClientSheet({
   client,
@@ -282,6 +282,7 @@ function ClientSheet({
   const [mode, setMode] = useState<Mode>("view");
   const [pickId, setPickId] = useState("");
   const [coachId, setCoachId] = useState("");
+  const [email, setEmail] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const open = !!client;
@@ -292,6 +293,7 @@ function ClientSheet({
       setMode("view");
       setPickId("");
       setCoachId(client.assignedCoachId ?? "");
+      setEmail(client.email ?? "");
       setError(null);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -333,9 +335,15 @@ function ClientSheet({
       if (!coachId) return setError("Choose a coach.");
       return run(() => api.assignCoach(shown.id, coachId));
     }
+    if (mode === "invite") {
+      const e = email.trim();
+      if (!/^\S+@\S+\.\S+$/.test(e)) return setError("Enter a valid email.");
+      return run(() => api.inviteClient(shown.id, e));
+    }
   };
 
-  const successLabel = mode === "assign" ? "Coach assigned" : mode === "renew-membership" ? "Membership started" : "Package sold";
+  const successLabel =
+    mode === "assign" ? "Coach assigned" : mode === "invite" ? "Invitation sent" : mode === "renew-membership" ? "Membership started" : "Package sold";
 
   return (
     <>
@@ -384,6 +392,9 @@ function ClientSheet({
             <Button variant="secondary" fullWidth style={{ marginTop: 8 }} disabled={packageActive} onClick={() => setMode("assign")}>
               {packageActive ? "Coach locked mid-package" : coachName ? "Change coach" : "Assign a coach"}
             </Button>
+            <Button variant="secondary" fullWidth style={{ marginTop: 8 }} onClick={() => setMode("invite")}>
+              {shown.email ? "Re-invite to app" : "Invite to app"}
+            </Button>
             <Button variant="quiet" fullWidth style={{ marginTop: 8 }} onClick={onClose}>
               Close
             </Button>
@@ -392,9 +403,17 @@ function ClientSheet({
           <>
             <SheetHeading
               kicker={shown.name.toUpperCase()}
-              title={mode === "assign" ? "Assign a coach" : mode === "renew-membership" ? "Choose membership" : "Choose package"}
+              title={mode === "assign" ? "Assign a coach" : mode === "invite" ? "Invite to app" : mode === "renew-membership" ? "Choose membership" : "Choose package"}
             />
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              {mode === "invite" && (
+                <>
+                  <TextField label="EMAIL" value={email} onChange={(e) => setEmail(e.target.value)} inputMode="email" placeholder="member@email.com" />
+                  <div style={{ font: "400 12px/1.5 var(--font-mono)", color: "var(--ink-faint)" }}>
+                    They'll use this email to sign in to the branded member app.
+                  </div>
+                </>
+              )}
               {mode === "renew-membership" && (
                 <SelectField
                   label="MEMBERSHIP"
@@ -412,7 +431,7 @@ function ClientSheet({
             </div>
             {error && <ErrorBanner text={error} />}
             <Button fullWidth size="lg" style={{ marginTop: 16 }} disabled={busy} onClick={confirmMode}>
-              {busy ? "Saving…" : mode === "assign" ? "Assign coach" : mode === "renew-membership" ? "Start membership" : "Sell package"}
+              {busy ? "Saving…" : mode === "assign" ? "Assign coach" : mode === "invite" ? "Send invitation" : mode === "renew-membership" ? "Start membership" : "Sell package"}
             </Button>
             <Button
               variant="secondary"

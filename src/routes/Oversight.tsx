@@ -249,6 +249,35 @@ export function Oversight() {
         </span>
       </button>
 
+      <button
+        onClick={() => navigate("/activity")}
+        data-sq
+        style={{
+          width: "100%",
+          textAlign: "left",
+          background: "var(--surface)",
+          border: "1px solid var(--line)",
+          borderRadius: "var(--r-tile)",
+          padding: "16px 18px",
+          marginBottom: 14,
+          cursor: "pointer",
+          display: "flex",
+          alignItems: "center",
+          gap: 14,
+        }}
+      >
+        <span style={{ width: 42, height: 42, flex: "none", borderRadius: 12, background: "var(--primary-tint)", color: "var(--primary-pressed)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <Icon name="history" size={22} />
+        </span>
+        <span style={{ flex: 1, minWidth: 0 }}>
+          <span style={{ display: "block", font: "700 16px var(--font-body)" }}>Activity</span>
+          <span style={{ display: "block", font: "400 13px var(--font-mono)", color: "var(--ink-faint)", marginTop: 2 }}>Member feed and the full transaction log</span>
+        </span>
+        <span style={{ flex: "none", color: "var(--ink-faint)", display: "flex" }}>
+          <Icon name="chevron-right" size={20} />
+        </span>
+      </button>
+
       <Card title="PAYOUT TREND" sub="LAST 3 MONTHS · EGP">
         {trend ? <TrendChart points={trend} /> : <TrendChartPlaceholder />}
       </Card>

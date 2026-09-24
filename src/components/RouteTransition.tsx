@@ -11,7 +11,7 @@ import type { Role } from "../lib/types";
  * children (/account/profile) without the two directions flipping. */
 function pushDepth(pathname: string): number {
   if (pathname === "/account/profile" || pathname === "/account/password") return 2;
-  if (pathname === "/account" || pathname === "/classes" || /^\/coaches\/[^/]+$/.test(pathname)) return 1;
+  if (pathname === "/account" || pathname === "/classes" || pathname === "/activity" || /^\/coaches\/[^/]+$/.test(pathname)) return 1;
   return 0;
 }
 

@@ -275,6 +275,16 @@ export interface GymClass {
   status: GymClassStatus;
 }
 
+// ===== Staff activity feed / logs (dept_head + front_desk) =====
+export interface ActivityEntry {
+  id: string;
+  type: string; // check_in | class_booked | sale_* | wallet_* | points_earned | …
+  amount: number | null;
+  clientName: string | null;
+  meta: Record<string, unknown> | null;
+  at: string;
+}
+
 // Per-org member-app configuration (set by ops at onboarding).
 export interface OrgBrandingConfig {
   appName: string | null;

@@ -110,6 +110,13 @@ export function FrontDeskHome() {
           </div>
         )}
       </Card>
+
+      <button
+        onClick={() => navigate("/activity")}
+        style={{ display: "inline-flex", alignItems: "center", gap: 4, border: 0, background: "none", color: "var(--primary-pressed)", cursor: "pointer", font: "700 14px var(--font-body)", marginTop: 12, padding: "4px 0" }}
+      >
+        Full activity &amp; logs <Icon name="chevron-right" size={16} />
+      </button>
     </div>
   );
 }
