@@ -116,6 +116,114 @@ async function planLimitError(orgId: string, kind: "team" | "client"): Promise<s
   return null;
 }
 
+// ---- client (member) identity -----------------------------------------
+// A member's client row is linked to their auth user via auth_user_id (filled
+// at activation). They have no profile; they use the branded client app.
+async function clientOf(userId: string) {
+  const { data } = await admin().from("clients").select("*").eq("auth_user_id", userId).maybeSingle();
+  return data;
+}
+function toClientAccount(row: any) {
+  return { id: row.id, orgId: row.org_id, name: row.name, phone: row.phone ?? null, email: row.email ?? null };
+}
+async function orgSettingsOf(orgId: string) {
+  const { data } = await admin().from("org_settings").select("*").eq("org_id", orgId).maybeSingle();
+  return data;
+}
+
+async function logActivity(orgId: string, type: string, opts: { actorId?: string | null; clientId?: string | null; amount?: number | null; meta?: any } = {}) {
+  await admin().from("activity_log").insert({
+    org_id: orgId,
+    actor_id: opts.actorId ?? null,
+    subject_client_id: opts.clientId ?? null,
+    type,
+    amount: opts.amount ?? null,
+    meta: opts.meta ?? {},
+  });
+}
+
+// ---- wallet engine (EGP store credit, FIFO credit lots, 12-month expiry) ----
+// Each credit row carries `remaining` (unspent) + `expires_at`. Debits consume
+// oldest-expiring lots first. Balance = sum(remaining) of live lots; cached in
+// wallets.balance. Expiry is swept lazily on any read/debit.
+async function sweepWalletExpiry(clientId: string, orgId: string) {
+  const nowIso = new Date().toISOString();
+  const { data: stale } = await admin().from("wallet_transactions")
+    .select("id, remaining")
+    .eq("client_id", clientId).eq("org_id", orgId).eq("type", "credit")
+    .gt("remaining", 0).lte("expires_at", nowIso);
+  for (const lot of stale ?? []) {
+    await admin().from("wallet_transactions").update({ remaining: 0 }).eq("id", lot.id);
+    await admin().from("wallet_transactions").insert({
+      org_id: orgId, client_id: clientId, type: "debit", amount: Number(lot.remaining),
+      category: "expiry", description: "Store credit expired",
+    });
+    await logActivity(orgId, "wallet_expired", { clientId, amount: Number(lot.remaining) });
+  }
+}
+async function walletBalance(clientId: string, orgId: string): Promise<number> {
+  await sweepWalletExpiry(clientId, orgId);
+  const { data } = await admin().from("wallet_transactions")
+    .select("remaining")
+    .eq("client_id", clientId).eq("org_id", orgId).eq("type", "credit").gt("remaining", 0);
+  const bal = (data ?? []).reduce((s: number, r: any) => s + Number(r.remaining), 0);
+  await admin().from("wallets").upsert({ client_id: clientId, org_id: orgId, balance: bal, updated_at: new Date().toISOString() });
+  return bal;
+}
+async function creditWallet(clientId: string, orgId: string, amount: number, category: string, description: string) {
+  const settings = await orgSettingsOf(orgId);
+  const ttl = settings?.wallet_credit_ttl_months ?? 12;
+  const expires = new Date();
+  expires.setUTCMonth(expires.getUTCMonth() + ttl);
+  await admin().from("wallet_transactions").insert({
+    org_id: orgId, client_id: clientId, type: "credit", amount, category, description,
+    expires_at: expires.toISOString(), remaining: amount,
+  });
+  await logActivity(orgId, `wallet_${category}`, { clientId, amount });
+  return await walletBalance(clientId, orgId);
+}
+async function debitWallet(clientId: string, orgId: string, amount: number, category: string, description: string): Promise<{ ok: boolean; balance: number }> {
+  const bal = await walletBalance(clientId, orgId);
+  if (bal < amount) return { ok: false, balance: bal };
+  let need = amount;
+  const { data: lots } = await admin().from("wallet_transactions")
+    .select("id, remaining")
+    .eq("client_id", clientId).eq("org_id", orgId).eq("type", "credit").gt("remaining", 0)
+    .order("expires_at", { ascending: true });
+  for (const lot of lots ?? []) {
+    if (need <= 0) break;
+    const take = Math.min(need, Number(lot.remaining));
+    await admin().from("wallet_transactions").update({ remaining: Number(lot.remaining) - take }).eq("id", lot.id);
+    need -= take;
+  }
+  await admin().from("wallet_transactions").insert({
+    org_id: orgId, client_id: clientId, type: "debit", amount, category, description,
+  });
+  return { ok: true, balance: await walletBalance(clientId, orgId) };
+}
+
+// ---- points engine (symmetric per-org rate; earn on check-in + desk sales) ----
+async function bumpPointsBalance(clientId: string, orgId: string): Promise<number> {
+  const { data } = await admin().from("points_ledger").select("points").eq("client_id", clientId).eq("org_id", orgId);
+  const total = (data ?? []).reduce((s: number, r: any) => s + Number(r.points), 0);
+  await admin().from("points_balances").upsert({ client_id: clientId, org_id: orgId, total_points: total, tier: "member", updated_at: new Date().toISOString() });
+  return total;
+}
+async function earnPoints(clientId: string, orgId: string, points: number, reason: string) {
+  if (points <= 0) return;
+  await admin().from("points_ledger").insert({ org_id: orgId, client_id: clientId, points, reason });
+  await bumpPointsBalance(clientId, orgId);
+  await logActivity(orgId, "points_earned", { clientId, amount: points, meta: { reason } });
+}
+// Points on a desk purchase of `egp`, at the org's symmetric rate (null = off).
+async function earnPurchasePoints(clientId: string | null | undefined, orgId: string, egp: number) {
+  if (!clientId || !egp || egp <= 0) return;
+  const settings = await orgSettingsOf(orgId);
+  const rate = settings?.points_per_egp;
+  if (!rate || rate <= 0) return;
+  await earnPoints(clientId, orgId, Math.floor(egp * rate), "purchase");
+}
+
 const stateOf = (s: any) => (!s ? "logging" : s.paid_at ? "paid" : "settled") as "logging" | "settled" | "paid";
 
 // A package's status is never actively ticked over by a background job (this
@@ -338,7 +446,10 @@ app.post(`${P}/signup`, async (c) => {
     const { data: staffInvite } = teamInvite
       ? { data: null }
       : await admin().from("staff_invitations").select("*").eq("email", normalizedEmail).maybeSingle();
-    if (!teamInvite && !staffInvite) return c.json({ error: "You're not part of this organization." }, 403);
+    const { data: clientInvite } = (teamInvite || staffInvite)
+      ? { data: null }
+      : await admin().from("client_invitations").select("*").eq("email", normalizedEmail).maybeSingle();
+    if (!teamInvite && !staffInvite && !clientInvite) return c.json({ error: "You're not part of this organization." }, 403);
 
     const { data: created, error: cErr } = await admin().auth.admin.createUser({
       email,
@@ -359,15 +470,28 @@ app.post(`${P}/signup`, async (c) => {
       return c.json({ bizqwikTeam: toBizqwikTeam(member) });
     }
 
-    const { data: profile, error: pErr } = await admin()
-      .from("profiles")
-      .insert({ id: uid, org_id: staffInvite.org_id, role: staffInvite.role, name: displayName, email, tier_id: staffInvite.tier_id, avatar_url: null })
+    if (staffInvite) {
+      const { data: profile, error: pErr } = await admin()
+        .from("profiles")
+        .insert({ id: uid, org_id: staffInvite.org_id, role: staffInvite.role, name: displayName, email, tier_id: staffInvite.tier_id, avatar_url: null })
+        .select()
+        .single();
+      if (pErr) throw pErr;
+      await admin().from("staff_invitations").delete().eq("id", staffInvite.id);
+      return c.json({ profile: toProfile(profile) });
+    }
+
+    // client (member): the client row already exists (created by the front desk
+    // at registration) — link it to this new auth user and consume the invite.
+    const { data: linked, error: lErr } = await admin()
+      .from("clients")
+      .update({ auth_user_id: uid })
+      .eq("id", clientInvite.client_id)
       .select()
       .single();
-    if (pErr) throw pErr;
-    await admin().from("staff_invitations").delete().eq("id", staffInvite.id);
-
-    return c.json({ profile: toProfile(profile) });
+    if (lErr) throw lErr;
+    await admin().from("client_invitations").delete().eq("id", clientInvite.id);
+    return c.json({ client: toClientAccount(linked) });
   } catch (e) {
     return c.json({ error: (e as Error).message }, 500);
   }
@@ -379,13 +503,14 @@ app.post(`${P}/signup`, async (c) => {
 app.get(`${P}/me`, async (c) => {
   const user = await requireUser(c);
   if (!user) return c.json({ error: "Unauthorized" }, 401);
-  const [profile, team] = await Promise.all([profileOf(user.id), bizqwikTeamOf(user.id)]);
-  if (!profile && !team) return c.json({ error: "No profile" }, 404);
+  const [profile, team, client] = await Promise.all([profileOf(user.id), bizqwikTeamOf(user.id), clientOf(user.id)]);
+  if (!profile && !team && !client) return c.json({ error: "No profile" }, 404);
   const tier = profile?.tier_id ? await tierOf(profile.tier_id) : null;
   return c.json({
     profile: profile ? toProfile(profile) : null,
     tier: tier ? toTier(tier) : null,
     bizqwikTeam: team ? toBizqwikTeam(team) : null,
+    client: client ? toClientAccount(client) : null,
   });
 });
 
@@ -997,6 +1122,8 @@ app.post(`${P}/clients`, async (c) => {
     await admin().from("clients").delete().eq("id", client.id);
     return c.json({ error: result.error }, result.status);
   }
+  await earnPurchasePoints(result.client.id, me.org_id, Number(result.package.price_at_sale));
+  await logActivity(me.org_id, "sale_package", { actorId: me.id, clientId: result.client.id, amount: Number(result.package.price_at_sale) });
   return c.json({ client: toClient(result.client, conditions || null, null), package: toPackageInstance(result.package) });
 });
 
@@ -1065,6 +1192,8 @@ app.post(`${P}/packages`, async (c) => {
   const { clientId, bundleTypeId, coachId } = await c.req.json();
   const result = await sellPackageTo(clientId, bundleTypeId, coachId, me);
   if ("error" in result) return c.json({ error: result.error }, result.status);
+  await earnPurchasePoints(clientId, me.org_id, Number(result.package.price_at_sale));
+  await logActivity(me.org_id, "sale_package", { actorId: me.id, clientId, amount: Number(result.package.price_at_sale) });
   return c.json({ package: toPackageInstance(result.package) });
 });
 
@@ -1148,6 +1277,8 @@ app.post(`${P}/memberships/sell`, async (c) => {
     if (createdNow) await admin().from("clients").delete().eq("id", client.id);
     throw error;
   }
+  await earnPurchasePoints(client.id, me.org_id, Number(type.price));
+  await logActivity(me.org_id, "sale_membership", { actorId: me.id, clientId: client.id, amount: Number(type.price) });
   return c.json({ client: toClient(client, null, null, toMembershipInstance(membership)), membership: toMembershipInstance(membership) });
 });
 
@@ -1187,6 +1318,8 @@ app.post(`${P}/check-ins`, async (c) => {
   if (!status.eligible) return c.json({ error: `${client.name} has no active membership or package.` }, 400);
   const { data, error } = await admin().from("check_ins").insert({ org_id: me.org_id, client_id: clientId, source }).select().single();
   if (error) throw error;
+  await earnPoints(clientId, me.org_id, 1, "checkin");
+  await logActivity(me.org_id, "check_in", { actorId: me.id, clientId });
   return c.json({ checkIn: { id: data.id, clientId: data.client_id, source: data.source, checkedInAt: data.checked_in_at } });
 });
 
@@ -1209,6 +1342,8 @@ app.post(`${P}/drop-ins`, async (c) => {
     .select()
     .single();
   if (error) throw error;
+  await earnPurchasePoints(data.client_id, me.org_id, amount);
+  await logActivity(me.org_id, "sale_dropin", { actorId: me.id, clientId: data.client_id, amount });
   return c.json({ dropIn: { id: data.id, clientId: data.client_id, category: data.category, price: Number(data.price), createdAt: data.created_at } });
 });
 
@@ -1905,6 +2040,279 @@ app.post(`${P}/ops/plans/delete`, async (c) => {
   const { data: inUse } = await admin().from("organizations").select("id").eq("plan_id", id).limit(1);
   if ((inUse?.length ?? 0) > 0) return c.json({ error: "An organization is on this plan — move it to another plan first." }, 400);
   const { error } = await admin().from("plan_types").delete().eq("id", id);
+  if (error) throw error;
+  return c.json({ ok: true });
+});
+
+// ================= Client (member) app + classes + org config =================
+function toClassRow(row: any) {
+  return { id: row.id, title: row.title, description: row.description ?? null, startsAt: row.starts_at, price: Number(row.price_egp), status: row.status };
+}
+function toBookingRow(row: any) {
+  return { id: row.id, classId: row.class_id, payMethod: row.pay_method, payStatus: row.pay_status, attendance: row.attendance, price: Number(row.price_egp), bookedAt: row.booked_at };
+}
+async function requireClient(c: any) {
+  const user = await requireUser(c);
+  if (!user) return null;
+  return await clientOf(user.id);
+}
+
+// ---- branded onboarding: public pre-auth theming by slug ----
+app.get(`${P}/client/branding`, async (c) => {
+  const slug = c.req.query("slug") || "";
+  const { data: org } = await admin().from("organizations").select("id, name, slug, status").eq("slug", slug).maybeSingle();
+  if (!org) return c.json({ error: "Unknown gym" }, 404);
+  const { data: b } = await admin().from("org_branding").select("*").eq("org_id", org.id).maybeSingle();
+  return c.json({
+    org: { id: org.id, name: org.name, slug: org.slug, status: org.status },
+    branding: {
+      appName: b?.app_name ?? org.name,
+      logoUrl: b?.logo_url ?? null,
+      iconUrl: b?.icon_url ?? null,
+      primaryColor: b?.primary_color ?? null,
+      onboardingAssets: b?.onboarding_assets ?? [],
+    },
+  });
+});
+
+app.get(`${P}/client/home`, async (c) => {
+  const me = await requireClient(c);
+  if (!me) return c.json({ error: "Unauthorized" }, 401);
+  const [status, wallet, points, settings, upcoming] = await Promise.all([
+    clientPlanStatus(me.id, me.org_id),
+    walletBalance(me.id, me.org_id),
+    bumpPointsBalance(me.id, me.org_id),
+    orgSettingsOf(me.org_id),
+    admin().from("classes").select("*").eq("org_id", me.org_id).eq("status", "active").gte("starts_at", new Date().toISOString()).order("starts_at").limit(10),
+  ]);
+  const rate = settings?.points_per_egp ?? null;
+  return c.json({
+    name: me.name,
+    membership: status.membership,
+    package: status.package,
+    eligible: status.eligible,
+    wallet,
+    points,
+    pointsValueEgp: rate && rate > 0 ? points / rate : 0,
+    upcomingClasses: (upcoming.data ?? []).map(toClassRow),
+  });
+});
+
+app.get(`${P}/client/classes`, async (c) => {
+  const me = await requireClient(c);
+  if (!me) return c.json({ error: "Unauthorized" }, 401);
+  const { data } = await admin().from("classes").select("*").eq("org_id", me.org_id).eq("status", "active").gte("starts_at", new Date().toISOString()).order("starts_at");
+  const { data: mine } = await admin().from("class_bookings").select("class_id").eq("client_id", me.id).neq("attendance", "cancelled");
+  const booked = new Set((mine ?? []).map((b: any) => b.class_id));
+  return c.json({ classes: (data ?? []).map((r: any) => ({ ...toClassRow(r), booked: booked.has(r.id) })) });
+});
+
+app.post(`${P}/client/classes/:id/book`, async (c) => {
+  const me = await requireClient(c);
+  if (!me) return c.json({ error: "Unauthorized" }, 401);
+  const classId = c.req.param("id");
+  const { payMethod } = await c.req.json();
+  if (payMethod !== "wallet" && payMethod !== "desk") return c.json({ error: "Choose how to pay." }, 400);
+  const { data: cls } = await admin().from("classes").select("*").eq("id", classId).eq("org_id", me.org_id).eq("status", "active").maybeSingle();
+  if (!cls) return c.json({ error: "This class isn't available." }, 404);
+  const { data: existing } = await admin().from("class_bookings").select("id, attendance").eq("class_id", classId).eq("client_id", me.id).maybeSingle();
+  if (existing && existing.attendance !== "cancelled") return c.json({ error: "You've already booked this class." }, 400);
+  const price = Number(cls.price_egp);
+  let payStatus = "pending";
+  if (payMethod === "wallet") {
+    const res = await debitWallet(me.id, me.org_id, price, "class_booking", `Booked ${cls.title}`);
+    if (!res.ok) return c.json({ error: "Your wallet balance doesn't cover this class.", code: "insufficient_wallet" }, 400);
+    payStatus = "paid";
+  }
+  const { data: booking, error } = await admin().from("class_bookings").upsert(
+    { org_id: me.org_id, class_id: classId, client_id: me.id, pay_method: payMethod, pay_status: payStatus, attendance: "booked", price_egp: price, booked_at: new Date().toISOString() },
+    { onConflict: "class_id,client_id" },
+  ).select().single();
+  if (error) throw error;
+  await logActivity(me.org_id, "class_booked", { clientId: me.id, amount: price, meta: { classId, title: cls.title, payMethod } });
+  return c.json({ booking: toBookingRow(booking) });
+});
+
+app.get(`${P}/client/bookings`, async (c) => {
+  const me = await requireClient(c);
+  if (!me) return c.json({ error: "Unauthorized" }, 401);
+  const { data } = await admin().from("class_bookings").select("*, classes(title, starts_at)").eq("client_id", me.id).order("booked_at", { ascending: false });
+  return c.json({ bookings: (data ?? []).map((r: any) => ({ ...toBookingRow(r), classTitle: r.classes?.title ?? null, classStartsAt: r.classes?.starts_at ?? null })) });
+});
+
+app.post(`${P}/client/bookings/:id/cancel`, async (c) => {
+  const me = await requireClient(c);
+  if (!me) return c.json({ error: "Unauthorized" }, 401);
+  const id = c.req.param("id");
+  const { data: booking } = await admin().from("class_bookings").select("*").eq("id", id).eq("client_id", me.id).maybeSingle();
+  if (!booking) return c.json({ error: "No such booking" }, 404);
+  if (booking.attendance === "cancelled") return c.json({ error: "Already cancelled." }, 400);
+  let refunded = 0;
+  if (booking.pay_status === "paid" && booking.pay_method === "wallet") {
+    await creditWallet(me.id, me.org_id, Number(booking.price_egp), "refund", "Refund: cancelled booking");
+    refunded = Number(booking.price_egp);
+  }
+  await admin().from("class_bookings").update({ attendance: "cancelled", pay_status: booking.pay_status === "paid" ? "refunded" : booking.pay_status }).eq("id", id);
+  await logActivity(me.org_id, "class_cancelled", { clientId: me.id, amount: refunded, meta: { bookingId: id } });
+  return c.json({ ok: true, refundedToWallet: refunded });
+});
+
+// Member scans the desk QR (which encodes the org slug/id) to check in + earn 1 pt.
+app.post(`${P}/client/check-in`, async (c) => {
+  const me = await requireClient(c);
+  if (!me) return c.json({ error: "Unauthorized" }, 401);
+  const { token } = await c.req.json();
+  const { data: org } = await admin().from("organizations").select("id, slug").eq("id", me.org_id).maybeSingle();
+  if (!token || (token !== org?.slug && token !== org?.id)) return c.json({ error: "That QR isn't your gym's check-in code." }, 400);
+  const status = await clientPlanStatus(me.id, me.org_id);
+  if (!status.eligible) return c.json({ error: "No active plan — please see the front desk.", code: "no_plan" }, 400);
+  await admin().from("check_ins").insert({ org_id: me.org_id, client_id: me.id, source: "qr" });
+  await earnPoints(me.id, me.org_id, 1, "checkin");
+  await logActivity(me.org_id, "check_in", { clientId: me.id });
+  return c.json({ ok: true });
+});
+
+app.get(`${P}/client/wallet`, async (c) => {
+  const me = await requireClient(c);
+  if (!me) return c.json({ error: "Unauthorized" }, 401);
+  const balance = await walletBalance(me.id, me.org_id);
+  const { data: tx } = await admin().from("wallet_transactions").select("*").eq("client_id", me.id).order("created_at", { ascending: false }).limit(50);
+  return c.json({ balance, transactions: (tx ?? []).map((t: any) => ({ id: t.id, type: t.type, amount: Number(t.amount), category: t.category, description: t.description ?? null, createdAt: t.created_at })) });
+});
+
+app.get(`${P}/client/points`, async (c) => {
+  const me = await requireClient(c);
+  if (!me) return c.json({ error: "Unauthorized" }, 401);
+  const total = await bumpPointsBalance(me.id, me.org_id);
+  const settings = await orgSettingsOf(me.org_id);
+  const rate = settings?.points_per_egp ?? null;
+  const { data: ledger } = await admin().from("points_ledger").select("*").eq("client_id", me.id).order("created_at", { ascending: false }).limit(50);
+  return c.json({ total, valueEgp: rate && rate > 0 ? total / rate : 0, rate, ledger: (ledger ?? []).map((l: any) => ({ id: l.id, points: l.points, reason: l.reason, createdAt: l.created_at })) });
+});
+
+// ---- classes (dept_head creates; staff view) ----
+app.get(`${P}/classes`, async (c) => {
+  const user = await requireUser(c);
+  const me = user && (await profileOf(user.id));
+  if (!me) return c.json({ error: "Unauthorized" }, 401);
+  if (me.role === "accountant") return c.json({ error: "Forbidden" }, 403);
+  const { data } = await admin().from("classes").select("*").eq("org_id", me.org_id).order("starts_at", { ascending: false });
+  return c.json({ classes: (data ?? []).map(toClassRow) });
+});
+app.post(`${P}/classes`, async (c) => {
+  const user = await requireUser(c);
+  const me = user && (await profileOf(user.id));
+  if (me?.role !== "dept_head") return c.json({ error: "Forbidden" }, 403);
+  const { title, description, startsAt, price } = await c.req.json();
+  if (!String(title ?? "").trim()) return c.json({ error: "Title is required." }, 400);
+  if (!startsAt) return c.json({ error: "Pick a date and time." }, 400);
+  const p = Number(price);
+  if (!Number.isFinite(p) || p < 0) return c.json({ error: "Price must be zero or more." }, 400);
+  const { data, error } = await admin().from("classes").insert({ org_id: me.org_id, title: String(title).trim(), description: description ?? null, starts_at: startsAt, price_egp: p, created_by: me.id }).select().single();
+  if (error) throw error;
+  return c.json({ class: toClassRow(data) });
+});
+app.post(`${P}/classes/update`, async (c) => {
+  const user = await requireUser(c);
+  const me = user && (await profileOf(user.id));
+  if (me?.role !== "dept_head") return c.json({ error: "Forbidden" }, 403);
+  const { id, title, description, startsAt, price } = await c.req.json();
+  const p = Number(price);
+  if (!String(title ?? "").trim()) return c.json({ error: "Title is required." }, 400);
+  if (!Number.isFinite(p) || p < 0) return c.json({ error: "Price must be zero or more." }, 400);
+  const { data, error } = await admin().from("classes").update({ title: String(title).trim(), description: description ?? null, starts_at: startsAt, price_egp: p }).eq("id", id).eq("org_id", me.org_id).select().maybeSingle();
+  if (error) throw error;
+  if (!data) return c.json({ error: "No such class" }, 404);
+  return c.json({ class: toClassRow(data) });
+});
+app.post(`${P}/classes/cancel`, async (c) => {
+  const user = await requireUser(c);
+  const me = user && (await profileOf(user.id));
+  if (me?.role !== "dept_head") return c.json({ error: "Forbidden" }, 403);
+  const { id } = await c.req.json();
+  const { data: cls } = await admin().from("classes").select("*").eq("id", id).eq("org_id", me.org_id).maybeSingle();
+  if (!cls) return c.json({ error: "No such class" }, 404);
+  const { data: bookings } = await admin().from("class_bookings").select("*").eq("class_id", id).neq("attendance", "cancelled");
+  for (const b of bookings ?? []) {
+    if (b.pay_status === "paid" && b.pay_method === "wallet") {
+      await creditWallet(b.client_id, me.org_id, Number(b.price_egp), "refund", `Refund: ${cls.title} cancelled`);
+    }
+    await admin().from("class_bookings").update({ attendance: "cancelled", pay_status: b.pay_status === "paid" ? "refunded" : b.pay_status }).eq("id", b.id);
+  }
+  await admin().from("classes").update({ status: "cancelled" }).eq("id", id);
+  await logActivity(me.org_id, "class_cancelled_by_staff", { actorId: me.id, meta: { classId: id, title: cls.title } });
+  return c.json({ ok: true });
+});
+
+// ---- staff activity feed / logs ----
+app.get(`${P}/activity`, async (c) => {
+  const user = await requireUser(c);
+  const me = user && (await profileOf(user.id));
+  if (me?.role !== "dept_head" && me?.role !== "front_desk") return c.json({ error: "Forbidden" }, 403);
+  const limit = Math.min(Number(c.req.query("limit") ?? "100") || 100, 300);
+  const { data } = await admin().from("activity_log").select("*, clients:subject_client_id(name)").eq("org_id", me.org_id).order("created_at", { ascending: false }).limit(limit);
+  return c.json({ activity: (data ?? []).map((a: any) => ({ id: a.id, type: a.type, amount: a.amount != null ? Number(a.amount) : null, clientName: a.clients?.name ?? null, meta: a.meta, at: a.created_at })) });
+});
+
+// ---- invite a client to the branded app (front desk / dept_head) ----
+app.post(`${P}/client-invites`, async (c) => {
+  const user = await requireUser(c);
+  const me = user && (await profileOf(user.id));
+  if (me?.role !== "dept_head" && me?.role !== "front_desk") return c.json({ error: "Forbidden" }, 403);
+  const { clientId, email } = await c.req.json();
+  const normalizedEmail = String(email ?? "").trim().toLowerCase();
+  if (!/^\S+@\S+\.\S+$/.test(normalizedEmail)) return c.json({ error: "A valid email is required." }, 400);
+  const { data: client } = await admin().from("clients").select("id, auth_user_id").eq("id", clientId).eq("org_id", me.org_id).maybeSingle();
+  if (!client) return c.json({ error: "No such client" }, 404);
+  if (client.auth_user_id) return c.json({ error: "This client already has an app account." }, 400);
+  const { error } = await admin().from("client_invitations").upsert(
+    { org_id: me.org_id, client_id: clientId, email: normalizedEmail, invited_by: me.id },
+    { onConflict: "email" },
+  );
+  if (error) throw error;
+  await admin().from("clients").update({ email: normalizedEmail }).eq("id", clientId);
+  return c.json({ ok: true });
+});
+
+// ---- ops: per-org branding + settings (bizqwik_team) ----
+app.get(`${P}/ops/orgs/:id/config`, async (c) => {
+  const user = await requireUser(c);
+  const team = user && (await bizqwikTeamOf(user.id));
+  if (!team) return c.json({ error: "Forbidden" }, 403);
+  const id = c.req.param("id");
+  const [{ data: b }, { data: s }] = await Promise.all([
+    admin().from("org_branding").select("*").eq("org_id", id).maybeSingle(),
+    admin().from("org_settings").select("*").eq("org_id", id).maybeSingle(),
+  ]);
+  return c.json({
+    branding: b ? { appName: b.app_name, logoUrl: b.logo_url, iconUrl: b.icon_url, primaryColor: b.primary_color, onboardingAssets: b.onboarding_assets } : null,
+    settings: s ? { pointsPerEgp: s.points_per_egp, walletCreditTtlMonths: s.wallet_credit_ttl_months } : null,
+  });
+});
+app.post(`${P}/ops/orgs/:id/branding`, async (c) => {
+  const user = await requireUser(c);
+  const team = user && (await bizqwikTeamOf(user.id));
+  if (!team) return c.json({ error: "Forbidden" }, 403);
+  const id = c.req.param("id");
+  const { appName, logoUrl, iconUrl, primaryColor, onboardingAssets } = await c.req.json();
+  const { error } = await admin().from("org_branding").upsert({
+    org_id: id, app_name: appName ?? null, logo_url: logoUrl ?? null, icon_url: iconUrl ?? null,
+    primary_color: primaryColor ?? null, onboarding_assets: onboardingAssets ?? [], updated_at: new Date().toISOString(),
+  });
+  if (error) throw error;
+  return c.json({ ok: true });
+});
+app.post(`${P}/ops/orgs/:id/settings`, async (c) => {
+  const user = await requireUser(c);
+  const team = user && (await bizqwikTeamOf(user.id));
+  if (!team) return c.json({ error: "Forbidden" }, 403);
+  const id = c.req.param("id");
+  const { pointsPerEgp, walletCreditTtlMonths } = await c.req.json();
+  const ppe = pointsPerEgp === null || pointsPerEgp === "" || pointsPerEgp === undefined ? null : Number(pointsPerEgp);
+  if (ppe !== null && (!Number.isInteger(ppe) || ppe < 1)) return c.json({ error: "Points per EGP must be a whole number of 1 or more, or blank." }, 400);
+  const ttlRaw = walletCreditTtlMonths === undefined || walletCreditTtlMonths === null || walletCreditTtlMonths === "" ? 12 : Number(walletCreditTtlMonths);
+  const ttl = Number.isInteger(ttlRaw) && ttlRaw > 0 ? ttlRaw : 12;
+  const { error } = await admin().from("org_settings").upsert({ org_id: id, points_per_egp: ppe, wallet_credit_ttl_months: ttl, updated_at: new Date().toISOString() });
   if (error) throw error;
   return c.json({ ok: true });
 });
