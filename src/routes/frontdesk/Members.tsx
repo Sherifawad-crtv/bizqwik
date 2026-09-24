@@ -12,8 +12,10 @@ import { Sheet } from "../../components/Sheet";
 import { Segmented } from "../../components/Segmented";
 import { SheetSuccessIcon } from "../../components/SheetSuccessIcon";
 import { TextField, SelectField } from "../../components/FormField";
+import { PaymentSelect } from "../../components/PaymentSelect";
 import { Spinner } from "../../components/Spinner";
 import { Icon } from "../../components/Icon";
+import type { PayMethod } from "../../lib/types";
 import { Card, ErrorBanner, PlanPill, SearchField, SectionTitle, matchesClient, planSummary } from "./shared";
 
 export function useFrontDeskCatalog() {
@@ -155,6 +157,7 @@ export function CreateClientSheet({
   const [membershipTypeId, setMembershipTypeId] = useState("");
   const [bundleTypeId, setBundleTypeId] = useState("");
   const [coachId, setCoachId] = useState("");
+  const [payMethod, setPayMethod] = useState<PayMethod>("cash");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { confirmed, iconIn, showSuccess } = useSheetSuccess(open, onClose);
@@ -168,6 +171,7 @@ export function CreateClientSheet({
       setMembershipTypeId("");
       setBundleTypeId("");
       setCoachId("");
+      setPayMethod("cash");
       setError(null);
     }
   }, [open]);
@@ -195,8 +199,8 @@ export function CreateClientSheet({
     setBusy(true);
     setError(null);
     try {
-      if (kind === "membership") await api.sellMembership(fields, membershipTypeId);
-      else await api.createServiceClient(fields, bundleTypeId, coachId);
+      if (kind === "membership") await api.sellMembership(fields, membershipTypeId, payMethod);
+      else await api.createServiceClient(fields, bundleTypeId, coachId, payMethod);
       showSuccess();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
@@ -250,6 +254,9 @@ export function CreateClientSheet({
               A department head needs to add memberships under Tiers &amp; People → Bundles first.
             </div>
           )}
+          <div style={{ marginTop: 12 }}>
+            <PaymentSelect value={payMethod} onChange={setPayMethod} />
+          </div>
           {error && <ErrorBanner text={error} />}
           <Button fullWidth size="lg" style={{ marginTop: 16 }} disabled={busy} onClick={submit}>
             {busy ? "Saving…" : kind === "membership" ? "Create & start membership" : "Create & sell package"}
@@ -286,6 +293,7 @@ function ClientSheet({
   const [refundAmount, setRefundAmount] = useState("");
   const [refundDest, setRefundDest] = useState<"wallet" | "desk">("wallet");
   const [refundNote, setRefundNote] = useState("");
+  const [payMethod, setPayMethod] = useState<PayMethod>("cash");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const open = !!client;
@@ -300,6 +308,7 @@ function ClientSheet({
       setRefundAmount("");
       setRefundDest("wallet");
       setRefundNote("");
+      setPayMethod("cash");
       setError(null);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -331,11 +340,11 @@ function ClientSheet({
   const confirmMode = () => {
     if (mode === "renew-membership") {
       if (!pickId) return setError("Choose a membership.");
-      return run(() => api.sellMembership({ clientId: shown.id }, pickId));
+      return run(() => api.sellMembership({ clientId: shown.id }, pickId, payMethod));
     }
     if (mode === "renew-package") {
       if (!pickId || !coachId) return setError("Choose a package and a coach.");
-      return run(() => api.sellPackage(shown.id, pickId, coachId));
+      return run(() => api.sellPackage(shown.id, pickId, coachId, payMethod));
     }
     if (mode === "assign") {
       if (!coachId) return setError("Choose a coach.");
@@ -468,6 +477,9 @@ function ClientSheet({
               {mode === "renew-package" && <SelectField label="PACKAGE" value={pickId} onChange={setPickId} placeholder="Choose a package" options={bundleOptions(bundleTypes)} />}
               {(mode === "renew-package" || mode === "assign") && (
                 <SelectField label="COACH" value={coachId} onChange={setCoachId} placeholder="Choose a coach" options={coachOptions(coaches)} />
+              )}
+              {(mode === "renew-membership" || mode === "renew-package") && (
+                <PaymentSelect value={payMethod} onChange={setPayMethod} wallet />
               )}
             </div>
             {error && <ErrorBanner text={error} />}

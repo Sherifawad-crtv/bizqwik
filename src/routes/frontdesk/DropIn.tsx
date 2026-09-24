@@ -8,9 +8,11 @@ import type { ClientWithPackage } from "../../lib/types";
 import { Button } from "../../components/Button";
 import { Sheet } from "../../components/Sheet";
 import { TextField } from "../../components/FormField";
+import { PaymentSelect } from "../../components/PaymentSelect";
 import { Icon } from "../../components/Icon";
 import { Card, ClientPicker, ErrorBanner } from "./shared";
 import { useFrontDeskCatalog } from "./Members";
+import type { PayMethod } from "../../lib/types";
 
 export function DropIn() {
   useSetHeader({ kicker: "FRONT DESK", title: "Drop-In" }, []);
@@ -23,9 +25,13 @@ export function DropIn() {
   const client = clientId ? { id: clientId, name: params.get("name") ?? "Client" } : null;
   const setClient = (c: { id: string; name: string } | null) => setParams(c ? { client: c.id, name: c.name } : {}, { replace: true });
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [payMethod, setPayMethod] = useState<PayMethod>("cash");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<string | null>(null);
+
+  // Wallet is only payable when a member is linked; a walk-in has no wallet.
+  const effectivePay: PayMethod = !client && payMethod === "wallet" ? "cash" : payMethod;
 
   const submit = async () => {
     const amount = Number(price);
@@ -40,11 +46,12 @@ export function DropIn() {
     setBusy(true);
     setError(null);
     try {
-      await api.dropIn(client?.id ?? null, category.trim(), amount);
+      await api.dropIn(client?.id ?? null, category.trim(), amount, effectivePay);
       setDone(`${client ? client.name : "Walk-in"} · ${category.trim()} · ${fmt(amount)} EGP`);
       setCategory("");
       setPrice("");
       setClient(null);
+      setPayMethod("cash");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
@@ -98,6 +105,8 @@ export function DropIn() {
             </Button>
           )}
         </div>
+
+        <PaymentSelect value={effectivePay} onChange={setPayMethod} wallet={!!client} />
       </div>
 
       {error && <ErrorBanner text={error} />}

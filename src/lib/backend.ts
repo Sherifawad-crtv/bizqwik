@@ -26,6 +26,7 @@ import type {
   OrgSummary,
   PackageInstance,
   PackageWithNames,
+  PayMethod,
   PlanType,
   Profile,
   Role,
@@ -119,8 +120,8 @@ export const api = {
   updateClient: (id: string, name: string, age: number | null, conditions: string | null) =>
     callFn<{ client: Client }>("clients/update", { method: "POST", body: { id, name, age, conditions } }),
   deleteClient: (id: string) => callFn<void>("clients/delete", { method: "POST", body: { id } }),
-  sellPackage: (clientId: string, bundleTypeId: string, coachId: string) =>
-    callFn<{ package: PackageInstance }>("packages", { method: "POST", body: { clientId, bundleTypeId, coachId } }),
+  sellPackage: (clientId: string, bundleTypeId: string, coachId: string, payMethod?: PayMethod) =>
+    callFn<{ package: PackageInstance }>("packages", { method: "POST", body: { clientId, bundleTypeId, coachId, payMethod } }),
   deliverSession: (packageInstanceId: string) =>
     callFn<{ package: PackageInstance }>("packages/deliver", { method: "POST", body: { packageInstanceId } }),
   // Coach payout drill-down (accountant/dept_head/head_coach): every private
@@ -158,15 +159,15 @@ export const api = {
 
   // Front desk. Coach names only — no payout data, unlike month().
   coaches: () => callFn<{ coaches: CoachOption[] }>("coaches"),
-  createServiceClient: (fields: NewClientFields, bundleTypeId: string, coachId: string) =>
-    callFn<{ client: Client; package: PackageInstance }>("clients", { method: "POST", body: { ...fields, bundleTypeId, coachId } }),
-  sellMembership: (target: { clientId: string } | NewClientFields, membershipTypeId: string) =>
-    callFn<{ client: ClientWithPackage; membership: MembershipInstance }>("memberships/sell", { method: "POST", body: { ...target, membershipTypeId } }),
+  createServiceClient: (fields: NewClientFields, bundleTypeId: string, coachId: string, payMethod?: PayMethod) =>
+    callFn<{ client: Client; package: PackageInstance }>("clients", { method: "POST", body: { ...fields, bundleTypeId, coachId, payMethod } }),
+  sellMembership: (target: { clientId: string } | NewClientFields, membershipTypeId: string, payMethod?: PayMethod) =>
+    callFn<{ client: ClientWithPackage; membership: MembershipInstance }>("memberships/sell", { method: "POST", body: { ...target, membershipTypeId, payMethod } }),
   assignCoach: (id: string, coachId: string) => callFn<{ client: Client }>("clients/assign-coach", { method: "POST", body: { id, coachId } }),
   frontDeskSummary: () => callFn<FrontDeskSummary>("front-desk/summary"),
   checkIn: (clientId: string, source: "qr" | "manual") => callFn<void>("check-ins", { method: "POST", body: { clientId, source } }),
-  dropIn: (clientId: string | null, category: string, price: number) =>
-    callFn<void>("drop-ins", { method: "POST", body: { clientId, category, price } }),
+  dropIn: (clientId: string | null, category: string, price: number, payMethod?: PayMethod) =>
+    callFn<void>("drop-ins", { method: "POST", body: { clientId, category, price, payMethod } }),
   invite: (clientId: string, inviteeName: string, inviteePhone: string, visitDate: string) =>
     callFn<{ invitationsRemaining: number }>("invitations", { method: "POST", body: { clientId, inviteeName, inviteePhone, visitDate } }),
 
