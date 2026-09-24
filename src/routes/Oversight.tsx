@@ -10,6 +10,7 @@ import { HomeAvatar } from "../components/HomeAvatar";
 import { MoneyHero } from "../components/MoneyHero";
 import { RollupTable, type ListRow } from "../components/RollupTable";
 import { Spinner } from "../components/Spinner";
+import { Icon } from "../components/Icon";
 import { canLog, STATE_LABELS } from "../lib/types";
 import type { Rollup, State } from "../lib/types";
 
@@ -218,6 +219,35 @@ export function Oversight() {
           { k: "CLOSED", v: `${closed} of ${rows.length}` },
         ]}
       />
+
+      <button
+        onClick={() => navigate("/classes")}
+        data-sq
+        style={{
+          width: "100%",
+          textAlign: "left",
+          background: "var(--surface)",
+          border: "1px solid var(--line)",
+          borderRadius: "var(--r-tile)",
+          padding: "16px 18px",
+          marginBottom: 14,
+          cursor: "pointer",
+          display: "flex",
+          alignItems: "center",
+          gap: 14,
+        }}
+      >
+        <span style={{ width: 42, height: 42, flex: "none", borderRadius: 12, background: "var(--primary-tint)", color: "var(--primary-pressed)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <Icon name="calendar" size={22} />
+        </span>
+        <span style={{ flex: 1, minWidth: 0 }}>
+          <span style={{ display: "block", font: "700 16px var(--font-body)" }}>Classes</span>
+          <span style={{ display: "block", font: "400 13px var(--font-mono)", color: "var(--ink-faint)", marginTop: 2 }}>Schedule bookable classes for the member app</span>
+        </span>
+        <span style={{ flex: "none", color: "var(--ink-faint)", display: "flex" }}>
+          <Icon name="chevron-right" size={20} />
+        </span>
+      </button>
 
       <Card title="PAYOUT TREND" sub="LAST 3 MONTHS · EGP">
         {trend ? <TrendChart points={trend} /> : <TrendChartPlaceholder />}

@@ -263,6 +263,18 @@ export const ORG_STATUS_LABELS: Record<OrgStatus, string> = {
   paused: "Paused",
 };
 
+// ===== Member app: classes (dept_head manages; members book) =====
+export type GymClassStatus = "active" | "cancelled";
+
+export interface GymClass {
+  id: string;
+  title: string;
+  description: string | null;
+  startsAt: string;
+  price: number;
+  status: GymClassStatus;
+}
+
 // Per-org member-app configuration (set by ops at onboarding).
 export interface OrgBrandingConfig {
   appName: string | null;

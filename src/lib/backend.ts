@@ -13,6 +13,7 @@ import type {
   ClientWithPackage,
   CoachOption,
   FrontDeskSummary,
+  GymClass,
   Invite,
   MembershipInstance,
   MembershipType,
@@ -167,6 +168,14 @@ export const api = {
     callFn<void>("drop-ins", { method: "POST", body: { clientId, category, price } }),
   invite: (clientId: string, inviteeName: string, inviteePhone: string, visitDate: string) =>
     callFn<{ invitationsRemaining: number }>("invitations", { method: "POST", body: { clientId, inviteeName, inviteePhone, visitDate } }),
+
+  // ===== Classes (staff read; dept_head writes) =====
+  classes: () => callFn<{ classes: GymClass[] }>("classes"),
+  createClass: (title: string, description: string | null, startsAt: string, price: number) =>
+    callFn<{ class: GymClass }>("classes", { method: "POST", body: { title, description, startsAt, price } }),
+  updateClass: (id: string, title: string, description: string | null, startsAt: string, price: number) =>
+    callFn<{ class: GymClass }>("classes/update", { method: "POST", body: { id, title, description, startsAt, price } }),
+  cancelClass: (id: string) => callFn<{ ok: true }>("classes/cancel", { method: "POST", body: { id } }),
 
   pushVapidPublicKey: () => callFn<{ publicKey: string }>("push/vapid-public-key"),
   pushSubscribe: (sub: PushSubscriptionJSON, deviceId: string) =>
