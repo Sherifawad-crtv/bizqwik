@@ -33,6 +33,7 @@ import { DeskClasses } from "./routes/frontdesk/DeskClasses";
 import { OpsShell } from "./routes/ops/OpsShell";
 import { Overview as OpsOverview } from "./routes/ops/Overview";
 import { OrgDetail as OpsOrgDetail } from "./routes/ops/OrgDetail";
+import { OrgQr as OpsOrgQr } from "./routes/ops/OrgQr";
 import { Team as OpsTeam } from "./routes/ops/Team";
 import { Plans as OpsPlans } from "./routes/ops/Plans";
 
@@ -57,6 +58,7 @@ export default function App() {
                 <Route element={<OpsShell />}>
                   <Route path="/bizqwik" element={<OpsOverview />} />
                   <Route path="/bizqwik/orgs/:id" element={<OpsOrgDetail />} />
+                  <Route path="/bizqwik/orgs/:id/qr" element={<OpsOrgQr />} />
                   <Route path="/bizqwik/team" element={<OpsTeam />} />
                   <Route path="/bizqwik/plans" element={<OpsPlans />} />
                 </Route>

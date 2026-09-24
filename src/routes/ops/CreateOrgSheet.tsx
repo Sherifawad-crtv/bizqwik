@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Sheet } from "../../components/Sheet";
 import { Button } from "../../components/Button";
 import { TextField, SelectField } from "../../components/FormField";
@@ -11,6 +12,7 @@ function slugify(s: string): string {
 }
 
 export function CreateOrgSheet({ open, onClose, plans, onCreated }: { open: boolean; onClose: () => void; plans: PlanType[]; onCreated: () => void }) {
+  const navigate = useNavigate();
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
   const [slugTouched, setSlugTouched] = useState(false);
@@ -19,6 +21,7 @@ export function CreateOrgSheet({ open, onClose, plans, onCreated }: { open: bool
   const [planId, setPlanId] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [created, setCreated] = useState<{ id: string; name: string; slug: string; deptHeadEmail: string } | null>(null);
 
   const reset = () => {
     setName("");
@@ -28,6 +31,7 @@ export function CreateOrgSheet({ open, onClose, plans, onCreated }: { open: bool
     setHeadEmail("");
     setPlanId("");
     setError(null);
+    setCreated(null);
   };
 
   const close = () => {
@@ -44,10 +48,11 @@ export function CreateOrgSheet({ open, onClose, plans, onCreated }: { open: bool
     if (!headEmail.trim()) return setError("A department-head email is required.");
     setBusy(true);
     try {
-      await api.ops.createOrg(name.trim(), effectiveSlug, headName.trim(), headEmail.trim(), planId || null);
-      reset();
+      const res = await api.ops.createOrg(name.trim(), effectiveSlug, headName.trim(), headEmail.trim(), planId || null);
+      // Keep the sheet open on a success step so the operator can jump straight
+      // to the printable check-in QR; the list refreshes underneath.
       onCreated();
-      onClose();
+      setCreated({ id: res.org.id, name: res.org.name, slug: res.org.slug, deptHeadEmail: res.deptHeadEmail });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
@@ -56,6 +61,33 @@ export function CreateOrgSheet({ open, onClose, plans, onCreated }: { open: bool
   };
 
   const planOptions = [{ value: "", label: "No plan (assign later)" }, ...plans.map((p) => ({ value: p.id, label: p.name }))];
+
+  if (created) {
+    return (
+      <Sheet open={open} onClose={close}>
+        <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--paid-fg)" }}>ORGANIZATION CREATED</div>
+        <div style={{ font: "800 26px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 6px" }}>{created.name} is live</div>
+        <div style={{ font: "400 13px/1.7 var(--font-mono)", color: "var(--ink-muted)", marginBottom: 18 }}>
+          Its department head signs up with <b>{created.deptHeadEmail}</b>. Two starter pay tiers were created. Next: print
+          the front-desk check-in QR so members can start checking in.
+        </div>
+        <Button
+          fullWidth
+          size="lg"
+          onClick={() => {
+            const id = created.id;
+            close();
+            navigate(`/bizqwik/orgs/${id}/qr`);
+          }}
+        >
+          View &amp; print check-in QR
+        </Button>
+        <Button variant="quiet" fullWidth style={{ marginTop: 8 }} onClick={close}>
+          Done
+        </Button>
+      </Sheet>
+    );
+  }
 
   return (
     <Sheet open={open} onClose={close}>

@@ -113,6 +113,21 @@ export function OrgDetail() {
       <OrgAppConfig id={id} />
 
       <div style={{ marginTop: 26 }}>
+        <SectionTitle>Check-in QR</SectionTitle>
+        <Card style={{ padding: 18, display: "flex", alignItems: "center", gap: 14 }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ font: "700 15px var(--font-body)" }}>Lifetime check-in code</div>
+            <div style={{ font: "400 13px/1.5 var(--font-mono)", color: "var(--ink-faint)", marginTop: 2 }}>
+              Print it for {org.name}'s front desk — members scan it in the app to check in.
+            </div>
+          </div>
+          <Button variant="secondary" style={{ flex: "none" }} onClick={() => navigate(`/bizqwik/orgs/${id}/qr`)}>
+            Open
+          </Button>
+        </Card>
+      </div>
+
+      <div style={{ marginTop: 26 }}>
         <SectionTitle>Usage</SectionTitle>
         <Card style={{ overflow: "hidden" }}>
           <UsageRow label="GMV" value={egp(usage.gmv)} />
