@@ -131,10 +131,11 @@ export function OpsShell() {
           </button>
         </div>
       </div>
-      <div style={{ flex: 1, minWidth: 0, display: "flex", justifyContent: "center" }}>
-        <div style={{ width: "100%", maxWidth: 860, padding: "34px 32px 60px" }}>
-          <Outlet />
-        </div>
+      {/* Fill the space beside the sidebar, same as the org Shell — no
+          centered/capped column, which on wide screens left the body frozen
+          at 860px in a sea of empty gutters. */}
+      <div style={{ flex: 1, minWidth: 0, padding: "34px 30px 60px" }}>
+        <Outlet />
       </div>
     </div>
   );
