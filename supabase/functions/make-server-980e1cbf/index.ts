@@ -202,6 +202,13 @@ async function debitWallet(clientId: string, orgId: string, amount: number, cate
   return { ok: true, balance: await walletBalance(clientId, orgId) };
 }
 
+// Desk-sale payment method. cash/card are external (recorded in activity only);
+// "wallet" spends store credit. Default "cash" keeps every existing caller —
+// including the current business app, which sends no payMethod — unchanged.
+function normPayMethod(v: any): "cash" | "card" | "wallet" {
+  return v === "card" ? "card" : v === "wallet" ? "wallet" : "cash";
+}
+
 // ---- points engine (symmetric per-org rate; earn on check-in + desk sales) ----
 async function bumpPointsBalance(clientId: string, orgId: string): Promise<number> {
   const { data } = await admin().from("points_ledger").select("points").eq("client_id", clientId).eq("org_id", orgId);
@@ -433,8 +440,8 @@ app.get(`${P}/health`, (c) => c.json({ status: "ok" }));
 // membership) a new account joins is decided entirely by which invite their
 // email matches — never by "the one org that exists," since there can now be
 // many. A Bizqwik-team invite creates a team member (no org, no profile); a
-// staff invite creates that org's profile. No match → rejected before any auth
-// user is created.
+// staff invite creates that org's profile; a client invite links the existing
+// client row. No match → rejected before any auth user is created.
 app.post(`${P}/signup`, async (c) => {
   try {
     const { name, email, password } = await c.req.json();
@@ -498,8 +505,9 @@ app.post(`${P}/signup`, async (c) => {
 });
 
 // ---- me ----------------------------------------------------------------
-// Returns whichever identities the caller holds: an org profile (staff) and/or
-// bizqwik_team membership (ops). At least one must exist.
+// Returns whichever identities the caller holds: an org profile (staff),
+// bizqwik_team membership (ops), and/or a client account (member). At least one
+// must exist.
 app.get(`${P}/me`, async (c) => {
   const user = await requireUser(c);
   if (!user) return c.json({ error: "Unauthorized" }, 401);
@@ -1102,11 +1110,13 @@ app.post(`${P}/clients`, async (c) => {
   if (me?.role !== "dept_head" && me?.role !== "front_desk") return c.json({ error: "Forbidden" }, 403);
   const body = await c.req.json();
   const { name, age, phone, email, bundleTypeId, coachId } = body;
+  const payMethod = normPayMethod(body.payMethod);
   // front_desk never writes medical conditions, even if a payload carries them.
   const conditions = me.role === "front_desk" ? null : body.conditions;
   if (!name || !String(name).trim() || !bundleTypeId || !coachId) {
     return c.json({ error: "Name, bundle, and coach are all required to create a client." }, 400);
   }
+  if (payMethod === "wallet") return c.json({ error: "A brand-new client has no wallet balance yet — take cash or card." }, 400);
   const limitErr = await planLimitError(me.org_id, "client");
   if (limitErr) return c.json({ error: limitErr }, 400);
 
@@ -1123,7 +1133,7 @@ app.post(`${P}/clients`, async (c) => {
     return c.json({ error: result.error }, result.status);
   }
   await earnPurchasePoints(result.client.id, me.org_id, Number(result.package.price_at_sale));
-  await logActivity(me.org_id, "sale_package", { actorId: me.id, clientId: result.client.id, amount: Number(result.package.price_at_sale) });
+  await logActivity(me.org_id, "sale_package", { actorId: me.id, clientId: result.client.id, amount: Number(result.package.price_at_sale), meta: { payMethod } });
   return c.json({ client: toClient(result.client, conditions || null, null), package: toPackageInstance(result.package) });
 });
 
@@ -1189,11 +1199,21 @@ app.post(`${P}/packages`, async (c) => {
   const user = await requireUser(c);
   const me = user && (await profileOf(user.id));
   if (me?.role !== "dept_head" && me?.role !== "front_desk") return c.json({ error: "Forbidden" }, 403);
-  const { clientId, bundleTypeId, coachId } = await c.req.json();
+  const body = await c.req.json();
+  const { clientId, bundleTypeId, coachId } = body;
+  const payMethod = normPayMethod(body.payMethod);
   const result = await sellPackageTo(clientId, bundleTypeId, coachId, me);
   if ("error" in result) return c.json({ error: result.error }, result.status);
-  await earnPurchasePoints(clientId, me.org_id, Number(result.package.price_at_sale));
-  await logActivity(me.org_id, "sale_package", { actorId: me.id, clientId, amount: Number(result.package.price_at_sale) });
+  const price = Number(result.package.price_at_sale);
+  if (payMethod === "wallet") {
+    const r = await debitWallet(clientId, me.org_id, price, "purchase", "Package purchase");
+    if (!r.ok) {
+      await admin().from("package_instances").delete().eq("id", result.package.id);
+      return c.json({ error: "Wallet balance doesn't cover this package.", code: "insufficient_wallet" }, 400);
+    }
+  }
+  await earnPurchasePoints(clientId, me.org_id, price);
+  await logActivity(me.org_id, "sale_package", { actorId: me.id, clientId, amount: price, meta: { payMethod } });
   return c.json({ package: toPackageInstance(result.package) });
 });
 
@@ -1236,7 +1256,10 @@ app.post(`${P}/memberships/sell`, async (c) => {
   const user = await requireUser(c);
   const me = user && (await profileOf(user.id));
   if (me?.role !== "front_desk") return c.json({ error: "Forbidden" }, 403);
-  const { clientId, name, age, phone, email, membershipTypeId } = await c.req.json();
+  const body = await c.req.json();
+  const { clientId, name, age, phone, email, membershipTypeId } = body;
+  const payMethod = normPayMethod(body.payMethod);
+  if (payMethod === "wallet" && !clientId) return c.json({ error: "A brand-new client has no wallet balance yet — take cash or card." }, 400);
 
   const { data: type } = await admin().from("membership_types").select("*").eq("id", membershipTypeId).eq("org_id", me.org_id).maybeSingle();
   if (!type) return c.json({ error: "Choose a membership." }, 400);
@@ -1277,8 +1300,16 @@ app.post(`${P}/memberships/sell`, async (c) => {
     if (createdNow) await admin().from("clients").delete().eq("id", client.id);
     throw error;
   }
+  if (payMethod === "wallet") {
+    const r = await debitWallet(client.id, me.org_id, Number(type.price), "purchase", "Membership purchase");
+    if (!r.ok) {
+      await admin().from("membership_instances").delete().eq("id", membership.id);
+      if (createdNow) await admin().from("clients").delete().eq("id", client.id);
+      return c.json({ error: "Wallet balance doesn't cover this membership.", code: "insufficient_wallet" }, 400);
+    }
+  }
   await earnPurchasePoints(client.id, me.org_id, Number(type.price));
-  await logActivity(me.org_id, "sale_membership", { actorId: me.id, clientId: client.id, amount: Number(type.price) });
+  await logActivity(me.org_id, "sale_membership", { actorId: me.id, clientId: client.id, amount: Number(type.price), meta: { payMethod } });
   return c.json({ client: toClient(client, null, null, toMembershipInstance(membership)), membership: toMembershipInstance(membership) });
 });
 
@@ -1327,11 +1358,14 @@ app.post(`${P}/drop-ins`, async (c) => {
   const user = await requireUser(c);
   const me = user && (await profileOf(user.id));
   if (me?.role !== "front_desk") return c.json({ error: "Forbidden" }, 403);
-  const { clientId, category, price } = await c.req.json();
+  const body = await c.req.json();
+  const { clientId, category, price } = body;
+  const payMethod = normPayMethod(body.payMethod);
   const cat = String(category ?? "").trim();
   const amount = Number(price);
   if (!cat) return c.json({ error: "Enter what the drop-in is for." }, 400);
   if (!Number.isFinite(amount) || amount < 0) return c.json({ error: "Enter a valid price." }, 400);
+  if (payMethod === "wallet" && !clientId) return c.json({ error: "Wallet payment needs an existing member." }, 400);
   if (clientId) {
     const { data: client } = await admin().from("clients").select("id").eq("id", clientId).eq("org_id", me.org_id).maybeSingle();
     if (!client) return c.json({ error: "No such client" }, 404);
@@ -1342,8 +1376,15 @@ app.post(`${P}/drop-ins`, async (c) => {
     .select()
     .single();
   if (error) throw error;
+  if (payMethod === "wallet") {
+    const r = await debitWallet(clientId, me.org_id, amount, "purchase", `Drop-in: ${cat}`);
+    if (!r.ok) {
+      await admin().from("drop_ins").delete().eq("id", data.id);
+      return c.json({ error: "Wallet balance doesn't cover this drop-in.", code: "insufficient_wallet" }, 400);
+    }
+  }
   await earnPurchasePoints(data.client_id, me.org_id, amount);
-  await logActivity(me.org_id, "sale_dropin", { actorId: me.id, clientId: data.client_id, amount });
+  await logActivity(me.org_id, "sale_dropin", { actorId: me.id, clientId: data.client_id, amount, meta: { payMethod } });
   return c.json({ dropIn: { id: data.id, clientId: data.client_id, category: data.category, price: Number(data.price), createdAt: data.created_at } });
 });
 
@@ -2242,6 +2283,88 @@ app.post(`${P}/classes/cancel`, async (c) => {
   await admin().from("classes").update({ status: "cancelled" }).eq("id", id);
   await logActivity(me.org_id, "class_cancelled_by_staff", { actorId: me.id, meta: { classId: id, title: cls.title } });
   return c.json({ ok: true });
+});
+
+// ---- staff: class bookings, attendance, pay-at-desk collection ----
+app.get(`${P}/classes/:id/bookings`, async (c) => {
+  const user = await requireUser(c);
+  const me = user && (await profileOf(user.id));
+  if (me?.role !== "dept_head" && me?.role !== "front_desk") return c.json({ error: "Forbidden" }, 403);
+  const classId = c.req.param("id");
+  const { data: cls } = await admin().from("classes").select("id").eq("id", classId).eq("org_id", me.org_id).maybeSingle();
+  if (!cls) return c.json({ error: "No such class" }, 404);
+  const { data } = await admin().from("class_bookings").select("*, clients(name)").eq("class_id", classId).order("booked_at");
+  return c.json({ bookings: (data ?? []).map((r: any) => ({ ...toBookingRow(r), clientName: r.clients?.name ?? null })) });
+});
+app.post(`${P}/bookings/attendance`, async (c) => {
+  const user = await requireUser(c);
+  const me = user && (await profileOf(user.id));
+  if (me?.role !== "dept_head" && me?.role !== "front_desk") return c.json({ error: "Forbidden" }, 403);
+  const { bookingId, attendance } = await c.req.json();
+  if (attendance !== "arrived" && attendance !== "no_show" && attendance !== "booked") return c.json({ error: "Invalid attendance." }, 400);
+  const { data: b } = await admin().from("class_bookings").select("*").eq("id", bookingId).eq("org_id", me.org_id).maybeSingle();
+  if (!b) return c.json({ error: "No such booking" }, 404);
+  if (b.attendance === "cancelled") return c.json({ error: "That booking was cancelled." }, 400);
+  await admin().from("class_bookings").update({ attendance }).eq("id", bookingId);
+  if (attendance !== "booked") {
+    await logActivity(me.org_id, attendance === "arrived" ? "booking_arrived" : "booking_no_show", { actorId: me.id, clientId: b.client_id, meta: { bookingId, classId: b.class_id } });
+  }
+  return c.json({ ok: true });
+});
+app.post(`${P}/bookings/collect`, async (c) => {
+  const user = await requireUser(c);
+  const me = user && (await profileOf(user.id));
+  if (me?.role !== "dept_head" && me?.role !== "front_desk") return c.json({ error: "Forbidden" }, 403);
+  const body = await c.req.json();
+  const { bookingId } = body;
+  const payMethod = normPayMethod(body.payMethod);
+  const { data: b } = await admin().from("class_bookings").select("*").eq("id", bookingId).eq("org_id", me.org_id).maybeSingle();
+  if (!b) return c.json({ error: "No such booking" }, 404);
+  if (b.pay_status === "paid") return c.json({ error: "Already paid." }, 400);
+  if (b.attendance === "cancelled") return c.json({ error: "That booking was cancelled." }, 400);
+  const price = Number(b.price_egp);
+  if (payMethod === "wallet") {
+    const r = await debitWallet(b.client_id, me.org_id, price, "class_booking", "Class payment at desk");
+    if (!r.ok) return c.json({ error: "Wallet balance doesn't cover this class.", code: "insufficient_wallet" }, 400);
+  }
+  // class_bookings.pay_method is constrained to wallet|desk; cash/card collected
+  // at the desk are recorded as "desk", with the exact tender in the activity log.
+  await admin().from("class_bookings").update({ pay_status: "paid", pay_method: payMethod === "wallet" ? "wallet" : "desk" }).eq("id", bookingId);
+  await logActivity(me.org_id, "class_collected", { actorId: me.id, clientId: b.client_id, amount: price, meta: { bookingId, payMethod } });
+  return c.json({ ok: true });
+});
+
+// ---- staff: refunds (to wallet or "at desk") + goodwill compensation ----
+app.post(`${P}/clients/refund`, async (c) => {
+  const user = await requireUser(c);
+  const me = user && (await profileOf(user.id));
+  if (me?.role !== "dept_head" && me?.role !== "front_desk") return c.json({ error: "Forbidden" }, 403);
+  const { clientId, amount, destination, note } = await c.req.json();
+  const amt = Number(amount);
+  if (!Number.isFinite(amt) || amt <= 0) return c.json({ error: "Enter a refund amount." }, 400);
+  if (destination !== "wallet" && destination !== "desk") return c.json({ error: "Choose where the refund goes." }, 400);
+  const { data: client } = await admin().from("clients").select("id").eq("id", clientId).eq("org_id", me.org_id).maybeSingle();
+  if (!client) return c.json({ error: "No such client" }, 404);
+  if (destination === "wallet") {
+    const balance = await creditWallet(clientId, me.org_id, amt, "refund", note ? String(note) : "Refund to wallet");
+    return c.json({ ok: true, walletBalance: balance });
+  }
+  // "At desk": the real money (cash / card / Stripe) is handled outside Bizqwik;
+  // we only record the equivalent for the log.
+  await logActivity(me.org_id, "refund_desk", { actorId: me.id, clientId, amount: amt, meta: { note: note ?? null } });
+  return c.json({ ok: true });
+});
+app.post(`${P}/clients/compensate`, async (c) => {
+  const user = await requireUser(c);
+  const me = user && (await profileOf(user.id));
+  if (me?.role !== "dept_head") return c.json({ error: "Forbidden" }, 403);
+  const { clientId, amount, note } = await c.req.json();
+  const amt = Number(amount);
+  if (!Number.isFinite(amt) || amt <= 0) return c.json({ error: "Enter an amount." }, 400);
+  const { data: client } = await admin().from("clients").select("id").eq("id", clientId).eq("org_id", me.org_id).maybeSingle();
+  if (!client) return c.json({ error: "No such client" }, 404);
+  const balance = await creditWallet(clientId, me.org_id, amt, "compensation", note ? String(note) : "Compensation credit");
+  return c.json({ ok: true, walletBalance: balance });
 });
 
 // ---- staff activity feed / logs ----
