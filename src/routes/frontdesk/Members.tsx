@@ -263,7 +263,7 @@ export function CreateClientSheet({
   );
 }
 
-type Mode = "view" | "renew-membership" | "renew-package" | "assign" | "invite";
+type Mode = "view" | "renew-membership" | "renew-package" | "assign" | "invite" | "refund";
 
 function ClientSheet({
   client,
@@ -283,6 +283,9 @@ function ClientSheet({
   const [pickId, setPickId] = useState("");
   const [coachId, setCoachId] = useState("");
   const [email, setEmail] = useState("");
+  const [refundAmount, setRefundAmount] = useState("");
+  const [refundDest, setRefundDest] = useState<"wallet" | "desk">("wallet");
+  const [refundNote, setRefundNote] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const open = !!client;
@@ -294,6 +297,9 @@ function ClientSheet({
       setPickId("");
       setCoachId(client.assignedCoachId ?? "");
       setEmail(client.email ?? "");
+      setRefundAmount("");
+      setRefundDest("wallet");
+      setRefundNote("");
       setError(null);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -340,10 +346,23 @@ function ClientSheet({
       if (!/^\S+@\S+\.\S+$/.test(e)) return setError("Enter a valid email.");
       return run(() => api.inviteClient(shown.id, e));
     }
+    if (mode === "refund") {
+      const amt = Number(refundAmount);
+      if (!Number.isFinite(amt) || amt <= 0) return setError("Enter a refund amount.");
+      return run(() => api.refundClient(shown.id, amt, refundDest, refundNote.trim() || undefined));
+    }
   };
 
   const successLabel =
-    mode === "assign" ? "Coach assigned" : mode === "invite" ? "Invitation sent" : mode === "renew-membership" ? "Membership started" : "Package sold";
+    mode === "assign"
+      ? "Coach assigned"
+      : mode === "invite"
+        ? "Invitation sent"
+        : mode === "refund"
+          ? refundDest === "wallet" ? "Refunded to wallet" : "Refund recorded"
+          : mode === "renew-membership"
+            ? "Membership started"
+            : "Package sold";
 
   return (
     <>
@@ -395,6 +414,9 @@ function ClientSheet({
             <Button variant="secondary" fullWidth style={{ marginTop: 8 }} onClick={() => setMode("invite")}>
               {shown.email ? "Re-invite to app" : "Invite to app"}
             </Button>
+            <Button variant="quiet" fullWidth style={{ marginTop: 8 }} onClick={() => setMode("refund")}>
+              Issue a refund
+            </Button>
             <Button variant="quiet" fullWidth style={{ marginTop: 8 }} onClick={onClose}>
               Close
             </Button>
@@ -403,9 +425,28 @@ function ClientSheet({
           <>
             <SheetHeading
               kicker={shown.name.toUpperCase()}
-              title={mode === "assign" ? "Assign a coach" : mode === "invite" ? "Invite to app" : mode === "renew-membership" ? "Choose membership" : "Choose package"}
+              title={mode === "assign" ? "Assign a coach" : mode === "invite" ? "Invite to app" : mode === "refund" ? "Issue a refund" : mode === "renew-membership" ? "Choose membership" : "Choose package"}
             />
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              {mode === "refund" && (
+                <>
+                  <TextField label="AMOUNT (EGP)" value={refundAmount} onChange={(e) => setRefundAmount(e.target.value)} inputMode="numeric" placeholder="0" />
+                  <Segmented
+                    value={refundDest}
+                    options={[
+                      { value: "wallet", label: "To wallet" },
+                      { value: "desk", label: "Cash / card" },
+                    ]}
+                    onChange={(v) => setRefundDest(v as "wallet" | "desk")}
+                  />
+                  <div style={{ font: "400 12px/1.5 var(--font-mono)", color: "var(--ink-faint)" }}>
+                    {refundDest === "wallet"
+                      ? "Adds store credit to their wallet (expires per the org's policy)."
+                      : "You hand back cash/card outside Bizqwik — this just records the amount."}
+                  </div>
+                  <TextField label="NOTE (OPTIONAL)" value={refundNote} onChange={(e) => setRefundNote(e.target.value)} placeholder="Reason for the refund" />
+                </>
+              )}
               {mode === "invite" && (
                 <>
                   <TextField label="EMAIL" value={email} onChange={(e) => setEmail(e.target.value)} inputMode="email" placeholder="member@email.com" />
@@ -431,7 +472,7 @@ function ClientSheet({
             </div>
             {error && <ErrorBanner text={error} />}
             <Button fullWidth size="lg" style={{ marginTop: 16 }} disabled={busy} onClick={confirmMode}>
-              {busy ? "Saving…" : mode === "assign" ? "Assign coach" : mode === "invite" ? "Send invitation" : mode === "renew-membership" ? "Start membership" : "Sell package"}
+              {busy ? "Saving…" : mode === "assign" ? "Assign coach" : mode === "invite" ? "Send invitation" : mode === "refund" ? "Issue refund" : mode === "renew-membership" ? "Start membership" : "Sell package"}
             </Button>
             <Button
               variant="secondary"
