@@ -14,6 +14,7 @@ const ACTIONS: { key: string; label: string; icon: IconName; to: string; primary
   { key: "new", label: "New client", icon: "user-plus", to: "/members?new=1", primary: true },
   { key: "dropin", label: "Drop-in pass", icon: "ticket", to: "/drop-in" },
   { key: "invite", label: "Guest invitation", icon: "gift", to: "/invitations" },
+  { key: "classes", label: "Classes", icon: "calendar", to: "/desk-classes" },
 ];
 
 function timeAgo(iso: string): string {

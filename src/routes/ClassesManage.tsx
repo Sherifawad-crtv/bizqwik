@@ -12,6 +12,7 @@ import { Sheet } from "../components/Sheet";
 import { TextField, SelectField } from "../components/FormField";
 import { DateField } from "../components/DateField";
 import { ConfirmSheet } from "../components/ConfirmSheet";
+import { ClassRosterSheet } from "../components/ClassRosterSheet";
 
 const pad = (n: number) => String(n).padStart(2, "0");
 
@@ -66,6 +67,7 @@ export function ClassesManage() {
   const classes = useAsync(() => api.classes(), []);
   const [form, setForm] = useState<FormState | null>(null);
   const [confirmCancel, setConfirmCancel] = useState<GymClass | null>(null);
+  const [roster, setRoster] = useState<GymClass | null>(null);
   useSetHeader({ kicker: "MEMBER APP", title: "Classes" }, []);
 
   const list = classes.data?.classes ?? [];
@@ -107,7 +109,7 @@ export function ClassesManage() {
       {scheduled.length > 0 && (
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           {scheduled.map((c) => (
-            <ClassCard key={c.id} c={c} onEdit={() => setForm(formOf(c))} />
+            <ClassCard key={c.id} c={c} onEdit={() => setForm(formOf(c))} onRoster={() => setRoster(c)} />
           ))}
         </div>
       )}
@@ -138,6 +140,13 @@ export function ClassesManage() {
         }}
       />
 
+      <ClassRosterSheet
+        open={roster !== null}
+        onClose={() => setRoster(null)}
+        classId={roster?.id ?? null}
+        title={roster?.title ?? "Class"}
+      />
+
       <ConfirmSheet
         open={confirmCancel !== null}
         onClose={() => setConfirmCancel(null)}
@@ -156,37 +165,43 @@ export function ClassesManage() {
   );
 }
 
-function ClassCard({ c, onEdit }: { c: GymClass; onEdit?: () => void }) {
+function ClassCard({ c, onEdit, onRoster }: { c: GymClass; onEdit?: () => void; onRoster?: () => void }) {
   const cancelled = c.status === "cancelled";
   return (
     <div
       data-sq
-      onClick={onEdit}
       style={{
         background: "var(--surface)",
         border: "1px solid var(--line)",
         borderRadius: "var(--r-card)",
         padding: "14px 16px",
-        cursor: onEdit ? "pointer" : "default",
         opacity: cancelled ? 0.55 : 1,
-        display: "flex",
-        alignItems: "center",
-        gap: 12,
       }}
     >
-      <div style={{ minWidth: 0, flex: 1 }}>
-        <div style={{ font: "700 16px var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", textDecoration: cancelled ? "line-through" : "none" }}>{c.title}</div>
-        <div style={{ font: "500 13px var(--font-mono)", color: "var(--ink-muted)", marginTop: 3 }}>{whenLabel(c.startsAt)}</div>
-        {c.description && (
-          <div style={{ font: "400 13px/1.4 var(--font-body)", color: "var(--ink-faint)", marginTop: 6, overflow: "hidden", textOverflow: "ellipsis", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>
-            {c.description}
-          </div>
-        )}
+      <div onClick={onEdit} style={{ display: "flex", alignItems: "center", gap: 12, cursor: onEdit ? "pointer" : "default" }}>
+        <div style={{ minWidth: 0, flex: 1 }}>
+          <div style={{ font: "700 16px var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", textDecoration: cancelled ? "line-through" : "none" }}>{c.title}</div>
+          <div style={{ font: "500 13px var(--font-mono)", color: "var(--ink-muted)", marginTop: 3 }}>{whenLabel(c.startsAt)}</div>
+          {c.description && (
+            <div style={{ font: "400 13px/1.4 var(--font-body)", color: "var(--ink-faint)", marginTop: 6, overflow: "hidden", textOverflow: "ellipsis", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>
+              {c.description}
+            </div>
+          )}
+        </div>
+        <div style={{ flex: "none", textAlign: "right" }}>
+          <div className="tabular" style={{ font: "800 16px var(--font-body)" }}>{c.price > 0 ? egp(c.price) : "Free"}</div>
+          {onEdit && <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".06em", color: "var(--ink-faint)", marginTop: 4 }}>EDIT</div>}
+        </div>
       </div>
-      <div style={{ flex: "none", textAlign: "right" }}>
-        <div className="tabular" style={{ font: "800 16px var(--font-body)" }}>{c.price > 0 ? egp(c.price) : "Free"}</div>
-        {onEdit && <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".06em", color: "var(--ink-faint)", marginTop: 4 }}>EDIT</div>}
-      </div>
+      {onRoster && (
+        <button
+          type="button"
+          onClick={onRoster}
+          style={{ marginTop: 12, width: "100%", border: "1px solid var(--line)", background: "var(--paper)", color: "var(--ink-muted)", borderRadius: 10, padding: "8px 0", font: "700 13px var(--font-body)", cursor: "pointer" }}
+        >
+          View roster
+        </button>
+      )}
     </div>
   );
 }

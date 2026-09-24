@@ -279,6 +279,21 @@ export interface GymClass {
   status: GymClassStatus;
 }
 
+export type BookingAttendance = "booked" | "arrived" | "no_show" | "cancelled";
+export type BookingPayStatus = "paid" | "pending" | "refunded";
+
+// A class booking as staff see it (roster row): who booked, how they're paying,
+// whether they've paid, and their attendance.
+export interface ClassBooking {
+  id: string;
+  classId: string;
+  clientName: string | null;
+  payMethod: "wallet" | "desk";
+  payStatus: BookingPayStatus;
+  attendance: BookingAttendance;
+  price: number;
+}
+
 // ===== Staff activity feed / logs (dept_head + front_desk) =====
 export interface ActivityEntry {
   id: string;

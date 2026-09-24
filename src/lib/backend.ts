@@ -7,6 +7,7 @@ import { bump } from "./bus";
 import type {
   ActivityEntry,
   BizqwikRole,
+  ClassBooking,
   BizqwikTeam,
   BizqwikTeamInvite,
   BundleType,
@@ -178,6 +179,13 @@ export const api = {
   updateClass: (id: string, title: string, description: string | null, startsAt: string, price: number) =>
     callFn<{ class: GymClass }>("classes/update", { method: "POST", body: { id, title, description, startsAt, price } }),
   cancelClass: (id: string) => callFn<{ ok: true }>("classes/cancel", { method: "POST", body: { id } }),
+
+  // ===== Class roster / attendance / at-desk collection (dept_head + front_desk) =====
+  classBookings: (classId: string) => callFn<{ bookings: ClassBooking[] }>(`classes/${classId}/bookings`),
+  markAttendance: (bookingId: string, attendance: "arrived" | "no_show" | "booked") =>
+    callFn<{ ok: true }>("bookings/attendance", { method: "POST", body: { bookingId, attendance } }),
+  collectBooking: (bookingId: string, payMethod: PayMethod) =>
+    callFn<{ ok: true }>("bookings/collect", { method: "POST", body: { bookingId, payMethod } }),
 
   // ===== Staff activity feed / logs (dept_head + front_desk) =====
   activity: (limit = 100) => callFn<{ activity: ActivityEntry[] }>(`activity?limit=${limit}`),

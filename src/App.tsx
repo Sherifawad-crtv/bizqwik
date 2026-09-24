@@ -29,6 +29,7 @@ import { Members } from "./routes/frontdesk/Members";
 import { CheckIn } from "./routes/frontdesk/CheckIn";
 import { DropIn } from "./routes/frontdesk/DropIn";
 import { Invitations } from "./routes/frontdesk/Invitations";
+import { DeskClasses } from "./routes/frontdesk/DeskClasses";
 import { OpsShell } from "./routes/ops/OpsShell";
 import { Overview as OpsOverview } from "./routes/ops/Overview";
 import { OrgDetail as OpsOrgDetail } from "./routes/ops/OrgDetail";
@@ -77,6 +78,7 @@ export default function App() {
                     <Route path="/checkin" element={<CheckIn />} />
                     <Route path="/drop-in" element={<DropIn />} />
                     <Route path="/invitations" element={<Invitations />} />
+                    <Route path="/desk-classes" element={<DeskClasses />} />
                   </Route>
 
                   <Route element={<RequireRole roles={["head_coach", "dept_head"]} />}>
