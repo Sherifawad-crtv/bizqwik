@@ -51,7 +51,13 @@ bundle types, and the org rows.
 ## Notes / follow-ups
 - Both apps: `tsc -b` + `npm run build` clean. Added `src/vite-env.d.ts` to the
   client app so `import.meta.env` typechecks (build already worked; tsc didn't).
-- Mocked-network Playwright smoke per app (business money screens + client
-  auth→home→book→wallet) — tracked separately.
+- Mocked-network Playwright smoke per app (`npm run test:e2e`), fully offline
+  against the dev server, all green:
+  - business (`e2e/frontdesk-money.spec.ts`): login form + redirect; front-desk
+    Drop-In payment selector (cash/card, wallet hidden for walk-ins) → record;
+    dept-head-only route gated for front_desk.
+  - client (`e2e/member-flow.spec.ts`): branded intro → sign in → home → book a
+    class (pay from wallet) → bookings → profile → wallet; unknown gym shows the
+    friendly "Gym not found".
 - Unrelated observations (not touched): Revolt is `status: trial`; leftover
   `test`/`Test2`/`test3` orgs from ops verification remain.
