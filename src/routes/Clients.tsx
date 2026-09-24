@@ -451,9 +451,11 @@ function ClientDetailSheet({
   coachName: (id: string | null) => string | null;
   onClose: () => void;
 }) {
-  const [mode, setMode] = useState<"view" | "sell">("view");
+  const [mode, setMode] = useState<"view" | "sell" | "compensate">("view");
   const [bundleTypeId, setBundleTypeId] = useState("");
   const [coachId, setCoachId] = useState("");
+  const [compAmount, setCompAmount] = useState("");
+  const [compNote, setCompNote] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successLabel, setSuccessLabel] = useState("");
@@ -464,6 +466,8 @@ function ClientDetailSheet({
       setMode("view");
       setBundleTypeId("");
       setCoachId(role === "coach" ? myId : "");
+      setCompAmount("");
+      setCompNote("");
       setError(null);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -483,6 +487,25 @@ function ClientDetailSheet({
     try {
       await api.sellPackage(client.id, bundleTypeId, coachId);
       setSuccessLabel("Package sold");
+      showSuccess();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const compensate = async () => {
+    const amt = Number(compAmount);
+    if (!Number.isFinite(amt) || amt <= 0) {
+      setError("Enter an amount.");
+      return;
+    }
+    setBusy(true);
+    setError(null);
+    try {
+      await api.compensateClient(client.id, amt, compNote.trim() || undefined);
+      setSuccessLabel("Wallet credited");
       showSuccess();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
@@ -569,6 +592,11 @@ function ClientDetailSheet({
                   {pkg ? "Sell / renew package" : "Sell package"}
                 </Button>
               )}
+              {role === "dept_head" && (
+                <Button variant="secondary" fullWidth style={{ marginTop: 8 }} onClick={() => setMode("compensate")}>
+                  Compensate to wallet
+                </Button>
+              )}
               <Button variant="quiet" fullWidth style={{ marginTop: 8 }} onClick={onClose}>
                 Close
               </Button>
@@ -600,6 +628,30 @@ function ClientDetailSheet({
               )}
               <Button fullWidth size="lg" style={{ marginTop: 16 }} disabled={busy} onClick={sell}>
                 {busy ? "Selling…" : "Confirm sale"}
+              </Button>
+              <Button variant="secondary" fullWidth style={{ marginTop: 8 }} onClick={() => setMode("view")} disabled={busy}>
+                Back
+              </Button>
+            </>
+          )}
+
+          {mode === "compensate" && (
+            <>
+              <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", marginBottom: 10 }}>GOODWILL WALLET CREDIT</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                <TextField label="AMOUNT (EGP)" value={compAmount} onChange={(e) => setCompAmount(e.target.value)} inputMode="numeric" placeholder="0" />
+                <TextField label="NOTE (OPTIONAL)" value={compNote} onChange={(e) => setCompNote(e.target.value)} placeholder="Why you're compensating them" />
+              </div>
+              <div style={{ marginTop: 8, font: "400 12px/1.5 var(--font-mono)", color: "var(--ink-faint)" }}>
+                Adds store credit to {client.name}'s wallet. They can spend it on classes and desk purchases.
+              </div>
+              {error && (
+                <div style={{ marginTop: 12, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>
+                  {error}
+                </div>
+              )}
+              <Button fullWidth size="lg" style={{ marginTop: 16 }} disabled={busy} onClick={compensate}>
+                {busy ? "Crediting…" : "Credit wallet"}
               </Button>
               <Button variant="secondary" fullWidth style={{ marginTop: 8 }} onClick={() => setMode("view")} disabled={busy}>
                 Back
