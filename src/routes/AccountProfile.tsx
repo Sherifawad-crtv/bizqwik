@@ -3,6 +3,7 @@ import { useAuth } from "../lib/auth";
 import { useSetHeader } from "../lib/header";
 import { api } from "../lib/backend";
 import { supabase } from "../lib/supabaseClient";
+import { squareCrop } from "../lib/image";
 import { Avatar } from "../components/Avatar";
 import { Button } from "../components/Button";
 import { Icon } from "../components/Icon";
@@ -12,35 +13,6 @@ import { ROLE_LABELS, hasTier } from "../lib/types";
 // Self-service photo upload/removal is turned off for the time being —
 // avatars are being set manually. Flip this back on to restore it.
 const PHOTO_EDIT_ENABLED = false;
-
-// Center-crop to a square, then downscale — every avatar in the app is
-// rendered as a circle via object-fit: cover, so a square source is all
-// that's ever needed regardless of the uploaded photo's original aspect.
-async function squareCrop(file: File, targetSize = 512): Promise<Blob> {
-  const objectUrl = URL.createObjectURL(file);
-  try {
-    const img = await new Promise<HTMLImageElement>((resolve, reject) => {
-      const el = new Image();
-      el.onload = () => resolve(el);
-      el.onerror = () => reject(new Error("Couldn't read that image."));
-      el.src = objectUrl;
-    });
-    const side = Math.min(img.width, img.height);
-    const sx = (img.width - side) / 2;
-    const sy = (img.height - side) / 2;
-    const canvas = document.createElement("canvas");
-    canvas.width = targetSize;
-    canvas.height = targetSize;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) throw new Error("Couldn't process that image.");
-    ctx.drawImage(img, sx, sy, side, side, 0, 0, targetSize, targetSize);
-    return await new Promise<Blob>((resolve, reject) => {
-      canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error("Couldn't process that image."))), "image/jpeg", 0.88);
-    });
-  } finally {
-    URL.revokeObjectURL(objectUrl);
-  }
-}
 
 async function uploadAvatar(userId: string, blob: Blob): Promise<string> {
   const path = `${userId}/avatar.jpg`;
