@@ -6,7 +6,8 @@ import { useLatch } from "../lib/useLatch";
 import { useSheetSuccess } from "../lib/useSheetSuccess";
 import { api } from "../lib/backend";
 import { egp, fmt } from "../lib/format";
-import { TIME_OPTIONS, WEEKDAY_ORDER, WEEKDAY_SHORT, timeLabel, weekdaysLabel } from "../lib/classTime";
+import { WEEKDAY_ORDER, WEEKDAY_SHORT, timeLabel, weekdaysLabel } from "../lib/classTime";
+import { TimeWheelField } from "../components/TimeWheelField";
 import type { ClassSeries, GroupPlanType, GroupPlanTypeKind } from "../lib/types";
 import { Segmented } from "../components/Segmented";
 import { Button } from "../components/Button";
@@ -226,8 +227,6 @@ export function SeriesSheet({ open, series, onClose }: { open: boolean; series: 
 
   if (!open) return null;
 
-  const timeOptions = TIME_OPTIONS.some((o) => o.value === startTime) ? TIME_OPTIONS : [{ value: startTime, label: timeLabel(startTime) }, ...TIME_OPTIONS];
-
   const save = async () => {
     const dropInNum = Number(dropIn);
     const monthlyNum = Number(monthly);
@@ -268,7 +267,7 @@ export function SeriesSheet({ open, series, onClose }: { open: boolean; series: 
               <TextField label="DESCRIPTION" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Optional — shown to members" />
               <WeekdayPicker value={weekdays} onChange={setWeekdays} />
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-                <SelectField label="STARTS AT" value={startTime} options={timeOptions} onChange={setStartTime} />
+                <TimeWheelField label="STARTS AT" value={startTime} onChange={setStartTime} />
                 <SelectField label="LENGTH" value={duration} options={DURATION_OPTIONS} onChange={setDuration} />
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>

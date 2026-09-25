@@ -9,14 +9,6 @@ export function timeLabel(hhmm: string): string {
   return `${h12}:${pad(m)} ${am ? "AM" : "PM"}`;
 }
 
-// 30-min slots across a gym's plausible day. A custom sheet picker (not a
-// native <input type=time>) — keeps the installed iOS PWA in standalone mode.
-export const TIME_OPTIONS = Array.from({ length: (23 - 5) * 2 + 1 }, (_, i) => {
-  const mins = 5 * 60 + i * 30;
-  const hhmm = `${pad(Math.floor(mins / 60))}:${pad(mins % 60)}`;
-  return { value: hhmm, label: timeLabel(hhmm) };
-});
-
 export function whenLabel(iso: string): string {
   const d = new Date(iso);
   const date = d.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });

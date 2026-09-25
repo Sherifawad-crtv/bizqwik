@@ -9,11 +9,12 @@ import { Spinner } from "../components/Spinner";
 import { Button } from "../components/Button";
 import { Icon } from "../components/Icon";
 import { Sheet } from "../components/Sheet";
-import { TextField, SelectField } from "../components/FormField";
+import { TextField } from "../components/FormField";
 import { DateField } from "../components/DateField";
 import { ConfirmSheet } from "../components/ConfirmSheet";
 import { ClassRosterSheet } from "../components/ClassRosterSheet";
-import { TIME_OPTIONS, pad, timeLabel, whenLabel } from "../lib/classTime";
+import { pad, whenLabel } from "../lib/classTime";
+import { TimeWheelField } from "../components/TimeWheelField";
 
 interface FormState {
   id: string | null; // null = creating
@@ -235,9 +236,6 @@ function ClassSheet({
 
   const editing = draft.id !== null;
 
-  const timeOptions = TIME_OPTIONS.some((o) => o.value === draft.time)
-    ? TIME_OPTIONS
-    : [{ value: draft.time, label: timeLabel(draft.time) }, ...TIME_OPTIONS];
 
   const save = async () => {
     setError(null);
@@ -276,7 +274,7 @@ function ClassSheet({
         <TextField label="TITLE" value={draft.title} onChange={(e) => setDraft({ ...draft, title: e.target.value })} placeholder="e.g. Sunrise HIIT" />
         <TextField label="DESCRIPTION" value={draft.description} onChange={(e) => setDraft({ ...draft, description: e.target.value })} placeholder="Optional — shown to members" />
         <DateField value={draft.date} min={todayIso()} onChange={(iso) => setDraft({ ...draft, date: iso })} />
-        <SelectField label="TIME" value={draft.time} options={timeOptions} onChange={(v) => setDraft({ ...draft, time: v })} />
+        <TimeWheelField label="TIME" value={draft.time} onChange={(v) => setDraft({ ...draft, time: v })} />
         <TextField label="DROP-IN PRICE (EGP)" value={draft.price} onChange={(e) => setDraft({ ...draft, price: e.target.value })} inputMode="numeric" placeholder="0 for free" />
       </div>
 
