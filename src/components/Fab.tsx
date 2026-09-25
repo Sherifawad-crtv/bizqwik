@@ -1,7 +1,10 @@
 import { useCallback, useState } from "react";
 import { Icon } from "./Icon";
 import { AddSessionSheet } from "./AddSessionSheet";
-import { NewClientWizardSheet } from "./NewClientWizardSheet";
+import { Sheet } from "./Sheet";
+import { Button } from "./Button";
+import { SeriesSheet, PlanTypeSheet } from "../routes/Catalog";
+import { BundleSheet } from "../routes/Manage";
 import { useAuth } from "../lib/auth";
 import { useOwnMonth } from "../lib/ownMonth";
 import { useAsync } from "../lib/useAsync";
@@ -36,15 +39,57 @@ function FabButton({ size, label, onClick, opacity = 1 }: { size: number; label:
   );
 }
 
-/** Dept heads' FAB starts the client-onboarding flow instead of logging a
- * group session — creating clients and selling them a package is their
- * primary fast-path action now, not personal session logging. */
-function NewClientFab({ size }: { size: number }) {
-  const [open, setOpen] = useState(false);
+type CreateKind = "class" | "bundle" | "membership" | "pt";
+
+const CREATE_OPTIONS: { kind: CreateKind; title: string; sub: string; icon: "calendar" | "ticket" | "gift" | "coaches" }[] = [
+  { kind: "class", title: "Group class", sub: "Repeats weekly · drop-in + monthly price", icon: "calendar" },
+  { kind: "bundle", title: "Class bundle", sub: "A pack of class credits, any class", icon: "ticket" },
+  { kind: "membership", title: "Membership", sub: "All classes for set months", icon: "gift" },
+  { kind: "pt", title: "PT bundle", sub: "Private training sessions with a coach", icon: "coaches" },
+];
+
+/** The founder's FAB opens a "Create" menu for what the gym sells. Clients
+ * are registered by the front desk, not here. */
+function CreateFab({ size }: { size: number }) {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [kind, setKind] = useState<CreateKind | null>(null);
+  const pick = (k: CreateKind) => {
+    setMenuOpen(false);
+    // Let the menu's close animation finish before the next sheet opens.
+    window.setTimeout(() => setKind(k), 260);
+  };
   return (
     <>
-      <FabButton size={size} label="New client" onClick={() => setOpen(true)} />
-      <NewClientWizardSheet open={open} onClose={() => setOpen(false)} />
+      <FabButton size={size} label="Create" onClick={() => setMenuOpen(true)} />
+      <Sheet open={menuOpen} onClose={() => setMenuOpen(false)}>
+        <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>CREATE</div>
+        <div style={{ font: "800 26px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 16px" }}>What are you adding?</div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          {CREATE_OPTIONS.map((o) => (
+            <button
+              key={o.kind}
+              onClick={() => pick(o.kind)}
+              data-sq
+              style={{ textAlign: "left", background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "14px 16px", cursor: "pointer", display: "flex", alignItems: "center", gap: 14 }}
+            >
+              <span style={{ width: 40, height: 40, flex: "none", borderRadius: 12, background: "var(--primary-tint)", color: "var(--primary-pressed)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <Icon name={o.icon} size={20} />
+              </span>
+              <span style={{ flex: 1, minWidth: 0 }}>
+                <span style={{ display: "block", font: "700 16px var(--font-body)" }}>{o.title}</span>
+                <span style={{ display: "block", font: "400 12px var(--font-mono)", color: "var(--ink-faint)", marginTop: 2 }}>{o.sub}</span>
+              </span>
+              <Icon name="chevron-right" size={18} />
+            </button>
+          ))}
+        </div>
+        <Button variant="quiet" fullWidth style={{ marginTop: 12 }} onClick={() => setMenuOpen(false)}>
+          Cancel
+        </Button>
+      </Sheet>
+      <SeriesSheet open={kind === "class"} series={null} onClose={() => setKind(null)} />
+      <PlanTypeSheet open={kind === "bundle" || kind === "membership"} kind={kind === "bundle" ? "bundle" : "membership"} planType={null} onClose={() => setKind(null)} />
+      <BundleSheet open={kind === "pt"} bundleType={null} onClose={() => setKind(null)} />
     </>
   );
 }
@@ -96,6 +141,6 @@ function AddSessionFab({ size }: { size: number }) {
 export function Fab({ size = 64 }: { size?: number }) {
   const { profile } = useAuth();
   if (!profile) return null;
-  if (profile.role === "dept_head") return <NewClientFab size={size} />;
+  if (profile.role === "dept_head") return <CreateFab size={size} />;
   return <AddSessionFab size={size} />;
 }

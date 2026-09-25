@@ -130,6 +130,8 @@ export interface PackageInstance {
 export interface ClientWithPackage extends Client {
   currentPackage: PackageInstance | null;
   currentMembership?: MembershipInstance | null;
+  // The member's one active group plan (membership / class monthly / bundle), if any.
+  groupPlan?: GroupPlan | null;
 }
 
 // Coach payout drill-down row — a package plus the names needed to show it
@@ -272,11 +274,15 @@ export type GymClassStatus = "active" | "cancelled";
 
 export interface GymClass {
   id: string;
+  seriesId?: string | null;
   title: string;
   description: string | null;
   startsAt: string;
-  price: number;
+  price: number; // the drop-in price
   status: GymClassStatus;
+  bookedCount?: number;
+  planSeats?: number;
+  dropInSeats?: number;
 }
 
 export type BookingAttendance = "booked" | "arrived" | "no_show" | "cancelled";
@@ -288,10 +294,12 @@ export interface ClassBooking {
   id: string;
   classId: string;
   clientName: string | null;
-  payMethod: "wallet" | "desk";
+  payMethod: "wallet" | "desk" | "plan";
   payStatus: BookingPayStatus;
   attendance: BookingAttendance;
   price: number;
+  // "plan" = paid for by the member's group plan; "drop_in" = paid per class.
+  coverage: "plan" | "drop_in";
 }
 
 // ===== Staff activity feed / logs (dept_head + front_desk) =====
@@ -319,4 +327,75 @@ export interface OrgPointsSettings {
 export interface OrgConfig {
   branding: OrgBrandingConfig | null;
   settings: OrgPointsSettings | null;
+}
+
+// ===== Services model: recurring classes + group plans =====
+// A class series repeats on the chosen weekdays at one local time, month to
+// month, until someone edits or ends it. Each session is bookable as a
+// drop-in; the monthly price buys a month of that one class.
+export interface ClassSeries {
+  id: string;
+  title: string;
+  description: string | null;
+  weekdays: number[]; // 0 = Sunday … 6 = Saturday
+  startTime: string; // "HH:MM", gym-local
+  durationMin: number;
+  dropInPrice: number;
+  monthlyPrice: number;
+  status: "active" | "ended";
+  activeMonthlySubscribers?: number;
+}
+
+// The founder's catalog: an all-access membership, or a class bundle of N
+// credits usable on any class. Both run N months from purchase.
+export type GroupPlanTypeKind = "membership" | "bundle";
+export interface GroupPlanType {
+  id: string;
+  kind: GroupPlanTypeKind;
+  name: string;
+  price: number;
+  durationMonths: number;
+  credits: number | null;
+  invitationsAllowance: number;
+  active: boolean;
+}
+
+export type GroupPlanKind = "membership" | "class_monthly" | "bundle";
+export interface GroupPlan {
+  id: string;
+  clientId: string;
+  kind: GroupPlanKind;
+  planTypeId: string | null;
+  seriesId: string | null;
+  name: string;
+  priceAtSale: number;
+  payMethod: PayMethod;
+  creditsTotal: number | null;
+  creditsRemaining: number | null;
+  invitationsRemaining: number;
+  startsAt: string;
+  expiresAt: string;
+  status: "active" | "finished";
+}
+
+export const GROUP_PLAN_KIND_LABELS: Record<GroupPlanKind, string> = {
+  membership: "Membership",
+  class_monthly: "Class monthly",
+  bundle: "Class bundle",
+};
+
+// dept_head money view (GET /revenue).
+export interface RevenueSlice {
+  key: string;
+  label: string;
+  amount: number;
+}
+export interface RevenueReport {
+  months: { month: string; revenue: number; payouts: number; profit: number }[];
+  totals: { revenue: number; payouts: number; profit: number };
+  byService: RevenueSlice[];
+  byType: RevenueSlice[];
+  byCoach: { coachId: string; name: string; revenue: number; payouts: number }[];
+  activeSubscribers: { total: number; groupPlans: number; ptPackages: number; byPlanKind: Record<GroupPlanKind, number> };
+  walletLiability: number;
 }

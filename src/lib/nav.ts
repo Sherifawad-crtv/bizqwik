@@ -64,11 +64,13 @@ export const NAV: Record<Role, NavItem[]> = {
     { key: "clients", path: "/clients", label: "Clients", icon: "clients" },
     { key: "history", path: "/history", label: "History", icon: "history" },
   ],
+  // The founder view: money first; clients are read-only (the front desk
+  // registers and sells); Team & Tiers lives under Coaches.
   dept_head: [
-    { key: "oversight", path: "/oversight", label: "Oversight", icon: "home" },
+    { key: "oversight", path: "/oversight", label: "Overview", icon: "home" },
     { key: "coaches", path: "/coaches", label: "Coaches", icon: "coaches" },
     { key: "clients", path: "/clients", label: "Clients", icon: "clients" },
-    { key: "manage", path: "/manage", label: "Tiers & People", icon: "settings" },
+    { key: "catalog", path: "/catalog", label: "Catalog", icon: "tag" },
     { key: "history", path: "/history", label: "History", icon: "history" },
   ],
   accountant: [

@@ -19,6 +19,7 @@ test("front desk: drop-in with payment selector -> record", async ({ page }) => 
   await mockBackend(page, "front_desk", { "drop-ins": {} });
 
   await page.goto("/drop-in");
+  await page.getByRole("button", { name: "WALK-IN" }).click();
   await expect(page.getByText("One-time entry")).toBeVisible();
 
   // Payment selector: cash/card offered; wallet hidden for a walk-in (no member).
@@ -28,7 +29,7 @@ test("front desk: drop-in with payment selector -> record", async ({ page }) => 
   await expect(page.getByText("WALLET", { exact: true })).toHaveCount(0);
 
   // Record a walk-in drop-in.
-  await page.getByPlaceholder("e.g. Calisthenics").fill("Calisthenics");
+  await page.getByPlaceholder("e.g. Open gym").fill("Calisthenics");
   await page.locator('input[type="number"]').fill("120");
   await page.getByRole("button", { name: /Confirm drop-in/ }).click();
 

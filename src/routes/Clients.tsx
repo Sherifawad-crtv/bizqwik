@@ -5,17 +5,17 @@ import { useAsync } from "../lib/useAsync";
 import { useLatch } from "../lib/useLatch";
 import { useIsMobile } from "../lib/useIsMobile";
 import { api, MOCK } from "../lib/backend";
-import { dateLabel, egp, fmt } from "../lib/format";
+import { dateLabel, egp } from "../lib/format";
 import { canLog } from "../lib/types";
-import type { BundleType, ClientWithPackage, Role } from "../lib/types";
+import type { ClientWithPackage, GroupPlan, Role } from "../lib/types";
+import { GROUP_PLAN_KIND_LABELS } from "../lib/types";
 import { Button } from "../components/Button";
 import { Icon } from "../components/Icon";
 import { Avatar } from "../components/Avatar";
 import { Spinner } from "../components/Spinner";
 import { Sheet } from "../components/Sheet";
 import { ConfirmSheet } from "../components/ConfirmSheet";
-import { TextField, SelectField } from "../components/FormField";
-import { NewClientWizardSheet } from "../components/NewClientWizardSheet";
+import { TextField } from "../components/FormField";
 import { PackageStatusPill } from "../components/PackageStatusPill";
 import { SheetSuccessIcon } from "../components/SheetSuccessIcon";
 import { useSheetSuccess } from "../lib/useSheetSuccess";
@@ -48,9 +48,16 @@ function packageMetaText(client: ClientWithPackage): string {
 
 const EXPIRING_SOON_DAYS = 7;
 
-function OverviewCards({ clients }: { clients: ClientWithPackage[] }) {
+function groupPlanLine(p: GroupPlan): string {
+  const until = `until ${dateLabel(p.expiresAt.slice(0, 10))}`;
+  if (p.kind === "bundle") return `${p.creditsRemaining} of ${p.creditsTotal} classes left · ${until}`;
+  return `${GROUP_PLAN_KIND_LABELS[p.kind]} · ${until}`;
+}
+
+function OverviewCards({ clients, showGroupPlans }: { clients: ClientWithPackage[]; showGroupPlans: boolean }) {
   const stats = [
     { k: "TOTAL CLIENTS", v: clients.length },
+    ...(showGroupPlans ? [{ k: "ON A GROUP PLAN", v: clients.filter((c) => c.groupPlan).length }] : []),
     { k: "ACTIVE PACKAGES", v: clients.filter((c) => c.currentPackage?.status === "active").length },
     { k: "NEEDS RENEWAL", v: clients.filter((c) => c.currentPackage && c.currentPackage.status !== "active").length },
     {
@@ -72,24 +79,21 @@ function OverviewCards({ clients }: { clients: ClientWithPackage[] }) {
 
 export function Clients() {
   const { profile } = useAuth();
-  // Only dept_head gets department-wide admin capability (create clients,
-  // sell/renew packages, assign/reassign) — and sees the full roster, full
-  // stop, no "mine" sub-view. Head coach's private-training role is the
-  // same as a plain coach's: view their own assigned clients and log
-  // deliveries against them, nothing more.
+  // dept_head sees the full roster, read-only apart from edits, deletes and
+  // goodwill credit: registering clients and selling plans/packages is the
+  // front desk's job. Head coach's private-training role is the same as a
+  // plain coach's: view their own assigned clients and log deliveries.
   const isDeptHead = profile?.role === "dept_head";
 
   const { data } = useAsync(() => api.clients(), []);
-  const { data: bundleData } = useAsync(() => (isDeptHead ? api.bundleTypes() : Promise.resolve(null)), [isDeptHead]);
   const { data: monthData } = useAsync(() => (isDeptHead ? api.month(MOCK.CURRENT_MONTH) : Promise.resolve(null)), [isDeptHead]);
 
-  useSetHeader({ kicker: "PRIVATE TRAINING", title: "Clients" }, []);
+  useSetHeader({ kicker: isDeptHead ? "MEMBERS" : "PRIVATE TRAINING", title: "Clients" }, [isDeptHead]);
 
   if (!profile) return null;
   if (!data) return <Spinner />;
 
   const coachOptions: CoachOption[] = (monthData?.rows ?? []).filter((r) => canLog(r.role)).map((r) => ({ id: r.coachId, name: r.name }));
-  const bundleTypes: BundleType[] = bundleData?.bundleTypes ?? [];
   const visibleClients = isDeptHead ? data.clients : data.clients.filter((c) => c.assignedCoachId === profile.id);
   const coachName = (id: string | null) => (id ? (coachOptions.find((c) => c.id === id)?.name ?? "—") : null);
 
@@ -98,8 +102,6 @@ export function Clients() {
       clients={visibleClients}
       role={profile.role}
       myId={profile.id}
-      coachOptions={coachOptions}
-      bundleTypes={bundleTypes}
       coachName={coachName}
       showAssignedCoach={isDeptHead}
       canManage={isDeptHead}
@@ -111,8 +113,6 @@ function ClientList({
   clients,
   role,
   myId,
-  coachOptions,
-  bundleTypes,
   coachName,
   showAssignedCoach,
   canManage,
@@ -120,14 +120,11 @@ function ClientList({
   clients: ClientWithPackage[];
   role: Role;
   myId: string;
-  coachOptions: CoachOption[];
-  bundleTypes: BundleType[];
   coachName: (id: string | null) => string | null;
   showAssignedCoach: boolean;
   canManage: boolean;
 }) {
   const [selected, setSelected] = useState<ClientWithPackage | null>(null);
-  const [newClientOpen, setNewClientOpen] = useState(false);
   const [editing, setEditing] = useState<ClientWithPackage | null>(null);
   const [deleting, setDeleting] = useState<ClientWithPackage | null>(null);
   const [actionsFor, setActionsFor] = useState<ClientWithPackage | null>(null);
@@ -138,13 +135,10 @@ function ClientList({
 
   return (
     <div>
-      <OverviewCards clients={clients} />
-
+      <OverviewCards clients={clients} showGroupPlans={canManage} />
       {canManage && (
-        <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 14 }}>
-          <Button size="md" style={{ height: 40, padding: "0 16px" }} onClick={() => setNewClientOpen(true)}>
-            + New client
-          </Button>
+        <div style={{ font: "400 12px/1.5 var(--font-mono)", color: "var(--ink-faint)", margin: "-6px 2px 14px" }}>
+          New clients, plans and packages are handled at the front desk.
         </div>
       )}
 
@@ -170,14 +164,10 @@ function ClientList({
           client={shownSelected}
           role={role}
           myId={myId}
-          coachOptions={coachOptions}
-          bundleTypes={bundleTypes}
           coachName={coachName}
           onClose={() => setSelected(null)}
         />
       )}
-
-      {canManage && <NewClientWizardSheet open={newClientOpen} onClose={() => setNewClientOpen(false)} />}
 
       {canManage && shownActionsFor && (
         <ClientActionSheet
@@ -282,7 +272,7 @@ function ClientRoster({
 }) {
   const isMobile = useIsMobile();
   const metaFor = (c: ClientWithPackage) => (showAssignedCoach ? (coachName(c.assignedCoachId) ?? "Unassigned") : packageMetaText(c));
-  const subFor = (c: ClientWithPackage) => (showAssignedCoach ? countdownText(c) : null);
+  const subFor = (c: ClientWithPackage) => (showAssignedCoach ? (c.groupPlan ? `${c.groupPlan.name} · ${groupPlanLine(c.groupPlan)}` : countdownText(c)) : null);
   const valueFor = (c: ClientWithPackage) => (c.currentPackage ? egp(c.currentPackage.priceAtSale) : "—");
 
   if (clients.length === 0) {
@@ -437,8 +427,6 @@ function ClientDetailSheet({
   client,
   role,
   myId,
-  coachOptions,
-  bundleTypes,
   coachName,
   onClose,
 }: {
@@ -446,14 +434,10 @@ function ClientDetailSheet({
   client: ClientWithPackage;
   role: Role;
   myId: string;
-  coachOptions: CoachOption[];
-  bundleTypes: BundleType[];
   coachName: (id: string | null) => string | null;
   onClose: () => void;
 }) {
-  const [mode, setMode] = useState<"view" | "sell" | "compensate">("view");
-  const [bundleTypeId, setBundleTypeId] = useState("");
-  const [coachId, setCoachId] = useState("");
+  const [mode, setMode] = useState<"view" | "compensate">("view");
   const [compAmount, setCompAmount] = useState("");
   const [compNote, setCompNote] = useState("");
   const [busy, setBusy] = useState(false);
@@ -464,8 +448,6 @@ function ClientDetailSheet({
   useEffect(() => {
     if (open) {
       setMode("view");
-      setBundleTypeId("");
-      setCoachId(role === "coach" ? myId : "");
       setCompAmount("");
       setCompNote("");
       setError(null);
@@ -474,26 +456,7 @@ function ClientDetailSheet({
   }, [open, client.id]);
 
   const pkg = client.currentPackage;
-  const canSell = role === "dept_head" && (!pkg || pkg.status !== "active");
   const canDeliver = role !== "accountant" && client.assignedCoachId === myId && !!pkg && pkg.status === "active";
-
-  const sell = async () => {
-    if (!bundleTypeId || !coachId) {
-      setError("Pick a bundle and a coach.");
-      return;
-    }
-    setBusy(true);
-    setError(null);
-    try {
-      await api.sellPackage(client.id, bundleTypeId, coachId);
-      setSuccessLabel("Package sold");
-      showSuccess();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong.");
-    } finally {
-      setBusy(false);
-    }
-  };
 
   const compensate = async () => {
     const amt = Number(compAmount);
@@ -557,6 +520,22 @@ function ClientDetailSheet({
                 <div style={{ font: "600 16px var(--font-body)" }}>{coachName(client.assignedCoachId) ?? "Unassigned"}</div>
               </div>
 
+              {role === "dept_head" && (
+                <div data-sq style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "12px 16px", marginBottom: 10 }}>
+                  <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>GROUP PLAN</div>
+                  {client.groupPlan ? (
+                    <>
+                      <div style={{ font: "600 16px var(--font-body)" }}>{client.groupPlan.name}</div>
+                      <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-muted)" }}>
+                        {groupPlanLine(client.groupPlan)} · {egp(client.groupPlan.priceAtSale)}
+                      </div>
+                    </>
+                  ) : (
+                    <div style={{ font: "600 15px var(--font-body)", color: "var(--ink-faint)" }}>No active plan</div>
+                  )}
+                </div>
+              )}
+
               {pkg ? (
                 <div data-sq style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "12px 16px", marginBottom: 10 }}>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
@@ -587,11 +566,6 @@ function ClientDetailSheet({
                   {busy ? "Logging…" : "Log delivered session"}
                 </Button>
               )}
-              {canSell && (
-                <Button fullWidth size="lg" style={{ marginTop: 6 }} onClick={() => setMode("sell")}>
-                  {pkg ? "Sell / renew package" : "Sell package"}
-                </Button>
-              )}
               {role === "dept_head" && (
                 <Button variant="secondary" fullWidth style={{ marginTop: 8 }} onClick={() => setMode("compensate")}>
                   Compensate to wallet
@@ -599,38 +573,6 @@ function ClientDetailSheet({
               )}
               <Button variant="quiet" fullWidth style={{ marginTop: 8 }} onClick={onClose}>
                 Close
-              </Button>
-            </>
-          )}
-
-          {mode === "sell" && (
-            <>
-              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                <SelectField
-                  label="BUNDLE"
-                  value={bundleTypeId}
-                  onChange={setBundleTypeId}
-                  placeholder="Choose a bundle"
-                  options={bundleTypes.map((b) => ({ value: b.id, label: `${b.name} · ${fmt(b.price)} EGP` }))}
-                />
-                <SelectField
-                  label="COACH"
-                  value={coachId}
-                  onChange={setCoachId}
-                  placeholder="Choose a coach"
-                  options={coachOptions.map((c) => ({ value: c.id, label: c.name }))}
-                />
-              </div>
-              {error && (
-                <div style={{ marginTop: 12, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>
-                  {error}
-                </div>
-              )}
-              <Button fullWidth size="lg" style={{ marginTop: 16 }} disabled={busy} onClick={sell}>
-                {busy ? "Selling…" : "Confirm sale"}
-              </Button>
-              <Button variant="secondary" fullWidth style={{ marginTop: 8 }} onClick={() => setMode("view")} disabled={busy}>
-                Back
               </Button>
             </>
           )}

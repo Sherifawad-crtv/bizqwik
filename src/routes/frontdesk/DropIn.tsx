@@ -2,23 +2,34 @@ import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useSetHeader } from "../../lib/header";
 import { useAsync } from "../../lib/useAsync";
-import { api } from "../../lib/backend";
+import { ApiError, api } from "../../lib/backend";
 import { fmt } from "../../lib/format";
+import { whenLabel } from "../../lib/classTime";
 import type { ClientWithPackage } from "../../lib/types";
 import { Button } from "../../components/Button";
 import { Sheet } from "../../components/Sheet";
-import { TextField } from "../../components/FormField";
+import { Segmented } from "../../components/Segmented";
+import { ConfirmSheet } from "../../components/ConfirmSheet";
+import { TextField, SelectField } from "../../components/FormField";
 import { PaymentSelect } from "../../components/PaymentSelect";
 import { Icon } from "../../components/Icon";
 import { Card, ClientPicker, ErrorBanner } from "./shared";
 import { useFrontDeskCatalog } from "./Members";
 import type { PayMethod } from "../../lib/types";
 
+type Mode = "class" | "walkin";
+
+/** Pay-per-visit at the desk. "Class" puts a member into one class session at
+ * its drop-in price (they land on the roster); "Walk-in" is a free-form entry
+ * like open gym. A member who still has a group plan running gets the same
+ * "are you sure?" check as the member app before being charged. */
 export function DropIn() {
   useSetHeader({ kicker: "FRONT DESK", title: "Drop-In" }, []);
   const [params, setParams] = useSearchParams();
+  const [mode, setMode] = useState<Mode>("class");
   const [category, setCategory] = useState("");
   const [price, setPrice] = useState("");
+  const [classId, setClassId] = useState("");
   // The linked client lives in the URL so a check-in hand-off
   // (?client=…&name=…) survives the tab transition's remount.
   const clientId = params.get("client");
@@ -29,31 +40,58 @@ export function DropIn() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<string | null>(null);
+  const [confirmPlan, setConfirmPlan] = useState<string | null>(null);
+
+  const classes = useAsync(() => api.classes(), []);
+  const now = Date.now();
+  const sessions = (classes.data?.classes ?? []).filter(
+    (c) => c.status === "active" && Date.parse(c.startsAt) >= now - 2 * 60 * 60 * 1000 && Date.parse(c.startsAt) <= now + 7 * 86400000,
+  );
+  const session = sessions.find((c) => c.id === classId) ?? null;
 
   // Wallet is only payable when a member is linked; a walk-in has no wallet.
   const effectivePay: PayMethod = !client && payMethod === "wallet" ? "cash" : payMethod;
 
-  const submit = async () => {
-    const amount = Number(price);
-    if (!category.trim()) {
-      setError("Enter what the drop-in is for.");
-      return;
+  const reset = () => {
+    setCategory("");
+    setPrice("");
+    setClassId("");
+    setClient(null);
+    setPayMethod("cash");
+  };
+
+  // Records the sale; throws on failure. `confirmed` re-sends after the desk
+  // has acknowledged the member's running plan.
+  const perform = async (confirmed: boolean) => {
+    if (mode === "class" && client && session) {
+      await api.classDropIn(client.id, session.id, effectivePay, confirmed);
+      setDone(`${client.name} · ${session.title} · ${fmt(session.price)} EGP`);
+    } else {
+      await api.dropIn(client?.id ?? null, category.trim(), Number(price), effectivePay, confirmed);
+      setDone(`${client ? client.name : "Walk-in"} · ${category.trim()} · ${fmt(Number(price))} EGP`);
     }
-    if (price === "" || !Number.isFinite(amount) || amount < 0) {
-      setError("Enter the price paid.");
-      return;
+    reset();
+  };
+
+  const submit = async () => {
+    setError(null);
+    if (mode === "class") {
+      if (!client) return setError("Link the member first — a class drop-in puts them on the roster.");
+      if (!session) return setError("Choose the class session.");
+    } else {
+      if (!category.trim()) return setError("Enter what the drop-in is for.");
+      const amount = Number(price);
+      if (price === "" || !Number.isFinite(amount) || amount < 0) return setError("Enter the price paid.");
     }
     setBusy(true);
-    setError(null);
     try {
-      await api.dropIn(client?.id ?? null, category.trim(), amount, effectivePay);
-      setDone(`${client ? client.name : "Walk-in"} · ${category.trim()} · ${fmt(amount)} EGP`);
-      setCategory("");
-      setPrice("");
-      setClient(null);
-      setPayMethod("cash");
+      await perform(false);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong.");
+      if (err instanceof ApiError && err.code === "active_plan_confirm") {
+        setConfirmPlan(err.message);
+      } else {
+        setError(err instanceof Error ? err.message : "Something went wrong.");
+      }
     } finally {
       setBusy(false);
     }
@@ -61,13 +99,32 @@ export function DropIn() {
 
   return (
     <div>
+      <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}>
+        <Segmented
+          value={mode}
+          onChange={(v) => {
+            setMode(v);
+            setError(null);
+            setDone(null);
+          }}
+          options={[
+            { value: "class", label: "CLASS SESSION" },
+            { value: "walkin", label: "WALK-IN" },
+          ]}
+        />
+      </div>
+
       <Card style={{ padding: "16px 18px", display: "flex", gap: 12, alignItems: "flex-start", marginBottom: 16 }}>
         <span style={{ color: "var(--primary-pressed)", display: "flex", marginTop: 2 }}>
-          <Icon name="ticket" size={22} />
+          <Icon name={mode === "class" ? "calendar" : "ticket"} size={22} />
         </span>
         <div>
-          <div style={{ font: "700 16px var(--font-body)" }}>One-time entry</div>
-          <div style={{ font: "400 13px/1.5 var(--font-mono)", color: "var(--ink-muted)" }}>Valid for a single session. Link a client if they have a record, or leave it as a walk-in.</div>
+          <div style={{ font: "700 16px var(--font-body)" }}>{mode === "class" ? "Drop into a class" : "One-time entry"}</div>
+          <div style={{ font: "400 13px/1.5 var(--font-mono)", color: "var(--ink-muted)" }}>
+            {mode === "class"
+              ? "Charges that class's drop-in price and adds the member to its roster as arrived."
+              : "Valid for a single visit. Link a client if they have a record, or leave it as a walk-in."}
+          </div>
         </div>
       </Card>
 
@@ -78,22 +135,10 @@ export function DropIn() {
       )}
 
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-        <TextField
-          label="SESSION"
-          value={category}
-          onChange={(e) => {
-            setCategory(e.target.value);
-            setDone(null);
-          }}
-          placeholder="e.g. Calisthenics"
-          autoComplete="off"
-        />
-        <TextField label="PRICE PAID · EGP" type="number" min={0} inputMode="decimal" value={price} onChange={(e) => setPrice(e.target.value)} />
-
         <div data-sq style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "10px 16px", display: "flex", alignItems: "center", gap: 10 }}>
           <div style={{ minWidth: 0, flex: 1 }}>
-            <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>CLIENT (OPTIONAL)</div>
-            <div style={{ font: "600 16px var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{client ? client.name : "Walk-in"}</div>
+            <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>{mode === "class" ? "MEMBER" : "CLIENT (OPTIONAL)"}</div>
+            <div style={{ font: "600 16px var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{client ? client.name : mode === "class" ? "Not linked" : "Walk-in"}</div>
           </div>
           {client ? (
             <Button variant="quiet" size="md" style={{ height: 36, padding: "0 12px" }} onClick={() => setClient(null)}>
@@ -105,6 +150,41 @@ export function DropIn() {
             </Button>
           )}
         </div>
+
+        {mode === "class" ? (
+          <>
+            <SelectField
+              label="CLASS SESSION"
+              value={classId}
+              onChange={(v) => {
+                setClassId(v);
+                setDone(null);
+              }}
+              placeholder={sessions.length ? "Choose a session (next 7 days)" : "No sessions in the next 7 days"}
+              disabled={sessions.length === 0}
+              options={sessions.map((c) => ({ value: c.id, label: `${c.title} · ${whenLabel(c.startsAt)} · ${fmt(c.price)} EGP` }))}
+            />
+            {session && (
+              <div style={{ font: "600 14px var(--font-body)", padding: "0 4px" }}>
+                Drop-in price: <span className="tabular">{fmt(session.price)} EGP</span>
+              </div>
+            )}
+          </>
+        ) : (
+          <>
+            <TextField
+              label="SESSION"
+              value={category}
+              onChange={(e) => {
+                setCategory(e.target.value);
+                setDone(null);
+              }}
+              placeholder="e.g. Open gym"
+              autoComplete="off"
+            />
+            <TextField label="PRICE PAID · EGP" type="number" min={0} inputMode="decimal" value={price} onChange={(e) => setPrice(e.target.value)} />
+          </>
+        )}
 
         <PaymentSelect value={effectivePay} onChange={setPayMethod} wallet={!!client} />
       </div>
@@ -123,18 +203,28 @@ export function DropIn() {
           setPickerOpen(false);
         }}
       />
+
+      <ConfirmSheet
+        open={confirmPlan !== null}
+        onClose={() => setConfirmPlan(null)}
+        kicker="PLAN STILL RUNNING"
+        title="Charge a drop-in anyway?"
+        sub={confirmPlan ?? ""}
+        confirmLabel="Yes, charge the drop-in"
+        onConfirm={() => perform(true)}
+      />
     </div>
   );
 }
 
 function PickClientSheet({ open, onClose, onPick }: { open: boolean; onClose: () => void; onPick: (c: ClientWithPackage) => void }) {
   const { data } = useAsync(() => (open ? api.clients() : Promise.resolve(null)), [open]);
-  const { membershipTypes, bundleTypes } = useFrontDeskCatalog();
+  const { bundleTypes } = useFrontDeskCatalog();
   return (
     <Sheet open={open} onClose={onClose}>
       <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>DROP-IN</div>
       <div style={{ font: "800 26px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 16px" }}>Link a client</div>
-      <ClientPicker clients={data?.clients ?? []} membershipTypes={membershipTypes} bundleTypes={bundleTypes} onPick={onPick} />
+      <ClientPicker clients={data?.clients ?? []} bundleTypes={bundleTypes} onPick={onPick} />
       <Button variant="quiet" fullWidth style={{ marginTop: 10 }} onClick={onClose}>
         Cancel
       </Button>

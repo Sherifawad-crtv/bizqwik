@@ -18,6 +18,7 @@ import { Oversight } from "./routes/Oversight";
 import { ClassesManage } from "./routes/ClassesManage";
 import { Activity } from "./routes/Activity";
 import { Manage } from "./routes/Manage";
+import { Catalog } from "./routes/Catalog";
 import { Pay } from "./routes/Pay";
 import { PayeeDetail } from "./routes/PayeeDetail";
 import { History } from "./routes/History";
@@ -100,6 +101,7 @@ export default function App() {
                     <Route path="/oversight" element={<Oversight />} />
                     <Route path="/classes" element={<ClassesManage />} />
                     <Route path="/manage" element={<Manage />} />
+                    <Route path="/catalog" element={<Catalog />} />
                   </Route>
 
                   <Route element={<RequireRole roles={["accountant"]} />}>
