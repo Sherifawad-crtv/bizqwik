@@ -71,3 +71,30 @@ Group training is now sold as **one active group plan per member**:
 ## Pending
 - **Next deploy:** a desk class drop-in now rolls back its sale (and refunds a wallet payment) if the roster seat can't be written. Found when a series edit removed the session mid-request. It's in the source but not deployed yet. It ships with the Phase 3 backend deploy.
 - Legacy `membership_types` / `membership_instances` / `/memberships/sell` stay until the business app switches to plans (Phase 3), then get removed.
+
+## Phase 3 — business app (branch `claude/services-model`)
+- **dept_head, now the founder view:**
+  - Overview is a money dashboard. It shows this month's revenue, profit and payouts, a 3/6/12-month revenue vs coach payouts chart, and breakdowns by service, by type and by coach. It also shows active subscribers and unspent wallet credit.
+  - Nav is Overview · Coaches · Clients · Catalog · History.
+  - Team & tiers moved under Coaches, and Activity moved under History.
+- **Catalog:**
+  - Group classes: a weekday picker, start time, length, drop-in price and monthly price. Classes can be edited or ended.
+  - Memberships and class bundles: priced in months and credits, with an on-sale/off-sale toggle.
+  - PT bundles.
+  - Sessions & rosters live under it.
+- **FAB:** a "Create" menu (group class, class bundle, membership, PT bundle). The dept_head's client wizard is removed, and Clients is read-only apart from edit, delete and compensation.
+- **Front desk:**
+  - Sells group plans: catalog plans plus each class's monthly.
+  - Drop-In has a CLASS SESSION mode (the member lands on the roster) alongside WALK-IN, with the "plan still running, charge anyway?" confirm.
+  - Rosters show plan vs drop-in seats.
+- e2e: 9/9 (services spec, 6 tests).
+
+## Phase 4 — member app (branch `claude/services-model`)
+- **Home:** a current-plan card and a 7-day schedule with "On your plan" coverage.
+- **Booking sheet:** book on the plan (a bundle spends a credit) or pay as a drop-in. The server's `active_plan_confirm` becomes the "You still have a plan running" dialog.
+- **My plan:** the active plan, any PT package, and a shop. Purchases are paid from the wallet, and the shop is locked while a plan runs.
+- **Bookings:** show plan vs drop-in. Cancelling returns bundle credits.
+- e2e: 10/10 (plans spec, 4 tests).
+
+## Release plan
+Merge both branches together. After that, one backend deploy ships the drop-in rollback hardening and removes the legacy `membership_types` / `/memberships/sell` endpoints. The old production front desk still calls those until the merge.
