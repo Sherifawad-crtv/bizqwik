@@ -180,8 +180,8 @@ function WeekdayPicker({ value, onChange }: { value: number[]; onChange: (v: num
                 height: 44,
                 borderRadius: 12,
                 border: on ? "0" : "1px solid var(--line)",
-                background: on ? "var(--primary)" : "var(--sunken)",
-                color: on ? "var(--surface)" : "var(--ink-muted)",
+                background: on ? "var(--accent)" : "var(--sunken)",
+                color: on ? "var(--accent-ink)" : "var(--ink-muted)",
                 font: "700 12px var(--font-mono)",
                 cursor: "pointer",
               }}

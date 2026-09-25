@@ -123,7 +123,7 @@ export function TimeWheelField({ label, value, onChange }: { label: string; valu
         <div style={{ font: "800 26px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 12px" }}>{timeLabel(join(draft.h, draft.m, draft.pm))}</div>
         <div style={{ position: "relative", display: "flex", gap: 4 }}>
           {/* selection band behind the middle row */}
-          <div aria-hidden style={{ position: "absolute", left: 0, right: 0, top: ITEM_H * 2, height: ITEM_H, borderRadius: 12, background: "var(--primary-tint)" }} />
+          <div aria-hidden style={{ position: "absolute", left: 0, right: 0, top: ITEM_H * 2, height: ITEM_H, borderRadius: 12, background: "var(--accent-tint)" }} />
           <Wheel label="Hour" items={HOURS} index={draft.h - 1} onIndex={(i) => setDraft((d) => ({ ...d, h: i + 1 }))} />
           <Wheel label="Minute" items={MINUTES} index={draft.m / 5} onIndex={(i) => setDraft((d) => ({ ...d, m: i * 5 }))} />
           <Wheel label="AM/PM" items={PERIODS} index={draft.pm ? 1 : 0} onIndex={(i) => setDraft((d) => ({ ...d, pm: i === 1 }))} />
