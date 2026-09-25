@@ -87,6 +87,10 @@ a:hover {
 
 button {
   font-family: inherit;
+  /* iOS Safari paints button text its system blue when no color is set, so
+     every unstyled button would read like a link. Inherit the ink instead;
+     buttons with their own color still override this. */
+  color: inherit;
   -webkit-tap-highlight-color: transparent;
 }
 
