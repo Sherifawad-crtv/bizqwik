@@ -19,8 +19,8 @@ export function Shell() {
 
   if (!profile) return null;
   // Everyone but accountant and front desk gets a FAB — what it does depends
-  // on role (Fab.tsx branches: dept_head gets the client wizard,
-  // coach/head_coach get "log a session"). Front desk's actions live on its
+  // on role (Fab.tsx branches: dept_head gets the "Create" menu for the
+  // catalog, coach/head_coach get "log a session"). Front desk's actions live on its
   // home screen's quick-action grid instead.
   const showFab = profile.role !== "accountant" && profile.role !== "front_desk";
 

@@ -13,7 +13,7 @@ import { useFrontDeskCatalog } from "./Members";
 export function Invitations() {
   useSetHeader({ kicker: "FRONT DESK", title: "Invitations" }, []);
   const { data } = useAsync(() => api.clients(), []);
-  const { membershipTypes, bundleTypes } = useFrontDeskCatalog();
+  const { bundleTypes } = useFrontDeskCatalog();
   const [memberId, setMemberId] = useState<string | null>(null);
   const [guestName, setGuestName] = useState("");
   const [guestPhone, setGuestPhone] = useState("");
@@ -25,8 +25,8 @@ export function Invitations() {
   if (!data) return <Spinner />;
 
   const member = data.clients.find((c) => c.id === memberId) ?? null;
-  const membership = member?.currentMembership?.status === "active" ? member.currentMembership : null;
-  const left = membership?.invitationsRemaining ?? 0;
+  const plan = member?.groupPlan ?? null;
+  const left = plan?.invitationsRemaining ?? 0;
 
   const submit = async () => {
     if (!member) return;
@@ -61,7 +61,7 @@ export function Invitations() {
         </span>
         <div>
           <div style={{ font: "700 16px var(--font-body)" }}>Guest invitations</div>
-          <div style={{ font: "400 13px/1.5 var(--font-mono)", color: "var(--ink-muted)" }}>Members with an active membership can bring guests, up to what their membership includes.</div>
+          <div style={{ font: "400 13px/1.5 var(--font-mono)", color: "var(--ink-muted)" }}>Members on an active plan can bring guests, up to the guest passes their plan includes.</div>
         </div>
       </Card>
 
@@ -76,10 +76,9 @@ export function Invitations() {
           <SectionTitle>Choose the member</SectionTitle>
           <ClientPicker
             clients={data.clients}
-            membershipTypes={membershipTypes}
             bundleTypes={bundleTypes}
-            filter={(c) => c.currentMembership?.status === "active"}
-            emptyText="No one with an active membership matches."
+            filter={(c) => (c.groupPlan?.invitationsRemaining ?? 0) > 0}
+            emptyText="No one with guest passes left matches."
             onPick={(c) => {
               setMemberId(c.id);
               setError(null);
@@ -127,7 +126,7 @@ export function Invitations() {
             </>
           ) : (
             <div style={{ font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>
-              {member.name} has used every invitation on this membership.
+              {member.name} has used every guest pass on this plan.
             </div>
           )}
         </>

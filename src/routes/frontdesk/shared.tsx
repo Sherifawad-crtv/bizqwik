@@ -1,6 +1,6 @@
 import { useMemo, useState, type ReactNode } from "react";
 import { Icon } from "../../components/Icon";
-import type { BundleType, ClientWithPackage, MembershipType } from "../../lib/types";
+import type { BundleType, ClientWithPackage } from "../../lib/types";
 import { dateLabel } from "../../lib/format";
 
 export type PlanTone = "active" | "expired" | "none";
@@ -11,21 +11,22 @@ export interface PlanSummary {
   detail: string;
 }
 
-/** One line describing what a client is on right now — an active membership
- * wins over an active package, then whatever lapsed most recently. */
-export function planSummary(client: ClientWithPackage, membershipTypes: MembershipType[], bundleTypes: BundleType[]): PlanSummary {
-  const m = client.currentMembership ?? null;
+/** One line describing what a client is on right now — an active group plan
+ * wins over an active PT package, then whatever lapsed most recently. */
+export function planSummary(client: ClientWithPackage, bundleTypes: BundleType[]): PlanSummary {
+  const g = client.groupPlan ?? null;
   const p = client.currentPackage;
-  const mName = m ? (membershipTypes.find((t) => t.id === m.membershipTypeId)?.name ?? "Membership") : "";
   const pName = p ? (bundleTypes.find((b) => b.id === p.bundleTypeId)?.name ?? "Package") : "";
 
-  if (m && m.status === "active") return { tone: "active", title: mName, detail: `Until ${dateLabel(m.expiryDate)}` };
+  if (g) {
+    const detail = g.kind === "bundle" ? `${g.creditsRemaining} of ${g.creditsTotal} classes left` : `Until ${dateLabel(g.expiresAt.slice(0, 10))}`;
+    return { tone: "active", title: g.name, detail: p?.status === "active" ? `${detail} · + PT` : detail };
+  }
   if (p && p.status === "active") {
     return { tone: "active", title: pName, detail: `${p.sessionsRemaining} of ${p.sessionsIncluded} sessions left` };
   }
-  if (m) return { tone: "expired", title: mName, detail: `Ended ${dateLabel(m.expiryDate)}` };
   if (p) return { tone: "expired", title: pName, detail: p.status === "exhausted" ? "All sessions used" : `Ended ${dateLabel(p.expiryDate)}` };
-  return { tone: "none", title: "No plan", detail: "Never bought one" };
+  return { tone: "none", title: "No plan", detail: "Nothing active" };
 }
 
 const TONE: Record<PlanTone, { fg: string; bg: string; label: string }> = {
@@ -112,14 +113,12 @@ export function matchesClient(c: ClientWithPackage, query: string) {
 /** Search-as-you-type client list; tapping a row picks it. */
 export function ClientPicker({
   clients,
-  membershipTypes,
   bundleTypes,
   onPick,
   filter,
   emptyText = "No clients match.",
 }: {
   clients: ClientWithPackage[];
-  membershipTypes: MembershipType[];
   bundleTypes: BundleType[];
   onPick: (c: ClientWithPackage) => void;
   filter?: (c: ClientWithPackage) => boolean;
@@ -132,7 +131,7 @@ export function ClientPicker({
       <SearchField value={query} onChange={setQuery} />
       <Card style={{ marginTop: 10, overflow: "hidden" }}>
         {shown.map((c, i) => {
-          const plan = planSummary(c, membershipTypes, bundleTypes);
+          const plan = planSummary(c, bundleTypes);
           return (
             <button
               key={c.id}

@@ -12,6 +12,8 @@ import { RollupTable, type ListRow } from "../components/RollupTable";
 import { DayList } from "../components/DayList";
 import { LockedBanner } from "../components/LockedBanner";
 import { Spinner } from "../components/Spinner";
+import { Segmented } from "../components/Segmented";
+import { ActivityPanel } from "./Activity";
 import { canLog, isHead } from "../lib/types";
 import type { Rollup, Session } from "../lib/types";
 
@@ -105,6 +107,32 @@ function RosterHistory({ rows, month, paidOnly, onOpenCoach }: { rows: Rollup[];
 
 export function History() {
   const { profile } = useAuth();
+  // The dept_head's History holds both ledgers: coach payouts and the member
+  // activity feed (moved here from the home screen).
+  const [view, setView] = useState<"payouts" | "activity">("payouts");
+  useSetHeader({ kicker: "LEDGER", title: "History" }, []);
+  if (profile?.role === "dept_head") {
+    return (
+      <div>
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: 18 }}>
+          <Segmented
+            value={view}
+            onChange={setView}
+            options={[
+              { value: "payouts", label: "PAYOUTS" },
+              { value: "activity", label: "ACTIVITY" },
+            ]}
+          />
+        </div>
+        {view === "payouts" ? <LedgerHistory /> : <ActivityPanel />}
+      </div>
+    );
+  }
+  return <LedgerHistory />;
+}
+
+function LedgerHistory() {
+  const { profile } = useAuth();
   const navigate = useNavigate();
   const [month, setMonth] = useState(MOCK.CURRENT_MONTH);
   const months = currentYearMonths();
@@ -123,8 +151,6 @@ export function History() {
     const rows = monthRes.rows.filter((r) => canLog(r.role) && (!isAccountant || r.state === "paid"));
     return { kind: "roster", rows };
   }, [profile?.id, profile?.role, month]);
-
-  useSetHeader({ kicker: "LEDGER", title: "History" }, []);
 
   if (!profile) return null;
 

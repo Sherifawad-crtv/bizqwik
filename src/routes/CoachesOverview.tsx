@@ -7,10 +7,13 @@ import { MoneyHero } from "../components/MoneyHero";
 import { RollupTable, type ListRow } from "../components/RollupTable";
 import { Spinner } from "../components/Spinner";
 import { canLog } from "../lib/types";
+import { useAuth } from "../lib/auth";
+import { Icon } from "../components/Icon";
 
 export function CoachesOverview() {
   const month = MOCK.CURRENT_MONTH;
   const navigate = useNavigate();
+  const { profile } = useAuth();
 
   const { data } = useAsync(() => api.month(month), [month]);
 
@@ -42,6 +45,22 @@ export function CoachesOverview() {
           { k: "STILL LOGGING", v: String(rows.filter((r) => r.state === "logging").length) },
         ]}
       />
+      {profile?.role === "dept_head" && (
+        <button
+          onClick={() => navigate("/manage")}
+          data-sq
+          style={{ width: "100%", marginBottom: 14, textAlign: "left", background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-tile)", padding: "14px 18px", cursor: "pointer", display: "flex", alignItems: "center", gap: 12 }}
+        >
+          <span style={{ color: "var(--primary-pressed)", display: "flex" }}>
+            <Icon name="settings" size={20} />
+          </span>
+          <span style={{ flex: 1, minWidth: 0 }}>
+            <span style={{ display: "block", font: "700 15px var(--font-body)" }}>Team & tiers</span>
+            <span style={{ display: "block", font: "400 12px var(--font-mono)", color: "var(--ink-faint)", marginTop: 2 }}>Pay tiers, staff invites and people</span>
+          </span>
+          <Icon name="chevron-right" size={18} />
+        </button>
+      )}
       <div style={{ display: "flex", alignItems: "baseline", gap: 10, padding: "2px 2px 8px" }}>
         <span style={{ font: "700 20px var(--font-body)", letterSpacing: "-.01em" }}>Roster</span>
         <span style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>{rows.length} coaches</span>

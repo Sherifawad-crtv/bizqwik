@@ -13,7 +13,7 @@ import { Spinner } from "../../components/Spinner";
 import { ClientPicker, ErrorBanner, PlanPill, planSummary } from "./shared";
 import { useFrontDeskCatalog } from "./Members";
 
-const hasActivePlan = (c: ClientWithPackage) => c.currentMembership?.status === "active" || c.currentPackage?.status === "active";
+const hasActivePlan = (c: ClientWithPackage) => !!c.groupPlan || c.currentPackage?.status === "active";
 
 // Clients normally check themselves in by scanning the desk's QR code in the
 // client app; this is the desk's manual fallback.
@@ -21,7 +21,7 @@ export function CheckIn() {
   useSetHeader({ kicker: "FRONT DESK", title: "Check-In" }, []);
   const navigate = useNavigate();
   const { data } = useAsync(() => api.clients(), []);
-  const { membershipTypes, bundleTypes } = useFrontDeskCatalog();
+  const { bundleTypes } = useFrontDeskCatalog();
   const [picked, setPicked] = useState<ClientWithPackage | null>(null);
 
   if (!data) return <Spinner />;
@@ -31,7 +31,7 @@ export function CheckIn() {
       <div style={{ font: "400 13px/1.5 var(--font-mono)", color: "var(--ink-muted)", margin: "0 2px 14px" }}>
         Find the client by name or phone to check them in by hand.
       </div>
-      <ClientPicker clients={data.clients} membershipTypes={membershipTypes} bundleTypes={bundleTypes} onPick={setPicked} />
+      <ClientPicker clients={data.clients} bundleTypes={bundleTypes} onPick={setPicked} />
       <ConfirmCheckInSheet
         client={picked}
         onClose={() => setPicked(null)}
@@ -47,14 +47,14 @@ function ConfirmCheckInSheet({ client, onClose, onDropIn }: { client: ClientWith
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { confirmed, iconIn, showSuccess } = useSheetSuccess(open, onClose);
-  const { membershipTypes, bundleTypes } = useFrontDeskCatalog();
+  const { bundleTypes } = useFrontDeskCatalog();
 
   useEffect(() => {
     if (client) setError(null);
   }, [client]);
 
   if (!shown) return null;
-  const plan = planSummary(shown, membershipTypes, bundleTypes);
+  const plan = planSummary(shown, bundleTypes);
   const eligible = hasActivePlan(shown);
 
   const confirm = async () => {
@@ -94,7 +94,7 @@ function ConfirmCheckInSheet({ client, onClose, onDropIn }: { client: ClientWith
           ) : (
             <>
               <div style={{ marginTop: 12, font: "600 13px/1.5 var(--font-body)", color: "var(--logging-fg)", background: "var(--logging-bg)", borderRadius: 14, padding: "10px 14px" }}>
-                No active membership or package — they can pay for a drop-in, or renew from their client page.
+                No active plan or package — they can pay for a drop-in, or buy a plan from their client page.
               </div>
               <Button fullWidth size="lg" style={{ marginTop: 16 }} onClick={() => onDropIn(shown)}>
                 Sell a drop-in pass

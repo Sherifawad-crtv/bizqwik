@@ -3,7 +3,7 @@ import { useSetHeader } from "../lib/header";
 import { useAsync } from "../lib/useAsync";
 import { useLatch } from "../lib/useLatch";
 import { api } from "../lib/backend";
-import type { BundleType, Invite, MembershipType, Profile, Role, Tier } from "../lib/types";
+import type { BundleType, Invite, Profile, Role, Tier } from "../lib/types";
 import { ROLE_LABELS, hasTier } from "../lib/types";
 import { Segmented } from "../components/Segmented";
 import { Button } from "../components/Button";
@@ -17,12 +17,12 @@ import { SheetSuccessIcon } from "../components/SheetSuccessIcon";
 import { useSheetSuccess } from "../lib/useSheetSuccess";
 import { useAuth } from "../lib/auth";
 
-type Tab = "tiers" | "bundles" | "invites" | "people";
+type Tab = "tiers" | "invites" | "people";
 
 export function Manage() {
   const [tab, setTab] = useState<Tab>("tiers");
 
-  useSetHeader({ kicker: "MANAGE", title: "Tiers & People" }, []);
+  useSetHeader({ kicker: "MANAGE", title: "Team & Tiers" }, []);
 
   return (
     <div>
@@ -32,19 +32,12 @@ export function Manage() {
           onChange={setTab}
           options={[
             { value: "tiers", label: "TIERS" },
-            { value: "bundles", label: "BUNDLES" },
             { value: "invites", label: "INVITES" },
             { value: "people", label: "PEOPLE" },
           ]}
         />
       </div>
       {tab === "tiers" && <TiersPanel />}
-      {tab === "bundles" && (
-        <>
-          <BundlesPanel />
-          <MembershipsPanel />
-        </>
-      )}
       {tab === "invites" && <InvitesPanel />}
       {tab === "people" && <PeoplePanel />}
     </div>
@@ -189,7 +182,7 @@ function TierSheet({ open, tier, onClose }: { open: boolean; tier: Tier | null; 
 
 // ---------- Bundles (private training) ----------
 
-function BundlesPanel() {
+export function BundlesPanel() {
   const { data } = useAsync(() => api.bundleTypes(), []);
   const [editing, setEditing] = useState<BundleType | "new" | null>(null);
   const [deleting, setDeleting] = useState<BundleType | null>(null);
@@ -200,7 +193,7 @@ function BundlesPanel() {
   return (
     <div>
       <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
-        <span style={{ font: "700 20px var(--font-body)", letterSpacing: "-.01em" }}>Bundle types</span>
+        <span style={{ font: "700 20px var(--font-body)", letterSpacing: "-.01em" }}>Private training bundles</span>
         <span style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>{data.bundleTypes.length}</span>
         <Button size="md" style={{ marginLeft: "auto", height: 40, padding: "0 16px" }} onClick={() => setEditing("new")}>
           + New bundle
@@ -251,7 +244,7 @@ function BundlesPanel() {
   );
 }
 
-function BundleSheet({ open, bundleType, onClose }: { open: boolean; bundleType: BundleType | null; onClose: () => void }) {
+export function BundleSheet({ open, bundleType, onClose }: { open: boolean; bundleType: BundleType | null; onClose: () => void }) {
   const [name, setName] = useState(bundleType?.name ?? "");
   const [price, setPrice] = useState(String(bundleType?.price ?? ""));
   const [sessionsIncluded, setSessionsIncluded] = useState(String(bundleType?.sessionsIncluded ?? ""));
@@ -315,147 +308,6 @@ function BundleSheet({ open, bundleType, onClose }: { open: boolean; bundleType:
           )}
           <Button fullWidth size="lg" style={{ marginTop: 16 }} disabled={busy} onClick={save}>
             {busy ? "Saving…" : bundleType ? "Save changes" : "Create bundle"}
-          </Button>
-          <Button variant="secondary" fullWidth style={{ marginTop: 8 }} onClick={onClose} disabled={busy}>
-            Cancel
-          </Button>
-        </>
-      )}
-    </Sheet>
-  );
-}
-
-// ---------- Memberships (sold by front desk) ----------
-
-function MembershipsPanel() {
-  const { data } = useAsync(() => api.membershipTypes(), []);
-  const [editing, setEditing] = useState<MembershipType | "new" | null>(null);
-  const [deleting, setDeleting] = useState<MembershipType | null>(null);
-  const shownDeleting = useLatch(deleting);
-
-  if (!data) return <Spinner />;
-
-  return (
-    <div style={{ marginTop: 28 }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
-        <span style={{ font: "700 20px var(--font-body)", letterSpacing: "-.01em" }}>Memberships</span>
-        <span style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>{data.membershipTypes.length}</span>
-        <Button size="md" style={{ marginLeft: "auto", height: 40, padding: "0 16px" }} onClick={() => setEditing("new")}>
-          + Membership
-        </Button>
-      </div>
-
-      <div data-sq style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", overflow: "hidden" }}>
-        {data.membershipTypes.map((m, i) => (
-          <div key={m.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "16px 20px", borderBottom: i === data.membershipTypes.length - 1 ? "none" : "1px solid var(--line)" }}>
-            <div style={{ minWidth: 0, flex: 1 }}>
-              <div style={{ font: "700 16px var(--font-body)" }}>{m.name}</div>
-              <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>
-                {m.price} EGP · {m.durationDays} days · {m.invitationsAllowance} invite{m.invitationsAllowance === 1 ? "" : "s"}
-              </div>
-            </div>
-            <button onClick={() => setEditing(m)} aria-label="Edit membership" style={{ width: 36, height: 36, borderRadius: 999, border: 0, background: "var(--primary-tint)", color: "var(--primary-pressed)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <Icon name="pencil" size={15} />
-            </button>
-            <button onClick={() => setDeleting(m)} aria-label="Delete membership" style={{ width: 36, height: 36, borderRadius: 999, border: 0, background: "var(--danger-bg)", color: "var(--danger-fg)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <Icon name="trash" size={15} />
-            </button>
-          </div>
-        ))}
-        {data.membershipTypes.length === 0 && (
-          <div style={{ padding: "28px 20px", display: "flex", flexDirection: "column", alignItems: "center", gap: 8, color: "var(--ink-faint)", font: "500 14px var(--font-body)", textAlign: "center" }}>
-            <Icon name="tag" size={26} />
-            No memberships yet — front desk can't sell one until you add it here.
-          </div>
-        )}
-      </div>
-
-      <MembershipTypeSheet open={editing !== null} membershipType={editing === "new" ? null : editing} onClose={() => setEditing(null)} />
-      {shownDeleting && (
-        <ConfirmSheet
-          open={!!deleting}
-          onClose={() => setDeleting(null)}
-          kicker="DELETE MEMBERSHIP"
-          title={`Delete ${shownDeleting.name}?`}
-          sub="Only possible if it has never been sold."
-          confirmLabel="Delete membership"
-          danger
-          onConfirm={async () => {
-            await api.deleteMembershipType(shownDeleting.id);
-          }}
-        />
-      )}
-    </div>
-  );
-}
-
-function MembershipTypeSheet({ open, membershipType, onClose }: { open: boolean; membershipType: MembershipType | null; onClose: () => void }) {
-  const [name, setName] = useState("");
-  const [price, setPrice] = useState("");
-  const [durationDays, setDurationDays] = useState("");
-  const [invitations, setInvitations] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
-  const { confirmed, iconIn, showSuccess } = useSheetSuccess(open, onClose);
-
-  useEffect(() => {
-    if (open) {
-      setName(membershipType?.name ?? "");
-      setPrice(String(membershipType?.price ?? ""));
-      setDurationDays(String(membershipType?.durationDays ?? ""));
-      setInvitations(String(membershipType?.invitationsAllowance ?? ""));
-      setError(null);
-    }
-  }, [open, membershipType]);
-
-  if (!open) return null;
-
-  const save = async () => {
-    const priceNum = Number(price);
-    const daysNum = Number(durationDays);
-    const invitesNum = invitations === "" ? 0 : Number(invitations);
-    if (!name.trim() || !Number.isFinite(priceNum) || priceNum < 0 || !Number.isInteger(daysNum) || daysNum <= 0) {
-      setError("Enter a name, a price, and a whole number of days greater than 0.");
-      return;
-    }
-    if (!Number.isInteger(invitesNum) || invitesNum < 0) {
-      setError("Invitations must be a whole number, 0 or more.");
-      return;
-    }
-    setBusy(true);
-    setError(null);
-    try {
-      if (membershipType) await api.updateMembershipType(membershipType.id, name.trim(), daysNum, priceNum, invitesNum);
-      else await api.createMembershipType(name.trim(), daysNum, priceNum, invitesNum);
-      showSuccess();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong.");
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  return (
-    <Sheet open={open} onClose={onClose}>
-      {confirmed ? (
-        <SheetSuccessIcon label={membershipType ? "Membership updated" : "Membership created"} iconIn={iconIn} />
-      ) : (
-        <>
-          <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>{membershipType ? "EDIT MEMBERSHIP" : "NEW MEMBERSHIP"}</div>
-          <div style={{ font: "800 26px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 16px" }}>{membershipType ? membershipType.name : "New membership"}</div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            <TextField label="NAME" value={name} onChange={(e) => setName(e.target.value)} placeholder="Monthly Membership" />
-            <TextField label="PRICE · EGP" type="number" min={0} value={price} onChange={(e) => setPrice(e.target.value)} />
-            <TextField label="LENGTH · DAYS" type="number" min={1} value={durationDays} onChange={(e) => setDurationDays(e.target.value)} placeholder="30" />
-            <TextField label="GUEST INVITATIONS INCLUDED" type="number" min={0} value={invitations} onChange={(e) => setInvitations(e.target.value)} placeholder="0" />
-          </div>
-          {error && (
-            <div style={{ marginTop: 12, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>
-              {error}
-            </div>
-          )}
-          <Button fullWidth size="lg" style={{ marginTop: 16 }} disabled={busy} onClick={save}>
-            {busy ? "Saving…" : membershipType ? "Save changes" : "Create membership"}
           </Button>
           <Button variant="secondary" fullWidth style={{ marginTop: 8 }} onClick={onClose} disabled={busy}>
             Cancel

@@ -6,7 +6,8 @@ import { useLatch } from "../../lib/useLatch";
 import { useSheetSuccess } from "../../lib/useSheetSuccess";
 import { api } from "../../lib/backend";
 import { fmt, dateLabel } from "../../lib/format";
-import type { BundleType, ClientWithPackage, CoachOption, MembershipType } from "../../lib/types";
+import type { BundleType, ClassSeries, ClientWithPackage, CoachOption, GroupPlanType } from "../../lib/types";
+import { GROUP_PLAN_KIND_LABELS } from "../../lib/types";
 import { Button } from "../../components/Button";
 import { Sheet } from "../../components/Sheet";
 import { Segmented } from "../../components/Segmented";
@@ -19,9 +20,34 @@ import type { PayMethod } from "../../lib/types";
 import { Card, ErrorBanner, PlanPill, SearchField, SectionTitle, matchesClient, planSummary } from "./shared";
 
 export function useFrontDeskCatalog() {
-  const { data: m } = useAsync(() => api.membershipTypes(), []);
+  const { data: p } = useAsync(() => api.planTypes(), []);
+  const { data: s } = useAsync(() => api.classSeries(), []);
   const { data: b } = useAsync(() => api.bundleTypes(), []);
-  return { membershipTypes: m?.membershipTypes ?? [], bundleTypes: b?.bundleTypes ?? [] };
+  return {
+    planTypes: p?.planTypes ?? [],
+    series: (s?.series ?? []).filter((x) => x.status === "active"),
+    bundleTypes: b?.bundleTypes ?? [],
+  };
+}
+
+/** Everything the desk can sell as a group plan: catalog memberships and
+ * bundles, plus each running class's monthly. Values are "pt:<id>" (plan
+ * type) or "cs:<id>" (class series). */
+function groupOfferOptions(planTypes: GroupPlanType[], series: ClassSeries[]) {
+  const months = (n: number) => `${n} month${n === 1 ? "" : "s"}`;
+  return [
+    ...planTypes.map((t) => ({
+      value: `pt:${t.id}`,
+      label:
+        t.kind === "bundle"
+          ? `${t.name} · ${fmt(t.price)} EGP · ${t.credits} classes · ${months(t.durationMonths)}`
+          : `${t.name} · ${fmt(t.price)} EGP · all classes · ${months(t.durationMonths)}`,
+    })),
+    ...series.map((x) => ({ value: `cs:${x.id}`, label: `${x.title} monthly · ${fmt(x.monthlyPrice)} EGP · 1 month` })),
+  ];
+}
+function offerOf(v: string): { planTypeId: string } | { seriesId: string } {
+  return v.startsWith("cs:") ? { seriesId: v.slice(3) } : { planTypeId: v.slice(3) };
 }
 
 export function Members() {
@@ -30,7 +56,7 @@ export function Members() {
   const createRequested = params.get("new") === "1";
   const { data } = useAsync(() => api.clients(), []);
   const { data: coachData } = useAsync(() => api.coaches(), []);
-  const { membershipTypes, bundleTypes } = useFrontDeskCatalog();
+  const { planTypes, series, bundleTypes } = useFrontDeskCatalog();
   const coaches = coachData?.coaches ?? [];
 
   const [query, setQuery] = useState("");
@@ -56,7 +82,7 @@ export function Members() {
 
   if (!data) return <Spinner />;
 
-  const activeCount = clients.filter((c) => planSummary(c, membershipTypes, bundleTypes).tone === "active").length;
+  const activeCount = clients.filter((c) => planSummary(c, bundleTypes).tone === "active").length;
 
   return (
     <div>
@@ -79,7 +105,7 @@ export function Members() {
 
       <Card style={{ marginTop: 10, overflow: "hidden" }}>
         {shown.map((c, i) => {
-          const plan = planSummary(c, membershipTypes, bundleTypes);
+          const plan = planSummary(c, bundleTypes);
           return (
             <button
               key={c.id}
@@ -105,8 +131,8 @@ export function Members() {
         )}
       </Card>
 
-      <CreateClientSheet open={creating} onClose={closeCreate} membershipTypes={membershipTypes} bundleTypes={bundleTypes} coaches={coaches} />
-      <ClientSheet client={selected} onClose={() => setSelectedId(null)} membershipTypes={membershipTypes} bundleTypes={bundleTypes} coaches={coaches} />
+      <CreateClientSheet open={creating} onClose={closeCreate} planTypes={planTypes} series={series} bundleTypes={bundleTypes} coaches={coaches} />
+      <ClientSheet client={selected} onClose={() => setSelectedId(null)} planTypes={planTypes} series={series} bundleTypes={bundleTypes} coaches={coaches} />
     </div>
   );
 }
@@ -120,10 +146,8 @@ function Stat({ label, value }: { label: string; value: number }) {
   );
 }
 
-type PlanKind = "membership" | "service";
+type PlanKind = "plan" | "service";
 
-const membershipOptions = (types: MembershipType[]) =>
-  types.map((t) => ({ value: t.id, label: `${t.name} · ${fmt(t.price)} EGP · ${t.durationDays} days` }));
 const bundleOptions = (types: BundleType[]) =>
   types.map((b) => ({ value: b.id, label: `${b.name} · ${fmt(b.price)} EGP · ${b.sessionsIncluded} sessions` }));
 const coachOptions = (coaches: CoachOption[]) => coaches.map((c) => ({ value: c.id, label: c.name }));
@@ -140,21 +164,23 @@ function SheetHeading({ kicker, title }: { kicker: string; title: string }) {
 export function CreateClientSheet({
   open,
   onClose,
-  membershipTypes,
+  planTypes,
+  series,
   bundleTypes,
   coaches,
 }: {
   open: boolean;
   onClose: () => void;
-  membershipTypes: MembershipType[];
+  planTypes: GroupPlanType[];
+  series: ClassSeries[];
   bundleTypes: BundleType[];
   coaches: CoachOption[];
 }) {
-  const [kind, setKind] = useState<PlanKind>("membership");
+  const [kind, setKind] = useState<PlanKind>("plan");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
-  const [membershipTypeId, setMembershipTypeId] = useState("");
+  const [offer, setOffer] = useState("");
   const [bundleTypeId, setBundleTypeId] = useState("");
   const [coachId, setCoachId] = useState("");
   const [payMethod, setPayMethod] = useState<PayMethod>("cash");
@@ -164,11 +190,11 @@ export function CreateClientSheet({
 
   useEffect(() => {
     if (open) {
-      setKind("membership");
+      setKind("plan");
       setName("");
       setPhone("");
       setEmail("");
-      setMembershipTypeId("");
+      setOffer("");
       setBundleTypeId("");
       setCoachId("");
       setPayMethod("cash");
@@ -187,8 +213,8 @@ export function CreateClientSheet({
       setError("That email doesn't look right — fix it or leave it blank.");
       return;
     }
-    if (kind === "membership" && !membershipTypeId) {
-      setError("Choose a membership.");
+    if (kind === "plan" && !offer) {
+      setError("Choose a plan.");
       return;
     }
     if (kind === "service" && (!bundleTypeId || !coachId)) {
@@ -199,7 +225,7 @@ export function CreateClientSheet({
     setBusy(true);
     setError(null);
     try {
-      if (kind === "membership") await api.sellMembership(fields, membershipTypeId, payMethod);
+      if (kind === "plan") await api.sellGroupPlan(fields, offerOf(offer), payMethod);
       else await api.createServiceClient(fields, bundleTypeId, coachId, payMethod);
       showSuccess();
     } catch (err) {
@@ -224,8 +250,8 @@ export function CreateClientSheet({
                 setError(null);
               }}
               options={[
-                { value: "membership", label: "MEMBERSHIP" },
-                { value: "service", label: "SERVICE" },
+                { value: "plan", label: "GROUP PLAN" },
+                { value: "service", label: "PT PACKAGE" },
               ]}
             />
           </div>
@@ -233,15 +259,8 @@ export function CreateClientSheet({
             <TextField label="FULL NAME" value={name} onChange={(e) => setName(e.target.value)} placeholder="Client name" autoComplete="off" />
             <TextField label="PHONE" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="01xxxxxxxxx" autoComplete="off" />
             <TextField label="EMAIL (OPTIONAL)" type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="off" />
-            {kind === "membership" ? (
-              <SelectField
-                label="MEMBERSHIP"
-                value={membershipTypeId}
-                onChange={setMembershipTypeId}
-                placeholder={membershipTypes.length ? "Choose a membership" : "No memberships set up yet"}
-                disabled={membershipTypes.length === 0}
-                options={membershipOptions(membershipTypes)}
-              />
+            {kind === "plan" ? (
+              <GroupOfferSelect value={offer} onChange={setOffer} planTypes={planTypes} series={series} />
             ) : (
               <>
                 <SelectField label="PACKAGE" value={bundleTypeId} onChange={setBundleTypeId} placeholder="Choose a package" options={bundleOptions(bundleTypes)} />
@@ -249,17 +268,13 @@ export function CreateClientSheet({
               </>
             )}
           </div>
-          {kind === "membership" && membershipTypes.length === 0 && (
-            <div style={{ marginTop: 10, font: "400 13px/1.5 var(--font-mono)", color: "var(--ink-faint)" }}>
-              A department head needs to add memberships under Tiers &amp; People → Bundles first.
-            </div>
-          )}
+
           <div style={{ marginTop: 12 }}>
             <PaymentSelect value={payMethod} onChange={setPayMethod} />
           </div>
           {error && <ErrorBanner text={error} />}
           <Button fullWidth size="lg" style={{ marginTop: 16 }} disabled={busy} onClick={submit}>
-            {busy ? "Saving…" : kind === "membership" ? "Create & start membership" : "Create & sell package"}
+            {busy ? "Saving…" : kind === "plan" ? "Create & start plan" : "Create & sell package"}
           </Button>
           <Button variant="secondary" fullWidth style={{ marginTop: 8 }} onClick={onClose} disabled={busy}>
             Cancel
@@ -270,18 +285,20 @@ export function CreateClientSheet({
   );
 }
 
-type Mode = "view" | "renew-membership" | "renew-package" | "assign" | "invite" | "refund";
+type Mode = "view" | "sell-plan" | "renew-package" | "assign" | "invite" | "refund";
 
 function ClientSheet({
   client,
   onClose,
-  membershipTypes,
+  planTypes,
+  series,
   bundleTypes,
   coaches,
 }: {
   client: ClientWithPackage | null;
   onClose: () => void;
-  membershipTypes: MembershipType[];
+  planTypes: GroupPlanType[];
+  series: ClassSeries[];
   bundleTypes: BundleType[];
   coaches: CoachOption[];
 }) {
@@ -316,11 +333,9 @@ function ClientSheet({
 
   if (!shown) return null;
 
-  const membership = shown.currentMembership ?? null;
+  const plan = shown.groupPlan ?? null;
   const pkg = shown.currentPackage;
-  const membershipActive = membership?.status === "active";
   const packageActive = pkg?.status === "active";
-  const mType = membership ? membershipTypes.find((t) => t.id === membership.membershipTypeId) : undefined;
   const bType = pkg ? bundleTypes.find((b) => b.id === pkg.bundleTypeId) : undefined;
   const coachName = coaches.find((c) => c.id === shown.assignedCoachId)?.name ?? null;
 
@@ -338,9 +353,9 @@ function ClientSheet({
   };
 
   const confirmMode = () => {
-    if (mode === "renew-membership") {
-      if (!pickId) return setError("Choose a membership.");
-      return run(() => api.sellMembership({ clientId: shown.id }, pickId, payMethod));
+    if (mode === "sell-plan") {
+      if (!pickId) return setError("Choose a plan.");
+      return run(() => api.sellGroupPlan({ clientId: shown.id }, offerOf(pickId), payMethod));
     }
     if (mode === "renew-package") {
       if (!pickId || !coachId) return setError("Choose a package and a coach.");
@@ -369,8 +384,8 @@ function ClientSheet({
         ? "Invitation sent"
         : mode === "refund"
           ? refundDest === "wallet" ? "Refunded to wallet" : "Refund recorded"
-          : mode === "renew-membership"
-            ? "Membership started"
+          : mode === "sell-plan"
+            ? "Plan started"
             : "Package sold";
 
   return (
@@ -388,14 +403,16 @@ function ClientSheet({
 
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               <PlanCard
-                label="MEMBERSHIP"
-                title={mType?.name ?? (membership ? "Membership" : "None")}
-                tone={membership ? (membershipActive ? "active" : "expired") : "none"}
+                label="GROUP PLAN"
+                title={plan ? plan.name : "None"}
+                tone={plan ? "active" : "none"}
                 lines={
-                  membership
+                  plan
                     ? [
-                        membershipActive ? `Until ${dateLabel(membership.expiryDate)}` : `Ended ${dateLabel(membership.expiryDate)}`,
-                        `${membership.invitationsRemaining} guest invitation${membership.invitationsRemaining === 1 ? "" : "s"} left`,
+                        plan.kind === "bundle"
+                          ? `${plan.creditsRemaining} of ${plan.creditsTotal} classes left · until ${dateLabel(plan.expiresAt.slice(0, 10))}`
+                          : `${GROUP_PLAN_KIND_LABELS[plan.kind]} · until ${dateLabel(plan.expiresAt.slice(0, 10))}`,
+                        ...(plan.invitationsRemaining > 0 ? [`${plan.invitationsRemaining} guest pass${plan.invitationsRemaining === 1 ? "" : "es"} left`] : []),
                       ]
                     : []
                 }
@@ -411,8 +428,8 @@ function ClientSheet({
 
             {error && <ErrorBanner text={error} />}
 
-            <Button fullWidth style={{ marginTop: 16 }} disabled={membershipActive} onClick={() => setMode("renew-membership")}>
-              {membershipActive ? "Membership still running" : membership ? "Renew membership" : "Start a membership"}
+            <Button fullWidth style={{ marginTop: 16 }} disabled={!!plan} onClick={() => setMode("sell-plan")}>
+              {plan ? "Plan still running — one at a time" : "Sell a group plan"}
             </Button>
             <Button fullWidth style={{ marginTop: 8 }} disabled={packageActive} onClick={() => setMode("renew-package")}>
               {packageActive ? "Package still running" : pkg ? "Renew package" : "Sell a package"}
@@ -434,7 +451,7 @@ function ClientSheet({
           <>
             <SheetHeading
               kicker={shown.name.toUpperCase()}
-              title={mode === "assign" ? "Assign a coach" : mode === "invite" ? "Invite to app" : mode === "refund" ? "Issue a refund" : mode === "renew-membership" ? "Choose membership" : "Choose package"}
+              title={mode === "assign" ? "Assign a coach" : mode === "invite" ? "Invite to app" : mode === "refund" ? "Issue a refund" : mode === "sell-plan" ? "Choose a plan" : "Choose package"}
             />
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {mode === "refund" && (
@@ -464,27 +481,18 @@ function ClientSheet({
                   </div>
                 </>
               )}
-              {mode === "renew-membership" && (
-                <SelectField
-                  label="MEMBERSHIP"
-                  value={pickId}
-                  onChange={setPickId}
-                  placeholder={membershipTypes.length ? "Choose a membership" : "No memberships set up yet"}
-                  disabled={membershipTypes.length === 0}
-                  options={membershipOptions(membershipTypes)}
-                />
-              )}
+              {mode === "sell-plan" && <GroupOfferSelect value={pickId} onChange={setPickId} planTypes={planTypes} series={series} />}
               {mode === "renew-package" && <SelectField label="PACKAGE" value={pickId} onChange={setPickId} placeholder="Choose a package" options={bundleOptions(bundleTypes)} />}
               {(mode === "renew-package" || mode === "assign") && (
                 <SelectField label="COACH" value={coachId} onChange={setCoachId} placeholder="Choose a coach" options={coachOptions(coaches)} />
               )}
-              {(mode === "renew-membership" || mode === "renew-package") && (
+              {(mode === "sell-plan" || mode === "renew-package") && (
                 <PaymentSelect value={payMethod} onChange={setPayMethod} wallet />
               )}
             </div>
             {error && <ErrorBanner text={error} />}
             <Button fullWidth size="lg" style={{ marginTop: 16 }} disabled={busy} onClick={confirmMode}>
-              {busy ? "Saving…" : mode === "assign" ? "Assign coach" : mode === "invite" ? "Send invitation" : mode === "refund" ? "Issue refund" : mode === "renew-membership" ? "Start membership" : "Sell package"}
+              {busy ? "Saving…" : mode === "assign" ? "Assign coach" : mode === "invite" ? "Send invitation" : mode === "refund" ? "Issue refund" : mode === "sell-plan" ? "Start plan" : "Sell package"}
             </Button>
             <Button
               variant="secondary"
@@ -519,5 +527,26 @@ function PlanCard({ label, title, tone, lines }: { label: string; title: string;
         </div>
       ))}
     </div>
+  );
+}
+
+function GroupOfferSelect({ value, onChange, planTypes, series }: { value: string; onChange: (v: string) => void; planTypes: GroupPlanType[]; series: ClassSeries[] }) {
+  const options = groupOfferOptions(planTypes, series);
+  return (
+    <>
+      <SelectField
+        label="GROUP PLAN"
+        value={value}
+        onChange={onChange}
+        placeholder={options.length ? "Membership, class monthly or bundle" : "Nothing on sale yet"}
+        disabled={options.length === 0}
+        options={options}
+      />
+      {options.length === 0 && (
+        <div style={{ font: "400 13px/1.5 var(--font-mono)", color: "var(--ink-faint)" }}>
+          The department head adds classes, memberships and bundles in Catalog first.
+        </div>
+      )}
+    </>
   );
 }

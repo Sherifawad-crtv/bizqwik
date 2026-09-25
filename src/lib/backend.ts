@@ -11,14 +11,16 @@ import type {
   BizqwikTeam,
   BizqwikTeamInvite,
   BundleType,
+  ClassSeries,
   Client,
   ClientWithPackage,
   CoachOption,
   FrontDeskSummary,
+  GroupPlan,
+  GroupPlanType,
+  GroupPlanTypeKind,
   GymClass,
   Invite,
-  MembershipInstance,
-  MembershipType,
   OpsSummary,
   OrgBrandingConfig,
   OrgConfig,
@@ -30,11 +32,31 @@ import type {
   PayMethod,
   PlanType,
   Profile,
+  RevenueReport,
   Role,
   Rollup,
   Session,
   Tier,
 } from "./types";
+
+export interface SeriesInput {
+  title: string;
+  description: string | null;
+  weekdays: number[];
+  startTime: string;
+  durationMin: number;
+  dropInPrice: number;
+  monthlyPrice: number;
+}
+
+export interface PlanTypeInput {
+  kind: GroupPlanTypeKind;
+  name: string;
+  price: number;
+  durationMonths: number;
+  credits: number | null;
+  invitationsAllowance: number;
+}
 
 export interface NewClientFields {
   name: string;
@@ -44,6 +66,20 @@ export interface NewClientFields {
 
 type Method = "GET" | "POST";
 
+/** A failed call, carrying the server's machine-readable `code` (e.g.
+ * "active_plan_confirm") and the full error body, so a screen can react to a
+ * specific refusal — like asking "charge a drop-in anyway?" — instead of just
+ * showing the message. */
+export class ApiError extends Error {
+  code: string | null;
+  data: Record<string, unknown> | null;
+  constructor(message: string, code: string | null, data: Record<string, unknown> | null) {
+    super(message);
+    this.code = code;
+    this.data = data;
+  }
+}
+
 async function callFn<T>(path: string, opts?: { method?: Method; body?: Record<string, unknown> }): Promise<T> {
   const method = opts?.method ?? "GET";
   const { data, error } = await supabase.functions.invoke(`${FN_SLUG}/${path}`, {
@@ -52,16 +88,19 @@ async function callFn<T>(path: string, opts?: { method?: Method; body?: Record<s
   });
   if (error) {
     let message = error.message;
-    const ctx = (error as { context?: { json?: () => Promise<{ error?: string }> } }).context;
+    let code: string | null = null;
+    let body: Record<string, unknown> | null = null;
+    const ctx = (error as { context?: { json?: () => Promise<Record<string, unknown>> } }).context;
     if (ctx?.json) {
       try {
-        const body = await ctx.json();
-        if (body?.error) message = body.error;
+        body = await ctx.json();
+        if (typeof body?.error === "string") message = body.error;
+        if (typeof body?.code === "string") code = body.code;
       } catch {
         // fall back to the raw error message
       }
     }
-    throw new Error(message);
+    throw new ApiError(message, code, body);
   }
   // POSTs are the app's only mutations — bump so every mounted useAsync
   // screen revalidates, not just whichever one happened to trigger this.
@@ -151,26 +190,41 @@ export const api = {
   reopen: (coachId: string, month: string) => callFn<void>("reopen", { method: "POST", body: { coachId, month } }),
   pay: (coachId: string, month: string) => callFn<void>("pay", { method: "POST", body: { coachId, month } }),
 
-  membershipTypes: () => callFn<{ membershipTypes: MembershipType[] }>("membership-types"),
-  createMembershipType: (name: string, durationDays: number, price: number, invitationsAllowance: number) =>
-    callFn<{ membershipType: MembershipType }>("membership-types", { method: "POST", body: { name, durationDays, price, invitationsAllowance } }),
-  updateMembershipType: (id: string, name: string, durationDays: number, price: number, invitationsAllowance: number) =>
-    callFn<void>("membership-types/update", { method: "POST", body: { id, name, durationDays, price, invitationsAllowance } }),
-  deleteMembershipType: (id: string) => callFn<void>("membership-types/delete", { method: "POST", body: { id } }),
-
   // Front desk. Coach names only — no payout data, unlike month().
   coaches: () => callFn<{ coaches: CoachOption[] }>("coaches"),
   createServiceClient: (fields: NewClientFields, bundleTypeId: string, coachId: string, payMethod?: PayMethod) =>
     callFn<{ client: Client; package: PackageInstance }>("clients", { method: "POST", body: { ...fields, bundleTypeId, coachId, payMethod } }),
-  sellMembership: (target: { clientId: string } | NewClientFields, membershipTypeId: string, payMethod?: PayMethod) =>
-    callFn<{ client: ClientWithPackage; membership: MembershipInstance }>("memberships/sell", { method: "POST", body: { ...target, membershipTypeId, payMethod } }),
   assignCoach: (id: string, coachId: string) => callFn<{ client: Client }>("clients/assign-coach", { method: "POST", body: { id, coachId } }),
   frontDeskSummary: () => callFn<FrontDeskSummary>("front-desk/summary"),
   checkIn: (clientId: string, source: "qr" | "manual") => callFn<void>("check-ins", { method: "POST", body: { clientId, source } }),
-  dropIn: (clientId: string | null, category: string, price: number, payMethod?: PayMethod) =>
-    callFn<void>("drop-ins", { method: "POST", body: { clientId, category, price, payMethod } }),
+  dropIn: (clientId: string | null, category: string, price: number, payMethod?: PayMethod, confirmActivePlan = false) =>
+    callFn<void>("drop-ins", { method: "POST", body: { clientId, category, price, payMethod, confirmActivePlan } }),
+  // A seat in one class session at its drop-in price; lands on the roster.
+  classDropIn: (clientId: string, classId: string, payMethod: PayMethod, confirmActivePlan = false) =>
+    callFn<void>("drop-ins", { method: "POST", body: { clientId, classId, payMethod, confirmActivePlan } }),
   invite: (clientId: string, inviteeName: string, inviteePhone: string, visitDate: string) =>
     callFn<{ invitationsRemaining: number }>("invitations", { method: "POST", body: { clientId, inviteeName, inviteePhone, visitDate } }),
+
+  // ===== Services: recurring classes, group plan catalog, plan sales, revenue =====
+  classSeries: () => callFn<{ series: ClassSeries[] }>("class-series"),
+  createClassSeries: (s: SeriesInput) => callFn<{ series: ClassSeries }>("class-series", { method: "POST", body: { ...s } }),
+  updateClassSeries: (id: string, s: SeriesInput) =>
+    callFn<{ series: ClassSeries; keptBookedSessions: number }>("class-series/update", { method: "POST", body: { id, ...s } }),
+  endClassSeries: (id: string) => callFn<{ ok: true; keptBookedSessions: number }>("class-series/end", { method: "POST", body: { id } }),
+
+  planTypes: () => callFn<{ planTypes: GroupPlanType[] }>("plan-types"),
+  createPlanType: (p: PlanTypeInput) => callFn<{ planType: GroupPlanType }>("plan-types", { method: "POST", body: { ...p } }),
+  updatePlanType: (id: string, p: PlanTypeInput & { active?: boolean }) =>
+    callFn<{ planType: GroupPlanType }>("plan-types/update", { method: "POST", body: { id, ...p } }),
+  deletePlanType: (id: string) => callFn<{ ok: true }>("plan-types/delete", { method: "POST", body: { id } }),
+
+  // Front desk: sell a group plan to an existing member or a brand-new one.
+  // `offer` is a catalog plan or a class series (that class's monthly).
+  sellGroupPlan: (target: { clientId: string } | NewClientFields, offer: { planTypeId: string } | { seriesId: string }, payMethod: PayMethod) =>
+    callFn<{ client: ClientWithPackage; plan: GroupPlan }>("group-plans/sell", { method: "POST", body: { ...target, ...offer, payMethod } }),
+  clientPlans: (clientId: string) => callFn<{ activePlan: GroupPlan | null; plans: GroupPlan[] }>(`group-plans/client/${clientId}`),
+
+  revenue: (months = 6) => callFn<RevenueReport>(`revenue?months=${months}`),
 
   // ===== Classes (staff read; dept_head writes) =====
   classes: () => callFn<{ classes: GymClass[] }>("classes"),

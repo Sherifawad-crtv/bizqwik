@@ -17,6 +17,7 @@ function catOf(type: string): Cat {
   if (type.startsWith("wallet_")) return "wallet";
   if (type.startsWith("points")) return "points";
   if (type.startsWith("class")) return "class";
+  if (type === "booking_arrived" || type === "booking_no_show") return "class";
   if (type === "check_in") return "checkin";
   return "other";
 }
@@ -43,6 +44,7 @@ function describe(e: ActivityEntry): string {
     case "check_in":
       return `${who} checked in`;
     case "class_booked":
+      if (metaStr(e.meta, "coverage") === "plan") return `${who} booked ${title ?? "a class"} on their plan`;
       return `${who} booked ${title ?? "a class"}${metaStr(e.meta, "payMethod") === "wallet" ? " (paid from wallet)" : ""}`;
     case "class_cancelled":
       return `${who} cancelled a class booking`;
@@ -55,7 +57,13 @@ function describe(e: ActivityEntry): string {
     case "sale_membership":
       return `${who} started a membership`;
     case "sale_dropin":
-      return `${who} paid for a drop-in`;
+      return `${who} paid for a drop-in${title ? ` — ${title}` : ""}`;
+    case "sale_plan":
+      return `${who} bought ${metaStr(e.meta, "name") ?? "a plan"}`;
+    case "class_series_created":
+      return `New class added — ${title ?? "a class"}`;
+    case "class_series_ended":
+      return `Class ended — ${title ?? "a class"}`;
     case "wallet_refund":
       return `${who} was refunded to wallet`;
     case "wallet_credit":
@@ -83,13 +91,9 @@ function timeLabel(iso: string): string {
 export function Activity() {
   const { profile } = useAuth();
   const navigate = useNavigate();
-  const [tab, setTab] = useState<"feed" | "logs">("feed");
-  const { data, loading, error } = useAsync(() => api.activity(300), []);
   useSetHeader({ kicker: "MEMBER APP", title: "Activity" }, []);
-
-  const back = profile?.role === "front_desk" ? "/" : "/oversight";
-  const backLabel = profile?.role === "front_desk" ? "Front Desk" : "Oversight";
-  const entries = data?.activity ?? [];
+  const back = profile?.role === "front_desk" ? "/" : "/history";
+  const backLabel = profile?.role === "front_desk" ? "Front Desk" : "History";
 
   return (
     <div>
@@ -99,13 +103,22 @@ export function Activity() {
       >
         <Icon name="chevron-left" size={16} /> {backLabel}
       </button>
+      <div style={{ font: "800 26px/1.1 var(--font-body)", letterSpacing: "-.02em", marginBottom: 12 }}>Activity</div>
+      <ActivityPanel />
+    </div>
+  );
+}
 
-      <div style={{ font: "800 26px/1.1 var(--font-body)", letterSpacing: "-.02em", marginBottom: 4 }}>Activity</div>
-      <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)", marginBottom: 16 }}>
-        {tab === "feed" ? "Recent member activity" : "Every transaction and event"}
-      </div>
+/** Member feed + full transaction log. Embedded in the dept_head's History
+ * tab and in the front desk's Activity screen. */
+export function ActivityPanel() {
+  const [tab, setTab] = useState<"feed" | "logs">("feed");
+  const { data, loading, error } = useAsync(() => api.activity(300), []);
+  const entries = data?.activity ?? [];
 
-      <div style={{ marginBottom: 16 }}>
+  return (
+    <div>
+      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
         <Segmented
           value={tab}
           options={[
@@ -114,6 +127,9 @@ export function Activity() {
           ]}
           onChange={(v) => setTab(v as "feed" | "logs")}
         />
+        <span style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>
+          {tab === "feed" ? "Recent member activity" : "Every transaction and event"}
+        </span>
       </div>
 
       {loading && <Spinner />}

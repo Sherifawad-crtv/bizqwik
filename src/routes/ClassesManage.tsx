@@ -13,29 +13,7 @@ import { TextField, SelectField } from "../components/FormField";
 import { DateField } from "../components/DateField";
 import { ConfirmSheet } from "../components/ConfirmSheet";
 import { ClassRosterSheet } from "../components/ClassRosterSheet";
-
-const pad = (n: number) => String(n).padStart(2, "0");
-
-function timeLabel(hhmm: string): string {
-  const [h, m] = hhmm.split(":").map(Number);
-  const am = h < 12;
-  const h12 = ((h + 11) % 12) + 1;
-  return `${h12}:${pad(m)} ${am ? "AM" : "PM"}`;
-}
-
-// 30-min slots across a gym's plausible day. A custom sheet picker (not a
-// native <input type=time>) — keeps the installed iOS PWA in standalone mode.
-const TIME_OPTIONS = Array.from({ length: (22 - 6) * 2 + 1 }, (_, i) => {
-  const mins = 6 * 60 + i * 30;
-  const hhmm = `${pad(Math.floor(mins / 60))}:${pad(mins % 60)}`;
-  return { value: hhmm, label: timeLabel(hhmm) };
-});
-
-function whenLabel(iso: string): string {
-  const d = new Date(iso);
-  const date = d.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
-  return `${date} · ${timeLabel(`${pad(d.getHours())}:${pad(d.getMinutes())}`)}`;
-}
+import { TIME_OPTIONS, pad, timeLabel, whenLabel } from "../lib/classTime";
 
 interface FormState {
   id: string | null; // null = creating
@@ -68,30 +46,34 @@ export function ClassesManage() {
   const [form, setForm] = useState<FormState | null>(null);
   const [confirmCancel, setConfirmCancel] = useState<GymClass | null>(null);
   const [roster, setRoster] = useState<GymClass | null>(null);
-  useSetHeader({ kicker: "MEMBER APP", title: "Classes" }, []);
+  useSetHeader({ kicker: "CATALOG", title: "Sessions" }, []);
 
+  // Sessions come from the recurring classes (Catalog → Classes). This screen
+  // is the day-to-day view: who's booked, rosters, and one-off changes.
   const list = classes.data?.classes ?? [];
-  const scheduled = list.filter((c) => c.status === "active");
+  const cutoff = Date.now() - 3 * 60 * 60 * 1000;
+  const scheduled = list.filter((c) => c.status === "active" && Date.parse(c.startsAt) >= cutoff);
+  const past = list.filter((c) => c.status === "active" && Date.parse(c.startsAt) < cutoff).reverse();
   const cancelled = list.filter((c) => c.status === "cancelled");
 
   return (
     <div>
       <button
-        onClick={() => navigate("/oversight")}
+        onClick={() => navigate("/catalog")}
         style={{ display: "inline-flex", alignItems: "center", gap: 4, border: 0, background: "none", color: "var(--ink-muted)", cursor: "pointer", font: "700 14px var(--font-body)", marginBottom: 14, padding: 0 }}
       >
-        <Icon name="chevron-left" size={16} /> Oversight
+        <Icon name="chevron-left" size={16} /> Catalog
       </button>
 
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ font: "800 26px/1.1 var(--font-body)", letterSpacing: "-.02em" }}>Classes</div>
+          <div style={{ font: "800 26px/1.1 var(--font-body)", letterSpacing: "-.02em" }}>Sessions</div>
           <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)", marginTop: 4 }}>
-            Scheduled classes members can book in the app.
+            Upcoming sessions from your classes. Tap one to edit just that session.
           </div>
         </div>
-        <Button onClick={() => setForm(emptyForm())} style={{ flex: "none" }}>
-          <Icon name="plus" size={18} /> New class
+        <Button variant="secondary" onClick={() => setForm(emptyForm())} style={{ flex: "none" }}>
+          <Icon name="plus" size={18} /> One-off
         </Button>
       </div>
 
@@ -102,7 +84,7 @@ export function ClassesManage() {
 
       {!classes.loading && list.length === 0 && (
         <div data-sq style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: "34px 20px", textAlign: "center", color: "var(--ink-faint)", font: "500 14px var(--font-body)" }}>
-          No classes yet. Create one to make it bookable in the member app.
+          No sessions yet. Add a class in Catalog → Classes and its sessions appear here.
         </div>
       )}
 
@@ -112,6 +94,19 @@ export function ClassesManage() {
             <ClassCard key={c.id} c={c} onEdit={() => setForm(formOf(c))} onRoster={() => setRoster(c)} />
           ))}
         </div>
+      )}
+
+      {past.length > 0 && (
+        <>
+          <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", margin: "24px 2px 10px" }}>
+            LAST 2 WEEKS · {past.length}
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {past.map((c) => (
+              <ClassCard key={c.id} c={c} onRoster={() => setRoster(c)} />
+            ))}
+          </div>
+        </>
       )}
 
       {cancelled.length > 0 && (
@@ -152,7 +147,7 @@ export function ClassesManage() {
         onClose={() => setConfirmCancel(null)}
         kicker="MEMBER APP"
         title={`Cancel ${confirmCancel?.title ?? "class"}?`}
-        sub="Members who paid from their wallet are refunded to wallet automatically. This can't be undone."
+        sub="Members who paid from their wallet are refunded to wallet, and class-bundle credits are returned automatically. This can't be undone."
         confirmLabel="Cancel class"
         danger
         onConfirm={async () => {
@@ -182,6 +177,11 @@ function ClassCard({ c, onEdit, onRoster }: { c: GymClass; onEdit?: () => void; 
         <div style={{ minWidth: 0, flex: 1 }}>
           <div style={{ font: "700 16px var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", textDecoration: cancelled ? "line-through" : "none" }}>{c.title}</div>
           <div style={{ font: "500 13px var(--font-mono)", color: "var(--ink-muted)", marginTop: 3 }}>{whenLabel(c.startsAt)}</div>
+          {!cancelled && (c.bookedCount ?? 0) > 0 && (
+            <div style={{ font: "500 12px var(--font-mono)", color: "var(--ink-faint)", marginTop: 3 }}>
+              {c.bookedCount} booked · {c.planSeats ?? 0} on a plan · {c.dropInSeats ?? 0} drop-in
+            </div>
+          )}
           {c.description && (
             <div style={{ font: "400 13px/1.4 var(--font-body)", color: "var(--ink-faint)", marginTop: 6, overflow: "hidden", textOverflow: "ellipsis", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>
               {c.description}
@@ -190,6 +190,7 @@ function ClassCard({ c, onEdit, onRoster }: { c: GymClass; onEdit?: () => void; 
         </div>
         <div style={{ flex: "none", textAlign: "right" }}>
           <div className="tabular" style={{ font: "800 16px var(--font-body)" }}>{c.price > 0 ? egp(c.price) : "Free"}</div>
+          <div style={{ font: "600 10px var(--font-mono)", letterSpacing: ".06em", color: "var(--ink-faint)" }}>DROP-IN</div>
           {onEdit && <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".06em", color: "var(--ink-faint)", marginTop: 4 }}>EDIT</div>}
         </div>
       </div>
@@ -268,15 +269,15 @@ function ClassSheet({
 
   return (
     <Sheet open={form !== null} onClose={busy ? () => {} : onClose}>
-      <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>MEMBER APP</div>
-      <div style={{ font: "800 26px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 16px" }}>{editing ? "Edit class" : "New class"}</div>
+      <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>{editing ? "THIS SESSION ONLY" : "ONE-OFF SESSION"}</div>
+      <div style={{ font: "800 26px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 16px" }}>{editing ? "Edit session" : "One-off session"}</div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
         <TextField label="TITLE" value={draft.title} onChange={(e) => setDraft({ ...draft, title: e.target.value })} placeholder="e.g. Sunrise HIIT" />
         <TextField label="DESCRIPTION" value={draft.description} onChange={(e) => setDraft({ ...draft, description: e.target.value })} placeholder="Optional — shown to members" />
         <DateField value={draft.date} min={todayIso()} onChange={(iso) => setDraft({ ...draft, date: iso })} />
         <SelectField label="TIME" value={draft.time} options={timeOptions} onChange={(v) => setDraft({ ...draft, time: v })} />
-        <TextField label="PRICE (EGP)" value={draft.price} onChange={(e) => setDraft({ ...draft, price: e.target.value })} inputMode="numeric" placeholder="0 for free" />
+        <TextField label="DROP-IN PRICE (EGP)" value={draft.price} onChange={(e) => setDraft({ ...draft, price: e.target.value })} inputMode="numeric" placeholder="0 for free" />
       </div>
 
       {error && (
@@ -284,7 +285,7 @@ function ClassSheet({
       )}
 
       <Button fullWidth size="lg" style={{ marginTop: 16 }} disabled={busy} onClick={save}>
-        {busy ? "Saving…" : editing ? "Save changes" : "Create class"}
+        {busy ? "Saving…" : editing ? "Save changes" : "Create session"}
       </Button>
       {editing && draft.id && (
         <Button
@@ -294,7 +295,7 @@ function ClassSheet({
           disabled={busy}
           onClick={() => onRequestCancel({ id: draft.id!, title: draft.title, description: draft.description || null, startsAt: new Date(`${draft.date}T${draft.time}:00`).toISOString(), price: Number(draft.price) || 0, status: "active" })}
         >
-          Cancel this class
+          Cancel this session
         </Button>
       )}
       <Button variant="quiet" fullWidth style={{ marginTop: 8 }} disabled={busy} onClick={onClose}>

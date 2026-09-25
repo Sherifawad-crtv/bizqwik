@@ -22,16 +22,21 @@ export function profile(role: Role) {
   return { id: "prof-zz", email: "zz-fd@zztest.dev", name: "Zed Frontdesk", role, tierId: null, avatarUrl: null };
 }
 
+/** An override can be a plain response body, or a handler that sees the
+ * request body and returns `{ status, body }` — for refusals like a 409, or
+ * to capture what the screen sent. */
+export type MockHandler = (reqBody: Record<string, unknown> | null) => { status?: number; body: unknown };
+
 // Intercept GoTrue auth + the edge function so the app runs fully offline.
 // `role` picks who /me reports; `overrides` maps an endpoint path suffix to a
-// response body (merged over the defaults) for test-specific data.
+// response body (or a MockHandler) for test-specific data.
 // `startSignedIn` (default true) short-circuits auth so screen tests can jump
 // straight in; pass false to exercise the real login form (/me reports no
 // profile until the /token endpoint is hit).
 export async function mockBackend(
   page: Page,
   role: Role = "front_desk",
-  overrides: Record<string, unknown> = {},
+  overrides: Record<string, unknown | MockHandler> = {},
   startSignedIn = true,
 ) {
   const state = { signedIn: startSignedIn };
@@ -50,8 +55,10 @@ export async function mockBackend(
 
   const defaults: Record<string, unknown> = {
     me: { profile: null, tier: null, bizqwikTeam: null }, // replaced below when signed in
-    "membership-types": { membershipTypes: [] },
     "bundle-types": { bundleTypes: [] },
+    "plan-types": { planTypes: [] },
+    "class-series": { series: [] },
+    classes: { classes: [] },
     clients: { clients: [] },
     "drop-ins": {},
   };
@@ -63,7 +70,19 @@ export async function mockBackend(
     // longest matching suffix wins so "membership-types" beats "types"
     const keys = [...Object.keys(overrides), ...Object.keys(defaults)].sort((a, b) => b.length - a.length);
     for (const k of keys) {
-      if (path.endsWith(`/${k}`)) return json(route, k in overrides ? overrides[k] : defaults[k]);
+      if (!path.endsWith(`/${k}`)) continue;
+      const o = k in overrides ? overrides[k] : defaults[k];
+      if (typeof o === "function") {
+        let reqBody: Record<string, unknown> | null = null;
+        try {
+          reqBody = route.request().postDataJSON();
+        } catch {
+          reqBody = null;
+        }
+        const r = (o as MockHandler)(reqBody);
+        return json(route, r.body, r.status ?? 200);
+      }
+      return json(route, o);
     }
     return json(route, {}); // unmapped endpoints: harmless empty object
   });
