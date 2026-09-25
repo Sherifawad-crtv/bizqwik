@@ -45,7 +45,7 @@ function roundedTopBarPath(x: number, yTop: number, w: number, yBottom: number, 
 }
 
 const REV_COLOR = "var(--primary)";
-const PAY_COLOR = "var(--accent-strong)";
+const PAY_COLOR = "var(--accent)";
 
 /** Revenue vs coach payouts per month — one EGP axis, two series side by side
  * with a 2px gap; revenue is direct-labelled, the legend names both. */
@@ -150,7 +150,7 @@ function StatTile({ label, value, sub, accent }: { label: string; value: string;
   return (
     <div data-sq style={{ background: accent ? "var(--accent-tint)" : "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: "16px 18px" }}>
       <div style={{ display: "flex", alignItems: "center", gap: 6, font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: accent ? "var(--accent-ink)" : "var(--ink-faint)" }}>
-        {accent && <i style={{ width: 8, height: 8, borderRadius: 999, background: "var(--accent-strong)", display: "block" }} />}
+        {accent && <i style={{ width: 8, height: 8, borderRadius: 999, background: "var(--accent)", display: "block" }} />}
         {label}
       </div>
       <div className="tabular" style={{ font: "800 28px/1.1 var(--font-body)", letterSpacing: "-.02em", marginTop: 6 }}>{value}</div>
