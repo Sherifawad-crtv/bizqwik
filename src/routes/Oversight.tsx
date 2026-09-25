@@ -45,7 +45,7 @@ function roundedTopBarPath(x: number, yTop: number, w: number, yBottom: number, 
 }
 
 const REV_COLOR = "var(--primary)";
-const PAY_COLOR = "var(--ink-faint)";
+const PAY_COLOR = "var(--accent-strong)";
 
 /** Revenue vs coach payouts per month — one EGP axis, two series side by side
  * with a 2px gap; revenue is direct-labelled, the legend names both. */
@@ -146,10 +146,13 @@ function ShareBars({ slices }: { slices: RevenueSlice[] }) {
   );
 }
 
-function StatTile({ label, value, sub }: { label: string; value: string; sub?: string }) {
+function StatTile({ label, value, sub, accent }: { label: string; value: string; sub?: string; accent?: boolean }) {
   return (
-    <div data-sq style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: "16px 18px" }}>
-      <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>{label}</div>
+    <div data-sq style={{ background: accent ? "var(--accent-tint)" : "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: "16px 18px" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 6, font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: accent ? "var(--accent-ink)" : "var(--ink-faint)" }}>
+        {accent && <i style={{ width: 8, height: 8, borderRadius: 999, background: "var(--accent-strong)", display: "block" }} />}
+        {label}
+      </div>
       <div className="tabular" style={{ font: "800 28px/1.1 var(--font-body)", letterSpacing: "-.02em", marginTop: 6 }}>{value}</div>
       {sub && <div style={{ font: "400 12px var(--font-mono)", color: "var(--ink-faint)", marginTop: 4 }}>{sub}</div>}
     </div>
@@ -209,7 +212,7 @@ export function Oversight() {
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(140px,1fr))", gap: 10, marginBottom: 14 }}>
             <StatTile label="REVENUE" value={fmt(data.totals.revenue)} sub={`Last ${range} months · EGP`} />
-            <StatTile label="PROFIT" value={fmt(data.totals.profit)} sub="Revenue − coach payouts" />
+            <StatTile label="PROFIT" value={fmt(data.totals.profit)} sub="Revenue − coach payouts" accent />
           </div>
 
           <Card title="REVENUE VS COACH PAYOUTS" sub={`BY MONTH · EGP`}>

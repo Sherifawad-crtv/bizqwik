@@ -13,6 +13,15 @@
   --primary-tint-strong: rgba(90, 65, 255, 0.12);
   --avatar-grad: linear-gradient(135deg, #7b5cff, #4a2fe0);
 
+  /* Secondary brand accent (lime) — aesthetics only, never on CTAs or status.
+     Vivid lime is too light to read on our cream surfaces, so it's only a
+     fill (with --accent-ink on top); anything read directly on a light
+     surface (chart bars, small marks) uses --accent-strong. */
+  --accent: #b5e02b;
+  --accent-strong: #65a30d;
+  --accent-tint: rgba(181, 224, 43, 0.22);
+  --accent-ink: #1a2e05;
+
   --logging-fg: #946200;
   --logging-bg: #f6e7c4;
   --settled-fg: #4832d6;
