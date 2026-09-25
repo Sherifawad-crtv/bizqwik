@@ -185,6 +185,14 @@ async function creditWallet(clientId: string, orgId: string, amount: number, cat
 async function debitWallet(clientId: string, orgId: string, amount: number, category: string, description: string): Promise<{ ok: boolean; balance: number }> {
   const bal = await walletBalance(clientId, orgId);
   if (bal < amount) return { ok: false, balance: bal };
+  // Record the debit BEFORE consuming any credit lots. There's no multi-row
+  // transaction here, so if this insert fails (e.g. a bad category), it throws
+  // before any `remaining` is touched — the balance can never silently drop
+  // without a matching ledger row.
+  const { error: insErr } = await admin().from("wallet_transactions").insert({
+    org_id: orgId, client_id: clientId, type: "debit", amount, category, description,
+  });
+  if (insErr) throw insErr;
   let need = amount;
   const { data: lots } = await admin().from("wallet_transactions")
     .select("id, remaining")
@@ -196,9 +204,6 @@ async function debitWallet(clientId: string, orgId: string, amount: number, cate
     await admin().from("wallet_transactions").update({ remaining: Number(lot.remaining) - take }).eq("id", lot.id);
     need -= take;
   }
-  await admin().from("wallet_transactions").insert({
-    org_id: orgId, client_id: clientId, type: "debit", amount, category, description,
-  });
   return { ok: true, balance: await walletBalance(clientId, orgId) };
 }
 
@@ -1206,7 +1211,7 @@ app.post(`${P}/packages`, async (c) => {
   if ("error" in result) return c.json({ error: result.error }, result.status);
   const price = Number(result.package.price_at_sale);
   if (payMethod === "wallet") {
-    const r = await debitWallet(clientId, me.org_id, price, "purchase", "Package purchase");
+    const r = await debitWallet(clientId, me.org_id, price, "desk_sale", "Package purchase");
     if (!r.ok) {
       await admin().from("package_instances").delete().eq("id", result.package.id);
       return c.json({ error: "Wallet balance doesn't cover this package.", code: "insufficient_wallet" }, 400);
@@ -1301,7 +1306,7 @@ app.post(`${P}/memberships/sell`, async (c) => {
     throw error;
   }
   if (payMethod === "wallet") {
-    const r = await debitWallet(client.id, me.org_id, Number(type.price), "purchase", "Membership purchase");
+    const r = await debitWallet(client.id, me.org_id, Number(type.price), "desk_sale", "Membership purchase");
     if (!r.ok) {
       await admin().from("membership_instances").delete().eq("id", membership.id);
       if (createdNow) await admin().from("clients").delete().eq("id", client.id);
@@ -1377,7 +1382,7 @@ app.post(`${P}/drop-ins`, async (c) => {
     .single();
   if (error) throw error;
   if (payMethod === "wallet") {
-    const r = await debitWallet(clientId, me.org_id, amount, "purchase", `Drop-in: ${cat}`);
+    const r = await debitWallet(clientId, me.org_id, amount, "desk_sale", `Drop-in: ${cat}`);
     if (!r.ok) {
       await admin().from("drop_ins").delete().eq("id", data.id);
       return c.json({ error: "Wallet balance doesn't cover this drop-in.", code: "insufficient_wallet" }, 400);
