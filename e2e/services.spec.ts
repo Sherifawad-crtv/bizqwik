@@ -167,3 +167,31 @@ test("front desk: sell a class monthly to a member with no plan", async ({ page 
   await expect(page.getByText("Plan started")).toBeVisible();
   expect(sold).toMatchObject({ clientId: "cl2", seriesId: "s1", payMethod: "cash" });
 });
+
+test("dept_head: class start time is picked on hour/minute/AM-PM wheels", async ({ page }) => {
+  let posted: Record<string, unknown> | null = null;
+  await mockBackend(page, "dept_head", {
+    "class-series": (body) => {
+      if (body) posted = body;
+      return { body: body ? { series: { ...SERIES[0], ...body, id: "s3" } } : { series: [] } };
+    },
+  });
+  await page.goto("/catalog");
+  await page.getByRole("button", { name: "+ New class" }).click();
+  await page.getByPlaceholder("e.g. Sunrise HIIT").fill("Early Bird");
+  await page.getByRole("button", { name: "Sat", exact: true }).click();
+  await page.getByPlaceholder("Per class").fill("150");
+  await page.getByPlaceholder("1 month").fill("1000");
+
+  await page.getByRole("button", { name: /STARTS AT: 6:00 PM/ }).click();
+  await page.getByRole("listbox", { name: "Hour" }).getByRole("option", { name: "7", exact: true }).click();
+  await page.getByRole("listbox", { name: "Minute" }).getByRole("option", { name: "30", exact: true }).click();
+  await page.getByRole("listbox", { name: "AM/PM" }).getByRole("option", { name: "AM", exact: true }).click();
+  await expect(page.getByText("7:30 AM").first()).toBeVisible();
+  await page.getByRole("button", { name: "Done" }).click();
+  await expect(page.getByRole("button", { name: /STARTS AT: 7:30 AM/ })).toBeVisible();
+
+  await page.getByRole("button", { name: "Create class" }).click();
+  await expect(page.getByText("Class created")).toBeVisible();
+  expect(posted).toMatchObject({ title: "Early Bird", weekdays: [6], startTime: "07:30" });
+});
