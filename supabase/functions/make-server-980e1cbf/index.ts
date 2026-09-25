@@ -275,6 +275,226 @@ async function currentMembershipForClient(clientId: string, orgId: string) {
   return await materializeMembership(data);
 }
 
+// ---- services model: recurring class series + group plans ------------------
+// Group training is sold as ONE active group plan per member at a time (an
+// all-access membership, one class's monthly, or a class bundle of credits);
+// anything not covered by it is a drop-in at the class's price. Private
+// training (packages) is separate and can run alongside a group plan.
+
+// Calendar months, rolling from `from` (Jan 31 + 1 month clamps to Feb 28/29).
+function addMonths(from: Date, months: number): Date {
+  const d = new Date(from.getTime());
+  const day = d.getUTCDate();
+  d.setUTCDate(1);
+  d.setUTCMonth(d.getUTCMonth() + months);
+  const lastDay = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 0)).getUTCDate();
+  d.setUTCDate(Math.min(day, lastDay));
+  return d;
+}
+
+async function orgTimezone(orgId: string): Promise<string> {
+  const { data } = await admin().from("organizations").select("timezone").eq("id", orgId).maybeSingle();
+  return data?.timezone || "Africa/Cairo";
+}
+
+// Offset (ms) of `tz` from UTC at instant `utcMs`.
+function tzOffsetMs(utcMs: number, tz: string): number {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: tz, hourCycle: "h23", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit",
+  }).formatToParts(new Date(utcMs));
+  const get = (t: string) => Number(parts.find((p) => p.type === t)?.value);
+  const asUtc = Date.UTC(get("year"), get("month") - 1, get("day"), get("hour"), get("minute"), get("second"));
+  return asUtc - utcMs;
+}
+// A gym-local wall-clock date + time ("2026-10-01", "18:30") -> UTC ISO,
+// DST-correct (re-checks the offset at the resulting instant).
+function localToUtcIso(dateIso: string, time: string, tz: string): string {
+  const [h, m] = time.split(":").map(Number);
+  const [y, mo, d] = dateIso.split("-").map(Number);
+  const naive = Date.UTC(y, mo - 1, d, h, m);
+  let utc = naive - tzOffsetMs(naive, tz);
+  utc = naive - tzOffsetMs(utc, tz);
+  return new Date(utc).toISOString();
+}
+function todayInTz(tz: string): string {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: tz, year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
+}
+
+// Sessions are generated a rolling 6 weeks ahead and topped up lazily whenever
+// a schedule is read — no background job needed, and "runs month to month
+// until someone changes it" falls out naturally.
+const SERIES_WINDOW_DAYS = 42;
+async function generateSeriesSessions(series: any, tz: string) {
+  if (series.status !== "active") return;
+  const today = todayInTz(tz);
+  const until = addDays(today, SERIES_WINDOW_DAYS);
+  if (series.generated_until && series.generated_until >= until) return;
+  const from = series.generated_until && series.generated_until >= today ? addDays(series.generated_until, 1) : today;
+  const time = String(series.start_time).slice(0, 5);
+  const weekdays = new Set((series.weekdays ?? []).map(Number));
+  const nowMs = Date.now();
+  const wanted: string[] = [];
+  for (let d = from; d <= until; d = addDays(d, 1)) {
+    if (!weekdays.has(new Date(`${d}T00:00:00Z`).getUTCDay())) continue;
+    const startsAt = localToUtcIso(d, time, tz);
+    if (Date.parse(startsAt) > nowMs) wanted.push(startsAt);
+  }
+  if (wanted.length > 0) {
+    const { data: existing } = await admin().from("classes").select("starts_at").eq("series_id", series.id).gte("starts_at", wanted[0]);
+    const have = new Set((existing ?? []).map((r: any) => new Date(r.starts_at).toISOString()));
+    const rows = wanted.filter((s) => !have.has(s)).map((s) => ({
+      org_id: series.org_id, series_id: series.id, title: series.title, description: series.description ?? null,
+      starts_at: s, price_egp: Number(series.drop_in_price), created_by: series.created_by ?? null, status: "active",
+    }));
+    if (rows.length > 0) {
+      const { error } = await admin().from("classes").insert(rows);
+      if (error && error.code !== "23505") throw error;
+    }
+  }
+  await admin().from("class_series").update({ generated_until: until }).eq("id", series.id);
+}
+async function extendOrgSeries(orgId: string) {
+  const { data: all } = await admin().from("class_series").select("*").eq("org_id", orgId).eq("status", "active");
+  if (!all || all.length === 0) return;
+  const tz = await orgTimezone(orgId);
+  const until = addDays(todayInTz(tz), SERIES_WINDOW_DAYS);
+  for (const s of all) if (!s.generated_until || s.generated_until < until) await generateSeriesSessions(s, tz);
+}
+
+// Removes a series' FUTURE sessions nobody holds a seat in (cancelled seats
+// don't count). Sessions with live bookings are left for staff to handle.
+async function clearFutureUnbookedSessions(seriesId: string) {
+  const { data: future } = await admin().from("classes").select("id").eq("series_id", seriesId).gt("starts_at", new Date().toISOString());
+  const ids = (future ?? []).map((r: any) => r.id);
+  if (ids.length === 0) return { removed: 0, kept: 0 };
+  const { data: held } = await admin().from("class_bookings").select("class_id").in("class_id", ids).neq("attendance", "cancelled");
+  const heldIds = new Set((held ?? []).map((r: any) => r.class_id));
+  const removable = ids.filter((id) => !heldIds.has(id));
+  if (removable.length > 0) await admin().from("classes").delete().in("id", removable);
+  return { removed: removable.length, kept: heldIds.size };
+}
+
+function toClassSeries(row: any) {
+  return {
+    id: row.id, title: row.title, description: row.description ?? null,
+    weekdays: (row.weekdays ?? []).map(Number), startTime: String(row.start_time).slice(0, 5), durationMin: row.duration_min,
+    dropInPrice: Number(row.drop_in_price), monthlyPrice: Number(row.monthly_price), status: row.status, createdAt: row.created_at,
+  };
+}
+function toGroupPlanType(row: any) {
+  return {
+    id: row.id, kind: row.kind, name: row.name, price: Number(row.price), durationMonths: row.duration_months,
+    credits: row.credits ?? null, invitationsAllowance: row.invitations_allowance, active: row.active,
+  };
+}
+function toGroupPlan(row: any) {
+  return {
+    id: row.id, clientId: row.client_id, kind: row.kind, planTypeId: row.plan_type_id ?? null, seriesId: row.series_id ?? null,
+    name: row.name, priceAtSale: Number(row.price_at_sale), payMethod: row.pay_method,
+    creditsTotal: row.credits_total ?? null, creditsRemaining: row.credits_remaining ?? null,
+    invitationsRemaining: row.invitations_remaining, startsAt: row.starts_at, expiresAt: row.expires_at,
+    status: row.status, createdAt: row.created_at,
+  };
+}
+
+// Lazy finish: a plan past its end, or a bundle with no credits left, stops
+// being the member's active plan the first time anything looks at it.
+async function sweepGroupPlans(clientId: string) {
+  const nowIso = new Date().toISOString();
+  await admin().from("group_plans").update({ status: "finished" }).eq("client_id", clientId).eq("status", "active").lte("expires_at", nowIso);
+  await admin().from("group_plans").update({ status: "finished" }).eq("client_id", clientId).eq("status", "active").eq("kind", "bundle").lte("credits_remaining", 0);
+}
+async function sweepOrgGroupPlans(orgId: string) {
+  const nowIso = new Date().toISOString();
+  await admin().from("group_plans").update({ status: "finished" }).eq("org_id", orgId).eq("status", "active").lte("expires_at", nowIso);
+  await admin().from("group_plans").update({ status: "finished" }).eq("org_id", orgId).eq("status", "active").eq("kind", "bundle").lte("credits_remaining", 0);
+}
+async function activeGroupPlan(clientId: string, orgId: string) {
+  await sweepGroupPlans(clientId);
+  const { data } = await admin().from("group_plans").select("*").eq("client_id", clientId).eq("org_id", orgId).eq("status", "active").maybeSingle();
+  return data;
+}
+function planSummary(plan: any): string {
+  const until = String(plan.expires_at).slice(0, 10);
+  if (plan.kind === "bundle") return `${plan.name} (${plan.credits_remaining} of ${plan.credits_total} classes left, until ${until})`;
+  return `${plan.name} (until ${until})`;
+}
+// Does this plan pay for this class session?
+function planCovers(plan: any, cls: any): boolean {
+  if (!plan || plan.status !== "active") return false;
+  const at = Date.parse(cls.starts_at);
+  if (at < Date.parse(plan.starts_at) || at >= Date.parse(plan.expires_at)) return false;
+  if (plan.kind === "membership") return true;
+  if (plan.kind === "class_monthly") return !!cls.series_id && cls.series_id === plan.series_id;
+  return Number(plan.credits_remaining) > 0;
+}
+
+// The one place a group plan is sold — front desk (cash/card/wallet) and the
+// member app (wallet only) both land here. `offer` is a catalog item
+// (membership/bundle) or a class series (that class's monthly).
+async function sellGroupPlan(opts: { orgId: string; client: any; planTypeId?: string | null; seriesId?: string | null; payMethod: "cash" | "card" | "wallet"; actorId: string | null }) {
+  const { orgId, client, payMethod, actorId } = opts;
+  let row: any;
+  if (opts.planTypeId) {
+    const { data: t } = await admin().from("group_plan_types").select("*").eq("id", opts.planTypeId).eq("org_id", orgId).maybeSingle();
+    if (!t || !t.active) return { error: "That plan isn't on sale.", status: 404 } as const;
+    row = {
+      kind: t.kind, plan_type_id: t.id, name: t.name, price_at_sale: Number(t.price), months: t.duration_months,
+      credits_total: t.kind === "bundle" ? t.credits : null, credits_remaining: t.kind === "bundle" ? t.credits : null,
+      invitations_remaining: Number(t.invitations_allowance ?? 0),
+    };
+  } else if (opts.seriesId) {
+    const { data: s } = await admin().from("class_series").select("*").eq("id", opts.seriesId).eq("org_id", orgId).maybeSingle();
+    if (!s || s.status !== "active") return { error: "That class isn't running anymore.", status: 404 } as const;
+    row = { kind: "class_monthly", series_id: s.id, name: `${s.title} · Monthly`, price_at_sale: Number(s.monthly_price), months: 1, credits_total: null, credits_remaining: null, invitations_remaining: 0 };
+  } else {
+    return { error: "Choose a plan.", status: 400 } as const;
+  }
+
+  const current = await activeGroupPlan(client.id, orgId);
+  if (current) {
+    return { error: `${client.name} already has an active plan: ${planSummary(current)}. A new one can be bought once it's finished.`, status: 400, code: "active_plan", activePlan: toGroupPlan(current) } as const;
+  }
+
+  const start = new Date();
+  const { months, ...fields } = row;
+  const { data: plan, error } = await admin().from("group_plans").insert({
+    org_id: orgId, client_id: client.id, ...fields, pay_method: payMethod,
+    starts_at: start.toISOString(), expires_at: addMonths(start, months).toISOString(), status: "active", created_by: actorId,
+  }).select().single();
+  if (error) {
+    // The one-active-plan unique index caught a simultaneous sale.
+    if (error.code === "23505") return { error: `${client.name} already has an active plan.`, status: 409, code: "active_plan" } as const;
+    throw error;
+  }
+  if (payMethod === "wallet") {
+    const r = await debitWallet(client.id, orgId, Number(plan.price_at_sale), "plan_purchase", `Plan: ${plan.name}`);
+    if (!r.ok) {
+      await admin().from("group_plans").delete().eq("id", plan.id);
+      return { error: "Wallet balance doesn't cover this plan.", status: 400, code: "insufficient_wallet" } as const;
+    }
+  }
+  await earnPurchasePoints(client.id, orgId, Number(plan.price_at_sale));
+  await logActivity(orgId, "sale_plan", { actorId, clientId: client.id, amount: Number(plan.price_at_sale), meta: { payMethod, kind: plan.kind, name: plan.name, planId: plan.id } });
+  return { plan } as const;
+}
+
+// Gives back a bundle credit when a plan-covered seat is released. A bundle
+// that had been finished only because its last credit was used comes back to
+// life — unless it's expired or the member has since bought another plan.
+async function returnPlanCredit(booking: any) {
+  if (booking.coverage !== "plan" || !booking.group_plan_id) return;
+  const { data: plan } = await admin().from("group_plans").select("*").eq("id", booking.group_plan_id).maybeSingle();
+  if (!plan || plan.kind !== "bundle") return;
+  const credits = Math.min(Number(plan.credits_total), Number(plan.credits_remaining) + 1);
+  const patch: any = { credits_remaining: credits };
+  if (plan.status === "finished" && Date.parse(plan.expires_at) > Date.now()) {
+    const { data: other } = await admin().from("group_plans").select("id").eq("client_id", plan.client_id).eq("status", "active").maybeSingle();
+    if (!other) patch.status = "active";
+  }
+  await admin().from("group_plans").update(patch).eq("id", plan.id);
+}
+
 // ---- API response mappers (snake_case DB rows -> camelCase JSON, matching
 // src/lib/types.ts exactly so the frontend's contract never changes) -------
 function toProfile(row: any) {
@@ -968,6 +1188,10 @@ app.post(`${P}/profiles/remove`, async (c) => {
   await admin().from("sessions").delete().eq("coach_id", id).eq("org_id", me.org_id);
   await admin().from("settlements").delete().eq("coach_id", id).eq("org_id", me.org_id);
   await admin().from("push_subscriptions").delete().eq("profile_id", id);
+  // Authorship-only references: the records stay, the author link is dropped.
+  await admin().from("group_plans").update({ created_by: null }).eq("created_by", id);
+  await admin().from("class_series").update({ created_by: null }).eq("created_by", id);
+  await admin().from("classes").update({ created_by: null }).eq("created_by", id);
 
   const { error: profileErr } = await admin().from("profiles").delete().eq("id", id);
   if (profileErr) throw profileErr;
@@ -1016,6 +1240,9 @@ app.get(`${P}/clients`, async (c) => {
   // Medical conditions stay with the assigned coach and heads only — for
   // front_desk they're never even read, not just hidden in the UI.
   const canSeeConditions = me.role !== "front_desk";
+  await sweepOrgGroupPlans(me.org_id);
+  const { data: plans } = await admin().from("group_plans").select("*").eq("org_id", me.org_id).eq("status", "active");
+  const planByClient = new Map((plans ?? []).map((p: any) => [p.client_id, p]));
   const rows = await Promise.all(
     (clients ?? []).map(async (cl) => {
       const [pkg, membership, conditions] = await Promise.all([
@@ -1023,7 +1250,8 @@ app.get(`${P}/clients`, async (c) => {
         currentMembershipForClient(cl.id, me.org_id),
         canSeeConditions ? conditionsOf(cl.id) : Promise.resolve(null),
       ]);
-      return toClient(cl, conditions, pkg ? toPackageInstance(pkg) : null, membership ? toMembershipInstance(membership) : null);
+      const plan = planByClient.get(cl.id);
+      return { ...toClient(cl, conditions, pkg ? toPackageInstance(pkg) : null, membership ? toMembershipInstance(membership) : null), groupPlan: plan ? toGroupPlan(plan) : null };
     }),
   );
   return c.json({ clients: rows });
@@ -1319,14 +1547,22 @@ app.post(`${P}/memberships/sell`, async (c) => {
 });
 
 // ---- check-ins, drop-ins, invitations (front desk) -------------------------
+// Check-in eligibility: an active group plan OR an active PT package. (The
+// legacy membership_instances still count until that table is retired.)
 async function clientPlanStatus(clientId: string, orgId: string) {
-  const [membership, pkg] = await Promise.all([currentMembershipForClient(clientId, orgId), currentPackageForClient(clientId, orgId)]);
+  const [membership, pkg, groupPlan] = await Promise.all([
+    currentMembershipForClient(clientId, orgId),
+    currentPackageForClient(clientId, orgId),
+    activeGroupPlan(clientId, orgId),
+  ]);
   const activeMembership = membership && membership.status === "active" ? membership : null;
   const activePackage = pkg && pkg.status === "active" ? pkg : null;
   return {
     membership: membership ? toMembershipInstance(membership) : null,
     package: pkg ? toPackageInstance(pkg) : null,
-    eligible: !!(activeMembership || activePackage),
+    groupPlan: groupPlan ? toGroupPlan(groupPlan) : null,
+    groupPlanRow: groupPlan,
+    eligible: !!(activeMembership || activePackage || groupPlan),
   };
 }
 
@@ -1339,7 +1575,7 @@ app.get(`${P}/front-desk/client-status/:id`, async (c) => {
   const { data: client } = await admin().from("clients").select("*").eq("id", id).eq("org_id", me.org_id).maybeSingle();
   if (!client) return c.json({ error: "Member not found. Please check the QR code." }, 404);
   const status = await clientPlanStatus(id, me.org_id);
-  return c.json({ client: toClient(client, null, status.package, status.membership), eligible: status.eligible });
+  return c.json({ client: { ...toClient(client, null, status.package, status.membership), groupPlan: status.groupPlan }, eligible: status.eligible });
 });
 
 app.post(`${P}/check-ins`, async (c) => {
@@ -1351,7 +1587,7 @@ app.post(`${P}/check-ins`, async (c) => {
   const { data: client } = await admin().from("clients").select("id, name").eq("id", clientId).eq("org_id", me.org_id).maybeSingle();
   if (!client) return c.json({ error: "No such client" }, 404);
   const status = await clientPlanStatus(clientId, me.org_id);
-  if (!status.eligible) return c.json({ error: `${client.name} has no active membership or package.` }, 400);
+  if (!status.eligible) return c.json({ error: `${client.name} has no active plan or package.` }, 400);
   const { data, error } = await admin().from("check_ins").insert({ org_id: me.org_id, client_id: clientId, source }).select().single();
   if (error) throw error;
   await earnPoints(clientId, me.org_id, 1, "checkin");
@@ -1364,20 +1600,53 @@ app.post(`${P}/drop-ins`, async (c) => {
   const me = user && (await profileOf(user.id));
   if (me?.role !== "front_desk") return c.json({ error: "Forbidden" }, 403);
   const body = await c.req.json();
-  const { clientId, category, price } = body;
+  const { clientId, classId } = body;
   const payMethod = normPayMethod(body.payMethod);
-  const cat = String(category ?? "").trim();
-  const amount = Number(price);
-  if (!cat) return c.json({ error: "Enter what the drop-in is for." }, 400);
-  if (!Number.isFinite(amount) || amount < 0) return c.json({ error: "Enter a valid price." }, 400);
   if (payMethod === "wallet" && !clientId) return c.json({ error: "Wallet payment needs an existing member." }, 400);
-  if (clientId) {
-    const { data: client } = await admin().from("clients").select("id").eq("id", clientId).eq("org_id", me.org_id).maybeSingle();
-    if (!client) return c.json({ error: "No such client" }, 404);
+
+  // Two shapes: a seat in a specific class session (price = that class's
+  // drop-in price, and the member lands on its roster), or a generic walk-in
+  // (free-text "what for" + price, as before).
+  let cls: any = null;
+  let cat: string;
+  let amount: number;
+  if (classId) {
+    if (!clientId) return c.json({ error: "Pick the member for this class drop-in." }, 400);
+    const { data } = await admin().from("classes").select("*").eq("id", classId).eq("org_id", me.org_id).eq("status", "active").maybeSingle();
+    if (!data) return c.json({ error: "That class isn't available." }, 404);
+    cls = data;
+    cat = cls.title;
+    amount = Number(cls.price_egp);
+  } else {
+    cat = String(body.category ?? "").trim();
+    amount = Number(body.price);
+    if (!cat) return c.json({ error: "Enter what the drop-in is for." }, 400);
+    if (!Number.isFinite(amount) || amount < 0) return c.json({ error: "Enter a valid price." }, 400);
   }
+
+  if (clientId) {
+    const { data: client } = await admin().from("clients").select("id, name").eq("id", clientId).eq("org_id", me.org_id).maybeSingle();
+    if (!client) return c.json({ error: "No such client" }, 404);
+    if (cls) {
+      const { data: seat } = await admin().from("class_bookings").select("id, attendance").eq("class_id", cls.id).eq("client_id", clientId).maybeSingle();
+      if (seat && seat.attendance !== "cancelled") return c.json({ error: `${client.name} is already booked into this class.` }, 400);
+    }
+    // Same flag as the member app: paying for a drop-in while a group plan is
+    // still running is allowed, but only once someone has confirmed it.
+    const plan = await activeGroupPlan(clientId, me.org_id);
+    if (plan && !body.confirmActivePlan) {
+      return c.json({
+        error: `${client.name} still has ${planSummary(plan)}. Charge a drop-in anyway?`,
+        code: "active_plan_confirm",
+        activePlan: toGroupPlan(plan),
+        coveredByPlan: cls ? planCovers(plan, cls) : false,
+      }, 409);
+    }
+  }
+
   const { data, error } = await admin()
     .from("drop_ins")
-    .insert({ org_id: me.org_id, client_id: clientId || null, category: cat, price: amount })
+    .insert({ org_id: me.org_id, client_id: clientId || null, category: cat, price: amount, class_id: cls?.id ?? null })
     .select()
     .single();
   if (error) throw error;
@@ -1388,9 +1657,25 @@ app.post(`${P}/drop-ins`, async (c) => {
       return c.json({ error: "Wallet balance doesn't cover this drop-in.", code: "insufficient_wallet" }, 400);
     }
   }
+  if (cls) {
+    const { error: bErr } = await admin().from("class_bookings").upsert(
+      {
+        org_id: me.org_id, class_id: cls.id, client_id: clientId, coverage: "drop_in", group_plan_id: null, drop_in_id: data.id,
+        pay_method: payMethod === "wallet" ? "wallet" : "desk", pay_status: "paid", attendance: "arrived", price_egp: amount, booked_at: new Date().toISOString(),
+      },
+      { onConflict: "class_id,client_id" },
+    );
+    if (bErr) {
+      // The seat couldn't be written (e.g. the session was just removed by a
+      // schedule edit) — undo the sale so no money is taken without a seat.
+      await admin().from("drop_ins").delete().eq("id", data.id);
+      if (payMethod === "wallet") await creditWallet(clientId, me.org_id, amount, "refund", `Refund: ${cat} drop-in not completed`);
+      return c.json({ error: "That class session is no longer available — nothing was charged." }, 409);
+    }
+  }
   await earnPurchasePoints(data.client_id, me.org_id, amount);
-  await logActivity(me.org_id, "sale_dropin", { actorId: me.id, clientId: data.client_id, amount, meta: { payMethod } });
-  return c.json({ dropIn: { id: data.id, clientId: data.client_id, category: data.category, price: Number(data.price), createdAt: data.created_at } });
+  await logActivity(me.org_id, "sale_dropin", { actorId: me.id, clientId: data.client_id, amount, meta: { payMethod, classId: cls?.id ?? null, title: cat } });
+  return c.json({ dropIn: { id: data.id, clientId: data.client_id, classId: data.class_id ?? null, category: data.category, price: Number(data.price), createdAt: data.created_at } });
 });
 
 app.post(`${P}/invitations`, async (c) => {
@@ -1405,14 +1690,14 @@ app.post(`${P}/invitations`, async (c) => {
 
   const { data: client } = await admin().from("clients").select("id, name").eq("id", clientId).eq("org_id", me.org_id).maybeSingle();
   if (!client) return c.json({ error: "No such client" }, 404);
-  const membership = await currentMembershipForClient(clientId, me.org_id);
-  if (!membership || membership.status !== "active") return c.json({ error: `${client.name} doesn't have an active membership.` }, 400);
-  if (membership.invitations_remaining <= 0) return c.json({ error: `${client.name} has no invitations left on this membership.` }, 400);
+  const membership = await activeGroupPlan(clientId, me.org_id);
+  if (!membership) return c.json({ error: `${client.name} doesn't have an active plan.` }, 400);
+  if (membership.invitations_remaining <= 0) return c.json({ error: `${client.name} has no invitations left on this plan.` }, 400);
 
   // Compare-and-set on the old count so two simultaneous invites can't both
   // spend the last one.
   const { data: spent, error: sErr } = await admin()
-    .from("membership_instances")
+    .from("group_plans")
     .update({ invitations_remaining: membership.invitations_remaining - 1 })
     .eq("id", membership.id)
     .eq("invitations_remaining", membership.invitations_remaining)
@@ -1433,7 +1718,7 @@ app.post(`${P}/invitations`, async (c) => {
     .select()
     .single();
   if (error) {
-    await admin().from("membership_instances").update({ invitations_remaining: membership.invitations_remaining }).eq("id", membership.id);
+    await admin().from("group_plans").update({ invitations_remaining: membership.invitations_remaining }).eq("id", membership.id);
     throw error;
   }
   return c.json({
@@ -1792,11 +2077,13 @@ function toPlanType(row: any) {
 }
 
 async function gmvByOrg(): Promise<Map<string, number>> {
-  const [pkgs, mems, memTypes, drops] = await Promise.all([
+  const [pkgs, mems, memTypes, drops, plans, bookings] = await Promise.all([
     admin().from("package_instances").select("org_id, price_at_sale"),
     admin().from("membership_instances").select("org_id, membership_type_id"),
     admin().from("membership_types").select("id, price"),
     admin().from("drop_ins").select("org_id, price"),
+    admin().from("group_plans").select("org_id, price_at_sale"),
+    admin().from("class_bookings").select("org_id, price_egp").eq("coverage", "drop_in").eq("pay_status", "paid").is("drop_in_id", null),
   ]);
   const priceOfType = new Map((memTypes.data ?? []).map((t: any) => [t.id, Number(t.price)]));
   const m = new Map<string, number>();
@@ -1804,6 +2091,8 @@ async function gmvByOrg(): Promise<Map<string, number>> {
   for (const p of pkgs.data ?? []) add(p.org_id, Number(p.price_at_sale));
   for (const mi of mems.data ?? []) add(mi.org_id, priceOfType.get(mi.membership_type_id) ?? 0);
   for (const d of drops.data ?? []) add(d.org_id, Number(d.price));
+  for (const g of plans.data ?? []) add(g.org_id, Number(g.price_at_sale));
+  for (const b of bookings.data ?? []) add(b.org_id, Number(b.price_egp));
   return m;
 }
 
@@ -2092,10 +2381,13 @@ app.post(`${P}/ops/plans/delete`, async (c) => {
 
 // ================= Client (member) app + classes + org config =================
 function toClassRow(row: any) {
-  return { id: row.id, title: row.title, description: row.description ?? null, startsAt: row.starts_at, price: Number(row.price_egp), status: row.status };
+  return { id: row.id, seriesId: row.series_id ?? null, title: row.title, description: row.description ?? null, startsAt: row.starts_at, price: Number(row.price_egp), status: row.status };
 }
 function toBookingRow(row: any) {
-  return { id: row.id, classId: row.class_id, payMethod: row.pay_method, payStatus: row.pay_status, attendance: row.attendance, price: Number(row.price_egp), bookedAt: row.booked_at };
+  return {
+    id: row.id, classId: row.class_id, payMethod: row.pay_method, payStatus: row.pay_status, attendance: row.attendance, price: Number(row.price_egp), bookedAt: row.booked_at,
+    coverage: row.coverage ?? "drop_in", groupPlanId: row.group_plan_id ?? null,
+  };
 }
 async function requireClient(c: any) {
   const user = await requireUser(c);
@@ -2124,6 +2416,7 @@ app.get(`${P}/client/branding`, async (c) => {
 app.get(`${P}/client/home`, async (c) => {
   const me = await requireClient(c);
   if (!me) return c.json({ error: "Unauthorized" }, 401);
+  await extendOrgSeries(me.org_id);
   const [status, wallet, points, settings, upcoming] = await Promise.all([
     clientPlanStatus(me.id, me.org_id),
     walletBalance(me.id, me.org_id),
@@ -2132,37 +2425,85 @@ app.get(`${P}/client/home`, async (c) => {
     admin().from("classes").select("*").eq("org_id", me.org_id).eq("status", "active").gte("starts_at", new Date().toISOString()).order("starts_at").limit(10),
   ]);
   const rate = settings?.points_per_egp ?? null;
+  const plan = status.groupPlanRow;
   return c.json({
     name: me.name,
     membership: status.membership,
     package: status.package,
+    groupPlan: status.groupPlan,
     eligible: status.eligible,
     wallet,
     points,
     pointsValueEgp: rate && rate > 0 ? points / rate : 0,
-    upcomingClasses: (upcoming.data ?? []).map(toClassRow),
+    upcomingClasses: (upcoming.data ?? []).map((r: any) => ({ ...toClassRow(r), coverage: planCovers(plan, r) ? "plan" : "drop_in" })),
   });
 });
 
+// The schedule, with what each session would cost THIS member: "plan" when
+// their active group plan pays for it, else "drop_in" at the class price.
 app.get(`${P}/client/classes`, async (c) => {
   const me = await requireClient(c);
   if (!me) return c.json({ error: "Unauthorized" }, 401);
-  const { data } = await admin().from("classes").select("*").eq("org_id", me.org_id).eq("status", "active").gte("starts_at", new Date().toISOString()).order("starts_at");
-  const { data: mine } = await admin().from("class_bookings").select("class_id").eq("client_id", me.id).neq("attendance", "cancelled");
+  await extendOrgSeries(me.org_id);
+  const [{ data }, { data: mine }, plan] = await Promise.all([
+    admin().from("classes").select("*").eq("org_id", me.org_id).eq("status", "active").gte("starts_at", new Date().toISOString()).order("starts_at"),
+    admin().from("class_bookings").select("class_id").eq("client_id", me.id).neq("attendance", "cancelled"),
+    activeGroupPlan(me.id, me.org_id),
+  ]);
   const booked = new Set((mine ?? []).map((b: any) => b.class_id));
-  return c.json({ classes: (data ?? []).map((r: any) => ({ ...toClassRow(r), booked: booked.has(r.id) })) });
+  return c.json({
+    activePlan: plan ? toGroupPlan(plan) : null,
+    classes: (data ?? []).map((r: any) => ({ ...toClassRow(r), booked: booked.has(r.id), coverage: planCovers(plan, r) ? "plan" : "drop_in" })),
+  });
 });
 
+// Booking resolver. Covered by the active plan -> a plan seat (a bundle spends
+// one credit). Otherwise it's a drop-in at the class price, paid from the
+// wallet or at the desk — and if a plan is still running, the member must
+// confirm first (409 active_plan_confirm drives the "you still have X" popup).
+// `useDropIn: true` forces a drop-in even when the plan would cover it.
 app.post(`${P}/client/classes/:id/book`, async (c) => {
   const me = await requireClient(c);
   if (!me) return c.json({ error: "Unauthorized" }, 401);
   const classId = c.req.param("id");
-  const { payMethod } = await c.req.json();
-  if (payMethod !== "wallet" && payMethod !== "desk") return c.json({ error: "Choose how to pay." }, 400);
+  const body = await c.req.json().catch(() => ({}));
   const { data: cls } = await admin().from("classes").select("*").eq("id", classId).eq("org_id", me.org_id).eq("status", "active").maybeSingle();
   if (!cls) return c.json({ error: "This class isn't available." }, 404);
+  if (Date.parse(cls.starts_at) <= Date.now()) return c.json({ error: "This class has already started." }, 400);
   const { data: existing } = await admin().from("class_bookings").select("id, attendance").eq("class_id", classId).eq("client_id", me.id).maybeSingle();
   if (existing && existing.attendance !== "cancelled") return c.json({ error: "You've already booked this class." }, 400);
+
+  const plan = await activeGroupPlan(me.id, me.org_id);
+  if (plan && planCovers(plan, cls) && !body.useDropIn) {
+    if (plan.kind === "bundle") {
+      // Compare-and-set so two bookings can't both spend the last credit.
+      const { data: spent } = await admin().from("group_plans")
+        .update({ credits_remaining: Number(plan.credits_remaining) - 1 })
+        .eq("id", plan.id).eq("credits_remaining", plan.credits_remaining).select().maybeSingle();
+      if (!spent) return c.json({ error: "Your bundle just changed — please try again." }, 409);
+    }
+    const { data: booking, error } = await admin().from("class_bookings").upsert(
+      { org_id: me.org_id, class_id: classId, client_id: me.id, coverage: "plan", group_plan_id: plan.id, drop_in_id: null, pay_method: "plan", pay_status: "paid", attendance: "booked", price_egp: 0, booked_at: new Date().toISOString() },
+      { onConflict: "class_id,client_id" },
+    ).select().single();
+    if (error) {
+      await returnPlanCredit({ coverage: "plan", group_plan_id: plan.id });
+      throw error;
+    }
+    await logActivity(me.org_id, "class_booked", { clientId: me.id, amount: 0, meta: { classId, title: cls.title, coverage: "plan", plan: plan.name } });
+    return c.json({ booking: toBookingRow(booking) });
+  }
+
+  const payMethod = body.payMethod;
+  if (payMethod !== "wallet" && payMethod !== "desk") return c.json({ error: "Choose how to pay." }, 400);
+  if (plan && !body.confirmActivePlan) {
+    return c.json({
+      error: `You still have ${planSummary(plan)}. Pay for this class as a drop-in anyway?`,
+      code: "active_plan_confirm",
+      activePlan: toGroupPlan(plan),
+      coveredByPlan: planCovers(plan, cls),
+    }, 409);
+  }
   const price = Number(cls.price_egp);
   let payStatus = "pending";
   if (payMethod === "wallet") {
@@ -2171,12 +2512,50 @@ app.post(`${P}/client/classes/:id/book`, async (c) => {
     payStatus = "paid";
   }
   const { data: booking, error } = await admin().from("class_bookings").upsert(
-    { org_id: me.org_id, class_id: classId, client_id: me.id, pay_method: payMethod, pay_status: payStatus, attendance: "booked", price_egp: price, booked_at: new Date().toISOString() },
+    { org_id: me.org_id, class_id: classId, client_id: me.id, coverage: "drop_in", group_plan_id: null, drop_in_id: null, pay_method: payMethod, pay_status: payStatus, attendance: "booked", price_egp: price, booked_at: new Date().toISOString() },
     { onConflict: "class_id,client_id" },
   ).select().single();
   if (error) throw error;
-  await logActivity(me.org_id, "class_booked", { clientId: me.id, amount: price, meta: { classId, title: cls.title, payMethod } });
+  await logActivity(me.org_id, "class_booked", { clientId: me.id, amount: price, meta: { classId, title: cls.title, payMethod, coverage: "drop_in" } });
   return c.json({ booking: toBookingRow(booking) });
+});
+
+// My plans + the shop. Offers: the org's active catalog (memberships and
+// bundles) plus a monthly for every running class. `canBuy` is false while a
+// plan is active — one plan at a time.
+app.get(`${P}/client/plans`, async (c) => {
+  const me = await requireClient(c);
+  if (!me) return c.json({ error: "Unauthorized" }, 401);
+  const plan = await activeGroupPlan(me.id, me.org_id);
+  const [{ data: history }, { data: types }, { data: series }, wallet] = await Promise.all([
+    admin().from("group_plans").select("*").eq("client_id", me.id).order("created_at", { ascending: false }).limit(20),
+    admin().from("group_plan_types").select("*").eq("org_id", me.org_id).eq("active", true).order("price"),
+    admin().from("class_series").select("*").eq("org_id", me.org_id).eq("status", "active").order("title"),
+    walletBalance(me.id, me.org_id),
+  ]);
+  return c.json({
+    activePlan: plan ? toGroupPlan(plan) : null,
+    history: (history ?? []).map(toGroupPlan),
+    wallet,
+    canBuy: !plan,
+    offers: [
+      ...(types ?? []).map((t: any) => ({ offerType: "plan_type", id: t.id, kind: t.kind, name: t.name, price: Number(t.price), durationMonths: t.duration_months, credits: t.credits ?? null })),
+      ...(series ?? []).map((s: any) => ({ offerType: "series", id: s.id, kind: "class_monthly", name: `${s.title} · Monthly`, price: Number(s.monthly_price), durationMonths: 1, credits: null, weekdays: (s.weekdays ?? []).map(Number), startTime: String(s.start_time).slice(0, 5) })),
+    ],
+  });
+});
+
+// Members buy with store credit only; cash/card purchases happen at the desk.
+app.post(`${P}/client/plans/buy`, async (c) => {
+  const me = await requireClient(c);
+  if (!me) return c.json({ error: "Unauthorized" }, 401);
+  const { planTypeId, seriesId } = await c.req.json();
+  const result = await sellGroupPlan({ orgId: me.org_id, client: { id: me.id, name: "You" }, planTypeId, seriesId, payMethod: "wallet", actorId: null });
+  if ("error" in result) {
+    const msg = result.code === "active_plan" ? "You already have an active plan. You can buy a new one once it's finished." : result.error;
+    return c.json({ error: msg, code: (result as any).code ?? null, activePlan: (result as any).activePlan ?? null }, result.status);
+  }
+  return c.json({ plan: toGroupPlan(result.plan), wallet: await walletBalance(me.id, me.org_id) });
 });
 
 app.get(`${P}/client/bookings`, async (c) => {
@@ -2193,14 +2572,20 @@ app.post(`${P}/client/bookings/:id/cancel`, async (c) => {
   const { data: booking } = await admin().from("class_bookings").select("*").eq("id", id).eq("client_id", me.id).maybeSingle();
   if (!booking) return c.json({ error: "No such booking" }, 404);
   if (booking.attendance === "cancelled") return c.json({ error: "Already cancelled." }, 400);
+  const { data: cls } = await admin().from("classes").select("starts_at").eq("id", booking.class_id).maybeSingle();
+  if (cls && Date.parse(cls.starts_at) <= Date.now()) return c.json({ error: "This class has already started, so it can't be cancelled here — please speak to the front desk." }, 400);
   let refunded = 0;
-  if (booking.pay_status === "paid" && booking.pay_method === "wallet") {
+  let creditReturned = false;
+  if (booking.coverage === "plan") {
+    await returnPlanCredit(booking);
+    creditReturned = true;
+  } else if (booking.pay_status === "paid" && booking.pay_method === "wallet") {
     await creditWallet(me.id, me.org_id, Number(booking.price_egp), "refund", "Refund: cancelled booking");
     refunded = Number(booking.price_egp);
   }
   await admin().from("class_bookings").update({ attendance: "cancelled", pay_status: booking.pay_status === "paid" ? "refunded" : booking.pay_status }).eq("id", id);
-  await logActivity(me.org_id, "class_cancelled", { clientId: me.id, amount: refunded, meta: { bookingId: id } });
-  return c.json({ ok: true, refundedToWallet: refunded });
+  await logActivity(me.org_id, "class_cancelled", { clientId: me.id, amount: refunded, meta: { bookingId: id, coverage: booking.coverage } });
+  return c.json({ ok: true, refundedToWallet: refunded, planCreditReturned: creditReturned });
 });
 
 // Member scans the desk QR (which encodes the org slug/id) to check in + earn 1 pt.
@@ -2242,8 +2627,27 @@ app.get(`${P}/classes`, async (c) => {
   const me = user && (await profileOf(user.id));
   if (!me) return c.json({ error: "Unauthorized" }, 401);
   if (me.role === "accountant") return c.json({ error: "Forbidden" }, 403);
-  const { data } = await admin().from("classes").select("*").eq("org_id", me.org_id).order("starts_at", { ascending: false });
-  return c.json({ classes: (data ?? []).map(toClassRow) });
+  await extendOrgSeries(me.org_id);
+  // Recurring series generate lots of sessions, so the list is windowed:
+  // the last 14 days (for rosters/attendance) through everything scheduled.
+  const since = c.req.query("since") || new Date(Date.now() - 14 * 86400000).toISOString();
+  const { data } = await admin().from("classes").select("*").eq("org_id", me.org_id).gte("starts_at", since).order("starts_at", { ascending: true });
+  const ids = (data ?? []).map((r: any) => r.id);
+  const { data: seats } = ids.length > 0
+    ? await admin().from("class_bookings").select("class_id, coverage").in("class_id", ids).neq("attendance", "cancelled")
+    : { data: [] as any[] };
+  const count = new Map<string, { plan: number; dropIn: number }>();
+  for (const s of seats ?? []) {
+    const agg = count.get(s.class_id) ?? { plan: 0, dropIn: 0 };
+    if (s.coverage === "plan") agg.plan += 1; else agg.dropIn += 1;
+    count.set(s.class_id, agg);
+  }
+  return c.json({
+    classes: (data ?? []).map((r: any) => {
+      const n = count.get(r.id) ?? { plan: 0, dropIn: 0 };
+      return { ...toClassRow(r), bookedCount: n.plan + n.dropIn, planSeats: n.plan, dropInSeats: n.dropIn };
+    }),
+  });
 });
 app.post(`${P}/classes`, async (c) => {
   const user = await requireUser(c);
@@ -2280,7 +2684,9 @@ app.post(`${P}/classes/cancel`, async (c) => {
   if (!cls) return c.json({ error: "No such class" }, 404);
   const { data: bookings } = await admin().from("class_bookings").select("*").eq("class_id", id).neq("attendance", "cancelled");
   for (const b of bookings ?? []) {
-    if (b.pay_status === "paid" && b.pay_method === "wallet") {
+    if (b.coverage === "plan") {
+      await returnPlanCredit(b);
+    } else if (b.pay_status === "paid" && b.pay_method === "wallet") {
       await creditWallet(b.client_id, me.org_id, Number(b.price_egp), "refund", `Refund: ${cls.title} cancelled`);
     }
     await admin().from("class_bookings").update({ attendance: "cancelled", pay_status: b.pay_status === "paid" ? "refunded" : b.pay_status }).eq("id", b.id);
@@ -2288,6 +2694,312 @@ app.post(`${P}/classes/cancel`, async (c) => {
   await admin().from("classes").update({ status: "cancelled" }).eq("id", id);
   await logActivity(me.org_id, "class_cancelled_by_staff", { actorId: me.id, meta: { classId: id, title: cls.title } });
   return c.json({ ok: true });
+});
+
+// ---- class series (dept_head): recurring classes on chosen weekdays ----
+function seriesFields(body: any) {
+  const title = String(body.title ?? "").trim();
+  const weekdays = Array.isArray(body.weekdays) ? [...new Set(body.weekdays.map(Number))].sort() : [];
+  const startTime = String(body.startTime ?? "");
+  const durationMin = body.durationMin === undefined || body.durationMin === null || body.durationMin === "" ? 60 : Number(body.durationMin);
+  const dropInPrice = Number(body.dropInPrice);
+  const monthlyPrice = Number(body.monthlyPrice);
+  if (!title) return { error: "Title is required." } as const;
+  if (weekdays.length === 0 || weekdays.some((d: any) => !Number.isInteger(d) || d < 0 || d > 6)) return { error: "Pick at least one day of the week." } as const;
+  if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(startTime)) return { error: "Pick a start time." } as const;
+  if (!Number.isInteger(durationMin) || durationMin <= 0) return { error: "Duration must be a whole number of minutes." } as const;
+  if (!Number.isFinite(dropInPrice) || dropInPrice < 0) return { error: "Drop-in price must be zero or more." } as const;
+  if (!Number.isFinite(monthlyPrice) || monthlyPrice < 0) return { error: "Monthly price must be zero or more." } as const;
+  return {
+    row: { title, description: blankToNull(body.description), weekdays, start_time: startTime, duration_min: durationMin, drop_in_price: dropInPrice, monthly_price: monthlyPrice },
+  } as const;
+}
+
+app.get(`${P}/class-series`, async (c) => {
+  const user = await requireUser(c);
+  const me = user && (await profileOf(user.id));
+  if (me?.role !== "dept_head" && me?.role !== "front_desk") return c.json({ error: "Forbidden" }, 403);
+  await extendOrgSeries(me.org_id);
+  const [{ data }, { data: subs }] = await Promise.all([
+    admin().from("class_series").select("*").eq("org_id", me.org_id).order("status").order("title"),
+    admin().from("group_plans").select("series_id").eq("org_id", me.org_id).eq("status", "active").eq("kind", "class_monthly"),
+  ]);
+  const subCount = new Map<string, number>();
+  for (const s of subs ?? []) subCount.set(s.series_id, (subCount.get(s.series_id) ?? 0) + 1);
+  return c.json({ series: (data ?? []).map((r: any) => ({ ...toClassSeries(r), activeMonthlySubscribers: subCount.get(r.id) ?? 0 })) });
+});
+
+app.post(`${P}/class-series`, async (c) => {
+  const user = await requireUser(c);
+  const me = user && (await profileOf(user.id));
+  if (me?.role !== "dept_head") return c.json({ error: "Forbidden" }, 403);
+  const parsed = seriesFields(await c.req.json());
+  if ("error" in parsed) return c.json({ error: parsed.error }, 400);
+  const { data, error } = await admin().from("class_series").insert({ org_id: me.org_id, ...parsed.row, created_by: me.id }).select().single();
+  if (error) throw error;
+  await generateSeriesSessions(data, await orgTimezone(me.org_id));
+  await logActivity(me.org_id, "class_series_created", { actorId: me.id, meta: { seriesId: data.id, title: data.title } });
+  return c.json({ series: toClassSeries(data) });
+});
+
+// Editing a series only changes the FUTURE: upcoming sessions nobody has
+// booked are regenerated from the new schedule/prices; sessions that already
+// have seats keep their time and price (staff can cancel them if needed).
+app.post(`${P}/class-series/update`, async (c) => {
+  const user = await requireUser(c);
+  const me = user && (await profileOf(user.id));
+  if (me?.role !== "dept_head") return c.json({ error: "Forbidden" }, 403);
+  const body = await c.req.json();
+  const parsed = seriesFields(body);
+  if ("error" in parsed) return c.json({ error: parsed.error }, 400);
+  const { data: existing } = await admin().from("class_series").select("*").eq("id", body.id).eq("org_id", me.org_id).maybeSingle();
+  if (!existing) return c.json({ error: "No such class" }, 404);
+  if (existing.status !== "active") return c.json({ error: "This class has ended — create a new one instead." }, 400);
+  const { data, error } = await admin().from("class_series").update({ ...parsed.row, generated_until: null }).eq("id", existing.id).select().single();
+  if (error) throw error;
+  const cleared = await clearFutureUnbookedSessions(existing.id);
+  // Booked future sessions keep their slot/price, but follow the new name.
+  await admin().from("classes").update({ title: data.title, description: data.description }).eq("series_id", existing.id).gt("starts_at", new Date().toISOString());
+  await generateSeriesSessions(data, await orgTimezone(me.org_id));
+  return c.json({ series: toClassSeries(data), keptBookedSessions: cleared.kept });
+});
+
+// Ending stops it from recurring: future sessions without seats disappear,
+// booked ones stay on the schedule for staff to run or cancel.
+app.post(`${P}/class-series/end`, async (c) => {
+  const user = await requireUser(c);
+  const me = user && (await profileOf(user.id));
+  if (me?.role !== "dept_head") return c.json({ error: "Forbidden" }, 403);
+  const { id } = await c.req.json();
+  const { data: existing } = await admin().from("class_series").select("*").eq("id", id).eq("org_id", me.org_id).maybeSingle();
+  if (!existing) return c.json({ error: "No such class" }, 404);
+  await admin().from("class_series").update({ status: "ended" }).eq("id", id);
+  const cleared = await clearFutureUnbookedSessions(id);
+  await logActivity(me.org_id, "class_series_ended", { actorId: me.id, meta: { seriesId: id, title: existing.title } });
+  return c.json({ ok: true, keptBookedSessions: cleared.kept });
+});
+
+// ---- group plan catalog (dept_head): all-access memberships + class bundles ----
+function planTypeFields(body: any) {
+  const kind = body.kind === "bundle" ? "bundle" : body.kind === "membership" ? "membership" : null;
+  const name = String(body.name ?? "").trim();
+  const price = Number(body.price);
+  const durationMonths = Number(body.durationMonths);
+  const credits = kind === "bundle" ? Number(body.credits) : null;
+  const invitationsAllowance = Number(body.invitationsAllowance ?? 0);
+  if (!kind) return { error: "Choose a membership or a class bundle." } as const;
+  if (!name) return { error: "Name is required." } as const;
+  if (!Number.isFinite(price) || price < 0) return { error: "Price must be zero or more." } as const;
+  if (!Number.isInteger(durationMonths) || durationMonths < 1) return { error: "Duration must be a whole number of months (1 or more)." } as const;
+  if (kind === "bundle" && (!Number.isInteger(credits) || (credits as number) < 1)) return { error: "A bundle needs a whole number of classes (1 or more)." } as const;
+  if (!Number.isInteger(invitationsAllowance) || invitationsAllowance < 0) return { error: "Invitations must be a whole number, zero or more." } as const;
+  return { row: { kind, name, price, duration_months: durationMonths, credits, invitations_allowance: invitationsAllowance } } as const;
+}
+
+app.get(`${P}/plan-types`, async (c) => {
+  const user = await requireUser(c);
+  const me = user && (await profileOf(user.id));
+  if (me?.role !== "dept_head" && me?.role !== "front_desk") return c.json({ error: "Forbidden" }, 403);
+  let q = admin().from("group_plan_types").select("*").eq("org_id", me.org_id);
+  if (me.role === "front_desk") q = q.eq("active", true);
+  const { data, error } = await q.order("kind").order("price");
+  if (error) throw error;
+  return c.json({ planTypes: (data ?? []).map(toGroupPlanType) });
+});
+
+app.post(`${P}/plan-types`, async (c) => {
+  const user = await requireUser(c);
+  const me = user && (await profileOf(user.id));
+  if (me?.role !== "dept_head") return c.json({ error: "Forbidden" }, 403);
+  const parsed = planTypeFields(await c.req.json());
+  if ("error" in parsed) return c.json({ error: parsed.error }, 400);
+  const { data, error } = await admin().from("group_plan_types").insert({ org_id: me.org_id, ...parsed.row }).select().single();
+  if (error) throw error;
+  return c.json({ planType: toGroupPlanType(data) });
+});
+
+// Edits apply to future sales only — sold plans keep their snapshot. Kind
+// can't change once created (a bundle's credits would be meaningless).
+app.post(`${P}/plan-types/update`, async (c) => {
+  const user = await requireUser(c);
+  const me = user && (await profileOf(user.id));
+  if (me?.role !== "dept_head") return c.json({ error: "Forbidden" }, 403);
+  const body = await c.req.json();
+  const { data: existing } = await admin().from("group_plan_types").select("*").eq("id", body.id).eq("org_id", me.org_id).maybeSingle();
+  if (!existing) return c.json({ error: "No such plan" }, 404);
+  const parsed = planTypeFields({ ...body, kind: existing.kind });
+  if ("error" in parsed) return c.json({ error: parsed.error }, 400);
+  const active = body.active === undefined ? existing.active : !!body.active;
+  const { data, error } = await admin().from("group_plan_types").update({ ...parsed.row, active }).eq("id", existing.id).select().single();
+  if (error) throw error;
+  return c.json({ planType: toGroupPlanType(data) });
+});
+
+app.post(`${P}/plan-types/delete`, async (c) => {
+  const user = await requireUser(c);
+  const me = user && (await profileOf(user.id));
+  if (me?.role !== "dept_head") return c.json({ error: "Forbidden" }, 403);
+  const { id } = await c.req.json();
+  const { data: sold } = await admin().from("group_plans").select("id").eq("plan_type_id", id).eq("org_id", me.org_id).limit(1);
+  if ((sold?.length ?? 0) > 0) return c.json({ error: "This plan has already been sold, so it can't be deleted — take it off sale instead." }, 400);
+  const { error } = await admin().from("group_plan_types").delete().eq("id", id).eq("org_id", me.org_id);
+  if (error) throw error;
+  return c.json({ ok: true });
+});
+
+// ---- group plans: desk sales + a member's plan history ----
+// Front desk sells to an existing member or creates the member in the same
+// step (like memberships/sell did). One active plan per member, enforced in
+// sellGroupPlan and by the database.
+app.post(`${P}/group-plans/sell`, async (c) => {
+  const user = await requireUser(c);
+  const me = user && (await profileOf(user.id));
+  if (me?.role !== "front_desk") return c.json({ error: "Forbidden" }, 403);
+  const body = await c.req.json();
+  const { clientId, name, age, phone, email, planTypeId, seriesId } = body;
+  const payMethod = normPayMethod(body.payMethod);
+  if (payMethod === "wallet" && !clientId) return c.json({ error: "A brand-new client has no wallet balance yet — take cash or card." }, 400);
+  if (!planTypeId && !seriesId) return c.json({ error: "Choose a plan." }, 400);
+
+  let client: any;
+  let createdNow = false;
+  if (clientId) {
+    const { data } = await admin().from("clients").select("*").eq("id", clientId).eq("org_id", me.org_id).maybeSingle();
+    if (!data) return c.json({ error: "No such client" }, 404);
+    client = data;
+  } else {
+    if (!name || !String(name).trim()) return c.json({ error: "Name is required." }, 400);
+    const limitErr = await planLimitError(me.org_id, "client");
+    if (limitErr) return c.json({ error: limitErr }, 400);
+    client = await insertClient(me, { name, age, phone, email });
+    createdNow = true;
+  }
+  let result;
+  try {
+    result = await sellGroupPlan({ orgId: me.org_id, client, planTypeId, seriesId, payMethod, actorId: me.id });
+  } catch (err) {
+    if (createdNow) await admin().from("clients").delete().eq("id", client.id);
+    throw err;
+  }
+  if ("error" in result) {
+    if (createdNow) await admin().from("clients").delete().eq("id", client.id);
+    return c.json({ error: result.error, code: (result as any).code ?? null, activePlan: (result as any).activePlan ?? null }, result.status);
+  }
+  return c.json({ client: { ...toClient(client, null, null), groupPlan: toGroupPlan(result.plan) }, plan: toGroupPlan(result.plan) });
+});
+
+app.get(`${P}/group-plans/client/:id`, async (c) => {
+  const user = await requireUser(c);
+  const me = user && (await profileOf(user.id));
+  if (me?.role !== "dept_head" && me?.role !== "front_desk") return c.json({ error: "Forbidden" }, 403);
+  const id = c.req.param("id");
+  const { data: client } = await admin().from("clients").select("id").eq("id", id).eq("org_id", me.org_id).maybeSingle();
+  if (!client) return c.json({ error: "No such client" }, 404);
+  const active = await activeGroupPlan(id, me.org_id);
+  const { data } = await admin().from("group_plans").select("*").eq("client_id", id).order("created_at", { ascending: false });
+  return c.json({ activePlan: active ? toGroupPlan(active) : null, plans: (data ?? []).map(toGroupPlan) });
+});
+
+// ---- revenue (dept_head): the SME founder's money view ----
+// Revenue is recognised at the moment of sale, whatever the tender (cash,
+// card or store credit). Wallet top-ups are NOT revenue — the sale they're
+// later spent on is — so nothing is counted twice. Coach payouts are the same
+// numbers the payout screens use (group sessions × rate + private cuts).
+const REVENUE_TYPE_LABELS: Record<string, string> = {
+  pt_bundle: "PT bundles", membership: "Memberships", class_monthly: "Class monthlies", bundle: "Class bundles",
+  class_drop_in: "Class drop-ins", walk_in: "Walk-ins", legacy_membership: "Memberships (legacy)",
+};
+function monthsBack(n: number): string[] {
+  const out: string[] = [];
+  const d = new Date();
+  d.setUTCDate(1);
+  for (let i = n - 1; i >= 0; i--) {
+    const m = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() - i, 1));
+    out.push(`${m.getUTCFullYear()}-${String(m.getUTCMonth() + 1).padStart(2, "0")}`);
+  }
+  return out;
+}
+
+app.get(`${P}/revenue`, async (c) => {
+  const user = await requireUser(c);
+  const me = user && (await profileOf(user.id));
+  if (me?.role !== "dept_head") return c.json({ error: "Forbidden" }, 403);
+  const org = me.org_id;
+  const nMonths = Math.min(Math.max(Number(c.req.query("months") ?? "6") || 6, 1), 24);
+  const months = monthsBack(nMonths);
+  const since = `${months[0]}-01T00:00:00Z`;
+  await sweepOrgGroupPlans(org);
+
+  const [pkgs, plans, drops, bookings, legacyMems, legacyTypes, coaches, activePkgs, activePlans, lots] = await Promise.all([
+    admin().from("package_instances").select("purchased_at, price_at_sale, coach_id, client_id").eq("org_id", org).gte("purchased_at", since),
+    admin().from("group_plans").select("created_at, price_at_sale, kind, client_id").eq("org_id", org).gte("created_at", since),
+    admin().from("drop_ins").select("created_at, price, class_id").eq("org_id", org).gte("created_at", since),
+    admin().from("class_bookings").select("booked_at, price_egp").eq("org_id", org).eq("coverage", "drop_in").eq("pay_status", "paid").is("drop_in_id", null).gte("booked_at", since),
+    admin().from("membership_instances").select("starts_at, membership_type_id").eq("org_id", org).gte("starts_at", since),
+    admin().from("membership_types").select("id, price").eq("org_id", org),
+    admin().from("profiles").select("*").eq("org_id", org).in("role", ["coach", "head_coach", "dept_head"]),
+    admin().from("package_instances").select("client_id").eq("org_id", org).eq("status", "active").gte("expires_at", `${todayIso()}T00:00:00Z`),
+    admin().from("group_plans").select("client_id, kind").eq("org_id", org).eq("status", "active"),
+    admin().from("wallet_transactions").select("remaining").eq("org_id", org).eq("type", "credit").gt("remaining", 0).gt("expires_at", new Date().toISOString()),
+  ]);
+
+  type Sale = { month: string; amount: number; service: "private_training" | "group"; type: string; coachId?: string };
+  const sales: Sale[] = [];
+  const mo = (ts: string) => String(ts).slice(0, 7);
+  for (const p of pkgs.data ?? []) sales.push({ month: mo(p.purchased_at), amount: Number(p.price_at_sale), service: "private_training", type: "pt_bundle", coachId: p.coach_id });
+  for (const g of plans.data ?? []) sales.push({ month: mo(g.created_at), amount: Number(g.price_at_sale), service: "group", type: g.kind });
+  for (const d of drops.data ?? []) sales.push({ month: mo(d.created_at), amount: Number(d.price), service: "group", type: d.class_id ? "class_drop_in" : "walk_in" });
+  for (const b of bookings.data ?? []) sales.push({ month: mo(b.booked_at), amount: Number(b.price_egp), service: "group", type: "class_drop_in" });
+  const legacyPrice = new Map((legacyTypes.data ?? []).map((t: any) => [t.id, Number(t.price)]));
+  for (const m of legacyMems.data ?? []) sales.push({ month: mo(m.starts_at), amount: legacyPrice.get(m.membership_type_id) ?? 0, service: "group", type: "legacy_membership" });
+
+  const inRange = new Set(months);
+  const kept = sales.filter((s) => inRange.has(s.month));
+
+  // Coach payouts per month, from the same rollup the payout screens use.
+  const payoutRows = await Promise.all(months.map((m) => monthRollups(org, coaches.data ?? [], m)));
+  const payoutByMonth = new Map(months.map((m, i) => [m, payoutRows[i].reduce((s: number, r: any) => s + r.total, 0)]));
+  const payoutByCoach = new Map<string, number>();
+  for (const rows of payoutRows) for (const r of rows) payoutByCoach.set(r.coachId, (payoutByCoach.get(r.coachId) ?? 0) + r.total);
+
+  const series = months.map((m) => {
+    const revenue = kept.filter((s) => s.month === m).reduce((a, s) => a + s.amount, 0);
+    const payouts = payoutByMonth.get(m) ?? 0;
+    return { month: m, revenue, payouts, profit: revenue - payouts };
+  });
+  const sumBy = (key: (s: Sale) => string | undefined) => {
+    const out = new Map<string, number>();
+    for (const s of kept) {
+      const k = key(s);
+      if (k) out.set(k, (out.get(k) ?? 0) + s.amount);
+    }
+    return out;
+  };
+  const byService = [...sumBy((s) => s.service)].map(([key, amount]) => ({ key, label: key === "group" ? "Group training" : "Private training", amount })).sort((a, b) => b.amount - a.amount);
+  const byType = [...sumBy((s) => s.type)].map(([key, amount]) => ({ key, label: REVENUE_TYPE_LABELS[key] ?? key, amount })).sort((a, b) => b.amount - a.amount);
+  const coachName = new Map((coaches.data ?? []).map((p: any) => [p.id, p.name]));
+  const ptByCoach = sumBy((s) => s.coachId);
+  const coachIds = new Set([...ptByCoach.keys(), ...[...payoutByCoach].filter(([, v]) => v > 0).map(([k]) => k)]);
+  const byCoach = [...coachIds].map((id) => ({
+    coachId: id, name: coachName.get(id) ?? "Former coach", revenue: ptByCoach.get(id) ?? 0, payouts: payoutByCoach.get(id) ?? 0,
+  })).sort((a, b) => b.revenue - a.revenue);
+
+  const groupSubs = new Set((activePlans.data ?? []).map((p: any) => p.client_id));
+  const ptSubs = new Set((activePkgs.data ?? []).map((p: any) => p.client_id));
+  const planKinds: Record<string, number> = { membership: 0, class_monthly: 0, bundle: 0 };
+  for (const p of activePlans.data ?? []) planKinds[p.kind] = (planKinds[p.kind] ?? 0) + 1;
+
+  const totalRevenue = series.reduce((a, s) => a + s.revenue, 0);
+  const totalPayouts = series.reduce((a, s) => a + s.payouts, 0);
+  return c.json({
+    months: series,
+    totals: { revenue: totalRevenue, payouts: totalPayouts, profit: totalRevenue - totalPayouts },
+    byService,
+    byType,
+    byCoach,
+    activeSubscribers: { total: new Set([...groupSubs, ...ptSubs]).size, groupPlans: groupSubs.size, ptPackages: ptSubs.size, byPlanKind: planKinds },
+    walletLiability: (lots.data ?? []).reduce((a: number, l: any) => a + Number(l.remaining), 0),
+  });
 });
 
 // ---- staff: class bookings, attendance, pay-at-desk collection ----
