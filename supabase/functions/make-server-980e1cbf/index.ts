@@ -519,15 +519,6 @@ function toClient(row: any, conditions: string | null, currentPackage: any, curr
     currentMembership,
   };
 }
-function toMembershipType(row: any) {
-  return {
-    id: row.id,
-    name: row.name,
-    durationDays: row.duration_days,
-    price: Number(row.price),
-    invitationsAllowance: row.invitations_allowance,
-  };
-}
 function toMembershipInstance(row: any) {
   return {
     id: row.id,
@@ -998,66 +989,6 @@ app.post(`${P}/bundle-types/delete`, async (c) => {
   return c.json({ ok: true });
 });
 
-// ---- membership types ----------------------------------------------------
-app.get(`${P}/membership-types`, async (c) => {
-  const user = await requireUser(c);
-  const me = user && (await profileOf(user.id));
-  if (!me) return c.json({ error: "Unauthorized" }, 401);
-  const { data, error } = await admin().from("membership_types").select("*").eq("org_id", me.org_id).order("name");
-  if (error) throw error;
-  return c.json({ membershipTypes: (data ?? []).map(toMembershipType) });
-});
-
-function membershipTypeFields(body: any) {
-  const name = String(body.name ?? "").trim();
-  const durationDays = Number(body.durationDays);
-  const price = Number(body.price);
-  const invitationsAllowance = Number(body.invitationsAllowance ?? 0);
-  if (!name) return { error: "Name is required." } as const;
-  if (!Number.isInteger(durationDays) || durationDays <= 0) return { error: "Duration must be a whole number of days." } as const;
-  if (!Number.isFinite(price) || price < 0) return { error: "Price must be zero or more." } as const;
-  if (!Number.isInteger(invitationsAllowance) || invitationsAllowance < 0) return { error: "Invitations must be a whole number, zero or more." } as const;
-  return { row: { name, duration_days: durationDays, price, invitations_allowance: invitationsAllowance } } as const;
-}
-
-app.post(`${P}/membership-types`, async (c) => {
-  const user = await requireUser(c);
-  const me = user && (await profileOf(user.id));
-  if (me?.role !== "dept_head") return c.json({ error: "Forbidden" }, 403);
-  const parsed = membershipTypeFields(await c.req.json());
-  if ("error" in parsed) return c.json({ error: parsed.error }, 400);
-  const { data, error } = await admin().from("membership_types").insert({ org_id: me.org_id, ...parsed.row }).select().single();
-  if (error) throw error;
-  return c.json({ membershipType: toMembershipType(data) });
-});
-
-app.post(`${P}/membership-types/update`, async (c) => {
-  const user = await requireUser(c);
-  const me = user && (await profileOf(user.id));
-  if (me?.role !== "dept_head") return c.json({ error: "Forbidden" }, 403);
-  const body = await c.req.json();
-  const parsed = membershipTypeFields(body);
-  if ("error" in parsed) return c.json({ error: parsed.error }, 400);
-  const { data, error } = await admin().from("membership_types").update(parsed.row).eq("id", body.id).eq("org_id", me.org_id).select().maybeSingle();
-  if (error) throw error;
-  if (!data) return c.json({ error: "No such membership type" }, 404);
-  return c.json({ membershipType: toMembershipType(data) });
-});
-
-app.post(`${P}/membership-types/delete`, async (c) => {
-  const user = await requireUser(c);
-  const me = user && (await profileOf(user.id));
-  if (me?.role !== "dept_head") return c.json({ error: "Forbidden" }, 403);
-  const { id } = await c.req.json();
-  const { data: sold } = await admin().from("membership_instances").select("id").eq("membership_type_id", id).eq("org_id", me.org_id).limit(1);
-  if ((sold?.length ?? 0) > 0) {
-    return c.json({ error: "This membership has already been sold, so it can't be deleted — edit it instead, or leave it in place." }, 400);
-  }
-  const { error } = await admin().from("membership_types").delete().eq("id", id).eq("org_id", me.org_id);
-  if (error) throw error;
-  return c.json({ ok: true });
-});
-
 // ---- coach picker ----------------------------------------------------------
 // Names only — for roles that assign clients to coaches but must not see
 // payout data (front_desk can't use /month, which carries earnings).
@@ -1479,71 +1410,6 @@ app.post(`${P}/clients/assign-coach`, async (c) => {
     url: "/clients",
   });
   return c.json({ client: toClient(updated, null, null) });
-});
-
-// ---- memberships (front desk) ----------------------------------------------
-// Sell a membership to an existing client (renewal) or a brand-new one.
-// Renewal is only allowed once the current membership has ended — the same
-// "only when finished" rule sellPackageTo applies to packages.
-app.post(`${P}/memberships/sell`, async (c) => {
-  const user = await requireUser(c);
-  const me = user && (await profileOf(user.id));
-  if (me?.role !== "front_desk") return c.json({ error: "Forbidden" }, 403);
-  const body = await c.req.json();
-  const { clientId, name, age, phone, email, membershipTypeId } = body;
-  const payMethod = normPayMethod(body.payMethod);
-  if (payMethod === "wallet" && !clientId) return c.json({ error: "A brand-new client has no wallet balance yet — take cash or card." }, 400);
-
-  const { data: type } = await admin().from("membership_types").select("*").eq("id", membershipTypeId).eq("org_id", me.org_id).maybeSingle();
-  if (!type) return c.json({ error: "Choose a membership." }, 400);
-
-  let client: any;
-  let createdNow = false;
-  if (clientId) {
-    const { data } = await admin().from("clients").select("*").eq("id", clientId).eq("org_id", me.org_id).maybeSingle();
-    if (!data) return c.json({ error: "No such client" }, 404);
-    client = data;
-    const current = await currentMembershipForClient(clientId, me.org_id);
-    if (current && current.status === "active") {
-      return c.json({ error: `${client.name} already has an active membership until ${String(current.expires_at).slice(0, 10)}.` }, 400);
-    }
-  } else {
-    if (!name || !String(name).trim()) return c.json({ error: "Name is required." }, 400);
-    const limitErr = await planLimitError(me.org_id, "client");
-    if (limitErr) return c.json({ error: limitErr }, 400);
-    client = await insertClient(me, { name, age, phone, email });
-    createdNow = true;
-  }
-
-  const start = todayIso();
-  const { data: membership, error } = await admin()
-    .from("membership_instances")
-    .insert({
-      org_id: me.org_id,
-      client_id: client.id,
-      membership_type_id: type.id,
-      starts_at: `${start}T00:00:00Z`,
-      expires_at: `${addDays(start, Number(type.duration_days))}T00:00:00Z`,
-      status: "active",
-      invitations_remaining: Number(type.invitations_allowance ?? 0),
-    })
-    .select()
-    .single();
-  if (error) {
-    if (createdNow) await admin().from("clients").delete().eq("id", client.id);
-    throw error;
-  }
-  if (payMethod === "wallet") {
-    const r = await debitWallet(client.id, me.org_id, Number(type.price), "desk_sale", "Membership purchase");
-    if (!r.ok) {
-      await admin().from("membership_instances").delete().eq("id", membership.id);
-      if (createdNow) await admin().from("clients").delete().eq("id", client.id);
-      return c.json({ error: "Wallet balance doesn't cover this membership.", code: "insufficient_wallet" }, 400);
-    }
-  }
-  await earnPurchasePoints(client.id, me.org_id, Number(type.price));
-  await logActivity(me.org_id, "sale_membership", { actorId: me.id, clientId: client.id, amount: Number(type.price), meta: { payMethod } });
-  return c.json({ client: toClient(client, null, null, toMembershipInstance(membership)), membership: toMembershipInstance(membership) });
 });
 
 // ---- check-ins, drop-ins, invitations (front desk) -------------------------
