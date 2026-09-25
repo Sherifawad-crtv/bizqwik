@@ -98,3 +98,7 @@ Group training is now sold as **one active group plan per member**:
 
 ## Release plan
 Merge both branches together. After that, one backend deploy ships the drop-in rollback hardening and removes the legacy `membership_types` / `/memberships/sell` endpoints. The old production front desk still calls those until the merge.
+
+## Released (2026-09-25)
+- Business app PR #3 merged to `main` → production READY. Member app fast-forwarded on its trunk branch → production READY.
+- Edge function **v47**: desk class drop-in rollback shipped; legacy `membership-types` CRUD and `/memberships/sell` removed (the legacy tables stay for history and GMV). Smoke-checked: health 200, removed route 404, branding 200, gated routes 403.
