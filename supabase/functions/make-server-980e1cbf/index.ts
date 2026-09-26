@@ -218,7 +218,8 @@ function normPayMethod(v: any): "cash" | "card" | "wallet" {
 async function bumpPointsBalance(clientId: string, orgId: string): Promise<number> {
   const { data } = await admin().from("points_ledger").select("points").eq("client_id", clientId).eq("org_id", orgId);
   const total = (data ?? []).reduce((s: number, r: any) => s + Number(r.points), 0);
-  await admin().from("points_balances").upsert({ client_id: clientId, org_id: orgId, total_points: total, tier: "member", updated_at: new Date().toISOString() });
+  // tier is left to the column default (its check only allows silver/gold/platinum).
+  await admin().from("points_balances").upsert({ client_id: clientId, org_id: orgId, total_points: total, updated_at: new Date().toISOString() });
   return total;
 }
 async function earnPoints(clientId: string, orgId: string, points: number, reason: string) {
@@ -2506,6 +2507,36 @@ app.get(`${P}/client/points`, async (c) => {
   const rate = settings?.points_per_egp ?? null;
   const { data: ledger } = await admin().from("points_ledger").select("*").eq("client_id", me.id).order("created_at", { ascending: false }).limit(50);
   return c.json({ total, valueEgp: rate && rate > 0 ? total / rate : 0, rate, ledger: (ledger ?? []).map((l: any) => ({ id: l.id, points: l.points, reason: l.reason, createdAt: l.created_at })) });
+});
+
+// Member turns points into wallet credit at the gym's rate (points_per_egp),
+// in whole EGP. Omit `points` to redeem everything redeemable. The points
+// debit is written first and re-checked, so two taps can't spend them twice.
+app.post(`${P}/client/points/redeem`, async (c) => {
+  const me = await requireClient(c);
+  if (!me) return c.json({ error: "Unauthorized" }, 401);
+  const body = await c.req.json().catch(() => ({}));
+  const settings = await orgSettingsOf(me.org_id);
+  const rate = Number(settings?.points_per_egp ?? 0);
+  if (!rate || rate <= 0) return c.json({ error: "Points can't be redeemed at your gym yet." }, 400);
+  const total = await bumpPointsBalance(me.id, me.org_id);
+  const requested = body.points === undefined || body.points === null ? total : Number(body.points);
+  if (!Number.isInteger(requested) || requested <= 0) return c.json({ error: "Choose how many points to redeem." }, 400);
+  if (requested > total) return c.json({ error: "You don't have that many points." }, 400);
+  const egpCredited = Math.floor(requested / rate);
+  if (egpCredited < 1) return c.json({ error: `You need at least ${rate} points to redeem 1 EGP.` }, 400);
+  const pointsSpent = egpCredited * rate;
+
+  const { data: debit, error } = await admin().from("points_ledger").insert({ org_id: me.org_id, client_id: me.id, points: -pointsSpent, reason: "redeem" }).select().single();
+  if (error) throw error;
+  const after = await bumpPointsBalance(me.id, me.org_id);
+  if (after < 0) {
+    await admin().from("points_ledger").delete().eq("id", debit.id);
+    await bumpPointsBalance(me.id, me.org_id);
+    return c.json({ error: "Your points just changed — please try again." }, 409);
+  }
+  const wallet = await creditWallet(me.id, me.org_id, egpCredited, "reward", `Redeemed ${pointsSpent.toLocaleString("en-US")} points`);
+  return c.json({ pointsSpent, egpCredited, points: after, wallet });
 });
 
 // ---- classes (dept_head creates; staff view) ----

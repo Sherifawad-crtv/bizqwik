@@ -68,6 +68,8 @@ function describe(e: ActivityEntry): string {
       return `${who} was refunded to wallet`;
     case "wallet_credit":
       return `${who}'s wallet was credited`;
+    case "wallet_reward":
+      return `${who} redeemed points for wallet credit`;
     case "wallet_compensation":
       return `${who} was compensated to wallet`;
     case "wallet_expired":
