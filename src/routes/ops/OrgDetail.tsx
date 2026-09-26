@@ -460,7 +460,10 @@ function OrgAppConfigForm({ id, initial, onSaved }: { id: string; initial: OrgCo
     }
     setBusy(true);
     try {
-      const onboardingAssets = [asset0, asset1, asset2].map((a) => a.trim()).filter(Boolean);
+      // Keep each image on its own slide: an empty slot stays "" (the member app
+      // shows the default photo there); only trailing empties are dropped.
+      const onboardingAssets = [asset0, asset1, asset2].map((a) => a.trim());
+      while (onboardingAssets.length && !onboardingAssets[onboardingAssets.length - 1]) onboardingAssets.pop();
       await api.ops.setOrgBranding(id, {
         appName: appName.trim() || null,
         logoUrl: logoUrl.trim() || null,
