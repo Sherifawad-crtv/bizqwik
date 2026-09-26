@@ -674,13 +674,27 @@ app.post(`${P}/signup`, async (c) => {
       : await admin().from("client_invitations").select("*").eq("email", normalizedEmail).maybeSingle();
     if (!teamInvite && !staffInvite && !clientInvite) return c.json({ error: "You're not part of this organization." }, 403);
 
-    const { data: created, error: cErr } = await admin().auth.admin.createUser({
-      email,
-      password,
-      email_confirm: true,
-    });
-    if (cErr || !created?.user) return c.json({ error: cErr?.message || "Sign up failed" }, 400);
-    const uid = created.user.id;
+    // An invited email can still carry an orphaned login (an auth user with no
+    // profile, client or team row — e.g. its client was deleted). Adopt it with
+    // the new password rather than failing "already registered"; a login that
+    // still backs any identity is never touched.
+    let uid: string;
+    const { data: existingId } = await admin().rpc("auth_user_id_by_email", { p_email: normalizedEmail });
+    if (existingId) {
+      const [p, t, cl] = await Promise.all([profileOf(existingId), bizqwikTeamOf(existingId), clientOf(existingId)]);
+      if (p || t || cl) return c.json({ error: "This email already has an account — sign in instead." }, 400);
+      const { error: uErr } = await admin().auth.admin.updateUserById(existingId, { password, email_confirm: true });
+      if (uErr) return c.json({ error: uErr.message }, 400);
+      uid = existingId;
+    } else {
+      const { data: created, error: cErr } = await admin().auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true,
+      });
+      if (cErr || !created?.user) return c.json({ error: cErr?.message || "Sign up failed" }, 400);
+      uid = created.user.id;
+    }
 
     if (teamInvite) {
       const { data: member, error: mErr } = await admin()
@@ -1333,7 +1347,7 @@ app.post(`${P}/clients/delete`, async (c) => {
   const me = user && (await profileOf(user.id));
   if (me?.role !== "dept_head") return c.json({ error: "Forbidden" }, 403);
   const { id } = await c.req.json();
-  const { data: client } = await admin().from("clients").select("id").eq("id", id).eq("org_id", me.org_id).maybeSingle();
+  const { data: client } = await admin().from("clients").select("id, auth_user_id").eq("id", id).eq("org_id", me.org_id).maybeSingle();
   if (!client) return c.json({ error: "No such client" }, 404);
 
   // Every FK into clients is NO ACTION, so each referencing row is cleared by
@@ -1353,8 +1367,15 @@ app.post(`${P}/clients/delete`, async (c) => {
   await admin().from("points_ledger").delete().eq("client_id", id);
   await admin().from("points_balances").delete().eq("client_id", id);
   await admin().from("client_notes").delete().eq("client_id", id);
+  await admin().from("client_invitations").delete().eq("client_id", id);
   const { error } = await admin().from("clients").delete().eq("id", id);
   if (error) throw error;
+  // Remove the member's app login too, so the email isn't left "already
+  // registered" — unless that login is also staff or ops.
+  if (client.auth_user_id) {
+    const [p, t] = await Promise.all([profileOf(client.auth_user_id), bizqwikTeamOf(client.auth_user_id)]);
+    if (!p && !t) await admin().auth.admin.deleteUser(client.auth_user_id);
+  }
   return c.json({ ok: true });
 });
 
