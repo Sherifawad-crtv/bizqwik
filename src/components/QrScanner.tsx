@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Html5Qrcode } from "html5-qrcode";
+import { startQrCamera } from "../lib/qrCamera";
 import { Icon } from "./Icon";
 import { Button } from "./Button";
 
@@ -35,40 +35,37 @@ export function QrScanner({ title, hint, onClose, onScan }: { title: string; hin
   const onScanRef = useRef(onScan);
   onScanRef.current = onScan;
 
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+
   useEffect(() => {
     let alive = true;
+    let stopCamera: (() => void) | null = null;
     doneRef.current = false;
-    const reader = new Html5Qrcode(REGION_ID, false);
     const finish = (text: string) => {
       if (doneRef.current || !alive) return;
       doneRef.current = true;
-      const stop = reader.isScanning ? reader.stop().catch(() => {}) : Promise.resolve();
-      stop.finally(() => alive && onScanRef.current(text.trim()));
+      stopCamera?.();
+      onScanRef.current(text.trim());
     };
     const onTest = (e: Event) => finish(String((e as CustomEvent).detail ?? ""));
     window.addEventListener("bq-test-scan", onTest);
 
-    const config = { fps: 10, aspectRatio: 1.0 };
-    (async () => {
-      try {
-        await reader.start({ facingMode: "environment" }, config, finish, () => {});
-      } catch {
-        if (!alive) return;
-        try {
-          const cams = await Html5Qrcode.getCameras();
-          if (!cams.length) throw new DOMException("no camera", "NotFoundError");
-          await reader.start(cams[cams.length - 1].id, config, finish, () => {});
-        } catch (err) {
+    const video = videoRef.current;
+    if (video) {
+      startQrCamera(video, finish)
+        .then((stop) => {
+          if (alive) stopCamera = stop;
+          else stop();
+        })
+        .catch((err) => {
           if (alive) setError(cameraError(err));
-        }
-      }
-    })();
+        });
+    }
 
     return () => {
       alive = false;
       window.removeEventListener("bq-test-scan", onTest);
-      if (reader.isScanning) reader.stop().catch(() => {}).finally(() => reader.clear());
-      else reader.clear();
+      stopCamera?.();
     };
   }, [attempt]);
 
@@ -93,7 +90,9 @@ export function QrScanner({ title, hint, onClose, onScan }: { title: string; hin
       </div>
       <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
         <div style={{ position: "relative", width: "100%", maxWidth: 420 }}>
-          <div id={REGION_ID} className="bq-qr-region" style={{ position: "relative", width: "100%", aspectRatio: "1 / 1", borderRadius: 28, overflow: "hidden", background: "#111" }} />
+          <div id={REGION_ID} className="bq-qr-region" style={{ position: "relative", width: "100%", aspectRatio: "1 / 1", borderRadius: 28, overflow: "hidden", background: "#111" }}>
+            <video ref={videoRef} playsInline muted autoPlay />
+          </div>
           {!error && (
             <div aria-hidden style={{ position: "absolute", inset: "14%", border: "3px solid var(--primary)", borderRadius: 24, pointerEvents: "none" }} />
           )}
