@@ -65,9 +65,18 @@ export function CoachesOverview() {
         <span style={{ font: "700 20px var(--font-body)", letterSpacing: "-.01em" }}>Roster</span>
         <span style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>{rows.length} coaches</span>
       </div>
-      <RollupTable colA="COACH" colB="ACTIVITY" rows={rowItems} />
+      <RollupTable
+        colA="COACH"
+        colB="ACTIVITY"
+        rows={rowItems}
+        empty={
+          profile?.role === "dept_head"
+            ? { title: "No coaches on the team yet", body: "Invite coaches and head coaches by email. They show up here, with their sessions and pay, once they sign up.", action: { label: "Invite someone", onClick: () => navigate("/manage?tab=invites") } }
+            : { title: "No coaches on the team yet", body: "The department head invites coaches. They show up here once they sign up." }
+        }
+      />
       <div style={{ padding: "18px 4px 0", font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>
-        Tap a coach to review their sessions and settle the month.
+        {rows.length > 0 ? "Tap a coach to review their sessions and settle the month." : null}
       </div>
     </div>
   );

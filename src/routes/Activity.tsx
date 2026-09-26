@@ -1,3 +1,4 @@
+import { EmptyState } from "../components/EmptyState";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../lib/backend";
@@ -139,9 +140,7 @@ export function ActivityPanel() {
         <div style={{ font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>{error}</div>
       )}
       {!loading && entries.length === 0 && (
-        <div data-sq style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: "34px 20px", textAlign: "center", color: "var(--ink-faint)", font: "500 14px var(--font-body)" }}>
-          Nothing has happened yet.
-        </div>
+        <EmptyState icon="history" title="Nothing has happened yet" body="Sales, check-ins, bookings, refunds and wallet changes are listed here as they happen." />
       )}
 
       {tab === "feed" ? <Feed entries={entries} /> : <Logs entries={entries} />}

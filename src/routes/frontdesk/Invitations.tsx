@@ -78,7 +78,8 @@ export function Invitations() {
             clients={data.clients}
             bundleTypes={bundleTypes}
             filter={(c) => (c.groupPlan?.invitationsRemaining ?? 0) > 0}
-            emptyText="No one with guest passes left matches."
+            emptyTitle="No one has guest passes left"
+            emptyBody="Guest passes come with membership plans that include them. Set a plan's guest passes in Catalog, then sell it to a member."
             onPick={(c) => {
               setMemberId(c.id);
               setError(null);

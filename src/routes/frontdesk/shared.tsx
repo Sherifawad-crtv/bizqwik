@@ -1,5 +1,7 @@
 import { useMemo, useState, type ReactNode } from "react";
 import { Icon } from "../../components/Icon";
+import { EmptyState } from "../../components/EmptyState";
+import { useNavigate } from "react-router-dom";
 import type { BundleType, ClientWithPackage } from "../../lib/types";
 import { dateLabel } from "../../lib/format";
 
@@ -116,15 +118,20 @@ export function ClientPicker({
   bundleTypes,
   onPick,
   filter,
-  emptyText = "No clients match.",
+  emptyTitle,
+  emptyBody,
 }: {
   clients: ClientWithPackage[];
   bundleTypes: BundleType[];
   onPick: (c: ClientWithPackage) => void;
   filter?: (c: ClientWithPackage) => boolean;
-  emptyText?: string;
+  /** When clients exist but none pass `filter` (e.g. nobody has guest passes). */
+  emptyTitle?: string;
+  emptyBody?: string;
 }) {
   const [query, setQuery] = useState("");
+  const navigate = useNavigate();
+  const eligible = filter ? clients.filter(filter).length : clients.length;
   const shown = useMemo(() => clients.filter((c) => (!filter || filter(c)) && matchesClient(c, query)).slice(0, 30), [clients, filter, query]);
   return (
     <div>
@@ -148,7 +155,14 @@ export function ClientPicker({
             </button>
           );
         })}
-        {shown.length === 0 && <div style={{ padding: "22px 18px", textAlign: "center", color: "var(--ink-faint)", font: "500 14px var(--font-body)" }}>{emptyText}</div>}
+        {shown.length === 0 &&
+          (clients.length === 0 ? (
+            <EmptyState bare icon="clients" title="No clients yet" body="Register your first client from Clients — then they can be found here." action={{ label: "+ New client", onClick: () => navigate("/members?new=1") }} />
+          ) : eligible === 0 ? (
+            <EmptyState bare icon="clients" title={emptyTitle ?? "No one to show"} body={emptyBody} />
+          ) : (
+            <EmptyState bare icon="search" title={`No one matches “${query.trim()}”`} body="Check the spelling, or search by phone number instead." />
+          ))}
       </Card>
     </div>
   );

@@ -1,3 +1,4 @@
+import { EmptyState } from "../../components/EmptyState";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../../lib/backend";
@@ -89,10 +90,7 @@ export function Overview() {
           </button>
         ))}
         {orgs.length === 0 && (
-          <div style={{ padding: "28px 20px", display: "flex", flexDirection: "column", alignItems: "center", gap: 8, color: "var(--ink-faint)", font: "500 14px var(--font-body)" }}>
-            <Icon name="inbox" size={26} />
-            No organizations yet.
-          </div>
+          <EmptyState bare icon="home" title="No organizations yet" body="Create a gym to get started. Its department head gets an invite and sets up the rest." action={{ label: "+ New org", onClick: () => setSheetOpen(true) }} />
         )}
       </Card>
 

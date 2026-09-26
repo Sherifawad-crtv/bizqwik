@@ -1,3 +1,4 @@
+import { EmptyState } from "../../components/EmptyState";
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useSetHeader } from "../../lib/header";
@@ -124,10 +125,11 @@ export function Members() {
           );
         })}
         {shown.length === 0 && (
-          <div style={{ padding: "28px 20px", display: "flex", flexDirection: "column", alignItems: "center", gap: 8, color: "var(--ink-faint)", font: "500 14px var(--font-body)" }}>
-            <Icon name="clients" size={26} />
-            {clients.length === 0 ? "No clients yet." : "No clients match."}
-          </div>
+          clients.length === 0 ? (
+            <EmptyState bare icon="clients" title="No clients yet" body="Register your first client with + New client. You'll sell them a plan or PT package in the same step, and they get an app invite." />
+          ) : (
+            <EmptyState bare icon="search" title="No one matches that search" body="Check the spelling, or search by phone number instead." />
+          )
         )}
       </Card>
 
@@ -285,8 +287,8 @@ export function CreateClientSheet({
               <GroupOfferSelect value={offer} onChange={setOffer} planTypes={planTypes} series={series} />
             ) : (
               <>
-                <SelectField label="PACKAGE" value={bundleTypeId} onChange={setBundleTypeId} placeholder="Choose a package" options={bundleOptions(bundleTypes)} />
-                <SelectField label="COACH" value={coachId} onChange={setCoachId} placeholder="Choose a coach" options={coachOptions(coaches)} />
+                <SelectField label="PACKAGE" value={bundleTypeId} onChange={setBundleTypeId} placeholder="Choose a package" options={bundleOptions(bundleTypes)} empty={{ title: "No PT packages yet", body: "The department head adds PT packages in Catalog → PT bundles. Once one exists you can sell it here." }} />
+                <SelectField label="COACH" value={coachId} onChange={setCoachId} placeholder="Choose a coach" options={coachOptions(coaches)} empty={{ title: "No coaches yet", body: "The department head invites coaches from Team → Team & tiers. They appear here once they sign up." }} />
               </>
             )}
           </div>
@@ -504,9 +506,9 @@ function ClientSheet({
                 </>
               )}
               {mode === "sell-plan" && <GroupOfferSelect value={pickId} onChange={setPickId} planTypes={planTypes} series={series} />}
-              {mode === "renew-package" && <SelectField label="PACKAGE" value={pickId} onChange={setPickId} placeholder="Choose a package" options={bundleOptions(bundleTypes)} />}
+              {mode === "renew-package" && <SelectField label="PACKAGE" value={pickId} onChange={setPickId} placeholder="Choose a package" options={bundleOptions(bundleTypes)} empty={{ title: "No PT packages yet", body: "The department head adds PT packages in Catalog → PT bundles. Once one exists you can sell it here." }} />}
               {(mode === "renew-package" || mode === "assign") && (
-                <SelectField label="COACH" value={coachId} onChange={setCoachId} placeholder="Choose a coach" options={coachOptions(coaches)} />
+                <SelectField label="COACH" value={coachId} onChange={setCoachId} placeholder="Choose a coach" options={coachOptions(coaches)} empty={{ title: "No coaches yet", body: "The department head invites coaches from Team → Team & tiers. They appear here once they sign up." }} />
               )}
               {(mode === "sell-plan" || mode === "renew-package") && (
                 <PaymentSelect value={payMethod} onChange={setPayMethod} wallet />
@@ -560,15 +562,10 @@ function GroupOfferSelect({ value, onChange, planTypes, series }: { value: strin
         label="GROUP PLAN"
         value={value}
         onChange={onChange}
-        placeholder={options.length ? "Membership, class monthly or bundle" : "Nothing on sale yet"}
-        disabled={options.length === 0}
+        placeholder="Membership, class monthly or bundle"
         options={options}
+        empty={{ title: "Nothing on sale yet", body: "The department head adds classes, memberships and class bundles in Catalog. They show up here to sell as soon as they're created." }}
       />
-      {options.length === 0 && (
-        <div style={{ font: "400 13px/1.5 var(--font-mono)", color: "var(--ink-faint)" }}>
-          The department head adds classes, memberships and bundles in Catalog first.
-        </div>
-      )}
     </>
   );
 }

@@ -1,3 +1,4 @@
+import { EmptyState } from "../../components/EmptyState";
 import { useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { api } from "../../lib/backend";
@@ -283,7 +284,14 @@ export function OrgDetail() {
               <span style={{ font: "700 11px var(--font-mono)", letterSpacing: ".06em", color: "var(--ink-muted)", flex: "none" }}>{ROLE_LABELS[p.role].toUpperCase()}</span>
             </div>
           ))}
-          {staff.length === 0 && <div style={{ padding: "22px 18px", textAlign: "center", color: "var(--ink-faint)", font: "500 14px var(--font-body)" }}>No staff have signed up yet.</div>}
+          {staff.length === 0 && (
+            <EmptyState
+              bare
+              icon="coaches"
+              title="No staff have signed up yet"
+              body={pendingInvites.length > 0 ? "The invites below are waiting. Once the department head signs up with their email, they can invite the rest of the team." : "Nobody is invited yet. The department head is invited when the org is created."}
+            />
+          )}
         </Card>
       </div>
 

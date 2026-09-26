@@ -1,3 +1,4 @@
+import { EmptyState } from "../components/EmptyState";
 import { useEffect, useState } from "react";
 import { useSetHeader } from "../lib/header";
 import { useAsync } from "../lib/useAsync";
@@ -20,7 +21,9 @@ import { useAuth } from "../lib/auth";
 type Tab = "tiers" | "invites" | "people";
 
 export function Manage() {
-  const [tab, setTab] = useState<Tab>("tiers");
+  // Empty states elsewhere deep-link straight to a tab (?tab=invites).
+  const initialTab = new URLSearchParams(window.location.search).get("tab");
+  const [tab, setTab] = useState<Tab>(initialTab === "invites" || initialTab === "people" ? initialTab : "tiers");
 
   useSetHeader({ kicker: "MANAGE", title: "Team & Tiers" }, []);
 
@@ -80,10 +83,7 @@ function TiersPanel() {
           </div>
         ))}
         {data.tiers.length === 0 && (
-          <div style={{ padding: "28px 20px", display: "flex", flexDirection: "column", alignItems: "center", gap: 8, color: "var(--ink-faint)", font: "500 14px var(--font-body)" }}>
-            <Icon name="tag" size={26} />
-            No tiers yet.
-          </div>
+          <EmptyState bare icon="tag" title="No pay tiers yet" body="A tier sets what a coach earns per group session and their cut of PT sales. Create one, then assign it to coaches in People." action={{ label: "+ New tier", onClick: () => setEditing("new") }} />
         )}
       </div>
 
@@ -218,10 +218,7 @@ export function BundlesPanel() {
           </div>
         ))}
         {data.bundleTypes.length === 0 && (
-          <div style={{ padding: "28px 20px", display: "flex", flexDirection: "column", alignItems: "center", gap: 8, color: "var(--ink-faint)", font: "500 14px var(--font-body)" }}>
-            <Icon name="tag" size={26} />
-            No bundle types yet.
-          </div>
+          <EmptyState bare icon="coaches" title="No PT bundles yet" body="A PT bundle is a pack of private sessions with one coach (e.g. 8 sessions, valid 30 days). The front desk sells them once they exist." action={{ label: "+ New PT bundle", onClick: () => setEditing("new") }} />
         )}
       </div>
 
@@ -358,10 +355,7 @@ function InvitesPanel() {
           </div>
         ))}
         {data.invites.length === 0 && (
-          <div style={{ padding: "28px 20px", display: "flex", flexDirection: "column", alignItems: "center", gap: 8, color: "var(--ink-faint)", font: "500 14px var(--font-body)" }}>
-            <Icon name="envelope" size={26} />
-            No pending invites.
-          </div>
+          <EmptyState bare icon="envelope" title="No pending invites" body="Invite coaches, head coaches, the front desk or an accountant by email. They sign up with that email and appear in People." action={{ label: "+ Invite someone", onClick: () => setOpen(true) }} />
         )}
       </div>
 
@@ -443,6 +437,11 @@ function InviteSheet({ open, tiers, onClose }: { open: boolean; tiers: Tier[]; o
                 options={[{ value: "", label: "No tier yet" }, ...tiers.map((t) => ({ value: t.id, label: t.name }))]}
               />
             )}
+            {hasTier(role) && tiers.length === 0 && (
+              <div style={{ font: "400 12px/1.5 var(--font-mono)", color: "var(--ink-faint)", padding: "0 2px" }}>
+                No pay tiers yet — create one in the Tiers tab, then assign it here or later from People.
+              </div>
+            )}
           </div>
           {error && (
             <div style={{ marginTop: 12, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>
@@ -497,6 +496,9 @@ function PeoplePanel() {
             <Icon name="chevron-right" size={16} />
           </button>
         ))}
+        {data.profiles.length === 0 && (
+          <EmptyState bare icon="coaches" title="No one has joined yet" body="People appear here once they accept an invite and sign up. Send invites from the Invites tab." />
+        )}
       </div>
 
       <PersonSheet open={!!editing} profile={editing} tiers={tiers} isSelf={editing?.id === me?.id} onClose={() => setEditing(null)} />
@@ -574,6 +576,11 @@ function PersonSheet({
               disabled={busy}
               options={[{ value: "", label: "Not assigned" }, ...tiers.map((t) => ({ value: t.id, label: t.name }))]}
             />
+          )}
+          {hasTier(shown.role) && tiers.length === 0 && (
+            <div style={{ font: "400 12px/1.5 var(--font-mono)", color: "var(--ink-faint)", padding: "0 2px" }}>
+              No pay tiers yet — create one in the Tiers tab to set this person's rate.
+            </div>
           )}
         </div>
 

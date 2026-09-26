@@ -1,3 +1,4 @@
+import { EmptyState } from "../../components/EmptyState";
 import { useState } from "react";
 import { api } from "../../lib/backend";
 import { useAsync } from "../../lib/useAsync";
@@ -108,6 +109,9 @@ export function Team() {
             <span style={{ font: "700 11px var(--font-mono)", letterSpacing: ".06em", color: "var(--ink-muted)", flex: "none" }}>{BIZQWIK_ROLE_LABELS[m.role].toUpperCase()}</span>
           </div>
         ))}
+        {members.length === 0 && (
+          <EmptyState bare icon="coaches" title="No team members yet" body="Invite ops managers and teammates by email. They get access to this dashboard once they sign up." action={{ label: "Invite someone", onClick: () => setSheetOpen(true) }} />
+        )}
       </Card>
 
       {invites.length > 0 && (
