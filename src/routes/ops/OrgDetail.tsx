@@ -127,13 +127,18 @@ const STATUS_OPTIONS: { value: OrgStatus; label: string }[] = [
   { value: "paused", label: "PAUSED" },
 ];
 
-const POINTS_RATE_OPTIONS = [
-  { value: "", label: "Off — no points" },
-  { value: "5", label: "5 points / EGP" },
-  { value: "10", label: "10 points / EGP" },
-  { value: "15", label: "15 points / EGP" },
-  { value: "20", label: "20 points / EGP" },
-];
+// Blank earn rate = points off. Defaults: 10 pts/EGP earned, 500 pts = 1 EGP
+// (2% back), 50 pts per check-in, 10,000 pts minimum, 12-month expiry.
+const POINTS_DEFAULTS = { earn: "10", redeem: "500", checkin: "50", min: "10000", ttl: "12" };
+
+const fmtNum = (n: number) => n.toLocaleString("en-US", { maximumFractionDigits: 2 });
+
+function pointsPreview(earn: number, redeem: number, checkin: number, min: number): string {
+  if (!earn) return "Points are off for this gym.";
+  if (!redeem) return "";
+  const back = (earn / redeem) * 100;
+  return `≈ ${fmtNum(back)}% back on cash/card spend · a check-in is worth ${fmtNum(checkin / redeem)} EGP · members can redeem from ${fmtNum(min / redeem)} EGP (${fmtNum(min)} pts).`;
+}
 
 function UsageRow({ label, value }: { label: string; value: string }) {
   return (
@@ -315,7 +320,11 @@ function OrgAppConfigForm({ id, initial, onSaved }: { id: string; initial: OrgCo
   const [asset0, setAsset0] = useState(b?.onboardingAssets?.[0] ?? "");
   const [asset1, setAsset1] = useState(b?.onboardingAssets?.[1] ?? "");
   const [asset2, setAsset2] = useState(b?.onboardingAssets?.[2] ?? "");
-  const [pointsPerEgp, setPointsPerEgp] = useState(s?.pointsPerEgp != null ? String(s.pointsPerEgp) : "");
+  const [earn, setEarn] = useState(s ? (s.pointsEarnPerEgp != null ? String(s.pointsEarnPerEgp) : "") : POINTS_DEFAULTS.earn);
+  const [redeem, setRedeem] = useState(String(s?.pointsRedeemPerEgp ?? POINTS_DEFAULTS.redeem));
+  const [checkin, setCheckin] = useState(String(s?.pointsCheckin ?? POINTS_DEFAULTS.checkin));
+  const [minRedeem, setMinRedeem] = useState(String(s?.pointsMinRedeem ?? POINTS_DEFAULTS.min));
+  const [pointsTtl, setPointsTtl] = useState(String(s?.pointsTtlMonths ?? POINTS_DEFAULTS.ttl));
   const [ttlMonths, setTtlMonths] = useState(String(s?.walletCreditTtlMonths ?? 12));
 
   const [busy, setBusy] = useState(false);
@@ -326,8 +335,17 @@ function OrgAppConfigForm({ id, initial, onSaved }: { id: string; initial: OrgCo
     setError(null);
     setSaved(false);
     const months = Number(ttlMonths);
-    if (!Number.isFinite(months) || months < 1) {
+    if (!Number.isInteger(months) || months < 1) {
       setError("Wallet credit expiry must be at least 1 month.");
+      return;
+    }
+    const whole = (v: string) => Number.isInteger(Number(v)) && Number(v) >= 0 && v.trim() !== "";
+    if (earn.trim() !== "" && (!whole(earn) || Number(earn) < 1)) {
+      setError("Points earned per EGP must be a whole number of 1 or more — or blank to turn points off.");
+      return;
+    }
+    if (!whole(redeem) || Number(redeem) < 1 || !whole(checkin) || !whole(minRedeem) || !whole(pointsTtl) || Number(pointsTtl) < 1) {
+      setError("Points settings must be whole numbers (redeem rate and expiry at least 1).");
       return;
     }
     setBusy(true);
@@ -340,7 +358,14 @@ function OrgAppConfigForm({ id, initial, onSaved }: { id: string; initial: OrgCo
         primaryColor: primaryColor.trim() || null,
         onboardingAssets,
       });
-      await api.ops.setOrgSettings(id, pointsPerEgp === "" ? null : Number(pointsPerEgp), months);
+      await api.ops.setOrgSettings(id, {
+        pointsEarnPerEgp: earn.trim() === "" ? null : Number(earn),
+        pointsRedeemPerEgp: Number(redeem),
+        pointsCheckin: Number(checkin),
+        pointsMinRedeem: Number(minRedeem),
+        pointsTtlMonths: Number(pointsTtl),
+        walletCreditTtlMonths: months,
+      });
       setSaved(true);
       onSaved();
     } catch (err) {
@@ -362,15 +387,13 @@ function OrgAppConfigForm({ id, initial, onSaved }: { id: string; initial: OrgCo
       <ImageUploadField orgId={id} assetKey="art-2" label="ONBOARDING ART 3" value={asset2} onChange={setAsset2} />
 
       <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", margin: "10px 2px 0" }}>LOYALTY</div>
-      <SelectField
-        label="POINTS EARN RATE"
-        value={pointsPerEgp}
-        options={POINTS_RATE_OPTIONS}
-        onChange={setPointsPerEgp}
-        placeholder="Off — no points"
-      />
-      <div style={{ font: "500 12px/1.5 var(--font-mono)", color: "var(--ink-faint)", padding: "0 2px" }}>
-        Applies to desk sales; check-ins always earn 1 point. Redemption value = points ÷ rate in EGP.
+      <TextField label="POINTS EARNED PER 1 EGP" value={earn} onChange={(e) => setEarn(e.target.value)} inputMode="numeric" placeholder="Blank = points off" />
+      <TextField label="POINTS PER 1 EGP OF WALLET CREDIT" value={redeem} onChange={(e) => setRedeem(e.target.value)} inputMode="numeric" placeholder="500" />
+      <TextField label="POINTS PER CHECK-IN" value={checkin} onChange={(e) => setCheckin(e.target.value)} inputMode="numeric" placeholder="50" />
+      <TextField label="MINIMUM POINTS TO REDEEM" value={minRedeem} onChange={(e) => setMinRedeem(e.target.value)} inputMode="numeric" placeholder="10000" />
+      <TextField label="POINTS EXPIRE AFTER (MONTHS)" value={pointsTtl} onChange={(e) => setPointsTtl(e.target.value)} inputMode="numeric" placeholder="12" />
+      <div data-testid="points-preview" style={{ font: "500 12px/1.5 var(--font-mono)", color: "var(--ink-muted)", padding: "0 2px" }}>
+        {pointsPreview(Number(earn) || 0, Number(redeem) || 0, Number(checkin) || 0, Number(minRedeem) || 0)} Only cash/card purchases earn; wallet-paid ones don't, and refunds take points back.
       </div>
       <TextField label="WALLET CREDIT EXPIRY (MONTHS)" value={ttlMonths} onChange={(e) => setTtlMonths(e.target.value)} inputMode="numeric" placeholder="12" />
 

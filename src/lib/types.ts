@@ -320,8 +320,13 @@ export interface OrgBrandingConfig {
   primaryColor: string | null;
   onboardingAssets: string[];
 }
+// Loyalty economy. pointsEarnPerEgp null = points off for the org.
 export interface OrgPointsSettings {
-  pointsPerEgp: number | null;
+  pointsEarnPerEgp: number | null;
+  pointsRedeemPerEgp: number;
+  pointsCheckin: number;
+  pointsMinRedeem: number;
+  pointsTtlMonths: number;
   walletCreditTtlMonths: number;
 }
 export interface OrgConfig {
