@@ -2227,6 +2227,41 @@ app.get(`${P}/ops/orgs`, async (c) => {
   });
 });
 
+// Each gym's member app lives at <slug>.bizqwik.co. The wildcard DNS already
+// routes every subdomain to the client-app project, but Vercel only issues an
+// https certificate for a subdomain added to the project by name (the DNS is at
+// GoDaddy, so no wildcard certificate) — and without https phones block the
+// camera. So creating/deleting an org adds/removes its domain automatically.
+// Needs the vercel_token secret in Vault; without it this is skipped and reported.
+const VERCEL_PROJECT = "prj_sngf4uowChULYDqvI5syTZzGLqYq";
+const VERCEL_TEAM = "team_fGNC6nYrJCurPXH9plLSJWIZ";
+const gymDomain = (slug: string) => `${slug}.bizqwik.co`;
+
+async function vercelDomain(method: "POST" | "DELETE", slug: string): Promise<{ ok: boolean; reason?: string }> {
+  const token = await getSecret("vercel_token").catch(() => null);
+  if (!token) return { ok: false, reason: "the Vercel token isn't set up yet" };
+  const url =
+    method === "POST"
+      ? `https://api.vercel.com/v10/projects/${VERCEL_PROJECT}/domains?teamId=${VERCEL_TEAM}`
+      : `https://api.vercel.com/v9/projects/${VERCEL_PROJECT}/domains/${gymDomain(slug)}?teamId=${VERCEL_TEAM}`;
+  try {
+    const res = await fetch(url, {
+      method,
+      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+      body: method === "POST" ? JSON.stringify({ name: gymDomain(slug) }) : undefined,
+    });
+    if (res.ok) return { ok: true };
+    const body = await res.json().catch(() => ({}));
+    const code = body?.error?.code;
+    // Already there (adding) or already gone (removing) is the outcome we want.
+    if (method === "POST" && (code === "domain_already_in_use" || code === "domain_already_exists")) return { ok: true };
+    if (method === "DELETE" && res.status === 404) return { ok: true };
+    return { ok: false, reason: body?.error?.message ?? `Vercel ${res.status}` };
+  } catch (e) {
+    return { ok: false, reason: String(e) };
+  }
+}
+
 app.post(`${P}/ops/orgs`, async (c) => {
   const user = await requireUser(c);
   const team = user && (await bizqwikTeamOf(user.id));
@@ -2267,7 +2302,14 @@ app.post(`${P}/ops/orgs`, async (c) => {
   );
   if (invErr) throw invErr;
 
-  return c.json({ org: { id: org.id, name: org.name, slug: org.slug, status: org.status, planId: org.plan_id ?? null }, deptHeadEmail: headEmail });
+  const domain = await vercelDomain("POST", org.slug);
+  if (!domain.ok) console.error(`Could not connect ${gymDomain(org.slug)}:`, domain.reason);
+
+  return c.json({
+    org: { id: org.id, name: org.name, slug: org.slug, status: org.status, planId: org.plan_id ?? null },
+    deptHeadEmail: headEmail,
+    domain: { name: gymDomain(org.slug), connected: domain.ok, reason: domain.reason ?? null },
+  });
 });
 
 app.get(`${P}/ops/orgs/:id`, async (c) => {
@@ -2380,6 +2422,9 @@ app.post(`${P}/ops/orgs/:id/delete`, async (c) => {
 
   const { data: files } = await admin().storage.from("org-branding").list(id, { limit: 1000 });
   if (files && files.length > 0) await admin().storage.from("org-branding").remove(files.map((f: any) => `${id}/${f.name}`));
+
+  const domain = await vercelDomain("DELETE", org.slug);
+  if (!domain.ok) console.error(`Could not remove ${gymDomain(org.slug)}:`, domain.reason);
 
   return c.json({ ok: true, name: org.name, loginsRemoved });
 });

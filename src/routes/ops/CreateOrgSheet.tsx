@@ -21,7 +21,7 @@ export function CreateOrgSheet({ open, onClose, plans, onCreated }: { open: bool
   const [planId, setPlanId] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [created, setCreated] = useState<{ id: string; name: string; slug: string; deptHeadEmail: string } | null>(null);
+  const [created, setCreated] = useState<{ id: string; name: string; slug: string; deptHeadEmail: string; domain: { name: string; connected: boolean; reason: string | null } | null } | null>(null);
 
   const reset = () => {
     setName("");
@@ -52,7 +52,7 @@ export function CreateOrgSheet({ open, onClose, plans, onCreated }: { open: bool
       // Keep the sheet open on a success step so the operator can jump straight
       // to the printable check-in QR; the list refreshes underneath.
       onCreated();
-      setCreated({ id: res.org.id, name: res.org.name, slug: res.org.slug, deptHeadEmail: res.deptHeadEmail });
+      setCreated({ id: res.org.id, name: res.org.name, slug: res.org.slug, deptHeadEmail: res.deptHeadEmail, domain: res.domain ?? null });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
@@ -71,6 +71,16 @@ export function CreateOrgSheet({ open, onClose, plans, onCreated }: { open: bool
           Its department head signs up with <b>{created.deptHeadEmail}</b>. Two starter pay tiers were created. Next: print
           the front-desk check-in QR so members can start checking in.
         </div>
+        {created.domain && !created.domain.connected && (
+          <div
+            data-testid="domain-warning"
+            style={{ font: "500 13px/1.5 var(--font-body)", color: "var(--ink)", background: "var(--primary-tint)", borderRadius: 12, padding: "10px 12px", marginBottom: 18 }}
+          >
+            <b>{created.domain.name}</b> couldn't be connected automatically
+            {created.domain.reason ? ` (${created.domain.reason})` : ""}, so its member app has no https yet and the camera
+            won't work there.
+          </div>
+        )}
         <Button
           fullWidth
           size="lg"
