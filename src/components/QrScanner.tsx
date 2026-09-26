@@ -20,8 +20,10 @@ function cameraError(err: unknown): string {
     case "NotReadableError":
     case "TrackStartError":
       return "The camera is in use by another app. Close it and try again.";
+    case "SecurityError":
+      return "This browser blocked the camera for this page. Open the app in Safari or Chrome directly (not inside another app), then try again.";
     default:
-      return "Couldn't start the camera. Check the camera permission and try again.";
+      return `Couldn't start the camera (${name ?? "unknown error"}). Check the camera permission and try again.`;
   }
 }
 
@@ -31,6 +33,10 @@ function cameraError(err: unknown): string {
 export function QrScanner({ title, hint, onClose, onScan }: { title: string; hint: string; onClose: () => void; onScan: (text: string) => void }) {
   const [error, setError] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
+  // The camera was granted but no picture arrived (seen on some phones right
+  // after the permission prompt, or in installed home-screen apps): offer a
+  // tap to start it, which also counts as the user gesture some phones want.
+  const [stalled, setStalled] = useState(false);
   const doneRef = useRef(false);
   const onScanRef = useRef(onScan);
   onScanRef.current = onScan;
@@ -51,11 +57,16 @@ export function QrScanner({ title, hint, onClose, onScan }: { title: string; hin
     window.addEventListener("bq-test-scan", onTest);
 
     const video = videoRef.current;
+    let watchdog: number | undefined;
+    setStalled(false);
     if (video) {
       startQrCamera(video, finish)
         .then((stop) => {
-          if (alive) stopCamera = stop;
-          else stop();
+          if (!alive) return stop();
+          stopCamera = stop;
+          watchdog = window.setTimeout(() => {
+            if (alive && !doneRef.current && video.videoWidth === 0) setStalled(true);
+          }, 2500);
         })
         .catch((err) => {
           if (alive) setError(cameraError(err));
@@ -64,10 +75,22 @@ export function QrScanner({ title, hint, onClose, onScan }: { title: string; hin
 
     return () => {
       alive = false;
+      window.clearTimeout(watchdog);
       window.removeEventListener("bq-test-scan", onTest);
       stopCamera?.();
     };
   }, [attempt]);
+
+  // Within the tap: play the stream we already have; if the picture still
+  // doesn't come, open the camera again from scratch.
+  const startFromTap = () => {
+    const video = videoRef.current;
+    setStalled(false);
+    video?.play().catch(() => undefined);
+    window.setTimeout(() => {
+      if (!doneRef.current && (!video || video.videoWidth === 0)) setAttempt((n) => n + 1);
+    }, 1200);
+  };
 
   return createPortal(
     <div
@@ -93,8 +116,13 @@ export function QrScanner({ title, hint, onClose, onScan }: { title: string; hin
           <div id={REGION_ID} className="bq-qr-region" style={{ position: "relative", width: "100%", aspectRatio: "1 / 1", borderRadius: 28, overflow: "hidden", background: "#111" }}>
             <video ref={videoRef} playsInline muted autoPlay />
           </div>
-          {!error && (
+          {!error && !stalled && (
             <div aria-hidden style={{ position: "absolute", inset: "14%", border: "3px solid var(--primary)", borderRadius: 24, pointerEvents: "none" }} />
+          )}
+          {!error && stalled && (
+            <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
+              <Button onClick={startFromTap}>Tap to start the camera</Button>
+            </div>
           )}
         </div>
       </div>
