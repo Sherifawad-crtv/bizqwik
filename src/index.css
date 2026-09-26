@@ -13,11 +13,14 @@
   --primary-tint-strong: rgba(90, 65, 255, 0.12);
   --avatar-grad: linear-gradient(135deg, #7b5cff, #4a2fe0);
 
-  /* Secondary brand accent (lime) — aesthetics only, never on CTAs or status.
-     Light enough that text on it uses --accent-ink. */
-  --accent: #b5e02b;
-  --accent-tint: rgba(181, 224, 43, 0.22);
-  --accent-ink: #1a2e05;
+  /* Lighter / darker shades of the primary violet. The secondary accent is
+     drawn from these (no second hue for now) — aesthetics only, never on CTAs
+     or status. Light enough that text on it uses --accent-ink. */
+  --primary-light: #a193ff;
+  --primary-dark: #2e1f99;
+  --accent: var(--primary-light);
+  --accent-tint: rgba(90, 65, 255, 0.16);
+  --accent-ink: var(--primary-dark);
 
   --logging-fg: #946200;
   --logging-bg: #f6e7c4;
