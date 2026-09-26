@@ -21,8 +21,11 @@ type Mode = "class" | "walkin";
 
 /** Pay-per-visit at the desk. "Class" puts a member into one class session at
  * its drop-in price (they land on the roster); "Walk-in" is a free-form entry
- * like open gym. A member who still has a group plan running gets the same
- * "are you sure?" check as the member app before being charged. */
+ * like open gym. Both are always recorded against a member — a walk-in can
+ * link an existing client or add a new one (name, phone, email) on the spot,
+ * so the visit lands in their history and they can sign up to the app. A
+ * member who still has a group plan running gets the same "are you sure?"
+ * check as the member app before being charged. */
 export function DropIn() {
   useSetHeader({ kicker: "FRONT DESK", title: "Drop-In" }, []);
   const [params, setParams] = useSearchParams();
@@ -36,6 +39,11 @@ export function DropIn() {
   const client = clientId ? { id: clientId, name: params.get("name") ?? "Client" } : null;
   const setClient = (c: { id: string; name: string } | null) => setParams(c ? { client: c.id, name: c.name } : {}, { replace: true });
   const [pickerOpen, setPickerOpen] = useState(false);
+  // Walk-in for someone who isn't a client yet: their details, sent with the sale.
+  const [adding, setAdding] = useState(false);
+  const [newName, setNewName] = useState("");
+  const [newPhone, setNewPhone] = useState("");
+  const [newEmail, setNewEmail] = useState("");
   const [payMethod, setPayMethod] = useState<PayMethod>("cash");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -49,8 +57,9 @@ export function DropIn() {
   );
   const session = sessions.find((c) => c.id === classId) ?? null;
 
-  // Wallet is only payable when a member is linked; a walk-in has no wallet.
+  // Wallet is only payable for a linked member; a brand-new one has no wallet.
   const effectivePay: PayMethod = !client && payMethod === "wallet" ? "cash" : payMethod;
+  const newMember = mode === "walkin" && !client && adding;
 
   const reset = () => {
     setCategory("");
@@ -58,6 +67,10 @@ export function DropIn() {
     setClassId("");
     setClient(null);
     setPayMethod("cash");
+    setAdding(false);
+    setNewName("");
+    setNewPhone("");
+    setNewEmail("");
   };
 
   // Records the sale; throws on failure. `confirmed` re-sends after the desk
@@ -67,8 +80,9 @@ export function DropIn() {
       await api.classDropIn(client.id, session.id, effectivePay, confirmed);
       setDone(`${client.name} · ${session.title} · ${fmt(session.price)} EGP`);
     } else {
-      await api.dropIn(client?.id ?? null, category.trim(), Number(price), effectivePay, confirmed);
-      setDone(`${client ? client.name : "Walk-in"} · ${category.trim()} · ${fmt(Number(price))} EGP`);
+      const member = client ? { clientId: client.id } : { newClient: { name: newName.trim(), phone: newPhone.trim(), email: newEmail.trim().toLowerCase() } };
+      await api.dropIn(member, category.trim(), Number(price), effectivePay, confirmed);
+      setDone(`${client ? client.name : `${newName.trim()} (new member · app invite ready)`} · ${category.trim()} · ${fmt(Number(price))} EGP`);
     }
     reset();
   };
@@ -79,6 +93,11 @@ export function DropIn() {
       if (!client) return setError("Link the member first — a class drop-in puts them on the roster.");
       if (!session) return setError("Choose the class session.");
     } else {
+      if (!client && !adding) return setError("Link the member or add their details — every walk-in is recorded against a member.");
+      if (newMember) {
+        if (!newName.trim() || !newPhone.trim()) return setError("Enter the member's name and phone number.");
+        if (!/^\S+@\S+\.\S+$/.test(newEmail.trim())) return setError("Enter the member's email — they sign in to the app with it.");
+      }
       if (!category.trim()) return setError("Enter what the drop-in is for.");
       const amount = Number(price);
       if (price === "" || !Number.isFinite(amount) || amount < 0) return setError("Enter the price paid.");
@@ -123,7 +142,7 @@ export function DropIn() {
           <div style={{ font: "400 13px/1.5 var(--font-mono)", color: "var(--ink-muted)" }}>
             {mode === "class"
               ? "Charges that class's drop-in price and adds the member to its roster as arrived."
-              : "Valid for a single visit. Link a client if they have a record, or leave it as a walk-in."}
+              : "Valid for a single visit. Link the member, or add a new one with their details."}
           </div>
         </div>
       </Card>
@@ -137,19 +156,42 @@ export function DropIn() {
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
         <div data-sq style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "10px 16px", display: "flex", alignItems: "center", gap: 10 }}>
           <div style={{ minWidth: 0, flex: 1 }}>
-            <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>{mode === "class" ? "MEMBER" : "CLIENT (OPTIONAL)"}</div>
-            <div style={{ font: "600 16px var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{client ? client.name : mode === "class" ? "Not linked" : "Walk-in"}</div>
+            <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>MEMBER</div>
+            <div style={{ font: "600 16px var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{client ? client.name : newMember ? "New member" : "Not linked"}</div>
           </div>
-          {client ? (
-            <Button variant="quiet" size="md" style={{ height: 36, padding: "0 12px" }} onClick={() => setClient(null)}>
-              Remove
+          {client || newMember ? (
+            <Button
+              variant="quiet"
+              size="md"
+              style={{ height: 36, padding: "0 12px" }}
+              onClick={() => {
+                setClient(null);
+                setAdding(false);
+              }}
+            >
+              {client ? "Remove" : "Cancel"}
             </Button>
           ) : (
-            <Button variant="secondary" size="md" style={{ height: 36, padding: "0 12px" }} onClick={() => setPickerOpen(true)}>
-              Link client
-            </Button>
+            <>
+              {mode === "walkin" && (
+                <Button variant="quiet" size="md" style={{ height: 36, padding: "0 12px" }} onClick={() => setAdding(true)}>
+                  New member
+                </Button>
+              )}
+              <Button variant="secondary" size="md" style={{ height: 36, padding: "0 12px" }} onClick={() => setPickerOpen(true)}>
+                Link member
+              </Button>
+            </>
           )}
         </div>
+
+        {newMember && (
+          <>
+            <TextField label="FULL NAME" value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="Member name" autoComplete="off" />
+            <TextField label="PHONE" type="tel" value={newPhone} onChange={(e) => setNewPhone(e.target.value)} placeholder="01xxxxxxxxx" autoComplete="off" />
+            <TextField label="EMAIL" type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} autoComplete="off" />
+          </>
+        )}
 
         {mode === "class" ? (
           <>
@@ -200,6 +242,7 @@ export function DropIn() {
         onClose={() => setPickerOpen(false)}
         onPick={(c) => {
           setClient({ id: c.id, name: c.name });
+          setAdding(false);
           setPickerOpen(false);
         }}
       />
@@ -223,7 +266,7 @@ function PickClientSheet({ open, onClose, onPick }: { open: boolean; onClose: ()
   return (
     <Sheet open={open} onClose={onClose}>
       <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>DROP-IN</div>
-      <div style={{ font: "800 26px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 16px" }}>Link a client</div>
+      <div style={{ font: "800 26px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 16px" }}>Link a member</div>
       <ClientPicker clients={data?.clients ?? []} bundleTypes={bundleTypes} onPick={onPick} />
       <Button variant="quiet" fullWidth style={{ marginTop: 10 }} onClick={onClose}>
         Cancel
