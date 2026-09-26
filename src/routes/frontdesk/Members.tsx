@@ -131,7 +131,7 @@ export function Members() {
         )}
       </Card>
 
-      <CreateClientSheet open={creating} onClose={closeCreate} planTypes={planTypes} series={series} bundleTypes={bundleTypes} coaches={coaches} />
+      <CreateClientSheet open={creating} onClose={closeCreate} takenEmails={clients.map((c) => c.email ?? "")} planTypes={planTypes} series={series} bundleTypes={bundleTypes} coaches={coaches} />
       <ClientSheet client={selected} onClose={() => setSelectedId(null)} planTypes={planTypes} series={series} bundleTypes={bundleTypes} coaches={coaches} />
     </div>
   );
@@ -168,9 +168,11 @@ export function CreateClientSheet({
   series,
   bundleTypes,
   coaches,
+  takenEmails = [],
 }: {
   open: boolean;
   onClose: () => void;
+  takenEmails?: string[];
   planTypes: GroupPlanType[];
   series: ClassSeries[];
   bundleTypes: BundleType[];
@@ -186,10 +188,13 @@ export function CreateClientSheet({
   const [payMethod, setPayMethod] = useState<PayMethod>("cash");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Set once the client exists, so a retry after a failed invite only re-sends the invite.
+  const [createdId, setCreatedId] = useState<string | null>(null);
   const { confirmed, iconIn, showSuccess } = useSheetSuccess(open, onClose);
 
   useEffect(() => {
     if (open) {
+      setCreatedId(null);
       setKind("plan");
       setName("");
       setPhone("");
@@ -209,8 +214,14 @@ export function CreateClientSheet({
       setError("Name and phone number are required.");
       return;
     }
-    if (email.trim() && !/^\S+@\S+\.\S+$/.test(email.trim())) {
-      setError("That email doesn't look right — fix it or leave it blank.");
+    // Email is how the client signs in to the member app, so it's required.
+    const mail = email.trim().toLowerCase();
+    if (!/^\S+@\S+\.\S+$/.test(mail)) {
+      setError("Enter the client's email — they sign in to the app with it.");
+      return;
+    }
+    if (!createdId && takenEmails.some((e) => e.trim().toLowerCase() === mail)) {
+      setError("Another client already uses this email.");
       return;
     }
     if (kind === "plan" && !offer) {
@@ -221,12 +232,23 @@ export function CreateClientSheet({
       setError("Choose a package and a coach.");
       return;
     }
-    const fields = { name: name.trim(), phone: phone.trim(), email: email.trim() || null };
+    const fields = { name: name.trim(), phone: phone.trim(), email: mail };
     setBusy(true);
     setError(null);
     try {
-      if (kind === "plan") await api.sellGroupPlan(fields, offerOf(offer), payMethod);
-      else await api.createServiceClient(fields, bundleTypeId, coachId, payMethod);
+      let clientId = createdId;
+      if (!clientId) {
+        const { client } = kind === "plan" ? await api.sellGroupPlan(fields, offerOf(offer), payMethod) : await api.createServiceClient(fields, bundleTypeId, coachId, payMethod);
+        clientId = client.id;
+        setCreatedId(clientId);
+      }
+      // Register the app invite so the client can sign up with this email.
+      try {
+        await api.inviteClient(clientId, mail);
+      } catch (err) {
+        setError(`Client created, but the app invite failed: ${err instanceof Error ? err.message : "try again"}. Submitting again only re-sends the invite.`);
+        return;
+      }
       showSuccess();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
@@ -238,7 +260,7 @@ export function CreateClientSheet({
   return (
     <Sheet open={open} onClose={onClose}>
       {confirmed ? (
-        <SheetSuccessIcon label="Client created" iconIn={iconIn} />
+        <SheetSuccessIcon label="Client created · app invite ready" iconIn={iconIn} />
       ) : (
         <>
           <SheetHeading kicker="NEW CLIENT" title="Create client" />
@@ -258,7 +280,7 @@ export function CreateClientSheet({
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             <TextField label="FULL NAME" value={name} onChange={(e) => setName(e.target.value)} placeholder="Client name" autoComplete="off" />
             <TextField label="PHONE" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="01xxxxxxxxx" autoComplete="off" />
-            <TextField label="EMAIL (OPTIONAL)" type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="off" />
+            <TextField label="EMAIL" type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="off" />
             {kind === "plan" ? (
               <GroupOfferSelect value={offer} onChange={setOffer} planTypes={planTypes} series={series} />
             ) : (

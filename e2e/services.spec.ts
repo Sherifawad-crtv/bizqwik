@@ -195,3 +195,39 @@ test("dept_head: class start time is picked on hour/minute/AM-PM wheels", async 
   await expect(page.getByText("Class created")).toBeVisible();
   expect(posted).toMatchObject({ title: "Early Bird", weekdays: [6], startTime: "07:30" });
 });
+
+test("front desk: new client needs an email and gets an app invite", async ({ page }) => {
+  let sold: Record<string, unknown> | null = null;
+  let invited: Record<string, unknown> | null = null;
+  await mockBackend(page, "front_desk", {
+    clients: { clients: [{ id: "cl2", name: "Omar Z", age: null, phone: "0111", email: "omar@x.com", conditions: null, assignedCoachId: null, currentPackage: null, currentMembership: null, groupPlan: null }] },
+    "plan-types": { planTypes: PLAN_TYPES },
+    "class-series": { series: SERIES },
+    coaches: { coaches: [] },
+    "group-plans/sell": (body) => {
+      sold = body;
+      return { body: { client: { id: "cl9" }, plan: {} } };
+    },
+    "client-invites": (body) => {
+      invited = body;
+      return { body: { ok: true } };
+    },
+  });
+  await page.goto("/members");
+  await page.getByRole("button", { name: "+ New client" }).click();
+  await page.getByLabel("FULL NAME", { exact: true }).fill("Mona K");
+  await page.getByLabel("PHONE", { exact: true }).fill("0122");
+  await page.getByText("Membership, class monthly or bundle").click();
+  await page.getByText(/Sunrise HIIT monthly/).click();
+  await page.getByRole("button", { name: "Create & start plan" }).click();
+  await expect(page.getByText("Enter the client's email — they sign in to the app with it.")).toBeVisible();
+  await page.getByLabel("EMAIL", { exact: true }).fill("omar@x.com");
+  await page.getByRole("button", { name: "Create & start plan" }).click();
+  await expect(page.getByText("Another client already uses this email.")).toBeVisible();
+  expect(sold).toBeNull();
+  await page.getByLabel("EMAIL", { exact: true }).fill(" Mona@X.com ");
+  await page.getByRole("button", { name: "Create & start plan" }).click();
+  await expect(page.getByText("Client created · app invite ready")).toBeVisible();
+  expect(sold).toMatchObject({ name: "Mona K", phone: "0122", email: "mona@x.com", seriesId: "s1" });
+  expect(invited).toEqual({ clientId: "cl9", email: "mona@x.com" });
+});
