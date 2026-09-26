@@ -45,7 +45,7 @@ type CreateKind = "class" | "bundle" | "membership" | "pt";
 
 const CREATE_OPTIONS: { kind: CreateKind; title: string; sub: string; icon: "calendar" | "ticket" | "gift" | "coaches" }[] = [
   { kind: "class", title: "Group class", sub: "Repeats weekly · drop-in + monthly price", icon: "calendar" },
-  { kind: "bundle", title: "Class bundle", sub: "A pack of class credits, any class", icon: "ticket" },
+  { kind: "bundle", title: "Class bundle", sub: "A pack of sessions — 1 used per check-in", icon: "ticket" },
   { kind: "membership", title: "Membership", sub: "All classes for set months", icon: "gift" },
   { kind: "pt", title: "PT bundle", sub: "Private training sessions with a coach", icon: "coaches" },
 ];

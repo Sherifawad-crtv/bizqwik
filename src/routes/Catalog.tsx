@@ -367,7 +367,7 @@ function PlansPanel() {
   return (
     <div>
       {section("membership", "Memberships", "No memberships yet. A membership covers every class for the months you choose.")}
-      {section("bundle", "Class bundles", "No bundles yet. A bundle is a pack of class credits usable on any class.")}
+      {section("bundle", "Class bundles", "No bundles yet. A bundle is a pack of sessions: one is used each day the member checks in.")}
       <div style={{ font: "400 12px/1.5 var(--font-mono)", color: "var(--ink-faint)", margin: "-12px 2px 0" }}>
         Each class's monthly is set on the class itself. A member holds one group plan at a time, and a new one can only be bought once the current one is finished.
       </div>
@@ -468,7 +468,7 @@ export function PlanTypeSheet({ open, kind, planType, onClose }: { open: boolean
             )}
           </div>
           <div style={{ marginTop: 10, font: "400 12px/1.5 var(--font-mono)", color: "var(--ink-faint)" }}>
-            {isBundle ? "Credits work on any class. " : "Covers every class. "}
+            {isBundle ? "One session is used each day the member checks in (booking a class only reserves the spot). " : "Covers every class. "}
             Runs from the day it's bought. Changes apply to future sales only.
           </div>
           {error && (
