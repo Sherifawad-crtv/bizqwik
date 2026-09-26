@@ -198,8 +198,10 @@ export const api = {
   assignCoach: (id: string, coachId: string) => callFn<{ client: Client }>("clients/assign-coach", { method: "POST", body: { id, coachId } }),
   frontDeskSummary: () => callFn<FrontDeskSummary>("front-desk/summary"),
   checkIn: (clientId: string, source: "qr" | "manual") => callFn<void>("check-ins", { method: "POST", body: { clientId, source } }),
-  dropIn: (clientId: string | null, category: string, price: number, payMethod?: PayMethod, confirmActivePlan = false) =>
-    callFn<void>("drop-ins", { method: "POST", body: { clientId, category, price, payMethod, confirmActivePlan } }),
+  // A walk-in is always recorded against a member: an existing client, or a
+  // new one created with the sale (the backend also registers their app invite).
+  dropIn: (member: { clientId: string } | { newClient: NewClientFields }, category: string, price: number, payMethod?: PayMethod, confirmActivePlan = false) =>
+    callFn<void>("drop-ins", { method: "POST", body: { ...member, category, price, payMethod, confirmActivePlan } }),
   // A seat in one class session at its drop-in price; lands on the roster.
   classDropIn: (clientId: string, classId: string, payMethod: PayMethod, confirmActivePlan = false) =>
     callFn<void>("drop-ins", { method: "POST", body: { clientId, classId, payMethod, confirmActivePlan } }),

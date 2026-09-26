@@ -1549,9 +1549,14 @@ app.post(`${P}/drop-ins`, async (c) => {
   const me = user && (await profileOf(user.id));
   if (me?.role !== "front_desk") return c.json({ error: "Forbidden" }, 403);
   const body = await c.req.json();
-  const { clientId, classId } = body;
+  const { classId } = body;
+  let clientId: string | null = body.clientId || null;
   const payMethod = normPayMethod(body.payMethod);
-  if (payMethod === "wallet" && !clientId) return c.json({ error: "Wallet payment needs an existing member." }, 400);
+  // Every drop-in is recorded against a member: an existing client, or one
+  // created right here from `newClient` (name, phone, email).
+  const nc = !clientId && body.newClient ? body.newClient : null;
+  if (!clientId && !nc) return c.json({ error: "Add the member — every drop-in is recorded against a member." }, 400);
+  if (payMethod === "wallet" && !clientId) return c.json({ error: "A brand-new member has no wallet balance yet — take cash or card." }, 400);
 
   // Two shapes: a seat in a specific class session (price = that class's
   // drop-in price, and the member lands on its roster), or a generic walk-in
@@ -1573,7 +1578,30 @@ app.post(`${P}/drop-ins`, async (c) => {
     if (!Number.isFinite(amount) || amount < 0) return c.json({ error: "Enter a valid price." }, 400);
   }
 
-  if (clientId) {
+  let createdClientId: string | null = null;
+  if (nc) {
+    const name = String(nc.name ?? "").trim();
+    const phone = String(nc.phone ?? "").trim();
+    const email = String(nc.email ?? "").trim().toLowerCase();
+    if (!name || !phone) return c.json({ error: "Enter the member's name and phone number." }, 400);
+    if (!/^\S+@\S+\.\S+$/.test(email)) return c.json({ error: "Enter the member's email — they sign in to the app with it." }, 400);
+    const { data: taken } = await admin().from("clients").select("id").eq("org_id", me.org_id).ilike("email", email).limit(1);
+    if ((taken?.length ?? 0) > 0) return c.json({ error: "Another client already uses this email — link them instead." }, 400);
+    const limitErr = await planLimitError(me.org_id, "client");
+    if (limitErr) return c.json({ error: limitErr }, 400);
+    const created = await insertClient(me, { name, phone, email });
+    createdClientId = created.id;
+    clientId = created.id;
+    await admin().from("client_invitations").upsert({ org_id: me.org_id, client_id: created.id, email, invited_by: me.id }, { onConflict: "email" });
+  }
+  // A new member's record is removed again if the sale doesn't go through.
+  const undoNewClient = async () => {
+    if (!createdClientId) return;
+    await admin().from("client_invitations").delete().eq("client_id", createdClientId);
+    await admin().from("clients").delete().eq("id", createdClientId);
+  };
+
+  if (clientId && !createdClientId) {
     const { data: client } = await admin().from("clients").select("id, name").eq("id", clientId).eq("org_id", me.org_id).maybeSingle();
     if (!client) return c.json({ error: "No such client" }, 404);
     if (cls) {
@@ -1595,10 +1623,13 @@ app.post(`${P}/drop-ins`, async (c) => {
 
   const { data, error } = await admin()
     .from("drop_ins")
-    .insert({ org_id: me.org_id, client_id: clientId || null, category: cat, price: amount, class_id: cls?.id ?? null, pay_method: payMethod })
+    .insert({ org_id: me.org_id, client_id: clientId, category: cat, price: amount, class_id: cls?.id ?? null, pay_method: payMethod })
     .select()
     .single();
-  if (error) throw error;
+  if (error) {
+    await undoNewClient();
+    throw error;
+  }
   if (payMethod === "wallet") {
     const r = await debitWallet(clientId, me.org_id, amount, "desk_sale", `Drop-in: ${cat}`);
     if (!r.ok) {
@@ -1618,13 +1649,14 @@ app.post(`${P}/drop-ins`, async (c) => {
       // The seat couldn't be written (e.g. the session was just removed by a
       // schedule edit) — undo the sale so no money is taken without a seat.
       await admin().from("drop_ins").delete().eq("id", data.id);
+      await undoNewClient();
       if (payMethod === "wallet") await creditWallet(clientId, me.org_id, amount, "refund", `Refund: ${cat} drop-in not completed`);
       return c.json({ error: "That class session is no longer available — nothing was charged." }, 409);
     }
   }
   await earnPurchasePoints(data.client_id, me.org_id, amount, payMethod);
   await logActivity(me.org_id, "sale_dropin", { actorId: me.id, clientId: data.client_id, amount, meta: { payMethod, classId: cls?.id ?? null, title: cat } });
-  return c.json({ dropIn: { id: data.id, clientId: data.client_id, classId: data.class_id ?? null, category: data.category, price: Number(data.price), createdAt: data.created_at } });
+  return c.json({ dropIn: { id: data.id, clientId: data.client_id, classId: data.class_id ?? null, category: data.category, price: Number(data.price), createdAt: data.created_at }, newClientId: createdClientId });
 });
 
 app.post(`${P}/invitations`, async (c) => {

@@ -14,27 +14,41 @@ test("login form signs a front-desk user in and lands them in the app", async ({
 });
 
 // Fully-mocked click-through of the front-desk money UI:
-// Drop-In -> payment selector -> record a walk-in drop-in.
-test("front desk: drop-in with payment selector -> record", async ({ page }) => {
-  await mockBackend(page, "front_desk", { "drop-ins": {} });
+// Drop-In -> walk-in needs a member -> add a new one -> payment -> record.
+test("front desk: walk-in must be recorded against a member", async ({ page }) => {
+  let sent: Record<string, unknown> | null = null;
+  await mockBackend(page, "front_desk", {
+    "drop-ins": (body) => {
+      sent = body;
+      return { body: {} };
+    },
+  });
 
   await page.goto("/drop-in");
   await page.getByRole("button", { name: "WALK-IN" }).click();
   await expect(page.getByText("One-time entry")).toBeVisible();
 
-  // Payment selector: cash/card offered; wallet hidden for a walk-in (no member).
-  await expect(page.getByText("PAYMENT", { exact: true })).toBeVisible();
-  await expect(page.getByText("CASH", { exact: true })).toBeVisible();
-  await expect(page.getByText("CARD", { exact: true })).toBeVisible();
-  await expect(page.getByText("WALLET", { exact: true })).toHaveCount(0);
-
-  // Record a walk-in drop-in.
+  // No anonymous walk-ins.
   await page.getByPlaceholder("e.g. Open gym").fill("Calisthenics");
   await page.locator('input[type="number"]').fill("120");
   await page.getByRole("button", { name: /Confirm drop-in/ }).click();
+  await expect(page.getByText("Link the member or add their details — every walk-in is recorded against a member.")).toBeVisible();
+  expect(sent).toBeNull();
+
+  // Add a new member; wallet isn't offered for someone with no wallet yet.
+  await page.getByRole("button", { name: "New member" }).click();
+  await expect(page.getByText("WALLET", { exact: true })).toHaveCount(0);
+  await page.getByLabel("FULL NAME", { exact: true }).fill("Nour Adel");
+  await page.getByLabel("PHONE", { exact: true }).fill("0100");
+  await page.getByRole("button", { name: /Confirm drop-in/ }).click();
+  await expect(page.getByText("Enter the member's email — they sign in to the app with it.")).toBeVisible();
+  await page.getByLabel("EMAIL", { exact: true }).fill("Nour@Example.com");
+  await page.getByText("CARD", { exact: true }).click();
+  await page.getByRole("button", { name: /Confirm drop-in/ }).click();
 
   await expect(page.getByText(/Drop-in recorded/)).toBeVisible();
-  await expect(page.getByText(/Walk-in · Calisthenics · 120 EGP/)).toBeVisible();
+  await expect(page.getByText(/Nour Adel \(new member · app invite ready\) · Calisthenics · 120 EGP/)).toBeVisible();
+  expect(sent).toMatchObject({ newClient: { name: "Nour Adel", phone: "0100", email: "nour@example.com" }, category: "Calisthenics", price: 120, payMethod: "card" });
 });
 
 // Role gating: a front-desk user hitting a dept-head-only route is bounced home.
