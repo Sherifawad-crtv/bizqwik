@@ -273,7 +273,7 @@ export const api = {
     summary: () => callFn<OpsSummary>("ops/summary"),
     orgs: () => callFn<{ orgs: OrgSummary[] }>("ops/orgs"),
     createOrg: (name: string, slug: string, deptHeadName: string, deptHeadEmail: string, planId: string | null) =>
-      callFn<{ org: OrgSummary; deptHeadEmail: string }>("ops/orgs", {
+      callFn<{ org: OrgSummary; deptHeadEmail: string; domain?: { name: string; connected: boolean; reason: string | null } }>("ops/orgs", {
         method: "POST",
         body: { name, slug, deptHeadName, deptHeadEmail, planId },
       }),
