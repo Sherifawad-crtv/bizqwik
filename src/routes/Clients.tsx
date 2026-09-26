@@ -477,21 +477,6 @@ function ClientDetailSheet({
     }
   };
 
-  const deliver = async () => {
-    if (!pkg) return;
-    setBusy(true);
-    setError(null);
-    try {
-      await api.deliverSession(pkg.id);
-      setSuccessLabel("Session logged");
-      showSuccess();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong.");
-    } finally {
-      setBusy(false);
-    }
-  };
-
   return (
     <Sheet open={open} onClose={onClose}>
       {confirmed ? (
@@ -562,9 +547,9 @@ function ClientDetailSheet({
               )}
 
               {canDeliver && (
-                <Button fullWidth size="lg" style={{ marginTop: 6 }} disabled={busy} onClick={deliver}>
-                  {busy ? "Logging…" : "Log delivered session"}
-                </Button>
+                <div data-testid="pt-scan-hint" style={{ marginTop: 6, font: "500 13px/1.5 var(--font-body)", color: "var(--ink-muted)", background: "var(--primary-tint)", borderRadius: 14, padding: "10px 14px" }}>
+                  To log a session, scan the PT code in {client.name.split(" ")[0]}'s app (the + button, or Scan QR).
+                </div>
               )}
               {role === "dept_head" && (
                 <Button variant="secondary" fullWidth style={{ marginTop: 8 }} onClick={() => setMode("compensate")}>

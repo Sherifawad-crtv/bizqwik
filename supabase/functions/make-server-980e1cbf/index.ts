@@ -51,6 +51,11 @@ const isFutureMonth = (m: string) => m > currentMonth();
 function todayIso(): string {
   return new Date().toISOString().slice(0, 10);
 }
+// The gym's own calendar day (Cairo), for scan-based attendance: a coach
+// scanning at 1am local must land on that local day, not UTC's.
+function gymToday(): string {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "Africa/Cairo", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
+}
 function addDays(dateIso: string, days: number): string {
   const d = new Date(`${dateIso}T00:00:00Z`);
   d.setUTCDate(d.getUTCDate() + days);
@@ -608,7 +613,7 @@ function toPackageInstance(row: any) {
   };
 }
 function toSession(row: any) {
-  return { id: row.id, coachId: row.coach_id, month: row.month, date: row.date, createdBy: row.created_by };
+  return { id: row.id, coachId: row.coach_id, month: row.month, date: row.date, createdBy: row.created_by, source: row.source ?? "manual" };
 }
 function toInvite(row: any) {
   return { email: row.email, role: row.role, tierId: row.tier_id, invitedBy: row.invited_by };
@@ -1746,32 +1751,90 @@ app.get(`${P}/front-desk/summary`, async (c) => {
   });
 });
 
+// PT sessions are deducted only by scanning the member's per-bundle QR
+// (shown in their app): proof the member is physically there. Resolves the
+// code for the scanning coach, or returns the reason it can't be used.
+async function resolvePtScan(me: any, token: string): Promise<{ pkg: any } | { error: string; status: number }> {
+  const { data: row } = await admin().from("package_instances").select("*").eq("qr_token", token).eq("org_id", me.org_id).maybeSingle();
+  if (!row) return { error: "This PT code isn't valid anymore — ask the member to open their latest code in the app.", status: 404 };
+  const pkg = await materializePackage(row);
+  if (pkg.status !== "active") return { error: "This PT bundle has finished — it has no sessions left to log.", status: 400 };
+  if (pkg.coach_id !== me.id) {
+    const { data: coach } = await admin().from("profiles").select("name").eq("id", pkg.coach_id).maybeSingle();
+    return { error: `This bundle is with ${coach?.name ?? "another coach"} — only they can log its sessions.`, status: 403 };
+  }
+  const { data: today } = await admin().from("delivery_logs").select("id").eq("package_instance_id", pkg.id).eq("date", gymToday()).limit(1);
+  if ((today?.length ?? 0) > 0) return { error: "Today's session for this bundle is already logged.", status: 400 };
+  return { pkg };
+}
+
+async function ptScanPreview(pkg: any) {
+  const [{ data: client }, { data: bundle }] = await Promise.all([
+    admin().from("clients").select("name").eq("id", pkg.client_id).maybeSingle(),
+    admin().from("bundle_types").select("name").eq("id", pkg.bundle_type_id).maybeSingle(),
+  ]);
+  return {
+    id: pkg.id,
+    clientName: client?.name ?? "Member",
+    bundleName: bundle?.name ?? "PT bundle",
+    sessionsRemaining: pkg.sessions_remaining,
+    sessionsIncluded: pkg.sessions_included,
+    expiryDate: String(pkg.expires_at).slice(0, 10),
+  };
+}
+
+// The FAB's scanner: tells the coach app what was scanned. The coaches'-room
+// QR -> "attendance" (the app then shows the session stepper); a member's PT
+// code -> "pt" (the app asks to confirm the deduction).
+app.post(`${P}/scan`, async (c) => {
+  const user = await requireUser(c);
+  const me = user && (await profileOf(user.id));
+  if (!me || (me.role !== "coach" && me.role !== "head_coach")) return c.json({ error: "Forbidden" }, 403);
+  const token = String((await c.req.json().catch(() => ({}))).token ?? "").trim();
+  const { data: org } = await admin().from("organizations").select("id, slug, coach_qr_token").eq("id", me.org_id).maybeSingle();
+  if (token && token === org?.coach_qr_token) {
+    const date = gymToday();
+    const blocked = await assertLoggable(me.org_id, me.id, date.slice(0, 7));
+    if (blocked) return c.json({ error: blocked }, 400);
+    return c.json({ kind: "attendance", date, month: date.slice(0, 7) });
+  }
+  if (token && (token === org?.slug || token === org?.id)) {
+    return c.json({ error: "That's the members' check-in QR — scan the coaches' QR in the coaches' room." }, 400);
+  }
+  if (token.startsWith("bqpt_")) {
+    const r = await resolvePtScan(me, token);
+    if ("error" in r) return c.json({ error: r.error }, r.status as any);
+    return c.json({ kind: "pt", package: await ptScanPreview(r.pkg) });
+  }
+  return c.json({ error: "This QR isn't one of your gym's codes." }, 400);
+});
+
 app.post(`${P}/packages/deliver`, async (c) => {
   const user = await requireUser(c);
   const me = user && (await profileOf(user.id));
   if (!me) return c.json({ error: "Unauthorized" }, 401);
-  const { packageInstanceId } = await c.req.json();
-  const { data: pkgRow, error } = await admin().from("package_instances").select("*").eq("id", packageInstanceId).eq("org_id", me.org_id).maybeSingle();
-  if (error) throw error;
-  if (!pkgRow) return c.json({ error: "No such package" }, 404);
-  if (pkgRow.coach_id !== me.id) return c.json({ error: "Forbidden" }, 403);
-
-  const pkg = await materializePackage(pkgRow);
-  if (pkg.status !== "active") return c.json({ error: "This package isn't active." }, 400);
+  const { qrToken } = await c.req.json();
+  if (!qrToken) return c.json({ error: "Scan the member's PT code to log the session.", code: "scan_required" }, 400);
+  const r = await resolvePtScan(me, String(qrToken));
+  if ("error" in r) return c.json({ error: r.error }, r.status as any);
+  const pkg = r.pkg;
 
   const sessionsRemaining = pkg.sessions_remaining - 1;
   const status = sessionsRemaining <= 0 ? "exhausted" : "active";
+  // Compare-and-set so two scans can't both spend the same session.
   const { data: updated, error: uErr } = await admin()
     .from("package_instances")
     .update({ sessions_remaining: sessionsRemaining, status })
     .eq("id", pkg.id)
+    .eq("sessions_remaining", pkg.sessions_remaining)
     .select()
-    .single();
+    .maybeSingle();
   if (uErr) throw uErr;
+  if (!updated) return c.json({ error: "This bundle just changed — scan again." }, 409);
 
-  await admin().from("delivery_logs").insert({ org_id: me.org_id, package_instance_id: pkg.id, date: todayIso(), logged_by: me.id });
+  await admin().from("delivery_logs").insert({ org_id: me.org_id, package_instance_id: pkg.id, date: gymToday(), logged_by: me.id, source: "qr" });
 
-  return c.json({ package: toPackageInstance(updated) });
+  return c.json({ package: toPackageInstance(updated), preview: await ptScanPreview(updated) });
 });
 
 // Coach payout drill-down (accountant/dept_head/head_coach): every private
@@ -1927,11 +1990,32 @@ app.post(`${P}/sessions/add`, async (c) => {
   const user = await requireUser(c);
   const me = user && (await profileOf(user.id));
   if (!me) return c.json({ error: "Unauthorized" }, 401);
-  const { coachId, month, date } = await c.req.json();
+  const body = await c.req.json();
+  const { coachId } = body;
+  let { month, date } = body;
   if (!canMutateSessions(me, coachId)) return c.json({ error: "Forbidden" }, 403);
+  // A coach logs their own attendance only by scanning the coaches'-room QR,
+  // and only for today. Heads keep manual control (corrections, any date).
+  let source = "manual";
+  if (me.role === "coach") {
+    const { data: org } = await admin().from("organizations").select("coach_qr_token").eq("id", me.org_id).maybeSingle();
+    if (!body.scanToken || body.scanToken !== org?.coach_qr_token) {
+      return c.json({ error: "Scan the coaches' QR in the coaches' room to log your attendance.", code: "scan_required" }, 400);
+    }
+    date = gymToday();
+    month = date.slice(0, 7);
+    source = "qr";
+  } else if (body.scanToken) {
+    const { data: org } = await admin().from("organizations").select("coach_qr_token").eq("id", me.org_id).maybeSingle();
+    if (body.scanToken === org?.coach_qr_token && coachId === me.id) {
+      date = gymToday();
+      month = date.slice(0, 7);
+      source = "qr";
+    }
+  }
   const blocked = await assertLoggable(me.org_id, coachId, month);
   if (blocked) return c.json({ error: blocked }, 400);
-  const { data, error } = await admin().from("sessions").insert({ org_id: me.org_id, coach_id: coachId, month, date, created_by: me.id }).select().single();
+  const { data, error } = await admin().from("sessions").insert({ org_id: me.org_id, coach_id: coachId, month, date, created_by: me.id, source }).select().single();
   if (error) throw error;
   return c.json({ session: toSession(data) });
 });
@@ -1942,6 +2026,8 @@ app.post(`${P}/sessions/edit`, async (c) => {
   if (!me) return c.json({ error: "Unauthorized" }, 401);
   const { id, coachId, month, date } = await c.req.json();
   if (!canMutateSessions(me, coachId)) return c.json({ error: "Forbidden" }, 403);
+  // A scanned session is pinned to the day it was scanned.
+  if (me.role === "coach") return c.json({ error: "Only a head can move a session to another day." }, 403);
   const blocked = await assertLoggable(me.org_id, coachId, month);
   if (blocked) return c.json({ error: blocked }, 400);
   const { data: existing } = await admin().from("sessions").select("id").eq("id", id).eq("org_id", me.org_id).maybeSingle();
@@ -2213,6 +2299,7 @@ app.get(`${P}/ops/orgs/:id`, async (c) => {
       id: org.id,
       name: org.name,
       slug: org.slug,
+      coachQrToken: org.coach_qr_token,
       status: org.status,
       planId: org.plan_id ?? null,
       planName: plan?.name ?? null,
@@ -2630,6 +2717,42 @@ async function clientMoneyHistory(clientId: string) {
   out.sort((a, b) => Date.parse(b.at) - Date.parse(a.at));
   return out.slice(0, 150);
 }
+
+// The member's running PT bundles, each with the code their coach scans at
+// the session. Finished bundles (used up / expired / replaced by a renewal)
+// aren't returned, so their codes disappear from the app.
+app.get(`${P}/client/pt`, async (c) => {
+  const me = await requireClient(c);
+  if (!me) return c.json({ error: "Unauthorized" }, 401);
+  const { data } = await admin().from("package_instances").select("*").eq("client_id", me.id).eq("org_id", me.org_id).eq("status", "active").order("purchased_at", { ascending: false });
+  const live = [];
+  for (const row of data ?? []) {
+    const pkg = await materializePackage(row);
+    if (pkg.status === "active" && pkg.sessions_remaining > 0) live.push(pkg);
+  }
+  const coachIds = [...new Set(live.map((p) => p.coach_id))];
+  const bundleIds = [...new Set(live.map((p) => p.bundle_type_id))];
+  const [{ data: coaches }, { data: bundles }, { data: todays }] = await Promise.all([
+    coachIds.length ? admin().from("profiles").select("id, name").in("id", coachIds) : Promise.resolve({ data: [] as any[] }),
+    bundleIds.length ? admin().from("bundle_types").select("id, name").in("id", bundleIds) : Promise.resolve({ data: [] as any[] }),
+    live.length ? admin().from("delivery_logs").select("package_instance_id").in("package_instance_id", live.map((p) => p.id)).eq("date", gymToday()) : Promise.resolve({ data: [] as any[] }),
+  ]);
+  const coachName = new Map((coaches ?? []).map((x: any) => [x.id, x.name]));
+  const bundleName = new Map((bundles ?? []).map((x: any) => [x.id, x.name]));
+  const doneToday = new Set((todays ?? []).map((x: any) => x.package_instance_id));
+  return c.json({
+    bundles: live.map((p) => ({
+      id: p.id,
+      name: bundleName.get(p.bundle_type_id) ?? "PT bundle",
+      coachName: coachName.get(p.coach_id) ?? "Your coach",
+      sessionsRemaining: p.sessions_remaining,
+      sessionsIncluded: p.sessions_included,
+      expiryDate: String(p.expires_at).slice(0, 10),
+      qrToken: p.qr_token,
+      loggedToday: doneToday.has(p.id),
+    })),
+  });
+});
 
 app.get(`${P}/client/wallet`, async (c) => {
   const me = await requireClient(c);

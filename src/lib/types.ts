@@ -23,7 +23,22 @@ export interface Session {
   month: string;
   date: string;
   createdBy: string;
+  /** "qr" = the coach scanned the coaches' QR; "manual" = a head logged it. */
+  source?: "qr" | "manual";
 }
+
+export interface PtScanPreview {
+  id: string;
+  clientName: string;
+  bundleName: string;
+  sessionsRemaining: number;
+  sessionsIncluded: number;
+  expiryDate: string;
+}
+
+export type ScanResult =
+  | { kind: "attendance"; date: string; month: string }
+  | { kind: "pt"; package: PtScanPreview };
 
 export interface Invite {
   email: string;
@@ -236,6 +251,8 @@ export interface OrgDetail {
     id: string;
     name: string;
     slug: string;
+    /** Printed in the coaches' room; coaches scan it to log attendance. */
+    coachQrToken: string;
     status: OrgStatus;
     planId: string | null;
     planName: string | null;

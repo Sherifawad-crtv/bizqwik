@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import QRCode from "qrcode";
 import { api } from "../../lib/backend";
 import { useAsync } from "../../lib/useAsync";
@@ -7,6 +7,7 @@ import { Spinner } from "../../components/Spinner";
 import { Icon } from "../../components/Icon";
 import { Button } from "../../components/Button";
 import { Card, SectionTitle, ErrorBanner } from "./shared";
+import { Segmented } from "../../components/Segmented";
 
 // The lifetime check-in QR. It encodes the org's check-in token — its slug,
 // which is fixed for the org's life — matching the `/client/check-in` backend
@@ -15,16 +16,21 @@ import { Card, SectionTitle, ErrorBanner } from "./shared";
 export function OrgQr() {
   const { id = "" } = useParams();
   const navigate = useNavigate();
+  const [params, setParams] = useSearchParams();
+  const forCoaches = params.get("for") === "coaches";
   const detail = useAsync(() => api.ops.org(id), [id]);
   const [pngUrl, setPngUrl] = useState<string | null>(null);
   const [qrError, setQrError] = useState<string | null>(null);
 
   const org = detail.data?.org ?? null;
-  const token = org?.slug ?? "";
+  // Members' check-in code = the org slug; the coaches' room code is a
+  // separate secret token so members can't log staff attendance (or vice versa).
+  const token = (forCoaches ? org?.coachQrToken : org?.slug) ?? "";
 
   useEffect(() => {
     if (!token) return;
     let alive = true;
+    setPngUrl(null);
     QRCode.toDataURL(token, { errorCorrectionLevel: "M", margin: 2, width: 900 })
       .then((url) => {
         if (alive) setPngUrl(url);
@@ -41,12 +47,15 @@ export function OrgQr() {
   if (detail.error || !org) return <ErrorBanner text={detail.error ?? "Organization not found."} />;
 
   const appName = org.name;
+  const copy = forCoaches
+    ? { title: "Coaches' QR", sub: "Coaches log attendance", file: "coaches-qr", intro: `Lifetime code for ${org.name}'s coaches' room. Coaches scan it with the + button in the staff app to log their sessions.`, steps: `Open the staff app &nbsp;→&nbsp; tap <b>+</b> &nbsp;→&nbsp; scan this code &nbsp;→&nbsp; log your sessions`, label: "Encodes the coaches' attendance code" }
+    : { title: "Check-in QR", sub: "Check in here", file: "checkin-qr", intro: `Lifetime code for ${org.name} — print it for the front desk. Members scan it in the app to check in.`, steps: `Open the <b>${escapeHtml(appName)}</b> app &nbsp;→&nbsp; tap <b>Scan</b> &nbsp;→&nbsp; point at this code`, label: `Encodes check-in code <b>${org.slug}</b>` };
 
   const downloadPng = () => {
     if (!pngUrl) return;
     const a = document.createElement("a");
     a.href = pngUrl;
-    a.download = `${org.slug}-checkin-qr.png`;
+    a.download = `${org.slug}-${copy.file}.png`;
     document.body.appendChild(a);
     a.click();
     a.remove();
@@ -59,7 +68,7 @@ export function OrgQr() {
     if (!pngUrl) return;
     const w = window.open("", "_blank", "width=800,height=1000");
     if (!w) return;
-    w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${escapeHtml(appName)} — Check-in QR</title>
+    w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${escapeHtml(appName)} — ${copy.title}</title>
 <style>
   @page { margin: 24mm; }
   html,body { height: 100%; margin: 0; }
@@ -72,10 +81,10 @@ export function OrgQr() {
   .code { font-family: ui-monospace, Menlo, monospace; font-size: 13px; color: #9a9186; margin-top: 18px; letter-spacing: .04em; }
 </style></head><body>
   <h1 class="name">${escapeHtml(appName)}</h1>
-  <p class="sub">Check in here</p>
-  <img src="${pngUrl}" alt="Check-in QR code" />
-  <div class="steps">Open the <b>${escapeHtml(appName)}</b> app &nbsp;→&nbsp; tap <b>Scan</b> &nbsp;→&nbsp; point at this code</div>
-  <div class="code">${escapeHtml(org.slug)}</div>
+  <p class="sub">${copy.sub}</p>
+  <img src="${pngUrl}" alt="${copy.title}" />
+  <div class="steps">${copy.steps}</div>
+  ${forCoaches ? "" : `<div class="code">${escapeHtml(org.slug)}</div>`}
 </body></html>`);
     w.document.close();
     // Give the embedded image a tick to lay out before printing.
@@ -92,10 +101,15 @@ export function OrgQr() {
         <Icon name="chevron-left" size={16} /> {org.name}
       </button>
 
-      <div style={{ font: "800 30px/1.1 var(--font-body)", letterSpacing: "-.02em" }}>Check-in QR</div>
-      <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)", marginTop: 6 }}>
-        Lifetime code for {org.name} — print it for the front desk. Members scan it in the app to check in.
+      <div style={{ marginBottom: 16 }}>
+        <Segmented
+          value={forCoaches ? "coaches" : "members"}
+          options={[{ value: "members", label: "MEMBERS" }, { value: "coaches", label: "COACHES" }]}
+          onChange={(v) => setParams(v === "coaches" ? { for: "coaches" } : {}, { replace: true })}
+        />
       </div>
+      <div style={{ font: "800 30px/1.1 var(--font-body)", letterSpacing: "-.02em" }}>{copy.title}</div>
+      <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)", marginTop: 6 }}>{copy.intro}</div>
 
       <div style={{ marginTop: 22, maxWidth: 520 }}>
         <SectionTitle>Code</SectionTitle>
@@ -104,10 +118,10 @@ export function OrgQr() {
           {!pngUrl && !qrError && <div style={{ padding: "40px 0", color: "var(--ink-faint)", font: "500 14px var(--font-body)" }}>Rendering…</div>}
           {pngUrl && (
             <>
-              <img src={pngUrl} alt={`${org.name} check-in QR`} width={260} height={260} style={{ width: 260, height: 260, imageRendering: "pixelated" }} />
+              <img src={pngUrl} alt={`${org.name} ${copy.title}`} width={260} height={260} style={{ width: 260, height: 260, imageRendering: "pixelated" }} />
               <div style={{ font: "700 18px var(--font-body)", marginTop: 14 }}>{org.name}</div>
               <div style={{ font: "400 13px/1.6 var(--font-mono)", color: "var(--ink-faint)", marginTop: 4 }}>
-                Encodes check-in code <b>{org.slug}</b>
+                {forCoaches ? copy.label : <>Encodes check-in code <b>{org.slug}</b></>}
               </div>
             </>
           )}

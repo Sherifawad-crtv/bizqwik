@@ -37,6 +37,8 @@ import type {
   Role,
   Rollup,
   Session,
+  ScanResult,
+  PtScanPreview,
   Tier,
 } from "./types";
 
@@ -163,8 +165,11 @@ export const api = {
   deleteClient: (id: string) => callFn<void>("clients/delete", { method: "POST", body: { id } }),
   sellPackage: (clientId: string, bundleTypeId: string, coachId: string, payMethod?: PayMethod) =>
     callFn<{ package: PackageInstance }>("packages", { method: "POST", body: { clientId, bundleTypeId, coachId, payMethod } }),
-  deliverSession: (packageInstanceId: string) =>
-    callFn<{ package: PackageInstance }>("packages/deliver", { method: "POST", body: { packageInstanceId } }),
+  // PT sessions are deducted only by scanning the member's per-bundle code.
+  deliverSession: (qrToken: string) =>
+    callFn<{ package: PackageInstance; preview: PtScanPreview }>("packages/deliver", { method: "POST", body: { qrToken } }),
+  // The FAB scanner: what did the coach just scan?
+  scan: (token: string) => callFn<ScanResult>("scan", { method: "POST", body: { token } }),
   // Coach payout drill-down (accountant/dept_head/head_coach): every private
   // package a coach sold in a given month, with client/bundle names attached.
   packagesByCoach: (coachId: string, month: string) => callFn<{ packages: PackageWithNames[] }>(`packages/by-coach/${coachId}/${month}`),
@@ -180,8 +185,8 @@ export const api = {
 
   month: (month: string) => callFn<{ rows: Rollup[] }>(`month/${month}`),
   sessions: (coachId: string, month: string) => callFn<{ sessions: Session[] }>(`sessions/${coachId}/${month}`),
-  addSession: (coachId: string, month: string, date: string) =>
-    callFn<{ session: Session }>("sessions/add", { method: "POST", body: { coachId, month, date } }),
+  addSession: (coachId: string, month: string, date: string, scanToken?: string) =>
+    callFn<{ session: Session }>("sessions/add", { method: "POST", body: { coachId, month, date, scanToken } }),
   editSession: (id: string, coachId: string, month: string, date: string) =>
     callFn<{ session: Session }>("sessions/edit", { method: "POST", body: { id, coachId, month, date } }),
   removeSession: (id: string, coachId: string, month: string) =>

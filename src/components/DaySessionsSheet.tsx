@@ -21,9 +21,12 @@ interface DaySessionsSheetProps {
   /** Called synchronously right when "add another" is tapped, before the
    * network call — lets the caller show the new session instantly. */
   onOptimisticAdd?: (date: string) => void;
+  /** A coach's own day: sessions come only from scanning the coaches' QR, so
+   * no adding or re-dating here — only removing a mistaken one. */
+  scanOnly?: boolean;
 }
 
-export function DaySessionsSheet({ open, onClose, coachId, month, date, sessions, rate, editable, onOptimisticAdd }: DaySessionsSheetProps) {
+export function DaySessionsSheet({ open, onClose, coachId, month, date, sessions, rate, editable, onOptimisticAdd, scanOnly = false }: DaySessionsSheetProps) {
   const [busyId, setBusyId] = useState<string | null>(null);
   const [movingId, setMovingId] = useState<string | null>(null);
   const [removingId, setRemovingId] = useState<string | null>(null);
@@ -86,8 +89,10 @@ export function DaySessionsSheet({ open, onClose, coachId, month, date, sessions
               ) : (
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                   <span style={{ font: "600 15px var(--font-body)", color: "var(--ink)" }}>Session {i + 1}</span>
+                  <span style={{ font: "700 10px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>{s.source === "qr" ? "QR" : "MANUAL"}</span>
                   {editable && (
                     <>
+                      {!scanOnly && (
                       <button
                         aria-label="Change date"
                         onClick={() => setMovingId(s.id)}
@@ -96,11 +101,12 @@ export function DaySessionsSheet({ open, onClose, coachId, month, date, sessions
                       >
                         <Icon name="pencil" size={15} />
                       </button>
+                      )}
                       <button
                         aria-label="Remove session"
                         onClick={() => setRemovingId(s.id)}
                         disabled={busyId === s.id}
-                        style={{ width: 34, height: 34, borderRadius: 999, border: 0, background: "var(--danger-bg)", color: "var(--danger-fg)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
+                        style={{ marginLeft: scanOnly ? "auto" : undefined, width: 34, height: 34, borderRadius: 999, border: 0, background: "var(--danger-bg)", color: "var(--danger-fg)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
                       >
                         <Icon name="trash" size={15} />
                       </button>
@@ -118,7 +124,7 @@ export function DaySessionsSheet({ open, onClose, coachId, month, date, sessions
           </div>
         )}
 
-        {editable && (
+        {editable && !scanOnly && (
           <Button variant="secondary" fullWidth style={{ marginTop: 14 }} onClick={addAnother}>
             + Add another session this date
           </Button>
