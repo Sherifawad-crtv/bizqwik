@@ -1,3 +1,4 @@
+import { EmptyState } from "../components/EmptyState";
 import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "../lib/auth";
@@ -22,7 +23,7 @@ function Card({ title, sub, children }: { title: string; sub?: string; children:
 }
 
 function Empty({ text }: { text: string }) {
-  return <div style={{ font: "500 13px var(--font-body)", color: "var(--ink-faint)" }}>{text}</div>;
+  return <EmptyState bare icon="insights" title={text} body="This fills in automatically as the front desk sells plans, packages and drop-ins." />;
 }
 
 function useMeasuredWidth(fallback: number) {
@@ -59,6 +60,9 @@ function RevenueChart({ months }: { months: RevenueReport["months"] }) {
   const slot = W / months.length;
   const barW = Math.max(6, Math.min(18, slot / 3));
   const [hover, setHover] = useState<number | null>(null);
+  if (months.every((m) => m.revenue === 0 && m.payouts === 0)) {
+    return <EmptyState bare icon="insights" title="No sales or payouts yet" body="Once the front desk starts selling and coaches log sessions, this chart fills in month by month." />;
+  }
 
   return (
     <div ref={ref} style={{ width: "100%", position: "relative" }}>
@@ -229,7 +233,7 @@ export function Oversight() {
 
           <Card title="BY COACH" sub="PRIVATE TRAINING SOLD · WHAT THEY EARNED">
             {data.byCoach.length === 0 ? (
-              <Empty text="No coach activity in this period." />
+              <EmptyState bare icon="coaches" title="No coach activity in this period" body="Coaches appear here once they sell PT or get paid for sessions in these months." />
             ) : (
               <div style={{ display: "flex", flexDirection: "column" }}>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 90px 90px", gap: 8, font: "700 10px var(--font-mono)", letterSpacing: ".06em", color: "var(--ink-faint)", paddingBottom: 8 }}>

@@ -119,7 +119,13 @@ export function CoachWallet() {
         </span>
       </div>
 
-      <DayList sessions={sessions} rate={row.rate} state={row.state} onOpenDay={(g) => setDayDate(g.date)} />
+      <DayList
+        sessions={sessions}
+        rate={row.rate}
+        state={row.state}
+        onOpenDay={(g) => setDayDate(g.date)}
+        emptyHint={editable ? "Tap + and scan the coaches' room QR when you arrive to log your first session." : "No sessions were logged this month."}
+      />
 
       <div style={{ padding: "22px 2px 0", font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>
         {editable

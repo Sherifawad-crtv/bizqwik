@@ -177,7 +177,7 @@ test("dept_head: class start time is picked on hour/minute/AM-PM wheels", async 
     },
   });
   await page.goto("/catalog");
-  await page.getByRole("button", { name: "+ New class" }).click();
+  await page.getByRole("button", { name: "+ New class" }).first().click();
   await page.getByPlaceholder("e.g. Sunrise HIIT").fill("Early Bird");
   await page.getByRole("button", { name: "Sat", exact: true }).click();
   await page.getByPlaceholder("Per class").fill("150");

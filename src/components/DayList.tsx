@@ -1,6 +1,6 @@
 import type { Session } from "../lib/types";
 import { StatePill } from "./StatePill";
-import { Icon } from "./Icon";
+import { EmptyState } from "./EmptyState";
 import { dateLabel, egp } from "../lib/format";
 import type { State } from "../lib/types";
 
@@ -26,21 +26,19 @@ export function DayList({
   rate,
   state,
   onOpenDay,
+  emptyHint,
 }: {
   sessions: Session[];
   rate: number;
   state: State;
   onOpenDay: (group: DayGroup) => void;
+  /** One line on how sessions get logged, for the empty state. */
+  emptyHint?: string;
 }) {
   const groups = groupByDate(sessions);
 
   if (groups.length === 0) {
-    return (
-      <div data-sq style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-tile)", padding: "32px 16px", display: "flex", flexDirection: "column", alignItems: "center", gap: 8, color: "var(--ink-faint)", font: "500 14px var(--font-body)" }}>
-        <Icon name="calendar" size={26} />
-        No sessions logged yet.
-      </div>
-    );
+    return <EmptyState icon="calendar" title="No sessions logged this month" body={emptyHint ?? "Logged sessions show up here, grouped by day."} />;
   }
 
   return (

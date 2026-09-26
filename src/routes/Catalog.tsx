@@ -1,3 +1,4 @@
+import { EmptyState } from "../components/EmptyState";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSetHeader } from "../lib/header";
@@ -72,13 +73,9 @@ function PanelHeader({ title, count, action }: { title: string; count: number; a
   );
 }
 
-function EmptyRow({ text }: { text: string }) {
-  return (
-    <div style={{ padding: "28px 20px", display: "flex", flexDirection: "column", alignItems: "center", gap: 8, color: "var(--ink-faint)", font: "500 14px var(--font-body)", textAlign: "center" }}>
-      <Icon name="tag" size={26} />
-      {text}
-    </div>
-  );
+function EmptyRow({ text, action }: { text: string; action?: { label: string; onClick: () => void } }) {
+  const [title, ...rest] = text.split(". ");
+  return <EmptyState bare icon="tag" title={title.replace(/\.$/, "")} body={rest.join(". ") || undefined} action={action} />;
 }
 
 // ---------- Classes (recurring series) ----------
@@ -107,7 +104,7 @@ function ClassesPanel() {
         {active.map((s, i) => (
           <SeriesRow key={s.id} s={s} last={i === active.length - 1} onEdit={() => setEditing(s)} />
         ))}
-        {active.length === 0 && <EmptyRow text="No classes yet. Create one and it repeats every week until you change it." />}
+        {active.length === 0 && <EmptyRow text="No classes yet. Create one and it repeats every week until you change it. Members can then drop in or buy a monthly." action={{ label: "+ New class", onClick: () => setEditing("new") }} />}
       </div>
 
       <button
@@ -361,7 +358,7 @@ function PlansPanel() {
               </button>
             </div>
           ))}
-          {rows.length === 0 && <EmptyRow text={empty} />}
+          {rows.length === 0 && <EmptyRow text={empty} action={{ label: kind === "bundle" ? "+ New class bundle" : "+ New membership", onClick: () => setEditing({ kind, planType: null }) }} />}
         </div>
       </div>
     );

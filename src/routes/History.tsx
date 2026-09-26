@@ -1,10 +1,11 @@
+import { EmptyState } from "../components/EmptyState";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../lib/auth";
 import { useSetHeader } from "../lib/header";
 import { useAsync } from "../lib/useAsync";
 import { api, MOCK } from "../lib/backend";
-import { fmt, formatDateTime } from "../lib/format";
+import { fmt, formatDateTime, monthLabel } from "../lib/format";
 import { currentYearMonths } from "../lib/months";
 import { MoneyHero } from "../components/MoneyHero";
 import { YearMonthStrip } from "../components/YearMonthStrip";
@@ -31,9 +32,7 @@ interface RosterData {
 function PersonalHistory({ row, sessions }: { row: Rollup | null; sessions: Session[] }) {
   if (!row) {
     return (
-      <div data-sq style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-tile)", padding: "32px 16px", textAlign: "center", color: "var(--ink-faint)", font: "500 14px var(--font-body)" }}>
-        No record for this month.
-      </div>
+      <EmptyState icon="history" title="Nothing recorded this month" body="Pick another month above to see its sessions and pay." />
     );
   }
 
@@ -55,7 +54,7 @@ function PersonalHistory({ row, sessions }: { row: Rollup | null; sessions: Sess
           {new Set(sessions.map((s) => s.date)).size} {new Set(sessions.map((s) => s.date)).size === 1 ? "DAY" : "DAYS"}
         </span>
       </div>
-      <DayList sessions={sessions} rate={row.rate} state={row.state} onOpenDay={() => {}} />
+      <DayList sessions={sessions} rate={row.rate} state={row.state} onOpenDay={() => {}} emptyHint="No sessions were logged this month. Pick another month above to look back." />
     </>
   );
 }
@@ -100,7 +99,16 @@ function RosterHistory({ rows, month, paidOnly, onOpenCoach }: { rows: Rollup[];
               ]
         }
       />
-      <RollupTable colA={paidOnly ? "PAYEE" : "COACH"} colB={paidOnly ? "METHOD" : "ACTIVITY"} rows={rowItems} />
+      <RollupTable
+        colA={paidOnly ? "PAYEE" : "COACH"}
+        colB={paidOnly ? "METHOD" : "ACTIVITY"}
+        rows={rowItems}
+        empty={
+          paidOnly
+            ? { icon: "history", title: `No payouts for ${monthLabel(month)}`, body: "Coaches paid for this month appear here. Pick another month above to look back." }
+            : { icon: "history", title: `No coach activity in ${monthLabel(month)}`, body: "Sessions and pay for this month appear here once coaches log them. Pick another month above to look back." }
+        }
+      />
     </>
   );
 }

@@ -202,9 +202,9 @@ export function DropIn() {
                 setClassId(v);
                 setDone(null);
               }}
-              placeholder={sessions.length ? "Choose a session (next 7 days)" : "No sessions in the next 7 days"}
-              disabled={sessions.length === 0}
+              placeholder="Choose a session (next 7 days)"
               options={sessions.map((c) => ({ value: c.id, label: `${c.title} · ${whenLabel(c.startsAt)} · ${fmt(c.price)} EGP` }))}
+              empty={{ title: "No class sessions in the next 7 days", body: "Classes are scheduled by the department head in Catalog → Classes. For a visit that isn't a class, use Walk-in." }}
             />
             {session && (
               <div style={{ font: "600 14px var(--font-body)", padding: "0 4px" }}>

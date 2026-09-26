@@ -1,3 +1,4 @@
+import { EmptyState } from "../components/EmptyState";
 import { useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useSetHeader } from "../lib/header";
@@ -104,24 +105,7 @@ export function PayeeDetail() {
       </div>
 
       {packages.length === 0 ? (
-        <div
-          data-sq
-          style={{
-            background: "var(--surface)",
-            border: "1px solid var(--line)",
-            borderRadius: "var(--r-tile)",
-            padding: "32px 16px",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: 8,
-            color: "var(--ink-faint)",
-            font: "500 14px var(--font-body)",
-          }}
-        >
-          <Icon name="clients" size={26} />
-          No private packages sold this month.
-        </div>
+        <EmptyState icon="clients" title="No PT packages sold this month" body="This coach's cut of any PT package sold with them this month shows up here." />
       ) : (
         packages.map((pkg) => <PackageRow key={pkg.id} pkg={pkg} />)
       )}

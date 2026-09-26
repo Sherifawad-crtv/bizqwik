@@ -1,3 +1,4 @@
+import { EmptyState } from "../../components/EmptyState";
 import { useState } from "react";
 import { api } from "../../lib/backend";
 import { useAsync } from "../../lib/useAsync";
@@ -124,10 +125,7 @@ export function Plans() {
           </Card>
         ))}
         {plans.length === 0 && (
-          <Card style={{ padding: "28px 20px", display: "flex", flexDirection: "column", alignItems: "center", gap: 8, color: "var(--ink-faint)", font: "500 14px var(--font-body)" }}>
-            <Icon name="tag" size={26} />
-            No plans yet — create your first one.
-          </Card>
+          <EmptyState icon="tag" title="No SaaS plans yet" body="A plan sets what a gym pays Bizqwik each month and its staff and client limits. Assign one to each org." action={{ label: "+ New plan", onClick: openNew }} />
         )}
       </div>
 

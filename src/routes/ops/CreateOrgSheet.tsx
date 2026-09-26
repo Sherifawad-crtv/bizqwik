@@ -105,6 +105,11 @@ export function CreateOrgSheet({ open, onClose, plans, onCreated }: { open: bool
           placeholder="iron-athletics"
         />
         <SelectField label="PLAN" value={planId} options={planOptions} onChange={setPlanId} placeholder="No plan (assign later)" />
+        {plans.length === 0 && (
+          <div style={{ font: "500 12px/1.5 var(--font-mono)", color: "var(--ink-faint)", padding: "0 2px" }}>
+            No SaaS plans yet — create them under Plans. You can assign one to this org later.
+          </div>
+        )}
         <TextField label="DEPARTMENT-HEAD NAME" value={headName} onChange={(e) => setHeadName(e.target.value)} placeholder="Optional" />
         <TextField label="DEPARTMENT-HEAD EMAIL" type="email" value={headEmail} onChange={(e) => setHeadEmail(e.target.value)} placeholder="head@gym.com" />
         <div style={{ font: "500 12px/1.5 var(--font-mono)", color: "var(--ink-faint)", padding: "0 2px" }}>

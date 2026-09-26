@@ -52,9 +52,14 @@ export function Pay() {
         <span style={{ font: "700 20px var(--font-body)", letterSpacing: "-.01em" }}>Payout queue</span>
         <span style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>{rows.length} due</span>
       </div>
-      <RollupTable colA="PAYEE" colB="METHOD" rows={rowItems} />
+      <RollupTable
+        colA="PAYEE"
+        colB="METHOD"
+        rows={rowItems}
+        empty={{ icon: "topay", title: "Nothing to pay right now", body: "A coach appears here once a head settles their month. Paid months move to History." }}
+      />
       <div style={{ padding: "18px 4px 0", font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>
-        Tap a payee to see the full breakdown before paying.
+        {rows.length > 0 ? "Tap a payee to see the full breakdown before paying." : null}
       </div>
     </div>
   );

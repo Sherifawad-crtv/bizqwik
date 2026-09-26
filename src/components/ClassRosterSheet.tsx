@@ -1,3 +1,4 @@
+import { EmptyState } from "./EmptyState";
 import { useState } from "react";
 import { api } from "../lib/backend";
 import { useAsync } from "../lib/useAsync";
@@ -72,7 +73,7 @@ export function ClassRosterSheet({
         <div style={{ marginBottom: 12, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>{error}</div>
       )}
       {!roster.loading && live.length === 0 && (
-        <div style={{ padding: "26px 0", textAlign: "center", color: "var(--ink-faint)", font: "500 14px var(--font-body)" }}>No one has booked this class yet.</div>
+        <EmptyState bare icon="clients" title="No one has booked this class yet" body="Members book from the app, or the front desk can add a drop-in from Drop-In → Class session." />
       )}
 
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>

@@ -2,6 +2,10 @@ import { useState } from "react";
 import { Avatar } from "./Avatar";
 import { StatePill } from "./StatePill";
 import { Icon } from "./Icon";
+import { EmptyState } from "./EmptyState";
+import type { ComponentProps } from "react";
+
+type EmptyProps = Partial<ComponentProps<typeof EmptyState>>;
 import { useIsMobile } from "../lib/useIsMobile";
 import type { State } from "../lib/types";
 import { egp } from "../lib/format";
@@ -54,16 +58,22 @@ function DesktopRow({ r }: { r: ListRow }) {
   );
 }
 
-export function RollupTable({ colA, colB, rows }: { colA: string; colB: string; rows: ListRow[] }) {
+export function RollupTable({
+  colA,
+  colB,
+  rows,
+  empty,
+}: {
+  colA: string;
+  colB: string;
+  rows: ListRow[];
+  /** Why the list is empty and what to do about it. */
+  empty?: EmptyProps;
+}) {
   const isMobile = useIsMobile();
 
   if (rows.length === 0) {
-    return (
-      <div data-sq style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-tile)", padding: "32px 16px", display: "flex", flexDirection: "column", alignItems: "center", gap: 8, color: "var(--ink-faint)", font: "500 14px var(--font-body)" }}>
-        <Icon name="inbox" size={26} />
-        Nothing here yet.
-      </div>
-    );
+    return <EmptyState icon="coaches" title="Nothing here yet" {...empty} />;
   }
 
   if (isMobile) {

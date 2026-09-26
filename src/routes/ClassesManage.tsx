@@ -1,3 +1,4 @@
+import { EmptyState } from "../components/EmptyState";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../lib/backend";
@@ -84,9 +85,7 @@ export function ClassesManage() {
       )}
 
       {!classes.loading && list.length === 0 && (
-        <div data-sq style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: "34px 20px", textAlign: "center", color: "var(--ink-faint)", font: "500 14px var(--font-body)" }}>
-          No sessions yet. Add a class in Catalog → Classes and its sessions appear here.
-        </div>
+        <EmptyState icon="calendar" title="No sessions yet" body="Sessions come from your recurring classes. Add a class in Catalog and its upcoming sessions appear here." action={{ label: "Go to Catalog", onClick: () => navigate("/catalog") }} />
       )}
 
       {scheduled.length > 0 && (

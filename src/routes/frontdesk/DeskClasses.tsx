@@ -1,3 +1,4 @@
+import { EmptyState } from "../../components/EmptyState";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../../lib/backend";
@@ -51,9 +52,7 @@ export function DeskClasses() {
         <div style={{ font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>{classes.error}</div>
       )}
       {!classes.loading && upcoming.length === 0 && (
-        <div data-sq style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: "34px 20px", textAlign: "center", color: "var(--ink-faint)", font: "500 14px var(--font-body)" }}>
-          No upcoming classes.
-        </div>
+        <EmptyState icon="calendar" title="No upcoming classes" body="Classes are scheduled by the department head in Catalog → Classes. Once there's one, open it here to mark arrivals and collect payment." />
       )}
 
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>

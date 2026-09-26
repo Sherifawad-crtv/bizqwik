@@ -131,7 +131,7 @@ export function CoachDetail() {
         </span>
       </div>
 
-      <DayList sessions={sessions} rate={row.rate} state={row.state} onOpenDay={(g) => setDayDate(g.date)} />
+      <DayList sessions={sessions} rate={row.rate} state={row.state} onOpenDay={(g) => setDayDate(g.date)} emptyHint="This coach hasn't logged a session this month. Sessions they scan in show up here, and you can add one by hand." />
 
       <DaySessionsSheet
         open={!!dayDate}

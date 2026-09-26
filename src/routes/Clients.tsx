@@ -1,3 +1,4 @@
+import { EmptyState } from "../components/EmptyState";
 import { useEffect, useState } from "react";
 import { useAuth } from "../lib/auth";
 import { useSetHeader } from "../lib/header";
@@ -276,25 +277,10 @@ function ClientRoster({
   const valueFor = (c: ClientWithPackage) => (c.currentPackage ? egp(c.currentPackage.priceAtSale) : "—");
 
   if (clients.length === 0) {
-    return (
-      <div
-        data-sq
-        style={{
-          background: "var(--surface)",
-          border: "1px solid var(--line)",
-          borderRadius: "var(--r-tile)",
-          padding: "32px 16px",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: 8,
-          color: "var(--ink-faint)",
-          font: "500 14px var(--font-body)",
-        }}
-      >
-        <Icon name="clients" size={26} />
-        Nothing here yet.
-      </div>
+    return showAssignedCoach ? (
+      <EmptyState icon="clients" title="No clients yet" body="The front desk registers clients and sells their plans and PT packages. Everyone they add shows up here." />
+    ) : (
+      <EmptyState icon="clients" title="No PT clients yet" body="When the front desk sells someone a PT package with you, they show up here with their sessions left." />
     );
   }
 

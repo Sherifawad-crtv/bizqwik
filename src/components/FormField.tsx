@@ -1,6 +1,8 @@
-import { useState, type InputHTMLAttributes } from "react";
+import { useState, type InputHTMLAttributes, type ReactNode } from "react";
 import { Sheet } from "./Sheet";
 import { Icon } from "./Icon";
+import { Button } from "./Button";
+import { EmptyState } from "./EmptyState";
 
 export function TextField({ label, ...rest }: { label: string } & InputHTMLAttributes<HTMLInputElement>) {
   return (
@@ -26,11 +28,13 @@ interface SelectFieldProps {
   onChange: (value: string) => void;
   placeholder?: string;
   disabled?: boolean;
+  /** What to show when there's nothing to pick yet — why, and what to do. */
+  empty?: { title: string; body?: ReactNode };
 }
 
 /** Custom sheet-based picker, not a native <select> — a native picker inside an
  * installed iOS PWA kicks Safari out of standalone mode for the rest of the session. */
-export function SelectField({ label, value, options, onChange, placeholder, disabled }: SelectFieldProps) {
+export function SelectField({ label, value, options, onChange, placeholder, disabled, empty }: SelectFieldProps) {
   const [open, setOpen] = useState(false);
   const selected = options.find((o) => o.value === value);
 
@@ -56,7 +60,7 @@ export function SelectField({ label, value, options, onChange, placeholder, disa
         <span style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>{label}</span>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <span style={{ font: "600 16px var(--font-body)", color: selected ? "var(--ink)" : "var(--ink-faint)" }}>
-            {selected?.label ?? placeholder ?? "Select…"}
+            {selected?.label ?? (options.length === 0 ? (empty?.title ?? "Nothing to choose yet") : (placeholder ?? "Select…"))}
           </span>
           <span style={{ marginLeft: "auto", color: "var(--ink-faint)", display: "flex" }}>
             <Icon name="chevron-down" size={15} />
@@ -66,7 +70,16 @@ export function SelectField({ label, value, options, onChange, placeholder, disa
 
       <Sheet open={open} onClose={() => setOpen(false)}>
         <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>{label}</div>
-        <div style={{ font: "800 26px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 16px" }}>Choose one</div>
+        {options.length === 0 ? (
+          <>
+            <EmptyState bare icon="inbox" title={empty?.title ?? "Nothing to choose yet"} body={empty?.body ?? "There are no options here yet."} />
+            <Button variant="secondary" fullWidth style={{ marginTop: 8 }} onClick={() => setOpen(false)}>
+              OK
+            </Button>
+          </>
+        ) : (
+          <div style={{ font: "800 26px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 16px" }}>Choose one</div>
+        )}
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           {options.map((o) => {
             const on = o.value === value;

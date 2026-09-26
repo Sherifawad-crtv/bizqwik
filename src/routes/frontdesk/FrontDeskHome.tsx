@@ -1,3 +1,4 @@
+import { EmptyState } from "../../components/EmptyState";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../lib/auth";
 import { useSetHeader } from "../../lib/header";
@@ -105,10 +106,7 @@ export function FrontDeskHome() {
           </div>
         ))}
         {data.recent.length === 0 && (
-          <div style={{ padding: "28px 20px", display: "flex", flexDirection: "column", alignItems: "center", gap: 8, color: "var(--ink-faint)", font: "500 14px var(--font-body)" }}>
-            <Icon name="inbox" size={26} />
-            Nothing yet today.
-          </div>
+          <EmptyState bare icon="inbox" title="Nothing yet today" body="Check-ins and drop-ins show up here as they happen." />
         )}
       </Card>
 
