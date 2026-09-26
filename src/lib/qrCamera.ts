@@ -72,11 +72,14 @@ export async function startQrCamera(
   video.muted = true;
   video.autoplay = true;
   video.srcObject = stream;
-  try {
-    await video.play();
-  } catch {
-    // Autoplay can reject spuriously; frames still arrive once metadata loads.
-  }
+  // Don't wait on play() forever: with a camera that isn't delivering frames
+  // yet it can stay pending, and the caller needs control back to recover.
+  await Promise.race([
+    video.play().catch(() => {
+      // Autoplay can reject spuriously; frames still arrive once metadata loads.
+    }),
+    new Promise((resolve) => window.setTimeout(resolve, 1500)),
+  ]);
 
   const detector = await nativeDetector();
   const canvas = document.createElement("canvas");
