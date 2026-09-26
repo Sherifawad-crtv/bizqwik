@@ -1208,7 +1208,7 @@ app.get(`${P}/clients`, async (c) => {
 // clients waiting to be picked up later). If the package leg fails after
 // the client row is written, the client row is rolled back rather than
 // left behind as a half-created record.
-async function sellPackageTo(clientId: string, bundleTypeId: string, coachId: string, me: any) {
+async function sellPackageTo(clientId: string, bundleTypeId: string, coachId: string, me: any, payMethod: "cash" | "card" | "wallet" = "cash") {
   const { data: client, error: cErr } = await admin().from("clients").select("*").eq("id", clientId).eq("org_id", me.org_id).maybeSingle();
   if (cErr) throw cErr;
   if (!client) return { error: "No such client", status: 404 } as const;
@@ -1245,6 +1245,7 @@ async function sellPackageTo(clientId: string, bundleTypeId: string, coachId: st
       expires_at: `${expiryDate}T00:00:00Z`,
       status: "active",
       created_by: me.id,
+      pay_method: payMethod,
     })
     .select()
     .single();
@@ -1305,7 +1306,7 @@ app.post(`${P}/clients`, async (c) => {
     await admin().from("client_notes").insert({ client_id: client.id, org_id: me.org_id, conditions });
   }
 
-  const result = await sellPackageTo(client.id, bundleTypeId, coachId, me);
+  const result = await sellPackageTo(client.id, bundleTypeId, coachId, me, payMethod);
   if ("error" in result) {
     await admin().from("client_notes").delete().eq("client_id", client.id);
     await admin().from("clients").delete().eq("id", client.id);
@@ -1388,7 +1389,7 @@ app.post(`${P}/packages`, async (c) => {
   const body = await c.req.json();
   const { clientId, bundleTypeId, coachId } = body;
   const payMethod = normPayMethod(body.payMethod);
-  const result = await sellPackageTo(clientId, bundleTypeId, coachId, me);
+  const result = await sellPackageTo(clientId, bundleTypeId, coachId, me, payMethod);
   if ("error" in result) return c.json({ error: result.error }, result.status);
   const price = Number(result.package.price_at_sale);
   if (payMethod === "wallet") {
@@ -1534,7 +1535,7 @@ app.post(`${P}/drop-ins`, async (c) => {
 
   const { data, error } = await admin()
     .from("drop_ins")
-    .insert({ org_id: me.org_id, client_id: clientId || null, category: cat, price: amount, class_id: cls?.id ?? null })
+    .insert({ org_id: me.org_id, client_id: clientId || null, category: cat, price: amount, class_id: cls?.id ?? null, pay_method: payMethod })
     .select()
     .single();
   if (error) throw error;
@@ -1964,14 +1965,15 @@ function toPlanType(row: any) {
   return { id: row.id, name: row.name, price: Number(row.price), teamSizeLimit: row.team_size_limit, clientSizeLimit: row.client_size_limit };
 }
 
+// GMV = money in, same rule as revenue: wallet-paid sales are left out.
 async function gmvByOrg(): Promise<Map<string, number>> {
   const [pkgs, mems, memTypes, drops, plans, bookings] = await Promise.all([
-    admin().from("package_instances").select("org_id, price_at_sale"),
+    admin().from("package_instances").select("org_id, price_at_sale").or(NOT_WALLET),
     admin().from("membership_instances").select("org_id, membership_type_id"),
     admin().from("membership_types").select("id, price"),
-    admin().from("drop_ins").select("org_id, price"),
-    admin().from("group_plans").select("org_id, price_at_sale"),
-    admin().from("class_bookings").select("org_id, price_egp").eq("coverage", "drop_in").eq("pay_status", "paid").is("drop_in_id", null),
+    admin().from("drop_ins").select("org_id, price").or(NOT_WALLET),
+    admin().from("group_plans").select("org_id, price_at_sale").neq("pay_method", "wallet"),
+    admin().from("class_bookings").select("org_id, price_egp").eq("coverage", "drop_in").eq("pay_status", "paid").is("drop_in_id", null).neq("pay_method", "wallet"),
   ]);
   const priceOfType = new Map((memTypes.data ?? []).map((t: any) => [t.id, Number(t.price)]));
   const m = new Map<string, number>();
@@ -2819,14 +2821,17 @@ app.get(`${P}/group-plans/client/:id`, async (c) => {
 });
 
 // ---- revenue (dept_head): the SME founder's money view ----
-// Revenue is recognised at the moment of sale, whatever the tender (cash,
-// card or store credit). Wallet top-ups are NOT revenue — the sale they're
-// later spent on is — so nothing is counted twice. Coach payouts are the same
+// Revenue is new money in: sales paid by cash or card, recognised at the
+// moment of sale. Sales paid from the wallet are NOT revenue — wallet credit
+// comes from refunds (already counted when first sold), compensation and
+// points rewards, none of which is new money. Coach payouts are the same
 // numbers the payout screens use (group sessions × rate + private cuts).
 const REVENUE_TYPE_LABELS: Record<string, string> = {
   pt_bundle: "PT bundles", membership: "Memberships", class_monthly: "Class monthlies", bundle: "Class bundles",
   class_drop_in: "Class drop-ins", walk_in: "Walk-ins", legacy_membership: "Memberships (legacy)",
 };
+// pay_method is null on sales from before it was recorded (all desk sales).
+const NOT_WALLET = "pay_method.is.null,pay_method.neq.wallet";
 function monthsBack(n: number): string[] {
   const out: string[] = [];
   const d = new Date();
@@ -2849,10 +2854,10 @@ app.get(`${P}/revenue`, async (c) => {
   await sweepOrgGroupPlans(org);
 
   const [pkgs, plans, drops, bookings, legacyMems, legacyTypes, coaches, activePkgs, activePlans, lots] = await Promise.all([
-    admin().from("package_instances").select("purchased_at, price_at_sale, coach_id, client_id").eq("org_id", org).gte("purchased_at", since),
-    admin().from("group_plans").select("created_at, price_at_sale, kind, client_id").eq("org_id", org).gte("created_at", since),
-    admin().from("drop_ins").select("created_at, price, class_id").eq("org_id", org).gte("created_at", since),
-    admin().from("class_bookings").select("booked_at, price_egp").eq("org_id", org).eq("coverage", "drop_in").eq("pay_status", "paid").is("drop_in_id", null).gte("booked_at", since),
+    admin().from("package_instances").select("purchased_at, price_at_sale, coach_id, client_id").eq("org_id", org).gte("purchased_at", since).or(NOT_WALLET),
+    admin().from("group_plans").select("created_at, price_at_sale, kind, client_id").eq("org_id", org).gte("created_at", since).neq("pay_method", "wallet"),
+    admin().from("drop_ins").select("created_at, price, class_id").eq("org_id", org).gte("created_at", since).or(NOT_WALLET),
+    admin().from("class_bookings").select("booked_at, price_egp").eq("org_id", org).eq("coverage", "drop_in").eq("pay_status", "paid").is("drop_in_id", null).neq("pay_method", "wallet").gte("booked_at", since),
     admin().from("membership_instances").select("starts_at, membership_type_id").eq("org_id", org).gte("starts_at", since),
     admin().from("membership_types").select("id, price").eq("org_id", org),
     admin().from("profiles").select("*").eq("org_id", org).in("role", ["coach", "head_coach", "dept_head"]),
