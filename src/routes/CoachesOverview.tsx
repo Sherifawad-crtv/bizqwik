@@ -17,7 +17,7 @@ export function CoachesOverview() {
 
   const { data } = useAsync(() => api.month(month), [month]);
 
-  useSetHeader({ kicker: "CALISTHENICS DEPT", title: "Coaches" }, []);
+  useSetHeader({ kicker: "CALISTHENICS DEPT", title: "Team" }, []);
 
   if (!data) return <Spinner />;
   const rows = data.rows.filter((r) => canLog(r.role));

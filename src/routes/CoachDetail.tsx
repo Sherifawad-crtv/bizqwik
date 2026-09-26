@@ -77,7 +77,7 @@ export function CoachDetail() {
         onClick={() => navigate("/coaches")}
         style={{ display: "flex", alignItems: "center", gap: 4, border: 0, background: "none", cursor: "pointer", color: "var(--ink-muted)", font: "600 13px var(--font-body)", padding: "0 0 14px" }}
       >
-        <Icon name="chevron-left" size={16} /> Coaches
+        <Icon name="chevron-left" size={16} /> Team
       </button>
 
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 18 }}>
