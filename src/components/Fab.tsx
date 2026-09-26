@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useState, type ReactNode } from "react";
 import { Icon } from "./Icon";
 import { AddSessionSheet } from "./AddSessionSheet";
 import { Sheet } from "./Sheet";
@@ -6,10 +6,12 @@ import { Button } from "./Button";
 import { SeriesSheet, PlanTypeSheet } from "../routes/Catalog";
 import { BundleSheet } from "../routes/Manage";
 import { useAuth } from "../lib/auth";
-import { useOwnMonth } from "../lib/ownMonth";
 import { useAsync } from "../lib/useAsync";
 import { api } from "../lib/backend";
-import { monthLabel } from "../lib/format";
+import { QrScanner } from "./QrScanner";
+import { SheetSuccessIcon } from "./SheetSuccessIcon";
+import { useSheetSuccess } from "../lib/useSheetSuccess";
+import type { PtScanPreview } from "../lib/types";
 
 function FabButton({ size, label, onClick, opacity = 1 }: { size: number; label: string; onClick: () => void; opacity?: number }) {
   return (
@@ -94,47 +96,131 @@ function CreateFab({ size }: { size: number }) {
   );
 }
 
-function AddSessionFab({ size }: { size: number }) {
+// The coach's FAB is a scanner. What was scanned decides what happens next:
+// the coaches'-room QR -> the session stepper (locked to today); a member's
+// PT code -> confirm deducting one session from that bundle.
+export function ScanFlow({ trigger }: { trigger: (open: () => void, busy: boolean) => ReactNode }) {
   const { profile } = useAuth();
-  const { month } = useOwnMonth();
-  const [open, setOpen] = useState(false);
-  const [hint, setHint] = useState<string | null>(null);
+  const [scanning, setScanning] = useState(false);
+  const [checking, setChecking] = useState(false);
+  const [problem, setProblem] = useState<string | null>(null);
+  const [attendance, setAttendance] = useState<{ token: string; date: string; month: string } | null>(null);
+  const [pt, setPt] = useState<{ token: string; preview: PtScanPreview } | null>(null);
 
-  const { data } = useAsync(() => api.month(month), [month, profile?.id]);
-  const own = data?.rows.find((r) => r.coachId === profile?.id);
-  const enabled = own ? own.state === "logging" : true;
+  const { data } = useAsync(() => (attendance ? api.month(attendance.month) : Promise.resolve(null)), [attendance?.month, profile?.id]);
+  const rate = data?.rows.find((r) => r.coachId === profile?.id)?.rate ?? 0;
 
-  const showHint = useCallback(() => {
-    setHint(`${monthLabel(month)} is closed — switch to the current month to add sessions.`);
-    window.setTimeout(() => setHint(null), 2600);
-  }, [month]);
+  const onScan = useCallback(async (token: string) => {
+    setScanning(false);
+    setChecking(true);
+    try {
+      const res = await api.scan(token);
+      // Let the scanner's exit finish before the next sheet slides up.
+      window.setTimeout(() => {
+        if (res.kind === "attendance") setAttendance({ token, date: res.date, month: res.month });
+        else setPt({ token, preview: res.package });
+      }, 60);
+    } catch (err) {
+      setProblem(err instanceof Error ? err.message : "Couldn't read that code.");
+    } finally {
+      setChecking(false);
+    }
+  }, []);
 
   if (!profile) return null;
 
   return (
     <>
-      {hint && (
-        <div
-          style={{
-            position: "absolute",
-            right: 0,
-            bottom: size + 14,
-            zIndex: 60,
-            maxWidth: 240,
-            background: "var(--ink)",
-            color: "var(--surface)",
-            font: "600 13px/1.4 var(--font-body)",
-            padding: "10px 14px",
-            borderRadius: 14,
-            boxShadow: "var(--shadow-float)",
-          }}
-        >
-          {hint}
-        </div>
+      {trigger(() => setScanning(true), checking)}
+      {scanning && (
+        <QrScanner
+          title="Scan"
+          hint="The coaches' room QR to log attendance, or a member's PT code to log their session."
+          onClose={() => setScanning(false)}
+          onScan={onScan}
+        />
       )}
-      <FabButton size={size} label="Log session" onClick={() => (enabled ? setOpen(true) : showHint())} opacity={enabled ? 1 : 0.55} />
-      <AddSessionSheet open={open} onClose={() => setOpen(false)} coachId={profile.id} month={month} rate={own?.rate ?? 0} />
+      <Sheet open={!!problem} onClose={() => setProblem(null)}>
+        <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>SCAN</div>
+        <div style={{ font: "800 26px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 12px" }}>That didn't work</div>
+        <div role="alert" style={{ font: "600 14px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "12px 14px" }}>
+          {problem}
+        </div>
+        <Button fullWidth size="lg" style={{ marginTop: 16 }} onClick={() => { setProblem(null); setScanning(true); }}>
+          Scan again
+        </Button>
+        <Button fullWidth variant="secondary" style={{ marginTop: 8 }} onClick={() => setProblem(null)}>
+          Close
+        </Button>
+      </Sheet>
+      <AddSessionSheet
+        open={!!attendance}
+        onClose={() => setAttendance(null)}
+        coachId={profile.id}
+        month={attendance?.month ?? ""}
+        rate={rate}
+        scan={attendance ?? undefined}
+      />
+      <PtDeliverSheet scan={pt} onClose={() => setPt(null)} />
     </>
+  );
+}
+
+function PtDeliverSheet({ scan, onClose }: { scan: { token: string; preview: PtScanPreview } | null; onClose: () => void }) {
+  const open = !!scan;
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [left, setLeft] = useState<number | null>(null);
+  const { confirmed, iconIn, showSuccess } = useSheetSuccess(open, onClose);
+  const p = scan?.preview;
+
+  const confirm = async () => {
+    if (!scan) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await api.deliverSession(scan.token);
+      setLeft(res.package.sessionsRemaining);
+      showSuccess();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <Sheet open={open} onClose={onClose}>
+      {confirmed ? (
+        <SheetSuccessIcon label={`Session logged · ${left ?? 0} left`} iconIn={iconIn} />
+      ) : p ? (
+        <>
+          <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>PRIVATE TRAINING</div>
+          <div style={{ font: "800 30px/1.1 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 4px" }}>{p.clientName}</div>
+          <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-muted)", marginBottom: 16 }}>
+            {p.bundleName} · expires {p.expiryDate}
+          </div>
+          <div style={{ display: "flex", alignItems: "baseline", gap: 10, background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "14px 16px" }}>
+            <span style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>SESSIONS LEFT</span>
+            <span className="tabular" style={{ marginLeft: "auto", font: "800 26px var(--font-body)" }}>
+              {p.sessionsRemaining} → {p.sessionsRemaining - 1}
+            </span>
+            <span style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>of {p.sessionsIncluded}</span>
+          </div>
+          {error && (
+            <div role="alert" style={{ marginTop: 12, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>
+              {error}
+            </div>
+          )}
+          <Button fullWidth size="lg" style={{ marginTop: 16 }} disabled={busy} onClick={confirm}>
+            {busy ? "Logging…" : "Deduct 1 session"}
+          </Button>
+          <Button fullWidth variant="secondary" style={{ marginTop: 8 }} disabled={busy} onClick={onClose}>
+            Cancel
+          </Button>
+        </>
+      ) : null}
+    </Sheet>
   );
 }
 
@@ -142,5 +228,5 @@ export function Fab({ size = 64 }: { size?: number }) {
   const { profile } = useAuth();
   if (!profile) return null;
   if (profile.role === "dept_head") return <CreateFab size={size} />;
-  return <AddSessionFab size={size} />;
+  return <ScanFlow trigger={(open, busy) => <FabButton size={size} label="Scan" onClick={open} opacity={busy ? 0.55 : 1} />} />;
 }

@@ -3,10 +3,14 @@ import { Sheet } from "./Sheet";
 import { DateField } from "./DateField";
 import { Stepper } from "./Stepper";
 import { Button } from "./Button";
+import { Icon } from "./Icon";
 import { SheetSuccessIcon } from "./SheetSuccessIcon";
 import { useSheetSuccess } from "../lib/useSheetSuccess";
 import { api } from "../lib/backend";
 import { daysInMonth, egp, isoDate, monthLabel, todayIso } from "../lib/format";
+
+const shortDay = (iso: string) =>
+  new Date(`${iso}T00:00:00`).toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short" });
 
 interface AddSessionSheetProps {
   open: boolean;
@@ -19,12 +23,17 @@ interface AddSessionSheetProps {
    * calls — lets the caller show the new session(s) instantly instead of
    * waiting on a round-trip. The following refetch reconciles it for real. */
   onOptimisticAdd?: (date: string, qty: number) => void;
+  /** Set after the coach scans the coaches'-room QR: the date is locked to
+   * the day of the scan and the scan token proves they're on site. */
+  scan?: { token: string; date: string; month: string };
 }
 
-export function AddSessionSheet({ open, onClose, coachId, coachName, month, rate, onOptimisticAdd }: AddSessionSheetProps) {
+export function AddSessionSheet({ open, onClose, coachId, coachName, month: monthProp, rate, onOptimisticAdd, scan }: AddSessionSheetProps) {
+  const month = scan?.month ?? monthProp;
   const min = isoDate(month, 1);
   const max = isoDate(month, daysInMonth(month));
   const defaultDate = () => {
+    if (scan) return scan.date;
     const today = todayIso();
     return today >= min && today <= max ? today : min;
   };
@@ -44,7 +53,7 @@ export function AddSessionSheet({ open, onClose, coachId, coachName, month, rate
       setSavedCount(null);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, month]);
+  }, [open, month, scan?.date]);
 
   const confirm = async () => {
     setSaving(true);
@@ -53,7 +62,7 @@ export function AddSessionSheet({ open, onClose, coachId, coachName, month, rate
     onOptimisticAdd?.(date, qty);
     try {
       for (let i = 0; i < qty; i++) {
-        await api.addSession(coachId, month, date);
+        await api.addSession(coachId, month, date, scan?.token);
         done += 1;
       }
       showSuccess();
@@ -82,7 +91,15 @@ export function AddSessionSheet({ open, onClose, coachId, coachName, month, rate
           </div>
 
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            <DateField value={date} min={min} max={max} onChange={setDate} />
+            {scan ? (
+              <div data-testid="scan-date" style={{ display: "flex", alignItems: "center", gap: 10, background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "14px 16px" }}>
+                <Icon name="check" size={18} />
+                <span style={{ font: "700 15px var(--font-body)" }}>Today · {shortDay(scan.date)}</span>
+                <span style={{ marginLeft: "auto", font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>QR VERIFIED</span>
+              </div>
+            ) : (
+              <DateField value={date} min={min} max={max} onChange={setDate} />
+            )}
             <Stepper value={qty} onChange={setQty} />
             <div style={{ display: "flex", alignItems: "baseline", gap: 10, padding: "6px 6px 0" }}>
               <span style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>ADDS</span>

@@ -13,6 +13,7 @@ import { DayList } from "../components/DayList";
 import { DaySessionsSheet } from "../components/DaySessionsSheet";
 import { AddSessionSheet } from "../components/AddSessionSheet";
 import { Button } from "../components/Button";
+import { ScanFlow } from "../components/Fab";
 import { Spinner } from "../components/Spinner";
 
 export function CoachWallet() {
@@ -97,8 +98,11 @@ export function CoachWallet() {
               Reopen
             </Button>
           )}
-          {editable && !isMobile && (
+          {editable && !isMobile && isHead(profile.role) && (
             <Button onClick={() => setAddOpen(true)}>+ Add session</Button>
+          )}
+          {editable && !isMobile && (
+            <ScanFlow trigger={(open, busy) => <Button variant={isHead(profile.role) ? "secondary" : "primary"} disabled={busy} onClick={open}>Scan QR</Button>} />
           )}
         </div>
       )}
@@ -119,7 +123,9 @@ export function CoachWallet() {
 
       <div style={{ padding: "22px 2px 0", font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>
         {editable
-          ? "Logging stays editable until a head settles the month. Tap a day to adjust it."
+          ? profile.role === "coach"
+            ? "Log attendance by scanning the coaches' room QR. Tap a day to remove a mistake."
+            : "Logging stays editable until a head settles the month. Tap a day to adjust it."
           : `Read-only · ${row.state.toUpperCase()} — contact a head to change anything.`}
       </div>
 
@@ -132,6 +138,7 @@ export function CoachWallet() {
         sessions={dayGroup}
         rate={row.rate}
         editable={editable}
+        scanOnly={profile.role === "coach"}
         onOptimisticAdd={(d) => handleOptimisticAdd(d, 1)}
       />
       <AddSessionSheet

@@ -227,7 +227,7 @@ export function OrgDetail() {
       <OrgAppConfig id={id} />
 
       <div style={{ marginTop: 26 }}>
-        <SectionTitle>Check-in QR</SectionTitle>
+        <SectionTitle>QR codes</SectionTitle>
         <Card style={{ padding: 18, display: "flex", alignItems: "center", gap: 14 }}>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ font: "700 15px var(--font-body)" }}>Lifetime check-in code</div>
@@ -236,6 +236,17 @@ export function OrgDetail() {
             </div>
           </div>
           <Button variant="secondary" style={{ flex: "none" }} onClick={() => navigate(`/bizqwik/orgs/${id}/qr`)}>
+            Open
+          </Button>
+        </Card>
+        <Card style={{ padding: 18, display: "flex", alignItems: "center", gap: 14, marginTop: 10 }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ font: "700 15px var(--font-body)" }}>Coaches' attendance code</div>
+            <div style={{ font: "400 13px/1.5 var(--font-mono)", color: "var(--ink-faint)", marginTop: 2 }}>
+              Print it for the coaches' room — coaches scan it with the + button to log their sessions.
+            </div>
+          </div>
+          <Button variant="secondary" style={{ flex: "none" }} onClick={() => navigate(`/bizqwik/orgs/${id}/qr?for=coaches`)}>
             Open
           </Button>
         </Card>
