@@ -545,11 +545,12 @@ async function sellGroupPlan(opts: { orgId: string; client: any; planTypeId?: st
   return { plan } as const;
 }
 
-// Gives back a bundle credit when a plan-covered seat is released. A bundle
+// Gives back a bundle credit when a plan-covered seat that already used one is
+// released (only bookings from before check-in deduction, or checked-in ones). A bundle
 // that had been finished only because its last credit was used comes back to
 // life — unless it's expired or the member has since bought another plan.
 async function returnPlanCredit(booking: any) {
-  if (booking.coverage !== "plan" || !booking.group_plan_id) return;
+  if (booking.coverage !== "plan" || !booking.group_plan_id || !booking.credit_spent) return;
   const { data: plan } = await admin().from("group_plans").select("*").eq("id", booking.group_plan_id).maybeSingle();
   if (!plan || plan.kind !== "bundle") return;
   const credits = Math.min(Number(plan.credits_total), Number(plan.credits_remaining) + 1);
@@ -1520,6 +1521,83 @@ async function clientPlanStatus(clientId: string, orgId: string) {
   };
 }
 
+// ---- check-in: the one place a visit is recorded -------------------------
+// Everyone with an active plan or PT package can check in (and earns points).
+// A class bundle is used on arrival: checking in takes one session off it, at
+// most once per gym day, and marks today's reserved class (if any) attended.
+// Memberships and class monthlies are time-based, and PT is logged by the
+// coach's scan, so those deduct nothing here.
+async function dayBoundsUtc(orgId: string) {
+  const tz = await orgTimezone(orgId);
+  const today = todayInTz(tz);
+  return { start: localToUtcIso(today, "00:00", tz), end: localToUtcIso(addDays(today, 1), "00:00", tz) };
+}
+
+type CheckInResult =
+  | { ok: true; checkIn: any; deducted: boolean; plan: { name: string; kind: string; creditsRemaining: number | null; creditsTotal: number | null } | null }
+  | { ok: false; error: string; status: number; code?: string; plan?: any };
+
+async function recordCheckIn(orgId: string, clientId: string, clientName: string, source: "qr" | "manual", actorId: string | null, self: boolean): Promise<CheckInResult> {
+  const status = await clientPlanStatus(clientId, orgId);
+  if (!status.eligible) {
+    // A bundle that ran out gets its own, clearer answer.
+    const { data: last } = await admin().from("group_plans").select("*").eq("client_id", clientId).eq("org_id", orgId)
+      .eq("kind", "bundle").order("created_at", { ascending: false }).limit(1).maybeSingle();
+    if (last && Number(last.credits_remaining) <= 0 && Date.parse(last.expires_at) > Date.now()) {
+      return {
+        ok: false, status: 400, code: "no_sessions", plan: toGroupPlan(last),
+        error: self
+          ? `You've used all ${last.credits_total} sessions of ${last.name}. Renew at the front desk to keep training.`
+          : `${clientName} has used all ${last.credits_total} sessions of ${last.name}. Renew their bundle to check them in.`,
+      };
+    }
+    return { ok: false, status: 400, code: "no_plan", error: self ? "No active plan — please see the front desk." : `${clientName} has no active plan or package.` };
+  }
+
+  let plan = status.groupPlanRow;
+  let deductFrom: string | null = null;
+  if (plan && plan.kind === "bundle") {
+    const { start, end } = await dayBoundsUtc(orgId);
+    const { data: usedToday } = await admin().from("check_ins").select("id").eq("client_id", clientId)
+      .not("group_plan_id", "is", null).gte("checked_in_at", start).lt("checked_in_at", end).limit(1);
+    const { data: todays } = await admin().from("class_bookings").select("id, credit_spent, attendance, classes!inner(starts_at)")
+      .eq("client_id", clientId).eq("group_plan_id", plan.id).eq("coverage", "plan").neq("attendance", "cancelled")
+      .gte("classes.starts_at", start).lt("classes.starts_at", end);
+    // A class booked before this rule already used its session at booking.
+    const prepaid = (todays ?? []).some((b: any) => b.credit_spent);
+    if (!(usedToday?.length) && !prepaid) {
+      if (Number(plan.credits_remaining) <= 0) {
+        return { ok: false, status: 400, code: "no_sessions", plan: toGroupPlan(plan), error: self ? `You've used all sessions of ${plan.name}. Renew at the front desk to keep training.` : `${clientName} has no sessions left on ${plan.name}.` };
+      }
+      // Compare-and-set so two check-ins can't both take the last session.
+      const { data: spent } = await admin().from("group_plans").update({ credits_remaining: Number(plan.credits_remaining) - 1 })
+        .eq("id", plan.id).eq("credits_remaining", plan.credits_remaining).select().maybeSingle();
+      if (!spent) return { ok: false, status: 409, error: "That bundle just changed — please scan again." };
+      plan = spent;
+      deductFrom = plan.id;
+      const reserved = (todays ?? []).find((b: any) => !b.credit_spent);
+      if (reserved) await admin().from("class_bookings").update({ credit_spent: true, attendance: "arrived" }).eq("id", reserved.id);
+    }
+    // Any other class reserved today on this bundle counts as attended too.
+    const openIds = (todays ?? []).filter((b: any) => b.attendance === "booked").map((b: any) => b.id);
+    if (openIds.length) await admin().from("class_bookings").update({ attendance: "arrived" }).in("id", openIds);
+  }
+
+  const { data: checkIn, error } = await admin().from("check_ins").insert({ org_id: orgId, client_id: clientId, source, group_plan_id: deductFrom }).select().single();
+  if (error) {
+    if (deductFrom) await admin().from("group_plans").update({ credits_remaining: Number(plan.credits_remaining) + 1 }).eq("id", deductFrom);
+    throw error;
+  }
+  await earnCheckinPoints(clientId, orgId);
+  await logActivity(orgId, "check_in", { actorId, clientId, meta: deductFrom ? { bundle: plan.name, sessionsLeft: Number(plan.credits_remaining) } : {} });
+  return {
+    ok: true,
+    checkIn,
+    deducted: !!deductFrom,
+    plan: plan ? { name: plan.name, kind: plan.kind, creditsRemaining: plan.credits_remaining ?? null, creditsTotal: plan.credits_total ?? null } : null,
+  };
+}
+
 app.get(`${P}/front-desk/client-status/:id`, async (c) => {
   const user = await requireUser(c);
   const me = user && (await profileOf(user.id));
@@ -1540,13 +1618,10 @@ app.post(`${P}/check-ins`, async (c) => {
   if (source !== "qr" && source !== "manual") return c.json({ error: "Invalid check-in source." }, 400);
   const { data: client } = await admin().from("clients").select("id, name").eq("id", clientId).eq("org_id", me.org_id).maybeSingle();
   if (!client) return c.json({ error: "No such client" }, 404);
-  const status = await clientPlanStatus(clientId, me.org_id);
-  if (!status.eligible) return c.json({ error: `${client.name} has no active plan or package.` }, 400);
-  const { data, error } = await admin().from("check_ins").insert({ org_id: me.org_id, client_id: clientId, source }).select().single();
-  if (error) throw error;
-  await earnCheckinPoints(clientId, me.org_id);
-  await logActivity(me.org_id, "check_in", { actorId: me.id, clientId });
-  return c.json({ checkIn: { id: data.id, clientId: data.client_id, source: data.source, checkedInAt: data.checked_in_at } });
+  const r = await recordCheckIn(me.org_id, clientId, client.name, source, me.id, false);
+  if (!r.ok) return c.json({ error: r.error, code: r.code ?? null, plan: r.plan ?? null }, r.status as any);
+  const data = r.checkIn;
+  return c.json({ checkIn: { id: data.id, clientId: data.client_id, source: data.source, checkedInAt: data.checked_in_at }, deducted: r.deducted, plan: r.plan });
 });
 
 app.post(`${P}/drop-ins`, async (c) => {
@@ -1646,7 +1721,7 @@ app.post(`${P}/drop-ins`, async (c) => {
     const { error: bErr } = await admin().from("class_bookings").upsert(
       {
         org_id: me.org_id, class_id: cls.id, client_id: clientId, coverage: "drop_in", group_plan_id: null, drop_in_id: data.id,
-        pay_method: payMethod === "wallet" ? "wallet" : "desk", pay_status: "paid", attendance: "arrived", price_egp: amount, booked_at: new Date().toISOString(),
+        pay_method: payMethod === "wallet" ? "wallet" : "desk", pay_status: "paid", attendance: "arrived", price_egp: amount, credit_spent: false, booked_at: new Date().toISOString(),
       },
       { onConflict: "class_id,client_id" },
     );
@@ -2534,7 +2609,7 @@ function toClassRow(row: any) {
 function toBookingRow(row: any) {
   return {
     id: row.id, classId: row.class_id, payMethod: row.pay_method, payStatus: row.pay_status, attendance: row.attendance, price: Number(row.price_egp), bookedAt: row.booked_at,
-    coverage: row.coverage ?? "drop_in", groupPlanId: row.group_plan_id ?? null,
+    coverage: row.coverage ?? "drop_in", groupPlanId: row.group_plan_id ?? null, creditSpent: !!row.credit_spent,
   };
 }
 async function requireClient(c: any) {
@@ -2604,8 +2679,8 @@ app.get(`${P}/client/classes`, async (c) => {
   });
 });
 
-// Booking resolver. Covered by the active plan -> a plan seat (a bundle spends
-// one credit). Otherwise it's a drop-in at the class price, paid from the
+// Booking resolver. Covered by the active plan -> a plan seat (a bundle's
+// session is used later, at check-in). Otherwise it's a drop-in at the class price, paid from the
 // wallet or at the desk — and if a plan is still running, the member must
 // confirm first (409 active_plan_confirm drives the "you still have X" popup).
 // `useDropIn: true` forces a drop-in even when the plan would cover it.
@@ -2622,21 +2697,13 @@ app.post(`${P}/client/classes/:id/book`, async (c) => {
 
   const plan = await activeGroupPlan(me.id, me.org_id);
   if (plan && planCovers(plan, cls) && !body.useDropIn) {
-    if (plan.kind === "bundle") {
-      // Compare-and-set so two bookings can't both spend the last credit.
-      const { data: spent } = await admin().from("group_plans")
-        .update({ credits_remaining: Number(plan.credits_remaining) - 1 })
-        .eq("id", plan.id).eq("credits_remaining", plan.credits_remaining).select().maybeSingle();
-      if (!spent) return c.json({ error: "Your bundle just changed — please try again." }, 409);
-    }
+    // Booking only reserves the spot. A bundle session is used when the member
+    // checks in on arrival; cancelling or not showing up costs nothing.
     const { data: booking, error } = await admin().from("class_bookings").upsert(
-      { org_id: me.org_id, class_id: classId, client_id: me.id, coverage: "plan", group_plan_id: plan.id, drop_in_id: null, pay_method: "plan", pay_status: "paid", attendance: "booked", price_egp: 0, booked_at: new Date().toISOString() },
+      { org_id: me.org_id, class_id: classId, client_id: me.id, coverage: "plan", group_plan_id: plan.id, drop_in_id: null, pay_method: "plan", pay_status: "paid", attendance: "booked", price_egp: 0, credit_spent: false, booked_at: new Date().toISOString() },
       { onConflict: "class_id,client_id" },
     ).select().single();
-    if (error) {
-      await returnPlanCredit({ coverage: "plan", group_plan_id: plan.id });
-      throw error;
-    }
+    if (error) throw error;
     await logActivity(me.org_id, "class_booked", { clientId: me.id, amount: 0, meta: { classId, title: cls.title, coverage: "plan", plan: plan.name } });
     return c.json({ booking: toBookingRow(booking) });
   }
@@ -2659,7 +2726,7 @@ app.post(`${P}/client/classes/:id/book`, async (c) => {
     payStatus = "paid";
   }
   const { data: booking, error } = await admin().from("class_bookings").upsert(
-    { org_id: me.org_id, class_id: classId, client_id: me.id, coverage: "drop_in", group_plan_id: null, drop_in_id: null, pay_method: payMethod, pay_status: payStatus, attendance: "booked", price_egp: price, booked_at: new Date().toISOString() },
+    { org_id: me.org_id, class_id: classId, client_id: me.id, coverage: "drop_in", group_plan_id: null, drop_in_id: null, pay_method: payMethod, pay_status: payStatus, attendance: "booked", price_egp: price, credit_spent: false, booked_at: new Date().toISOString() },
     { onConflict: "class_id,client_id" },
   ).select().single();
   if (error) throw error;
@@ -2725,7 +2792,7 @@ app.post(`${P}/client/bookings/:id/cancel`, async (c) => {
   let creditReturned = false;
   if (booking.coverage === "plan") {
     await returnPlanCredit(booking);
-    creditReturned = true;
+    creditReturned = !!booking.credit_spent;
   } else if (booking.pay_status === "paid" && booking.pay_method === "wallet") {
     await creditWallet(me.id, me.org_id, Number(booking.price_egp), "refund", "Refund: cancelled booking");
     refunded = Number(booking.price_egp);
@@ -2735,19 +2802,17 @@ app.post(`${P}/client/bookings/:id/cancel`, async (c) => {
   return c.json({ ok: true, refundedToWallet: refunded, planCreditReturned: creditReturned });
 });
 
-// Member scans the desk QR (which encodes the org slug/id) to check in + earn 1 pt.
+// Member scans the desk QR (which encodes the org slug/id) to check in: earns
+// points, and uses one session of a class bundle (see recordCheckIn).
 app.post(`${P}/client/check-in`, async (c) => {
   const me = await requireClient(c);
   if (!me) return c.json({ error: "Unauthorized" }, 401);
   const { token } = await c.req.json();
   const { data: org } = await admin().from("organizations").select("id, slug").eq("id", me.org_id).maybeSingle();
   if (!token || (token !== org?.slug && token !== org?.id)) return c.json({ error: "That QR isn't your gym's check-in code." }, 400);
-  const status = await clientPlanStatus(me.id, me.org_id);
-  if (!status.eligible) return c.json({ error: "No active plan — please see the front desk.", code: "no_plan" }, 400);
-  await admin().from("check_ins").insert({ org_id: me.org_id, client_id: me.id, source: "qr" });
-  await earnCheckinPoints(me.id, me.org_id);
-  await logActivity(me.org_id, "check_in", { clientId: me.id });
-  return c.json({ ok: true });
+  const r = await recordCheckIn(me.org_id, me.id, me.name, "qr", null, true);
+  if (!r.ok) return c.json({ error: r.error, code: r.code ?? null, plan: r.plan ?? null }, r.status as any);
+  return c.json({ ok: true, deducted: r.deducted, plan: r.plan });
 });
 
 // Everything the member has paid us or been credited, however it was paid:

@@ -202,7 +202,10 @@ export const api = {
     callFn<{ client: Client; package: PackageInstance }>("clients", { method: "POST", body: { ...fields, bundleTypeId, coachId, payMethod } }),
   assignCoach: (id: string, coachId: string) => callFn<{ client: Client }>("clients/assign-coach", { method: "POST", body: { id, coachId } }),
   frontDeskSummary: () => callFn<FrontDeskSummary>("front-desk/summary"),
-  checkIn: (clientId: string, source: "qr" | "manual") => callFn<void>("check-ins", { method: "POST", body: { clientId, source } }),
+  // A class bundle loses one session on check-in (at most once a day);
+  // memberships, class monthlies and PT don't. `plan` is the plan afterwards.
+  checkIn: (clientId: string, source: "qr" | "manual") =>
+    callFn<{ deducted: boolean; plan: { name: string; kind: string; creditsRemaining: number | null; creditsTotal: number | null } | null }>("check-ins", { method: "POST", body: { clientId, source } }),
   // A walk-in is always recorded against a member: an existing client, or a
   // new one created with the sale (the backend also registers their app invite).
   dropIn: (member: { clientId: string } | { newClient: NewClientFields }, category: string, price: number, payMethod?: PayMethod, confirmActivePlan = false) =>
