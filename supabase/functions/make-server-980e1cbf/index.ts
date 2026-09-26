@@ -2350,6 +2350,40 @@ app.post(`${P}/ops/orgs/:id/plan`, async (c) => {
   return c.json({ ok: true, planId: data.plan_id ?? null });
 });
 
+// Permanently deletes an organization and everything under it (staff, members,
+// sales, sessions, wallets, points, branding). The caller must echo the org's
+// slug as confirmation. The data goes in one transaction (delete_org); then the
+// org's logins are removed unless they still back another identity, and its
+// branding images are cleared from storage.
+app.post(`${P}/ops/orgs/:id/delete`, async (c) => {
+  const user = await requireUser(c);
+  const team = user && (await bizqwikTeamOf(user.id));
+  if (!team) return c.json({ error: "Forbidden" }, 403);
+  const id = c.req.param("id");
+  const { confirmSlug } = await c.req.json().catch(() => ({}));
+  const { data: org } = await admin().from("organizations").select("id, slug, name").eq("id", id).maybeSingle();
+  if (!org) return c.json({ error: "No such organization" }, 404);
+  if (String(confirmSlug ?? "").trim().toLowerCase() !== org.slug) {
+    return c.json({ error: `Type ${org.slug} to confirm.` }, 400);
+  }
+
+  const { data: logins, error } = await admin().rpc("delete_org", { p_org: id });
+  if (error) throw error;
+
+  let loginsRemoved = 0;
+  for (const uid of (logins ?? []) as string[]) {
+    const [p, t, cl] = await Promise.all([profileOf(uid), bizqwikTeamOf(uid), clientOf(uid)]);
+    if (p || t || cl) continue;
+    const { error: dErr } = await admin().auth.admin.deleteUser(uid);
+    if (!dErr) loginsRemoved += 1;
+  }
+
+  const { data: files } = await admin().storage.from("org-branding").list(id, { limit: 1000 });
+  if (files && files.length > 0) await admin().storage.from("org-branding").remove(files.map((f: any) => `${id}/${f.name}`));
+
+  return c.json({ ok: true, name: org.name, loginsRemoved });
+});
+
 app.get(`${P}/ops/team`, async (c) => {
   const user = await requireUser(c);
   const team = user && (await bizqwikTeamOf(user.id));

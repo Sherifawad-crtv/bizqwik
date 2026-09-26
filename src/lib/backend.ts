@@ -282,6 +282,9 @@ export const api = {
       callFn<{ ok: true; status: OrgStatus }>(`ops/orgs/${id}/status`, { method: "POST", body: { status } }),
     setOrgPlan: (id: string, planId: string | null) =>
       callFn<{ ok: true; planId: string | null }>(`ops/orgs/${id}/plan`, { method: "POST", body: { planId } }),
+    // Permanent: removes the org and everything under it. `confirmSlug` must match.
+    deleteOrg: (id: string, confirmSlug: string) =>
+      callFn<{ ok: true; name: string; loginsRemoved: number }>(`ops/orgs/${id}/delete`, { method: "POST", body: { confirmSlug } }),
     orgConfig: (id: string) => callFn<OrgConfig>(`ops/orgs/${id}/config`),
     setOrgBranding: (id: string, b: OrgBrandingConfig) =>
       callFn<{ ok: true }>(`ops/orgs/${id}/branding`, { method: "POST", body: { ...b } }),
