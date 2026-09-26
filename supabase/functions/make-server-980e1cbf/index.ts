@@ -214,27 +214,87 @@ function normPayMethod(v: any): "cash" | "card" | "wallet" {
   return v === "card" ? "card" : v === "wallet" ? "wallet" : "cash";
 }
 
-// ---- points engine (symmetric per-org rate; earn on check-in + desk sales) ----
+// ---- points engine (v2) ----
+// Per-org config: earn rate (points per EGP of cash/card spend; null = points
+// off), redeem rate (points per 1 EGP of wallet credit), check-in bonus,
+// redemption minimum and expiry. Earned points are lots (remaining +
+// expires_at) spent oldest-expiring first; the balance is the ledger's sum.
+async function pointsConfig(orgId: string) {
+  const s = await orgSettingsOf(orgId);
+  return {
+    earnPerEgp: (s?.points_earn_per_egp ?? null) as number | null,
+    redeemPerEgp: Number(s?.points_redeem_per_egp ?? 500),
+    checkin: Number(s?.points_checkin ?? 50),
+    minRedeem: Number(s?.points_min_redeem ?? 10000),
+    ttlMonths: Number(s?.points_ttl_months ?? 12),
+  };
+}
+async function sweepPointsExpiry(clientId: string, orgId: string) {
+  const { data: stale } = await admin().from("points_ledger").select("id, remaining")
+    .eq("client_id", clientId).eq("org_id", orgId).gt("remaining", 0).lte("expires_at", new Date().toISOString());
+  for (const lot of stale ?? []) {
+    await admin().from("points_ledger").update({ remaining: 0 }).eq("id", lot.id);
+    await admin().from("points_ledger").insert({ org_id: orgId, client_id: clientId, points: -Number(lot.remaining), reason: "expired" });
+  }
+}
 async function bumpPointsBalance(clientId: string, orgId: string): Promise<number> {
+  await sweepPointsExpiry(clientId, orgId);
   const { data } = await admin().from("points_ledger").select("points").eq("client_id", clientId).eq("org_id", orgId);
   const total = (data ?? []).reduce((s: number, r: any) => s + Number(r.points), 0);
   // tier is left to the column default (its check only allows silver/gold/platinum).
   await admin().from("points_balances").upsert({ client_id: clientId, org_id: orgId, total_points: total, updated_at: new Date().toISOString() });
   return total;
 }
-async function earnPoints(clientId: string, orgId: string, points: number, reason: string) {
+async function earnPoints(clientId: string, orgId: string, points: number, reason: string, cfg?: Awaited<ReturnType<typeof pointsConfig>>) {
   if (points <= 0) return;
-  await admin().from("points_ledger").insert({ org_id: orgId, client_id: clientId, points, reason });
+  const c = cfg ?? (await pointsConfig(orgId));
+  const expires = addMonths(new Date(), c.ttlMonths).toISOString();
+  await admin().from("points_ledger").insert({ org_id: orgId, client_id: clientId, points, reason, remaining: points, expires_at: expires });
   await bumpPointsBalance(clientId, orgId);
   await logActivity(orgId, "points_earned", { clientId, amount: points, meta: { reason } });
 }
-// Points on a desk purchase of `egp`, at the org's symmetric rate (null = off).
-async function earnPurchasePoints(clientId: string | null | undefined, orgId: string, egp: number) {
-  if (!clientId || !egp || egp <= 0) return;
-  const settings = await orgSettingsOf(orgId);
-  const rate = settings?.points_per_egp;
-  if (!rate || rate <= 0) return;
-  await earnPoints(clientId, orgId, Math.floor(egp * rate), "purchase");
+// Spends points oldest-expiring first. The debit row is written and the
+// balance re-checked before any lot is touched, so two concurrent spends
+// can't take the same points; returns the new balance, or null if short.
+async function spendPoints(clientId: string, orgId: string, points: number, reason: string): Promise<number | null> {
+  const { data: debit, error } = await admin().from("points_ledger").insert({ org_id: orgId, client_id: clientId, points: -points, reason }).select().single();
+  if (error) throw error;
+  const after = await bumpPointsBalance(clientId, orgId);
+  if (after < 0) {
+    await admin().from("points_ledger").delete().eq("id", debit.id);
+    await bumpPointsBalance(clientId, orgId);
+    return null;
+  }
+  let need = points;
+  const { data: lots } = await admin().from("points_ledger").select("id, remaining")
+    .eq("client_id", clientId).eq("org_id", orgId).gt("remaining", 0).order("expires_at", { ascending: true });
+  for (const lot of lots ?? []) {
+    if (need <= 0) break;
+    const take = Math.min(need, Number(lot.remaining));
+    await admin().from("points_ledger").update({ remaining: Number(lot.remaining) - take }).eq("id", lot.id);
+    need -= take;
+  }
+  return after;
+}
+// Points on a purchase of `egp`. Only new money earns: wallet-paid sales don't.
+async function earnPurchasePoints(clientId: string | null | undefined, orgId: string, egp: number, payMethod: string) {
+  if (!clientId || !egp || egp <= 0 || payMethod === "wallet") return;
+  const cfg = await pointsConfig(orgId);
+  if (!cfg.earnPerEgp) return;
+  await earnPoints(clientId, orgId, Math.floor(egp * cfg.earnPerEgp), "purchase", cfg);
+}
+async function earnCheckinPoints(clientId: string, orgId: string) {
+  const cfg = await pointsConfig(orgId);
+  if (!cfg.earnPerEgp) return;
+  await earnPoints(clientId, orgId, cfg.checkin, "checkin", cfg);
+}
+// A refund takes back the points that money earned (never below zero).
+async function clawbackPoints(clientId: string, orgId: string, egp: number) {
+  const cfg = await pointsConfig(orgId);
+  if (!cfg.earnPerEgp) return;
+  const balance = await bumpPointsBalance(clientId, orgId);
+  const n = Math.min(Math.floor(egp * cfg.earnPerEgp), balance);
+  if (n > 0) await spendPoints(clientId, orgId, n, "refund");
 }
 
 const stateOf = (s: any) => (!s ? "logging" : s.paid_at ? "paid" : "settled") as "logging" | "settled" | "paid";
@@ -475,7 +535,7 @@ async function sellGroupPlan(opts: { orgId: string; client: any; planTypeId?: st
       return { error: "Wallet balance doesn't cover this plan.", status: 400, code: "insufficient_wallet" } as const;
     }
   }
-  await earnPurchasePoints(client.id, orgId, Number(plan.price_at_sale));
+  await earnPurchasePoints(client.id, orgId, Number(plan.price_at_sale), payMethod);
   await logActivity(orgId, "sale_plan", { actorId, clientId: client.id, amount: Number(plan.price_at_sale), meta: { payMethod, kind: plan.kind, name: plan.name, planId: plan.id } });
   return { plan } as const;
 }
@@ -1312,7 +1372,7 @@ app.post(`${P}/clients`, async (c) => {
     await admin().from("clients").delete().eq("id", client.id);
     return c.json({ error: result.error }, result.status);
   }
-  await earnPurchasePoints(result.client.id, me.org_id, Number(result.package.price_at_sale));
+  await earnPurchasePoints(result.client.id, me.org_id, Number(result.package.price_at_sale), payMethod);
   await logActivity(me.org_id, "sale_package", { actorId: me.id, clientId: result.client.id, amount: Number(result.package.price_at_sale), meta: { payMethod } });
   return c.json({ client: toClient(result.client, conditions || null, null), package: toPackageInstance(result.package) });
 });
@@ -1399,7 +1459,7 @@ app.post(`${P}/packages`, async (c) => {
       return c.json({ error: "Wallet balance doesn't cover this package.", code: "insufficient_wallet" }, 400);
     }
   }
-  await earnPurchasePoints(clientId, me.org_id, price);
+  await earnPurchasePoints(clientId, me.org_id, price, payMethod);
   await logActivity(me.org_id, "sale_package", { actorId: me.id, clientId, amount: price, meta: { payMethod } });
   return c.json({ package: toPackageInstance(result.package) });
 });
@@ -1479,7 +1539,7 @@ app.post(`${P}/check-ins`, async (c) => {
   if (!status.eligible) return c.json({ error: `${client.name} has no active plan or package.` }, 400);
   const { data, error } = await admin().from("check_ins").insert({ org_id: me.org_id, client_id: clientId, source }).select().single();
   if (error) throw error;
-  await earnPoints(clientId, me.org_id, 1, "checkin");
+  await earnCheckinPoints(clientId, me.org_id);
   await logActivity(me.org_id, "check_in", { actorId: me.id, clientId });
   return c.json({ checkIn: { id: data.id, clientId: data.client_id, source: data.source, checkedInAt: data.checked_in_at } });
 });
@@ -1562,7 +1622,7 @@ app.post(`${P}/drop-ins`, async (c) => {
       return c.json({ error: "That class session is no longer available — nothing was charged." }, 409);
     }
   }
-  await earnPurchasePoints(data.client_id, me.org_id, amount);
+  await earnPurchasePoints(data.client_id, me.org_id, amount, payMethod);
   await logActivity(me.org_id, "sale_dropin", { actorId: me.id, clientId: data.client_id, amount, meta: { payMethod, classId: cls?.id ?? null, title: cat } });
   return c.json({ dropIn: { id: data.id, clientId: data.client_id, classId: data.class_id ?? null, category: data.category, price: Number(data.price), createdAt: data.created_at } });
 });
@@ -2307,14 +2367,13 @@ app.get(`${P}/client/home`, async (c) => {
   const me = await requireClient(c);
   if (!me) return c.json({ error: "Unauthorized" }, 401);
   await extendOrgSeries(me.org_id);
-  const [status, wallet, points, settings, upcoming] = await Promise.all([
+  const [status, wallet, points, cfg, upcoming] = await Promise.all([
     clientPlanStatus(me.id, me.org_id),
     walletBalance(me.id, me.org_id),
     bumpPointsBalance(me.id, me.org_id),
-    orgSettingsOf(me.org_id),
+    pointsConfig(me.org_id),
     admin().from("classes").select("*").eq("org_id", me.org_id).eq("status", "active").gte("starts_at", new Date().toISOString()).order("starts_at").limit(10),
   ]);
-  const rate = settings?.points_per_egp ?? null;
   const plan = status.groupPlanRow;
   return c.json({
     name: me.name,
@@ -2324,7 +2383,7 @@ app.get(`${P}/client/home`, async (c) => {
     eligible: status.eligible,
     wallet,
     points,
-    pointsValueEgp: rate && rate > 0 ? points / rate : 0,
+    pointsValueEgp: cfg.earnPerEgp ? Math.floor(points / cfg.redeemPerEgp) : 0,
     upcomingClasses: (upcoming.data ?? []).map((r: any) => ({ ...toClassRow(r), coverage: planCovers(plan, r) ? "plan" : "drop_in" })),
   });
 });
@@ -2488,55 +2547,110 @@ app.post(`${P}/client/check-in`, async (c) => {
   const status = await clientPlanStatus(me.id, me.org_id);
   if (!status.eligible) return c.json({ error: "No active plan — please see the front desk.", code: "no_plan" }, 400);
   await admin().from("check_ins").insert({ org_id: me.org_id, client_id: me.id, source: "qr" });
-  await earnPoints(me.id, me.org_id, 1, "checkin");
+  await earnCheckinPoints(me.id, me.org_id);
   await logActivity(me.org_id, "check_in", { clientId: me.id });
   return c.json({ ok: true });
 });
+
+// Everything the member has paid us or been credited, however it was paid:
+// purchases (plans, PT packages, drop-ins, classes) with their tender, wallet
+// credits (refunds, compensation, redeemed points) and expiries, and refunds
+// paid out at the desk. `walletDelta` is the change to the wallet balance
+// (0 for cash/card), so wallet-paid purchases aren't listed twice.
+const WALLET_CREDIT_TITLES: Record<string, string> = {
+  refund: "Refund to wallet", compensation: "Compensation", reward: "Points redeemed", topup: "Top-up", cashback: "Cashback",
+};
+async function clientMoneyHistory(clientId: string) {
+  const [plans, pkgs, drops, seats, wallet, deskRefunds] = await Promise.all([
+    admin().from("group_plans").select("id, name, price_at_sale, pay_method, created_at").eq("client_id", clientId),
+    admin().from("package_instances").select("id, price_at_sale, pay_method, created_at, bundle_types(name)").eq("client_id", clientId),
+    admin().from("drop_ins").select("id, category, price, pay_method, created_at").eq("client_id", clientId),
+    admin().from("class_bookings").select("id, price_egp, pay_method, pay_status, booked_at, classes(title)").eq("client_id", clientId).eq("coverage", "drop_in").is("drop_in_id", null).in("pay_status", ["paid", "refunded"]),
+    admin().from("wallet_transactions").select("id, type, amount, category, description, created_at").eq("client_id", clientId).or("type.eq.credit,category.eq.expiry"),
+    admin().from("activity_log").select("id, amount, meta, created_at").eq("subject_client_id", clientId).eq("type", "refund_desk"),
+  ]);
+  const tender = (m: any) => (m === "cash" || m === "card" || m === "wallet" ? m : "desk");
+  const out: any[] = [];
+  for (const p of plans.data ?? []) {
+    const amt = Number(p.price_at_sale);
+    out.push({ id: `plan-${p.id}`, kind: "purchase", title: p.name, amount: amt, method: tender(p.pay_method), walletDelta: p.pay_method === "wallet" ? -amt : 0, at: p.created_at });
+  }
+  for (const p of pkgs.data ?? []) {
+    const amt = Number(p.price_at_sale);
+    out.push({ id: `pkg-${p.id}`, kind: "purchase", title: `PT · ${(p as any).bundle_types?.name ?? "Package"}`, amount: amt, method: tender(p.pay_method), walletDelta: p.pay_method === "wallet" ? -amt : 0, at: p.created_at });
+  }
+  for (const d of drops.data ?? []) {
+    const amt = Number(d.price);
+    out.push({ id: `drop-${d.id}`, kind: "purchase", title: `Drop-in · ${d.category}`, amount: amt, method: tender(d.pay_method), walletDelta: d.pay_method === "wallet" ? -amt : 0, at: d.created_at });
+  }
+  for (const b of seats.data ?? []) {
+    const amt = Number(b.price_egp);
+    out.push({ id: `seat-${b.id}`, kind: "purchase", title: `Class · ${(b as any).classes?.title ?? "Class"}`, amount: amt, method: tender(b.pay_method), walletDelta: b.pay_method === "wallet" ? -amt : 0, at: b.booked_at });
+  }
+  for (const t of wallet.data ?? []) {
+    const amt = Number(t.amount);
+    if (t.type === "credit") out.push({ id: `wt-${t.id}`, kind: "credit", title: WALLET_CREDIT_TITLES[t.category] ?? "Wallet credit", detail: t.description ?? null, amount: amt, method: "wallet", walletDelta: amt, at: t.created_at });
+    else out.push({ id: `wt-${t.id}`, kind: "expiry", title: "Credit expired", detail: null, amount: amt, method: "wallet", walletDelta: -amt, at: t.created_at });
+  }
+  for (const r of deskRefunds.data ?? []) {
+    out.push({ id: `rf-${r.id}`, kind: "refund", title: "Refund at desk", detail: (r.meta as any)?.note ?? null, amount: Number(r.amount ?? 0), method: "desk", walletDelta: 0, at: r.created_at });
+  }
+  out.sort((a, b) => Date.parse(b.at) - Date.parse(a.at));
+  return out.slice(0, 150);
+}
 
 app.get(`${P}/client/wallet`, async (c) => {
   const me = await requireClient(c);
   if (!me) return c.json({ error: "Unauthorized" }, 401);
   const balance = await walletBalance(me.id, me.org_id);
   const { data: tx } = await admin().from("wallet_transactions").select("*").eq("client_id", me.id).order("created_at", { ascending: false }).limit(50);
-  return c.json({ balance, transactions: (tx ?? []).map((t: any) => ({ id: t.id, type: t.type, amount: Number(t.amount), category: t.category, description: t.description ?? null, createdAt: t.created_at })) });
+  return c.json({
+    balance,
+    transactions: (tx ?? []).map((t: any) => ({ id: t.id, type: t.type, amount: Number(t.amount), category: t.category, description: t.description ?? null, createdAt: t.created_at })),
+    activity: await clientMoneyHistory(me.id),
+  });
 });
 
 app.get(`${P}/client/points`, async (c) => {
   const me = await requireClient(c);
   if (!me) return c.json({ error: "Unauthorized" }, 401);
-  const total = await bumpPointsBalance(me.id, me.org_id);
-  const settings = await orgSettingsOf(me.org_id);
-  const rate = settings?.points_per_egp ?? null;
-  const { data: ledger } = await admin().from("points_ledger").select("*").eq("client_id", me.id).order("created_at", { ascending: false }).limit(50);
-  return c.json({ total, valueEgp: rate && rate > 0 ? total / rate : 0, rate, ledger: (ledger ?? []).map((l: any) => ({ id: l.id, points: l.points, reason: l.reason, createdAt: l.created_at })) });
+  const [total, cfg] = await Promise.all([bumpPointsBalance(me.id, me.org_id), pointsConfig(me.org_id)]);
+  const [{ data: ledger }, { data: next }] = await Promise.all([
+    admin().from("points_ledger").select("*").eq("client_id", me.id).order("created_at", { ascending: false }).limit(50),
+    admin().from("points_ledger").select("remaining, expires_at").eq("client_id", me.id).gt("remaining", 0).order("expires_at", { ascending: true }).limit(1).maybeSingle(),
+  ]);
+  return c.json({
+    enabled: !!cfg.earnPerEgp,
+    total,
+    // Whole EGP the balance can turn into right now.
+    valueEgp: cfg.earnPerEgp ? Math.floor(total / cfg.redeemPerEgp) : 0,
+    rate: cfg.redeemPerEgp,
+    earnRate: cfg.earnPerEgp,
+    checkinPoints: cfg.checkin,
+    minRedeem: cfg.minRedeem,
+    nextExpiry: next ? { points: Number(next.remaining), at: next.expires_at } : null,
+    ledger: (ledger ?? []).map((l: any) => ({ id: l.id, points: l.points, reason: l.reason, createdAt: l.created_at })),
+  });
 });
 
-// Member turns points into wallet credit at the gym's rate (points_per_egp),
-// in whole EGP. Omit `points` to redeem everything redeemable. The points
-// debit is written first and re-checked, so two taps can't spend them twice.
+// Member turns points into wallet credit at the gym's redeem rate, in whole
+// EGP, once past the gym's minimum. Omit `points` to redeem everything.
 app.post(`${P}/client/points/redeem`, async (c) => {
   const me = await requireClient(c);
   if (!me) return c.json({ error: "Unauthorized" }, 401);
   const body = await c.req.json().catch(() => ({}));
-  const settings = await orgSettingsOf(me.org_id);
-  const rate = Number(settings?.points_per_egp ?? 0);
-  if (!rate || rate <= 0) return c.json({ error: "Points can't be redeemed at your gym yet." }, 400);
+  const cfg = await pointsConfig(me.org_id);
+  if (!cfg.earnPerEgp) return c.json({ error: "Points can't be redeemed at your gym yet." }, 400);
   const total = await bumpPointsBalance(me.id, me.org_id);
+  if (total < cfg.minRedeem) return c.json({ error: `You need at least ${cfg.minRedeem.toLocaleString("en-US")} points to redeem.` }, 400);
   const requested = body.points === undefined || body.points === null ? total : Number(body.points);
   if (!Number.isInteger(requested) || requested <= 0) return c.json({ error: "Choose how many points to redeem." }, 400);
   if (requested > total) return c.json({ error: "You don't have that many points." }, 400);
-  const egpCredited = Math.floor(requested / rate);
-  if (egpCredited < 1) return c.json({ error: `You need at least ${rate} points to redeem 1 EGP.` }, 400);
-  const pointsSpent = egpCredited * rate;
-
-  const { data: debit, error } = await admin().from("points_ledger").insert({ org_id: me.org_id, client_id: me.id, points: -pointsSpent, reason: "redeem" }).select().single();
-  if (error) throw error;
-  const after = await bumpPointsBalance(me.id, me.org_id);
-  if (after < 0) {
-    await admin().from("points_ledger").delete().eq("id", debit.id);
-    await bumpPointsBalance(me.id, me.org_id);
-    return c.json({ error: "Your points just changed — please try again." }, 409);
-  }
+  const egpCredited = Math.floor(requested / cfg.redeemPerEgp);
+  if (egpCredited < 1) return c.json({ error: `You need at least ${cfg.redeemPerEgp.toLocaleString("en-US")} points to redeem 1 EGP.` }, 400);
+  const pointsSpent = egpCredited * cfg.redeemPerEgp;
+  const after = await spendPoints(me.id, me.org_id, pointsSpent, "redeem");
+  if (after === null) return c.json({ error: "Your points just changed — please try again." }, 409);
   const wallet = await creditWallet(me.id, me.org_id, egpCredited, "reward", `Redeemed ${pointsSpent.toLocaleString("en-US")} points`);
   return c.json({ pointsSpent, egpCredited, points: after, wallet });
 });
@@ -2970,6 +3084,7 @@ app.post(`${P}/bookings/collect`, async (c) => {
   // class_bookings.pay_method is constrained to wallet|desk; cash/card collected
   // at the desk are recorded as "desk", with the exact tender in the activity log.
   await admin().from("class_bookings").update({ pay_status: "paid", pay_method: payMethod === "wallet" ? "wallet" : "desk" }).eq("id", bookingId);
+  await earnPurchasePoints(b.client_id, me.org_id, price, payMethod);
   await logActivity(me.org_id, "class_collected", { actorId: me.id, clientId: b.client_id, amount: price, meta: { bookingId, payMethod } });
   return c.json({ ok: true });
 });
@@ -2985,6 +3100,7 @@ app.post(`${P}/clients/refund`, async (c) => {
   if (destination !== "wallet" && destination !== "desk") return c.json({ error: "Choose where the refund goes." }, 400);
   const { data: client } = await admin().from("clients").select("id").eq("id", clientId).eq("org_id", me.org_id).maybeSingle();
   if (!client) return c.json({ error: "No such client" }, 404);
+  await clawbackPoints(clientId, me.org_id, amt);
   if (destination === "wallet") {
     const balance = await creditWallet(clientId, me.org_id, amt, "refund", note ? String(note) : "Refund to wallet");
     return c.json({ ok: true, walletBalance: balance });
@@ -3049,7 +3165,10 @@ app.get(`${P}/ops/orgs/:id/config`, async (c) => {
   ]);
   return c.json({
     branding: b ? { appName: b.app_name, logoUrl: b.logo_url, iconUrl: b.icon_url, primaryColor: b.primary_color, onboardingAssets: b.onboarding_assets } : null,
-    settings: s ? { pointsPerEgp: s.points_per_egp, walletCreditTtlMonths: s.wallet_credit_ttl_months } : null,
+    settings: s ? {
+      pointsEarnPerEgp: s.points_earn_per_egp ?? null, pointsRedeemPerEgp: s.points_redeem_per_egp, pointsCheckin: s.points_checkin,
+      pointsMinRedeem: s.points_min_redeem, pointsTtlMonths: s.points_ttl_months, walletCreditTtlMonths: s.wallet_credit_ttl_months,
+    } : null,
   });
 });
 app.post(`${P}/ops/orgs/:id/branding`, async (c) => {
@@ -3070,12 +3189,24 @@ app.post(`${P}/ops/orgs/:id/settings`, async (c) => {
   const team = user && (await bizqwikTeamOf(user.id));
   if (!team) return c.json({ error: "Forbidden" }, 403);
   const id = c.req.param("id");
-  const { pointsPerEgp, walletCreditTtlMonths } = await c.req.json();
-  const ppe = pointsPerEgp === null || pointsPerEgp === "" || pointsPerEgp === undefined ? null : Number(pointsPerEgp);
-  if (ppe !== null && (!Number.isInteger(ppe) || ppe < 1)) return c.json({ error: "Points per EGP must be a whole number of 1 or more, or blank." }, 400);
-  const ttlRaw = walletCreditTtlMonths === undefined || walletCreditTtlMonths === null || walletCreditTtlMonths === "" ? 12 : Number(walletCreditTtlMonths);
-  const ttl = Number.isInteger(ttlRaw) && ttlRaw > 0 ? ttlRaw : 12;
-  const { error } = await admin().from("org_settings").upsert({ org_id: id, points_per_egp: ppe, wallet_credit_ttl_months: ttl, updated_at: new Date().toISOString() });
+  const body = await c.req.json();
+  const int = (v: any) => (v === null || v === undefined || v === "" ? null : Number(v));
+  const earn = int(body.pointsEarnPerEgp);
+  const redeem = int(body.pointsRedeemPerEgp) ?? 500;
+  const checkin = int(body.pointsCheckin) ?? 0;
+  const minRedeem = int(body.pointsMinRedeem) ?? 0;
+  const pointsTtl = int(body.pointsTtlMonths) ?? 12;
+  const walletTtl = int(body.walletCreditTtlMonths) ?? 12;
+  if (earn !== null && (!Number.isInteger(earn) || earn < 1)) return c.json({ error: "Points earned per EGP must be a whole number of 1 or more, or blank for off." }, 400);
+  if (!Number.isInteger(redeem) || redeem < 1) return c.json({ error: "Points per 1 EGP of credit must be a whole number of 1 or more." }, 400);
+  if (!Number.isInteger(checkin) || checkin < 0) return c.json({ error: "Check-in points must be a whole number, zero or more." }, 400);
+  if (!Number.isInteger(minRedeem) || minRedeem < 0) return c.json({ error: "The redemption minimum must be a whole number, zero or more." }, 400);
+  if (!Number.isInteger(pointsTtl) || pointsTtl < 1) return c.json({ error: "Points expiry must be at least 1 month." }, 400);
+  if (!Number.isInteger(walletTtl) || walletTtl < 1) return c.json({ error: "Wallet credit expiry must be at least 1 month." }, 400);
+  const { error } = await admin().from("org_settings").upsert({
+    org_id: id, points_earn_per_egp: earn, points_redeem_per_egp: redeem, points_checkin: checkin, points_min_redeem: minRedeem,
+    points_ttl_months: pointsTtl, wallet_credit_ttl_months: walletTtl, updated_at: new Date().toISOString(),
+  });
   if (error) throw error;
   return c.json({ ok: true });
 });
