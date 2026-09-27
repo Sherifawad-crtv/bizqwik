@@ -1,10 +1,21 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { startQrCamera } from "../lib/qrCamera";
+import { findWideLens, setCameraZoom, startQrCamera, type WideLens } from "../lib/qrCamera";
 import { Icon } from "./Icon";
 import { Button } from "./Button";
 
 const REGION_ID = "bq-qr-reader";
+
+// The coach's last lens choice (0.5× is handy for scanning up close), kept per device.
+const LENS_KEY = "bq_scan_lens";
+type Lens = "1" | "0.5";
+function savedLens(): Lens {
+  try {
+    return localStorage.getItem(LENS_KEY) === "0.5" ? "0.5" : "1";
+  } catch {
+    return "1";
+  }
+}
 
 // getUserMedia error -> something a coach can act on.
 function cameraError(err: unknown): string {
@@ -43,6 +54,15 @@ export function QrScanner({ title, hint, onClose, onScan }: { title: string; hin
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
+  // 0.5× (ultra-wide): offered only when this phone exposes it (see findWideLens).
+  const [wide, setWide] = useState<WideLens | null>(null);
+  const [lens, setLens] = useState<Lens>(savedLens);
+  const [cameraDevice, setCameraDevice] = useState<string | undefined>(undefined);
+  const lensRef = useRef(lens);
+  lensRef.current = lens;
+  const wideRef = useRef<WideLens | null>(null);
+  const trackRef = useRef<MediaStreamTrack | undefined>(undefined);
+
   useEffect(() => {
     let alive = true;
     let stopCamera: (() => void) | null = null;
@@ -60,10 +80,21 @@ export function QrScanner({ title, hint, onClose, onScan }: { title: string; hin
     let watchdog: number | undefined;
     setStalled(false);
     if (video) {
-      startQrCamera(video, finish)
-        .then((stop) => {
+      startQrCamera(video, finish, { deviceId: cameraDevice })
+        .then(async (stop) => {
           if (!alive) return stop();
           stopCamera = stop;
+          trackRef.current = stop.track;
+          // Lens labels/capabilities are only readable once the camera is open.
+          if (!wideRef.current) {
+            const found = await findWideLens(stop.track);
+            if (!alive) return;
+            wideRef.current = found;
+            setWide(found);
+            if (found?.kind === "device" && lensRef.current === "0.5") setCameraDevice(found.deviceId);
+          }
+          const w = wideRef.current;
+          if (w?.kind === "zoom" && lensRef.current === "0.5") await setCameraZoom(stop.track, w.zoom);
           watchdog = window.setTimeout(() => {
             if (alive && !doneRef.current && video.videoWidth === 0) setStalled(true);
           }, 2500);
@@ -79,7 +110,20 @@ export function QrScanner({ title, hint, onClose, onScan }: { title: string; hin
       window.removeEventListener("bq-test-scan", onTest);
       stopCamera?.();
     };
-  }, [attempt]);
+  }, [attempt, cameraDevice]);
+
+  const chooseLens = (next: Lens) => {
+    setLens(next);
+    try {
+      localStorage.setItem(LENS_KEY, next);
+    } catch {
+      // storage blocked: the choice just won't be remembered
+    }
+    const w = wideRef.current;
+    if (!w) return;
+    if (w.kind === "zoom") void setCameraZoom(trackRef.current, next === "0.5" ? w.zoom : 1);
+    else setCameraDevice(next === "0.5" ? w.deviceId : undefined);
+  };
 
   // Within the tap: play the stream we already have; if the picture still
   // doesn't come, open the camera again from scratch.
@@ -118,6 +162,21 @@ export function QrScanner({ title, hint, onClose, onScan }: { title: string; hin
           </div>
           {!error && !stalled && (
             <div aria-hidden style={{ position: "absolute", inset: "14%", border: "3px solid var(--primary)", borderRadius: 24, pointerEvents: "none" }} />
+          )}
+          {!error && !stalled && wide && (
+            <div role="group" aria-label="Camera lens" style={{ position: "absolute", left: "50%", top: "calc(100% + 16px)", transform: "translateX(-50%)", display: "flex", gap: 6, padding: 4, borderRadius: 999, background: "rgba(255,255,255,.12)" }}>
+              {(["0.5", "1"] as Lens[]).map((l) => (
+                <button
+                  key={l}
+                  onClick={() => chooseLens(l)}
+                  aria-pressed={lens === l}
+                  aria-label={l === "0.5" ? "Wide lens 0.5×" : "Normal lens 1×"}
+                  style={{ minWidth: 44, height: 36, padding: "0 10px", borderRadius: 999, border: 0, cursor: "pointer", font: "700 13px var(--font-mono)", background: lens === l ? "#fff" : "transparent", color: lens === l ? "#000" : "#fff" }}
+                >
+                  {l === "0.5" ? ".5×" : "1×"}
+                </button>
+              ))}
+            </div>
           )}
           {!error && stalled && (
             <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>

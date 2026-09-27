@@ -31,14 +31,15 @@ async function nativeDetector(): Promise<Detector | null> {
   }
 }
 
-async function openCamera(): Promise<MediaStream> {
+async function openCamera(deviceId?: string): Promise<MediaStream> {
   if (!navigator.mediaDevices?.getUserMedia)
     throw new DOMException("Camera API unavailable", "NotSupportedError");
   try {
     return await navigator.mediaDevices.getUserMedia({
       audio: false,
       video: {
-        facingMode: { ideal: "environment" },
+        // A specific lens (the ultra-wide "0.5×") when asked for, else the back camera.
+        ...(deviceId ? { deviceId: { exact: deviceId } } : { facingMode: { ideal: "environment" } }),
         width: { ideal: 1280 },
         height: { ideal: 720 },
       },
@@ -51,11 +52,45 @@ async function openCamera(): Promise<MediaStream> {
   }
 }
 
+/** How this phone can show the ultra-wide ("0.5×") view, if at all: by zooming
+ * the current back camera out below 1× (recent iPhones, many Androids), or by
+ * switching to the separately listed ultra-wide camera. */
+export type WideLens = { kind: "zoom"; zoom: number } | { kind: "device"; deviceId: string };
+
+export async function findWideLens(track: MediaStreamTrack | undefined): Promise<WideLens | null> {
+  if (!track) return null;
+  try {
+    const caps = (track.getCapabilities?.() ?? {}) as { zoom?: { min: number; max: number } };
+    if (caps.zoom && caps.zoom.min < 1) return { kind: "zoom", zoom: Math.max(caps.zoom.min, 0.5) };
+    const current = track.getSettings?.().deviceId;
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const wide = devices.find((d) => d.kind === "videoinput" && /ultra\s*-?wide/i.test(d.label) && d.deviceId !== current);
+    if (wide) return { kind: "device", deviceId: wide.deviceId };
+  } catch {
+    // No capability info on this browser: just don't offer 0.5×.
+  }
+  return null;
+}
+
+/** Zoom the running camera (for WideLens "zoom"); false if it refused. */
+export async function setCameraZoom(track: MediaStreamTrack | undefined, zoom: number): Promise<boolean> {
+  if (!track) return false;
+  try {
+    await track.applyConstraints({ advanced: [{ zoom } as MediaTrackConstraintSet] });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export type QrCamera = (() => void) & { track: MediaStreamTrack | undefined };
+
 export async function startQrCamera(
   video: HTMLVideoElement,
   onCode: (text: string) => void,
-): Promise<() => void> {
-  const stream = await openCamera();
+  opts: { deviceId?: string } = {},
+): Promise<QrCamera> {
+  const stream = await openCamera(opts.deviceId);
   let stopped = false;
   let timer: number | undefined;
   const stop = () => {
@@ -122,5 +157,5 @@ export async function startQrCamera(
     timer = window.setTimeout(tick, 120);
   };
   tick();
-  return stop;
+  return Object.assign(stop, { track: stream.getVideoTracks()[0] });
 }
