@@ -2118,6 +2118,14 @@ function canMutateSessions(me: any, coachId: string) {
   return me.role === "dept_head" || me.role === "head_coach";
 }
 
+// The staff member a session or settlement is for must work at the caller's
+// gym. Profile ids come from the request, so never trust them on their own.
+async function staffInMyOrg(me: any, profileId: string) {
+  if (!profileId) return null;
+  const { data } = await admin().from("profiles").select("*").eq("id", profileId).eq("org_id", me.org_id).maybeSingle();
+  return data;
+}
+
 app.get(`${P}/sessions/:coachId/:month`, async (c) => {
   const user = await requireUser(c);
   const me = user && (await profileOf(user.id));
@@ -2147,6 +2155,7 @@ app.post(`${P}/sessions/add`, async (c) => {
   const { coachId } = body;
   let { month, date } = body;
   if (!canMutateSessions(me, coachId)) return c.json({ error: "Forbidden" }, 403);
+  if (!(await staffInMyOrg(me, coachId))) return c.json({ error: "No such coach" }, 404);
   // A coach logs their own attendance only by scanning the coaches'-room QR,
   // and only for today. Heads keep manual control (corrections, any date).
   let source = "manual";
@@ -2179,6 +2188,7 @@ app.post(`${P}/sessions/edit`, async (c) => {
   if (!me) return c.json({ error: "Unauthorized" }, 401);
   const { id, coachId, month, date } = await c.req.json();
   if (!canMutateSessions(me, coachId)) return c.json({ error: "Forbidden" }, 403);
+  if (!(await staffInMyOrg(me, coachId))) return c.json({ error: "No such coach" }, 404);
   // A scanned session is pinned to the day it was scanned.
   if (me.role === "coach") return c.json({ error: "Only a head can move a session to another day." }, 403);
   const blocked = await assertLoggable(me.org_id, coachId, month);
@@ -2196,6 +2206,7 @@ app.post(`${P}/sessions/remove`, async (c) => {
   if (!me) return c.json({ error: "Unauthorized" }, 401);
   const { id, coachId, month } = await c.req.json();
   if (!canMutateSessions(me, coachId)) return c.json({ error: "Forbidden" }, 403);
+  if (!(await staffInMyOrg(me, coachId))) return c.json({ error: "No such coach" }, 404);
   const blocked = await assertLoggable(me.org_id, coachId, month);
   if (blocked) return c.json({ error: blocked }, 400);
   await admin().from("sessions").delete().eq("id", id).eq("org_id", me.org_id);
@@ -2214,8 +2225,9 @@ app.post(`${P}/settle`, async (c) => {
   const { data: existingSettlement } = await admin().from("settlements").select("*").eq("org_id", me.org_id).eq("coach_id", coachId).eq("month", month).maybeSingle();
   if (stateOf(existingSettlement) !== "logging") return c.json({ error: "Already settled." }, 400);
 
-  const coach = await profileOf(coachId);
-  const tier = coach?.tier_id ? await tierOf(coach.tier_id) : null;
+  const coach = await staffInMyOrg(me, coachId);
+  if (!coach) return c.json({ error: "No such coach" }, 404);
+  const tier = coach.tier_id ? await tierOf(coach.tier_id) : null;
   const { data: sessions } = await admin().from("sessions").select("id").eq("org_id", me.org_id).eq("coach_id", coachId).eq("month", month);
   const { data: packages } = await admin().from("package_instances").select("coach_cut_at_sale, purchased_at").eq("org_id", me.org_id).eq("coach_id", coachId);
   const privateTotalSnapshot = (packages ?? [])
@@ -2240,13 +2252,11 @@ app.post(`${P}/settle`, async (c) => {
     .single();
   if (error) throw error;
 
-  if (coach) {
-    await sendPushToProfile(me.org_id, coachId, "month_settled", {
-      title: "💰 Month settled",
-      body: `Your account for ${month} has been settled. Tap here to view the details.`,
-      url: homePathForRole(coach.role),
-    });
-  }
+  await sendPushToProfile(me.org_id, coachId, "month_settled", {
+    title: "💰 Month settled",
+    body: `Your account for ${month} has been settled. Tap here to view the details.`,
+    url: homePathForRole(coach.role),
+  });
 
   return c.json({ settlement: toSettlement(settlement) });
 });
