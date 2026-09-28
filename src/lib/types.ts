@@ -297,6 +297,8 @@ export interface GymClass {
   startsAt: string;
   price: number; // the drop-in price
   status: GymClassStatus;
+  // The card photo members see (a series session shows its series' photo).
+  imageUrl?: string | null;
   bookedCount?: number;
   planSeats?: number;
   dropInSeats?: number;
@@ -365,6 +367,7 @@ export interface ClassSeries {
   dropInPrice: number;
   monthlyPrice: number;
   status: "active" | "ended";
+  imageUrl?: string | null;
   activeMonthlySubscribers?: number;
 }
 

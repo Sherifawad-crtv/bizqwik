@@ -358,6 +358,14 @@ function addMonths(from: Date, months: number): Date {
   return d;
 }
 
+/** "Mon, Oct 3 · 9:00 PM" in the gym's own time zone, for member messages. */
+async function gymWhen(orgId: string, iso: string): Promise<string> {
+  const tz = await orgTimezone(orgId);
+  const d = new Date(iso);
+  const day = new Intl.DateTimeFormat("en-US", { timeZone: tz, weekday: "short", month: "short", day: "numeric" }).format(d);
+  const time = new Intl.DateTimeFormat("en-US", { timeZone: tz, hour: "numeric", minute: "2-digit" }).format(d);
+  return `${day} · ${time}`;
+}
 async function orgTimezone(orgId: string): Promise<string> {
   const { data } = await admin().from("organizations").select("timezone").eq("id", orgId).maybeSingle();
   return data?.timezone || "Africa/Cairo";
@@ -445,6 +453,7 @@ function toClassSeries(row: any) {
     id: row.id, title: row.title, description: row.description ?? null,
     weekdays: (row.weekdays ?? []).map(Number), startTime: String(row.start_time).slice(0, 5), durationMin: row.duration_min,
     dropInPrice: Number(row.drop_in_price), monthlyPrice: Number(row.monthly_price), status: row.status, createdAt: row.created_at,
+    imageUrl: row.image_url ?? null,
   };
 }
 function toGroupPlanType(row: any) {
@@ -542,6 +551,11 @@ async function sellGroupPlan(opts: { orgId: string; client: any; planTypeId?: st
   }
   await earnPurchasePoints(client.id, orgId, Number(plan.price_at_sale), payMethod);
   await logActivity(orgId, "sale_plan", { actorId, clientId: client.id, amount: Number(plan.price_at_sale), meta: { payMethod, kind: plan.kind, name: plan.name, planId: plan.id } });
+  await notifyClient(orgId, client.id, "plan_started", {
+    title: `${plan.name} is active`,
+    body: plan.kind === "bundle" ? `${plan.credits_total} sessions to use by ${String(plan.expires_at).slice(0, 10)}. Book a class to get going.` : `Valid until ${String(plan.expires_at).slice(0, 10)}. Book a class to get going.`,
+    push: !!actorId,
+  });
   return { plan } as const;
 }
 
@@ -701,6 +715,49 @@ async function sendPushToProfile(
     console.log("notification_log insert failed", profileId, (logErr as Error).message);
   }
   return results;
+}
+
+/** Tells a member something: always an entry in their in-app notifications
+ * (the bell), and — when `push` — a web push to every device they enabled it
+ * on. Things the member just did themselves are in-app only; things the gym
+ * did (a class cancelled, a refund, a coach logging PT) and reminders push.
+ * `ref` makes it idempotent (a second call with the same type+ref is a no-op),
+ * which scheduled reminders rely on. Never throws. */
+async function notifyClient(
+  orgId: string,
+  clientId: string,
+  type: string,
+  msg: { title: string; body: string; url?: string; ref?: string; push?: boolean },
+) {
+  try {
+    const row = { org_id: orgId, client_id: clientId, type, title: msg.title, body: msg.body, url: msg.url ?? null, ref: msg.ref ?? null };
+    if (msg.ref) {
+      const { data, error } = await admin().from("client_notifications")
+        .upsert(row, { onConflict: "client_id,type,ref", ignoreDuplicates: true }).select("id");
+      if (error) throw error;
+      if (!data?.length) return; // already told them
+    } else {
+      const { error } = await admin().from("client_notifications").insert(row);
+      if (error) throw error;
+    }
+    if (!msg.push) return;
+    await ensureVapid();
+    const { data: subs } = await admin().from("client_push_subscriptions").select("*").eq("client_id", clientId);
+    await Promise.all((subs ?? []).map(async (sub: any) => {
+      try {
+        await webpush.sendNotification(
+          { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
+          JSON.stringify({ title: msg.title, body: msg.body, url: msg.url ?? "/" }),
+          { TTL: 86400 },
+        );
+      } catch (err: any) {
+        if (err?.statusCode === 404 || err?.statusCode === 410) await admin().from("client_push_subscriptions").delete().eq("id", sub.id);
+        else console.log("client push failed", clientId, err?.statusCode, err?.message);
+      }
+    }));
+  } catch (err) {
+    console.log("notifyClient error", clientId, type, (err as Error).message);
+  }
 }
 
 const app = new Hono();
@@ -1590,6 +1647,20 @@ async function recordCheckIn(orgId: string, clientId: string, clientName: string
   }
   await earnCheckinPoints(clientId, orgId);
   await logActivity(orgId, "check_in", { actorId, clientId, meta: deductFrom ? { bundle: plan.name, sessionsLeft: Number(plan.credits_remaining) } : {} });
+  const left = deductFrom ? Number(plan.credits_remaining) : null;
+  await notifyClient(orgId, clientId, "checked_in", {
+    title: "Checked in 💪",
+    body: left !== null ? `1 session used · ${left} of ${plan.credits_total} left on ${plan.name}.` : "Enjoy your session!",
+    push: !self,
+  });
+  if (left !== null && left <= 2) {
+    await notifyClient(orgId, clientId, left === 0 ? "bundle_finished" : "bundle_low", {
+      title: left === 0 ? `${plan.name} is used up` : `${left} session${left === 1 ? "" : "s"} left`,
+      body: left === 0 ? "That was your last session. Renew at the front desk or in the app to keep training." : `You're almost through ${plan.name}. Renew soon so you don't miss a class.`,
+      ref: `${plan.id}:${left}`,
+      push: true,
+    });
+  }
   return {
     ok: true,
     checkIn,
@@ -1909,6 +1980,13 @@ app.post(`${P}/packages/deliver`, async (c) => {
 
   await admin().from("delivery_logs").insert({ org_id: me.org_id, package_instance_id: pkg.id, date: gymToday(), logged_by: me.id, source: "qr" });
 
+  await notifyClient(me.org_id, pkg.client_id, "pt_logged", {
+    title: "PT session logged",
+    body: sessionsRemaining > 0
+      ? `${me.name} logged today's session · ${sessionsRemaining} of ${updated.sessions_included} left.`
+      : `${me.name} logged your last PT session. Ask the desk about renewing.`,
+    push: true,
+  });
   return c.json({ package: toPackageInstance(updated), preview: await ptScanPreview(updated) });
 });
 
@@ -2604,7 +2682,9 @@ app.post(`${P}/ops/plans/delete`, async (c) => {
 
 // ================= Client (member) app + classes + org config =================
 function toClassRow(row: any) {
-  return { id: row.id, seriesId: row.series_id ?? null, title: row.title, description: row.description ?? null, startsAt: row.starts_at, price: Number(row.price_egp), status: row.status };
+  // A series session shows its series' photo unless it has its own.
+  const imageUrl = row.image_url ?? row.class_series?.image_url ?? null;
+  return { id: row.id, seriesId: row.series_id ?? null, title: row.title, description: row.description ?? null, startsAt: row.starts_at, price: Number(row.price_egp), status: row.status, imageUrl };
 }
 function toBookingRow(row: any) {
   return {
@@ -2612,6 +2692,31 @@ function toBookingRow(row: any) {
     coverage: row.coverage ?? "drop_in", groupPlanId: row.group_plan_id ?? null, creditSpent: !!row.credit_spent,
   };
 }
+// Who's going to each upcoming class, for the member app's avatar stack:
+// a head count and up to 4 sets of initials — never names. The member
+// themselves shows first as "You".
+function initialsOf(name: string): string {
+  const parts = String(name ?? "").trim().split(/\s+/).filter(Boolean);
+  const first = parts[0]?.[0] ?? "";
+  const last = parts.length > 1 ? parts[parts.length - 1][0] : "";
+  return (first + last).toUpperCase() || "•";
+}
+async function classGoing(orgId: string, meId: string) {
+  const { data } = await admin().from("class_bookings").select("class_id, client_id, clients(name), classes!inner(starts_at)")
+    .eq("org_id", orgId).neq("attendance", "cancelled").gte("classes.starts_at", new Date().toISOString()).order("booked_at");
+  const out = new Map<string, { count: number; initials: string[] }>();
+  for (const b of data ?? []) {
+    const g = out.get(b.class_id) ?? { count: 0, initials: [] };
+    g.count += 1;
+    if (b.client_id === meId) g.initials.unshift("You");
+    else if (g.initials.length < 4) g.initials.push(initialsOf((b as any).clients?.name ?? ""));
+    out.set(b.class_id, g);
+  }
+  for (const g of out.values()) g.initials = g.initials.slice(0, 4);
+  return out;
+}
+const NO_ONE = { count: 0, initials: [] as string[] };
+
 async function requireClient(c: any) {
   const user = await requireUser(c);
   if (!user) return null;
@@ -2640,12 +2745,14 @@ app.get(`${P}/client/home`, async (c) => {
   const me = await requireClient(c);
   if (!me) return c.json({ error: "Unauthorized" }, 401);
   await extendOrgSeries(me.org_id);
-  const [status, wallet, points, cfg, upcoming] = await Promise.all([
+  const [status, wallet, points, cfg, upcoming, going, unread] = await Promise.all([
     clientPlanStatus(me.id, me.org_id),
     walletBalance(me.id, me.org_id),
     bumpPointsBalance(me.id, me.org_id),
     pointsConfig(me.org_id),
-    admin().from("classes").select("*").eq("org_id", me.org_id).eq("status", "active").gte("starts_at", new Date().toISOString()).order("starts_at").limit(10),
+    admin().from("classes").select("*, class_series(image_url)").eq("org_id", me.org_id).eq("status", "active").gte("starts_at", new Date().toISOString()).order("starts_at").limit(10),
+    classGoing(me.org_id, me.id),
+    admin().from("client_notifications").select("id", { count: "exact", head: true }).eq("client_id", me.id).is("read_at", null),
   ]);
   const plan = status.groupPlanRow;
   return c.json({
@@ -2657,7 +2764,8 @@ app.get(`${P}/client/home`, async (c) => {
     wallet,
     points,
     pointsValueEgp: cfg.earnPerEgp ? Math.floor(points / cfg.redeemPerEgp) : 0,
-    upcomingClasses: (upcoming.data ?? []).map((r: any) => ({ ...toClassRow(r), coverage: planCovers(plan, r) ? "plan" : "drop_in" })),
+    upcomingClasses: (upcoming.data ?? []).map((r: any) => ({ ...toClassRow(r), coverage: planCovers(plan, r) ? "plan" : "drop_in", going: going.get(r.id) ?? NO_ONE })),
+    unreadNotifications: unread.count ?? 0,
   });
 });
 
@@ -2667,15 +2775,16 @@ app.get(`${P}/client/classes`, async (c) => {
   const me = await requireClient(c);
   if (!me) return c.json({ error: "Unauthorized" }, 401);
   await extendOrgSeries(me.org_id);
-  const [{ data }, { data: mine }, plan] = await Promise.all([
-    admin().from("classes").select("*").eq("org_id", me.org_id).eq("status", "active").gte("starts_at", new Date().toISOString()).order("starts_at"),
+  const [{ data }, { data: mine }, plan, going] = await Promise.all([
+    admin().from("classes").select("*, class_series(image_url)").eq("org_id", me.org_id).eq("status", "active").gte("starts_at", new Date().toISOString()).order("starts_at"),
     admin().from("class_bookings").select("class_id").eq("client_id", me.id).neq("attendance", "cancelled"),
     activeGroupPlan(me.id, me.org_id),
+    classGoing(me.org_id, me.id),
   ]);
   const booked = new Set((mine ?? []).map((b: any) => b.class_id));
   return c.json({
     activePlan: plan ? toGroupPlan(plan) : null,
-    classes: (data ?? []).map((r: any) => ({ ...toClassRow(r), booked: booked.has(r.id), coverage: planCovers(plan, r) ? "plan" : "drop_in" })),
+    classes: (data ?? []).map((r: any) => ({ ...toClassRow(r), booked: booked.has(r.id), coverage: planCovers(plan, r) ? "plan" : "drop_in", going: going.get(r.id) ?? NO_ONE })),
   });
 });
 
@@ -2705,6 +2814,10 @@ app.post(`${P}/client/classes/:id/book`, async (c) => {
     ).select().single();
     if (error) throw error;
     await logActivity(me.org_id, "class_booked", { clientId: me.id, amount: 0, meta: { classId, title: cls.title, coverage: "plan", plan: plan.name } });
+    await notifyClient(me.org_id, me.id, "booked", {
+      title: `You're in: ${cls.title}`,
+      body: `${await gymWhen(me.org_id, cls.starts_at)} · on your ${plan.name}${plan.kind === "bundle" ? ". A session is used when you check in." : "."}`,
+    });
     return c.json({ booking: toBookingRow(booking) });
   }
 
@@ -2731,6 +2844,10 @@ app.post(`${P}/client/classes/:id/book`, async (c) => {
   ).select().single();
   if (error) throw error;
   await logActivity(me.org_id, "class_booked", { clientId: me.id, amount: price, meta: { classId, title: cls.title, payMethod, coverage: "drop_in" } });
+  await notifyClient(me.org_id, me.id, "booked", {
+    title: `You're in: ${cls.title}`,
+    body: `${await gymWhen(me.org_id, cls.starts_at)} · ${price <= 0 ? "free" : payMethod === "wallet" ? `${price} EGP paid from your wallet` : `pay ${price} EGP at the desk`}.`,
+  });
   return c.json({ booking: toBookingRow(booking) });
 });
 
@@ -2775,8 +2892,8 @@ app.post(`${P}/client/plans/buy`, async (c) => {
 app.get(`${P}/client/bookings`, async (c) => {
   const me = await requireClient(c);
   if (!me) return c.json({ error: "Unauthorized" }, 401);
-  const { data } = await admin().from("class_bookings").select("*, classes(title, starts_at)").eq("client_id", me.id).order("booked_at", { ascending: false });
-  return c.json({ bookings: (data ?? []).map((r: any) => ({ ...toBookingRow(r), classTitle: r.classes?.title ?? null, classStartsAt: r.classes?.starts_at ?? null })) });
+  const { data } = await admin().from("class_bookings").select("*, classes(title, starts_at, image_url, class_series(image_url))").eq("client_id", me.id).order("booked_at", { ascending: false });
+  return c.json({ bookings: (data ?? []).map((r: any) => ({ ...toBookingRow(r), classTitle: r.classes?.title ?? null, classStartsAt: r.classes?.starts_at ?? null, classImageUrl: r.classes?.image_url ?? r.classes?.class_series?.image_url ?? null })) });
 });
 
 app.post(`${P}/client/bookings/:id/cancel`, async (c) => {
@@ -2799,6 +2916,11 @@ app.post(`${P}/client/bookings/:id/cancel`, async (c) => {
   }
   await admin().from("class_bookings").update({ attendance: "cancelled", pay_status: booking.pay_status === "paid" ? "refunded" : booking.pay_status }).eq("id", id);
   await logActivity(me.org_id, "class_cancelled", { clientId: me.id, amount: refunded, meta: { bookingId: id, coverage: booking.coverage } });
+  const { data: clsName } = await admin().from("classes").select("title").eq("id", booking.class_id).maybeSingle();
+  await notifyClient(me.org_id, me.id, "booking_cancelled", {
+    title: `Booking cancelled: ${clsName?.title ?? "class"}`,
+    body: refunded > 0 ? `${refunded} EGP is back in your wallet.` : creditReturned ? "Your session is back on your bundle." : "Nothing was charged.",
+  });
   return c.json({ ok: true, refundedToWallet: refunded, planCreditReturned: creditReturned });
 });
 
@@ -2951,7 +3073,127 @@ app.post(`${P}/client/points/redeem`, async (c) => {
   const after = await spendPoints(me.id, me.org_id, pointsSpent, "redeem");
   if (after === null) return c.json({ error: "Your points just changed — please try again." }, 409);
   const wallet = await creditWallet(me.id, me.org_id, egpCredited, "reward", `Redeemed ${pointsSpent.toLocaleString("en-US")} points`);
+  await notifyClient(me.org_id, me.id, "points_redeemed", { title: `${egpCredited} EGP added to your wallet`, body: `You redeemed ${pointsSpent.toLocaleString("en-US")} points.` });
   return c.json({ pointsSpent, egpCredited, points: after, wallet });
+});
+
+// ---- member notifications (the bell) + web push ----
+function toClientNotification(n: any) {
+  return { id: n.id, type: n.type, title: n.title, body: n.body, url: n.url ?? null, read: !!n.read_at, createdAt: n.created_at };
+}
+app.get(`${P}/client/notifications`, async (c) => {
+  const me = await requireClient(c);
+  if (!me) return c.json({ error: "Unauthorized" }, 401);
+  const [{ data }, { count }] = await Promise.all([
+    admin().from("client_notifications").select("*").eq("client_id", me.id).order("created_at", { ascending: false }).limit(60),
+    admin().from("client_notifications").select("id", { count: "exact", head: true }).eq("client_id", me.id).is("read_at", null),
+  ]);
+  return c.json({ notifications: (data ?? []).map(toClientNotification), unread: count ?? 0 });
+});
+// Marks some (`ids`) or all of the member's notifications read.
+app.post(`${P}/client/notifications/read`, async (c) => {
+  const me = await requireClient(c);
+  if (!me) return c.json({ error: "Unauthorized" }, 401);
+  const { ids } = await c.req.json().catch(() => ({}));
+  let q = admin().from("client_notifications").update({ read_at: new Date().toISOString() }).eq("client_id", me.id).is("read_at", null);
+  if (Array.isArray(ids)) {
+    if (ids.length === 0) return c.json({ ok: true });
+    q = q.in("id", ids.map(String));
+  }
+  const { error } = await q;
+  if (error) throw error;
+  return c.json({ ok: true });
+});
+app.post(`${P}/client/push/subscribe`, async (c) => {
+  const me = await requireClient(c);
+  if (!me) return c.json({ error: "Unauthorized" }, 401);
+  const { endpoint, keys, deviceId } = await c.req.json();
+  if (!endpoint || !keys?.p256dh || !keys?.auth) return c.json({ error: "Invalid subscription." }, 400);
+  if (!deviceId) return c.json({ error: "Missing device id." }, 400);
+  // Same stale-endpoint cleanup as the staff app (iOS can rotate endpoints).
+  await admin().from("client_push_subscriptions").delete().eq("client_id", me.id).eq("endpoint", endpoint).neq("id", deviceId);
+  const { error } = await admin().from("client_push_subscriptions").upsert({
+    id: deviceId, org_id: me.org_id, client_id: me.id, endpoint, p256dh: keys.p256dh, auth: keys.auth, updated_at: new Date().toISOString(),
+  });
+  if (error) throw error;
+  return c.json({ ok: true });
+});
+app.post(`${P}/client/push/unsubscribe`, async (c) => {
+  const me = await requireClient(c);
+  if (!me) return c.json({ error: "Unauthorized" }, 401);
+  const { endpoint, deviceId } = await c.req.json().catch(() => ({}));
+  if (deviceId) await admin().from("client_push_subscriptions").delete().eq("id", deviceId).eq("client_id", me.id);
+  else if (endpoint) await admin().from("client_push_subscriptions").delete().eq("endpoint", endpoint).eq("client_id", me.id);
+  return c.json({ ok: true });
+});
+
+// Fired every 15 minutes by pg_cron (shared secret, never a user). Each
+// reminder is sent once thanks to its `ref`:
+// - a class you booked starts within the hour
+// - your plan ends within 3 days / has just ended (and you have no new one) —
+//   only sent between 10:00 and 20:00 gym time, never at night
+app.post(`${P}/push/client-reminders`, async (c) => {
+  const provided = c.req.header("x-cron-secret") || "";
+  const expected = await getSecret("cron_secret");
+  if (provided !== expected) return c.json({ error: "Forbidden" }, 403);
+  const now = Date.now();
+  let sent = 0;
+
+  const { data: soon } = await admin().from("class_bookings").select("id, org_id, client_id, classes!inner(title, starts_at, status)")
+    .eq("attendance", "booked").eq("classes.status", "active")
+    .gt("classes.starts_at", new Date(now).toISOString()).lte("classes.starts_at", new Date(now + 3600000).toISOString());
+  for (const b of soon ?? []) {
+    const cls = (b as any).classes;
+    const mins = Math.max(1, Math.round((Date.parse(cls.starts_at) - now) / 60000));
+    await notifyClient(b.org_id, b.client_id, "class_soon", {
+      title: `${cls.title} starts in ${mins} min`,
+      body: "Scan the check-in QR at the desk when you arrive.",
+      ref: b.id,
+      push: true,
+    });
+    sent++;
+  }
+
+  // Plan reminders only in daytime at each gym.
+  const hourCache = new Map<string, number>();
+  const daytime = async (orgId: string) => {
+    if (!hourCache.has(orgId)) {
+      const tz = await orgTimezone(orgId);
+      hourCache.set(orgId, Number(new Intl.DateTimeFormat("en-US", { timeZone: tz, hour: "numeric", hourCycle: "h23" }).format(new Date(now))));
+    }
+    const h = hourCache.get(orgId)!;
+    return h >= 10 && h < 20;
+  };
+
+  const { data: ending } = await admin().from("group_plans").select("id, org_id, client_id, name, expires_at")
+    .eq("status", "active").gt("expires_at", new Date(now).toISOString()).lte("expires_at", new Date(now + 3 * 86400000).toISOString());
+  for (const p of ending ?? []) {
+    if (!(await daytime(p.org_id))) continue;
+    const days = Math.max(1, Math.ceil((Date.parse(p.expires_at) - now) / 86400000));
+    await notifyClient(p.org_id, p.client_id, "plan_ending", {
+      title: `${p.name} ends in ${days} day${days === 1 ? "" : "s"}`,
+      body: "Renew now to keep booking classes without a gap.",
+      ref: p.id,
+      push: true,
+    });
+    sent++;
+  }
+
+  const { data: ended } = await admin().from("group_plans").select("id, org_id, client_id, name, expires_at")
+    .lte("expires_at", new Date(now).toISOString()).gt("expires_at", new Date(now - 2 * 86400000).toISOString());
+  for (const p of ended ?? []) {
+    if (!(await daytime(p.org_id))) continue;
+    const { data: newer } = await admin().from("group_plans").select("id").eq("client_id", p.client_id).eq("status", "active").gt("expires_at", new Date(now).toISOString()).limit(1);
+    if (newer?.length) continue;
+    await notifyClient(p.org_id, p.client_id, "plan_ended", {
+      title: `${p.name} has ended`,
+      body: "Pick a new plan to keep training with us.",
+      ref: p.id,
+      push: true,
+    });
+    sent++;
+  }
+  return c.json({ sent });
 });
 
 // ---- classes (dept_head creates; staff view) ----
@@ -2964,7 +3206,7 @@ app.get(`${P}/classes`, async (c) => {
   // Recurring series generate lots of sessions, so the list is windowed:
   // the last 14 days (for rosters/attendance) through everything scheduled.
   const since = c.req.query("since") || new Date(Date.now() - 14 * 86400000).toISOString();
-  const { data } = await admin().from("classes").select("*").eq("org_id", me.org_id).gte("starts_at", since).order("starts_at", { ascending: true });
+  const { data } = await admin().from("classes").select("*, class_series(image_url)").eq("org_id", me.org_id).gte("starts_at", since).order("starts_at", { ascending: true });
   const ids = (data ?? []).map((r: any) => r.id);
   const { data: seats } = ids.length > 0
     ? await admin().from("class_bookings").select("class_id, coverage").in("class_id", ids).neq("attendance", "cancelled")
@@ -2986,12 +3228,12 @@ app.post(`${P}/classes`, async (c) => {
   const user = await requireUser(c);
   const me = user && (await profileOf(user.id));
   if (me?.role !== "dept_head") return c.json({ error: "Forbidden" }, 403);
-  const { title, description, startsAt, price } = await c.req.json();
+  const { title, description, startsAt, price, imageUrl } = await c.req.json();
   if (!String(title ?? "").trim()) return c.json({ error: "Title is required." }, 400);
   if (!startsAt) return c.json({ error: "Pick a date and time." }, 400);
   const p = Number(price);
   if (!Number.isFinite(p) || p < 0) return c.json({ error: "Price must be zero or more." }, 400);
-  const { data, error } = await admin().from("classes").insert({ org_id: me.org_id, title: String(title).trim(), description: description ?? null, starts_at: startsAt, price_egp: p, created_by: me.id }).select().single();
+  const { data, error } = await admin().from("classes").insert({ org_id: me.org_id, title: String(title).trim(), description: description ?? null, starts_at: startsAt, price_egp: p, image_url: imageUrlField(imageUrl), created_by: me.id }).select().single();
   if (error) throw error;
   return c.json({ class: toClassRow(data) });
 });
@@ -2999,11 +3241,11 @@ app.post(`${P}/classes/update`, async (c) => {
   const user = await requireUser(c);
   const me = user && (await profileOf(user.id));
   if (me?.role !== "dept_head") return c.json({ error: "Forbidden" }, 403);
-  const { id, title, description, startsAt, price } = await c.req.json();
+  const { id, title, description, startsAt, price, imageUrl } = await c.req.json();
   const p = Number(price);
   if (!String(title ?? "").trim()) return c.json({ error: "Title is required." }, 400);
   if (!Number.isFinite(p) || p < 0) return c.json({ error: "Price must be zero or more." }, 400);
-  const { data, error } = await admin().from("classes").update({ title: String(title).trim(), description: description ?? null, starts_at: startsAt, price_egp: p }).eq("id", id).eq("org_id", me.org_id).select().maybeSingle();
+  const { data, error } = await admin().from("classes").update({ title: String(title).trim(), description: description ?? null, starts_at: startsAt, price_egp: p, image_url: imageUrlField(imageUrl) }).eq("id", id).eq("org_id", me.org_id).select().maybeSingle();
   if (error) throw error;
   if (!data) return c.json({ error: "No such class" }, 404);
   return c.json({ class: toClassRow(data) });
@@ -3023,6 +3265,12 @@ app.post(`${P}/classes/cancel`, async (c) => {
       await creditWallet(b.client_id, me.org_id, Number(b.price_egp), "refund", `Refund: ${cls.title} cancelled`);
     }
     await admin().from("class_bookings").update({ attendance: "cancelled", pay_status: b.pay_status === "paid" ? "refunded" : b.pay_status }).eq("id", b.id);
+    const walletBack = b.coverage !== "plan" && b.pay_status === "paid" && b.pay_method === "wallet" ? Number(b.price_egp) : 0;
+    await notifyClient(me.org_id, b.client_id, "class_cancelled", {
+      title: `${cls.title} is cancelled`,
+      body: `The gym cancelled ${cls.title} on ${await gymWhen(me.org_id, cls.starts_at)}.${walletBack > 0 ? ` ${walletBack} EGP is back in your wallet.` : ""} Sorry about that!`,
+      push: true,
+    });
   }
   await admin().from("classes").update({ status: "cancelled" }).eq("id", id);
   await logActivity(me.org_id, "class_cancelled_by_staff", { actorId: me.id, meta: { classId: id, title: cls.title } });
@@ -3030,6 +3278,12 @@ app.post(`${P}/classes/cancel`, async (c) => {
 });
 
 // ---- class series (dept_head): recurring classes on chosen weekdays ----
+// Class photos are uploaded straight to Storage by the app; we only keep an
+// https link (anything else is dropped).
+function imageUrlField(v: unknown): string | null {
+  const s = String(v ?? "").trim();
+  return /^https:\/\/\S+$/.test(s) && s.length <= 1000 ? s : null;
+}
 function seriesFields(body: any) {
   const title = String(body.title ?? "").trim();
   const weekdays = Array.isArray(body.weekdays) ? [...new Set(body.weekdays.map(Number))].sort() : [];
@@ -3044,7 +3298,7 @@ function seriesFields(body: any) {
   if (!Number.isFinite(dropInPrice) || dropInPrice < 0) return { error: "Drop-in price must be zero or more." } as const;
   if (!Number.isFinite(monthlyPrice) || monthlyPrice < 0) return { error: "Monthly price must be zero or more." } as const;
   return {
-    row: { title, description: blankToNull(body.description), weekdays, start_time: startTime, duration_min: durationMin, drop_in_price: dropInPrice, monthly_price: monthlyPrice },
+    row: { title, description: blankToNull(body.description), weekdays, start_time: startTime, duration_min: durationMin, drop_in_price: dropInPrice, monthly_price: monthlyPrice, image_url: imageUrlField(body.imageUrl) },
   } as const;
 }
 
@@ -3402,6 +3656,7 @@ app.post(`${P}/clients/refund`, async (c) => {
   await clawbackPoints(clientId, me.org_id, amt);
   if (destination === "wallet") {
     const balance = await creditWallet(clientId, me.org_id, amt, "refund", note ? String(note) : "Refund to wallet");
+    await notifyClient(me.org_id, clientId, "wallet_refund", { title: `${amt} EGP refunded to your wallet`, body: note ? String(note) : "You can use it for classes and plans.", push: true });
     return c.json({ ok: true, walletBalance: balance });
   }
   // "At desk": the real money (cash / card / Stripe) is handled outside Bizqwik;
@@ -3419,6 +3674,7 @@ app.post(`${P}/clients/compensate`, async (c) => {
   const { data: client } = await admin().from("clients").select("id").eq("id", clientId).eq("org_id", me.org_id).maybeSingle();
   if (!client) return c.json({ error: "No such client" }, 404);
   const balance = await creditWallet(clientId, me.org_id, amt, "compensation", note ? String(note) : "Compensation credit");
+  await notifyClient(me.org_id, clientId, "wallet_credit", { title: `${amt} EGP added to your wallet`, body: note ? String(note) : "A little something from the gym.", push: true });
   return c.json({ ok: true, walletBalance: balance });
 });
 

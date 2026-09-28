@@ -9,6 +9,7 @@ import { api } from "../lib/backend";
 import { egp, fmt } from "../lib/format";
 import { WEEKDAY_ORDER, WEEKDAY_SHORT, timeLabel, weekdaysLabel } from "../lib/classTime";
 import { TimeWheelField } from "../components/TimeWheelField";
+import { ClassPhotoField } from "../components/ClassPhotoField";
 import type { ClassSeries, GroupPlanType, GroupPlanTypeKind } from "../lib/types";
 import { Segmented } from "../components/Segmented";
 import { Button } from "../components/Button";
@@ -141,6 +142,7 @@ function ClassesPanel() {
 function SeriesRow({ s, last, onEdit }: { s: ClassSeries; last: boolean; onEdit?: () => void }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "16px 20px", borderBottom: last ? "none" : "1px solid var(--line)" }}>
+      {s.imageUrl && <img src={s.imageUrl} alt="" style={{ width: 40, height: 50, flex: "none", borderRadius: 10, objectFit: "cover" }} />}
       <div style={{ minWidth: 0, flex: 1 }}>
         <div style={{ font: "700 16px var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s.title}</div>
         <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>
@@ -202,6 +204,7 @@ export function SeriesSheet({ open, series, onClose }: { open: boolean; series: 
   const [duration, setDuration] = useState("60");
   const [dropIn, setDropIn] = useState("");
   const [monthly, setMonthly] = useState("");
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [confirmEnd, setConfirmEnd] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -217,6 +220,7 @@ export function SeriesSheet({ open, series, onClose }: { open: boolean; series: 
       setDuration(String(series?.durationMin ?? 60));
       setDropIn(series ? String(series.dropInPrice) : "");
       setMonthly(series ? String(series.monthlyPrice) : "");
+      setImageUrl(series?.imageUrl ?? null);
       setConfirmEnd(false);
       setError(null);
     }
@@ -231,7 +235,7 @@ export function SeriesSheet({ open, series, onClose }: { open: boolean; series: 
     if (weekdays.length === 0) return setError("Pick at least one day.");
     if (dropIn === "" || !Number.isFinite(dropInNum) || dropInNum < 0) return setError("Enter the drop-in price (0 for free).");
     if (monthly === "" || !Number.isFinite(monthlyNum) || monthlyNum < 0) return setError("Enter the monthly price.");
-    const input = { title: title.trim(), description: description.trim() || null, weekdays, startTime, durationMin: Number(duration), dropInPrice: dropInNum, monthlyPrice: monthlyNum };
+    const input = { title: title.trim(), description: description.trim() || null, weekdays, startTime, durationMin: Number(duration), dropInPrice: dropInNum, monthlyPrice: monthlyNum, imageUrl };
     setBusy(true);
     setError(null);
     try {
@@ -262,6 +266,7 @@ export function SeriesSheet({ open, series, onClose }: { open: boolean; series: 
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               <TextField label="NAME" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Sunrise HIIT" />
               <TextField label="DESCRIPTION" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Optional — shown to members" />
+              <ClassPhotoField value={imageUrl} onChange={setImageUrl} title={title} />
               <WeekdayPicker value={weekdays} onChange={setWeekdays} />
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
                 <TimeWheelField label="STARTS AT" value={startTime} onChange={setStartTime} />

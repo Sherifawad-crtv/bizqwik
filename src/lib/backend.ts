@@ -50,6 +50,7 @@ export interface SeriesInput {
   durationMin: number;
   dropInPrice: number;
   monthlyPrice: number;
+  imageUrl: string | null;
 }
 
 export interface PlanTypeInput {
@@ -239,10 +240,12 @@ export const api = {
 
   // ===== Classes (staff read; dept_head writes) =====
   classes: () => callFn<{ classes: GymClass[] }>("classes"),
-  createClass: (title: string, description: string | null, startsAt: string, price: number) =>
-    callFn<{ class: GymClass }>("classes", { method: "POST", body: { title, description, startsAt, price } }),
-  updateClass: (id: string, title: string, description: string | null, startsAt: string, price: number) =>
-    callFn<{ class: GymClass }>("classes/update", { method: "POST", body: { id, title, description, startsAt, price } }),
+  // `imageUrl` is the session's own photo; a series session sends null and
+  // shows its series' photo.
+  createClass: (title: string, description: string | null, startsAt: string, price: number, imageUrl: string | null = null) =>
+    callFn<{ class: GymClass }>("classes", { method: "POST", body: { title, description, startsAt, price, imageUrl } }),
+  updateClass: (id: string, title: string, description: string | null, startsAt: string, price: number, imageUrl: string | null = null) =>
+    callFn<{ class: GymClass }>("classes/update", { method: "POST", body: { id, title, description, startsAt, price, imageUrl } }),
   cancelClass: (id: string) => callFn<{ ok: true }>("classes/cancel", { method: "POST", body: { id } }),
 
   // ===== Class roster / attendance / at-desk collection (dept_head + front_desk) =====
