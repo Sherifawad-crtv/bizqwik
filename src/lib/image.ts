@@ -27,3 +27,45 @@ export async function squareCrop(file: File, targetSize = 512): Promise<Blob> {
     URL.revokeObjectURL(objectUrl);
   }
 }
+
+/** Crops a photo to a class card (4:5 portrait, 1080×1350 JPEG). A landscape
+ * shot keeps its centre; a tall one keeps its upper part (a third of the
+ * spare height is cut from the top, two thirds from the bottom), where heads
+ * and faces usually are. */
+export async function classCardCrop(file: File, width = 1080, height = 1350): Promise<Blob> {
+  const objectUrl = URL.createObjectURL(file);
+  try {
+    const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const el = new Image();
+      el.onload = () => resolve(el);
+      el.onerror = () => reject(new Error("Couldn't read that image."));
+      el.src = objectUrl;
+    });
+    const target = width / height;
+    let sw = img.width;
+    let sh = img.height;
+    let sx = 0;
+    let sy = 0;
+    if (img.width / img.height > target) {
+      sw = img.height * target;
+      sx = (img.width - sw) / 2;
+    } else {
+      sh = img.width / target;
+      sy = (img.height - sh) / 3;
+    }
+    // Never upscale a small photo beyond its own resolution.
+    const scale = Math.min(1, sw / width);
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.round(width * scale) || width;
+    canvas.height = Math.round(height * scale) || height;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) throw new Error("Couldn't process that image.");
+    ctx.imageSmoothingQuality = "high";
+    ctx.drawImage(img, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
+    return await new Promise<Blob>((resolve, reject) => {
+      canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error("Couldn't process that image."))), "image/jpeg", 0.85);
+    });
+  } finally {
+    URL.revokeObjectURL(objectUrl);
+  }
+}

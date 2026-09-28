@@ -16,6 +16,7 @@ import { ConfirmSheet } from "../components/ConfirmSheet";
 import { ClassRosterSheet } from "../components/ClassRosterSheet";
 import { pad, whenLabel } from "../lib/classTime";
 import { TimeWheelField } from "../components/TimeWheelField";
+import { ClassPhotoField } from "../components/ClassPhotoField";
 
 interface FormState {
   id: string | null; // null = creating
@@ -24,10 +25,14 @@ interface FormState {
   date: string;
   time: string;
   price: string;
+  // A one-off session carries its own photo; a series session shows its
+  // series' photo (edited on the class, in Catalog).
+  seriesId: string | null;
+  imageUrl: string | null;
 }
 
 function emptyForm(): FormState {
-  return { id: null, title: "", description: "", date: todayIso(), time: "18:00", price: "" };
+  return { id: null, title: "", description: "", date: todayIso(), time: "18:00", price: "", seriesId: null, imageUrl: null };
 }
 
 function formOf(c: GymClass): FormState {
@@ -39,6 +44,8 @@ function formOf(c: GymClass): FormState {
     date: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`,
     time: `${pad(d.getHours())}:${pad(d.getMinutes())}`,
     price: String(c.price),
+    seriesId: c.seriesId ?? null,
+    imageUrl: c.seriesId ? null : (c.imageUrl ?? null),
   };
 }
 
@@ -252,9 +259,9 @@ function ClassSheet({
     setBusy(true);
     try {
       if (draft.id) {
-        await api.updateClass(draft.id, draft.title.trim(), desc, startsAt, price);
+        await api.updateClass(draft.id, draft.title.trim(), desc, startsAt, price, draft.seriesId ? null : draft.imageUrl);
       } else {
-        await api.createClass(draft.title.trim(), desc, startsAt, price);
+        await api.createClass(draft.title.trim(), desc, startsAt, price, draft.imageUrl);
       }
       onSaved();
     } catch (err) {
@@ -272,6 +279,7 @@ function ClassSheet({
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
         <TextField label="TITLE" value={draft.title} onChange={(e) => setDraft({ ...draft, title: e.target.value })} placeholder="e.g. Sunrise HIIT" />
         <TextField label="DESCRIPTION" value={draft.description} onChange={(e) => setDraft({ ...draft, description: e.target.value })} placeholder="Optional — shown to members" />
+        {!draft.seriesId && <ClassPhotoField value={draft.imageUrl} onChange={(url) => setDraft({ ...draft, imageUrl: url })} title={draft.title} />}
         <DateField value={draft.date} min={todayIso()} onChange={(iso) => setDraft({ ...draft, date: iso })} />
         <TimeWheelField label="TIME" value={draft.time} onChange={(v) => setDraft({ ...draft, time: v })} />
         <TextField label="DROP-IN PRICE (EGP)" value={draft.price} onChange={(e) => setDraft({ ...draft, price: e.target.value })} inputMode="numeric" placeholder="0 for free" />
