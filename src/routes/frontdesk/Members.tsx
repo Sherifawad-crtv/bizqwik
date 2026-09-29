@@ -334,6 +334,8 @@ function ClientSheet({
   const [refundAmount, setRefundAmount] = useState("");
   const [refundDest, setRefundDest] = useState<"wallet" | "desk">("wallet");
   const [refundNote, setRefundNote] = useState("");
+  // What they've paid less what's already been refunded: the most this refund can be.
+  const [refundable, setRefundable] = useState<{ paid: number; refunded: number; refundable: number } | null>(null);
   const [payMethod, setPayMethod] = useState<PayMethod>("cash");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -349,11 +351,21 @@ function ClientSheet({
       setRefundAmount("");
       setRefundDest("wallet");
       setRefundNote("");
+      setRefundable(null);
       setPayMethod("cash");
       setError(null);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [client?.id]);
+
+  useEffect(() => {
+    if (mode !== "refund" || !client) return;
+    let alive = true;
+    api.refundable(client.id).then((r) => alive && setRefundable(r)).catch(() => undefined);
+    return () => {
+      alive = false;
+    };
+  }, [mode, client?.id]);
 
   if (!shown) return null;
 
@@ -397,6 +409,7 @@ function ClientSheet({
     if (mode === "refund") {
       const amt = Number(refundAmount);
       if (!Number.isFinite(amt) || amt <= 0) return setError("Enter a refund amount.");
+      if (refundable && amt > refundable.refundable) return setError(refundable.refundable > 0 ? `The most you can refund ${shown.name} is ${fmt(refundable.refundable)} EGP.` : `${shown.name} has nothing left to refund.`);
       return run(() => api.refundClient(shown.id, amt, refundDest, refundNote.trim() || undefined));
     }
   };
@@ -480,7 +493,12 @@ function ClientSheet({
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {mode === "refund" && (
                 <>
-                  <TextField label="AMOUNT (EGP)" value={refundAmount} onChange={(e) => setRefundAmount(e.target.value)} inputMode="numeric" placeholder="0" />
+                  <TextField label="AMOUNT (EGP)" value={refundAmount} onChange={(e) => setRefundAmount(e.target.value)} inputMode="decimal" placeholder="0" />
+                  {refundable && (
+                    <div style={{ font: "400 12px/1.5 var(--font-mono)", color: "var(--ink-faint)" }}>
+                      Up to {fmt(refundable.refundable)} EGP · {fmt(refundable.paid)} paid, {fmt(refundable.refunded)} already refunded.
+                    </div>
+                  )}
                   <Segmented
                     value={refundDest}
                     options={[

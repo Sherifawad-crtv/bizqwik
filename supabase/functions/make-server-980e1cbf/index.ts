@@ -333,6 +333,24 @@ async function clawbackPoints(clientId: string, orgId: string, egp: number) {
   if (n > 0) await spendPoints(clientId, orgId, n, "refund");
 }
 
+// The most a client can be refunded is what they've paid us, less refunds
+// already given. Wallet credit from compensation or points isn't money they
+// paid, so it doesn't count either way.
+async function refundableFor(clientId: string, orgId: string) {
+  const [plans, pkgs, drops, seats, refunds, deskRefunds] = await Promise.all([
+    admin().from("group_plans").select("price_at_sale").eq("client_id", clientId).eq("org_id", orgId),
+    admin().from("package_instances").select("price_at_sale").eq("client_id", clientId).eq("org_id", orgId),
+    admin().from("drop_ins").select("price").eq("client_id", clientId).eq("org_id", orgId),
+    admin().from("class_bookings").select("price_egp").eq("client_id", clientId).eq("org_id", orgId).eq("coverage", "drop_in").is("drop_in_id", null).in("pay_status", ["paid", "refunded"]),
+    admin().from("wallet_transactions").select("amount").eq("client_id", clientId).eq("org_id", orgId).eq("type", "credit").eq("category", "refund"),
+    admin().from("activity_log").select("amount").eq("subject_client_id", clientId).eq("org_id", orgId).eq("type", "refund_desk"),
+  ]);
+  const sum = (rows: any[] | null, k: string) => (rows ?? []).reduce((a, r) => a + Number(r[k] ?? 0), 0);
+  const paid = sum(plans.data, "price_at_sale") + sum(pkgs.data, "price_at_sale") + sum(drops.data, "price") + sum(seats.data, "price_egp");
+  const refunded = sum(refunds.data, "amount") + sum(deskRefunds.data, "amount");
+  return { paid, refunded, refundable: Math.max(0, Math.round((paid - refunded) * 100) / 100) };
+}
+
 const stateOf = (s: any) => (!s ? "logging" : s.paid_at ? "paid" : "settled") as "logging" | "settled" | "paid";
 
 // A package's status is never actively ticked over by a background job (this
@@ -3709,11 +3727,20 @@ app.post(`${P}/clients/refund`, async (c) => {
   const me = user && (await profileOf(user.id));
   if (me?.role !== "dept_head" && me?.role !== "front_desk") return c.json({ error: "Forbidden" }, 403);
   const { clientId, amount, destination, note } = await c.req.json();
-  const amt = Number(amount);
+  const amt = Math.round(Number(amount) * 100) / 100;
   if (!Number.isFinite(amt) || amt <= 0) return c.json({ error: "Enter a refund amount." }, 400);
   if (destination !== "wallet" && destination !== "desk") return c.json({ error: "Choose where the refund goes." }, 400);
-  const { data: client } = await admin().from("clients").select("id").eq("id", clientId).eq("org_id", me.org_id).maybeSingle();
+  const { data: client } = await admin().from("clients").select("id, name").eq("id", clientId).eq("org_id", me.org_id).maybeSingle();
   if (!client) return c.json({ error: "No such client" }, 404);
+  const { paid, refunded, refundable } = await refundableFor(clientId, me.org_id);
+  if (amt > refundable) {
+    return c.json({
+      error: refundable > 0
+        ? `A refund can't be more than what ${client.name} paid. They can be refunded up to ${refundable} EGP (${paid} paid, ${refunded} already refunded).`
+        : `${client.name} has nothing left to refund (${paid} paid, ${refunded} already refunded).`,
+      code: "refund_too_large", refundable,
+    }, 400);
+  }
   await clawbackPoints(clientId, me.org_id, amt);
   if (destination === "wallet") {
     const balance = await creditWallet(clientId, me.org_id, amt, "refund", note ? String(note) : "Refund to wallet");
@@ -3724,6 +3751,17 @@ app.post(`${P}/clients/refund`, async (c) => {
   // we only record the equivalent for the log.
   await logActivity(me.org_id, "refund_desk", { actorId: me.id, clientId, amount: amt, meta: { note: note ?? null } });
   return c.json({ ok: true });
+});
+// How much a client can still be refunded (shown in the desk's refund sheet).
+app.get(`${P}/clients/refundable/:id`, async (c) => {
+  const user = await requireUser(c);
+  const me = user && (await profileOf(user.id));
+  if (me?.role !== "dept_head" && me?.role !== "front_desk") return c.json({ error: "Forbidden" }, 403);
+  const id = c.req.param("id");
+  if (!/^[0-9a-f-]{36}$/i.test(id)) return c.json({ error: "No such client" }, 404);
+  const { data: client } = await admin().from("clients").select("id").eq("id", id).eq("org_id", me.org_id).maybeSingle();
+  if (!client) return c.json({ error: "No such client" }, 404);
+  return c.json(await refundableFor(id, me.org_id));
 });
 app.post(`${P}/clients/compensate`, async (c) => {
   const user = await requireUser(c);
