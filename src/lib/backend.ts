@@ -266,6 +266,7 @@ export const api = {
   // (external money, recorded only); compensation is a dept_head goodwill credit.
   refundClient: (clientId: string, amount: number, destination: "wallet" | "desk", note?: string) =>
     callFn<{ ok: true; walletBalance?: number }>("clients/refund", { method: "POST", body: { clientId, amount, destination, note: note ?? null } }),
+  refundable: (clientId: string) => callFn<{ paid: number; refunded: number; refundable: number }>(`clients/refundable/${clientId}`),
   compensateClient: (clientId: string, amount: number, note?: string) =>
     callFn<{ ok: true; walletBalance?: number }>("clients/compensate", { method: "POST", body: { clientId, amount, note: note ?? null } }),
 
