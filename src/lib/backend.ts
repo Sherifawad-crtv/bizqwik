@@ -239,7 +239,7 @@ export const api = {
   revenue: (months = 6) => callFn<RevenueReport>(`revenue?months=${months}`),
 
   // ===== Classes (staff read; dept_head writes) =====
-  classes: () => callFn<{ classes: GymClass[] }>("classes"),
+  classes: (since?: string) => callFn<{ classes: GymClass[] }>(since ? `classes?since=${encodeURIComponent(since)}` : "classes"),
   // `imageUrl` is the session's own photo; a series session sends null and
   // shows its series' photo.
   createClass: (title: string, description: string | null, startsAt: string, price: number, imageUrl: string | null = null) =>

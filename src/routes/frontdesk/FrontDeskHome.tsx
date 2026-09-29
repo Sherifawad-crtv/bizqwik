@@ -15,7 +15,7 @@ import { CreateClientSheet, useFrontDeskCatalog } from "./Members";
 import { CheckIn } from "./CheckIn";
 import { DropIn } from "./DropIn";
 import { Invitations } from "./Invitations";
-import { DeskClasses } from "./DeskClasses";
+import { ClassCalendarScreen } from "./ClassCalendar";
 
 type Modal = "checkin" | "new" | "dropin" | "invite" | "classes";
 
@@ -163,10 +163,7 @@ export function FrontDeskHome() {
         <SheetHeading kicker="FRONT DESK" title="Guest invitation" />
         <Invitations embedded onCreateClient={() => setModal("new")} />
       </Sheet>
-      <Sheet open={modal === "classes"} onClose={close} width={820}>
-        <SheetHeading kicker="FRONT DESK" title="Classes" />
-        <DeskClasses embedded />
-      </Sheet>
+      {modal === "classes" && <ClassCalendarScreen onClose={close} />}
       {modal === "new" && <NewClientModal onClose={close} />}
     </div>
   );
