@@ -6,6 +6,7 @@ import { UsersGroupRoundedIcon } from "@solar-icons/react/linear/users-group-rou
 import { MagnifierIcon } from "@solar-icons/react/linear/magnifier";
 import { SettingsIcon } from "@solar-icons/react/linear/settings";
 import { BanknoteIcon } from "@solar-icons/react/linear/banknote";
+import { CardIcon } from "@solar-icons/react/linear/card";
 import { ClockCircleIcon } from "@solar-icons/react/linear/clock-circle";
 import { ClipboardListIcon } from "@solar-icons/react/linear/clipboard-list";
 import { AddIcon } from "@solar-icons/react/linear/add";
@@ -39,6 +40,7 @@ import { UsersGroupRoundedIcon as UsersGroupRoundedIconBold } from "@solar-icons
 import { MagnifierIcon as MagnifierIconBold } from "@solar-icons/react/bold-duotone/magnifier";
 import { SettingsIcon as SettingsIconBold } from "@solar-icons/react/bold-duotone/settings";
 import { BanknoteIcon as BanknoteIconBold } from "@solar-icons/react/bold-duotone/banknote";
+import { CardIcon as CardIconBold } from "@solar-icons/react/bold-duotone/card";
 import { ClockCircleIcon as ClockCircleIconBold } from "@solar-icons/react/bold-duotone/clock-circle";
 import { ClipboardListIcon as ClipboardListIconBold } from "@solar-icons/react/bold-duotone/clipboard-list";
 import { AddIcon as AddIconBold } from "@solar-icons/react/bold-duotone/add";
@@ -68,6 +70,8 @@ export type IconName =
   | "insights"
   | "settings"
   | "topay"
+  | "cash"
+  | "card"
   | "history"
   | "clients"
   | "plus"
@@ -101,6 +105,8 @@ const LINEAR = {
   insights: ChartSquareIcon,
   settings: SettingsIcon,
   topay: BanknoteIcon,
+  cash: BanknoteIcon,
+  card: CardIcon,
   history: ClockCircleIcon,
   clients: ClipboardListIcon,
   plus: AddIcon,
@@ -135,6 +141,8 @@ const BOLD = {
   insights: ChartSquareIconBold,
   settings: SettingsIconBold,
   topay: BanknoteIconBold,
+  cash: BanknoteIconBold,
+  card: CardIconBold,
   history: ClockCircleIconBold,
   clients: ClipboardListIconBold,
   plus: AddIconBold,

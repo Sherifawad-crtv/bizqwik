@@ -15,6 +15,7 @@ import { Segmented } from "../../components/Segmented";
 import { SheetSuccessIcon } from "../../components/SheetSuccessIcon";
 import { TextField, SelectField } from "../../components/FormField";
 import { PaymentSelect } from "../../components/PaymentSelect";
+import { PaymentCards } from "../../components/PaymentCards";
 import { Spinner } from "../../components/Spinner";
 import { Icon } from "../../components/Icon";
 import type { PayMethod } from "../../lib/types";
@@ -332,7 +333,7 @@ export function CreateClientSheet({
 
           {step === 2 && (
             <>
-              <PaymentSelect value={payMethod} onChange={setPayMethod} />
+              <PaymentCards value={payMethod} onChange={setPayMethod} />
               <div style={{ marginTop: 10, font: "400 12px/1.5 var(--font-mono)", color: "var(--ink-faint)" }}>A new client has no wallet yet, so it's cash or card.</div>
             </>
           )}
