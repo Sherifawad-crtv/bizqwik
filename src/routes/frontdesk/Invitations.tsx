@@ -10,8 +10,8 @@ import { Spinner } from "../../components/Spinner";
 import { Card, ClientPicker, ErrorBanner, SectionTitle } from "./shared";
 import { useFrontDeskCatalog } from "./Members";
 
-export function Invitations() {
-  useSetHeader({ kicker: "FRONT DESK", title: "Invitations" }, []);
+export function Invitations({ embedded = false, onCreateClient }: { embedded?: boolean; onCreateClient?: () => void } = {}) {
+  useSetHeader(embedded ? null : { kicker: "FRONT DESK", title: "Invitations" }, []);
   const { data } = useAsync(() => api.clients(), []);
   const { bundleTypes } = useFrontDeskCatalog();
   const [memberId, setMemberId] = useState<string | null>(null);
@@ -80,6 +80,7 @@ export function Invitations() {
             filter={(c) => (c.groupPlan?.invitationsRemaining ?? 0) > 0}
             emptyTitle="No one has guest passes left"
             emptyBody="Guest passes come with membership plans that include them. Set a plan's guest passes in Catalog, then sell it to a member."
+            onCreate={onCreateClient}
             onPick={(c) => {
               setMemberId(c.id);
               setError(null);

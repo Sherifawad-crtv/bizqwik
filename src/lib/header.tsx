@@ -29,10 +29,10 @@ export function useHeader(): HeaderSpec {
 }
 
 /** Screens call this to publish their title into the Shell's sticky bar. */
-export function useSetHeader(spec: HeaderSpec, deps: unknown[]) {
+export function useSetHeader(spec: HeaderSpec | null, deps: unknown[]) {
   const { setHeader } = useHeaderCtx();
   useEffect(() => {
-    setHeader(spec);
+    if (spec) setHeader(spec); // null: shown inside a modal, so the page title stays
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps);
 }

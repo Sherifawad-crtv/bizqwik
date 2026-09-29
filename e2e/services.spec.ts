@@ -215,17 +215,25 @@ test("front desk: new client needs an email and gets an app invite", async ({ pa
   });
   await page.goto("/members");
   await page.getByRole("button", { name: "+ New client" }).click();
+  // Step 1: who they are. Email is required, and can't be one already in use.
   await page.getByLabel("FULL NAME", { exact: true }).fill("Mona K");
   await page.getByLabel("PHONE", { exact: true }).fill("0122");
-  await page.getByText("Membership, class monthly or bundle").click();
-  await page.getByText(/Sunrise HIIT monthly/).click();
-  await page.getByRole("button", { name: "Create & start plan" }).click();
+  await page.getByRole("button", { name: "Next" }).click();
   await expect(page.getByText("Enter the client's email — they sign in to the app with it.")).toBeVisible();
   await page.getByLabel("EMAIL", { exact: true }).fill("omar@x.com");
-  await page.getByRole("button", { name: "Create & start plan" }).click();
+  await page.getByRole("button", { name: "Next" }).click();
   await expect(page.getByText("Another client already uses this email.")).toBeVisible();
   expect(sold).toBeNull();
   await page.getByLabel("EMAIL", { exact: true }).fill(" Mona@X.com ");
+  await page.getByRole("button", { name: "Next" }).click();
+  // Step 2: the package. Step 3: payment. Step 4: summary, then create.
+  await page.getByRole("button", { name: "Next" }).click();
+  await expect(page.getByText("Choose a plan.")).toBeVisible();
+  await page.getByText("Membership, class monthly or bundle").click();
+  await page.getByText(/Sunrise HIIT monthly/).click();
+  await page.getByRole("button", { name: "Next" }).click();
+  await page.getByRole("button", { name: "Next" }).click();
+  await expect(page.getByText("Sunrise HIIT monthly · 1 month")).toBeVisible();
   await page.getByRole("button", { name: "Create & start plan" }).click();
   await expect(page.getByText("Client created · app invite ready")).toBeVisible();
   expect(sold).toMatchObject({ name: "Mona K", phone: "0122", email: "mona@x.com", seriesId: "s1" });

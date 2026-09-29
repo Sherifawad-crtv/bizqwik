@@ -19,8 +19,8 @@ const bundleEmpty = (c: ClientWithPackage) => c.groupPlan?.kind === "bundle" && 
 
 // Clients normally check themselves in by scanning the desk's QR code in the
 // client app; this is the desk's manual fallback.
-export function CheckIn() {
-  useSetHeader({ kicker: "FRONT DESK", title: "Check-In" }, []);
+export function CheckIn({ embedded = false, onDropIn, onCreateClient }: { embedded?: boolean; onDropIn?: (c: ClientWithPackage) => void; onCreateClient?: () => void } = {}) {
+  useSetHeader(embedded ? null : { kicker: "FRONT DESK", title: "Check-In" }, []);
   const navigate = useNavigate();
   const { data } = useAsync(() => api.clients(), []);
   const { bundleTypes } = useFrontDeskCatalog();
@@ -33,11 +33,11 @@ export function CheckIn() {
       <div style={{ font: "400 13px/1.5 var(--font-mono)", color: "var(--ink-muted)", margin: "0 2px 14px" }}>
         Find the client by name or phone to check them in by hand.
       </div>
-      <ClientPicker clients={data.clients} bundleTypes={bundleTypes} onPick={setPicked} />
+      <ClientPicker clients={data.clients} bundleTypes={bundleTypes} onPick={setPicked} onCreate={onCreateClient} />
       <ConfirmCheckInSheet
         client={picked}
         onClose={() => setPicked(null)}
-        onDropIn={(c) => navigate(`/drop-in?${new URLSearchParams({ client: c.id, name: c.name })}`)}
+        onDropIn={(c) => (onDropIn ? onDropIn(c) : navigate(`/drop-in?${new URLSearchParams({ client: c.id, name: c.name })}`))}
       />
     </div>
   );

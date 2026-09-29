@@ -18,7 +18,7 @@ import { PaymentSelect } from "../../components/PaymentSelect";
 import { Spinner } from "../../components/Spinner";
 import { Icon } from "../../components/Icon";
 import type { PayMethod } from "../../lib/types";
-import { Card, ErrorBanner, PlanPill, SearchField, SectionTitle, matchesClient, planSummary } from "./shared";
+import { Card, ErrorBanner, PlanPill, SearchField, SectionTitle, SheetHeading, matchesClient, planSummary } from "./shared";
 
 export function useFrontDeskCatalog() {
   const { data: p } = useAsync(() => api.planTypes(), []);
@@ -154,15 +154,10 @@ const bundleOptions = (types: BundleType[]) =>
   types.map((b) => ({ value: b.id, label: `${b.name} · ${fmt(b.price)} EGP · ${b.sessionsIncluded} sessions` }));
 const coachOptions = (coaches: CoachOption[]) => coaches.map((c) => ({ value: c.id, label: c.name }));
 
-function SheetHeading({ kicker, title }: { kicker: string; title: string }) {
-  return (
-    <>
-      <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>{kicker}</div>
-      <div style={{ font: "800 26px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 16px" }}>{title}</div>
-    </>
-  );
-}
+const CREATE_STEPS = ["Client info", "Package", "Payment", "Summary"] as const;
 
+/** New client, one thing at a time: who they are, what they're buying, how
+ * they pay, then a summary to check before anything is created. */
 export function CreateClientSheet({
   open,
   onClose,
@@ -180,6 +175,7 @@ export function CreateClientSheet({
   bundleTypes: BundleType[];
   coaches: CoachOption[];
 }) {
+  const [step, setStep] = useState(0);
   const [kind, setKind] = useState<PlanKind>("plan");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -196,6 +192,7 @@ export function CreateClientSheet({
 
   useEffect(() => {
     if (open) {
+      setStep(0);
       setCreatedId(null);
       setKind("plan");
       setName("");
@@ -211,29 +208,37 @@ export function CreateClientSheet({
 
   if (!open) return null;
 
+  const mail = email.trim().toLowerCase();
+
+  // What's wrong with a step, if anything. Email is how the client signs in
+  // to the member app, so it's required.
+  const problem = (s: number): string | null => {
+    if (s === 0) {
+      if (!name.trim() || !phone.trim()) return "Name and phone number are required.";
+      if (!/^\S+@\S+\.\S+$/.test(mail)) return "Enter the client's email — they sign in to the app with it.";
+      if (!createdId && takenEmails.some((e) => e.trim().toLowerCase() === mail)) return "Another client already uses this email.";
+    }
+    if (s === 1) {
+      if (kind === "plan" && !offer) return "Choose a plan.";
+      if (kind === "service" && (!bundleTypeId || !coachId)) return "Choose a package and a coach.";
+    }
+    return null;
+  };
+
+  const next = () => {
+    const msg = problem(step);
+    if (msg) return setError(msg);
+    setError(null);
+    setStep(step + 1);
+  };
+  const back = () => {
+    setError(null);
+    setStep(step - 1);
+  };
+
   const submit = async () => {
-    if (!name.trim() || !phone.trim()) {
-      setError("Name and phone number are required.");
-      return;
-    }
-    // Email is how the client signs in to the member app, so it's required.
-    const mail = email.trim().toLowerCase();
-    if (!/^\S+@\S+\.\S+$/.test(mail)) {
-      setError("Enter the client's email — they sign in to the app with it.");
-      return;
-    }
-    if (!createdId && takenEmails.some((e) => e.trim().toLowerCase() === mail)) {
-      setError("Another client already uses this email.");
-      return;
-    }
-    if (kind === "plan" && !offer) {
-      setError("Choose a plan.");
-      return;
-    }
-    if (kind === "service" && (!bundleTypeId || !coachId)) {
-      setError("Choose a package and a coach.");
-      return;
-    }
+    const msg = problem(0) ?? problem(1);
+    if (msg) return setError(msg);
     const fields = { name: name.trim(), phone: phone.trim(), email: mail };
     setBusy(true);
     setError(null);
@@ -259,49 +264,118 @@ export function CreateClientSheet({
     }
   };
 
+  // The chosen package as the summary describes it.
+  const chosen = (() => {
+    if (kind === "plan") {
+      if (offer.startsWith("cs:")) {
+        const x = series.find((r) => r.id === offer.slice(3));
+        return x ? { title: `${x.title} monthly`, detail: "1 month", price: x.monthlyPrice } : null;
+      }
+      const t = planTypes.find((r) => r.id === offer.slice(3));
+      if (!t) return null;
+      const months = `${t.durationMonths} month${t.durationMonths === 1 ? "" : "s"}`;
+      return { title: t.name, detail: t.kind === "bundle" ? `${t.credits} classes · ${months}` : `All classes · ${months}`, price: t.price };
+    }
+    const b = bundleTypes.find((r) => r.id === bundleTypeId);
+    return b ? { title: b.name, detail: `${b.sessionsIncluded} PT sessions`, price: b.price } : null;
+  })();
+  const coachName = coaches.find((c) => c.id === coachId)?.name ?? null;
+
   return (
     <Sheet open={open} onClose={onClose}>
       {confirmed ? (
         <SheetSuccessIcon label="Client created · app invite ready" iconIn={iconIn} />
       ) : (
         <>
-          <SheetHeading kicker="NEW CLIENT" title="Create client" />
-          <div style={{ display: "flex", justifyContent: "center", marginBottom: 14 }}>
-            <Segmented
-              value={kind}
-              onChange={(v) => {
-                setKind(v);
-                setError(null);
-              }}
-              options={[
-                { value: "plan", label: "GROUP PLAN" },
-                { value: "service", label: "PT PACKAGE" },
-              ]}
-            />
-          </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            <TextField label="FULL NAME" value={name} onChange={(e) => setName(e.target.value)} placeholder="Client name" autoComplete="off" />
-            <TextField label="PHONE" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="01xxxxxxxxx" autoComplete="off" />
-            <TextField label="EMAIL" type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="off" />
-            {kind === "plan" ? (
-              <GroupOfferSelect value={offer} onChange={setOffer} planTypes={planTypes} series={series} />
-            ) : (
-              <>
-                <SelectField label="PACKAGE" value={bundleTypeId} onChange={setBundleTypeId} placeholder="Choose a package" options={bundleOptions(bundleTypes)} empty={{ title: "No PT packages yet", body: "The department head adds PT packages in Catalog → PT bundles. Once one exists you can sell it here." }} />
-                <SelectField label="COACH" value={coachId} onChange={setCoachId} placeholder="Choose a coach" options={coachOptions(coaches)} empty={{ title: "No coaches yet", body: "The department head invites coaches from Team → Team & tiers. They appear here once they sign up." }} />
-              </>
-            )}
+          <SheetHeading kicker={`NEW CLIENT · STEP ${step + 1} OF ${CREATE_STEPS.length}`} title={CREATE_STEPS[step]} />
+          <div aria-hidden style={{ display: "flex", gap: 6, margin: "-6px 0 18px" }}>
+            {CREATE_STEPS.map((s, i) => (
+              <span key={s} style={{ flex: 1, height: 4, borderRadius: 999, background: i <= step ? "var(--primary)" : "var(--line)" }} />
+            ))}
           </div>
 
-          <div style={{ marginTop: 12 }}>
-            <PaymentSelect value={payMethod} onChange={setPayMethod} />
-          </div>
+          {step === 0 && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              <TextField label="FULL NAME" value={name} onChange={(e) => setName(e.target.value)} placeholder="Client name" autoComplete="off" />
+              <TextField label="PHONE" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="01xxxxxxxxx" autoComplete="off" />
+              <TextField label="EMAIL" type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="off" />
+            </div>
+          )}
+
+          {step === 1 && (
+            <>
+              <div style={{ display: "flex", justifyContent: "center", marginBottom: 14 }}>
+                <Segmented
+                  value={kind}
+                  onChange={(v) => {
+                    setKind(v);
+                    setError(null);
+                  }}
+                  options={[
+                    { value: "plan", label: "GROUP PLAN" },
+                    { value: "service", label: "PT PACKAGE" },
+                  ]}
+                />
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                {kind === "plan" ? (
+                  <GroupOfferSelect value={offer} onChange={setOffer} planTypes={planTypes} series={series} />
+                ) : (
+                  <>
+                    <SelectField label="PACKAGE" value={bundleTypeId} onChange={setBundleTypeId} placeholder="Choose a package" options={bundleOptions(bundleTypes)} empty={{ title: "No PT packages yet", body: "The department head adds PT packages in Catalog → PT bundles. Once one exists you can sell it here." }} />
+                    <SelectField label="COACH" value={coachId} onChange={setCoachId} placeholder="Choose a coach" options={coachOptions(coaches)} empty={{ title: "No coaches yet", body: "The department head invites coaches from Team → Team & tiers. They appear here once they sign up." }} />
+                  </>
+                )}
+              </div>
+            </>
+          )}
+
+          {step === 2 && (
+            <>
+              <PaymentSelect value={payMethod} onChange={setPayMethod} />
+              <div style={{ marginTop: 10, font: "400 12px/1.5 var(--font-mono)", color: "var(--ink-faint)" }}>A new client has no wallet yet, so it's cash or card.</div>
+            </>
+          )}
+
+          {step === 3 && (
+            <>
+              <Card style={{ overflow: "hidden" }}>
+                {(
+                  [
+                    ["CLIENT", name.trim()],
+                    ["PHONE", phone.trim()],
+                    ["EMAIL", mail],
+                    ["PACKAGE", chosen ? `${chosen.title} · ${chosen.detail}` : "—"],
+                    ...(kind === "service" ? [["COACH", coachName ?? "—"]] : []),
+                    ["PAYMENT", payMethod.toUpperCase()],
+                  ] as [string, string][]
+                ).map(([k, v]) => (
+                  <div key={k} style={{ display: "flex", gap: 12, padding: "12px 16px", borderBottom: "1px solid var(--line)" }}>
+                    <span style={{ flex: "none", width: 84, font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", paddingTop: 3 }}>{k}</span>
+                    <span style={{ minWidth: 0, flex: 1, font: "600 15px/1.4 var(--font-body)", overflowWrap: "anywhere" }}>{v}</span>
+                  </div>
+                ))}
+                <div style={{ display: "flex", alignItems: "baseline", gap: 12, padding: "14px 16px", background: "var(--sunken)" }}>
+                  <span style={{ flex: 1, font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>TOTAL TO COLLECT</span>
+                  <span className="tabular" style={{ font: "800 22px var(--font-body)", letterSpacing: "-.02em" }}>{chosen ? `${fmt(chosen.price)} EGP` : "—"}</span>
+                </div>
+              </Card>
+              <div style={{ marginTop: 10, font: "400 12px/1.5 var(--font-mono)", color: "var(--ink-faint)" }}>Creating the client also sends the app invite to {mail}.</div>
+            </>
+          )}
+
           {error && <ErrorBanner text={error} />}
-          <Button fullWidth size="lg" style={{ marginTop: 16 }} disabled={busy} onClick={submit}>
-            {busy ? "Saving…" : kind === "plan" ? "Create & start plan" : "Create & sell package"}
-          </Button>
-          <Button variant="secondary" fullWidth style={{ marginTop: 8 }} onClick={onClose} disabled={busy}>
-            Cancel
+          {step < 3 ? (
+            <Button fullWidth size="lg" style={{ marginTop: 16 }} onClick={next}>
+              Next
+            </Button>
+          ) : (
+            <Button fullWidth size="lg" style={{ marginTop: 16 }} disabled={busy} onClick={submit}>
+              {busy ? "Saving…" : kind === "plan" ? "Create & start plan" : "Create & sell package"}
+            </Button>
+          )}
+          <Button variant="secondary" fullWidth style={{ marginTop: 8 }} onClick={step === 0 ? onClose : back} disabled={busy}>
+            {step === 0 ? "Cancel" : "Back"}
           </Button>
         </>
       )}
