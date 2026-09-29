@@ -49,9 +49,9 @@ test("home quick actions open a modal on the same page", async ({ page }) => {
     await expect(page.getByText(expected).first()).toBeVisible();
     // Still on Home: nothing navigated.
     expect(new URL(page.url()).pathname).toBe("/");
-    await page.keyboard.press("Escape").catch(() => undefined);
-    // Close by tapping the backdrop.
-    await page.mouse.click(5, 5);
+    // Close: the calendar has its own close button, a modal closes on its backdrop.
+    if (action === "Classes") await page.getByRole("button", { name: "Close calendar" }).click();
+    else await page.mouse.click(5, 5);
     await expect(page.getByText(expected).first()).toHaveCount(0);
   }
 });
@@ -106,38 +106,61 @@ test("new client: step by step, then a summary to check before creating", async 
   expect(sold).toMatchObject({ name: "Mona K", phone: "0122", email: "mona@x.com", planTypeId: "p2", payMethod: "card" });
 });
 
-test("classes: a calendar with day, week and month views", async ({ page }) => {
+test("classes: a full-screen calendar with day, week and month views", async ({ page }) => {
   await open(page);
   await page.getByRole("button", { name: "Classes", exact: true }).click();
+  await expect(page.getByTestId("class-calendar")).toBeVisible();
+  const box = await page.getByTestId("class-calendar").boundingBox();
+  const viewport = page.viewportSize()!;
+  expect(box).toMatchObject({ x: 0, y: 0, width: viewport.width, height: viewport.height });
 
-  // Week is the default view, showing this week's classes (not the cancelled one).
+  // Week is the default view: seven day columns, today's classes as blocks
+  // (the cancelled one isn't shown).
   await expect(page.getByTestId("week-day")).toHaveCount(7);
   await expect(page.getByTestId("calendar-class").filter({ hasText: "Evening Yoga" })).toHaveCount(1);
   await expect(page.getByText("Cancelled Spin")).toHaveCount(0);
 
   await page.getByRole("button", { name: "DAY", exact: true }).click();
+  await expect(page.getByTestId("week-day")).toHaveCount(1);
   await expect(page.getByTestId("calendar-class")).toHaveCount(2);
-  await expect(page.getByText("7:00 AM")).toBeVisible();
   const today = await page.getByTestId("calendar-label").innerText();
   await page.getByRole("button", { name: "Next" }).click();
   await expect(page.getByText("No classes this day")).toBeVisible();
   await page.getByRole("button", { name: "TODAY", exact: true }).click();
   await expect(page.getByTestId("calendar-label")).toHaveText(today);
 
-  await page.getByRole("button", { name: "MONTH" }).click();
+  await page.getByRole("button", { name: "MONTH", exact: true }).click();
   await expect(page.getByTestId("calendar-label")).toContainText(String(new Date().getFullYear()));
+  // A day with classes shows them in its cell; opening the day goes to Day view.
   await expect(page.getByRole("button", { name: /, 2 classes$/ })).toHaveCount(1);
-  // Picking a day lists its classes underneath.
-  await page.getByRole("button", { name: /, 2 classes$/ }).click();
+  await page.getByRole("button", { name: /, 2 classes$/ }).click({ position: { x: 14, y: 14 } });
+  await expect(page.getByTestId("week-day")).toHaveCount(1);
   await expect(page.getByTestId("calendar-class")).toHaveCount(2);
+
+  // Closing goes back to Home.
+  await page.getByRole("button", { name: "Close calendar" }).click();
+  await expect(page.getByTestId("class-calendar")).toHaveCount(0);
+  expect(new URL(page.url()).pathname).toBe("/");
 });
 
-test("classes: on a phone the week is a list by day", async ({ page }) => {
+test("classes: opening a class from the calendar shows its roster", async ({ page }) => {
+  await open(page, { "classes/k2/bookings": { bookings: [] } });
+  await page.getByRole("button", { name: "Classes", exact: true }).click();
+  await page.getByTestId("calendar-class").filter({ hasText: "Evening Yoga" }).click();
+  await expect(page.getByText("Evening Yoga").first()).toBeVisible();
+  await expect(page.getByText(/0 booked/).first()).toBeVisible();
+});
+
+test("classes: the calendar fits a phone", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await open(page);
   await page.getByRole("button", { name: "Classes", exact: true }).click();
+  // A phone opens on the day; the week is one swipe away.
+  await expect(page.getByTestId("week-day")).toHaveCount(1);
+  await page.getByRole("button", { name: "WEEK", exact: true }).click();
   await expect(page.getByTestId("week-day")).toHaveCount(7);
-  await expect(page.getByTestId("calendar-class").first()).toBeVisible();
-  const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
-  expect(overflow).toBe(false);
+  // The page itself never scrolls sideways; only the week grid does.
+  expect(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth)).toBe(false);
+  await page.getByRole("button", { name: "MONTH", exact: true }).click();
+  await expect(page.getByTestId("month-day").first()).toBeVisible();
 });
