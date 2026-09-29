@@ -7,10 +7,20 @@ import webpush from "npm:web-push@3.6.7";
 // ---- Supabase admin client --------------------------------------------
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-const admin = () =>
-  createClient(SUPABASE_URL, SERVICE_ROLE, {
-    auth: { autoRefreshToken: false, persistSession: false },
-  });
+// One client for the whole worker: it holds no user session, and reusing it
+// keeps its connection and the auth signing keys cached between requests.
+const adminClient = createClient(SUPABASE_URL, SERVICE_ROLE, {
+  auth: { autoRefreshToken: false, persistSession: false },
+});
+const admin = () => adminClient;
+
+// Work the caller doesn't need to wait for (refreshing a cached total): it
+// finishes after the response is sent.
+function background(p: PromiseLike<unknown>) {
+  const task = Promise.resolve(p).catch((e) => console.log("background task failed", (e as Error)?.message));
+  const rt = (globalThis as any).EdgeRuntime;
+  if (rt?.waitUntil) rt.waitUntil(task);
+}
 
 // ---- secrets (Vault, via a service-role-only RPC — there's no tool to set
 // Edge Function env vars directly, so VAPID keys and the cron shared secret
@@ -62,13 +72,25 @@ function addDays(dateIso: string, days: number): string {
   return d.toISOString().slice(0, 10);
 }
 
-async function requireUser(c: any) {
+// Who's calling. The token's signature is checked here against the project's
+// published signing keys (fetched once, then cached), so there's no round
+// trip to the auth server on every request. The anon key is not a user.
+async function requireUser(c: any): Promise<{ id: string } | null> {
   const auth = c.req.header("Authorization") || "";
   const token = auth.replace("Bearer ", "");
   if (!token) return null;
+  try {
+    const { data, error } = await admin().auth.getClaims(token);
+    if (!error && data?.claims) {
+      const { sub, role } = data.claims as { sub?: string; role?: string };
+      return sub && role === "authenticated" ? { id: sub } : null;
+    }
+  } catch {
+    // fall through to the auth server
+  }
   const { data, error } = await admin().auth.getUser(token);
   if (error || !data?.user) return null;
-  return data.user;
+  return { id: data.user.id };
 }
 
 async function profileOf(userId: string) {
@@ -167,12 +189,17 @@ async function sweepWalletExpiry(clientId: string, orgId: string) {
   }
 }
 async function walletBalance(clientId: string, orgId: string): Promise<number> {
-  await sweepWalletExpiry(clientId, orgId);
   const { data } = await admin().from("wallet_transactions")
-    .select("remaining")
+    .select("remaining, expires_at")
     .eq("client_id", clientId).eq("org_id", orgId).eq("type", "credit").gt("remaining", 0);
+  const now = Date.now();
+  // Expired credit is rare: only then take the slower path that writes it off.
+  if ((data ?? []).some((r: any) => r.expires_at && Date.parse(r.expires_at) <= now)) {
+    await sweepWalletExpiry(clientId, orgId);
+    return walletBalance(clientId, orgId);
+  }
   const bal = (data ?? []).reduce((s: number, r: any) => s + Number(r.remaining), 0);
-  await admin().from("wallets").upsert({ client_id: clientId, org_id: orgId, balance: bal, updated_at: new Date().toISOString() });
+  background(admin().from("wallets").upsert({ client_id: clientId, org_id: orgId, balance: bal, updated_at: new Date().toISOString() }));
   return bal;
 }
 async function creditWallet(clientId: string, orgId: string, amount: number, category: string, description: string) {
@@ -243,11 +270,15 @@ async function sweepPointsExpiry(clientId: string, orgId: string) {
   }
 }
 async function bumpPointsBalance(clientId: string, orgId: string): Promise<number> {
-  await sweepPointsExpiry(clientId, orgId);
-  const { data } = await admin().from("points_ledger").select("points").eq("client_id", clientId).eq("org_id", orgId);
+  const { data } = await admin().from("points_ledger").select("points, remaining, expires_at").eq("client_id", clientId).eq("org_id", orgId);
+  const now = Date.now();
+  if ((data ?? []).some((r: any) => Number(r.remaining) > 0 && r.expires_at && Date.parse(r.expires_at) <= now)) {
+    await sweepPointsExpiry(clientId, orgId);
+    return bumpPointsBalance(clientId, orgId);
+  }
   const total = (data ?? []).reduce((s: number, r: any) => s + Number(r.points), 0);
   // tier is left to the column default (its check only allows silver/gold/platinum).
-  await admin().from("points_balances").upsert({ client_id: clientId, org_id: orgId, total_points: total, updated_at: new Date().toISOString() });
+  background(admin().from("points_balances").upsert({ client_id: clientId, org_id: orgId, total_points: total, updated_at: new Date().toISOString() }));
   return total;
 }
 async function earnPoints(clientId: string, orgId: string, points: number, reason: string, cfg?: Awaited<ReturnType<typeof pointsConfig>>) {
@@ -366,9 +397,15 @@ async function gymWhen(orgId: string, iso: string): Promise<string> {
   const time = new Intl.DateTimeFormat("en-US", { timeZone: tz, hour: "numeric", minute: "2-digit" }).format(d);
   return `${day} · ${time}`;
 }
+// A gym's time zone practically never changes; remember it for 10 minutes.
+const tzCache = new Map<string, { tz: string; at: number }>();
 async function orgTimezone(orgId: string): Promise<string> {
+  const hit = tzCache.get(orgId);
+  if (hit && Date.now() - hit.at < 600_000) return hit.tz;
   const { data } = await admin().from("organizations").select("timezone").eq("id", orgId).maybeSingle();
-  return data?.timezone || "Africa/Cairo";
+  const tz = data?.timezone || "Africa/Cairo";
+  tzCache.set(orgId, { tz, at: Date.now() });
+  return tz;
 }
 
 // Offset (ms) of `tz` from UTC at instant `utcMs`.
@@ -427,12 +464,17 @@ async function generateSeriesSessions(series: any, tz: string) {
   }
   await admin().from("class_series").update({ generated_until: until }).eq("id", series.id);
 }
+// Topping up is a daily job: once a worker has done it for a gym today it
+// skips it (creating or editing a class generates its own sessions).
+const seriesToppedUp = new Map<string, string>();
 async function extendOrgSeries(orgId: string) {
-  const { data: all } = await admin().from("class_series").select("*").eq("org_id", orgId).eq("status", "active");
-  if (!all || all.length === 0) return;
   const tz = await orgTimezone(orgId);
-  const until = addDays(todayInTz(tz), SERIES_WINDOW_DAYS);
-  for (const s of all) if (!s.generated_until || s.generated_until < until) await generateSeriesSessions(s, tz);
+  const today = todayInTz(tz);
+  if (seriesToppedUp.get(orgId) === today) return;
+  const { data: all } = await admin().from("class_series").select("*").eq("org_id", orgId).eq("status", "active");
+  const until = addDays(today, SERIES_WINDOW_DAYS);
+  for (const s of all ?? []) if (!s.generated_until || s.generated_until < until) await generateSeriesSessions(s, tz);
+  seriesToppedUp.set(orgId, today);
 }
 
 // Removes a series' FUTURE sessions nobody holds a seat in (cancelled seats
@@ -476,13 +518,17 @@ function toGroupPlan(row: any) {
 // being the member's active plan the first time anything looks at it.
 async function sweepGroupPlans(clientId: string) {
   const nowIso = new Date().toISOString();
-  await admin().from("group_plans").update({ status: "finished" }).eq("client_id", clientId).eq("status", "active").lte("expires_at", nowIso);
-  await admin().from("group_plans").update({ status: "finished" }).eq("client_id", clientId).eq("status", "active").eq("kind", "bundle").lte("credits_remaining", 0);
+  await Promise.all([
+    admin().from("group_plans").update({ status: "finished" }).eq("client_id", clientId).eq("status", "active").lte("expires_at", nowIso),
+    admin().from("group_plans").update({ status: "finished" }).eq("client_id", clientId).eq("status", "active").eq("kind", "bundle").lte("credits_remaining", 0),
+  ]);
 }
 async function sweepOrgGroupPlans(orgId: string) {
   const nowIso = new Date().toISOString();
-  await admin().from("group_plans").update({ status: "finished" }).eq("org_id", orgId).eq("status", "active").lte("expires_at", nowIso);
-  await admin().from("group_plans").update({ status: "finished" }).eq("org_id", orgId).eq("status", "active").eq("kind", "bundle").lte("credits_remaining", 0);
+  await Promise.all([
+    admin().from("group_plans").update({ status: "finished" }).eq("org_id", orgId).eq("status", "active").lte("expires_at", nowIso),
+    admin().from("group_plans").update({ status: "finished" }).eq("org_id", orgId).eq("status", "active").eq("kind", "bundle").lte("credits_remaining", 0),
+  ]);
 }
 async function activeGroupPlan(clientId: string, orgId: string) {
   await sweepGroupPlans(clientId);
@@ -2755,15 +2801,20 @@ app.get(`${P}/client/home`, async (c) => {
   const me = await requireClient(c);
   if (!me) return c.json({ error: "Unauthorized" }, 401);
   await extendOrgSeries(me.org_id);
-  const [status, wallet, points, cfg, upcoming, going, unread] = await Promise.all([
+  // Everything Home shows, in one call: the plan, balances, the unread count,
+  // and the next 7 days of classes (with whether the member has booked each).
+  const now = new Date();
+  const [status, wallet, points, cfg, upcoming, mine, going, unread] = await Promise.all([
     clientPlanStatus(me.id, me.org_id),
     walletBalance(me.id, me.org_id),
     bumpPointsBalance(me.id, me.org_id),
     pointsConfig(me.org_id),
-    admin().from("classes").select("*, class_series(image_url)").eq("org_id", me.org_id).eq("status", "active").gte("starts_at", new Date().toISOString()).order("starts_at").limit(10),
+    admin().from("classes").select("*, class_series(image_url)").eq("org_id", me.org_id).eq("status", "active").gte("starts_at", now.toISOString()).lt("starts_at", new Date(now.getTime() + 7 * 86400000).toISOString()).order("starts_at").limit(80),
+    admin().from("class_bookings").select("class_id").eq("client_id", me.id).neq("attendance", "cancelled"),
     classGoing(me.org_id, me.id),
     admin().from("client_notifications").select("id", { count: "exact", head: true }).eq("client_id", me.id).is("read_at", null),
   ]);
+  const booked = new Set((mine.data ?? []).map((b: any) => b.class_id));
   const plan = status.groupPlanRow;
   return c.json({
     name: me.name,
@@ -2774,7 +2825,7 @@ app.get(`${P}/client/home`, async (c) => {
     wallet,
     points,
     pointsValueEgp: cfg.earnPerEgp ? Math.floor(points / cfg.redeemPerEgp) : 0,
-    upcomingClasses: (upcoming.data ?? []).map((r: any) => ({ ...toClassRow(r), coverage: planCovers(plan, r) ? "plan" : "drop_in", going: going.get(r.id) ?? NO_ONE })),
+    upcomingClasses: (upcoming.data ?? []).map((r: any) => ({ ...toClassRow(r), booked: booked.has(r.id), coverage: planCovers(plan, r) ? "plan" : "drop_in", going: going.get(r.id) ?? NO_ONE })),
     unreadNotifications: unread.count ?? 0,
   });
 });
