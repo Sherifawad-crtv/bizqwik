@@ -83,7 +83,7 @@ test("new client: step by step, then a summary to check before creating", async 
   await page.getByRole("button", { name: "Next" }).click();
 
   await expect(page.getByText("STEP 3 OF 4")).toBeVisible();
-  await page.getByRole("button", { name: "CARD" }).click();
+  await page.getByRole("radio", { name: /Card/ }).click();
   await page.getByRole("button", { name: "Next" }).click();
 
   // The summary shows everything, and nothing has been created yet.
