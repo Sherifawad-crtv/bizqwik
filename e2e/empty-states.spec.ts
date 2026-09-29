@@ -45,6 +45,10 @@ test("empty org: dropdowns with no options explain why instead of opening blank"
   await boot(page, "front_desk");
   await page.goto("/members");
   await page.getByRole("button", { name: "+ New client" }).first().click();
+  await page.getByLabel("FULL NAME", { exact: true }).fill("Test Client");
+  await page.getByLabel("PHONE", { exact: true }).fill("0100");
+  await page.getByLabel("EMAIL", { exact: true }).fill("test@client.dev");
+  await page.getByRole("button", { name: "Next" }).click();
   await page.getByRole("button", { name: "PT PACKAGE" }).click();
   await expect(page.getByText("No PT packages yet").first()).toBeVisible();
   await page.getByText("PACKAGE", { exact: true }).click();

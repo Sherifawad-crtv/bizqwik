@@ -1,4 +1,5 @@
 import { EmptyState } from "../../components/EmptyState";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../lib/auth";
 import { useSetHeader } from "../../lib/header";
@@ -8,15 +9,34 @@ import { HomeAvatar } from "../../components/HomeAvatar";
 import { MoneyHero } from "../../components/MoneyHero";
 import { Icon, type IconName } from "../../components/Icon";
 import { Spinner } from "../../components/Spinner";
-import { Card, SectionTitle } from "./shared";
+import { Sheet } from "../../components/Sheet";
+import { Card, SectionTitle, SheetHeading } from "./shared";
+import { CreateClientSheet, useFrontDeskCatalog } from "./Members";
+import { CheckIn } from "./CheckIn";
+import { DropIn } from "./DropIn";
+import { Invitations } from "./Invitations";
+import { DeskClasses } from "./DeskClasses";
 
-const ACTIONS: { key: string; label: string; icon: IconName; to: string; primary?: boolean }[] = [
-  { key: "checkin", label: "Check someone in", icon: "check", to: "/checkin", primary: true },
-  { key: "new", label: "New client", icon: "user-plus", to: "/members?new=1", primary: true },
-  { key: "dropin", label: "Drop-in pass", icon: "ticket", to: "/drop-in" },
-  { key: "invite", label: "Guest invitation", icon: "gift", to: "/invitations" },
-  { key: "classes", label: "Classes", icon: "calendar", to: "/desk-classes" },
+type Modal = "checkin" | "new" | "dropin" | "invite" | "classes";
+
+// Each one opens right here as a modal; the bottom tabs are for going to a page.
+const ACTIONS: { key: Modal; label: string; icon: IconName; primary?: boolean }[] = [
+  { key: "checkin", label: "Check someone in", icon: "check", primary: true },
+  { key: "new", label: "New client", icon: "user-plus", primary: true },
+  { key: "dropin", label: "Drop-in pass", icon: "ticket" },
+  { key: "invite", label: "Guest invitation", icon: "gift" },
+  { key: "classes", label: "Classes", icon: "calendar" },
 ];
+
+/** The new-client flow, with what it needs loaded only while it's open. */
+function NewClientModal({ onClose }: { onClose: () => void }) {
+  const { data } = useAsync(() => api.clients(), []);
+  const { data: coachData } = useAsync(() => api.coaches(), []);
+  const { planTypes, series, bundleTypes } = useFrontDeskCatalog();
+  return (
+    <CreateClientSheet open onClose={onClose} takenEmails={(data?.clients ?? []).map((c) => c.email ?? "")} planTypes={planTypes} series={series} bundleTypes={bundleTypes} coaches={coachData?.coaches ?? []} />
+  );
+}
 
 function timeAgo(iso: string): string {
   const mins = Math.max(0, Math.round((Date.now() - Date.parse(iso)) / 60000));
@@ -30,6 +50,13 @@ export function FrontDeskHome() {
   const { profile } = useAuth();
   const navigate = useNavigate();
   const { data } = useAsync(() => api.frontDeskSummary(), []);
+  const [modal, setModal] = useState<Modal | null>(null);
+  // A check-in that turns out to need a drop-in hands the client over to it.
+  const [dropInFor, setDropInFor] = useState<{ id: string; name: string } | null>(null);
+  const close = () => {
+    setModal(null);
+    setDropInFor(null);
+  };
 
   useSetHeader({ kicker: "FRONT DESK", title: "Today" }, []);
 
@@ -56,7 +83,7 @@ export function FrontDeskHome() {
             key={a.key}
             data-sq
             data-tap
-            onClick={() => navigate(a.to)}
+            onClick={() => setModal(a.key)}
             style={{
               minHeight: 120,
               borderRadius: "var(--r-card)",
@@ -116,6 +143,31 @@ export function FrontDeskHome() {
       >
         Full activity &amp; logs <Icon name="chevron-right" size={16} />
       </button>
+
+      <Sheet open={modal === "checkin"} onClose={close}>
+        <SheetHeading kicker="FRONT DESK" title="Check-In" />
+        <CheckIn
+          embedded
+          onCreateClient={() => setModal("new")}
+          onDropIn={(c) => {
+            setDropInFor({ id: c.id, name: c.name });
+            setModal("dropin");
+          }}
+        />
+      </Sheet>
+      <Sheet open={modal === "dropin"} onClose={close}>
+        <SheetHeading kicker="FRONT DESK" title="Drop-In" />
+        <DropIn embedded initialClient={dropInFor} />
+      </Sheet>
+      <Sheet open={modal === "invite"} onClose={close}>
+        <SheetHeading kicker="FRONT DESK" title="Guest invitation" />
+        <Invitations embedded onCreateClient={() => setModal("new")} />
+      </Sheet>
+      <Sheet open={modal === "classes"} onClose={close} width={820}>
+        <SheetHeading kicker="FRONT DESK" title="Classes" />
+        <DeskClasses embedded />
+      </Sheet>
+      {modal === "new" && <NewClientModal onClose={close} />}
     </div>
   );
 }

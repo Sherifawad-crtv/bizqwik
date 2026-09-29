@@ -60,6 +60,15 @@ export function PlanPill({ tone }: { tone: PlanTone }) {
   );
 }
 
+export function SheetHeading({ kicker, title }: { kicker: string; title: string }) {
+  return (
+    <>
+      <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>{kicker}</div>
+      <div style={{ font: "800 26px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 16px" }}>{title}</div>
+    </>
+  );
+}
+
 export function ErrorBanner({ text }: { text: string }) {
   return (
     <div style={{ marginTop: 12, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>
@@ -120,6 +129,7 @@ export function ClientPicker({
   filter,
   emptyTitle,
   emptyBody,
+  onCreate,
 }: {
   clients: ClientWithPackage[];
   bundleTypes: BundleType[];
@@ -128,6 +138,8 @@ export function ClientPicker({
   /** When clients exist but none pass `filter` (e.g. nobody has guest passes). */
   emptyTitle?: string;
   emptyBody?: string;
+  /** Opens the new-client flow in place (a modal), instead of going to the Clients tab. */
+  onCreate?: () => void;
 }) {
   const [query, setQuery] = useState("");
   const navigate = useNavigate();
@@ -157,7 +169,7 @@ export function ClientPicker({
         })}
         {shown.length === 0 &&
           (clients.length === 0 ? (
-            <EmptyState bare icon="clients" title="No clients yet" body="Register your first client from Clients — then they can be found here." action={{ label: "+ New client", onClick: () => navigate("/members?new=1") }} />
+            <EmptyState bare icon="clients" title="No clients yet" body="Register your first client from Clients — then they can be found here." action={{ label: "+ New client", onClick: () => (onCreate ? onCreate() : navigate("/members?new=1")) }} />
           ) : eligible === 0 ? (
             <EmptyState bare icon="clients" title={emptyTitle ?? "No one to show"} body={emptyBody} />
           ) : (

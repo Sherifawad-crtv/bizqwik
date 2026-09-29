@@ -26,9 +26,11 @@ type Mode = "class" | "walkin";
  * so the visit lands in their history and they can sign up to the app. A
  * member who still has a group plan running gets the same "are you sure?"
  * check as the member app before being charged. */
-export function DropIn() {
-  useSetHeader({ kicker: "FRONT DESK", title: "Drop-In" }, []);
+export function DropIn({ embedded = false, initialClient = null }: { embedded?: boolean; initialClient?: { id: string; name: string } | null } = {}) {
+  useSetHeader(embedded ? null : { kicker: "FRONT DESK", title: "Drop-In" }, []);
   const [params, setParams] = useSearchParams();
+  // In a modal the linked client is plain state; as a page it lives in the URL.
+  const [localClient, setLocalClient] = useState<{ id: string; name: string } | null>(initialClient);
   const [mode, setMode] = useState<Mode>("class");
   const [category, setCategory] = useState("");
   const [price, setPrice] = useState("");
@@ -36,8 +38,9 @@ export function DropIn() {
   // The linked client lives in the URL so a check-in hand-off
   // (?client=…&name=…) survives the tab transition's remount.
   const clientId = params.get("client");
-  const client = clientId ? { id: clientId, name: params.get("name") ?? "Client" } : null;
-  const setClient = (c: { id: string; name: string } | null) => setParams(c ? { client: c.id, name: c.name } : {}, { replace: true });
+  const urlClient = clientId ? { id: clientId, name: params.get("name") ?? "Client" } : null;
+  const client = embedded ? localClient : urlClient;
+  const setClient = (c: { id: string; name: string } | null) => (embedded ? setLocalClient(c) : setParams(c ? { client: c.id, name: c.name } : {}, { replace: true }));
   const [pickerOpen, setPickerOpen] = useState(false);
   // Walk-in for someone who isn't a client yet: their details, sent with the sale.
   const [adding, setAdding] = useState(false);
