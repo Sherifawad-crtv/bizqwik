@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSetHeader } from "../lib/header";
 import { useAsync } from "../lib/useAsync";
@@ -9,11 +10,13 @@ import { Spinner } from "../components/Spinner";
 import { canLog } from "../lib/types";
 import { useAuth } from "../lib/auth";
 import { Icon } from "../components/Icon";
+import { InviteFlow } from "./Manage";
 
 export function CoachesOverview() {
   const month = MOCK.CURRENT_MONTH;
   const navigate = useNavigate();
   const { profile } = useAuth();
+  const [inviting, setInviting] = useState(false);
 
   const { data } = useAsync(() => api.month(month), [month]);
 
@@ -71,13 +74,14 @@ export function CoachesOverview() {
         rows={rowItems}
         empty={
           profile?.role === "dept_head"
-            ? { title: "No coaches on the team yet", body: "Invite coaches and head coaches by email. They show up here, with their sessions and pay, once they sign up.", action: { label: "Invite someone", onClick: () => navigate("/manage?tab=invites") } }
+            ? { title: "No coaches on the team yet", body: "Invite coaches and head coaches by email. They show up here, with their sessions and pay, once they sign up.", action: { label: "Invite someone", onClick: () => setInviting(true) } }
             : { title: "No coaches on the team yet", body: "The department head invites coaches. They show up here once they sign up." }
         }
       />
       <div style={{ padding: "18px 4px 0", font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>
         {rows.length > 0 ? "Tap a coach to review their sessions and settle the month." : null}
       </div>
+      <InviteFlow open={inviting} onClose={() => setInviting(false)} />
     </div>
   );
 }

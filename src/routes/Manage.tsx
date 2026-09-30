@@ -106,7 +106,7 @@ function TiersPanel() {
   );
 }
 
-function TierSheet({ open, tier, onClose }: { open: boolean; tier: Tier | null; onClose: () => void }) {
+export function TierSheet({ open, tier, onClose }: { open: boolean; tier: Tier | null; onClose: () => void }) {
   const [name, setName] = useState(tier?.name ?? "");
   const [rate, setRate] = useState(String(tier?.rate ?? ""));
   const [privateCutPct, setPrivateCutPct] = useState(String(tier?.privateCutPct ?? ""));
@@ -375,6 +375,13 @@ function InvitesPanel() {
       )}
     </div>
   );
+}
+
+/** The invite overlay on its own, for opening from any screen: it loads the
+ * pay tiers it needs to offer, then behaves exactly like the Invites tab's. */
+export function InviteFlow({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const { data } = useAsync(() => api.tiers(), [open]);
+  return <InviteSheet open={open} tiers={data?.tiers ?? []} onClose={onClose} />;
 }
 
 function InviteSheet({ open, tiers, onClose }: { open: boolean; tiers: Tier[]; onClose: () => void }) {

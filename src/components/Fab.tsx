@@ -4,7 +4,7 @@ import { AddSessionSheet } from "./AddSessionSheet";
 import { Sheet } from "./Sheet";
 import { Button } from "./Button";
 import { SeriesSheet, PlanTypeSheet } from "../routes/Catalog";
-import { BundleSheet } from "../routes/Manage";
+import { BundleSheet, InviteFlow, TierSheet } from "../routes/Manage";
 import { useAuth } from "../lib/auth";
 import { useAsync } from "../lib/useAsync";
 import { api } from "../lib/backend";
@@ -41,17 +41,20 @@ function FabButton({ size, label, onClick, opacity = 1 }: { size: number; label:
   );
 }
 
-type CreateKind = "class" | "bundle" | "membership" | "pt";
+type CreateKind = "class" | "bundle" | "membership" | "pt" | "invite" | "tier";
 
-const CREATE_OPTIONS: { kind: CreateKind; title: string; sub: string; icon: "calendar" | "ticket" | "gift" | "coaches" }[] = [
+const CREATE_OPTIONS: { kind: CreateKind; title: string; sub: string; icon: "calendar" | "ticket" | "gift" | "coaches" | "envelope" | "tag" }[] = [
   { kind: "class", title: "Group class", sub: "Repeats weekly · drop-in + monthly price", icon: "calendar" },
   { kind: "bundle", title: "Class bundle", sub: "A pack of sessions — 1 used per check-in", icon: "ticket" },
   { kind: "membership", title: "Membership", sub: "All classes for set months", icon: "gift" },
   { kind: "pt", title: "PT bundle", sub: "Private training sessions with a coach", icon: "coaches" },
+  { kind: "invite", title: "Invite someone", sub: "Add a coach, head coach, front desk or accountant", icon: "envelope" },
+  { kind: "tier", title: "Pay tier", sub: "What a coach earns per session and from PT sales", icon: "tag" },
 ];
 
-/** The founder's FAB opens a "Create" menu for what the gym sells. Clients
- * are registered by the front desk, not here. */
+/** The founder's FAB opens a "Create" menu, from any screen: what the gym
+ * sells, plus inviting people and setting pay tiers, so nothing needs a trip
+ * to another page first. Clients are registered by the front desk. */
 function CreateFab({ size }: { size: number }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [kind, setKind] = useState<CreateKind | null>(null);
@@ -92,6 +95,8 @@ function CreateFab({ size }: { size: number }) {
       <SeriesSheet open={kind === "class"} series={null} onClose={() => setKind(null)} />
       <PlanTypeSheet open={kind === "bundle" || kind === "membership"} kind={kind === "bundle" ? "bundle" : "membership"} planType={null} onClose={() => setKind(null)} />
       <BundleSheet open={kind === "pt"} bundleType={null} onClose={() => setKind(null)} />
+      <InviteFlow open={kind === "invite"} onClose={() => setKind(null)} />
+      <TierSheet open={kind === "tier"} tier={null} onClose={() => setKind(null)} />
     </>
   );
 }
