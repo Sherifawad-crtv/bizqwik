@@ -7,6 +7,7 @@ import { useAsync } from "../lib/useAsync";
 import { api, MOCK } from "../lib/backend";
 import { fmt, formatDateTime, monthLabel } from "../lib/format";
 import { currentYearMonths } from "../lib/months";
+import { loadYearRollups, sumTotal } from "../lib/payables";
 import { MoneyHero } from "../components/MoneyHero";
 import { YearMonthStrip } from "../components/YearMonthStrip";
 import { RollupTable, type ListRow } from "../components/RollupTable";
@@ -27,6 +28,8 @@ interface PersonalData {
 interface RosterData {
   kind: "roster";
   rows: Rollup[];
+  /** Paid out so far this year (accountant view). */
+  ytdPaid?: number;
 }
 
 function PersonalHistory({ row, sessions }: { row: Rollup | null; sessions: Session[] }) {
@@ -59,7 +62,7 @@ function PersonalHistory({ row, sessions }: { row: Rollup | null; sessions: Sess
   );
 }
 
-function RosterHistory({ rows, month, paidOnly, onOpenCoach }: { rows: Rollup[]; month: string; paidOnly: boolean; onOpenCoach?: (id: string) => void }) {
+function RosterHistory({ rows, month, paidOnly, ytdPaid, onOpenCoach }: { rows: Rollup[]; month: string; paidOnly: boolean; ytdPaid?: number; onOpenCoach?: (id: string) => void }) {
   const rowItems: ListRow[] = rows.map((r) => ({
     id: r.coachId,
     name: r.name,
@@ -90,7 +93,7 @@ function RosterHistory({ rows, month, paidOnly, onOpenCoach }: { rows: Rollup[];
             ? [
                 { k: "PAYEES", v: String(rows.length) },
                 { k: "SESSIONS", v: String(rows.reduce((s, r) => s + r.count, 0)) },
-                { k: "MONTH", v: month },
+                { k: "YEAR TO DATE", v: `${fmt(ytdPaid ?? 0)} EGP` },
               ]
             : [
                 { k: "COACHES", v: String(rows.length) },
@@ -157,6 +160,10 @@ function LedgerHistory() {
     }
     const monthRes = await api.month(month);
     const rows = monthRes.rows.filter((r) => canLog(r.role) && (!isAccountant || r.state === "paid"));
+    if (isAccountant) {
+      const year = await loadYearRollups();
+      return { kind: "roster", rows, ytdPaid: sumTotal(year.flatMap((m) => m.rows.filter((r) => r.state === "paid"))) };
+    }
     return { kind: "roster", rows };
   }, [profile?.id, profile?.role, month]);
 
@@ -170,7 +177,13 @@ function LedgerHistory() {
       ) : data.kind === "personal" ? (
         <PersonalHistory row={data.row} sessions={data.sessions} />
       ) : (
-        <RosterHistory rows={data.rows} month={month} paidOnly={isAccountant} onOpenCoach={isDeptView ? (id) => navigate(`/coaches/${id}`, { state: { month } }) : undefined} />
+        <RosterHistory
+          rows={data.rows}
+          month={month}
+          paidOnly={isAccountant}
+          ytdPaid={data.ytdPaid}
+          onOpenCoach={isDeptView ? (id) => navigate(`/coaches/${id}`, { state: { month } }) : isAccountant ? (id) => navigate(`/pay/${id}`, { state: { month, from: "history" } }) : undefined}
+        />
       )}
     </div>
   );
