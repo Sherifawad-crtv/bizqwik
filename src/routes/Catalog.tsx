@@ -18,7 +18,6 @@ import { Sheet } from "../components/Sheet";
 import { ConfirmSheet } from "../components/ConfirmSheet";
 import { TextField, SelectField } from "../components/FormField";
 import { Spinner } from "../components/Spinner";
-import { useIsMobile } from "../lib/useIsMobile";
 import { SheetSuccessIcon } from "../components/SheetSuccessIcon";
 import { BundlesPanel } from "./Manage";
 
@@ -65,19 +64,19 @@ const iconBtn = (danger?: boolean): React.CSSProperties => ({
   justifyContent: "center",
 });
 
-function PanelHeader({ title, count, action, hideAction }: { title: string; count: number; action?: React.ReactNode; hideAction?: boolean }) {
+function PanelHeader({ title, count, action }: { title: string; count: number; action?: React.ReactNode }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
       <span style={{ font: "700 20px var(--font-body)", letterSpacing: "-.01em" }}>{title}</span>
       <span style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>{count}</span>
-      {action && !hideAction && <div style={{ marginLeft: "auto" }}>{action}</div>}
+      {action && <div style={{ marginLeft: "auto" }}>{action}</div>}
     </div>
   );
 }
 
-function EmptyRow({ text, action, primary }: { text: string; action?: { label: string; onClick: () => void }; primary?: boolean }) {
+function EmptyRow({ text, action }: { text: string; action?: { label: string; onClick: () => void } }) {
   const [title, ...rest] = text.split(". ");
-  return <EmptyState bare icon="tag" title={title.replace(/\.$/, "")} body={rest.join(". ") || undefined} action={action} primaryAction={primary} />;
+  return <EmptyState bare icon="tag" title={title.replace(/\.$/, "")} body={rest.join(". ") || undefined} action={action} />;
 }
 
 // ---------- Classes (recurring series) ----------
@@ -86,7 +85,6 @@ function ClassesPanel() {
   const navigate = useNavigate();
   const { data } = useAsync(() => api.classSeries(), []);
   const [editing, setEditing] = useState<ClassSeries | "new" | null>(null);
-  const isMobile = useIsMobile();
 
   if (!data) return <Spinner />;
   const active = data.series.filter((s) => s.status === "active");
@@ -97,7 +95,6 @@ function ClassesPanel() {
       <PanelHeader
         title="Group classes"
         count={active.length}
-        hideAction={isMobile && active.length === 0}
         action={
           <Button size="md" style={{ height: 40, padding: "0 16px" }} onClick={() => setEditing("new")}>
             + New class
@@ -108,7 +105,7 @@ function ClassesPanel() {
         {active.map((s, i) => (
           <SeriesRow key={s.id} s={s} last={i === active.length - 1} onEdit={() => setEditing(s)} />
         ))}
-        {active.length === 0 && <EmptyRow text="No classes yet. Create one and it repeats every week until you change it. Members can then drop in or buy a monthly." action={{ label: "+ New class", onClick: () => setEditing("new") }} primary={isMobile} />}
+        {active.length === 0 && <EmptyRow text="No classes yet. Create one and it repeats every week until you change it. Members can then drop in or buy a monthly." action={{ label: "+ New class", onClick: () => setEditing("new") }} />}
       </div>
 
       <button
@@ -328,7 +325,6 @@ function PlansPanel() {
   const [editing, setEditing] = useState<{ kind: GroupPlanTypeKind; planType: GroupPlanType | null } | null>(null);
   const [deleting, setDeleting] = useState<GroupPlanType | null>(null);
   const shownDeleting = useLatch(deleting);
-  const isMobile = useIsMobile();
 
   if (!data) return <Spinner />;
 
@@ -339,7 +335,6 @@ function PlansPanel() {
         <PanelHeader
           title={title}
           count={rows.length}
-          hideAction={isMobile && rows.length === 0}
           action={
             <Button size="md" style={{ height: 40, padding: "0 16px" }} onClick={() => setEditing({ kind, planType: null })}>
               + {kind === "membership" ? "Membership" : "Bundle"}
@@ -368,7 +363,7 @@ function PlansPanel() {
               </button>
             </div>
           ))}
-          {rows.length === 0 && <EmptyRow text={empty} action={{ label: kind === "bundle" ? "+ New class bundle" : "+ New membership", onClick: () => setEditing({ kind, planType: null }) }} primary={isMobile} />}
+          {rows.length === 0 && <EmptyRow text={empty} action={{ label: kind === "bundle" ? "+ New class bundle" : "+ New membership", onClick: () => setEditing({ kind, planType: null }) }} />}
         </div>
       </div>
     );
