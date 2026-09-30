@@ -39,3 +39,15 @@ test("front desk: a used-up bundle shows 'No sessions left' instead of a check-i
   await expect(page.getByRole("button", { name: "Confirm check-in" })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Sell a drop-in pass" })).toBeVisible();
 });
+
+test("front desk: a client with a running plan can be checked in straight from their sheet", async ({ page }) => {
+  await mockBackend(page, "front_desk", {
+    clients: { clients: [client(bundle(8))] },
+    "check-ins": () => ({ body: { checkIn: { id: "ci-1" }, deducted: true, plan: { name: "10 Classes", kind: "bundle", creditsRemaining: 7, creditsTotal: 10 } } }),
+  });
+  await page.goto("/members");
+  await page.getByRole("button", { name: /Mona Samir/ }).click();
+  await page.getByRole("button", { name: "Check in", exact: true }).click();
+  await page.getByRole("button", { name: "Confirm check-in" }).click();
+  await expect(page.getByText("Mona Samir checked in · 7 of 10 sessions left")).toBeVisible();
+});
