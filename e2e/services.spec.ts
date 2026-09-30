@@ -170,8 +170,8 @@ test("front desk: sell a class monthly to a member with no plan", async ({ page 
   });
   await page.goto("/members");
   await page.getByText("Omar Z").click();
-  await expect(page.getByText("GROUP PLAN", { exact: true })).toBeVisible();
-  await page.getByRole("button", { name: "Sell a group plan" }).click();
+  await expect(page.getByText("No plan", { exact: true }).first()).toBeVisible();
+  await page.getByRole("button", { name: "Sell a plan" }).click();
   await page.getByText("Membership, class monthly or bundle").click();
   for (const t of [/All-Access · 3 Months · 9,000 EGP · all classes · 3 months/, /10-Class Pack · 1,800 EGP · 10 classes · 2 months/, /Sunrise HIIT monthly · 1,500 EGP · 1 month/]) {
     await expect(page.getByText(t)).toBeVisible();

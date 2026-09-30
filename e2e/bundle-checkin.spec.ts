@@ -51,3 +51,15 @@ test("front desk: a client with a running plan can be checked in straight from t
   await page.getByRole("button", { name: "Confirm check-in" }).click();
   await expect(page.getByText("Mona Samir checked in · 7 of 10 sessions left")).toBeVisible();
 });
+
+test("front desk: the client sheet shows one status, one main action, and tucks the rest under More options", async ({ page }) => {
+  await mockBackend(page, "front_desk", { clients: { clients: [client(bundle(8))] } });
+  await page.goto("/members");
+  await page.getByRole("button", { name: /Mona Samir/ }).click();
+  await expect(page.getByRole("button", { name: "Check in", exact: true })).toBeVisible();
+  await expect(page.getByText("Issue a refund")).toHaveCount(0);
+  await expect(page.getByText("Assign a coach")).toHaveCount(0);
+  await page.getByRole("button", { name: "More options" }).click();
+  await expect(page.getByText("Issue a refund")).toBeVisible();
+  await expect(page.getByText("Invite to app")).toBeVisible();
+});
