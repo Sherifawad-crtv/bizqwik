@@ -106,3 +106,17 @@ test("empty month: coach home and clients say what shows up there", async ({ pag
   await page.goto("/clients");
   await expect(page.getByText("No PT clients yet")).toBeVisible();
 });
+
+test("empty org on a phone: one blue button, under the message — none competing above it", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await boot(page, "dept_head");
+  await page.goto("/catalog");
+  await expect(page.getByText("No classes yet")).toBeVisible();
+  const add = page.getByRole("button", { name: "+ New class" });
+  await expect(add).toHaveCount(1);
+  const bg = await add.evaluate((el) => getComputedStyle(el).backgroundColor);
+  expect(bg).toBe("rgb(90, 65, 255)");
+  // On desktop the header button stays, so both are there.
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await expect(page.getByRole("button", { name: "+ New class" })).toHaveCount(2);
+});

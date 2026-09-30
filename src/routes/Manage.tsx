@@ -17,6 +17,7 @@ import { Spinner } from "../components/Spinner";
 import { SheetSuccessIcon } from "../components/SheetSuccessIcon";
 import { useSheetSuccess } from "../lib/useSheetSuccess";
 import { useAuth } from "../lib/auth";
+import { useIsMobile } from "../lib/useIsMobile";
 
 type Tab = "tiers" | "invites" | "people";
 
@@ -54,6 +55,7 @@ function TiersPanel() {
   const [editing, setEditing] = useState<Tier | "new" | null>(null);
   const [deleting, setDeleting] = useState<Tier | null>(null);
   const shownDeleting = useLatch(deleting);
+  const isMobile = useIsMobile();
 
   if (!data) return <Spinner />;
 
@@ -62,9 +64,11 @@ function TiersPanel() {
       <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
         <span style={{ font: "700 20px var(--font-body)", letterSpacing: "-.01em" }}>Tiers</span>
         <span style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>{data.tiers.length}</span>
-        <Button size="md" style={{ marginLeft: "auto", height: 40, padding: "0 16px" }} onClick={() => setEditing("new")}>
-          + New tier
-        </Button>
+        {!(isMobile && data.tiers.length === 0) && (
+          <Button size="md" style={{ marginLeft: "auto", height: 40, padding: "0 16px" }} onClick={() => setEditing("new")}>
+            + New tier
+          </Button>
+        )}
       </div>
 
       <div data-sq style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", overflow: "hidden" }}>
@@ -83,7 +87,7 @@ function TiersPanel() {
           </div>
         ))}
         {data.tiers.length === 0 && (
-          <EmptyState bare icon="tag" title="No pay tiers yet" body="A tier sets what a coach earns per group session and their cut of PT sales. Create one, then assign it to coaches in People." action={{ label: "+ New tier", onClick: () => setEditing("new") }} />
+          <EmptyState bare icon="tag" title="No pay tiers yet" body="A tier sets what a coach earns per group session and their cut of PT sales. Create one, then assign it to coaches in People." action={{ label: "+ New tier", onClick: () => setEditing("new") }} primaryAction={isMobile} />
         )}
       </div>
 
@@ -187,6 +191,7 @@ export function BundlesPanel() {
   const [editing, setEditing] = useState<BundleType | "new" | null>(null);
   const [deleting, setDeleting] = useState<BundleType | null>(null);
   const shownDeleting = useLatch(deleting);
+  const isMobile = useIsMobile();
 
   if (!data) return <Spinner />;
 
@@ -195,9 +200,11 @@ export function BundlesPanel() {
       <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
         <span style={{ font: "700 20px var(--font-body)", letterSpacing: "-.01em" }}>Private training bundles</span>
         <span style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>{data.bundleTypes.length}</span>
-        <Button size="md" style={{ marginLeft: "auto", height: 40, padding: "0 16px" }} onClick={() => setEditing("new")}>
-          + New bundle
-        </Button>
+        {!(isMobile && data.bundleTypes.length === 0) && (
+          <Button size="md" style={{ marginLeft: "auto", height: 40, padding: "0 16px" }} onClick={() => setEditing("new")}>
+            + New bundle
+          </Button>
+        )}
       </div>
 
       <div data-sq style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", overflow: "hidden" }}>
@@ -218,7 +225,7 @@ export function BundlesPanel() {
           </div>
         ))}
         {data.bundleTypes.length === 0 && (
-          <EmptyState bare icon="coaches" title="No PT bundles yet" body="A PT bundle is a pack of private sessions with one coach (e.g. 8 sessions, valid 30 days). The front desk sells them once they exist." action={{ label: "+ New PT bundle", onClick: () => setEditing("new") }} />
+          <EmptyState bare icon="coaches" title="No PT bundles yet" body="A PT bundle is a pack of private sessions with one coach (e.g. 8 sessions, valid 30 days). The front desk sells them once they exist." action={{ label: "+ New PT bundle", onClick: () => setEditing("new") }} primaryAction={isMobile} />
         )}
       </div>
 
@@ -325,6 +332,7 @@ function InvitesPanel() {
   const [open, setOpen] = useState(false);
   const [deleting, setDeleting] = useState<Invite | null>(null);
   const shownDeleting = useLatch(deleting);
+  const isMobile = useIsMobile();
 
   if (!data) return <Spinner />;
   const tiers = tierData?.tiers ?? [];
@@ -334,9 +342,11 @@ function InvitesPanel() {
       <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
         <span style={{ font: "700 20px var(--font-body)", letterSpacing: "-.01em" }}>Pending invites</span>
         <span style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>{data.invites.length}</span>
-        <Button size="md" style={{ marginLeft: "auto", height: 40, padding: "0 16px" }} onClick={() => setOpen(true)}>
-          + Invite
-        </Button>
+        {!(isMobile && data.invites.length === 0) && (
+          <Button size="md" style={{ marginLeft: "auto", height: 40, padding: "0 16px" }} onClick={() => setOpen(true)}>
+            + Invite
+          </Button>
+        )}
       </div>
 
       <div data-sq style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", overflow: "hidden" }}>
@@ -355,7 +365,7 @@ function InvitesPanel() {
           </div>
         ))}
         {data.invites.length === 0 && (
-          <EmptyState bare icon="envelope" title="No pending invites" body="Invite coaches, head coaches, the front desk or an accountant by email. They sign up with that email and appear in People." action={{ label: "+ Invite someone", onClick: () => setOpen(true) }} />
+          <EmptyState bare icon="envelope" title="No pending invites" body="Invite coaches, head coaches, the front desk or an accountant by email. They sign up with that email and appear in People." action={{ label: "+ Invite someone", onClick: () => setOpen(true) }} primaryAction={isMobile} />
         )}
       </div>
 
