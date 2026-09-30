@@ -8,7 +8,6 @@ import { useSheetSuccess } from "../../lib/useSheetSuccess";
 import { api } from "../../lib/backend";
 import { fmt, dateLabel } from "../../lib/format";
 import type { BundleType, ClassSeries, ClientWithPackage, CoachOption, GroupPlanType } from "../../lib/types";
-import { GROUP_PLAN_KIND_LABELS } from "../../lib/types";
 import { Button } from "../../components/Button";
 import { Sheet } from "../../components/Sheet";
 import { Segmented } from "../../components/Segmented";
@@ -425,6 +424,7 @@ function ClientSheet({
   const [refundable, setRefundable] = useState<{ paid: number; refunded: number; refundable: number } | null>(null);
   const [payMethod, setPayMethod] = useState<PayMethod>("cash");
   const [busy, setBusy] = useState(false);
+  const [showMore, setShowMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const open = !!client;
   const { confirmed, iconIn, showSuccess } = useSheetSuccess(open, onClose);
@@ -432,6 +432,7 @@ function ClientSheet({
   useEffect(() => {
     if (client) {
       setMode("view");
+      setShowMore(false);
       setPickId("");
       setCoachId(client.assignedCoachId ?? "");
       setEmail(client.email ?? "");
@@ -460,6 +461,7 @@ function ClientSheet({
   const pkg = shown.currentPackage;
   const packageActive = pkg?.status === "active";
   const bType = pkg ? bundleTypes.find((b) => b.id === pkg.bundleTypeId) : undefined;
+  const summary = planSummary(shown, bundleTypes);
   const coachName = coaches.find((c) => c.id === shown.assignedCoachId)?.name ?? null;
 
   const run = async (action: () => Promise<unknown>) => {
@@ -520,61 +522,66 @@ function ClientSheet({
         ) : mode === "view" ? (
           <>
             <SheetHeading kicker="CLIENT" title={shown.name} />
-            <div style={{ font: "400 13px/1.6 var(--font-mono)", color: "var(--ink-muted)", marginTop: -8, marginBottom: 14 }}>
-              {shown.phone ?? "No phone"}
-              {shown.email ? ` · ${shown.email}` : ""}
-            </div>
+            {shown.phone && <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-muted)", marginTop: -8, marginBottom: 14 }}>{shown.phone}</div>}
 
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              <PlanCard
-                label="GROUP PLAN"
-                title={plan ? plan.name : "None"}
-                tone={plan ? "active" : "none"}
-                lines={
-                  plan
-                    ? [
-                        plan.kind === "bundle"
-                          ? `${plan.creditsRemaining} of ${plan.creditsTotal} classes left · until ${dateLabel(plan.expiresAt.slice(0, 10))}`
-                          : `${GROUP_PLAN_KIND_LABELS[plan.kind]} · until ${dateLabel(plan.expiresAt.slice(0, 10))}`,
-                        ...(plan.invitationsRemaining > 0 ? [`${plan.invitationsRemaining} guest pass${plan.invitationsRemaining === 1 ? "" : "es"} left`] : []),
-                      ]
-                    : []
-                }
-              />
-              <PlanCard
-                label="PACKAGE"
-                title={bType?.name ?? (pkg ? "Package" : "None")}
-                tone={pkg ? (packageActive ? "active" : "expired") : "none"}
-                lines={pkg ? [`${pkg.sessionsRemaining} of ${pkg.sessionsIncluded} sessions left`, `Expires ${dateLabel(pkg.expiryDate)}`] : []}
-              />
-              <PlanCard label="COACH" title={coachName ?? "Not assigned"} tone={null} lines={[]} />
+            <div data-sq style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "14px 16px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <div style={{ font: "800 18px var(--font-body)", flex: 1, minWidth: 0 }}>{summary.title}</div>
+                <PlanPill tone={summary.tone} />
+              </div>
+              <div style={{ font: "400 14px var(--font-mono)", color: "var(--ink-muted)", marginTop: 4 }}>{summary.detail}</div>
+              {plan && plan.kind === "bundle" && <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)", marginTop: 2 }}>Until {dateLabel(plan.expiresAt.slice(0, 10))}</div>}
+              {packageActive && plan && (
+                <div style={{ font: "600 13px var(--font-body)", color: "var(--ink)", marginTop: 8, paddingTop: 8, borderTop: "1px solid var(--line)" }}>
+                  + {bType?.name ?? "Package"}: {pkg!.sessionsRemaining} of {pkg!.sessionsIncluded} sessions left
+                </div>
+              )}
+              {coachName && <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)", marginTop: 6 }}>Coach: {coachName}</div>}
             </div>
 
             {error && <ErrorBanner text={error} />}
 
-            {(plan || packageActive) && (
+            {summary.tone === "active" ? (
               <Button fullWidth size="lg" style={{ marginTop: 16 }} onClick={() => onCheckIn(shown)}>
                 Check in
               </Button>
+            ) : (
+              <Button fullWidth size="lg" style={{ marginTop: 16 }} onClick={() => setMode(plan ? "renew-package" : "sell-plan")}>
+                Sell a plan
+              </Button>
             )}
-            <Button fullWidth variant={plan || packageActive ? "secondary" : "primary"} style={{ marginTop: plan || packageActive ? 8 : 16 }} disabled={!!plan} onClick={() => setMode("sell-plan")}>
-              {plan ? "Plan still running — one at a time" : "Sell a group plan"}
-            </Button>
-            <Button fullWidth style={{ marginTop: 8 }} disabled={packageActive} onClick={() => setMode("renew-package")}>
-              {packageActive ? "Package still running" : pkg ? "Renew package" : "Sell a package"}
-            </Button>
-            <Button variant="secondary" fullWidth style={{ marginTop: 8 }} disabled={packageActive} onClick={() => setMode("assign")}>
-              {packageActive ? "Coach locked mid-package" : coachName ? "Change coach" : "Assign a coach"}
-            </Button>
-            <Button variant="secondary" fullWidth style={{ marginTop: 8 }} onClick={() => setMode("invite")}>
-              {shown.email ? "Re-invite to app" : "Invite to app"}
-            </Button>
-            <Button variant="quiet" fullWidth style={{ marginTop: 8 }} onClick={() => setMode("refund")}>
-              Issue a refund
-            </Button>
-            <Button variant="quiet" fullWidth style={{ marginTop: 8 }} onClick={onClose}>
-              Close
-            </Button>
+
+            <button
+              data-tap
+              onClick={() => setShowMore((v) => !v)}
+              aria-expanded={showMore}
+              style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 4, width: "100%", height: 48, marginTop: 6, border: 0, background: "none", color: "var(--primary-pressed)", font: "700 14px var(--font-body)", cursor: "pointer" }}
+            >
+              {showMore ? "Fewer options" : "More options"}
+            </button>
+            {showMore && (
+              <div style={{ border: "1px solid var(--line)", borderRadius: "var(--r-input)", overflow: "hidden" }}>
+                {[
+                  !plan && summary.tone === "active" ? { label: "Sell a group plan", go: () => setMode("sell-plan") } : null,
+                  !packageActive ? { label: pkg ? "Renew package" : "Sell a package", go: () => setMode("renew-package") } : null,
+                  !packageActive ? { label: coachName ? "Change coach" : "Assign a coach", go: () => setMode("assign") } : null,
+                  { label: shown.email ? "Re-invite to app" : "Invite to app", go: () => setMode("invite") },
+                  { label: "Issue a refund", go: () => setMode("refund"), danger: true },
+                ]
+                  .filter((x): x is { label: string; go: () => void; danger?: boolean } => !!x)
+                  .map((x, i, arr) => (
+                    <button
+                      key={x.label}
+                      data-tap
+                      onClick={x.go}
+                      style={{ display: "flex", alignItems: "center", width: "100%", minHeight: 52, padding: "0 16px", border: 0, borderBottom: i === arr.length - 1 ? "none" : "1px solid var(--line)", background: "none", cursor: "pointer", textAlign: "left", font: "600 15px var(--font-body)", color: x.danger ? "var(--danger-fg)" : "var(--ink)" }}
+                    >
+                      <span style={{ flex: 1 }}>{x.label}</span>
+                      <Icon name="chevron-right" size={16} />
+                    </button>
+                  ))}
+              </div>
+            )}
           </>
         ) : (
           <>
@@ -644,23 +651,6 @@ function ClientSheet({
         )}
       </Sheet>
     </>
-  );
-}
-
-function PlanCard({ label, title, tone, lines }: { label: string; title: string; tone: "active" | "expired" | "none" | null; lines: string[] }) {
-  return (
-    <div data-sq style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "12px 16px" }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-        <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", flex: 1 }}>{label}</div>
-        {tone && <PlanPill tone={tone} />}
-      </div>
-      <div style={{ font: "700 16px var(--font-body)", marginTop: 4 }}>{title}</div>
-      {lines.map((l) => (
-        <div key={l} style={{ font: "400 13px var(--font-mono)", color: "var(--ink-muted)" }}>
-          {l}
-        </div>
-      ))}
-    </div>
   );
 }
 
