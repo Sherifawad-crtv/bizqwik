@@ -18,7 +18,7 @@ const REVENUE = {
     { month: "2026-08", revenue: 15500, payouts: 6000, profit: 9500 },
     { month: "2026-09", revenue: 18250, payouts: 7250, profit: 11000 },
   ],
-  totals: { revenue: 45750, payouts: 18250, profit: 27500 },
+  totals: { revenue: 18250, payouts: 7250, profit: 11000 },
   byService: [
     { key: "group", label: "Group training", amount: 30750 },
     { key: "private_training", label: "Private training", amount: 15000 },
@@ -42,15 +42,29 @@ const PLAN_TYPES = [
 test("dept_head: overview shows the money view; nav has Catalog", async ({ page }) => {
   await mockBackend(page, "dept_head", { revenue: REVENUE });
   await page.goto("/oversight");
-  await expect(page.getByText("REVENUE · THIS MONTH · EGP")).toBeVisible();
+  await expect(page.getByText("REVENUE · EGP")).toBeVisible();
   await expect(page.getByText("18,250").first()).toBeVisible();
+  await expect(page.getByText("▲ 17.7%")).toBeVisible(); // revenue vs the period before
+  await expect(page.getByText("You have")).toHaveCount(0); // enough history, no disclaimer
   await expect(page.getByText("REVENUE VS COACH PAYOUTS")).toBeVisible();
   await expect(page.getByText("Group training")).toBeVisible();
   await expect(page.getByText("Coach Nour")).toBeVisible();
-  await expect(page.getByText("WALLET CREDIT OUT")).toBeVisible();
+  await expect(page.getByText("WALLET CREDIT", { exact: true })).toBeVisible();
   // The Activity tile no longer lives on the home screen.
   await expect(page.getByText("Member feed and the full transaction log")).toHaveCount(0);
   await expect(page.getByRole("link", { name: /Catalog/ }).or(page.getByText("Catalog", { exact: true })).first()).toBeVisible();
+});
+
+test("dept_head: a young business is told how little data it has, and gets no fake comparison", async ({ page }) => {
+  const young = { ...REVENUE, months: [{ month: "2026-09", revenue: 18250, payouts: 7250, profit: 11000 }], totals: { revenue: 18250, payouts: 7250, profit: 11000 } };
+  await mockBackend(page, "dept_head", { revenue: young });
+  await page.goto("/oversight");
+  await expect(page.getByText("18,250").first()).toBeVisible();
+  await expect(page.getByText(/▲|▼/)).toHaveCount(0);
+  await expect(page.getByText("You have 1 month of data.")).toHaveCount(0); // 1-month view is complete
+  await page.getByRole("button", { name: "6M" }).click();
+  await expect(page.getByText("You have 1 month of data.")).toBeVisible();
+  await expect(page.getByText(/Trends and comparisons/)).toBeVisible();
 });
 
 test("dept_head: Create FAB → new group class with weekday picker posts a series", async ({ page }) => {
