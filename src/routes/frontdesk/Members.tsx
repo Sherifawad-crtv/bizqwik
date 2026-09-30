@@ -20,6 +20,8 @@ import { Spinner } from "../../components/Spinner";
 import { Icon } from "../../components/Icon";
 import type { PayMethod } from "../../lib/types";
 import { Card, ErrorBanner, PlanPill, SearchField, SheetHeading, matchesClient, planSummary } from "./shared";
+import { ConfirmCheckInSheet } from "./CheckIn";
+import { DropIn } from "./DropIn";
 
 export function useFrontDeskCatalog() {
   const { data: p } = useAsync(() => api.planTypes(), []);
@@ -64,6 +66,8 @@ export function Members() {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<"all" | "active" | "expired" | "none">("all");
   const [creating, setCreating] = useState(false);
+  const [checkInFor, setCheckInFor] = useState<ClientWithPackage | null>(null);
+  const [dropInFor, setDropInFor] = useState<{ id: string; name: string } | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   // The home screen's "New client" quick action lands on ?new=1. It's read
@@ -138,7 +142,19 @@ export function Members() {
       </Card>
 
       <CreateClientSheet open={creating} onClose={closeCreate} takenEmails={clients.map((c) => c.email ?? "")} planTypes={planTypes} series={series} bundleTypes={bundleTypes} coaches={coaches} />
-      <ClientSheet client={selected} onClose={() => setSelectedId(null)} planTypes={planTypes} series={series} bundleTypes={bundleTypes} coaches={coaches} />
+      <ConfirmCheckInSheet
+        client={checkInFor}
+        onClose={() => setCheckInFor(null)}
+        onDropIn={(c) => {
+          setCheckInFor(null);
+          setDropInFor({ id: c.id, name: c.name });
+        }}
+      />
+      <Sheet open={!!dropInFor} onClose={() => setDropInFor(null)}>
+        <SheetHeading kicker="FRONT DESK" title="Drop-In" />
+        <DropIn embedded initialClient={dropInFor} />
+      </Sheet>
+      <ClientSheet client={selected} onCheckIn={(c) => { setSelectedId(null); setCheckInFor(c); }} onClose={() => setSelectedId(null)} planTypes={planTypes} series={series} bundleTypes={bundleTypes} coaches={coaches} />
     </div>
   );
 }
@@ -387,9 +403,11 @@ function ClientSheet({
   series,
   bundleTypes,
   coaches,
+  onCheckIn,
 }: {
   client: ClientWithPackage | null;
   onClose: () => void;
+  onCheckIn: (c: ClientWithPackage) => void;
   planTypes: GroupPlanType[];
   series: ClassSeries[];
   bundleTypes: BundleType[];
@@ -534,7 +552,12 @@ function ClientSheet({
 
             {error && <ErrorBanner text={error} />}
 
-            <Button fullWidth style={{ marginTop: 16 }} disabled={!!plan} onClick={() => setMode("sell-plan")}>
+            {(plan || packageActive) && (
+              <Button fullWidth size="lg" style={{ marginTop: 16 }} onClick={() => onCheckIn(shown)}>
+                Check in
+              </Button>
+            )}
+            <Button fullWidth variant={plan || packageActive ? "secondary" : "primary"} style={{ marginTop: plan || packageActive ? 8 : 16 }} disabled={!!plan} onClick={() => setMode("sell-plan")}>
               {plan ? "Plan still running — one at a time" : "Sell a group plan"}
             </Button>
             <Button fullWidth style={{ marginTop: 8 }} disabled={packageActive} onClick={() => setMode("renew-package")}>
