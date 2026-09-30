@@ -63,9 +63,14 @@ test("empty org: front desk search screens point to adding the first client", as
   await page.goto("/checkin");
   await expect(page.getByText("No clients yet")).toBeVisible();
   await page.getByRole("button", { name: "+ New client" }).click();
-  await expect(page).toHaveURL(/\/members\?new=1/);
+  // The new-client flow opens right here, over the screen.
+  await expect(page).toHaveURL(/\/checkin$/);
+  await expect(page.getByText("Client info").first()).toBeVisible();
   await page.goto("/invitations");
   await expect(page.getByText("No clients yet")).toBeVisible();
+  await page.getByRole("button", { name: "+ New client" }).click();
+  await expect(page).toHaveURL(/\/invitations$/);
+  await expect(page.getByText("Client info").first()).toBeVisible();
 });
 
 test("empty org: dept head Team links straight to inviting someone", async ({ page }) => {
@@ -123,4 +128,13 @@ test("dept head: the Create button offers Invite and Pay tier on any screen and 
   await page.getByText("Pay tier", { exact: true }).click();
   await expect(page.getByText("NEW TIER", { exact: true })).toBeVisible();
   await expect(page).toHaveURL(/\/oversight$/);
+});
+
+test("empty org: dept head Sessions screen adds a class in place", async ({ page }) => {
+  await boot(page, "dept_head");
+  await page.goto("/classes");
+  await expect(page.getByText("No sessions yet")).toBeVisible();
+  await page.getByRole("button", { name: "+ New class" }).click();
+  await expect(page).toHaveURL(/\/classes$/);
+  await expect(page.getByText("New class", { exact: true })).toBeVisible();
 });

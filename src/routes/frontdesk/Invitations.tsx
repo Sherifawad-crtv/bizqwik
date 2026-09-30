@@ -8,12 +8,14 @@ import { TextField } from "../../components/FormField";
 import { Icon } from "../../components/Icon";
 import { Spinner } from "../../components/Spinner";
 import { Card, ClientPicker, ErrorBanner, SectionTitle } from "./shared";
+import { useNewClient } from "./NewClientModal";
 import { useFrontDeskCatalog } from "./Members";
 
 export function Invitations({ embedded = false, onCreateClient }: { embedded?: boolean; onCreateClient?: () => void } = {}) {
   useSetHeader(embedded ? null : { kicker: "FRONT DESK", title: "Invitations" }, []);
   const { data } = useAsync(() => api.clients(), []);
   const { bundleTypes } = useFrontDeskCatalog();
+  const newClient = useNewClient();
   const [memberId, setMemberId] = useState<string | null>(null);
   const [guestName, setGuestName] = useState("");
   const [guestPhone, setGuestPhone] = useState("");
@@ -80,7 +82,7 @@ export function Invitations({ embedded = false, onCreateClient }: { embedded?: b
             filter={(c) => (c.groupPlan?.invitationsRemaining ?? 0) > 0}
             emptyTitle="No one has guest passes left"
             emptyBody="Guest passes come with membership plans that include them. Set a plan's guest passes in Catalog, then sell it to a member."
-            onCreate={onCreateClient}
+            onCreate={onCreateClient ?? newClient.open}
             onPick={(c) => {
               setMemberId(c.id);
               setError(null);
@@ -133,6 +135,7 @@ export function Invitations({ embedded = false, onCreateClient }: { embedded?: b
           )}
         </>
       )}
+      {newClient.modal}
     </div>
   );
 }

@@ -17,6 +17,7 @@ import { ClassRosterSheet } from "../components/ClassRosterSheet";
 import { pad, whenLabel } from "../lib/classTime";
 import { TimeWheelField } from "../components/TimeWheelField";
 import { ClassPhotoField } from "../components/ClassPhotoField";
+import { SeriesSheet } from "./Catalog";
 
 interface FormState {
   id: string | null; // null = creating
@@ -53,6 +54,7 @@ export function ClassesManage() {
   const navigate = useNavigate();
   const classes = useAsync(() => api.classes(), []);
   const [form, setForm] = useState<FormState | null>(null);
+  const [newClass, setNewClass] = useState(false);
   const [confirmCancel, setConfirmCancel] = useState<GymClass | null>(null);
   const [roster, setRoster] = useState<GymClass | null>(null);
   useSetHeader({ kicker: "CATALOG", title: "Sessions" }, []);
@@ -92,7 +94,7 @@ export function ClassesManage() {
       )}
 
       {!classes.loading && list.length === 0 && (
-        <EmptyState icon="calendar" title="No sessions yet" body="Sessions come from your recurring classes. Add a class in Catalog and its upcoming sessions appear here." action={{ label: "Go to Catalog", onClick: () => navigate("/catalog") }} />
+        <EmptyState icon="calendar" title="No sessions yet" body="Sessions come from your recurring classes. Add a class and its upcoming sessions appear here." action={{ label: "+ New class", onClick: () => setNewClass(true) }} />
       )}
 
       {scheduled.length > 0 && (
@@ -142,6 +144,7 @@ export function ClassesManage() {
         }}
       />
 
+      <SeriesSheet open={newClass} series={null} onClose={() => { setNewClass(false); classes.refetch(); }} />
       <ClassRosterSheet
         open={roster !== null}
         onClose={() => setRoster(null)}

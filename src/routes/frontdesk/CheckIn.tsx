@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { useSetHeader } from "../../lib/header";
 import { useAsync } from "../../lib/useAsync";
 import { useSheetSuccess } from "../../lib/useSheetSuccess";
@@ -12,6 +11,9 @@ import { SheetSuccessIcon } from "../../components/SheetSuccessIcon";
 import { Spinner } from "../../components/Spinner";
 import { ClientPicker, ErrorBanner, PlanPill, planSummary } from "./shared";
 import { useFrontDeskCatalog } from "./Members";
+import { useNewClient } from "./NewClientModal";
+import { DropIn } from "./DropIn";
+import { SheetHeading } from "./shared";
 
 const hasActivePlan = (c: ClientWithPackage) => !!c.groupPlan || c.currentPackage?.status === "active";
 // A class bundle with nothing left can't be checked in on (unless PT covers them).
@@ -21,7 +23,9 @@ const bundleEmpty = (c: ClientWithPackage) => c.groupPlan?.kind === "bundle" && 
 // client app; this is the desk's manual fallback.
 export function CheckIn({ embedded = false, onDropIn, onCreateClient }: { embedded?: boolean; onDropIn?: (c: ClientWithPackage) => void; onCreateClient?: () => void } = {}) {
   useSetHeader(embedded ? null : { kicker: "FRONT DESK", title: "Check-In" }, []);
-  const navigate = useNavigate();
+  const newClient = useNewClient();
+  // Reached on its own, a check-in that needs a drop-in opens it right here.
+  const [dropInFor, setDropInFor] = useState<{ id: string; name: string } | null>(null);
   const { data } = useAsync(() => api.clients(), []);
   const { bundleTypes } = useFrontDeskCatalog();
   const [picked, setPicked] = useState<ClientWithPackage | null>(null);
@@ -33,12 +37,17 @@ export function CheckIn({ embedded = false, onDropIn, onCreateClient }: { embedd
       <div style={{ font: "400 13px/1.5 var(--font-mono)", color: "var(--ink-muted)", margin: "0 2px 14px" }}>
         Find the client by name or phone to check them in by hand.
       </div>
-      <ClientPicker clients={data.clients} bundleTypes={bundleTypes} onPick={setPicked} onCreate={onCreateClient} />
+      <ClientPicker clients={data.clients} bundleTypes={bundleTypes} onPick={setPicked} onCreate={onCreateClient ?? newClient.open} />
       <ConfirmCheckInSheet
         client={picked}
         onClose={() => setPicked(null)}
-        onDropIn={(c) => (onDropIn ? onDropIn(c) : navigate(`/drop-in?${new URLSearchParams({ client: c.id, name: c.name })}`))}
+        onDropIn={(c) => (onDropIn ? onDropIn(c) : setDropInFor({ id: c.id, name: c.name }))}
       />
+      <Sheet open={!!dropInFor} onClose={() => setDropInFor(null)}>
+        <SheetHeading kicker="FRONT DESK" title="Drop-In" />
+        <DropIn embedded initialClient={dropInFor} />
+      </Sheet>
+      {newClient.modal}
     </div>
   );
 }

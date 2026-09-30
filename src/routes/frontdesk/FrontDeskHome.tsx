@@ -11,7 +11,7 @@ import { Icon, type IconName } from "../../components/Icon";
 import { Spinner } from "../../components/Spinner";
 import { Sheet } from "../../components/Sheet";
 import { Card, SectionTitle, SheetHeading } from "./shared";
-import { CreateClientSheet, useFrontDeskCatalog } from "./Members";
+import { NewClientModal } from "./NewClientModal";
 import { CheckIn } from "./CheckIn";
 import { DropIn } from "./DropIn";
 import { Invitations } from "./Invitations";
@@ -27,16 +27,6 @@ const ACTIONS: { key: Modal; label: string; icon: IconName; primary?: boolean }[
   { key: "invite", label: "Guest invitation", icon: "gift" },
   { key: "classes", label: "Classes", icon: "calendar" },
 ];
-
-/** The new-client flow, with what it needs loaded only while it's open. */
-function NewClientModal({ onClose }: { onClose: () => void }) {
-  const { data } = useAsync(() => api.clients(), []);
-  const { data: coachData } = useAsync(() => api.coaches(), []);
-  const { planTypes, series, bundleTypes } = useFrontDeskCatalog();
-  return (
-    <CreateClientSheet open onClose={onClose} takenEmails={(data?.clients ?? []).map((c) => c.email ?? "")} planTypes={planTypes} series={series} bundleTypes={bundleTypes} coaches={coachData?.coaches ?? []} />
-  );
-}
 
 function timeAgo(iso: string): string {
   const mins = Math.max(0, Math.round((Date.now() - Date.parse(iso)) / 60000));

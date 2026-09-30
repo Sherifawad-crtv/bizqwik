@@ -14,6 +14,7 @@ import { TextField, SelectField } from "../../components/FormField";
 import { PaymentSelect } from "../../components/PaymentSelect";
 import { Icon } from "../../components/Icon";
 import { Card, ClientPicker, ErrorBanner } from "./shared";
+import { useNewClient } from "./NewClientModal";
 import { useFrontDeskCatalog } from "./Members";
 import type { PayMethod } from "../../lib/types";
 
@@ -264,16 +265,18 @@ export function DropIn({ embedded = false, initialClient = null }: { embedded?: 
 }
 
 function PickClientSheet({ open, onClose, onPick }: { open: boolean; onClose: () => void; onPick: (c: ClientWithPackage) => void }) {
+  const newClient = useNewClient();
   const { data } = useAsync(() => (open ? api.clients() : Promise.resolve(null)), [open]);
   const { bundleTypes } = useFrontDeskCatalog();
   return (
     <Sheet open={open} onClose={onClose}>
       <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>DROP-IN</div>
       <div style={{ font: "800 26px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 16px" }}>Link a member</div>
-      <ClientPicker clients={data?.clients ?? []} bundleTypes={bundleTypes} onPick={onPick} />
+      <ClientPicker clients={data?.clients ?? []} bundleTypes={bundleTypes} onPick={onPick} onCreate={newClient.open} />
       <Button variant="quiet" fullWidth style={{ marginTop: 10 }} onClick={onClose}>
         Cancel
       </Button>
+      {newClient.modal}
     </Sheet>
   );
 }
