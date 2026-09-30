@@ -166,7 +166,7 @@ function Feed({ entries }: { entries: ActivityEntry[] }) {
             <span style={{ flex: "none", font: "700 10px var(--font-mono)", letterSpacing: ".06em", color: tone.fg, background: tone.bg, borderRadius: 8, padding: "5px 8px", minWidth: 74, textAlign: "center" }}>{tone.label}</span>
             <span style={{ flex: 1, minWidth: 0 }}>
               <span style={{ display: "block", font: "600 14px/1.35 var(--font-body)" }}>{describe(e)}</span>
-              <span style={{ display: "block", font: "400 12px var(--font-mono)", color: "var(--ink-faint)", marginTop: 2 }}>{timeLabel(e.at)}</span>
+              <span style={{ display: "block", font: "400 12px var(--font-mono)", color: "var(--ink-faint)", marginTop: 2 }}>{timeLabel(e.at)}{e.actorName ? ` · by ${e.actorName}` : ""}</span>
             </span>
             {amt && <span className="tabular" style={{ flex: "none", font: "800 14px var(--font-body)", color: tone.fg }}>{amt}</span>}
           </div>
@@ -186,7 +186,7 @@ function Logs({ entries }: { entries: ActivityEntry[] }) {
           <div key={e.id} style={{ display: "flex", alignItems: "baseline", gap: 10, padding: "10px 14px", borderBottom: i === entries.length - 1 ? "none" : "1px solid var(--line)" }}>
             <span style={{ flex: "none", width: 96, font: "400 11px var(--font-mono)", color: "var(--ink-faint)" }}>{timeLabel(e.at)}</span>
             <span style={{ flex: "none", width: 128, font: "700 11px var(--font-mono)", letterSpacing: ".04em", color: "var(--ink-muted)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{e.type}</span>
-            <span style={{ flex: 1, minWidth: 0, font: "500 13px var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{e.clientName ?? "—"}</span>
+            <span style={{ flex: 1, minWidth: 0, font: "500 13px var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{e.clientName ?? "—"}{e.actorName ? ` · by ${e.actorName}` : ""}</span>
             <span className="tabular" style={{ flex: "none", font: "700 12px var(--font-mono)", color: "var(--ink-muted)" }}>{amt ?? ""}</span>
           </div>
         );

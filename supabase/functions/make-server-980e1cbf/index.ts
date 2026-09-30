@@ -202,7 +202,7 @@ async function walletBalance(clientId: string, orgId: string): Promise<number> {
   background(admin().from("wallets").upsert({ client_id: clientId, org_id: orgId, balance: bal, updated_at: new Date().toISOString() }));
   return bal;
 }
-async function creditWallet(clientId: string, orgId: string, amount: number, category: string, description: string) {
+async function creditWallet(clientId: string, orgId: string, amount: number, category: string, description: string, actorId: string | null = null) {
   const settings = await orgSettingsOf(orgId);
   const ttl = settings?.wallet_credit_ttl_months ?? 12;
   const expires = new Date();
@@ -211,7 +211,7 @@ async function creditWallet(clientId: string, orgId: string, amount: number, cat
     org_id: orgId, client_id: clientId, type: "credit", amount, category, description,
     expires_at: expires.toISOString(), remaining: amount,
   });
-  await logActivity(orgId, `wallet_${category}`, { clientId, amount });
+  await logActivity(orgId, `wallet_${category}`, { clientId, amount, actorId });
   return await walletBalance(clientId, orgId);
 }
 async function debitWallet(clientId: string, orgId: string, amount: number, category: string, description: string): Promise<{ ok: boolean; balance: number }> {
@@ -1865,7 +1865,7 @@ app.post(`${P}/drop-ins`, async (c) => {
       // schedule edit) — undo the sale so no money is taken without a seat.
       await admin().from("drop_ins").delete().eq("id", data.id);
       await undoNewClient();
-      if (payMethod === "wallet") await creditWallet(clientId, me.org_id, amount, "refund", `Refund: ${cat} drop-in not completed`);
+      if (payMethod === "wallet") await creditWallet(clientId, me.org_id, amount, "refund", `Refund: ${cat} drop-in not completed`, me.id);
       return c.json({ error: "That class session is no longer available — nothing was charged." }, 409);
     }
   }
@@ -3341,7 +3341,7 @@ app.post(`${P}/classes/cancel`, async (c) => {
     if (b.coverage === "plan") {
       await returnPlanCredit(b);
     } else if (b.pay_status === "paid" && b.pay_method === "wallet") {
-      await creditWallet(b.client_id, me.org_id, Number(b.price_egp), "refund", `Refund: ${cls.title} cancelled`);
+      await creditWallet(b.client_id, me.org_id, Number(b.price_egp), "refund", `Refund: ${cls.title} cancelled`, me.id);
     }
     await admin().from("class_bookings").update({ attendance: "cancelled", pay_status: b.pay_status === "paid" ? "refunded" : b.pay_status }).eq("id", b.id);
     const walletBack = b.coverage !== "plan" && b.pay_status === "paid" && b.pay_method === "wallet" ? Number(b.price_egp) : 0;
@@ -3743,7 +3743,7 @@ app.post(`${P}/clients/refund`, async (c) => {
   }
   await clawbackPoints(clientId, me.org_id, amt);
   if (destination === "wallet") {
-    const balance = await creditWallet(clientId, me.org_id, amt, "refund", note ? String(note) : "Refund to wallet");
+    const balance = await creditWallet(clientId, me.org_id, amt, "refund", note ? String(note) : "Refund to wallet", me.id);
     await notifyClient(me.org_id, clientId, "wallet_refund", { title: `${amt} EGP refunded to your wallet`, body: note ? String(note) : "You can use it for classes and plans.", push: true });
     return c.json({ ok: true, walletBalance: balance });
   }
@@ -3772,7 +3772,7 @@ app.post(`${P}/clients/compensate`, async (c) => {
   if (!Number.isFinite(amt) || amt <= 0) return c.json({ error: "Enter an amount." }, 400);
   const { data: client } = await admin().from("clients").select("id").eq("id", clientId).eq("org_id", me.org_id).maybeSingle();
   if (!client) return c.json({ error: "No such client" }, 404);
-  const balance = await creditWallet(clientId, me.org_id, amt, "compensation", note ? String(note) : "Compensation credit");
+  const balance = await creditWallet(clientId, me.org_id, amt, "compensation", note ? String(note) : "Compensation credit", me.id);
   await notifyClient(me.org_id, clientId, "wallet_credit", { title: `${amt} EGP added to your wallet`, body: note ? String(note) : "A little something from the gym.", push: true });
   return c.json({ ok: true, walletBalance: balance });
 });
@@ -3784,7 +3784,11 @@ app.get(`${P}/activity`, async (c) => {
   if (me?.role !== "dept_head" && me?.role !== "front_desk" && me?.role !== "accountant") return c.json({ error: "Forbidden" }, 403);
   const limit = Math.min(Number(c.req.query("limit") ?? "100") || 100, 300);
   const { data } = await admin().from("activity_log").select("*, clients:subject_client_id(name)").eq("org_id", me.org_id).order("created_at", { ascending: false }).limit(limit);
-  return c.json({ activity: (data ?? []).map((a: any) => ({ id: a.id, type: a.type, amount: a.amount != null ? Number(a.amount) : null, clientName: a.clients?.name ?? null, meta: a.meta, at: a.created_at })) });
+  // Who did it, when a staff member did (members' own actions have no actor).
+  const actorIds = [...new Set((data ?? []).map((a: any) => a.actor_id).filter(Boolean))];
+  const { data: actors } = actorIds.length ? await admin().from("profiles").select("id, name").in("id", actorIds) : { data: [] as any[] };
+  const actorName = new Map((actors ?? []).map((p: any) => [p.id, p.name]));
+  return c.json({ activity: (data ?? []).map((a: any) => ({ id: a.id, type: a.type, amount: a.amount != null ? Number(a.amount) : null, clientName: a.clients?.name ?? null, actorName: a.actor_id ? (actorName.get(a.actor_id) ?? null) : null, meta: a.meta, at: a.created_at })) });
 });
 
 // ---- invite a client to the branded app (front desk / dept_head) ----

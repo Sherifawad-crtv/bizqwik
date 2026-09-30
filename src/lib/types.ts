@@ -327,6 +327,8 @@ export interface ActivityEntry {
   type: string; // check_in | class_booked | sale_* | wallet_* | points_earned | …
   amount: number | null;
   clientName: string | null;
+  /** The staff member who did it (members' own actions have none). */
+  actorName?: string | null;
   meta: Record<string, unknown> | null;
   at: string;
 }
