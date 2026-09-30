@@ -19,7 +19,7 @@ import { PaymentCards } from "../../components/PaymentCards";
 import { Spinner } from "../../components/Spinner";
 import { Icon } from "../../components/Icon";
 import type { PayMethod } from "../../lib/types";
-import { Card, ErrorBanner, PlanPill, SearchField, SectionTitle, SheetHeading, matchesClient, planSummary } from "./shared";
+import { Card, ErrorBanner, PlanPill, SearchField, SheetHeading, matchesClient, planSummary } from "./shared";
 
 export function useFrontDeskCatalog() {
   const { data: p } = useAsync(() => api.planTypes(), []);
@@ -62,6 +62,7 @@ export function Members() {
   const coaches = coachData?.coaches ?? [];
 
   const [query, setQuery] = useState("");
+  const [filter, setFilter] = useState<"all" | "active" | "expired" | "none">("all");
   const [creating, setCreating] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
@@ -79,31 +80,33 @@ export function Members() {
   };
 
   const clients = data?.clients ?? [];
-  const shown = useMemo(() => clients.filter((c) => matchesClient(c, query)), [clients, query]);
+  const shown = useMemo(() => clients.filter((c) => matchesClient(c, query) && (filter === "all" || planSummary(c, bundleTypes).tone === filter)), [clients, query, filter, bundleTypes]);
   const selected = clients.find((c) => c.id === selectedId) ?? null;
 
   if (!data) return <Spinner />;
 
-  const activeCount = clients.filter((c) => planSummary(c, bundleTypes).tone === "active").length;
-
   return (
     <div>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 18 }}>
-        <Stat label="CLIENTS" value={clients.length} />
-        <Stat label="ACTIVE PLANS" value={activeCount} />
-      </div>
-
-      <SectionTitle
-        count={shown.length}
-        right={
-          <Button size="md" style={{ height: 40, padding: "0 16px" }} onClick={() => setCreating(true)}>
-            + New client
-          </Button>
-        }
-      >
-        Roster
-      </SectionTitle>
       <SearchField value={query} onChange={setQuery} />
+      <div style={{ display: "flex", alignItems: "center", gap: 8, margin: "12px 0 4px", overflowX: "auto" }}>
+        {(["all", "active", "expired", "none"] as const).map((f) => {
+          const n = f === "all" ? clients.length : clients.filter((c) => planSummary(c, bundleTypes).tone === f).length;
+          const on = filter === f;
+          return (
+            <button
+              key={f}
+              data-tap
+              onClick={() => setFilter(f)}
+              style={{ flex: "none", height: 36, padding: "0 14px", borderRadius: 999, border: on ? 0 : "1px solid var(--line)", background: on ? "var(--primary)" : "var(--surface)", color: on ? "var(--surface)" : "var(--ink)", font: "700 13px var(--font-body)", cursor: "pointer" }}
+            >
+              {{ all: "All", active: "Active", expired: "Expired", none: "No plan" }[f]} · {n}
+            </button>
+          );
+        })}
+        <Button size="md" style={{ height: 36, padding: "0 14px", marginLeft: "auto", flex: "none" }} onClick={() => setCreating(true)}>
+          + New client
+        </Button>
+      </div>
 
       <Card style={{ marginTop: 10, overflow: "hidden" }}>
         {shown.map((c, i) => {
@@ -112,7 +115,7 @@ export function Members() {
             <button
               key={c.id}
               onClick={() => setSelectedId(c.id)}
-              style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", padding: "14px 18px", border: 0, borderBottom: i === shown.length - 1 ? "none" : "1px solid var(--line)", background: "none", cursor: "pointer", textAlign: "left" }}
+              style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", minHeight: 64, padding: "12px 18px", border: 0, borderBottom: i === shown.length - 1 ? "none" : "1px solid var(--line)", background: "none", cursor: "pointer", textAlign: "left" }}
             >
               <div style={{ minWidth: 0, flex: 1 }}>
                 <div style={{ font: "700 16px var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.name}</div>
@@ -137,15 +140,6 @@ export function Members() {
       <CreateClientSheet open={creating} onClose={closeCreate} takenEmails={clients.map((c) => c.email ?? "")} planTypes={planTypes} series={series} bundleTypes={bundleTypes} coaches={coaches} />
       <ClientSheet client={selected} onClose={() => setSelectedId(null)} planTypes={planTypes} series={series} bundleTypes={bundleTypes} coaches={coaches} />
     </div>
-  );
-}
-
-function Stat({ label, value }: { label: string; value: number }) {
-  return (
-    <Card style={{ padding: "16px 18px" }}>
-      <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>{label}</div>
-      <div style={{ font: "800 30px/1.1 var(--font-body)", letterSpacing: "-.02em", marginTop: 6 }}>{value}</div>
-    </Card>
   );
 }
 
