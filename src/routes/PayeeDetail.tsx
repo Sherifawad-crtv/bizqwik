@@ -4,7 +4,7 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useSetHeader } from "../lib/header";
 import { useAsync } from "../lib/useAsync";
 import { api, MOCK } from "../lib/backend";
-import { dateLabel, egp, fmt, monthShort } from "../lib/format";
+import { dateLabel, egp, fmt, formatDateTime, monthShort } from "../lib/format";
 import { MoneyHero } from "../components/MoneyHero";
 import { Avatar } from "../components/Avatar";
 import { Button } from "../components/Button";
@@ -35,7 +35,9 @@ export function PayeeDetail() {
   const { coachId } = useParams<{ coachId: string }>();
   const location = useLocation();
   const navigate = useNavigate();
-  const month = (location.state as { month?: string })?.month ?? MOCK.CURRENT_MONTH;
+  const nav = (location.state as { month?: string; from?: "pay" | "history" } | null) ?? {};
+  const month = nav.month ?? MOCK.CURRENT_MONTH;
+  const backTo = nav.from === "history" ? { path: "/history", label: "History" } : { path: "/pay", label: "To Pay" };
   const [paying, setPaying] = useState(false);
   const id = coachId ?? "";
 
@@ -53,10 +55,10 @@ export function PayeeDetail() {
   return (
     <div>
       <button
-        onClick={() => navigate("/pay")}
+        onClick={() => navigate(backTo.path)}
         style={{ display: "flex", alignItems: "center", gap: 4, border: 0, background: "none", cursor: "pointer", color: "var(--ink-muted)", font: "600 13px var(--font-body)", padding: "0 0 14px" }}
       >
-        <Icon name="chevron-left" size={16} /> To Pay
+        <Icon name="chevron-left" size={16} /> {backTo.label}
       </button>
 
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 18 }}>
@@ -91,6 +93,20 @@ export function PayeeDetail() {
             {row.packageCount} {row.packageCount === 1 ? "package" : "packages"} = {egp(row.privateTotal)}
           </div>
         </div>
+      </div>
+
+      <div data-sq style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-tile)", padding: "16px 18px", marginBottom: 18 }}>
+        <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>PAYMENT RECORD</div>
+        {[
+          ["Month", monthShort(month)],
+          ["Settled", row.settledAt ? formatDateTime(row.settledAt) : "Not settled yet"],
+          ["Paid", row.paidAt ? `${formatDateTime(row.paidAt)} · ${fmt(row.total)} EGP` : "Not paid yet"],
+        ].map(([k, v]) => (
+          <div key={k} style={{ display: "flex", alignItems: "baseline", gap: 10, marginTop: 10 }}>
+            <span style={{ font: "600 13px var(--font-mono)", color: "var(--ink-muted)" }}>{k}</span>
+            <span className="tabular" style={{ marginLeft: "auto", font: "700 14px var(--font-body)", textAlign: "right" }}>{v}</span>
+          </div>
+        ))}
       </div>
 
       {row.state === "settled" && (

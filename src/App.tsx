@@ -16,7 +16,7 @@ import { CoachesOverview } from "./routes/CoachesOverview";
 import { CoachDetail } from "./routes/CoachDetail";
 import { Oversight } from "./routes/Oversight";
 import { ClassesManage } from "./routes/ClassesManage";
-import { Activity } from "./routes/Activity";
+import { Activity, Transactions } from "./routes/Activity";
 import { Manage } from "./routes/Manage";
 import { Catalog } from "./routes/Catalog";
 import { Pay } from "./routes/Pay";
@@ -107,6 +107,8 @@ export default function App() {
                   <Route element={<RequireRole roles={["accountant"]} />}>
                     <Route path="/pay" element={<Pay />} />
                     <Route path="/pay/:coachId" element={<PayeeDetail />} />
+                    <Route path="/revenue" element={<Oversight />} />
+                    <Route path="/transactions" element={<Transactions />} />
                   </Route>
                 </Route>
               </Route>

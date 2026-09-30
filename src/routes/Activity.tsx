@@ -11,10 +11,11 @@ import { Spinner } from "../components/Spinner";
 import { Icon } from "../components/Icon";
 import { Segmented } from "../components/Segmented";
 
-type Cat = "sale" | "wallet" | "points" | "class" | "checkin" | "other";
+type Cat = "sale" | "refund" | "wallet" | "points" | "class" | "checkin" | "other";
 
 function catOf(type: string): Cat {
-  if (type.startsWith("sale_")) return "sale";
+  if (type.startsWith("sale_") || type === "class_collected") return "sale";
+  if (type === "refund_desk" || type === "wallet_refund") return "refund";
   if (type.startsWith("wallet_")) return "wallet";
   if (type.startsWith("points")) return "points";
   if (type.startsWith("class")) return "class";
@@ -25,6 +26,7 @@ function catOf(type: string): Cat {
 
 const CAT_TONE: Record<Cat, { fg: string; bg: string; label: string }> = {
   sale: { fg: "var(--paid-fg)", bg: "var(--paid-bg)", label: "SALE" },
+  refund: { fg: "var(--danger-fg)", bg: "var(--danger-bg)", label: "REFUND" },
   wallet: { fg: "var(--primary-pressed)", bg: "var(--primary-tint)", label: "WALLET" },
   points: { fg: "var(--settled-fg)", bg: "var(--settled-bg)", label: "POINTS" },
   class: { fg: "var(--logging-fg)", bg: "var(--logging-bg)", label: "CLASS" },
@@ -65,6 +67,10 @@ function describe(e: ActivityEntry): string {
       return `New class added — ${title ?? "a class"}`;
     case "class_series_ended":
       return `Class ended — ${title ?? "a class"}`;
+    case "refund_desk":
+      return `${who} was refunded${metaStr(e.meta, "payMethod") ? ` (${metaStr(e.meta, "payMethod")})` : " at the desk"}`;
+    case "class_collected":
+      return `${who} paid for a class at the desk`;
     case "wallet_refund":
       return `${who} was refunded to wallet`;
     case "wallet_credit":
@@ -185,6 +191,62 @@ function Logs({ entries }: { entries: ActivityEntry[] }) {
           </div>
         );
       })}
+    </div>
+  );
+}
+
+// ---- the accountant's view: only the money ----------------------------------
+
+/** Anything that moves money: sales, desk refunds and collections, wallet changes. */
+const isMoney = (type: string) => type.startsWith("sale_") || type.startsWith("wallet_") || type === "refund_desk" || type === "class_collected";
+
+type Kind = "all" | "sales" | "refunds" | "wallet";
+const kindOf = (type: string): Exclude<Kind, "all"> =>
+  type.startsWith("sale_") || type === "class_collected" ? "sales" : type === "refund_desk" || type === "wallet_refund" ? "refunds" : "wallet";
+
+/** Every transaction on the money side, newest first, with what it adds up to. */
+export function Transactions() {
+  useSetHeader({ kicker: "MONEY", title: "Transactions" }, []);
+  const { data, loading, error } = useAsync(() => api.activity(300), []);
+  const [kind, setKind] = useState<Kind>("all");
+  const all = (data?.activity ?? []).filter((e) => isMoney(e.type) && e.amount != null);
+  const shown = kind === "all" ? all : all.filter((e) => kindOf(e.type) === kind);
+  const sum = (k: Exclude<Kind, "all">) => all.filter((e) => kindOf(e.type) === k && e.type !== "wallet_expired").reduce((s, e) => s + Math.abs(e.amount ?? 0), 0);
+
+  return (
+    <div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(140px,1fr))", gap: 10, marginBottom: 16 }}>
+        {(
+          [
+            ["SALES", sum("sales"), "Cash, card and wallet sales"],
+            ["REFUNDS", sum("refunds"), "Given back to clients"],
+            ["WALLET CHANGES", sum("wallet"), "Credits, rewards, expiries"],
+          ] as const
+        ).map(([label, value, hint]) => (
+          <div key={label} data-sq style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: "14px 16px" }}>
+            <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>{label}</div>
+            <div className="tabular" style={{ font: "800 22px/1.15 var(--font-body)", letterSpacing: "-.02em", marginTop: 4 }}>{egp(value)}</div>
+            <div style={{ font: "400 12px var(--font-mono)", color: "var(--ink-faint)", marginTop: 4 }}>{hint}</div>
+          </div>
+        ))}
+      </div>
+      <div style={{ display: "flex", justifyContent: "center", marginBottom: 14 }}>
+        <Segmented
+          value={kind}
+          onChange={setKind}
+          options={[
+            { value: "all", label: "ALL" },
+            { value: "sales", label: "SALES" },
+            { value: "refunds", label: "REFUNDS" },
+            { value: "wallet", label: "WALLET" },
+          ]}
+        />
+      </div>
+      {loading && <Spinner />}
+      {error && <div style={{ font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>{error}</div>}
+      {!loading && shown.length === 0 && <EmptyState icon="history" title="No transactions yet" body="Sales, refunds and wallet changes are listed here, newest first, as they happen." />}
+      {shown.length > 0 && <Feed entries={shown} />}
+      {all.length >= 300 && <div style={{ textAlign: "center", font: "400 12px var(--font-mono)", color: "var(--ink-faint)", margin: "14px 0" }}>Showing the latest 300 transactions.</div>}
     </div>
   );
 }

@@ -3566,7 +3566,7 @@ app.get(`${P}/group-plans/client/:id`, async (c) => {
   return c.json({ activePlan: active ? toGroupPlan(active) : null, plans: (data ?? []).map(toGroupPlan) });
 });
 
-// ---- revenue (dept_head): the SME founder's money view ----
+// ---- revenue (dept_head, accountant): the money view ----
 // Revenue is new money in: sales paid by cash or card, recognised at the
 // moment of sale. Sales paid from the wallet are NOT revenue — wallet credit
 // comes from refunds (already counted when first sold), compensation and
@@ -3592,7 +3592,7 @@ function monthsBack(n: number): string[] {
 app.get(`${P}/revenue`, async (c) => {
   const user = await requireUser(c);
   const me = user && (await profileOf(user.id));
-  if (me?.role !== "dept_head") return c.json({ error: "Forbidden" }, 403);
+  if (me?.role !== "dept_head" && me?.role !== "accountant") return c.json({ error: "Forbidden" }, 403);
   const org = me.org_id;
   const nMonths = Math.min(Math.max(Number(c.req.query("months") ?? "6") || 6, 1), 24);
   const months = monthsBack(nMonths);
@@ -3781,7 +3781,7 @@ app.post(`${P}/clients/compensate`, async (c) => {
 app.get(`${P}/activity`, async (c) => {
   const user = await requireUser(c);
   const me = user && (await profileOf(user.id));
-  if (me?.role !== "dept_head" && me?.role !== "front_desk") return c.json({ error: "Forbidden" }, 403);
+  if (me?.role !== "dept_head" && me?.role !== "front_desk" && me?.role !== "accountant") return c.json({ error: "Forbidden" }, 403);
   const limit = Math.min(Number(c.req.query("limit") ?? "100") || 100, 300);
   const { data } = await admin().from("activity_log").select("*, clients:subject_client_id(name)").eq("org_id", me.org_id).order("created_at", { ascending: false }).limit(limit);
   return c.json({ activity: (data ?? []).map((a: any) => ({ id: a.id, type: a.type, amount: a.amount != null ? Number(a.amount) : null, clientName: a.clients?.name ?? null, meta: a.meta, at: a.created_at })) });
