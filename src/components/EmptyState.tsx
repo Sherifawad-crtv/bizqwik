@@ -10,6 +10,7 @@ export function EmptyState({
   title,
   body,
   action,
+  primaryAction = false,
   bare = false,
   testId,
 }: {
@@ -17,6 +18,8 @@ export function EmptyState({
   title: string;
   body?: ReactNode;
   action?: { label: string; onClick: () => void };
+  /** Draw the action as the page's one blue call to action (when nothing else on screen is). */
+  primaryAction?: boolean;
   bare?: boolean;
   testId?: string;
 }) {
@@ -42,7 +45,7 @@ export function EmptyState({
       <div style={{ font: "700 16px/1.3 var(--font-body)", color: "var(--ink)" }}>{title}</div>
       {body && <div style={{ font: "500 13px/1.5 var(--font-body)", color: "var(--ink-muted)", maxWidth: 340 }}>{body}</div>}
       {action && (
-        <Button variant="secondary" style={{ marginTop: 8 }} onClick={action.onClick}>
+        <Button variant={primaryAction ? "primary" : "secondary"} style={{ marginTop: 8 }} onClick={action.onClick}>
           {action.label}
         </Button>
       )}
