@@ -40,7 +40,7 @@ export function Manage() {
           ]}
         />
       </div>
-      {tab === "tiers" && <TiersPanel />}
+      {tab === "tiers" && <TiersPanel onOpenPeople={() => setTab("people")} onOpenInvites={() => setTab("invites")} />}
       {tab === "invites" && <InvitesPanel />}
       {tab === "people" && <PeoplePanel />}
     </div>
@@ -49,8 +49,13 @@ export function Manage() {
 
 // ---------- Tiers ----------
 
-function TiersPanel() {
+function TiersPanel({ onOpenPeople, onOpenInvites }: { onOpenPeople: () => void; onOpenInvites: () => void }) {
   const { data } = useAsync(() => api.tiers(), []);
+  // Who is on a tier decides whether it can be deleted, so know it up front.
+  const { data: peopleData } = useAsync(() => api.profiles(), []);
+  const { data: inviteData } = useAsync(() => api.invites(), []);
+  const onTier = (id?: string) => (peopleData?.profiles ?? []).filter((p) => !!id && p.tierId === id);
+  const invitedTo = (id?: string) => (inviteData?.invites ?? []).filter((i) => !!id && i.tierId === id);
   const [editing, setEditing] = useState<Tier | "new" | null>(null);
   const [deleting, setDeleting] = useState<Tier | null>(null);
   const shownDeleting = useLatch(deleting);
@@ -88,7 +93,42 @@ function TiersPanel() {
       </div>
 
       <TierSheet open={editing !== null} tier={editing === "new" ? null : editing} onClose={() => setEditing(null)} />
-      {shownDeleting && (
+      {shownDeleting && (onTier(shownDeleting.id).length > 0 || invitedTo(shownDeleting.id).length > 0) ? (
+        <Sheet open={!!deleting} onClose={() => setDeleting(null)}>
+          <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>DELETE TIER</div>
+          <div style={{ font: "800 26px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 4px" }}>{shownDeleting.name} is still in use</div>
+          <div style={{ font: "400 13px/1.5 var(--font-mono)", color: "var(--ink-muted)", marginBottom: 14 }}>Move these to another tier first, then delete it.</div>
+          <div data-sq style={{ background: "var(--sunken)", borderRadius: "var(--r-input)", padding: "6px 16px", marginBottom: 16 }}>
+            {onTier(shownDeleting.id).map((p) => (
+              <div key={p.id} style={{ display: "flex", alignItems: "baseline", gap: 10, padding: "10px 0" }}>
+                <span style={{ font: "700 15px var(--font-body)" }}>{p.name}</span>
+                <span style={{ marginLeft: "auto", font: "400 12px var(--font-mono)", color: "var(--ink-faint)" }}>{ROLE_LABELS[p.role]}</span>
+              </div>
+            ))}
+            {invitedTo(shownDeleting.id).map((i) => (
+              <div key={i.email} style={{ display: "flex", alignItems: "baseline", gap: 10, padding: "10px 0" }}>
+                <span style={{ font: "700 15px var(--font-body)", overflow: "hidden", textOverflow: "ellipsis" }}>{i.email}</span>
+                <span style={{ marginLeft: "auto", font: "400 12px var(--font-mono)", color: "var(--ink-faint)" }}>Pending invite</span>
+              </div>
+            ))}
+          </div>
+          <Button
+            fullWidth
+            size="lg"
+            onClick={() => {
+              const hasPeople = onTier(shownDeleting.id).length > 0;
+              setDeleting(null);
+              if (hasPeople) onOpenPeople();
+              else onOpenInvites();
+            }}
+          >
+            {onTier(shownDeleting.id).length > 0 ? "Change their tier in People" : "Go to pending invites"}
+          </Button>
+          <Button variant="quiet" fullWidth style={{ marginTop: 8 }} onClick={() => setDeleting(null)}>
+            Cancel
+          </Button>
+        </Sheet>
+      ) : shownDeleting ? (
         <ConfirmSheet
           open={!!deleting}
           onClose={() => setDeleting(null)}
@@ -101,7 +141,7 @@ function TiersPanel() {
             await api.deleteTier(shownDeleting.id);
           }}
         />
-      )}
+      ) : null}
     </div>
   );
 }
