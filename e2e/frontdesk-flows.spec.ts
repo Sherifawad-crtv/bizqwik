@@ -32,7 +32,7 @@ async function open(page: import("@playwright/test").Page, extra: Record<string,
     ...extra,
   });
   await page.goto("/");
-  await expect(page.getByText("Quick actions")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Check someone in" })).toBeVisible();
 }
 
 test("home quick actions open a modal on the same page", async ({ page }) => {
@@ -41,7 +41,6 @@ test("home quick actions open a modal on the same page", async ({ page }) => {
     ["Check someone in", "Find the client by name or phone to check them in by hand."],
     ["Drop-in pass", /Drop into a class/],
     ["Guest invitation", "Guest invitations"],
-    ["Classes", "MONTH"],
     ["New client", /STEP 1 OF 4/],
   ];
   for (const [action, expected] of cases) {
@@ -49,9 +48,7 @@ test("home quick actions open a modal on the same page", async ({ page }) => {
     await expect(page.getByText(expected).first()).toBeVisible();
     // Still on Home: nothing navigated.
     expect(new URL(page.url()).pathname).toBe("/");
-    // Close: the calendar has its own close button, a modal closes on its backdrop.
-    if (action === "Classes") await page.getByRole("button", { name: "Close calendar" }).click();
-    else await page.mouse.click(5, 5);
+    await page.mouse.click(5, 5);
     await expect(page.getByText(expected).first()).toHaveCount(0);
   }
 });
@@ -108,7 +105,8 @@ test("new client: step by step, then a summary to check before creating", async 
 
 test("classes: a full-screen calendar with day, week and month views", async ({ page }) => {
   await open(page);
-  await page.getByRole("button", { name: "Classes", exact: true }).click();
+  await page.getByRole("link", { name: "Bookings", exact: true }).click();
+  await page.getByRole("button", { name: "Open full calendar" }).click();
   await expect(page.getByTestId("class-calendar")).toBeVisible();
   const box = await page.getByTestId("class-calendar").boundingBox();
   const viewport = page.viewportSize()!;
@@ -137,15 +135,16 @@ test("classes: a full-screen calendar with day, week and month views", async ({ 
   await expect(page.getByTestId("week-day")).toHaveCount(1);
   await expect(page.getByTestId("calendar-class")).toHaveCount(2);
 
-  // Closing goes back to Home.
+  // Closing goes back to Bookings.
   await page.getByRole("button", { name: "Close calendar" }).click();
   await expect(page.getByTestId("class-calendar")).toHaveCount(0);
-  expect(new URL(page.url()).pathname).toBe("/");
+  expect(new URL(page.url()).pathname).toBe("/bookings");
 });
 
 test("classes: opening a class from the calendar shows its roster", async ({ page }) => {
   await open(page, { "classes/k2/bookings": { bookings: [] } });
-  await page.getByRole("button", { name: "Classes", exact: true }).click();
+  await page.getByRole("link", { name: "Bookings", exact: true }).click();
+  await page.getByRole("button", { name: "Open full calendar" }).click();
   await page.getByTestId("calendar-class").filter({ hasText: "Evening Yoga" }).click();
   await expect(page.getByText("Evening Yoga").first()).toBeVisible();
   await expect(page.getByText(/0 booked/).first()).toBeVisible();
@@ -154,7 +153,8 @@ test("classes: opening a class from the calendar shows its roster", async ({ pag
 test("classes: the calendar fits a phone", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await open(page);
-  await page.getByRole("button", { name: "Classes", exact: true }).click();
+  await page.getByRole("link", { name: "Bookings", exact: true }).click();
+  await page.getByRole("button", { name: "Open full calendar" }).click();
   // A phone opens on the day; the week is one swipe away.
   await expect(page.getByTestId("week-day")).toHaveCount(1);
   await page.getByRole("button", { name: "WEEK", exact: true }).click();

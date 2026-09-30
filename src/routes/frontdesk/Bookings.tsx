@@ -74,7 +74,7 @@ export function Bookings() {
         onClick={() => setOpen(c)}
         style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", padding: "14px 18px", border: 0, borderBottom: "1px solid var(--line)", background: "none", cursor: "pointer", textAlign: "left", opacity: muted ? 0.65 : 1 }}
       >
-        <span style={{ width: 64, flex: "none", font: "700 14px var(--font-mono)", color: happening ? "var(--primary-pressed)" : "var(--ink)" }}>{clock(c.startsAt)}</span>
+        <span style={{ width: 84, flex: "none", whiteSpace: "nowrap", font: "700 14px var(--font-mono)", color: happening ? "var(--primary-pressed)" : "var(--ink)" }}>{clock(c.startsAt)}</span>
         <span style={{ minWidth: 0, flex: 1 }}>
           <span style={{ display: "block", font: "700 15px var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.title}</span>
           <span style={{ display: "block", font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>

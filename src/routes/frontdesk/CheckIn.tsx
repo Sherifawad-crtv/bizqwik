@@ -52,7 +52,7 @@ export function CheckIn({ embedded = false, onDropIn, onCreateClient }: { embedd
   );
 }
 
-function ConfirmCheckInSheet({ client, onClose, onDropIn }: { client: ClientWithPackage | null; onClose: () => void; onDropIn: (c: ClientWithPackage) => void }) {
+export function ConfirmCheckInSheet({ client, onClose, onDropIn }: { client: ClientWithPackage | null; onClose: () => void; onDropIn: (c: ClientWithPackage) => void }) {
   const shown = useLatch(client);
   const open = !!client;
   const [busy, setBusy] = useState(false);
