@@ -73,7 +73,11 @@ test("empty org: dept head Team links straight to inviting someone", async ({ pa
   await page.goto("/coaches");
   await expect(page.getByText("No coaches on the team yet")).toBeVisible();
   await page.getByRole("button", { name: "Invite someone" }).click();
-  await expect(page).toHaveURL(/\/manage\?tab=invites/);
+  // The invite form opens right here — no trip to another page.
+  await expect(page).toHaveURL(/\/coaches$/);
+  await expect(page.getByText("NEW INVITE")).toBeVisible();
+  await page.getByRole("button", { name: "Cancel" }).click();
+  await page.goto("/manage?tab=invites");
   await expect(page.getByText("No pending invites")).toBeVisible();
   await page.getByRole("button", { name: "+ Invite someone" }).click();
   await expect(page.getByText("No pay tiers yet — create one in the Tiers tab", { exact: false })).toBeVisible();
@@ -105,4 +109,18 @@ test("empty month: coach home and clients say what shows up there", async ({ pag
   await expect(page.getByText("Tap + and scan the coaches' room QR", { exact: false })).toBeVisible();
   await page.goto("/clients");
   await expect(page.getByText("No PT clients yet")).toBeVisible();
+});
+
+test("dept head: the Create button offers Invite and Pay tier on any screen and opens them in place", async ({ page }) => {
+  await boot(page, "dept_head");
+  await page.goto("/oversight");
+  await page.getByRole("button", { name: "Create" }).click();
+  await page.getByText("Invite someone", { exact: true }).click();
+  await expect(page.getByText("NEW INVITE")).toBeVisible();
+  await expect(page).toHaveURL(/\/oversight$/);
+  await page.getByRole("button", { name: "Cancel" }).click();
+  await page.getByRole("button", { name: "Create" }).click();
+  await page.getByText("Pay tier", { exact: true }).click();
+  await expect(page.getByText("NEW TIER", { exact: true })).toBeVisible();
+  await expect(page).toHaveURL(/\/oversight$/);
 });
