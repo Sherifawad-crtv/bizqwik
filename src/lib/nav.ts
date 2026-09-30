@@ -80,10 +80,9 @@ export const NAV: Record<Role, NavItem[]> = {
     { key: "history", path: "/history", label: "History", icon: "history" },
   ],
   front_desk: [
-    { key: "desk", path: "/", label: "Front Desk", icon: "home" },
+    { key: "desk", path: "/", label: "Desk", icon: "home" },
+    { key: "bookings", path: "/bookings", label: "Bookings", icon: "calendar" },
     { key: "members", path: "/members", label: "Clients", icon: "clients" },
-    { key: "checkin", path: "/checkin", label: "Check-In", icon: "check" },
-    { key: "dropin", path: "/drop-in", label: "Drop-In", icon: "ticket" },
-    { key: "invites", path: "/invitations", label: "Invitations", icon: "gift" },
+    { key: "activity", path: "/activity", label: "Activity", icon: "history" },
   ],
 };
