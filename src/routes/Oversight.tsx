@@ -199,6 +199,15 @@ export function Oversight() {
             ]}
           />
 
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(140px,1fr))", gap: 10, marginBottom: 14 }}>
+            <StatTile
+              label="ACTIVE SUBSCRIBERS"
+              value={String(subs?.total ?? 0)}
+              sub={`${subs?.groupPlans ?? 0} group plan · ${subs?.ptPackages ?? 0} PT`}
+            />
+            <StatTile label="WALLET CREDIT OUT" value={fmt(data.walletLiability)} sub="Unspent store credit · EGP" />
+          </div>
+
           <div style={{ display: "flex", alignItems: "center", gap: 10, margin: "4px 2px 12px" }}>
             <span style={{ font: "700 20px var(--font-body)", letterSpacing: "-.01em" }}>Trends</span>
             <div style={{ marginLeft: "auto" }}>
@@ -251,15 +260,6 @@ export function Oversight() {
               </div>
             )}
           </Card>
-
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(140px,1fr))", gap: 10, marginBottom: 14 }}>
-            <StatTile
-              label="ACTIVE SUBSCRIBERS"
-              value={String(subs?.total ?? 0)}
-              sub={`${subs?.groupPlans ?? 0} group plan · ${subs?.ptPackages ?? 0} PT`}
-            />
-            <StatTile label="WALLET CREDIT OUT" value={fmt(data.walletLiability)} sub="Unspent store credit · EGP" />
-          </div>
 
           <div style={{ textAlign: "center", font: "400 12px/1.5 var(--font-mono)", color: "var(--ink-faint)", margin: "8px 0 18px" }}>
             Revenue counts every sale when it happens — cash, card or wallet. Wallet top-ups aren't counted twice.
