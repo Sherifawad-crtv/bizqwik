@@ -74,7 +74,35 @@ body {
   background: var(--paper);
   color: var(--ink);
   font-family: var(--font-body);
-  overscroll-behavior-y: none;
+  overscroll-behavior: none; /* no rubber-band, no pull-to-refresh */
+  -webkit-text-size-adjust: 100%; /* don't resize text when the phone rotates */
+  text-size-adjust: 100%;
+  touch-action: pan-x pan-y; /* scrolling yes, pinch/double-tap zoom no */
+}
+
+/* Native apps don't let you select page text, long-press for a menu, or drag
+   pictures out. Form fields keep normal editing. */
+body {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+input,
+textarea,
+[contenteditable=""],
+[contenteditable="true"] {
+  -webkit-user-select: text;
+  user-select: text;
+  -webkit-touch-callout: default;
+}
+img,
+svg,
+canvas,
+video,
+a {
+  -webkit-user-drag: none;
+  user-drag: none;
+  -webkit-touch-callout: none;
 }
 
 body {

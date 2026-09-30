@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
 import { startAutoUpdate } from './lib/autoUpdate'
+import { installNativeFeel } from './lib/native'
 
 // The camera (coach QR scanning) only works on a secure, top-level page. If the
 // app is ever reached over plain http, or framed by another site (e.g. a domain
@@ -26,6 +27,7 @@ function ensureSecureTopLevel(): boolean {
 }
 
 if (ensureSecureTopLevel()) {
+  installNativeFeel()
   startAutoUpdate()
   createRoot(document.getElementById('root')!).render(
     <StrictMode>
