@@ -9,8 +9,6 @@ function inEditable(t: EventTarget | null): boolean {
 }
 
 export function installNativeFeel() {
-  const opts = { passive: false } as const;
-
   // Long-press / right-click menus ("Save image", "Copy", "Open in new tab").
   document.addEventListener("contextmenu", (e) => { if (!inEditable(e.target)) e.preventDefault(); });
   // Dragging an image or link out of the page.
@@ -20,10 +18,12 @@ export function installNativeFeel() {
   document.addEventListener("copy", (e) => { if (!inEditable(e.target)) e.preventDefault(); });
   document.addEventListener("cut", (e) => { if (!inEditable(e.target)) e.preventDefault(); });
 
-  // iOS Safari ignores user-scalable=no: block its pinch gestures and any
-  // multi-finger touch that would start a zoom. (Double-tap zoom is turned off in CSS with touch-action, which, unlike cancelling touchend, never swallows fast repeated taps on buttons.)
-  for (const type of ["gesturestart", "gesturechange", "gestureend"]) document.addEventListener(type, (e) => e.preventDefault(), opts);
-  document.addEventListener("touchstart", (e) => { if (e.touches.length > 1) e.preventDefault(); }, opts);
+  // iOS Safari ignores user-scalable=no: block its pinch gestures. No touch
+  // listener is added on purpose — a non-passive one makes scrolling wait for
+  // JavaScript; `touch-action` in the CSS already turns off pinch and
+  // double-tap zoom everywhere else.
+  for (const type of ["gesturestart", "gesturechange", "gestureend"]) document.addEventListener(type, (e) => e.preventDefault(), { passive: false });
+
   // Stay upright where the browser lets a web app do that (installed Android
   // app / fullscreen). iOS ignores this; there the OS decides.
   try {
