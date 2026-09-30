@@ -138,3 +138,19 @@ test("empty org: dept head Sessions screen adds a class in place", async ({ page
   await expect(page).toHaveURL(/\/classes$/);
   await expect(page.getByText("New class", { exact: true })).toBeVisible();
 });
+
+test("dept head: deleting a tier that is in use says who is on it, instead of a dead-end error", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await mockBackend(page, "dept_head", {
+    tiers: { tiers: [{ id: "t1", name: "Tier 2", rate: 250, privateCutPct: 50 }] },
+    profiles: { profiles: [{ id: "p1", email: "m@x.com", name: "Mostafa Nezam", role: "dept_head", tierId: "t1", avatarUrl: null }] },
+    invites: { invites: [] },
+  });
+  await page.goto("/manage");
+  await page.getByRole("button", { name: "Delete tier" }).click();
+  await expect(page.getByText("Tier 2 is still in use")).toBeVisible();
+  await expect(page.getByText("Mostafa Nezam")).toBeVisible();
+  await page.getByRole("button", { name: "Change their tier in People" }).click();
+  await expect(page.getByText("Mostafa Nezam")).toBeVisible(); // now on the People tab
+  await expect(page.getByText("Tier 2 is still in use")).toHaveCount(0);
+});
