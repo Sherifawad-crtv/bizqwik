@@ -1,7 +1,6 @@
 import { useMemo, useState, type ReactNode } from "react";
 import { Icon } from "../../components/Icon";
 import { EmptyState } from "../../components/EmptyState";
-import { useNavigate } from "react-router-dom";
 import type { BundleType, ClientWithPackage } from "../../lib/types";
 import { dateLabel } from "../../lib/format";
 
@@ -138,11 +137,10 @@ export function ClientPicker({
   /** When clients exist but none pass `filter` (e.g. nobody has guest passes). */
   emptyTitle?: string;
   emptyBody?: string;
-  /** Opens the new-client flow in place (a modal), instead of going to the Clients tab. */
+  /** Opens the new-client flow in place (a modal). Without it there is no button. */
   onCreate?: () => void;
 }) {
   const [query, setQuery] = useState("");
-  const navigate = useNavigate();
   const eligible = filter ? clients.filter(filter).length : clients.length;
   const shown = useMemo(() => clients.filter((c) => (!filter || filter(c)) && matchesClient(c, query)).slice(0, 30), [clients, filter, query]);
   return (
@@ -169,7 +167,7 @@ export function ClientPicker({
         })}
         {shown.length === 0 &&
           (clients.length === 0 ? (
-            <EmptyState bare icon="clients" title="No clients yet" body="Register your first client from Clients — then they can be found here." action={{ label: "+ New client", onClick: () => (onCreate ? onCreate() : navigate("/members?new=1")) }} />
+            <EmptyState bare icon="clients" title="No clients yet" body="Register your first client from Clients — then they can be found here." action={onCreate ? { label: "+ New client", onClick: onCreate } : undefined} />
           ) : eligible === 0 ? (
             <EmptyState bare icon="clients" title={emptyTitle ?? "No one to show"} body={emptyBody} />
           ) : (
