@@ -19,7 +19,11 @@ export function CoachDetail() {
   const { id } = useParams<{ id: string }>();
   const location = useLocation();
   const navigate = useNavigate();
-  const month = (location.state as { month?: string })?.month ?? MOCK.CURRENT_MONTH;
+  const nav = (location.state as { month?: string; from?: "history" | "team" } | null) ?? {};
+  const month = nav.month ?? MOCK.CURRENT_MONTH;
+  const from = nav.from === "history" ? "history" : "team";
+  // Back goes to wherever you came from, as you left it.
+  const goBack = () => (location.key !== "default" ? navigate(-1) : navigate(from === "history" ? `/history?month=${month}` : "/coaches"));
   const [addOpen, setAddOpen] = useState(false);
   const [dayDate, setDayDate] = useState<string | null>(null);
   const [busyAction, setBusyAction] = useState(false);
@@ -74,10 +78,10 @@ export function CoachDetail() {
   return (
     <div>
       <button
-        onClick={() => navigate("/coaches")}
+        onClick={goBack}
         style={{ display: "flex", alignItems: "center", gap: 4, border: 0, background: "none", cursor: "pointer", color: "var(--ink-muted)", font: "600 13px var(--font-body)", padding: "0 0 14px" }}
       >
-        <Icon name="chevron-left" size={16} /> Team
+        <Icon name="chevron-left" size={16} /> {from === "history" ? "History" : "Team"}
       </button>
 
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 18 }}>

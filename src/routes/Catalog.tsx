@@ -1,4 +1,5 @@
 import { EmptyState } from "../components/EmptyState";
+import { useSticky } from "../lib/useSticky";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSetHeader } from "../lib/header";
@@ -27,7 +28,7 @@ type Tab = "classes" | "plans" | "pt";
  * each with a drop-in and a monthly price), group plans (all-access
  * memberships and class bundles), and private-training bundles. */
 export function Catalog() {
-  const [tab, setTab] = useState<Tab>("classes");
+  const [tab, setTab] = useSticky<Tab>("catalogTab", "classes", { valid: (v) => ["classes","plans","pt"].includes(v) });
   useSetHeader({ kicker: "WHAT YOU SELL", title: "Catalog" }, []);
 
   return (

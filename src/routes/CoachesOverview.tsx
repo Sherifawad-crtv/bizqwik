@@ -34,7 +34,7 @@ export function CoachesOverview() {
     sub: r.state === "paid" && r.paidAt ? `PAID` : r.state === "settled" ? "AWAITING PAY" : "IN PROGRESS",
     state: r.state,
     amount: r.total,
-    onClick: () => navigate(`/coaches/${r.coachId}`, { state: { month } }),
+    onClick: () => navigate(`/coaches/${r.coachId}`, { state: { month, from: "team" } }),
   }));
 
   return (

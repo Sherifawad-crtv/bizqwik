@@ -15,6 +15,7 @@ export function Segmented<T extends string>({
           <button
             key={o.value}
             onClick={() => onChange(o.value)}
+            aria-pressed={o.value === value}
             style={{
               border: 0,
               cursor: "pointer",

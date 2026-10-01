@@ -1,5 +1,5 @@
 import { EmptyState } from "../components/EmptyState";
-import { useState } from "react";
+import { useSticky } from "../lib/useSticky";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../lib/auth";
 import { useSetHeader } from "../lib/header";
@@ -120,7 +120,7 @@ export function History() {
   const { profile } = useAuth();
   // The dept_head's History holds both ledgers: coach payouts and the member
   // activity feed (moved here from the home screen).
-  const [view, setView] = useState<"payouts" | "activity">("payouts");
+  const [view, setView] = useSticky<"payouts" | "activity">("view", "payouts", { url: true, valid: (v) => v === "payouts" || v === "activity" });
   useSetHeader({ kicker: "LEDGER", title: "History" }, []);
   if (profile?.role === "dept_head") {
     return (
@@ -145,8 +145,8 @@ export function History() {
 function LedgerHistory() {
   const { profile } = useAuth();
   const navigate = useNavigate();
-  const [month, setMonth] = useState(MOCK.CURRENT_MONTH);
   const months = currentYearMonths();
+  const [month, setMonth] = useSticky("month", MOCK.CURRENT_MONTH, { url: true, valid: (v) => months.includes(v) });
 
   const isDeptView = !!profile && isHead(profile.role);
   const isAccountant = profile?.role === "accountant";
@@ -182,7 +182,7 @@ function LedgerHistory() {
           month={month}
           paidOnly={isAccountant}
           ytdPaid={data.ytdPaid}
-          onOpenCoach={isDeptView ? (id) => navigate(`/coaches/${id}`, { state: { month } }) : isAccountant ? (id) => navigate(`/pay/${id}`, { state: { month, from: "history" } }) : undefined}
+          onOpenCoach={isDeptView ? (id) => navigate(`/coaches/${id}`, { state: { month, from: "history" } }) : isAccountant ? (id) => navigate(`/pay/${id}`, { state: { month, from: "history" } }) : undefined}
         />
       )}
     </div>
