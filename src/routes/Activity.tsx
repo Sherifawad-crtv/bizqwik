@@ -1,5 +1,5 @@
 import { EmptyState } from "../components/EmptyState";
-import { useState } from "react";
+import { useSticky } from "../lib/useSticky";
 import { useNavigate } from "react-router-dom";
 import { api } from "../lib/backend";
 import { useAsync } from "../lib/useAsync";
@@ -121,7 +121,7 @@ export function Activity() {
 /** Member feed + full transaction log. Embedded in the dept_head's History
  * tab and in the front desk's Activity screen. */
 export function ActivityPanel() {
-  const [tab, setTab] = useState<"feed" | "logs">("feed");
+  const [tab, setTab] = useSticky<"feed" | "logs">("activityTab", "feed", { valid: (v) => v === "feed" || v === "logs" });
   const { data, loading, error } = useAsync(() => api.activity(300), []);
   const entries = data?.activity ?? [];
 
@@ -208,7 +208,7 @@ const kindOf = (type: string): Exclude<Kind, "all"> =>
 export function Transactions() {
   useSetHeader({ kicker: "MONEY", title: "Transactions" }, []);
   const { data, loading, error } = useAsync(() => api.activity(300), []);
-  const [kind, setKind] = useState<Kind>("all");
+  const [kind, setKind] = useSticky<Kind>("moneyKind", "all", { valid: (v) => ["all","sales","refunds","wallet"].includes(v) });
   const all = (data?.activity ?? []).filter((e) => isMoney(e.type) && e.amount != null);
   const shown = kind === "all" ? all : all.filter((e) => kindOf(e.type) === kind);
   const sum = (k: Exclude<Kind, "all">) => all.filter((e) => kindOf(e.type) === k && e.type !== "wallet_expired").reduce((s, e) => s + Math.abs(e.amount ?? 0), 0);

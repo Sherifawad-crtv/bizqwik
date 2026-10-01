@@ -1,4 +1,5 @@
 import { EmptyState } from "../components/EmptyState";
+import { useSticky } from "../lib/useSticky";
 import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "../lib/auth";
@@ -209,8 +210,8 @@ function caption(months: string[]): string {
  * is counted when a sale happens (any tender except wallet). */
 export function Oversight() {
   const { profile } = useAuth();
-  const [range, setRange] = useState<Range>("1");
-  const [breakdown, setBreakdown] = useState<Breakdown>("service");
+  const [range, setRange] = useSticky<Range>("range", "1", { valid: (v) => ["1","3","6","12"].includes(v) });
+  const [breakdown, setBreakdown] = useSticky<Breakdown>("breakdown", "service", { valid: (v) => v === "service" || v === "type" });
   const { data, error } = useAsync(async () => {
     const n = Number(range);
     // The report for the range, plus a window twice as long: its older half is
