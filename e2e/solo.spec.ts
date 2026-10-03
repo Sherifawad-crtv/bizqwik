@@ -207,7 +207,36 @@ test("solo: Plans opens on her plans, with classes (monthly), bundles and PT bac
   await expect(page.getByRole("button", { name: "2 months" })).toHaveCount(0);
 });
 
-test("solo: Schedule adds a class (no booking counts); Account has no import", async ({ page }) => {
+test("solo: Schedule's Add class is the recurring flow — pick several days, a time and a length; Account has no import", async ({ page }) => {
+  await boot(page, "solo");
+  const created: Record<string, unknown>[] = [];
+  await page.route("**/class-series", async (route) => {
+    if (route.request().method() === "POST") {
+      created.push(route.request().postDataJSON());
+      return route.fulfill({ json: { series: { id: "s1", title: "Morning", description: null, weekdays: [1, 3], startTime: "18:00", durationMin: 60, dropInPrice: 0, monthlyPrice: 0, status: "active" } } });
+    }
+    return route.fallback();
+  });
+  await page.goto("/");
+  await page.getByRole("link", { name: "Schedule", exact: true }).click();
+  await page.getByRole("button", { name: "Add class" }).click();
+  await page.getByPlaceholder("e.g. Sunrise HIIT").fill("Morning");
+  await expect(page.getByText("DAYS", { exact: true })).toBeVisible();
+  await expect(page.getByText("DROP-IN")).toHaveCount(0); // her prices live in her plans
+  // No day picked yet: she's told so.
+  await page.getByRole("button", { name: "Create class" }).click();
+  await expect(page.getByText("Pick at least one day.")).toBeVisible();
+  await page.getByRole("button", { name: "Mon", exact: true }).click();
+  await page.getByRole("button", { name: "Wed", exact: true }).click();
+  await page.getByRole("button", { name: "Create class" }).click();
+  await expect.poll(() => created.length).toBe(1);
+  expect([...(created[0].weekdays as number[])].sort()).toEqual([1, 3]);
+  expect(created[0]).toMatchObject({ title: "Morning", durationMin: 60, dropInPrice: 0, monthlyPrice: 0 });
+  await page.goto("/account");
+  await expect(page.getByText("Import members")).toHaveCount(0);
+});
+
+test("solo: 'Just one session' still adds a single class", async ({ page }) => {
   await boot(page, "solo");
   const created: unknown[] = [];
   await page.route("**/classes", async (route) => {
@@ -219,13 +248,10 @@ test("solo: Schedule adds a class (no booking counts); Account has no import", a
   });
   await page.goto("/");
   await page.getByRole("link", { name: "Schedule", exact: true }).click();
-  await page.getByRole("button", { name: "Add class" }).click();
+  await page.getByRole("button", { name: "Just one session" }).click();
   await page.getByPlaceholder("e.g. Sunrise HIIT").fill("Morning");
-  await expect(page.getByText("DROP-IN PRICE")).toHaveCount(0);
   await page.getByRole("button", { name: "Create session" }).click();
   await expect.poll(() => created.length).toBe(1);
-  await page.goto("/account");
-  await expect(page.getByText("Import members")).toHaveCount(0);
 });
 
 const QR = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==";
@@ -393,7 +419,7 @@ test("locations: a new session is created at the location she's working at", asy
   await page.goto("/");
   await page.getByRole("group", { name: "Working at" }).getByRole("button", { name: "Maadi" }).click();
   await page.getByRole("link", { name: "Schedule", exact: true }).click();
-  await page.getByRole("button", { name: "Add class" }).click();
+  await page.getByRole("button", { name: "Just one session" }).click();
   await expect(page.getByText("LOCATION", { exact: true })).toBeVisible();
   await page.getByPlaceholder("e.g. Sunrise HIIT").fill("Evening Flow");
   await page.getByRole("button", { name: "Create session" }).click();
@@ -652,4 +678,25 @@ test("locations: the switcher is there with the page — nothing pops in after t
     await expect(group).toBeVisible({ timeout: 100 });
     if (path === "/bookings") await expect(page.getByText("Maadi Burn")).toHaveCount(0);
   }
+});
+
+test("locations: a recurring class is created at the location she's working at", async ({ page }) => {
+  const sent: Record<string, unknown>[] = [];
+  await bootWithLocations(page);
+  await page.route("**/class-series", async (route) => {
+    if (route.request().method() === "POST") {
+      sent.push(route.request().postDataJSON());
+      return route.fulfill({ json: { series: { id: "s2", title: "x", description: null, weekdays: [2], startTime: "18:00", durationMin: 60, dropInPrice: 0, monthlyPrice: 0, status: "active", locationId: "L2" } } });
+    }
+    return route.fallback();
+  });
+  await page.goto("/");
+  await page.getByRole("group", { name: "Working at" }).getByRole("button", { name: "Maadi" }).click();
+  await page.getByRole("link", { name: "Schedule", exact: true }).click();
+  await page.getByRole("button", { name: "Add class" }).click();
+  await page.getByPlaceholder("e.g. Sunrise HIIT").fill("Evening Flow");
+  await page.getByRole("button", { name: "Tue", exact: true }).click();
+  await page.getByRole("button", { name: "Create class" }).click();
+  await expect.poll(() => sent.length).toBe(1);
+  expect(sent[0]).toMatchObject({ locationId: "L2", title: "Evening Flow" });
 });
