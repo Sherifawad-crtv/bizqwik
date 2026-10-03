@@ -50,3 +50,26 @@ test("welcome: fits a phone and shows the buttons", async ({ page }) => {
   expect(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth)).toBe(false);
   await page.screenshot({ path: "/tmp/claude-0/-home-claude-repo/79d812ed-04bd-5f9f-b39f-4aff3ec4e347/scratchpad/welcome.png" });
 });
+
+test("desktop: a first-time visitor skips the phone welcome and gets the split-screen sign-in and sign-up", async ({ page }) => {
+  await mockBackend(page, "dept_head", {}, false);
+  await page.addInitScript(() => localStorage.removeItem("bizqwik.welcomed"));
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/");
+  await expect(page).toHaveURL(/\/login$/);
+  await expect(page.getByRole("button", { name: "Sign in" })).toBeVisible();
+  await page.goto("/welcome");
+  await expect(page).toHaveURL(/\/login$/);
+  await page.screenshot({ path: "/tmp/claude-0/-home-claude-repo/79d812ed-04bd-5f9f-b39f-4aff3ec4e347/scratchpad/desk-login.png" });
+  await page.goto("/signup");
+  await expect(page.getByRole("button", { name: "Create account" })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth)).toBe(false);
+  await page.screenshot({ path: "/tmp/claude-0/-home-claude-repo/79d812ed-04bd-5f9f-b39f-4aff3ec4e347/scratchpad/desk-signup.png" });
+});
+
+test("phone: sign-up keeps the single-column layout", async ({ page }) => {
+  await mockBackend(page, "dept_head", {}, false);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/signup");
+  await expect(page.getByRole("button", { name: "Create account" })).toBeVisible();
+});

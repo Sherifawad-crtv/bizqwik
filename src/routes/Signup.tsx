@@ -3,6 +3,7 @@ import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "../lib/auth";
 import { useIsMobile } from "../lib/useIsMobile";
 import { useKeyboardInset } from "../lib/useKeyboardInset";
+import { DesktopAuth } from "../components/DesktopAuth";
 import { Button } from "../components/Button";
 import { TextField } from "../components/FormField";
 import { api } from "../lib/backend";
@@ -50,23 +51,8 @@ export function Signup() {
     }
   };
 
-  return (
-    <div
-      style={{
-        minHeight: "100svh",
-        background: "var(--paper)",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: keyboardOpen ? "flex-start" : "center",
-        gap: "clamp(20px, 4vh, 32px)",
-        padding: 20,
-        paddingBottom: keyboardOpen ? keyboardInset + 20 : 20,
-        overflowY: isMobile ? "auto" : undefined,
-      }}
-    >
-      <img src="/wordmark.png" alt="Bizqwik" style={{ height: "clamp(34px, 8vw, 42px)", width: "auto", display: "block" }} />
-      <div data-sq style={{ width: "min(420px, 100%)", background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: 30 }}>
+  const card = (
+    <div data-sq style={{ width: isMobile ? "min(420px, 100%)" : "min(580px, 100%)", background: "var(--surface)", border: "1px solid var(--line)", borderRadius: isMobile ? "var(--r-card)" : 40, padding: isMobile ? 30 : 48 }}>
         <div style={{ font: "800 30px/1.1 var(--font-body)", letterSpacing: "-.02em" }}>Create account</div>
         <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-muted)", marginTop: 6, marginBottom: 22 }}>
           USE THE EMAIL YOU WERE INVITED WITH
@@ -100,6 +86,27 @@ export function Signup() {
           </Link>
         </form>
       </div>
+  );
+
+  if (!isMobile) return <DesktopAuth>{card}</DesktopAuth>;
+
+  return (
+    <div
+      style={{
+        minHeight: "100svh",
+        background: "var(--paper)",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: keyboardOpen ? "flex-start" : "center",
+        gap: "clamp(20px, 4vh, 32px)",
+        padding: 20,
+        paddingBottom: keyboardOpen ? keyboardInset + 20 : 20,
+        overflowY: isMobile ? "auto" : undefined,
+      }}
+    >
+      <img src="/wordmark.png" alt="Bizqwik" style={{ height: "clamp(34px, 8vw, 42px)", width: "auto", display: "block" }} />
+      {card}
     </div>
   );
 }

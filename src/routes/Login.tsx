@@ -4,6 +4,7 @@ import { useAuth } from "../lib/auth";
 import { hasSeenWelcome } from "../lib/welcome";
 import { useIsMobile } from "../lib/useIsMobile";
 import { useKeyboardInset } from "../lib/useKeyboardInset";
+import { DesktopAuth } from "../components/DesktopAuth";
 import { Button } from "../components/Button";
 
 const KEYBOARD_THRESHOLD = 80; // ignore small viewport jitter from browser chrome
@@ -29,7 +30,7 @@ export function Login() {
   if (ready && profile) return <Navigate to="/" replace />;
   if (ready && bizqwikTeam) return <Navigate to="/bizqwik" replace />;
   // A brand-new device meets the welcome screen first (once).
-  if (ready && !hasSeenWelcome()) return <Navigate to="/welcome" replace />;
+  if (ready && isMobile && !hasSeenWelcome()) return <Navigate to="/welcome" replace />;
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,23 +45,8 @@ export function Login() {
     }
   };
 
-  return (
-    <div
-      style={{
-        minHeight: "100svh",
-        background: "var(--paper)",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: keyboardOpen ? "flex-start" : "center",
-        gap: "clamp(20px, 4vh, 32px)",
-        padding: 20,
-        paddingBottom: keyboardOpen ? keyboardInset + 20 : 20,
-        overflowY: isMobile ? "auto" : undefined,
-      }}
-    >
-      <img src="/wordmark.png" alt="Bizqwik" style={{ height: "clamp(34px, 8vw, 42px)", width: "auto", display: "block" }} />
-      <div data-sq style={{ width: "min(420px, 100%)", background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: 30 }}>
+  const card = (
+    <div data-sq style={{ width: isMobile ? "min(420px, 100%)" : "min(580px, 100%)", background: "var(--surface)", border: "1px solid var(--line)", borderRadius: isMobile ? "var(--r-card)" : 40, padding: isMobile ? 30 : 48 }}>
         <div style={{ font: "800 30px/1.1 var(--font-body)", letterSpacing: "-.02em" }}>Sign in</div>
         <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-muted)", marginTop: 6, marginBottom: 22 }}>
           ATTENDANCE &amp; PAYOUT PORTAL
@@ -112,6 +98,27 @@ export function Login() {
           </Link>
         </form>
       </div>
+  );
+
+  if (!isMobile) return <DesktopAuth>{card}</DesktopAuth>;
+
+  return (
+    <div
+      style={{
+        minHeight: "100svh",
+        background: "var(--paper)",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: keyboardOpen ? "flex-start" : "center",
+        gap: "clamp(20px, 4vh, 32px)",
+        padding: 20,
+        paddingBottom: keyboardOpen ? keyboardInset + 20 : 20,
+        overflowY: isMobile ? "auto" : undefined,
+      }}
+    >
+      <img src="/wordmark.png" alt="Bizqwik" style={{ height: "clamp(34px, 8vw, 42px)", width: "auto", display: "block" }} />
+      {card}
     </div>
   );
 }
