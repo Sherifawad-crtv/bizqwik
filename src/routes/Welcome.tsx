@@ -1,5 +1,6 @@
 import { Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "../lib/auth";
+import { useIsMobile } from "../lib/useIsMobile";
 import { hasSeenWelcome, markWelcomed } from "../lib/welcome";
 import hero from "../assets/welcome.webp";
 
@@ -7,11 +8,13 @@ import hero from "../assets/welcome.webp";
 export function Welcome() {
   const { profile, bizqwikTeam, ready } = useAuth();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
 
   if (ready && profile) return <Navigate to="/" replace />;
   if (ready && bizqwikTeam) return <Navigate to="/bizqwik" replace />;
   // Anyone who has been here before skips straight to sign-in.
-  if (hasSeenWelcome()) return <Navigate to="/login" replace />;
+  // The welcome screen is a phone screen: computers go straight to sign-in.
+  if (!isMobile || hasSeenWelcome()) return <Navigate to="/login" replace />;
 
   const go = (to: string) => {
     markWelcomed();
