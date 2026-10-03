@@ -62,3 +62,19 @@ test("dept head: a tab's choices survive switching tabs", async ({ page }) => {
   await page.getByRole("link", { name: "History", exact: true }).click();
   await expect(page.getByRole("button", { name: "ACTIVITY", exact: true })).toHaveAttribute("aria-pressed", "true");
 });
+
+test("dept head: the revenue vs payouts chart shows every month, whatever the range is", async ({ page }) => {
+  const months = [3, 2, 1, 0].map(ym);
+  const abbr = (m: string) => new Date(`${m}-01T12:00:00`).toLocaleString("en", { month: "short" }).toUpperCase();
+  await mockBackend(page, "dept_head", {
+    revenue: {
+      months: months.map((m, i) => ({ month: m, revenue: 1000 * (i + 1), payouts: 400 * (i + 1), profit: 600 * (i + 1) })),
+      totals: { revenue: 4000, payouts: 1600, profit: 2400 },
+      byService: [], byType: [], byCoach: [],
+      activeSubscribers: { total: 1, groupPlans: 1, ptPackages: 0, byPlanKind: {} }, walletLiability: 0,
+    },
+  });
+  await page.goto("/oversight"); // range defaults to 1 month
+  const card = page.getByText("REVENUE VS COACH PAYOUTS").locator("xpath=ancestor::*[contains(@style,'border')][1]");
+  for (const m of months) await expect(card.getByText(abbr(m), { exact: true }).first()).toBeVisible();
+});
