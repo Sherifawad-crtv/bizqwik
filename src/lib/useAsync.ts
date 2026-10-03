@@ -7,13 +7,12 @@ interface AsyncState<T> {
   error: string | null;
 }
 
-// Stale-while-revalidate: the last result for a request is shown at once when
-// a screen opens again (no spinner on every tab switch) while a fresh one is
-// fetched. Identical requests made at the same moment share one round trip.
-const cache = new Map<string, unknown>();
+// No caching: every screen always fetches fresh data from the server. The
+// only sharing is between identical requests made at the very same moment
+// (e.g. two parts of one screen asking for the client list), which get one
+// round trip and the same fresh answer.
 const inflight = new Map<string, Promise<unknown>>();
 export function clearAsyncCache() {
-  cache.clear();
   inflight.clear();
 }
 function keyOf(fn: () => unknown, deps: unknown[]): string {
@@ -33,7 +32,7 @@ export function useAsync<T>(
   deps: unknown[],
 ): AsyncState<T> & { refetch: () => void; mutate: (updater: T | ((prev: T | null) => T)) => void } {
   const key = keyOf(fn, deps);
-  const [state, setState] = useState<AsyncState<T>>(() => (cache.has(key) ? { data: cache.get(key) as T, loading: false, error: null } : { data: null, loading: true, error: null }));
+  const [state, setState] = useState<AsyncState<T>>({ data: null, loading: true, error: null });
   const fnRef = useRef(fn);
   fnRef.current = fn;
   const [tick, setTick] = useState(0);
@@ -43,8 +42,7 @@ export function useAsync<T>(
 
   useEffect(() => {
     let alive = true;
-    if (cache.has(key)) setState({ data: cache.get(key) as T, loading: false, error: null });
-    else setState((s) => ({ ...s, loading: true, error: null }));
+    setState((s) => ({ ...s, loading: true, error: null }));
     const flight = `${key}@${dataVersion}@${tick}`;
     let req = inflight.get(flight) as Promise<T> | undefined;
     if (!req) {
@@ -55,7 +53,6 @@ export function useAsync<T>(
     }
     req
       .then((data) => {
-        cache.set(key, data);
         if (alive) setState({ data, loading: false, error: null });
       })
       .catch((err: unknown) => {
