@@ -47,14 +47,20 @@ test("solo owner: Money shows revenue, how it was paid, and one transactions lis
   await page.getByRole("link", { name: "Money", exact: true }).click();
   await expect(page).toHaveURL(/\/money$/);
   await expect(page.getByText("3,500").first()).toBeVisible();
-  await expect(page.getByText("InstaPay", { exact: true }).first()).toBeVisible();
-  await expect(page.getByText("2,500")).toBeVisible();
+  await expect(page.getByText("InstaPay · 2,500")).toBeVisible();
   await expect(page.getByText("InstaPay transfers")).toHaveCount(0);
   await expect(page.getByText("Transactions", { exact: true })).toBeVisible();
   await expect(page.getByText("Mona Ali").first()).toBeVisible();
   await expect(page.getByText("CASH", { exact: true })).toBeVisible();
   await expect(page.getByText("INSTAPAY", { exact: true }).first()).toBeVisible();
   await expect(page.getByText("−150")).toBeVisible();
+  await expect(page.getByText("How you were paid")).toHaveCount(0);
+  // A row opens the full details of that transaction.
+  await page.getByRole("button", { name: /Omar Z/ }).click();
+  await expect(page.getByText("TRANSACTION", { exact: true })).toBeVisible();
+  await expect(page.getByText("PAID VIA", { exact: true })).toBeVisible();
+  await expect(page.getByText("CLIENT", { exact: true })).toBeVisible();
+  await expect(page.getByText("3 Months").last()).toBeVisible();
 });
 
 test("team owner is unchanged: Overview home with the full roster of tabs", async ({ page }) => {

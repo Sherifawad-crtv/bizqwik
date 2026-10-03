@@ -111,6 +111,7 @@ export function Bookings() {
           <Icon name="plus" size={18} /> New session
         </Button>
       )}
+      <div style={{ display: "flex", justifyContent: "center" }}>
       <Segmented
         value={range}
         onChange={(v) => setRange(v as Range)}
@@ -121,6 +122,7 @@ export function Bookings() {
           ...(solo ? [{ value: "all", label: "All" }] : []),
         ]}
       />
+      </div>
 
       <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 6 }}>
         <SectionLink onClick={() => setMonth(true)}>Open full calendar</SectionLink>
