@@ -258,3 +258,22 @@ test("solo drop-in: without a price it sends her to Plans to set one", async ({ 
   await expect(page).toHaveURL(/\/catalog/);
   await expect(page.getByRole("button", { name: "Set price" })).toBeVisible();
 });
+
+test("client list: uses the fast list, and falls back to the main backend if it's down", async ({ page }) => {
+  const hits: string[] = [];
+  await page.setViewportSize({ width: 390, height: 844 });
+  await mockBackend(page, "dept_head", { __orgMode: "solo", classes: { classes: [] }, revenue: REVENUE });
+  const one = { id: "c1", name: "Mona Ali", age: null, phone: "0100", email: null, conditions: null, assignedCoachId: null, currentPackage: null, currentMembership: null, groupPlan: null };
+  await page.route(/\/functions\/v1\/clients-list\/clients/, (route) => {
+    hits.push("fast");
+    return route.fulfill({ status: 500, contentType: "application/json", body: JSON.stringify({ error: "down" }) });
+  });
+  await page.route(/\/functions\/v1\/make-server-980e1cbf\/clients$/, (route) => {
+    hits.push("main");
+    return route.fulfill({ status: 200, contentType: "application/json", headers: { "access-control-allow-origin": "*" }, body: JSON.stringify({ clients: [one] }) });
+  });
+  await page.goto("/members");
+  await expect(page.getByText("Mona Ali")).toBeVisible();
+  expect(hits[0]).toBe("fast");
+  expect(hits).toContain("main");
+});
