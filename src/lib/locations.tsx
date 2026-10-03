@@ -1,4 +1,4 @@
-import { useSyncExternalStore } from "react";
+import { createContext, useContext, useSyncExternalStore, type ReactNode } from "react";
 import { api } from "./backend";
 import { useAsync } from "./useAsync";
 import type { Location } from "./types";
@@ -30,20 +30,38 @@ const subscribe = (l: () => void) => {
   return () => listeners.delete(l);
 };
 
+// The business's locations are fetched once, as soon as the app shell opens, and
+// shared by every screen. Each screen used to ask for them itself, so the
+// switcher popped in after the page's own content (and the page re-filtered
+// itself when the answer landed). Always fetched fresh — nothing is stored.
+interface LocationsState {
+  locations: Location[];
+  /** False until the first answer is in. Screens wait on this before filtering. */
+  ready: boolean;
+}
+const LocationsContext = createContext<LocationsState>({ locations: [], ready: true });
+
+export function LocationsProvider({ children }: { children: ReactNode }) {
+  const { data, error } = useAsync(() => api.locations(), []);
+  // A failed request must not hold screens back: treat it as "no locations".
+  const value: LocationsState = { locations: data?.locations ?? [], ready: data !== null || error !== null };
+  return <LocationsContext.Provider value={value}>{children}</LocationsContext.Provider>;
+}
+
 /** The business's locations (empty when it has none — then nothing about
  * locations shows anywhere). */
 export function useLocations(): Location[] {
-  const { data } = useAsync(() => api.locations(), []);
-  return data?.locations ?? [];
+  return useContext(LocationsContext).locations;
 }
 
 /** The location this phone is working at: the remembered one if it still
- * exists, else the first. Null when the business has no locations. */
-export function useCurrentLocation(): { locations: Location[]; current: Location | null; setCurrent: (id: string) => void } {
-  const locations = useLocations();
+ * exists, else the first. Null when the business has no locations. `ready` is
+ * false until the locations have loaded. */
+export function useCurrentLocation(): { locations: Location[]; current: Location | null; setCurrent: (id: string) => void; ready: boolean } {
+  const { locations, ready } = useContext(LocationsContext);
   const saved = useSyncExternalStore(subscribe, read, read);
   const current = locations.find((l) => l.id === saved) ?? locations[0] ?? null;
-  return { locations, current, setCurrent: setCurrentLocation };
+  return { locations, current, setCurrent: setCurrentLocation, ready };
 }
 
 export const locationName = (locations: Location[], id: string | null | undefined) => (id ? (locations.find((l) => l.id === id)?.name ?? null) : null);
@@ -70,7 +88,9 @@ export function LocationField({ locations, value, onChange }: { locations: Locat
  * fewer than two locations. `all` adds an "All" option local to the screen
  * (Money only: each location's clients are kept strictly apart). */
 export function LocationSwitcher({ all, onAll, isAll = false }: { all?: boolean; onAll?: (on: boolean) => void; isAll?: boolean }) {
-  const { locations, current, setCurrent } = useCurrentLocation();
+  const { locations, current, setCurrent, ready } = useCurrentLocation();
+  // Hold the switcher's place while locations load so nothing jumps when it appears.
+  if (!ready) return <div aria-hidden style={{ height: 44, marginBottom: 16 }} />;
   if (locations.length < 2 || !current) return null;
   const options = [...locations.map((l) => ({ value: l.id, label: l.name })), ...(all ? [{ value: "__all", label: "All" }] : [])];
   return (

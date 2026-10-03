@@ -10,9 +10,10 @@ import { Icon } from "./Icon";
 import { useAuth } from "../lib/auth";
 import { useHeader } from "../lib/header";
 import { useIsMobile, useIsNarrowPhone } from "../lib/useIsMobile";
+import { LocationsProvider } from "../lib/locations";
 import { navFor, headerMode, accountBackTarget, isSoloOwner } from "../lib/nav";
 
-export function Shell() {
+function ShellInner() {
   const { profile, orgMode } = useAuth();
   const isMobile = useIsMobile();
   const narrow = useIsNarrowPhone();
@@ -141,5 +142,14 @@ export function Shell() {
         </div>
       </div>
     </div>
+  );
+}
+
+/** The app shell. Locations load here, once, so every screen has them already. */
+export function Shell() {
+  return (
+    <LocationsProvider>
+      <ShellInner />
+    </LocationsProvider>
   );
 }

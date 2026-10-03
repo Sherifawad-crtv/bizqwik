@@ -56,14 +56,15 @@ export function Money() {
   const n = Number(range);
   const [open, setOpen] = useState<Txn | null>(null);
   // Each location's money, or "All" for the whole business.
-  const { locations, current } = useCurrentLocation();
+  const { locations, current, ready: locsReady } = useCurrentLocation();
   const [allLocations, setAllLocations] = useState(false);
   const here = locations.length > 1 && !allLocations ? (current?.id ?? null) : null;
   const { data, error } = useAsync(async () => {
+    if (!locsReady) return null;
     const [rev, pay, act] = await Promise.all([api.revenue(n), api.paymentsSummary(n, here), api.activity(300)]);
     const txns = toTransactions(act.activity ?? [], n).filter((t) => !here || (t.entry.meta as Record<string, unknown> | null)?.locationId === here);
     return { rev, pay, txns };
-  }, [range, here]);
+  }, [range, here, locsReady]);
 
   if (error) return <EmptyState icon="inbox" title="Couldn't load your money" body="Check your connection and try again." />;
 
