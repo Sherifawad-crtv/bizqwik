@@ -1,5 +1,10 @@
 import { useMemo, useState } from "react";
 import { api } from "../../lib/backend";
+import { useAuth } from "../../lib/auth";
+import { isSoloOwner } from "../../lib/nav";
+import { Button } from "../../components/Button";
+import { ConfirmSheet } from "../../components/ConfirmSheet";
+import { ClassSheet, emptyForm, formOf, type FormState } from "../ClassesManage";
 import { useAsync } from "../../lib/useAsync";
 import { useSetHeader } from "../../lib/header";
 import { timeLabel, pad } from "../../lib/classTime";
@@ -12,7 +17,7 @@ import { ClassRosterSheet } from "../../components/ClassRosterSheet";
 import { Card, SectionLink } from "./shared";
 import { ClassCalendarScreen } from "./ClassCalendar";
 
-type Range = "today" | "tomorrow" | "week";
+type Range = "today" | "tomorrow" | "week" | "all";
 
 const startOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
 const addDays = (d: Date, n: number) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
@@ -30,7 +35,11 @@ const dayHeading = (d: Date, today: Date) => {
 /** What's booked, in the order the desk needs it: what's on now and next first,
  * with the rest of today's finished classes tucked away. */
 export function Bookings() {
-  useSetHeader({ kicker: "FRONT DESK", title: "Bookings" }, []);
+  const { profile, orgMode } = useAuth();
+  const solo = !!profile && isSoloOwner(profile.role, orgMode);
+  useSetHeader(solo ? { kicker: "SESSIONS", title: "Schedule" } : { kicker: "FRONT DESK", title: "Bookings" }, [solo]);
+  const [form, setForm] = useState<FormState | null>(null);
+  const [cancelling, setCancelling] = useState<GymClass | null>(null);
   const [range, setRange] = useState<Range>("today");
   const [open, setOpen] = useState<GymClass | null>(null);
   const [showEarlier, setShowEarlier] = useState(false);
@@ -40,7 +49,7 @@ export function Bookings() {
   const { groups, earlier } = useMemo(() => {
     const now = Date.now();
     const today = startOfDay(new Date());
-    const last = range === "today" ? 1 : range === "tomorrow" ? 2 : 7;
+    const last = range === "today" ? 1 : range === "tomorrow" ? 2 : range === "week" ? 7 : 366;
     const first = range === "tomorrow" ? 1 : 0;
     const from = addDays(today, first).getTime();
     const to = addDays(today, last).getTime();
@@ -69,10 +78,10 @@ export function Bookings() {
     const happening = start <= nowMs && nowMs < start + 60 * 60000;
     const booked = c.bookedCount ?? 0;
     return (
+      <div key={c.id} style={{ display: "flex", alignItems: "center", borderBottom: "1px solid var(--line)", opacity: muted ? 0.65 : 1 }}>
       <button
-        key={c.id}
         onClick={() => setOpen(c)}
-        style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", padding: "14px 18px", border: 0, borderBottom: "1px solid var(--line)", background: "none", cursor: "pointer", textAlign: "left", opacity: muted ? 0.65 : 1 }}
+        style={{ display: "flex", alignItems: "center", gap: 12, flex: 1, minWidth: 0, padding: "14px 18px", border: 0, background: "none", cursor: "pointer", textAlign: "left" }}
       >
         <span style={{ width: 84, flex: "none", whiteSpace: "nowrap", font: "700 14px var(--font-mono)", color: happening ? "var(--primary-pressed)" : "var(--ink)" }}>{clock(c.startsAt)}</span>
         <span style={{ minWidth: 0, flex: 1 }}>
@@ -86,11 +95,22 @@ export function Bookings() {
         {!happening && c.id === nextId && <span style={{ font: "700 11px var(--font-mono)", color: "var(--primary-pressed)", background: "var(--primary-tint)", padding: "3px 8px", borderRadius: 999 }}>NEXT</span>}
         <Icon name="chevron-right" size={16} />
       </button>
+      {solo && !muted && (
+        <button onClick={() => setForm(formOf(c))} aria-label={`Edit ${c.title}`} style={{ flex: "none", width: 36, height: 36, margin: "0 14px 0 0", borderRadius: 999, border: 0, background: "var(--primary-tint)", color: "var(--primary-pressed)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <Icon name="pencil" size={15} />
+        </button>
+      )}
+      </div>
     );
   };
 
   return (
     <div>
+      {solo && (
+        <Button fullWidth size="lg" style={{ marginBottom: 14 }} onClick={() => setForm(emptyForm())}>
+          <Icon name="plus" size={18} /> New session
+        </Button>
+      )}
       <Segmented
         value={range}
         onChange={(v) => setRange(v as Range)}
@@ -98,6 +118,7 @@ export function Bookings() {
           { value: "today", label: "Today" },
           { value: "tomorrow", label: "Tomorrow" },
           { value: "week", label: "This week" },
+          ...(solo ? [{ value: "all", label: "All" }] : []),
         ]}
       />
 
@@ -108,7 +129,7 @@ export function Bookings() {
       {groups.length === 0 && earlier.length === 0 && (
         <div style={{ marginTop: 16 }}>
           <Card>
-            <EmptyState bare icon="calendar" title={range === "today" ? "Nothing booked for the rest of today" : "No classes in this range"} body="Classes appear here as soon as they're scheduled." />
+            <EmptyState bare icon="calendar" title={range === "today" ? "Nothing booked for the rest of today" : "No classes in this range"} body={solo ? "Add a session and the people who book it show up here." : "Classes appear here as soon as they're scheduled."} />
           </Card>
         </div>
       )}
@@ -132,6 +153,25 @@ export function Bookings() {
         </div>
       )}
 
+      {solo && (
+        <>
+          <ClassSheet solo form={form} onClose={() => setForm(null)} onSaved={() => { setForm(null); classes.refetch(); }} onRequestCancel={(c) => { setForm(null); setCancelling(c); }} />
+          <ConfirmSheet
+            open={cancelling !== null}
+            onClose={() => setCancelling(null)}
+            kicker="SESSION"
+            title={`Cancel ${cancelling?.title ?? "session"}?`}
+            sub="Anyone who booked is refunded automatically. This can't be undone."
+            confirmLabel="Cancel session"
+            danger
+            onConfirm={async () => {
+              if (cancelling) await api.cancelClass(cancelling.id);
+              setCancelling(null);
+              classes.refetch();
+            }}
+          />
+        </>
+      )}
       <ClassRosterSheet open={open !== null} onClose={() => setOpen(null)} classId={open?.id ?? null} title={open?.title ?? "Class"} onChanged={classes.refetch} />
     </div>
   );

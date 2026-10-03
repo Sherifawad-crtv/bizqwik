@@ -1,6 +1,6 @@
 import { EmptyState } from "../../components/EmptyState";
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { useSetHeader } from "../../lib/header";
 import { useAsync } from "../../lib/useAsync";
 import { useLatch } from "../../lib/useLatch";
@@ -57,7 +57,6 @@ function offerOf(v: string): { planTypeId: string } | { seriesId: string } {
 
 export function Members() {
   useSetHeader({ kicker: "FRONT DESK", title: "Clients" }, []);
-  const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
   const createRequested = params.get("new") === "1";
   const { data } = useAsync(() => api.clients(), []);
@@ -138,7 +137,7 @@ export function Members() {
         })}
         {shown.length === 0 && (
           clients.length === 0 ? (
-            <EmptyState bare icon="clients" title="No clients yet" body="Register your first client with + New client. You'll sell them a plan or PT package in the same step, and they get an app invite." action={{ label: "Import from a sheet", onClick: () => navigate("/import") }} />
+            <EmptyState bare icon="clients" title="No clients yet" body="Register your first client with + New client. You'll sell them a plan or PT package in the same step, and they get an app invite." />
           ) : (
             <EmptyState bare icon="search" title="No one matches that search" body="Check the spelling, or search by phone number instead." />
           )
@@ -421,6 +420,8 @@ function ClientSheet({
   coaches: CoachOption[];
 }) {
   const shown = useLatch(client);
+  const { profile: me, orgMode: om } = useAuth();
+  const solo = me?.role === "dept_head" && om === "solo";
   const [mode, setMode] = useState<Mode>("view");
   const [pickId, setPickId] = useState("");
   const [coachId, setCoachId] = useState("");
@@ -507,7 +508,8 @@ function ClientSheet({
       const amt = Number(refundAmount);
       if (!Number.isFinite(amt) || amt <= 0) return setError("Enter a refund amount.");
       if (refundable && amt > refundable.refundable) return setError(refundable.refundable > 0 ? `The most you can refund ${shown.name} is ${fmt(refundable.refundable)} EGP.` : `${shown.name} has nothing left to refund.`);
-      return run(() => api.refundClient(shown.id, amt, refundDest, refundNote.trim() || undefined));
+      const note = [solo && refundDest === "desk" ? "InstaPay" : "", refundNote.trim()].filter(Boolean).join(" · ");
+      return run(() => api.refundClient(shown.id, amt, refundDest, note || undefined));
     }
   };
 
@@ -621,14 +623,14 @@ function ClientSheet({
                     value={refundDest}
                     options={[
                       { value: "wallet", label: "To wallet" },
-                      { value: "desk", label: "Cash / card" },
+                      { value: "desk", label: solo ? "InstaPay" : "Cash / card" },
                     ]}
                     onChange={(v) => setRefundDest(v as "wallet" | "desk")}
                   />
                   <div style={{ font: "400 12px/1.5 var(--font-mono)", color: "var(--ink-faint)" }}>
                     {refundDest === "wallet"
                       ? "Adds store credit to their wallet (expires per the org's policy)."
-                      : "You hand back cash/card outside Bizqwik — this just records the amount."}
+                      : solo ? "You send the money yourself on InstaPay — this just records it." : "You hand back cash/card outside Bizqwik — this just records the amount."}
                   </div>
                   <TextField label="NOTE (OPTIONAL)" value={refundNote} onChange={(e) => setRefundNote(e.target.value)} placeholder="Reason for the refund" />
                 </>

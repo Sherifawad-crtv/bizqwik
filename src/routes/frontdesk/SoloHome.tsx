@@ -27,12 +27,11 @@ const clockOf = (iso: string) => {
   return timeLabel(`${pad(d.getHours())}:${pad(d.getMinutes())}`);
 };
 
-function timeAgo(iso: string): string {
-  const mins = Math.max(0, Math.round((Date.now() - Date.parse(iso)) / 60000));
-  if (mins < 1) return "just now";
-  if (mins < 60) return `${mins} min ago`;
-  const hrs = Math.round(mins / 60);
-  return `${hrs} hr${hrs === 1 ? "" : "s"} ago`;
+function dayOf(iso: string): string {
+  const d = new Date(iso);
+  const t = new Date();
+  const diff = Math.round((new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime() - new Date(t.getFullYear(), t.getMonth(), t.getDate()).getTime()) / 86400000);
+  return diff === 0 ? "Today" : diff === 1 ? "Tomorrow" : d.toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short" });
 }
 
 type Tone = { fg: string; bg: string };
@@ -69,12 +68,10 @@ export function SoloHome() {
   const { profile } = useAuth();
   const navigate = useNavigate();
   useSetHeader({ kicker: "TODAY", title: "Today" }, []);
-  const summary = useAsync(() => api.frontDeskSummary(), []);
   const clients = useAsync(() => api.clients(), []);
   const revenue = useAsync(() => api.revenue(12), []);
   const classes = useAsync(() => api.classes(new Date(Date.now() - 2 * 3600000).toISOString()), []);
-  const { bundleTypes, planTypes: allPlans } = useFrontDeskCatalog();
-  const planTypes = allPlans.filter((p) => p.kind === "membership" && p.active);
+  const { bundleTypes } = useFrontDeskCatalog();
   const [modal, setModal] = useState<"new" | "dropin" | "checkin" | null>(null);
   const [roster, setRoster] = useState<GymClass | null>(null);
 
@@ -97,9 +94,7 @@ export function SoloHome() {
   const delta = lastMonth > 0 ? Math.round(((thisMonth - lastMonth) / lastMonth) * 100) : null;
 
   const nextUp = useMemo(() => {
-    const end = new Date();
-    end.setHours(23, 59, 59, 999);
-    return (classes.data?.classes ?? []).filter((c) => c.status !== "cancelled" && Date.parse(c.startsAt) + 3600000 >= Date.now() && Date.parse(c.startsAt) <= end.getTime()).slice(0, 3);
+    return (classes.data?.classes ?? []).filter((c) => c.status !== "cancelled" && Date.parse(c.startsAt) + 3600000 >= Date.now()).slice(0, 5);
   }, [classes.data]);
 
   const goMembers = (filter: string) => {
@@ -108,8 +103,7 @@ export function SoloHome() {
   };
 
   if (!profile) return null;
-  if (!summary.data || !clients.data || !revenue.data) return <Spinner />;
-  const recent = summary.data.recent;
+  if (!clients.data || !revenue.data) return <Spinner />;
 
   return (
     <div>
@@ -133,7 +127,7 @@ export function SoloHome() {
         <QuickAction icon="check" label="Check in" onClick={() => setModal("checkin")} />
       </div>
 
-      <SectionTitle right={<SectionLink onClick={() => navigate("/bookings")}>All bookings</SectionLink>}>Next up</SectionTitle>
+      <SectionTitle right={<SectionLink onClick={() => navigate("/bookings")}>Schedule</SectionLink>}>Coming up</SectionTitle>
       <Card style={{ overflow: "hidden", marginBottom: 24 }}>
         {nextUp.map((c, i) => (
           <button
@@ -142,43 +136,18 @@ export function SoloHome() {
             onClick={() => setRoster(c)}
             style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", minHeight: 60, padding: "12px 18px", border: 0, borderBottom: i === nextUp.length - 1 ? "none" : "1px solid var(--line)", background: "none", cursor: "pointer", textAlign: "left" }}
           >
-            <span style={{ width: 84, flex: "none", whiteSpace: "nowrap", font: "700 14px var(--font-mono)" }}>{clockOf(c.startsAt)}</span>
+            <span style={{ width: 84, flex: "none", font: "700 14px var(--font-mono)" }}>
+              <span style={{ display: "block", whiteSpace: "nowrap" }}>{clockOf(c.startsAt)}</span>
+              <span style={{ display: "block", font: "400 11px var(--font-mono)", color: "var(--ink-faint)" }}>{dayOf(c.startsAt)}</span>
+            </span>
             <span style={{ minWidth: 0, flex: 1 }}>
               <span style={{ display: "block", font: "700 15px var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.title}</span>
-              <span style={{ display: "block", font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>{(c.bookedCount ?? 0) === 0 ? "No one booked" : `${c.bookedCount} booked`}</span>
+              <span style={{ display: "block", font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>{(c.bookedCount ?? 0) === 0 ? "No one coming yet" : `${c.bookedCount} coming`}</span>
             </span>
             <Icon name="chevron-right" size={16} />
           </button>
         ))}
-        {nextUp.length === 0 && <EmptyState bare icon="calendar" title="No more classes today" body="Upcoming classes show up here." />}
-      </Card>
-
-      <SectionTitle right={<SectionLink onClick={() => navigate("/catalog")}>{planTypes.length === 0 ? "Add plan" : "Manage"}</SectionLink>}>Your plans</SectionTitle>
-      <Card style={{ overflow: "hidden", marginBottom: 24 }}>
-        {planTypes.map((p, i) => (
-          <div key={p.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 18px", borderBottom: i === planTypes.length - 1 ? "none" : "1px solid var(--line)" }}>
-            <span style={{ minWidth: 0, flex: 1, font: "700 15px var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.name}</span>
-            <span style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>{fmt(p.price)} EGP · {p.durationMonths} mo</span>
-          </div>
-        ))}
-        {planTypes.length === 0 && <EmptyState bare icon="tag" title="No plans yet" body="Add your 1-month and 3-month plans to start signing members up." action={{ label: "+ New plan", onClick: () => navigate("/catalog") }} />}
-      </Card>
-
-      <SectionTitle right={<SectionLink onClick={() => navigate("/activity")}>Full activity &amp; logs</SectionLink>}>Recent activity</SectionTitle>
-      <Card style={{ overflow: "hidden" }}>
-        {recent.slice(0, 5).map((r, i, arr) => (
-          <div key={r.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 18px", borderBottom: i === arr.length - 1 ? "none" : "1px solid var(--line)" }}>
-            <span style={{ width: 36, height: 36, borderRadius: 999, flex: "none", display: "flex", alignItems: "center", justifyContent: "center", background: r.kind === "check_in" ? "var(--paid-bg)" : "var(--primary-tint)", color: r.kind === "check_in" ? "var(--paid-fg)" : "var(--primary-pressed)" }}>
-              <Icon name={r.kind === "check_in" ? "check" : "ticket"} size={18} />
-            </span>
-            <div style={{ minWidth: 0, flex: 1 }}>
-              <div style={{ font: "700 15px var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.name}</div>
-              <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>{r.detail}</div>
-            </div>
-            <span style={{ font: "400 12px var(--font-mono)", color: "var(--ink-faint)", whiteSpace: "nowrap" }}>{timeAgo(r.at)}</span>
-          </div>
-        ))}
-        {recent.length === 0 && <EmptyState bare icon="inbox" title="Nothing yet today" body="Check-ins and drop-ins show up here as they happen." />}
+        {nextUp.length === 0 && <EmptyState bare icon="calendar" title="No sessions coming up" body="Add a session on the Schedule tab and who's coming shows up here." />}
       </Card>
 
       <Sheet open={modal === "checkin"} onClose={() => setModal(null)}>

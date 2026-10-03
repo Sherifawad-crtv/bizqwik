@@ -11,7 +11,6 @@ import { Login } from "./routes/Login";
 import { Signup } from "./routes/Signup";
 import { LaunchGate } from "./components/Splash";
 import { Money } from "./routes/Money";
-import { ImportMembers } from "./routes/Import";
 import { Welcome } from "./routes/Welcome";
 import { ForgotPassword } from "./routes/ForgotPassword";
 import { ResetPassword } from "./routes/ResetPassword";
@@ -87,7 +86,6 @@ export default function App() {
 
                   <Route element={<RequireDesk />}>
                     <Route path="/members" element={<Members />} />
-                    <Route path="/import" element={<ImportMembers />} />
                     <Route path="/checkin" element={<CheckIn />} />
                     <Route path="/drop-in" element={<DropIn />} />
                     <Route path="/invitations" element={<Invitations />} />

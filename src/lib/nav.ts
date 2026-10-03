@@ -89,11 +89,12 @@ export const NAV: Record<Role, NavItem[]> = {
   ],
 };
 
-/** A solo business: the owner does it all, so four tabs and nothing about
+/** A solo business: the owner does it all, so five tabs and nothing about
  * teams, tiers or payouts. */
 export const SOLO_NAV: NavItem[] = [
   { key: "today", path: "/", label: "Today", icon: "home" },
-  { key: "members", path: "/members", label: "Members", icon: "clients" },
+  { key: "clients", path: "/members", label: "Clients", icon: "clients" },
+  { key: "plans", path: "/catalog", label: "Plans", icon: "tag" },
   { key: "schedule", path: "/bookings", label: "Schedule", icon: "calendar" },
   { key: "money", path: "/money", label: "Money", icon: "wallet" },
 ];

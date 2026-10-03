@@ -25,18 +25,23 @@ async function boot(page: import("@playwright/test").Page, mode: "solo" | "team"
     classes: { classes: [] },
     revenue: REVENUE,
     "payments/summary": PAYMENTS,
+    activity: { activity: [
+      { id: "a1", type: "sale_plan", amount: 500, clientName: "Mona Ali", meta: { payMethod: "instapay", name: "1 Month" }, at: new Date().toISOString() },
+      { id: "a2", type: "sale_plan", amount: 1000, clientName: "Omar Z", meta: { payMethod: "cash", name: "3 Months" }, at: new Date().toISOString() },
+      { id: "a3", type: "refund_desk", amount: 150, clientName: "Mona Ali", meta: { note: "InstaPay · left town" }, at: new Date().toISOString() },
+    ] },
   });
 }
 
-test("solo owner: four tabs, the desk as home, and no team tools", async ({ page }) => {
+test("solo owner: five tabs, the desk as home, and no team tools", async ({ page }) => {
   await boot(page, "solo");
   await page.goto("/");
   await expect(page.getByText("REVENUE", { exact: true }).first()).toBeVisible();
-  for (const l of ["Today", "Members", "Schedule", "Money"]) await expect(page.getByRole("link", { name: l, exact: true })).toBeVisible();
-  for (const l of ["Team", "Catalog", "History", "Overview"]) await expect(page.getByRole("link", { name: l, exact: true })).toHaveCount(0);
+  for (const l of ["Today", "Clients", "Plans", "Schedule", "Money"]) await expect(page.getByRole("link", { name: l, exact: true })).toBeVisible();
+  for (const l of ["Team", "Catalog", "History", "Overview", "Members"]) await expect(page.getByRole("link", { name: l, exact: true })).toHaveCount(0);
 });
 
-test("solo owner: Money shows revenue, how it was paid, and the InstaPay transfers", async ({ page }) => {
+test("solo owner: Money shows revenue, how it was paid, and one transactions list with a method label", async ({ page }) => {
   await boot(page, "solo");
   await page.goto("/");
   await page.getByRole("link", { name: "Money", exact: true }).click();
@@ -44,7 +49,12 @@ test("solo owner: Money shows revenue, how it was paid, and the InstaPay transfe
   await expect(page.getByText("3,500").first()).toBeVisible();
   await expect(page.getByText("InstaPay", { exact: true }).first()).toBeVisible();
   await expect(page.getByText("2,500")).toBeVisible();
-  await expect(page.getByText("Mona Ali")).toBeVisible();
+  await expect(page.getByText("InstaPay transfers")).toHaveCount(0);
+  await expect(page.getByText("Transactions", { exact: true })).toBeVisible();
+  await expect(page.getByText("Mona Ali").first()).toBeVisible();
+  await expect(page.getByText("CASH", { exact: true })).toBeVisible();
+  await expect(page.getByText("INSTAPAY", { exact: true }).first()).toBeVisible();
+  await expect(page.getByText("−150")).toBeVisible();
 });
 
 test("team owner is unchanged: Overview home with the full roster of tabs", async ({ page }) => {
@@ -79,9 +89,11 @@ test("solo home: four insight cards, a revenue chart, two quick actions, links o
   await expect(qa.getByRole("button", { name: "Check in" })).toBeVisible();
   await expect(qa.getByRole("button", { name: "New client" })).toBeVisible();
   await expect(qa.getByRole("button", { name: "Drop-in" })).toBeVisible();
-  // The links sit on the title's row, not under the list.
-  const titleY = (await page.getByText("Recent activity", { exact: true }).boundingBox())!.y;
-  const linkY = (await page.getByRole("button", { name: /Full activity/ }).boundingBox())!.y;
+  // The link sits on the title's row, not under the list; plans and activity are not on Today.
+  const titleY = (await page.getByText("Coming up", { exact: true }).boundingBox())!.y;
+  const linkY = (await page.getByRole("button", { name: "Schedule", exact: true }).first().boundingBox())!.y;
+  await expect(page.getByText("Your plans")).toHaveCount(0);
+  await expect(page.getByText("Recent activity")).toHaveCount(0);
   expect(Math.abs(titleY - linkY)).toBeLessThan(14);
   // Tapping a card lands on Members already filtered.
   await page.getByText("ENDING SOON", { exact: true }).click();
@@ -125,8 +137,7 @@ test("solo owner never lands on team screens: Activity goes back home, and team 
     clients: { clients: [] }, classes: { classes: [] }, revenue: REVENUE, activity: { activity: [] },
   });
   await page.goto("/");
-  await page.getByRole("button", { name: /Full activity/ }).click();
-  await expect(page).toHaveURL(/\/activity$/);
+  await page.goto("/activity");
   await page.getByRole("button", { name: "Today" }).first().click();
   await expect(page).toHaveURL(/localhost:\d+\/$/);
   for (const path of ["/history", "/coaches", "/oversight", "/manage", "/clients"]) {
@@ -165,14 +176,35 @@ test("solo: Check in lists everyone with a button each, searchable, and each ans
   expect(sent).toEqual(["c1", "c3"]);
 });
 
-test("solo: owner can reach My plans from Today and add a plan (plans only, no classes/bundles)", async ({ page }) => {
+test("solo: Plans is a tab with add/edit/delete, plans only", async ({ page }) => {
   await boot(page, "solo");
   await page.goto("/");
-  await page.getByRole("button", { name: "Add plan" }).click();
+  await page.getByRole("link", { name: "Plans", exact: true }).click();
   await expect(page).toHaveURL(/\/catalog/);
   await expect(page.getByText("My plans")).toBeVisible();
   await expect(page.getByRole("button", { name: "CLASSES" })).toHaveCount(0);
   await expect(page.getByText("Class bundles")).toHaveCount(0);
   await page.getByRole("button", { name: "+ Plan" }).click();
   await expect(page.getByText("NEW MEMBERSHIP", { exact: true }).first()).toBeVisible();
+});
+
+test("solo: Schedule adds a new session and shows who's coming; Account has no import", async ({ page }) => {
+  await boot(page, "solo");
+  const created: unknown[] = [];
+  await page.route("**/classes", async (route) => {
+    if (route.request().method() === "POST") {
+      created.push(route.request().postDataJSON());
+      return route.fulfill({ json: { class: { id: "n1", title: "Morning", description: null, startsAt: new Date().toISOString(), price: 0, status: "active" } } });
+    }
+    return route.fallback();
+  });
+  await page.goto("/");
+  await page.getByRole("link", { name: "Schedule", exact: true }).click();
+  await page.getByRole("button", { name: "New session" }).click();
+  await page.getByPlaceholder("e.g. Sunrise HIIT").fill("Morning");
+  await expect(page.getByText("DROP-IN PRICE")).toHaveCount(0);
+  await page.getByRole("button", { name: "Create session" }).click();
+  await expect.poll(() => created.length).toBe(1);
+  await page.goto("/account");
+  await expect(page.getByText("Import members")).toHaveCount(0);
 });
