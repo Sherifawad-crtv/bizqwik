@@ -246,3 +246,7 @@ textarea {
 
 .bq-qa { transition: transform .12s ease; }
 .bq-qa:active { transform: scale(.95); }
+
+/* pull-to-refresh spinner */
+@keyframes bq-ptr-spin { to { transform: rotate(360deg); } }
+.bq-ptr-spin { animation: bq-ptr-spin .7s linear infinite; }
