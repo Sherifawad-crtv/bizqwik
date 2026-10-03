@@ -7,10 +7,10 @@ import { Icon } from "./Icon";
 import { useAuth } from "../lib/auth";
 import { useHeader } from "../lib/header";
 import { useIsMobile, useIsNarrowPhone } from "../lib/useIsMobile";
-import { NAV, headerMode, accountBackTarget } from "../lib/nav";
+import { navFor, headerMode, accountBackTarget, isSoloOwner } from "../lib/nav";
 
 export function Shell() {
-  const { profile } = useAuth();
+  const { profile, orgMode } = useAuth();
   const isMobile = useIsMobile();
   const narrow = useIsNarrowPhone();
   const header = useHeader();
@@ -22,10 +22,10 @@ export function Shell() {
   // on role (Fab.tsx branches: dept_head gets the "Create" menu for the
   // catalog, coach/head_coach get "log a session"). Front desk's actions live on its
   // home screen's quick-action grid instead.
-  const showFab = profile.role !== "accountant" && profile.role !== "front_desk";
+  const showFab = profile.role !== "accountant" && profile.role !== "front_desk" && !isSoloOwner(profile.role, orgMode);
 
   if (isMobile) {
-    const mode = headerMode(pathname, profile.role);
+    const mode = headerMode(pathname, profile.role, orgMode);
     return (
       <div style={{ minHeight: "100svh", background: "var(--paper)", position: "relative", overflow: "hidden" }}>
         {mode !== "home" && (
@@ -44,7 +44,7 @@ export function Shell() {
             <div style={{ width: 30, flex: "none", display: "flex" }}>
               {mode === "account" && (
                 <button
-                  onClick={() => navigate(accountBackTarget(pathname, profile.role))}
+                  onClick={() => navigate(accountBackTarget(pathname, profile.role, orgMode))}
                   aria-label="Back"
                   style={{ border: 0, background: "none", padding: 4, margin: -4, cursor: "pointer", color: "var(--ink)", display: "flex" }}
                 >
@@ -76,7 +76,7 @@ export function Shell() {
         )}
 
         <main style={{ position: "relative", height: "100svh", overflow: "hidden" }}>
-          <RouteTransition tabs={NAV[profile.role]} role={profile.role} />
+          <RouteTransition tabs={navFor(profile.role, orgMode)} role={profile.role} orgMode={orgMode} />
         </main>
 
         <div
@@ -93,7 +93,7 @@ export function Shell() {
             gap: narrow ? 8 : 12,
           }}
         >
-          <BottomNav items={NAV[profile.role]} />
+          <BottomNav items={navFor(profile.role, orgMode)} />
           {showFab && <Fab />}
         </div>
       </div>

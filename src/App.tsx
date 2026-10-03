@@ -3,13 +3,14 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./lib/auth";
 import { HeaderProvider } from "./lib/header";
 import { OwnMonthProvider } from "./lib/ownMonth";
-import { RequireAuth, RequireRole, RequireBizqwikTeam } from "./lib/guards";
+import { RequireAuth, RequireRole, RequireBizqwikTeam, RequireDesk } from "./lib/guards";
 import { Shell } from "./components/Shell";
 import { initSquirclePolyfill } from "./lib/squircle";
 
 import { Login } from "./routes/Login";
 import { Signup } from "./routes/Signup";
 import { LaunchGate } from "./components/Splash";
+import { Money } from "./routes/Money";
 import { Welcome } from "./routes/Welcome";
 import { ForgotPassword } from "./routes/ForgotPassword";
 import { ResetPassword } from "./routes/ResetPassword";
@@ -81,7 +82,7 @@ export default function App() {
                     <Route path="/history" element={<History />} />
                   </Route>
 
-                  <Route element={<RequireRole roles={["front_desk"]} />}>
+                  <Route element={<RequireDesk />}>
                     <Route path="/members" element={<Members />} />
                     <Route path="/checkin" element={<CheckIn />} />
                     <Route path="/drop-in" element={<DropIn />} />
@@ -104,6 +105,7 @@ export default function App() {
                   </Route>
 
                   <Route element={<RequireRole roles={["dept_head"]} />}>
+                    <Route path="/money" element={<Money />} />
                     <Route path="/oversight" element={<Oversight />} />
                     <Route path="/classes" element={<ClassesManage />} />
                     <Route path="/manage" element={<Manage />} />

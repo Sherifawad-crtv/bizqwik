@@ -3,7 +3,7 @@ import { NavLink } from "react-router-dom";
 import { Avatar } from "./Avatar";
 import { Icon } from "./Icon";
 import { useAuth } from "../lib/auth";
-import { NAV, type NavItem } from "../lib/nav";
+import { navFor, type NavItem } from "../lib/nav";
 import { ROLE_LABELS } from "../lib/types";
 
 function SidebarItem({ item }: { item: NavItem }) {
@@ -35,9 +35,9 @@ function SidebarItem({ item }: { item: NavItem }) {
 }
 
 export function Sidebar() {
-  const { profile } = useAuth();
+  const { profile, orgMode } = useAuth();
   if (!profile) return null;
-  const items = NAV[profile.role];
+  const items = navFor(profile.role, orgMode);
 
   return (
     <div

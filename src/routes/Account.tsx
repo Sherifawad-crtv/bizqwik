@@ -9,7 +9,7 @@ import { ROLE_LABELS } from "../lib/types";
 import { cachedPushOn, disablePush, enablePush, isIOS, isStandalone, primePushState, pushSupported, syncPushSubscriptionInBackground } from "../lib/push";
 
 export function Account() {
-  const { profile, logout } = useAuth();
+  const { profile, logout, orgMode } = useAuth();
   const navigate = useNavigate();
 
   useSetHeader({ kicker: "ACCOUNT", title: "Account" }, []);
@@ -31,6 +31,7 @@ export function Account() {
 
       <div data-sq style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: "6px 4px", marginBottom: 16 }}>
         <NotificationsRow />
+        {profile.role === "dept_head" && orgMode === "solo" && <SettingsRow icon="tag" label="What I offer" onClick={() => navigate("/catalog")} />}
         <SettingsRow icon="account" label="Account Settings" onClick={() => navigate("/account/profile")} />
         <SettingsRow icon="lock" label="Password Settings" onClick={() => navigate("/account/password")} last />
       </div>

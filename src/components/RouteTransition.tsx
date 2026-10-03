@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { useLocation, useOutlet } from "react-router-dom";
-import { matchTabIndex, headerMode, type NavItem } from "../lib/nav";
+import { matchTabIndex, headerMode, type NavItem, type OrgMode } from "../lib/nav";
 import type { Role } from "../lib/types";
 
 /** How many levels deep a route sits, for push-transition purposes: 0 is a
@@ -11,7 +11,7 @@ import type { Role } from "../lib/types";
  * children (/account/profile) without the two directions flipping. */
 function pushDepth(pathname: string): number {
   if (pathname === "/account/profile" || pathname === "/account/password") return 2;
-  if (pathname === "/account" || pathname === "/classes" || pathname === "/activity" || pathname === "/desk-classes" || /^\/coaches\/[^/]+$/.test(pathname)) return 1;
+  if (pathname === "/account" || pathname === "/classes" || pathname === "/activity" || pathname === "/desk-classes" || pathname === "/import" || /^\/coaches\/[^/]+$/.test(pathname)) return 1;
   return 0;
 }
 
@@ -43,8 +43,8 @@ const TAB_EASE = "cubic-bezier(.22,1,.36,1)";
 // Top padding clears the fixed top chrome (Shell.tsx) — the home screen has
 // none at all (just breathing room below the safe area), everything else
 // gets the thin centered-title row's real height.
-function layerStyle(pathname: string, role: Role): CSSProperties {
-  const top = headerMode(pathname, role) === "home" ? 20 : 80;
+function layerStyle(pathname: string, role: Role, mode: OrgMode): CSSProperties {
+  const top = headerMode(pathname, role, mode) === "home" ? 20 : 80;
   return {
     position: "absolute",
     inset: 0,
@@ -55,7 +55,7 @@ function layerStyle(pathname: string, role: Role): CSSProperties {
   };
 }
 
-export function RouteTransition({ tabs, role }: { tabs: NavItem[]; role: Role }) {
+export function RouteTransition({ tabs, role, orgMode = "team" }: { tabs: NavItem[]; role: Role; orgMode?: OrgMode }) {
   const location = useLocation();
   const outlet = useOutlet();
 
@@ -131,7 +131,7 @@ export function RouteTransition({ tabs, role }: { tabs: NavItem[]; role: Role })
 
   if (!previous) {
     return (
-      <div data-scroll style={layerStyle(current.pathname, role)}>
+      <div data-scroll style={layerStyle(current.pathname, role, orgMode)}>
         {current.outlet}
       </div>
     );
@@ -140,7 +140,7 @@ export function RouteTransition({ tabs, role }: { tabs: NavItem[]; role: Role })
   switch (anim.type) {
     case "none":
       return (
-        <div data-scroll style={layerStyle(current.pathname, role)}>
+        <div data-scroll style={layerStyle(current.pathname, role, orgMode)}>
           {current.outlet}
         </div>
       );
@@ -152,7 +152,7 @@ export function RouteTransition({ tabs, role }: { tabs: NavItem[]; role: Role })
       const overShown = anim.type === "push-in" ? entered : !entered;
       return (
         <div style={{ position: "relative", height: "100%", overflow: "hidden" }}>
-          <div data-scroll style={layerStyle(underLayer.pathname, role)}>
+          <div data-scroll style={layerStyle(underLayer.pathname, role, orgMode)}>
             {underLayer.outlet}
           </div>
           <div
@@ -169,7 +169,7 @@ export function RouteTransition({ tabs, role }: { tabs: NavItem[]; role: Role })
           <div
             data-scroll
             style={{
-              ...layerStyle(overLayer.pathname, role),
+              ...layerStyle(overLayer.pathname, role, orgMode),
               boxShadow: overShown ? "-8px 0 24px rgba(0,0,0,.12)" : "none",
               transform: overShown ? "translateX(0)" : "translateX(100%)",
               transition: `transform ${PUSH_MS}ms ${PUSH_EASE}`,
@@ -188,7 +188,7 @@ export function RouteTransition({ tabs, role }: { tabs: NavItem[]; role: Role })
           <div
             data-scroll
             style={{
-              ...layerStyle(previous.pathname, role),
+              ...layerStyle(previous.pathname, role, orgMode),
               transform: entered ? `translateX(${-dir * 100}%)` : "translateX(0)",
               transition: `transform ${TAB_MS}ms ${TAB_EASE}`,
             }}
@@ -198,7 +198,7 @@ export function RouteTransition({ tabs, role }: { tabs: NavItem[]; role: Role })
           <div
             data-scroll
             style={{
-              ...layerStyle(current.pathname, role),
+              ...layerStyle(current.pathname, role, orgMode),
               transform: entered ? "translateX(0)" : `translateX(${dir * 100}%)`,
               transition: `transform ${TAB_MS}ms ${TAB_EASE}`,
             }}
