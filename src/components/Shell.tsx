@@ -25,7 +25,8 @@ export function Shell() {
   // on role (Fab.tsx branches: dept_head gets the "Create" menu for the
   // catalog, coach/head_coach get "log a session"). Front desk's actions live on its
   // home screen's quick-action grid instead.
-  const showFab = profile.role !== "accountant" && profile.role !== "front_desk" && !isSoloOwner(profile.role, orgMode);
+  const solo = isSoloOwner(profile.role, orgMode);
+  const showFab = profile.role !== "accountant" && profile.role !== "front_desk";
 
   if (isMobile) {
     const mode = headerMode(pathname, profile.role, orgMode);
@@ -108,6 +109,11 @@ export function Shell() {
   return (
     <div style={{ minHeight: "100svh", background: "var(--paper)", display: "flex" }}>
       <Sidebar />
+      {solo && (
+        <div style={{ position: "fixed", right: 32, bottom: 32, zIndex: 40 }}>
+          <Fab />
+        </div>
+      )}
       <div style={{ flex: 1, minWidth: 0 }}>
         <div
           style={{

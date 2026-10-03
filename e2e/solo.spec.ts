@@ -90,6 +90,9 @@ test("solo home: four insight cards, a revenue chart, two quick actions, links o
   await expect(page.getByText("ACTIVE", { exact: true })).toBeVisible();
   await expect(page.getByText("ENDING SOON", { exact: true })).toBeVisible();
   await expect(page.getByText("REVENUE BY MONTH · EGP")).toBeVisible();
+  // The quick actions live in the FAB now, not on the page.
+  await expect(page.getByRole("group", { name: "Quick actions" })).toHaveCount(0);
+  await page.getByRole("button", { name: "Quick actions" }).click();
   const qa = page.getByRole("group", { name: "Quick actions" });
   await expect(qa.getByRole("button")).toHaveCount(3);
   await expect(qa.getByRole("button", { name: "Check in" })).toBeVisible();
@@ -101,6 +104,7 @@ test("solo home: four insight cards, a revenue chart, two quick actions, links o
   await expect(page.getByText("Your plans")).toHaveCount(0);
   await expect(page.getByText("Recent activity")).toHaveCount(0);
   expect(Math.abs(titleY - linkY)).toBeLessThan(14);
+  await page.getByRole("button", { name: "Cancel" }).click();
   // Tapping a card lands on Members already filtered.
   await page.getByText("ENDING SOON", { exact: true }).click();
   await expect(page).toHaveURL(/\/members$/);
@@ -125,6 +129,7 @@ test("solo: a new client picks between two plans as cards", async ({ page }) => 
     coaches: { coaches: [] },
   });
   await page.goto("/");
+  await page.getByRole("button", { name: "Quick actions" }).click();
   await page.getByRole("group", { name: "Quick actions" }).getByRole("button", { name: "New client" }).click();
   await page.getByLabel("FULL NAME").fill("Mona K");
   await page.getByLabel("PHONE").fill("0122");
@@ -170,8 +175,9 @@ test("solo: Check in lists everyone with a button each, searchable, and each ans
     },
   });
   await page.goto("/");
+  await page.getByRole("button", { name: "Quick actions" }).click();
   await page.getByRole("group", { name: "Quick actions" }).getByRole("button", { name: "Check in" }).click();
-  await expect(page.getByRole("button", { name: "Check in", exact: true })).toHaveCount(3 + 1); // one per client + the quick action behind the sheet
+  await expect(page.getByRole("button", { name: "Check in", exact: true })).toHaveCount(3); // one per client
   await page.getByLabel("Search name or phone").fill("omar");
   await expect(page.getByText("Mona Ali")).toHaveCount(0);
   await page.getByLabel("Search name or phone").fill("");
@@ -226,6 +232,7 @@ async function dropInBoot(page: import("@playwright/test").Page, settings: unkno
     "drop-ins": (b: Record<string, unknown> | null) => { sent.push(b); return { body: {} }; },
   });
   await page.goto("/");
+  await page.getByRole("button", { name: "Quick actions" }).click();
   await page.getByRole("group", { name: "Quick actions" }).getByRole("button", { name: "Drop-in" }).click();
 }
 
@@ -312,4 +319,18 @@ test("solo: selling a plan offers only Cash or InstaPay — no card, no wallet",
   await expect(page.getByText(/^CARD$|^Card$/)).toHaveCount(0);
   await expect(page.getByText(/^WALLET$/)).toHaveCount(0);
   await expect(page.getByText(/INSTAPAY|InstaPay/).first()).toBeVisible();
+});
+
+test("solo FAB: the three quick actions from any tab, also on desktop", async ({ page }) => {
+  await boot(page, "solo");
+  await page.goto("/bookings");
+  await page.getByRole("button", { name: "Quick actions" }).click();
+  const qa = page.getByRole("group", { name: "Quick actions" });
+  for (const n of ["New client", "Drop-in", "Check in"]) await expect(qa.getByRole("button", { name: n })).toBeVisible();
+  await qa.getByRole("button", { name: "Check in" }).click();
+  await expect(page.getByText("NO SCAN?")).toBeVisible();
+
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto("/");
+  await expect(page.getByRole("button", { name: "Quick actions" })).toBeVisible();
 });
