@@ -1,4 +1,6 @@
 import { Icon } from "./Icon";
+import { useAuth } from "../lib/auth";
+import { isSoloOwner } from "../lib/nav";
 import type { PayMethod } from "../lib/types";
 
 const OPTIONS: { value: PayMethod; label: string; icon: "cash" | "card" | "wallet"; note: string }[] = [
@@ -9,9 +11,12 @@ const OPTIONS: { value: PayMethod; label: string; icon: "cash" | "card" | "walle
 
 /** Cash, card or InstaPay as big cards, for a sale where the client has no wallet yet. */
 export function PaymentCards({ value, onChange }: { value: PayMethod; onChange: (v: PayMethod) => void }) {
+  const { profile, orgMode } = useAuth();
+  // A solo business has no card machine: cash or InstaPay only.
+  const options = profile && isSoloOwner(profile.role, orgMode) ? OPTIONS.filter((o) => o.value !== "card") : OPTIONS;
   return (
-    <div role="radiogroup" aria-label="Payment" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8 }}>
-      {OPTIONS.map((o) => {
+    <div role="radiogroup" aria-label="Payment" style={{ display: "grid", gridTemplateColumns: `repeat(${options.length}, 1fr)`, gap: 8 }}>
+      {options.map((o) => {
         const on = value === o.value;
         return (
           <button

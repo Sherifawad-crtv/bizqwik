@@ -297,3 +297,19 @@ test("no caching: reopening a screen always shows the server's latest data", asy
   await page.evaluate(() => document.dispatchEvent(new Event("visibilitychange")));
   await expect(page.getByText("Mona Hassan")).toBeVisible();
 });
+
+test("solo: selling a plan offers only Cash or InstaPay — no card, no wallet", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const one = { id: "c1", name: "Mona Ali", age: null, phone: "0100", email: null, conditions: null, assignedCoachId: null, currentPackage: null, currentMembership: null, groupPlan: null };
+  await mockBackend(page, "dept_head", {
+    __orgMode: "solo", classes: { classes: [] }, revenue: REVENUE, clients: { clients: [one] },
+    "plan-types": { planTypes: [{ id: "p1", kind: "membership", name: "1 Month", price: 500, durationMonths: 1, credits: null, invitationsAllowance: 0, active: true }] },
+  });
+  await page.goto("/members");
+  await page.getByText("Mona Ali").click();
+  await page.getByRole("button", { name: /Sell a plan/ }).first().click();
+  await expect(page.getByRole("button", { name: "CASH", exact: true }).or(page.getByRole("radio", { name: /Cash/ })).first()).toBeVisible();
+  await expect(page.getByText(/^CARD$|^Card$/)).toHaveCount(0);
+  await expect(page.getByText(/^WALLET$/)).toHaveCount(0);
+  await expect(page.getByText(/INSTAPAY|InstaPay/).first()).toBeVisible();
+});

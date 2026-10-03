@@ -2,6 +2,8 @@ import { EmptyState } from "./EmptyState";
 import { useState } from "react";
 import { api } from "../lib/backend";
 import { useAsync } from "../lib/useAsync";
+import { useAuth } from "../lib/auth";
+import { isSoloOwner } from "../lib/nav";
 import { egp } from "../lib/format";
 import { PAY_METHOD_LABELS, type ClassBooking, type PayMethod, type BookingAttendance } from "../lib/types";
 import { Sheet } from "./Sheet";
@@ -103,6 +105,9 @@ function RosterRow({
   run: (fn: () => Promise<unknown>, id: string) => void;
 }) {
   const tone = ATT_TONE[b.attendance];
+  const { profile, orgMode } = useAuth();
+  // A solo business takes cash or InstaPay only.
+  const solo = !!profile && isSoloOwner(profile.role, orgMode);
   const paid = b.payStatus === "paid";
   const onPlan = b.coverage === "plan";
   return (
@@ -131,7 +136,7 @@ function RosterRow({
         <div style={{ marginTop: 10 }}>
           <div style={{ font: "700 10px var(--font-mono)", letterSpacing: ".06em", color: "var(--ink-faint)", marginBottom: 6 }}>COLLECT PAYMENT</div>
           <div style={{ display: "flex", gap: 8 }}>
-            {(["cash", "card", "instapay", "wallet"] as PayMethod[]).map((pm) => (
+            {((solo ? ["cash", "instapay"] : ["cash", "card", "instapay", "wallet"]) as PayMethod[]).map((pm) => (
               <RowBtn key={pm} disabled={busy} onClick={() => run(() => api.collectBooking(b.id, pm), b.id)}>
                 {PAY_METHOD_LABELS[pm]}
               </RowBtn>
