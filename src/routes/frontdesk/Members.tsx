@@ -18,6 +18,8 @@ import { PaymentCards } from "../../components/PaymentCards";
 import { Spinner } from "../../components/Spinner";
 import { Icon } from "../../components/Icon";
 import type { PayMethod } from "../../lib/types";
+import { useSticky } from "../../lib/useSticky";
+import { useAuth } from "../../lib/auth";
 import { Card, ErrorBanner, PlanPill, SearchField, SheetHeading, endingSoon, matchesClient, planSummary, renewalMessage, whatsappUrl } from "./shared";
 import { ConfirmCheckInSheet } from "./CheckIn";
 import { DropIn } from "./DropIn";
@@ -64,7 +66,7 @@ export function Members() {
   const coaches = coachData?.coaches ?? [];
 
   const [query, setQuery] = useState("");
-  const [filter, setFilter] = useState<"all" | "active" | "soon" | "expired" | "none">("all");
+  const [filter, setFilter] = useSticky<"all" | "active" | "soon" | "expired" | "none">("memberFilter", "all", { valid: (v) => ["all", "active", "soon", "expired", "none"].includes(v) });
   const [creating, setCreating] = useState(false);
   const [checkInFor, setCheckInFor] = useState<ClientWithPackage | null>(null);
   const [dropInFor, setDropInFor] = useState<{ id: string; name: string } | null>(null);
@@ -188,6 +190,7 @@ export function CreateClientSheet({
   bundleTypes: BundleType[];
   coaches: CoachOption[];
 }) {
+  const { profile, orgMode } = useAuth();
   const [step, setStep] = useState(0);
   const [kind, setKind] = useState<PlanKind>("plan");
   const [name, setName] = useState("");
@@ -317,6 +320,7 @@ export function CreateClientSheet({
 
           {step === 1 && (
             <>
+              {!(profile?.role === "dept_head" && orgMode === "solo" && bundleTypes.length === 0) && (
               <div style={{ display: "flex", justifyContent: "center", marginBottom: 14 }}>
                 <Segmented
                   value={kind}
@@ -330,6 +334,7 @@ export function CreateClientSheet({
                   ]}
                 />
               </div>
+              )}
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 {kind === "plan" ? (
                   <GroupOfferSelect value={offer} onChange={setOffer} planTypes={planTypes} series={series} />
@@ -670,6 +675,36 @@ function ClientSheet({
 
 function GroupOfferSelect({ value, onChange, planTypes, series }: { value: string; onChange: (v: string) => void; planTypes: GroupPlanType[]; series: ClassSeries[] }) {
   const options = groupOfferOptions(planTypes, series);
+  const { profile, orgMode } = useAuth();
+  // A solo owner with a couple of plans picks them as cards, not from a list.
+  if (profile?.role === "dept_head" && orgMode === "solo" && options.length > 0 && options.length <= 4) {
+    return (
+      <div role="radiogroup" aria-label="Plan" style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        {options.map((o) => {
+          const [name, price, ...rest] = o.label.split(" · ");
+          const on = value === o.value;
+          return (
+            <button
+              key={o.value}
+              type="button"
+              role="radio"
+              aria-checked={on}
+              data-sq
+              data-tap
+              onClick={() => onChange(o.value)}
+              style={{ display: "flex", alignItems: "center", gap: 12, padding: "16px 18px", cursor: "pointer", textAlign: "left", borderRadius: "var(--r-card)", border: on ? "2px solid var(--primary)" : "1px solid var(--line)", background: on ? "var(--primary-tint)" : "var(--surface)", color: "var(--ink)" }}
+            >
+              <span style={{ flex: 1, minWidth: 0 }}>
+                <span style={{ display: "block", font: "800 18px var(--font-body)", letterSpacing: "-.01em" }}>{name}</span>
+                <span style={{ display: "block", font: "400 12px var(--font-mono)", color: "var(--ink-muted)", marginTop: 2 }}>{rest.join(" · ")}</span>
+              </span>
+              <span style={{ font: "800 18px var(--font-mono)", color: on ? "var(--primary-pressed)" : "var(--ink)" }}>{price}</span>
+            </button>
+          );
+        })}
+      </div>
+    );
+  }
   return (
     <>
       <SelectField

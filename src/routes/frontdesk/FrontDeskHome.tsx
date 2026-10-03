@@ -9,7 +9,7 @@ import { HomeAvatar } from "../../components/HomeAvatar";
 import { Icon, type IconName } from "../../components/Icon";
 import { Spinner } from "../../components/Spinner";
 import { Sheet } from "../../components/Sheet";
-import { Card, SectionTitle, SheetHeading, SearchField, PlanPill, planSummary, matchesClient } from "./shared";
+import { Card, SectionLink, SectionTitle, SheetHeading, SearchField, PlanPill, planSummary, matchesClient } from "./shared";
 import { NewClientModal } from "./NewClientModal";
 import { CheckIn } from "./CheckIn";
 import { DropIn } from "./DropIn";
@@ -134,7 +134,7 @@ export function FrontDeskHome() {
         ))}
       </div>
 
-      <SectionTitle right={<button onClick={() => navigate("/bookings")} style={{ border: 0, background: "none", color: "var(--primary-pressed)", font: "700 13px var(--font-body)", cursor: "pointer" }}>All bookings</button>}>Next up</SectionTitle>
+      <SectionTitle right={<SectionLink onClick={() => navigate("/bookings")}>All bookings</SectionLink>}>Next up</SectionTitle>
       <Card style={{ overflow: "hidden", marginBottom: 24 }}>
         {nextUp.map((c, i) => (
           <button
@@ -154,7 +154,7 @@ export function FrontDeskHome() {
         {nextUp.length === 0 && <EmptyState bare icon="calendar" title="No more classes today" body="Upcoming classes show up here." />}
       </Card>
 
-      <SectionTitle count={data.recent.length}>Recent activity</SectionTitle>
+      <SectionTitle right={<SectionLink onClick={() => navigate("/activity")}>Full activity &amp; logs</SectionLink>}>Recent activity</SectionTitle>
       <Card style={{ overflow: "hidden" }}>
         {data.recent.slice(0, 5).map((r, i) => (
           <div key={r.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 18px", borderBottom: i === Math.min(data.recent.length, 5) - 1 ? "none" : "1px solid var(--line)" }}>
@@ -185,12 +185,6 @@ export function FrontDeskHome() {
         )}
       </Card>
 
-      <button
-        onClick={() => navigate("/activity")}
-        style={{ display: "inline-flex", alignItems: "center", gap: 4, border: 0, background: "none", color: "var(--primary-pressed)", cursor: "pointer", font: "700 14px var(--font-body)", marginTop: 12, padding: "4px 0" }}
-      >
-        Full activity &amp; logs <Icon name="chevron-right" size={16} />
-      </button>
 
       <Sheet open={modal === "checkin"} onClose={close}>
         <SheetHeading kicker="FRONT DESK" title="Check-In" />

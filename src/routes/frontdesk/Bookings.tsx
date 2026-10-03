@@ -9,7 +9,7 @@ import { Spinner } from "../../components/Spinner";
 import { EmptyState } from "../../components/EmptyState";
 import { Icon } from "../../components/Icon";
 import { ClassRosterSheet } from "../../components/ClassRosterSheet";
-import { Card } from "./shared";
+import { Card, SectionLink } from "./shared";
 import { ClassCalendarScreen } from "./ClassCalendar";
 
 type Range = "today" | "tomorrow" | "week";
@@ -101,6 +101,10 @@ export function Bookings() {
         ]}
       />
 
+      <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 6 }}>
+        <SectionLink onClick={() => setMonth(true)}>Open full calendar</SectionLink>
+      </div>
+
       {groups.length === 0 && earlier.length === 0 && (
         <div style={{ marginTop: 16 }}>
           <Card>
@@ -127,13 +131,6 @@ export function Bookings() {
           {showEarlier && <Card style={{ overflow: "hidden", marginTop: 8 }}>{earlier.map((c) => row(c, true))}</Card>}
         </div>
       )}
-
-      <button
-        onClick={() => setMonth(true)}
-        style={{ display: "inline-flex", alignItems: "center", gap: 4, border: 0, background: "none", color: "var(--primary-pressed)", cursor: "pointer", font: "700 14px var(--font-body)", marginTop: 16, padding: "4px 0" }}
-      >
-        Open full calendar <Icon name="chevron-right" size={16} />
-      </button>
 
       <ClassRosterSheet open={open !== null} onClose={() => setOpen(null)} classId={open?.id ?? null} title={open?.title ?? "Class"} onChanged={classes.refetch} />
     </div>
