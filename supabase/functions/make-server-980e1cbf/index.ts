@@ -2116,9 +2116,12 @@ async function ptScanPreview(pkg: any) {
 app.post(`${P}/scan`, async (c) => {
   const user = await requireUser(c);
   const me = user && (await profileOf(user.id));
-  if (!me || (me.role !== "coach" && me.role !== "head_coach")) return c.json({ error: "Forbidden" }, 403);
+  // A solo owner is her own trainer, so she scans PT codes too (no coaches' room).
+  const soloOwner = me?.role === "dept_head" && (await orgModeOf(me.org_id)) === "solo";
+  if (!me || (me.role !== "coach" && me.role !== "head_coach" && !soloOwner)) return c.json({ error: "Forbidden" }, 403);
   const token = String((await c.req.json().catch(() => ({}))).token ?? "").trim();
   const { data: org } = await admin().from("organizations").select("id, slug, coach_qr_token").eq("id", me.org_id).maybeSingle();
+  if (soloOwner && token && token === org?.coach_qr_token) return c.json({ error: "That's the coaches' QR — scan a member's PT code instead." }, 400);
   if (token && token === org?.coach_qr_token) {
     const date = gymToday();
     const blocked = await assertLoggable(me.org_id, me.id, date.slice(0, 7));

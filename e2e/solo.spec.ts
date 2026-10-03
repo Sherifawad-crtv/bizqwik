@@ -94,7 +94,8 @@ test("solo home: four insight cards, a revenue chart, two quick actions, links o
   await expect(page.getByRole("group", { name: "Quick actions" })).toHaveCount(0);
   await page.getByRole("button", { name: "Quick actions" }).click();
   const qa = page.getByRole("group", { name: "Quick actions" });
-  await expect(qa.getByRole("button")).toHaveCount(3);
+  await expect(qa.getByRole("button")).toHaveCount(4);
+  await expect(qa.getByRole("button", { name: "Scan PT code" })).toBeVisible();
   await expect(qa.getByRole("button", { name: "Check in" })).toBeVisible();
   await expect(qa.getByRole("button", { name: "New client" })).toBeVisible();
   await expect(qa.getByRole("button", { name: "Drop-in" })).toBeVisible();
@@ -327,12 +328,12 @@ test("solo: selling a plan offers only Cash or InstaPay — no card, no wallet",
   await expect(page.getByText(/INSTAPAY|InstaPay/).first()).toBeVisible();
 });
 
-test("solo FAB: the three quick actions from any tab, also on desktop", async ({ page }) => {
+test("solo FAB: the four quick actions from any tab, also on desktop", async ({ page }) => {
   await boot(page, "solo");
   await page.goto("/bookings");
   await page.getByRole("button", { name: "Quick actions" }).click();
   const qa = page.getByRole("group", { name: "Quick actions" });
-  for (const n of ["New client", "Drop-in", "Check in"]) await expect(qa.getByRole("button", { name: n })).toBeVisible();
+  for (const n of ["New client", "Drop-in", "Check in", "Scan PT code"]) await expect(qa.getByRole("button", { name: n })).toBeVisible();
   await qa.getByRole("button", { name: "Check in" }).click();
   await expect(page.getByText("NO SCAN?")).toBeVisible();
 

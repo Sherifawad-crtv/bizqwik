@@ -93,3 +93,29 @@ test("coach: no manual logging — desktop gets Scan QR, the day sheet only remo
   await expect(page.getByRole("button", { name: "Change date" })).toHaveCount(0);
   await expect(page.getByRole("button", { name: /Add another session/ })).toHaveCount(0);
 });
+
+test("solo owner: Scan PT code from her quick actions logs a member's session", async ({ page }) => {
+  let delivered: Record<string, unknown> | null = null;
+  const preview = { id: "pk1", clientName: "Mona Adel", bundleName: "Adults personal training 8 sessions", sessionsRemaining: 8, sessionsIncluded: 8, expiryDate: "2099-01-01" };
+  await mockBackend(page, "dept_head", {
+    __orgMode: "solo",
+    clients: { clients: [] },
+    revenue: { months: [] },
+    scan: { kind: "pt", package: preview },
+    "packages/deliver": (b) => {
+      delivered = b;
+      return { body: { package: { id: "pk1", sessionsRemaining: 7, sessionsIncluded: 8, status: "active" }, preview: { ...preview, sessionsRemaining: 7 } } };
+    },
+  });
+  await page.goto("/");
+  await page.getByRole("button", { name: "Quick actions" }).click();
+  await page.getByRole("group", { name: "Quick actions" }).getByRole("button", { name: "Scan PT code" }).click();
+  await expect(page.getByRole("dialog", { name: "Scan" })).toBeVisible();
+  await expect(page.getByText("A member's PT code, from their app")).toBeVisible();
+  await page.evaluate((t) => window.dispatchEvent(new CustomEvent("bq-test-scan", { detail: t })), "bqpt_abc");
+  await expect(page.getByText("Mona Adel")).toBeVisible();
+  await expect(page.getByText("8 → 7")).toBeVisible();
+  await page.getByRole("button", { name: "Deduct 1 session" }).click();
+  await expect(page.getByText("Session logged · 7 left")).toBeVisible();
+  expect(delivered).toEqual({ qrToken: "bqpt_abc" });
+});
