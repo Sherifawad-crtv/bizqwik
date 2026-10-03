@@ -86,6 +86,8 @@ export class ApiError extends Error {
 
 // The solo owner's small helper function (drop-in price, InstaPay QR, member-less drop-in).
 const SOLO_DESK = "solo-desk";
+// The fast staff client list.
+const CLIENTS_LIST = "clients-list";
 
 async function callFn<T>(path: string, opts?: { method?: Method; body?: Record<string, unknown> }, slug: string = FN_SLUG): Promise<T> {
   const method = opts?.method ?? "GET";
@@ -160,7 +162,16 @@ export const api = {
     callFn<void>("bundle-types/update", { method: "POST", body: { id, name, price, sessionsIncluded, expiryDays } }),
   deleteBundleType: (id: string) => callFn<void>("bundle-types/delete", { method: "POST", body: { id } }),
 
-  clients: () => callFn<{ clients: ClientWithPackage[] }>("clients"),
+  // The batched client list (one fixed set of queries however many clients);
+  // if it's ever unavailable, the original endpoint answers instead.
+  clients: async () => {
+    try {
+      return await callFn<{ clients: ClientWithPackage[] }>("clients", undefined, CLIENTS_LIST);
+    } catch (err) {
+      console.warn("clients-list unavailable, using the main endpoint", err);
+      return callFn<{ clients: ClientWithPackage[] }>("clients");
+    }
+  },
   // Creation and coach assignment happen atomically, in one call — a client
   // never exists without an assigned coach (no orphaned/unassigned clients).
   createClient: (name: string, age: number | null, conditions: string | null, bundleTypeId: string, coachId: string) =>
