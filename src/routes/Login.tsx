@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "../lib/auth";
+import { hasSeenWelcome } from "../lib/welcome";
 import { useIsMobile } from "../lib/useIsMobile";
 import { useKeyboardInset } from "../lib/useKeyboardInset";
 import { Button } from "../components/Button";
@@ -27,6 +28,8 @@ export function Login() {
   // profile wins at "/"; a profile-less Bizqwik-team member goes to ops.
   if (ready && profile) return <Navigate to="/" replace />;
   if (ready && bizqwikTeam) return <Navigate to="/bizqwik" replace />;
+  // A brand-new device meets the welcome screen first (once).
+  if (ready && !hasSeenWelcome()) return <Navigate to="/welcome" replace />;
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();

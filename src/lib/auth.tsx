@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { markWelcomed } from "./welcome";
 import { api, auth as authApi } from "./backend";
 import { autoEnablePushIfPossible } from "./push";
 import type { BizqwikTeam, Profile, Tier } from "./types";
@@ -38,6 +39,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       })
       .finally(() => setReady(true));
   }, []);
+
+  // Anyone who has ever signed in on this device has "been welcomed", so a
+  // later sign-out lands on the regular sign-in page, not the first-time screen.
+  useEffect(() => {
+    if (profile || bizqwikTeam) markWelcomed();
+  }, [profile, bizqwikTeam]);
 
   // Turns push on the moment we know who's signed in — on initial load and
   // right after login — so notifications start flowing without anyone
