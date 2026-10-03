@@ -6,6 +6,11 @@ import { Button } from "./Button";
 import { SeriesSheet, PlanTypeSheet } from "../routes/Catalog";
 import { BundleSheet, InviteFlow, TierSheet } from "../routes/Manage";
 import { useAuth } from "../lib/auth";
+import { isSoloOwner } from "../lib/nav";
+import { NewClientModal } from "../routes/frontdesk/NewClientModal";
+import { SoloDropIn } from "../routes/frontdesk/SoloDropIn";
+import { CheckInList } from "../routes/frontdesk/CheckInList";
+import { SheetHeading } from "../routes/frontdesk/shared";
 import { useAsync } from "../lib/useAsync";
 import { api } from "../lib/backend";
 import { QrScanner } from "./QrScanner";
@@ -229,9 +234,69 @@ function PtDeliverSheet({ scan, onClose }: { scan: { token: string; preview: PtS
   );
 }
 
+type SoloAction = "new" | "dropin" | "checkin";
+
+const SOLO_OPTIONS: { kind: SoloAction; title: string; sub: string; icon: "user-plus" | "ticket" | "check" }[] = [
+  { kind: "new", title: "New client", sub: "Add someone and sell them a plan", icon: "user-plus" },
+  { kind: "dropin", title: "Drop-in", sub: "One visit · cash or InstaPay", icon: "ticket" },
+  { kind: "checkin", title: "Check in", sub: "Someone who didn't scan", icon: "check" },
+];
+
+/** The solo owner's FAB: her three everyday actions, from any screen. */
+function SoloFab({ size }: { size: number }) {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [kind, setKind] = useState<SoloAction | null>(null);
+  const pick = (k: SoloAction) => {
+    setMenuOpen(false);
+    // Let the menu's close animation finish before the next sheet opens.
+    window.setTimeout(() => setKind(k), 260);
+  };
+  return (
+    <>
+      <FabButton size={size} label="Quick actions" onClick={() => setMenuOpen(true)} />
+      <Sheet open={menuOpen} onClose={() => setMenuOpen(false)}>
+        <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>QUICK ACTIONS</div>
+        <div style={{ font: "800 26px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 16px" }}>What do you need?</div>
+        <div role="group" aria-label="Quick actions" style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          {SOLO_OPTIONS.map((o) => (
+            <button
+              key={o.kind}
+              onClick={() => pick(o.kind)}
+              data-sq
+              style={{ textAlign: "left", background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "14px 16px", cursor: "pointer", display: "flex", alignItems: "center", gap: 14 }}
+            >
+              <span style={{ width: 40, height: 40, flex: "none", borderRadius: 12, background: "var(--primary-tint)", color: "var(--primary-pressed)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <Icon name={o.icon} size={20} />
+              </span>
+              <span style={{ flex: 1, minWidth: 0 }}>
+                <span style={{ display: "block", font: "700 16px var(--font-body)" }}>{o.title}</span>
+                <span style={{ display: "block", font: "400 12px var(--font-mono)", color: "var(--ink-faint)", marginTop: 2 }}>{o.sub}</span>
+              </span>
+              <Icon name="chevron-right" size={18} />
+            </button>
+          ))}
+        </div>
+        <Button variant="quiet" fullWidth style={{ marginTop: 12 }} onClick={() => setMenuOpen(false)}>
+          Cancel
+        </Button>
+      </Sheet>
+      <Sheet open={kind === "checkin"} onClose={() => setKind(null)}>
+        <SheetHeading kicker="NO SCAN?" title="Check in" />
+        <CheckInList />
+      </Sheet>
+      <Sheet open={kind === "dropin"} onClose={() => setKind(null)}>
+        <SheetHeading kicker="DROP-IN" title="Drop-In" />
+        {kind === "dropin" && <SoloDropIn onDone={() => setKind(null)} />}
+      </Sheet>
+      {kind === "new" && <NewClientModal onClose={() => setKind(null)} />}
+    </>
+  );
+}
+
 export function Fab({ size = 64 }: { size?: number }) {
-  const { profile } = useAuth();
+  const { profile, orgMode } = useAuth();
   if (!profile) return null;
+  if (isSoloOwner(profile.role, orgMode)) return <SoloFab size={size} />;
   if (profile.role === "dept_head") return <CreateFab size={size} />;
   return <ScanFlow trigger={(open, busy) => <FabButton size={size} label="Scan" onClick={open} opacity={busy ? 0.55 : 1} />} />;
 }

@@ -9,17 +9,12 @@ import { fmt } from "../../lib/format";
 import { timeLabel, pad } from "../../lib/classTime";
 import type { GymClass } from "../../lib/types";
 import { HomeAvatar } from "../../components/HomeAvatar";
-import { QuickAction } from "../../components/QuickAction";
 import { ClassRosterSheet } from "../../components/ClassRosterSheet";
 import { EmptyState } from "../../components/EmptyState";
 import { Icon, type IconName } from "../../components/Icon";
-import { Sheet } from "../../components/Sheet";
 import { Spinner } from "../../components/Spinner";
 import { RevenueChart } from "../Oversight";
-import { Card, SectionLink, SectionTitle, SheetHeading, endingSoon, planSummary } from "./shared";
-import { NewClientModal } from "./NewClientModal";
-import { SoloDropIn } from "./SoloDropIn";
-import { CheckInList } from "./CheckInList";
+import { Card, SectionLink, SectionTitle, endingSoon, planSummary } from "./shared";
 
 const clockOf = (iso: string) => {
   const d = new Date(iso);
@@ -72,7 +67,6 @@ export function SoloHome() {
   const classes = useAsync(() => api.classes(new Date(Date.now() - 2 * 3600000).toISOString()), []);
   const bundles = useAsync(() => api.bundleTypes(), []);
   const bundleTypes = bundles.data?.bundleTypes ?? [];
-  const [modal, setModal] = useState<"new" | "dropin" | "checkin" | null>(null);
   const [roster, setRoster] = useState<GymClass | null>(null);
 
   const stats = useMemo(() => {
@@ -121,11 +115,6 @@ export function SoloHome() {
         <RevenueChart months={trend} revenueOnly />
       </Card>
 
-      <div role="group" aria-label="Quick actions" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", justifyItems: "center", margin: "24px 0 4px", maxWidth: 360, marginInline: "auto" }}>
-        <QuickAction icon="user-plus" label="New client" onClick={() => setModal("new")} />
-        <QuickAction icon="ticket" label="Drop-in" onClick={() => setModal("dropin")} />
-        <QuickAction icon="check" label="Check in" onClick={() => setModal("checkin")} />
-      </div>
 
       <SectionTitle right={<SectionLink onClick={() => navigate("/bookings")}>Schedule</SectionLink>}>Coming up</SectionTitle>
       <Card style={{ overflow: "hidden", marginBottom: 24 }}>
@@ -150,15 +139,6 @@ export function SoloHome() {
         {nextUp.length === 0 && <EmptyState bare icon="calendar" title="No sessions coming up" body="Add a session on the Schedule tab and who's coming shows up here." />}
       </Card>
 
-      <Sheet open={modal === "checkin"} onClose={() => setModal(null)}>
-        <SheetHeading kicker="NO SCAN?" title="Check in" />
-        <CheckInList />
-      </Sheet>
-      <Sheet open={modal === "dropin"} onClose={() => setModal(null)}>
-        <SheetHeading kicker="DROP-IN" title="Drop-In" />
-        {modal === "dropin" && <SoloDropIn onDone={() => setModal(null)} />}
-      </Sheet>
-      {modal === "new" && <NewClientModal onClose={() => setModal(null)} />}
       <ClassRosterSheet open={roster !== null} onClose={() => setRoster(null)} classId={roster?.id ?? null} title={roster?.title ?? "Class"} onChanged={classes.refetch} />
     </div>
   );
