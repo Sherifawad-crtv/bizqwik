@@ -9,6 +9,7 @@ import { initSquirclePolyfill } from "./lib/squircle";
 
 import { Login } from "./routes/Login";
 import { Signup } from "./routes/Signup";
+import { LaunchGate } from "./components/Splash";
 import { Welcome } from "./routes/Welcome";
 import { ForgotPassword } from "./routes/ForgotPassword";
 import { ResetPassword } from "./routes/ResetPassword";
@@ -50,6 +51,7 @@ export default function App() {
       <AuthProvider>
         <HeaderProvider>
           <OwnMonthProvider>
+            <LaunchGate>
             <Routes>
               <Route path="/welcome" element={<Welcome />} />
               <Route path="/login" element={<Login />} />
@@ -119,6 +121,7 @@ export default function App() {
 
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
+            </LaunchGate>
           </OwnMonthProvider>
         </HeaderProvider>
       </AuthProvider>
