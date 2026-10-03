@@ -19,7 +19,7 @@ import { TimeWheelField } from "../components/TimeWheelField";
 import { ClassPhotoField } from "../components/ClassPhotoField";
 import { SeriesSheet } from "./Catalog";
 
-interface FormState {
+export interface FormState {
   id: string | null; // null = creating
   title: string;
   description: string;
@@ -32,11 +32,11 @@ interface FormState {
   imageUrl: string | null;
 }
 
-function emptyForm(): FormState {
+export function emptyForm(): FormState {
   return { id: null, title: "", description: "", date: todayIso(), time: "18:00", price: "", seriesId: null, imageUrl: null };
 }
 
-function formOf(c: GymClass): FormState {
+export function formOf(c: GymClass): FormState {
   const d = new Date(c.startsAt);
   return {
     id: c.id,
@@ -217,12 +217,14 @@ function ClassCard({ c, onEdit, onRoster }: { c: GymClass; onEdit?: () => void; 
   );
 }
 
-function ClassSheet({
+export function ClassSheet({
   form,
   onClose,
   onSaved,
   onRequestCancel,
+  solo,
 }: {
+  solo?: boolean;
   form: FormState | null;
   onClose: () => void;
   onSaved: () => void;
@@ -252,7 +254,7 @@ function ClassSheet({
       setError("Give the class a title.");
       return;
     }
-    const price = Number(draft.price);
+    const price = solo ? Number(draft.price) || 0 : Number(draft.price);
     if (!Number.isFinite(price) || price < 0) {
       setError("Price must be zero or more.");
       return;
@@ -277,15 +279,15 @@ function ClassSheet({
   return (
     <Sheet open={form !== null} onClose={busy ? () => {} : onClose}>
       <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>{editing ? "THIS SESSION ONLY" : "ONE-OFF SESSION"}</div>
-      <div style={{ font: "800 26px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 16px" }}>{editing ? "Edit session" : "One-off session"}</div>
+      <div style={{ font: "800 26px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 16px" }}>{editing ? "Edit session" : solo ? "New session" : "One-off session"}</div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
         <TextField label="TITLE" value={draft.title} onChange={(e) => setDraft({ ...draft, title: e.target.value })} placeholder="e.g. Sunrise HIIT" />
-        <TextField label="DESCRIPTION" value={draft.description} onChange={(e) => setDraft({ ...draft, description: e.target.value })} placeholder="Optional — shown to members" />
-        {!draft.seriesId && <ClassPhotoField value={draft.imageUrl} onChange={(url) => setDraft({ ...draft, imageUrl: url })} title={draft.title} />}
+        {!solo && <TextField label="DESCRIPTION" value={draft.description} onChange={(e) => setDraft({ ...draft, description: e.target.value })} placeholder="Optional — shown to members" />}
+        {!solo && !draft.seriesId && <ClassPhotoField value={draft.imageUrl} onChange={(url) => setDraft({ ...draft, imageUrl: url })} title={draft.title} />}
         <DateField value={draft.date} min={todayIso()} onChange={(iso) => setDraft({ ...draft, date: iso })} />
         <TimeWheelField label="TIME" value={draft.time} onChange={(v) => setDraft({ ...draft, time: v })} />
-        <TextField label="DROP-IN PRICE (EGP)" value={draft.price} onChange={(e) => setDraft({ ...draft, price: e.target.value })} inputMode="numeric" placeholder="0 for free" />
+        {!solo && <TextField label="DROP-IN PRICE (EGP)" value={draft.price} onChange={(e) => setDraft({ ...draft, price: e.target.value })} inputMode="numeric" placeholder="0 for free" />}
       </div>
 
       {error && (

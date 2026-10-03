@@ -4,7 +4,7 @@
 // keeps working (see supabaseClient.ts for which project it targets).
 import { FN_SLUG, supabase } from "./supabaseClient";
 import { bump } from "./bus";
-import type { PaymentsSummary, ImportRow, ImportResult,
+import type { PaymentsSummary,
   ActivityEntry,
   BizqwikRole,
   ClassBooking,
@@ -140,7 +140,6 @@ export const api = {
 
   me: () => callFn<{ profile: Profile | null; orgMode?: "solo" | "team" | null; tier: Tier | null; bizqwikTeam: BizqwikTeam | null }>("me"),
   paymentsSummary: (months: number) => callFn<PaymentsSummary>(`payments/summary?months=${months}`),
-  importClients: (rows: ImportRow[]) => callFn<ImportResult>("clients/import", { method: "POST", body: { rows } }),
   updateMe: (name: string) => callFn<{ profile: Profile }>("me/update", { method: "POST", body: { name } }),
   updateAvatar: (avatarUrl: string | null) => callFn<{ profile: Profile }>("me/update", { method: "POST", body: { avatarUrl } }),
 

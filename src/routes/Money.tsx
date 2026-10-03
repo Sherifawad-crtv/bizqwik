@@ -6,7 +6,34 @@ import { fmt, formatDateTime } from "../lib/format";
 import { Segmented } from "../components/Segmented";
 import { Spinner } from "../components/Spinner";
 import { EmptyState } from "../components/EmptyState";
+import type { ActivityEntry } from "../lib/types";
 import { Card, SectionTitle } from "./frontdesk/shared";
+
+interface Txn { id: string; at: string; clientName: string | null; amount: number; what: string; method: string; refund: boolean }
+
+const METHOD_LABEL: Record<string, string> = { cash: "Cash", card: "Card", instapay: "InstaPay", wallet: "Wallet" };
+
+/** Every sale and refund in the range, newest first, each tagged with how it was paid. */
+function toTransactions(list: ActivityEntry[], months: number): Txn[] {
+  const now = new Date();
+  const since = new Date(now.getFullYear(), now.getMonth() - (months - 1), 1).getTime();
+  const out: Txn[] = [];
+  for (const a of list) {
+    if (Date.parse(a.at) < since) continue;
+    const m = (a.meta ?? {}) as Record<string, unknown>;
+    const amount = Number(a.amount ?? 0);
+    if (a.type.startsWith("sale_") || a.type === "class_collected") {
+      const name = (m.name ?? m.title) as string | undefined;
+      out.push({ id: a.id, at: a.at, clientName: a.clientName, amount, what: name ?? (a.type === "sale_package" ? "PT package" : a.type === "class_collected" ? "Class" : a.type === "sale_dropin" ? "Drop-in" : "Sale"), method: METHOD_LABEL[String(m.payMethod ?? "")] ?? "Not recorded", refund: false });
+    } else if (a.type === "refund_desk") {
+      const note = String(m.note ?? "");
+      out.push({ id: a.id, at: a.at, clientName: a.clientName, amount, what: "Refund", method: /^instapay/i.test(note) ? "InstaPay" : "Cash", refund: true });
+    } else if (a.type === "wallet_refund") {
+      out.push({ id: a.id, at: a.at, clientName: a.clientName, amount, what: "Refund", method: "Wallet", refund: true });
+    }
+  }
+  return out;
+}
 
 type Range = "1" | "3" | "12";
 const RANGES: { value: Range; label: string }[] = [
@@ -22,8 +49,8 @@ export function Money() {
   const [range, setRange] = useSticky<Range>("moneyRange", "1", { valid: (v) => v === "1" || v === "3" || v === "12" });
   const n = Number(range);
   const { data, error } = useAsync(async () => {
-    const [rev, pay] = await Promise.all([api.revenue(n), api.paymentsSummary(n)]);
-    return { rev, pay };
+    const [rev, pay, act] = await Promise.all([api.revenue(n), api.paymentsSummary(n), api.activity(300)]);
+    return { rev, pay, txns: toTransactions(act.activity, n) };
   }, [range]);
 
   if (error) return <EmptyState icon="inbox" title="Couldn't load your money" body="Check your connection and try again." />;
@@ -70,9 +97,9 @@ export function Money() {
             )}
           </Card>
 
-          <SectionTitle count={data.pay.transfers.length}>InstaPay transfers</SectionTitle>
+          <SectionTitle count={data.txns.length}>Transactions</SectionTitle>
           <Card style={{ overflow: "hidden", marginBottom: 12 }}>
-            {data.pay.transfers.slice(0, 30).map((t, i, arr) => (
+            {data.txns.slice(0, 100).map((t, i, arr) => (
               <div key={t.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "13px 18px", borderBottom: i === arr.length - 1 ? "none" : "1px solid var(--line)" }}>
                 <div style={{ minWidth: 0, flex: 1 }}>
                   <div style={{ font: "700 15px var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t.clientName ?? "Client"}</div>
@@ -80,11 +107,12 @@ export function Money() {
                     {t.what} · {formatDateTime(t.at)}
                   </div>
                 </div>
-                <div style={{ font: "800 15px var(--font-mono)" }}>{fmt(t.amount)}</div>
+                <span style={{ flex: "none", font: "700 10px var(--font-mono)", letterSpacing: ".06em", borderRadius: 8, padding: "3px 7px", color: t.method === "InstaPay" ? "var(--primary-pressed)" : "var(--ink-muted)", background: t.method === "InstaPay" ? "var(--primary-tint)" : "var(--sunken)" }}>{t.method.toUpperCase()}</span>
+                <div style={{ flex: "none", minWidth: 64, textAlign: "right", font: "800 15px var(--font-mono)", color: t.refund ? "var(--danger-fg)" : "var(--ink)" }}>{t.refund ? "−" : ""}{fmt(t.amount)}</div>
               </div>
             ))}
-            {data.pay.transfers.length === 0 && (
-              <EmptyState bare icon="inbox" title="No InstaPay transfers" body="When you record a sale as InstaPay it's listed here, so you can tick it off against your bank app." />
+            {data.txns.length === 0 && (
+              <EmptyState bare icon="inbox" title="No transactions yet" body="Sales and refunds are listed here with how each was paid." />
             )}
           </Card>
         </>

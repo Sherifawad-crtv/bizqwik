@@ -438,18 +438,3 @@ export interface PaymentsSummary {
   transfers: { id: string; at: string; clientName: string | null; amount: number; what: string }[];
 }
 
-// ===== Bringing existing members in =====
-export interface ImportRow {
-  name: string;
-  phone?: string;
-  email?: string;
-  plan?: string;
-  startsOn?: string; // 2026-10-01
-  expiresOn?: string; // 2026-11-01
-  creditsLeft?: number | null;
-  creditsTotal?: number | null;
-}
-export interface ImportResult {
-  imported: number;
-  skipped: { row: number; reason: string }[];
-}
