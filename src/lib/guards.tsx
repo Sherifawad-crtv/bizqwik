@@ -31,6 +31,15 @@ export function RequireDesk() {
   return <Navigate to="/" replace />;
 }
 
+// Team screens (payouts, coaches, tiers, the team dashboard): a solo owner has
+// no team, so none of these exist for her — straight back to her home.
+export function RequireTeam() {
+  const { profile, orgMode } = useAuth();
+  if (!profile) return null;
+  if (profile.role === "dept_head" && orgMode === "solo") return <Navigate to="/" replace />;
+  return <Outlet />;
+}
+
 export function RequireRole({ roles }: { roles: Role[] }) {
   const { profile } = useAuth();
   if (!profile) return null;

@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./lib/auth";
 import { HeaderProvider } from "./lib/header";
 import { OwnMonthProvider } from "./lib/ownMonth";
-import { RequireAuth, RequireRole, RequireBizqwikTeam, RequireDesk } from "./lib/guards";
+import { RequireAuth, RequireRole, RequireBizqwikTeam, RequireDesk, RequireTeam } from "./lib/guards";
 import { Shell } from "./components/Shell";
 import { initSquirclePolyfill } from "./lib/squircle";
 
@@ -80,7 +80,9 @@ export default function App() {
                   <Route path="/account/password" element={<AccountPassword />} />
 
                   <Route element={<RequireRole roles={["coach", "head_coach", "dept_head", "accountant"]} />}>
-                    <Route path="/history" element={<History />} />
+                    <Route element={<RequireTeam />}>
+                      <Route path="/history" element={<History />} />
+                    </Route>
                   </Route>
 
                   <Route element={<RequireDesk />}>
@@ -94,12 +96,16 @@ export default function App() {
                   </Route>
 
                   <Route element={<RequireRole roles={["head_coach", "dept_head"]} />}>
-                    <Route path="/coaches" element={<CoachesOverview />} />
-                    <Route path="/coaches/:id" element={<CoachDetail />} />
+                    <Route element={<RequireTeam />}>
+                      <Route path="/coaches" element={<CoachesOverview />} />
+                      <Route path="/coaches/:id" element={<CoachDetail />} />
+                    </Route>
                   </Route>
 
                   <Route element={<RequireRole roles={["coach", "head_coach", "dept_head"]} />}>
-                    <Route path="/clients" element={<Clients />} />
+                    <Route element={<RequireTeam />}>
+                      <Route path="/clients" element={<Clients />} />
+                    </Route>
                   </Route>
 
                   <Route element={<RequireRole roles={["dept_head", "front_desk"]} />}>
@@ -108,9 +114,13 @@ export default function App() {
 
                   <Route element={<RequireRole roles={["dept_head"]} />}>
                     <Route path="/money" element={<Money />} />
-                    <Route path="/oversight" element={<Oversight />} />
+                    <Route element={<RequireTeam />}>
+                      <Route path="/oversight" element={<Oversight />} />
+                    </Route>
                     <Route path="/classes" element={<ClassesManage />} />
-                    <Route path="/manage" element={<Manage />} />
+                    <Route element={<RequireTeam />}>
+                      <Route path="/manage" element={<Manage />} />
+                    </Route>
                     <Route path="/catalog" element={<Catalog />} />
                   </Route>
 

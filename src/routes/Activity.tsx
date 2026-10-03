@@ -98,11 +98,13 @@ function timeLabel(iso: string): string {
 }
 
 export function Activity() {
-  const { profile } = useAuth();
+  const { profile, orgMode } = useAuth();
   const navigate = useNavigate();
   useSetHeader({ kicker: "MEMBER APP", title: "Activity" }, []);
-  const back = profile?.role === "front_desk" ? "/" : "/history";
-  const backLabel = profile?.role === "front_desk" ? "Front Desk" : "History";
+  // The desk and a solo owner come from their home screen; a team owner from History.
+  const fromHome = profile?.role === "front_desk" || (profile?.role === "dept_head" && orgMode === "solo");
+  const back = fromHome ? "/" : "/history";
+  const backLabel = profile?.role === "front_desk" ? "Front Desk" : fromHome ? "Today" : "History";
 
   return (
     <div>
