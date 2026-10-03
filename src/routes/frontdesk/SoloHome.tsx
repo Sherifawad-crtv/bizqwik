@@ -115,7 +115,7 @@ export function SoloHome() {
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
         <Stat label="REVENUE" icon="cash" tone="primary" value={fmt(thisMonth)} sub={delta === null ? "EGP this month" : `${delta >= 0 ? "▲" : "▼"} ${Math.abs(delta)}% this month`} onClick={() => navigate("/money")} />
-        <Stat label="MEMBERS" icon="clients" tone="neutral" value={String(stats.total)} sub="All clients" onClick={() => goMembers("all")} />
+        <Stat label="MEMBERS" icon="account" tone="neutral" value={String(stats.total)} sub="All clients" onClick={() => goMembers("all")} />
         <Stat label="ACTIVE" icon="check" tone="good" value={String(stats.active)} sub="On a running plan" onClick={() => goMembers("active")} />
         <Stat label="ENDING SOON" icon="history" tone="warn" value={String(stats.soon)} sub="Next 7 days" onClick={() => goMembers("soon")} />
       </div>
