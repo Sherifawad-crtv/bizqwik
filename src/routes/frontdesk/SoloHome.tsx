@@ -13,6 +13,7 @@ import { Icon, type IconName } from "../../components/Icon";
 import { Spinner } from "../../components/Spinner";
 import { RevenueChart } from "../Oversight";
 import { LocationSwitcher, atLocation, useCurrentLocation } from "../../lib/locations";
+import { PaymentRequestsCard } from "./PaymentRequests";
 import { Card, SectionLink, SectionTitle, endingSoon, planSummary } from "./shared";
 
 const clockOf = (iso: string) => {
@@ -114,6 +115,7 @@ export function SoloHome() {
     <div>
       <HomeAvatar name={profile.name} avatarUrl={profile.avatarUrl} greeting={`Hi, ${profile.name.split(" ")[0]}`} />
       <LocationSwitcher />
+      <PaymentRequestsCard />
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
         <Stat label="REVENUE" icon="cash" tone="primary" value={fmt(thisMonth)} sub={delta === null ? "EGP this month" : `${delta >= 0 ? "▲" : "▼"} ${Math.abs(delta)}% this month`} onClick={() => navigate("/money")} />

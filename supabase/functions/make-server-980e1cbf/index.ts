@@ -3122,6 +3122,167 @@ app.post(`${P}/client/plans/buy`, async (c) => {
   return c.json({ plan: toGroupPlan(result.plan), wallet: await walletBalance(me.id, me.org_id) });
 });
 
+// ---- paying by InstaPay transfer (solo gyms) ----
+// The member pays in the InstaPay app, uploads the receipt screenshot here, and
+// the owner approves it. Nothing is granted until she does. The screenshot
+// lives in a private bucket and is only ever shown to her via a short-lived link.
+const PROOF_BUCKET = "payment-proofs";
+const NO_EXPIRY = 3650;
+
+function toPaymentRequest(r: any) {
+  return {
+    id: r.id, offerType: r.offer_type, name: r.name, price: Number(r.price), status: r.status,
+    note: r.note ?? null, locationId: r.location_id ?? null, createdAt: r.created_at, reviewedAt: r.reviewed_at ?? null,
+  };
+}
+
+// The owner of a solo business (she is also its desk).
+async function soloOwnerOf(c: any) {
+  const user = await requireUser(c);
+  const me = user && (await profileOf(user.id));
+  if (me?.role !== "dept_head" || (await orgModeOf(me.org_id)) !== "solo") return null;
+  return me;
+}
+
+app.get(`${P}/client/prices`, async (c) => {
+  const me = await requireClient(c);
+  if (!me) return c.json({ error: "Unauthorized" }, 401);
+  const solo = (await orgModeOf(me.org_id)) === "solo";
+  const [plan, pkg, { data: types }, { data: bundles }, { data: org }, { data: reqs }] = await Promise.all([
+    activeGroupPlan(me.id, me.org_id),
+    currentPackageForClient(me.id, me.org_id),
+    atMemberLocation(admin().from("group_plan_types").select("*").eq("org_id", me.org_id).eq("active", true).eq("kind", "bundle"), me).order("price"),
+    atMemberLocation(admin().from("bundle_types").select("*").eq("org_id", me.org_id), me).order("price"),
+    admin().from("organizations").select("instapay_address, instapay_qr").eq("id", me.org_id).maybeSingle(),
+    admin().from("payment_requests").select("*").eq("client_id", me.id).order("created_at", { ascending: false }).limit(5),
+  ]);
+  const pending = (reqs ?? []).find((r: any) => r.status === "pending") ?? null;
+  const ptActive = !!pkg && pkg.status === "active" && Number(pkg.sessions_remaining) > 0;
+  return c.json({
+    solo,
+    pay: { address: org?.instapay_address ?? null, qr: org?.instapay_qr ?? null },
+    activePlan: plan ? toGroupPlan(plan) : null,
+    activePackage: ptActive ? { name: null, sessionsRemaining: Number(pkg.sessions_remaining), sessionsIncluded: Number(pkg.sessions_included), expiresAt: pkg.expires_at } : null,
+    offers: [
+      ...(types ?? []).map((t: any) => ({ offerType: "plan_type", id: t.id, name: t.name, price: Number(t.price), months: t.duration_months, count: t.credits, locationId: t.location_id ?? null, canRequest: !plan })),
+      ...(bundles ?? []).map((b: any) => ({ offerType: "bundle_type", id: b.id, name: b.name, price: Number(b.price), months: null, expiryDays: b.expiry_days >= NO_EXPIRY ? null : Number(b.expiry_days), count: b.sessions_included, locationId: b.location_id ?? null, canRequest: !ptActive })),
+    ],
+    pending: pending ? toPaymentRequest(pending) : null,
+    recent: (reqs ?? []).filter((r: any) => r.status !== "pending").slice(0, 3).map(toPaymentRequest),
+  });
+});
+
+app.post(`${P}/client/payment-requests`, async (c) => {
+  const me = await requireClient(c);
+  if (!me) return c.json({ error: "Unauthorized" }, 401);
+  if ((await orgModeOf(me.org_id)) !== "solo") return c.json({ error: "Pay at the desk." }, 400);
+  const { offerType, id, proof } = await c.req.json();
+  const m = /^data:(image\/(png|jpeg|webp));base64,(.+)$/.exec(String(proof ?? ""));
+  if (!m) return c.json({ error: "Upload a screenshot of your InstaPay receipt." }, 400);
+  const bytes = Uint8Array.from(atob(m[3]), (ch) => ch.charCodeAt(0));
+  if (bytes.length > 2_500_000) return c.json({ error: "That image is too large. Try a smaller screenshot." }, 400);
+
+  let row: any;
+  if (offerType === "plan_type") {
+    const { data: t } = await atMemberLocation(admin().from("group_plan_types").select("*").eq("id", id).eq("org_id", me.org_id).eq("active", true).eq("kind", "bundle"), me).maybeSingle();
+    if (!t) return c.json({ error: "That plan isn't on sale." }, 404);
+    if (await activeGroupPlan(me.id, me.org_id)) return c.json({ error: "You already have an active plan. You can get a new one once it's finished.", code: "active_plan" }, 400);
+    row = { offer_type: "plan_type", plan_type_id: t.id, name: t.name, price: Number(t.price), location_id: t.location_id ?? null };
+  } else if (offerType === "bundle_type") {
+    const { data: b } = await atMemberLocation(admin().from("bundle_types").select("*").eq("id", id).eq("org_id", me.org_id), me).maybeSingle();
+    if (!b) return c.json({ error: "That package isn't on sale." }, 404);
+    const pkg = await currentPackageForClient(me.id, me.org_id);
+    if (pkg && pkg.status === "active") return c.json({ error: "You already have an active package.", code: "active_package" }, 400);
+    row = { offer_type: "bundle_type", bundle_type_id: b.id, name: b.name, price: Number(b.price), location_id: b.location_id ?? null };
+  } else {
+    return c.json({ error: "Choose what you're paying for." }, 400);
+  }
+
+  // The unique index allows one waiting request per member.
+  const { data: req, error } = await admin().from("payment_requests").insert({ org_id: me.org_id, client_id: me.id, ...row }).select().single();
+  if (error) {
+    if (error.code === "23505") return c.json({ error: "You already have a payment waiting for approval.", code: "pending_exists" }, 409);
+    throw error;
+  }
+  const path = `${me.org_id}/${req.id}.${m[2] === "jpeg" ? "jpg" : m[2]}`;
+  const up = await admin().storage.from(PROOF_BUCKET).upload(path, bytes, { contentType: m[1], upsert: true });
+  if (up.error) {
+    await admin().from("payment_requests").delete().eq("id", req.id);
+    return c.json({ error: "Couldn't upload your screenshot. Please try again." }, 500);
+  }
+  await admin().from("payment_requests").update({ proof_path: path }).eq("id", req.id);
+
+  const { data: owners } = await admin().from("profiles").select("id").eq("org_id", me.org_id).eq("role", "dept_head");
+  await Promise.all((owners ?? []).map((o: any) => sendPushToProfile(me.org_id, o.id, "payment_request", { title: "Payment to approve", body: `${me.name} paid ${row.price} EGP for ${row.name}.`, url: "/" })));
+  return c.json({ request: toPaymentRequest({ ...req, proof_path: path }) });
+});
+
+app.post(`${P}/client/payment-requests/:id/cancel`, async (c) => {
+  const me = await requireClient(c);
+  if (!me) return c.json({ error: "Unauthorized" }, 401);
+  const { data } = await admin().from("payment_requests").update({ status: "cancelled", reviewed_at: new Date().toISOString() }).eq("id", c.req.param("id")).eq("client_id", me.id).eq("status", "pending").select("id").maybeSingle();
+  if (!data) return c.json({ error: "That request is no longer waiting." }, 400);
+  return c.json({ ok: true });
+});
+
+// Owner: what's waiting (newest first) with a short-lived link to each screenshot.
+app.get(`${P}/payment-requests`, async (c) => {
+  const me = await soloOwnerOf(c);
+  if (!me) return c.json({ error: "Forbidden" }, 403);
+  const { data, error } = await admin().from("payment_requests").select("*, clients(name, phone)").eq("org_id", me.org_id).eq("status", c.req.query("status") === "done" ? "approved" : "pending").order("created_at", { ascending: false }).limit(50);
+  if (error) throw error;
+  const out = await Promise.all((data ?? []).map(async (r: any) => {
+    let proofUrl: string | null = null;
+    if (r.proof_path) proofUrl = (await admin().storage.from(PROOF_BUCKET).createSignedUrl(r.proof_path, 600)).data?.signedUrl ?? null;
+    return { ...toPaymentRequest(r), clientId: r.client_id, clientName: r.clients?.name ?? "Member", clientPhone: r.clients?.phone ?? null, proofUrl };
+  }));
+  return c.json({ requests: out });
+});
+
+app.post(`${P}/payment-requests/:id/approve`, async (c) => {
+  const me = await soloOwnerOf(c);
+  if (!me) return c.json({ error: "Forbidden" }, 403);
+  const id = c.req.param("id");
+  const { data: req } = await admin().from("payment_requests").select("*").eq("id", id).eq("org_id", me.org_id).maybeSingle();
+  if (!req) return c.json({ error: "No such request" }, 404);
+  if (req.status !== "pending") return c.json({ error: "That one was already handled." }, 409);
+  const { data: client } = await admin().from("clients").select("*").eq("id", req.client_id).maybeSingle();
+  if (!client) return c.json({ error: "That member no longer exists." }, 404);
+
+  // Claim it so a double-tap can't sell twice; put it back if the sale fails.
+  const { data: claimed } = await admin().from("payment_requests").update({ status: "approved", reviewed_by: me.id, reviewed_at: new Date().toISOString() }).eq("id", id).eq("status", "pending").select("id").maybeSingle();
+  if (!claimed) return c.json({ error: "That one was already handled." }, 409);
+  const release = () => admin().from("payment_requests").update({ status: "pending", reviewed_by: null, reviewed_at: null }).eq("id", id);
+
+  if (req.offer_type === "plan_type") {
+    const { data: t } = req.plan_type_id ? await admin().from("group_plan_types").select("price").eq("id", req.plan_type_id).maybeSingle() : { data: null };
+    if (t && Number(t.price) !== Number(req.price)) { await release(); return c.json({ error: `The price changed from ${req.price} to ${t.price} EGP since this was paid. Reject it and ask them to pay again.` }, 400); }
+    const r = await sellGroupPlan({ orgId: me.org_id, client: { id: client.id, name: client.name }, planTypeId: req.plan_type_id, payMethod: "instapay", actorId: me.id });
+    if ("error" in r) { await release(); return c.json({ error: r.error }, r.status); }
+  } else {
+    const { data: b } = req.bundle_type_id ? await admin().from("bundle_types").select("price").eq("id", req.bundle_type_id).maybeSingle() : { data: null };
+    if (b && Number(b.price) !== Number(req.price)) { await release(); return c.json({ error: `The price changed from ${req.price} to ${b.price} EGP since this was paid. Reject it and ask them to pay again.` }, 400); }
+    if (!req.bundle_type_id) { await release(); return c.json({ error: "That package isn't on sale anymore." }, 404); }
+    const r = await sellPackageTo(client.id, req.bundle_type_id, me.id, me, "instapay");
+    if ("error" in r) { await release(); return c.json({ error: r.error }, r.status); }
+    await earnPurchasePoints(client.id, me.org_id, Number(r.package.price_at_sale), "instapay");
+    await logActivity(me.org_id, "sale_package", { actorId: me.id, clientId: client.id, amount: Number(r.package.price_at_sale), meta: { payMethod: "instapay", locationId: r.package.location_id ?? null, requestId: id } });
+    await notifyClient(me.org_id, client.id, "payment_approved", { title: `${req.name} is active`, body: `Your payment was approved. ${r.package.sessions_included} sessions are ready to use.`, push: true });
+  }
+  return c.json({ ok: true });
+});
+
+app.post(`${P}/payment-requests/:id/reject`, async (c) => {
+  const me = await soloOwnerOf(c);
+  if (!me) return c.json({ error: "Forbidden" }, 403);
+  const { note } = await c.req.json().catch(() => ({}));
+  const text = String(note ?? "").trim().slice(0, 200) || null;
+  const { data: req } = await admin().from("payment_requests").update({ status: "rejected", note: text, reviewed_by: me.id, reviewed_at: new Date().toISOString() }).eq("id", c.req.param("id")).eq("org_id", me.org_id).eq("status", "pending").select("*").maybeSingle();
+  if (!req) return c.json({ error: "That one was already handled." }, 409);
+  await notifyClient(me.org_id, req.client_id, "payment_rejected", { title: "We couldn't confirm your payment", body: text ? `${req.name}: ${text}` : `${req.name}: please check the receipt and try again.`, push: true });
+  return c.json({ ok: true });
+});
+
 app.get(`${P}/client/bookings`, async (c) => {
   const me = await requireClient(c);
   if (!me) return c.json({ error: "Unauthorized" }, 401);

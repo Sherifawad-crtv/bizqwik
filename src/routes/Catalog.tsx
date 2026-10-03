@@ -563,8 +563,22 @@ function SoloOffer() {
   const [rows, setRows] = useState<{ label: string; price: string }[]>([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [address, setAddress] = useState<string | null>(null);
   if (!settings.data) return null;
-  const { instapayQr } = settings.data;
+  const { instapayQr, instapayAddress } = settings.data;
+  const saveAddress = async () => {
+    setBusy(true);
+    setError(null);
+    try {
+      await api.saveOrgSettings({ instapayAddress: (address ?? "").trim() || null });
+      setAddress(null);
+      settings.refetch();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Couldn't save.");
+    } finally {
+      setBusy(false);
+    }
+  };
   // With locations, each has its own drop-in price.
   const dropInPrice = catalogHere ? (settings.data.dropInPrices[catalogHere] ?? null) : settings.data.dropInPrice;
   const dropInList = catalogHere ? (settings.data.dropInOptions[catalogHere] ?? []) : [];
@@ -666,6 +680,28 @@ function SoloOffer() {
             <input type="file" accept="image/*" hidden onChange={(e) => { void pickQr(e.target.files?.[0]); e.target.value = ""; }} />
           </label>
         </div>
+      </div>
+      <div data-sq style={card}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ font: "700 16px var(--font-body)" }}>InstaPay address</div>
+            <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{instapayAddress ?? "Members copy this to pay you"}</div>
+          </div>
+          {address === null && (
+            <Button size="md" variant="secondary" style={{ height: 40, padding: "0 16px" }} onClick={() => { setAddress(instapayAddress ?? ""); setError(null); }}>
+              {instapayAddress ? "Edit" : "Add"}
+            </Button>
+          )}
+        </div>
+        {address !== null && (
+          <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 10 }}>
+            <TextField label="INSTAPAY ADDRESS" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="name@instapay" autoCapitalize="none" autoCorrect="off" />
+            <div style={{ display: "flex", gap: 8 }}>
+              <Button style={{ flex: 1 }} disabled={busy} onClick={saveAddress}>{busy ? "Saving…" : "Save"}</Button>
+              <Button variant="quiet" disabled={busy} onClick={() => setAddress(null)}>Cancel</Button>
+            </div>
+          </div>
+        )}
       </div>
       {error && <div style={{ font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px", marginBottom: 12 }}>{error}</div>}
     </div>

@@ -29,7 +29,7 @@ async function soloOwner(c: any) {
   if (!user) return null;
   const { data: me } = await admin.from("profiles").select("id, org_id, role").eq("id", user.id).maybeSingle();
   if (!me || me.role !== "dept_head") return null;
-  const { data: org } = await admin.from("organizations").select("mode, dropin_price, instapay_qr").eq("id", me.org_id).maybeSingle();
+  const { data: org } = await admin.from("organizations").select("mode, dropin_price, instapay_qr, instapay_address").eq("id", me.org_id).maybeSingle();
   if (org?.mode !== "solo") return null;
   return { me, org };
 }
@@ -48,7 +48,7 @@ app.get(`${P}/org-settings`, async (c) => {
     dropInPrices[l.id] = l.dropin_price != null ? Number(l.dropin_price) : null;
     dropInOptions[l.id] = Array.isArray(l.dropin_options) ? l.dropin_options : [];
   }
-  return c.json({ dropInPrice: o.org.dropin_price != null ? Number(o.org.dropin_price) : null, dropInPrices, dropInOptions, instapayQr: o.org.instapay_qr ?? null });
+  return c.json({ dropInPrice: o.org.dropin_price != null ? Number(o.org.dropin_price) : null, dropInPrices, dropInOptions, instapayQr: o.org.instapay_qr ?? null, instapayAddress: o.org.instapay_address ?? null });
 });
 
 app.post(`${P}/org-settings`, async (c) => {
@@ -63,7 +63,7 @@ app.post(`${P}/org-settings`, async (c) => {
     const { data: loc, error: lErr } = await admin.from("locations").update({ dropin_options: opts }).eq("id", String(body.locationId)).eq("org_id", o.me.org_id).select("id").maybeSingle();
     if (lErr) throw lErr;
     if (!loc) return c.json({ error: "That location doesn't exist." }, 404);
-    if (!("instapayQr" in body) && !("dropInPrice" in body)) return c.json({ ok: true });
+    if (!("instapayQr" in body) && !("dropInPrice" in body) && !("instapayAddress" in body)) return c.json({ ok: true });
   }
   // A location's own drop-in price.
   if (body.locationId && "dropInPrice" in body) {
@@ -73,7 +73,7 @@ app.post(`${P}/org-settings`, async (c) => {
     if (lErr) throw lErr;
     if (!loc) return c.json({ error: "That location doesn't exist." }, 404);
     delete body.dropInPrice;
-    if (!("instapayQr" in body)) return c.json({ ok: true });
+    if (!("instapayQr" in body) && !("instapayAddress" in body)) return c.json({ ok: true });
   }
   if ("dropInPrice" in body) {
     if (body.dropInPrice === null) patch.dropin_price = null;
@@ -82,6 +82,12 @@ app.post(`${P}/org-settings`, async (c) => {
       if (!Number.isFinite(n) || n < 0) return c.json({ error: "Enter a valid drop-in price." }, 400);
       patch.dropin_price = n;
     }
+  }
+  // The address members copy into the InstaPay app (e.g. name@instapay).
+  if ("instapayAddress" in body) {
+    const a = body.instapayAddress === null ? "" : String(body.instapayAddress).trim();
+    if (a.length > 80) return c.json({ error: "That InstaPay address is too long." }, 400);
+    patch.instapay_address = a || null;
   }
   if ("instapayQr" in body) {
     if (body.instapayQr === null) patch.instapay_qr = null;

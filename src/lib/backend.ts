@@ -43,6 +43,7 @@ import type { PaymentsSummary, Location,
 } from "./types";
 
 /** One kind of drop-in at a location (e.g. Kids / Adults) and its price. */
+export interface PaymentRequest { id: string; clientId: string; clientName: string; clientPhone: string | null; name: string; price: number; offerType: "plan_type" | "bundle_type"; createdAt: string; proofUrl: string | null }
 export interface DropInOption {
   label: string;
   price: number;
@@ -247,11 +248,15 @@ export const api = {
   // A walk-in is always recorded against a member: an existing client, or a
   // new one created with the sale (the backend also registers their app invite).
   orgSettings: async () => {
-    const r = await callFn<{ dropInPrice?: number | null; dropInPrices?: Record<string, number | null>; dropInOptions?: Record<string, DropInOption[]>; instapayQr?: string | null }>("org-settings", undefined, SOLO_DESK);
-    return { dropInPrice: r.dropInPrice ?? null, dropInPrices: r.dropInPrices ?? {}, dropInOptions: r.dropInOptions ?? {}, instapayQr: r.instapayQr ?? null };
+    const r = await callFn<{ dropInPrice?: number | null; dropInPrices?: Record<string, number | null>; dropInOptions?: Record<string, DropInOption[]>; instapayQr?: string | null; instapayAddress?: string | null }>("org-settings", undefined, SOLO_DESK);
+    return { dropInPrice: r.dropInPrice ?? null, dropInPrices: r.dropInPrices ?? {}, dropInOptions: r.dropInOptions ?? {}, instapayQr: r.instapayQr ?? null, instapayAddress: r.instapayAddress ?? null };
   },
   // With `locationId`, sets that location's own drop-in price.
-  saveOrgSettings: (patch: { dropInPrice?: number | null; instapayQr?: string | null; locationId?: string; dropInOptions?: DropInOption[] }) => callFn<{ ok: true }>("org-settings", { method: "POST", body: patch }, SOLO_DESK),
+  saveOrgSettings: (patch: { dropInPrice?: number | null; instapayQr?: string | null; instapayAddress?: string | null; locationId?: string; dropInOptions?: DropInOption[] }) => callFn<{ ok: true }>("org-settings", { method: "POST", body: patch }, SOLO_DESK),
+  // Members who paid by InstaPay and uploaded the receipt, waiting for her to approve.
+  paymentRequests: () => callFn<{ requests: PaymentRequest[] }>("payment-requests"),
+  approvePayment: (id: string) => callFn<{ ok: true }>(`payment-requests/${id}/approve`, { method: "POST" }),
+  rejectPayment: (id: string, note?: string) => callFn<{ ok: true }>(`payment-requests/${id}/reject`, { method: "POST", body: { note } }),
   soloDropIn: (payMethod: "cash" | "instapay", locationId?: string | null, label?: string) => callFn<void>("drop-ins", { method: "POST", body: { payMethod, locationId: locationId ?? undefined, label } }, SOLO_DESK),
   dropIn: (member: { clientId: string } | { newClient: NewClientFields }, category: string, price: number, payMethod?: PayMethod, confirmActivePlan = false) =>
     callFn<void>("drop-ins", { method: "POST", body: { ...member, category, price, payMethod, confirmActivePlan } }),
