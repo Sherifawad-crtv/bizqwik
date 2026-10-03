@@ -1,3 +1,4 @@
+import { clearAsyncCache } from "./useAsync";
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { markWelcomed } from "./welcome";
 import { api, auth as authApi } from "./backend";
@@ -59,6 +60,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (email: string, password: string) => {
     await authApi.signInWithPassword(email, password);
+    clearAsyncCache();
     const me = await api.me();
     setProfile(me.profile);
     setTier(me.tier);
@@ -68,6 +70,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = async () => {
     await authApi.signOut();
+    clearAsyncCache();
     setProfile(null);
     setTier(null);
     setOrgMode("team");

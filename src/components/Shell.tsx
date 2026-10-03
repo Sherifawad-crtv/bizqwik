@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+import { Spinner } from "./Spinner";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { BottomNav } from "./BottomNav";
 import { RouteTransition } from "./RouteTransition";
@@ -126,7 +128,7 @@ export function Shell() {
           {header.right && <div style={{ marginLeft: "auto" }}>{header.right}</div>}
         </div>
         <div style={{ padding: "24px 30px 60px" }}>
-          <Outlet />
+          <Suspense fallback={<Spinner />}><Outlet /></Suspense>
         </div>
       </div>
     </div>

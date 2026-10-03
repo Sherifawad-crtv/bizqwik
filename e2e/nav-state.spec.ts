@@ -49,7 +49,9 @@ test("dept head: Back from a coach opened on Team returns to Team", async ({ pag
   await boot(page);
   await page.goto("/coaches");
   await page.getByText("Coach Nour").first().click();
-  await expect(page.getByRole("button", { name: "Team" }).last()).toBeVisible();
+  await expect(page).toHaveURL(/\/coaches\/[^/]+$/);
+  // Let the slide finish so only the coach screen is on top, then tap its Back.
+  await page.waitForTimeout(700);
   await page.getByRole("button", { name: "Team" }).last().click();
   await expect(page).toHaveURL(/\/coaches$/);
 });

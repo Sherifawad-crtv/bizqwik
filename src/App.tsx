@@ -1,9 +1,10 @@
-import { useEffect } from "react";
+import { Suspense, lazy, useEffect, type ComponentType } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./lib/auth";
 import { HeaderProvider } from "./lib/header";
 import { OwnMonthProvider } from "./lib/ownMonth";
 import { RequireAuth, RequireRole, RequireBizqwikTeam, RequireDesk, RequireTeam } from "./lib/guards";
+import { Spinner } from "./components/Spinner";
 import { Shell } from "./components/Shell";
 import { initSquirclePolyfill } from "./lib/squircle";
 
@@ -11,36 +12,42 @@ import { Login } from "./routes/Login";
 import { Signup } from "./routes/Signup";
 import { LaunchGate } from "./components/Splash";
 import { Money } from "./routes/Money";
-import { Welcome } from "./routes/Welcome";
-import { ForgotPassword } from "./routes/ForgotPassword";
-import { ResetPassword } from "./routes/ResetPassword";
 import { Home } from "./routes/Home";
-import { CoachesOverview } from "./routes/CoachesOverview";
-import { CoachDetail } from "./routes/CoachDetail";
 import { Oversight } from "./routes/Oversight";
 import { ClassesManage } from "./routes/ClassesManage";
 import { Activity, Transactions } from "./routes/Activity";
-import { Manage } from "./routes/Manage";
 import { Catalog } from "./routes/Catalog";
-import { Pay } from "./routes/Pay";
-import { PayeeDetail } from "./routes/PayeeDetail";
-import { History } from "./routes/History";
-import { Clients } from "./routes/Clients";
 import { Account } from "./routes/Account";
-import { AccountProfile } from "./routes/AccountProfile";
-import { AccountPassword } from "./routes/AccountPassword";
 import { Members } from "./routes/frontdesk/Members";
 import { CheckIn } from "./routes/frontdesk/CheckIn";
 import { DropIn } from "./routes/frontdesk/DropIn";
-import { Invitations } from "./routes/frontdesk/Invitations";
 import { Bookings } from "./routes/frontdesk/Bookings";
-import { DeskClasses } from "./routes/frontdesk/DeskClasses";
-import { OpsShell } from "./routes/ops/OpsShell";
-import { Overview as OpsOverview } from "./routes/ops/Overview";
-import { OrgDetail as OpsOrgDetail } from "./routes/ops/OrgDetail";
-import { OrgQr as OpsOrgQr } from "./routes/ops/OrgQr";
-import { Team as OpsTeam } from "./routes/ops/Team";
-import { Plans as OpsPlans } from "./routes/ops/Plans";
+
+
+// Screens most people never open load on demand, keeping the first download small.
+function lazyNamed<T extends Record<string, unknown>>(load: () => Promise<T>, name: keyof T) {
+  return lazy(async () => ({ default: (await load())[name] as ComponentType }));
+}
+const Welcome = lazyNamed(() => import("./routes/Welcome"), "Welcome");
+const ForgotPassword = lazyNamed(() => import("./routes/ForgotPassword"), "ForgotPassword");
+const ResetPassword = lazyNamed(() => import("./routes/ResetPassword"), "ResetPassword");
+const CoachesOverview = lazyNamed(() => import("./routes/CoachesOverview"), "CoachesOverview");
+const CoachDetail = lazyNamed(() => import("./routes/CoachDetail"), "CoachDetail");
+const Manage = lazyNamed(() => import("./routes/Manage"), "Manage");
+const Pay = lazyNamed(() => import("./routes/Pay"), "Pay");
+const PayeeDetail = lazyNamed(() => import("./routes/PayeeDetail"), "PayeeDetail");
+const History = lazyNamed(() => import("./routes/History"), "History");
+const Clients = lazyNamed(() => import("./routes/Clients"), "Clients");
+const Invitations = lazyNamed(() => import("./routes/frontdesk/Invitations"), "Invitations");
+const DeskClasses = lazyNamed(() => import("./routes/frontdesk/DeskClasses"), "DeskClasses");
+const AccountProfile = lazyNamed(() => import("./routes/AccountProfile"), "AccountProfile");
+const AccountPassword = lazyNamed(() => import("./routes/AccountPassword"), "AccountPassword");
+const OpsShell = lazyNamed(() => import("./routes/ops/OpsShell"), "OpsShell");
+const OpsOverview = lazyNamed(() => import("./routes/ops/Overview"), "Overview");
+const OpsOrgDetail = lazyNamed(() => import("./routes/ops/OrgDetail"), "OrgDetail");
+const OpsOrgQr = lazyNamed(() => import("./routes/ops/OrgQr"), "OrgQr");
+const OpsTeam = lazyNamed(() => import("./routes/ops/Team"), "Team");
+const OpsPlans = lazyNamed(() => import("./routes/ops/Plans"), "Plans");
 
 export default function App() {
   useEffect(() => {
@@ -53,6 +60,7 @@ export default function App() {
         <HeaderProvider>
           <OwnMonthProvider>
             <LaunchGate>
+            <Suspense fallback={<Spinner />}>
             <Routes>
               <Route path="/welcome" element={<Welcome />} />
               <Route path="/login" element={<Login />} />
@@ -133,6 +141,7 @@ export default function App() {
 
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
+            </Suspense>
             </LaunchGate>
           </OwnMonthProvider>
         </HeaderProvider>
