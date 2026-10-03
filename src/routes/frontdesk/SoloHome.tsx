@@ -12,7 +12,7 @@ import { HomeAvatar } from "../../components/HomeAvatar";
 import { QuickAction } from "../../components/QuickAction";
 import { ClassRosterSheet } from "../../components/ClassRosterSheet";
 import { EmptyState } from "../../components/EmptyState";
-import { Icon } from "../../components/Icon";
+import { Icon, type IconName } from "../../components/Icon";
 import { Sheet } from "../../components/Sheet";
 import { Spinner } from "../../components/Spinner";
 import { RevenueChart } from "../Oversight";
@@ -34,7 +34,15 @@ function timeAgo(iso: string): string {
   return `${hrs} hr${hrs === 1 ? "" : "s"} ago`;
 }
 
-function Stat({ label, value, sub, onClick }: { label: string; value: string; sub: string; onClick?: () => void }) {
+type Tone = { fg: string; bg: string };
+const TONES: Record<"primary" | "good" | "warn" | "neutral", Tone> = {
+  primary: { fg: "var(--primary-pressed)", bg: "var(--primary-tint)" },
+  good: { fg: "var(--paid-fg)", bg: "var(--paid-bg)" },
+  warn: { fg: "var(--logging-fg)", bg: "var(--logging-bg)" },
+  neutral: { fg: "var(--ink-muted)", bg: "var(--sunken)" },
+};
+
+function Stat({ label, value, sub, icon, tone, onClick }: { label: string; value: string; sub: string; icon: IconName; tone: keyof typeof TONES; onClick?: () => void }) {
   return (
     <button
       data-sq
@@ -42,8 +50,13 @@ function Stat({ label, value, sub, onClick }: { label: string; value: string; su
       onClick={onClick}
       style={{ textAlign: "left", background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: "16px 18px", cursor: onClick ? "pointer" : "default", minWidth: 0 }}
     >
-      <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>{label}</div>
-      <div style={{ font: "800 30px/1.1 var(--font-body)", letterSpacing: "-.02em", marginTop: 6, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{value}</div>
+      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <span style={{ width: 32, height: 32, borderRadius: 999, flex: "none", display: "flex", alignItems: "center", justifyContent: "center", background: TONES[tone].bg, color: TONES[tone].fg }}>
+          <Icon name={icon} size={17} />
+        </span>
+        <span style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>{label}</span>
+      </div>
+      <div style={{ font: "800 30px/1.1 var(--font-body)", letterSpacing: "-.02em", marginTop: 10, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{value}</div>
       <div style={{ font: "400 12px var(--font-mono)", color: "var(--ink-muted)", marginTop: 4 }}>{sub}</div>
     </button>
   );
@@ -101,10 +114,10 @@ export function SoloHome() {
       <HomeAvatar name={profile.name} avatarUrl={profile.avatarUrl} greeting={`Hi, ${profile.name.split(" ")[0]}`} />
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-        <Stat label="REVENUE" value={fmt(thisMonth)} sub={delta === null ? "EGP this month" : `${delta >= 0 ? "▲" : "▼"} ${Math.abs(delta)}% this month`} onClick={() => navigate("/money")} />
-        <Stat label="MEMBERS" value={String(stats.total)} sub="All clients" onClick={() => goMembers("all")} />
-        <Stat label="ACTIVE" value={String(stats.active)} sub="On a running plan" onClick={() => goMembers("active")} />
-        <Stat label="ENDING SOON" value={String(stats.soon)} sub="Next 7 days" onClick={() => goMembers("soon")} />
+        <Stat label="REVENUE" icon="cash" tone="primary" value={fmt(thisMonth)} sub={delta === null ? "EGP this month" : `${delta >= 0 ? "▲" : "▼"} ${Math.abs(delta)}% this month`} onClick={() => navigate("/money")} />
+        <Stat label="MEMBERS" icon="clients" tone="neutral" value={String(stats.total)} sub="All clients" onClick={() => goMembers("all")} />
+        <Stat label="ACTIVE" icon="check" tone="good" value={String(stats.active)} sub="On a running plan" onClick={() => goMembers("active")} />
+        <Stat label="ENDING SOON" icon="history" tone="warn" value={String(stats.soon)} sub="Next 7 days" onClick={() => goMembers("soon")} />
       </div>
 
       <Card style={{ padding: "18px 18px 12px", marginTop: 10 }}>
