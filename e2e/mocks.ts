@@ -40,6 +40,8 @@ export async function mockBackend(
   startSignedIn = true,
 ) {
   const state = { signedIn: startSignedIn };
+  // Every test device has already been welcomed; the welcome spec clears this.
+  await page.addInitScript(() => localStorage.setItem("bizqwik.welcomed", "1"));
 
   await page.route(/\/auth\/v1\//, (route) => {
     if (route.request().method() === "OPTIONS") return route.fulfill({ status: 204, headers: CORS });
