@@ -30,6 +30,49 @@ export function planSummary(client: ClientWithPackage, bundleTypes: BundleType[]
   return { tone: "none", title: "No plan", detail: "Nothing active" };
 }
 
+const DAY = 86400000;
+
+/** Is this client's plan about to run out? A running plan ending within a week,
+ * or a class pack down to its last two sessions. Returns what's left to say. */
+export function endingSoon(client: ClientWithPackage): { days: number | null; label: string } | null {
+  const g = client.groupPlan ?? null;
+  const p = client.currentPackage && client.currentPackage.status === "active" ? client.currentPackage : null;
+  const now = Date.now();
+  const daysTo = (iso: string) => Math.ceil((Date.parse(iso) - now) / DAY);
+  if (g) {
+    const d = daysTo(g.expiresAt);
+    if (g.kind === "bundle" && (g.creditsRemaining ?? 0) <= 2) return { days: d, label: `${g.creditsRemaining} session${g.creditsRemaining === 1 ? "" : "s"} left` };
+    if (d <= 7) return { days: d, label: d <= 0 ? "Ends today" : d === 1 ? "Ends tomorrow" : `Ends in ${d} days` };
+  }
+  if (p) {
+    const d = daysTo(p.expiryDate);
+    if (p.sessionsRemaining <= 2) return { days: d, label: `${p.sessionsRemaining} PT session${p.sessionsRemaining === 1 ? "" : "s"} left` };
+    if (d <= 7) return { days: d, label: d <= 0 ? "Ends today" : `Ends in ${d} days` };
+  }
+  return null;
+}
+
+/** WhatsApp wants the number in international form, digits only. An Egyptian
+ * mobile typed 010… becomes 2010…; anything already starting with a country
+ * code is kept. */
+export function whatsappUrl(phone: string | null | undefined, text: string): string | null {
+  const digits = String(phone ?? "").replace(/\D/g, "");
+  if (digits.length < 8) return null;
+  const intl = digits.startsWith("00") ? digits.slice(2) : digits.startsWith("0") ? `20${digits.slice(1)}` : digits;
+  return `https://wa.me/${intl}?text=${encodeURIComponent(text)}`;
+}
+
+/** A friendly renewal nudge for a client, ready to edit in WhatsApp. */
+export function renewalMessage(client: ClientWithPackage, bundleTypes: BundleType[]): string {
+  const first = client.name.trim().split(/\s+/)[0];
+  const s = planSummary(client, bundleTypes);
+  const ended = s.tone !== "active";
+  const what = s.title && s.title !== "No plan" ? s.title : "your plan";
+  return ended
+    ? `Hi ${first}! Your ${what} has ended. Would you like to renew so you can keep training? 💪`
+    : `Hi ${first}! Just a heads up — your ${what} is almost up (${s.detail}). Want me to renew it for you? 💪`;
+}
+
 const TONE: Record<PlanTone, { fg: string; bg: string; label: string }> = {
   active: { fg: "var(--paid-fg)", bg: "var(--paid-bg)", label: "ACTIVE" },
   expired: { fg: "var(--danger-fg)", bg: "var(--danger-bg)", label: "EXPIRED" },

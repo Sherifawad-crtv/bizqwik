@@ -32,6 +32,7 @@ export function Account() {
       <div data-sq style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: "6px 4px", marginBottom: 16 }}>
         <NotificationsRow />
         {profile.role === "dept_head" && orgMode === "solo" && <SettingsRow icon="tag" label="What I offer" onClick={() => navigate("/catalog")} />}
+        {(profile.role === "front_desk" || (profile.role === "dept_head" && orgMode === "solo")) && <SettingsRow icon="clients" label="Import members" onClick={() => navigate("/import")} />}
         <SettingsRow icon="account" label="Account Settings" onClick={() => navigate("/account/profile")} />
         <SettingsRow icon="lock" label="Password Settings" onClick={() => navigate("/account/password")} last />
       </div>
