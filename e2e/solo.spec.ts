@@ -626,3 +626,21 @@ test("InstaPay payments: nothing waiting shows no card; she can set her InstaPay
   await expect.poll(() => sent.length).toBe(1);
   expect(sent[0]).toMatchObject({ instapayAddress: "hh@instapay" });
 });
+
+test("locations: the switcher is there with the page — nothing pops in after the content", async ({ page }) => {
+  await bootWithLocations(page);
+  // Slow the locations answer; the page must wait for it instead of showing first and shifting.
+  await page.route(/\/functions\/v1\/[^/]+\/locations$/, async (route) => {
+    await new Promise((r) => setTimeout(r, 900));
+    await route.fallback();
+  });
+  for (const path of ["/", "/bookings", "/members"]) {
+    await page.goto(path);
+    const group = page.getByRole("group", { name: "Working at" });
+    // The first real content on each page (not the switcher): once it's there, the switcher must be too.
+    const content = path === "/" ? page.getByText("ENDING SOON", { exact: true }) : path === "/bookings" ? page.getByText("Zamalek Flow") : page.getByRole("button", { name: /New client/ });
+    await expect(content.first()).toBeVisible({ timeout: 10_000 });
+    await expect(group).toBeVisible({ timeout: 100 });
+    if (path === "/bookings") await expect(page.getByText("Maadi Burn")).toHaveCount(0);
+  }
+});

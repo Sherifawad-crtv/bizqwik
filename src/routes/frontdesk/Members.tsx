@@ -97,13 +97,13 @@ export function Members() {
 
   // Each location keeps its own clients. (Clients from before locations show
   // at both, flagged, until they're given one.)
-  const { locations: memberLocations, current: memberHere } = useCurrentLocation();
+  const { locations: memberLocations, current: memberHere, ready: locsReady } = useCurrentLocation();
   const here = memberLocations.length > 1 ? (memberHere?.id ?? null) : null;
   const clients = (data?.clients ?? []).filter((c) => atLocation(c.homeLocationId, here));
   const shown = useMemo(() => clients.filter((c) => matchesClient(c, query) && (filter === "all" || (filter === "soon" ? endingSoon(c) !== null : planSummary(c, bundleTypes).tone === filter))), [clients, query, filter, bundleTypes]);
   const selected = clients.find((c) => c.id === selectedId) ?? null;
 
-  if (!data) return <Spinner />;
+  if (!locsReady || !data) return <Spinner />;
 
   return (
     <div>

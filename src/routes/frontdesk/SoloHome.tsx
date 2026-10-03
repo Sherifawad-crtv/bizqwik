@@ -67,7 +67,7 @@ export function SoloHome() {
   const classes = useAsync(() => api.classes(new Date(Date.now() - 2 * 3600000).toISOString()), []);
   const bundles = useAsync(() => api.bundleTypes(), []);
   const bundleTypes = bundles.data?.bundleTypes ?? [];
-  const { locations, current } = useCurrentLocation();
+  const { locations, current, ready: locsReady } = useCurrentLocation();
   // Two or more locations: everything on Today is the selected location's.
   const here = locations.length > 1 ? (current?.id ?? null) : null;
   const locRevenue = useAsync(() => (here ? api.paymentsSummary(12, here) : Promise.resolve(null)), [here]);
@@ -109,7 +109,7 @@ export function SoloHome() {
   };
 
   if (!profile) return null;
-  if (!clients.data || !revenue.data || (here && !locRevenue.data)) return <Spinner />;
+  if (!locsReady || !clients.data || !revenue.data || (here && !locRevenue.data)) return <Spinner />;
 
   return (
     <div>

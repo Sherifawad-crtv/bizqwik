@@ -36,6 +36,7 @@ export function Catalog() {
   // A solo owner opens on her plans; a team catalog on its classes.
   const [tab, setTab] = useSticky<Tab>("catalogTab", solo ? "plans" : "classes", { valid: (v) => ["classes","plans","pt"].includes(v) });
   useSetHeader(solo ? { kicker: "WHAT YOU SELL", title: "Plans" } : { kicker: "WHAT YOU SELL", title: "Catalog" }, [solo]);
+  const { ready: locsReady } = useCurrentLocation();
 
   return (
     <div>
@@ -51,9 +52,15 @@ export function Catalog() {
           ]}
         />
       </div>
-      {tab === "classes" && <ClassesPanel solo={solo} />}
-      {tab === "plans" && (solo ? (<div><LocationsCard /><SoloOffer /><PlansPanel solo /></div>) : <PlansPanel />)}
-      {tab === "pt" && <BundlesPanel />}
+      {!locsReady ? (
+        <Spinner />
+      ) : (
+        <>
+          {tab === "classes" && <ClassesPanel solo={solo} />}
+          {tab === "plans" && (solo ? (<div><LocationsCard /><SoloOffer /><PlansPanel solo /></div>) : <PlansPanel />)}
+          {tab === "pt" && <BundlesPanel />}
+        </>
+      )}
     </div>
   );
 }

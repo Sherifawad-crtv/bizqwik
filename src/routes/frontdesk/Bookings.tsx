@@ -40,7 +40,7 @@ export function Bookings() {
   const solo = !!profile && isSoloOwner(profile.role, orgMode);
   useSetHeader(solo ? { kicker: "SESSIONS", title: "Schedule" } : { kicker: "FRONT DESK", title: "Bookings" }, [solo]);
   const [form, setForm] = useState<FormState | null>(null);
-  const { locations, current } = useCurrentLocation();
+  const { locations, current, ready: locsReady } = useCurrentLocation();
   // The selected location's sessions only (each location is run separately).
   const place = locations.length > 1 ? (current?.id ?? "all") : "all";
   const [cancelling, setCancelling] = useState<GymClass | null>(null);
@@ -71,7 +71,7 @@ export function Bookings() {
   }, [classes.data, range, place]);
 
   if (month) return <ClassCalendarScreen onClose={() => setMonth(false)} />;
-  if (!classes.data) return <Spinner />;
+  if (!locsReady || !classes.data) return <Spinner />;
 
   const today = startOfDay(new Date());
   const nowMs = Date.now();
