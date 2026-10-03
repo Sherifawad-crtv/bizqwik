@@ -11,7 +11,8 @@ import { egp, fmt } from "../lib/format";
 import { WEEKDAY_ORDER, WEEKDAY_SHORT, timeLabel, weekdaysLabel } from "../lib/classTime";
 import { TimeWheelField } from "../components/TimeWheelField";
 import { ClassPhotoField } from "../components/ClassPhotoField";
-import type { ClassSeries, GroupPlanType, GroupPlanTypeKind } from "../lib/types";
+import type { ClassSeries, GroupPlanType, GroupPlanTypeKind, Location } from "../lib/types";
+import { LocationField, LocationPill, useCurrentLocation, useLocations } from "../lib/locations";
 import { Segmented } from "../components/Segmented";
 import { Button } from "../components/Button";
 import { Icon } from "../components/Icon";
@@ -29,13 +30,11 @@ type Tab = "classes" | "plans" | "pt";
  * each with a drop-in and a monthly price), group plans (all-access
  * memberships and class bundles), and private-training bundles. */
 export function Catalog() {
-  const [tab, setTab] = useSticky<Tab>("catalogTab", "classes", { valid: (v) => ["classes","plans","pt"].includes(v) });
   const { orgMode } = useAuth();
   const solo = orgMode === "solo";
-  useSetHeader(solo ? { kicker: "WHAT YOU SELL", title: "My plans" } : { kicker: "WHAT YOU SELL", title: "Catalog" }, [solo]);
-
-  // A solo owner sells memberships only: no classes, bundles or PT tabs.
-  if (solo) return (<div><SoloOffer /><PlansPanel solo /></div>);
+  // A solo owner opens on her plans; a team catalog on its classes.
+  const [tab, setTab] = useSticky<Tab>("catalogTab", solo ? "plans" : "classes", { valid: (v) => ["classes","plans","pt"].includes(v) });
+  useSetHeader(solo ? { kicker: "WHAT YOU SELL", title: "Plans" } : { kicker: "WHAT YOU SELL", title: "Catalog" }, [solo]);
 
   return (
     <div>
@@ -50,8 +49,8 @@ export function Catalog() {
           ]}
         />
       </div>
-      {tab === "classes" && <ClassesPanel />}
-      {tab === "plans" && <PlansPanel />}
+      {tab === "classes" && <ClassesPanel solo={solo} />}
+      {tab === "plans" && (solo ? (<div><LocationsCard /><SoloOffer /><PlansPanel solo /></div>) : <PlansPanel />)}
       {tab === "pt" && <BundlesPanel />}
     </div>
   );
@@ -88,9 +87,10 @@ function EmptyRow({ text, action }: { text: string; action?: { label: string; on
 
 // ---------- Classes (recurring series) ----------
 
-function ClassesPanel() {
+function ClassesPanel({ solo }: { solo?: boolean }) {
   const navigate = useNavigate();
   const { data } = useAsync(() => api.classSeries(), []);
+  const locations = useLocations();
   const [editing, setEditing] = useState<ClassSeries | "new" | null>(null);
 
   if (!data) return <Spinner />;
@@ -110,13 +110,13 @@ function ClassesPanel() {
       />
       <div data-sq style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", overflow: "hidden" }}>
         {active.map((s, i) => (
-          <SeriesRow key={s.id} s={s} last={i === active.length - 1} onEdit={() => setEditing(s)} />
+          <SeriesRow key={s.id} s={s} last={i === active.length - 1} onEdit={() => setEditing(s)} locations={locations} />
         ))}
         {active.length === 0 && <EmptyRow text="No classes yet. Create one and it repeats every week until you change it. Members can then drop in or buy a monthly." action={{ label: "+ New class", onClick: () => setEditing("new") }} />}
       </div>
 
       <button
-        onClick={() => navigate("/classes")}
+        onClick={() => navigate(solo ? "/bookings" : "/classes")}
         data-sq
         style={{ width: "100%", marginTop: 12, textAlign: "left", background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-tile)", padding: "14px 18px", cursor: "pointer", display: "flex", alignItems: "center", gap: 12 }}
       >
@@ -146,12 +146,15 @@ function ClassesPanel() {
   );
 }
 
-function SeriesRow({ s, last, onEdit }: { s: ClassSeries; last: boolean; onEdit?: () => void }) {
+function SeriesRow({ s, last, onEdit, locations = [] }: { s: ClassSeries; last: boolean; onEdit?: () => void; locations?: Location[] }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "16px 20px", borderBottom: last ? "none" : "1px solid var(--line)" }}>
       {s.imageUrl && <img src={s.imageUrl} alt="" style={{ width: 40, height: 50, flex: "none", borderRadius: 10, objectFit: "cover" }} />}
       <div style={{ minWidth: 0, flex: 1 }}>
-        <div style={{ font: "700 16px var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s.title}</div>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <span style={{ font: "700 16px var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s.title}</span>
+          <LocationPill locations={locations} id={s.locationId} />
+        </div>
         <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>
           {weekdaysLabel(s.weekdays)} · {timeLabel(s.startTime)} · {s.durationMin} min
         </div>
@@ -212,6 +215,9 @@ export function SeriesSheet({ open, series, onClose }: { open: boolean; series: 
   const [dropIn, setDropIn] = useState("");
   const [monthly, setMonthly] = useState("");
   const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [locationId, setLocationId] = useState<string | null>(null);
+  const locations = useLocations();
+  const { current } = useCurrentLocation();
   const [confirmEnd, setConfirmEnd] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -228,6 +234,7 @@ export function SeriesSheet({ open, series, onClose }: { open: boolean; series: 
       setDropIn(series ? String(series.dropInPrice) : "");
       setMonthly(series ? String(series.monthlyPrice) : "");
       setImageUrl(series?.imageUrl ?? null);
+      setLocationId(series ? (series.locationId ?? null) : (current?.id ?? null));
       setConfirmEnd(false);
       setError(null);
     }
@@ -242,7 +249,8 @@ export function SeriesSheet({ open, series, onClose }: { open: boolean; series: 
     if (weekdays.length === 0) return setError("Pick at least one day.");
     if (dropIn === "" || !Number.isFinite(dropInNum) || dropInNum < 0) return setError("Enter the drop-in price (0 for free).");
     if (monthly === "" || !Number.isFinite(monthlyNum) || monthlyNum < 0) return setError("Enter the monthly price.");
-    const input = { title: title.trim(), description: description.trim() || null, weekdays, startTime, durationMin: Number(duration), dropInPrice: dropInNum, monthlyPrice: monthlyNum, imageUrl };
+    if (locations.length > 0 && !locationId) return setError("Choose the location.");
+    const input = { title: title.trim(), description: description.trim() || null, weekdays, startTime, durationMin: Number(duration), dropInPrice: dropInNum, monthlyPrice: monthlyNum, imageUrl, ...(locations.length > 0 ? { locationId } : {}) };
     setBusy(true);
     setError(null);
     try {
@@ -274,6 +282,7 @@ export function SeriesSheet({ open, series, onClose }: { open: boolean; series: 
               <TextField label="NAME" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Sunrise HIIT" />
               <TextField label="DESCRIPTION" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Optional — shown to members" />
               <ClassPhotoField value={imageUrl} onChange={setImageUrl} title={title} />
+              <LocationField locations={locations} value={locationId} onChange={setLocationId} />
               <WeekdayPicker value={weekdays} onChange={setWeekdays} />
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
                 <TimeWheelField label="STARTS AT" value={startTime} onChange={setStartTime} />
@@ -329,6 +338,7 @@ export function SeriesSheet({ open, series, onClose }: { open: boolean; series: 
 
 function PlansPanel({ solo }: { solo?: boolean }) {
   const { data } = useAsync(() => api.planTypes(), []);
+  const locations = useLocations();
   const [editing, setEditing] = useState<{ kind: GroupPlanTypeKind; planType: GroupPlanType | null } | null>(null);
   const [deleting, setDeleting] = useState<GroupPlanType | null>(null);
   const shownDeleting = useLatch(deleting);
@@ -344,7 +354,7 @@ function PlansPanel({ solo }: { solo?: boolean }) {
           count={rows.length}
           action={
             <Button size="md" style={{ height: 40, padding: "0 16px" }} onClick={() => setEditing({ kind, planType: null })}>
-              + {kind === "membership" ? (solo ? "Plan" : "Membership") : "Bundle"}
+              + {kind === "membership" ? "Membership" : "Bundle"}
             </Button>
           }
         />
@@ -354,6 +364,7 @@ function PlansPanel({ solo }: { solo?: boolean }) {
               <div style={{ minWidth: 0, flex: 1 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                   <span style={{ font: "700 16px var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.name}</span>
+                  <LocationPill locations={locations} id={p.locationId} />
                   {!p.active && <span style={{ flex: "none", font: "700 10px var(--font-mono)", letterSpacing: ".06em", color: "var(--ink-muted)", background: "var(--sunken)", borderRadius: 8, padding: "3px 7px" }}>OFF SALE</span>}
                 </div>
                 <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>
@@ -378,8 +389,8 @@ function PlansPanel({ solo }: { solo?: boolean }) {
 
   return (
     <div>
-      {section("membership", solo ? "Plans" : "Memberships", solo ? "No plans yet. Add a 1-month and a 3-month plan so you can sign members up." : "No memberships yet. A membership covers every class for the months you choose.")}
-      {!solo && section("bundle", "Class bundles", "No bundles yet. A bundle is a pack of sessions: one is used each day the member checks in.")}
+      {section("membership", "Memberships", solo ? "No memberships yet. A membership covers every class at its location for the months you choose." : "No memberships yet. A membership covers every class for the months you choose.")}
+      {section("bundle", "Class bundles", "No bundles yet. A bundle is a pack of sessions: one is used each day the member checks in.")}
       {!solo && <div style={{ font: "400 12px/1.5 var(--font-mono)", color: "var(--ink-faint)", margin: "-12px 2px 0" }}>
         Each class's monthly is set on the class itself. A member holds one group plan at a time, and a new one can only be bought once the current one is finished.
       </div>}
@@ -412,6 +423,9 @@ export function PlanTypeSheet({ open, kind, planType, onClose }: { open: boolean
   const [credits, setCredits] = useState("");
   const [invitations, setInvitations] = useState("");
   const [onSale, setOnSale] = useState<"on" | "off">("on");
+  const [locationId, setLocationId] = useState<string | null>(null);
+  const locations = useLocations();
+  const { current } = useCurrentLocation();
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const { confirmed, iconIn, showSuccess } = useSheetSuccess(open, onClose);
@@ -425,6 +439,7 @@ export function PlanTypeSheet({ open, kind, planType, onClose }: { open: boolean
       setCredits(planType?.credits != null ? String(planType.credits) : "");
       setInvitations(planType ? String(planType.invitationsAllowance) : "");
       setOnSale(planType && !planType.active ? "off" : "on");
+      setLocationId(planType ? (planType.locationId ?? null) : (current?.id ?? null));
       setError(null);
     }
   }, [open, planType]);
@@ -439,7 +454,8 @@ export function PlanTypeSheet({ open, kind, planType, onClose }: { open: boolean
     if (price === "" || !Number.isFinite(priceNum) || priceNum < 0) return setError("Enter a price.");
     if (isBundle && (!Number.isInteger(creditsNum) || creditsNum < 1)) return setError("Enter how many classes the bundle includes.");
     if (!Number.isInteger(invitesNum) || invitesNum < 0) return setError("Guest passes must be a whole number, 0 or more.");
-    const input = { kind, name: name.trim(), price: priceNum, durationMonths: Number(months), credits: isBundle ? creditsNum : null, invitationsAllowance: invitesNum };
+    if (locations.length > 0 && !locationId) return setError("Choose the location it's for.");
+    const input = { kind, name: name.trim(), price: priceNum, durationMonths: Number(months), credits: isBundle ? creditsNum : null, invitationsAllowance: invitesNum, ...(locations.length > 0 ? { locationId } : {}) };
     setBusy(true);
     setError(null);
     try {
@@ -465,6 +481,7 @@ export function PlanTypeSheet({ open, kind, planType, onClose }: { open: boolean
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             <TextField label="NAME" value={name} onChange={(e) => setName(e.target.value)} placeholder={isBundle ? "10-Class Pack" : "All-Access · 3 Months"} />
             <TextField label="PRICE · EGP" type="number" min={0} inputMode="decimal" value={price} onChange={(e) => setPrice(e.target.value)} />
+            <LocationField locations={locations} value={locationId} onChange={setLocationId} />
             {isBundle && <TextField label="CLASSES INCLUDED" type="number" min={1} value={credits} onChange={(e) => setCredits(e.target.value)} placeholder="10" />}
             <SelectField label={isBundle ? "VALID FOR" : "LENGTH"} value={months} options={MONTH_OPTIONS} onChange={setMonths} />
             <TextField label="GUEST PASSES INCLUDED" type="number" min={0} value={invitations} onChange={(e) => setInvitations(e.target.value)} placeholder="0" />
@@ -590,6 +607,69 @@ function SoloOffer() {
         </div>
       </div>
       {error && <div style={{ font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px", marginBottom: 12 }}>{error}</div>}
+    </div>
+  );
+}
+
+
+/** The places she works. Every session, plan and PT bundle belongs to one. */
+function LocationsCard() {
+  const { data } = useAsync(() => api.locations(), []);
+  const [editing, setEditing] = useState<{ id: string | null; name: string } | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  if (!data) return null;
+  const list = data.locations ?? [];
+
+  const save = async () => {
+    if (!editing) return;
+    const name = editing.name.trim();
+    if (!name) return setError("Give the location a name.");
+    setBusy(true);
+    setError(null);
+    try {
+      if (editing.id) await api.renameLocation(editing.id, name);
+      else await api.createLocation(name);
+      setEditing(null);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Couldn't save.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div style={{ marginBottom: 12 }}>
+      <div data-sq style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: "16px 20px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: list.length ? 8 : 0 }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ font: "700 16px var(--font-body)" }}>Locations</div>
+            <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>{list.length === 0 ? "Working in more than one place? Add them." : "Each plan, PT bundle and session belongs to one."}</div>
+          </div>
+          {list.length < 10 && (
+            <Button size="md" variant="secondary" style={{ height: 40, padding: "0 16px" }} onClick={() => { setError(null); setEditing({ id: null, name: "" }); }}>
+              + Location
+            </Button>
+          )}
+        </div>
+        {list.map((l) => (
+          <div key={l.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 0", borderTop: "1px solid var(--line)" }}>
+            <Icon name="map-pin" size={16} />
+            <span style={{ flex: 1, minWidth: 0, font: "600 15px var(--font-body)" }}>{l.name}</span>
+            <button onClick={() => { setError(null); setEditing({ id: l.id, name: l.name }); }} aria-label={`Rename ${l.name}`} style={iconBtn()}>
+              <Icon name="pencil" size={15} />
+            </button>
+          </div>
+        ))}
+      </div>
+      <Sheet open={editing !== null} onClose={busy ? () => {} : () => setEditing(null)}>
+        <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>{editing?.id ? "RENAME LOCATION" : "NEW LOCATION"}</div>
+        <div style={{ font: "800 26px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 16px" }}>{editing?.id ? "Rename" : "Add a location"}</div>
+        <TextField label="NAME" value={editing?.name ?? ""} onChange={(e) => setEditing((x) => (x ? { ...x, name: e.target.value } : x))} placeholder="e.g. Zamalek studio" />
+        {error && <div style={{ marginTop: 12, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>{error}</div>}
+        <Button fullWidth size="lg" style={{ marginTop: 16 }} disabled={busy} onClick={save}>{busy ? "Saving…" : "Save"}</Button>
+        <Button variant="secondary" fullWidth style={{ marginTop: 8 }} disabled={busy} onClick={() => setEditing(null)}>Cancel</Button>
+      </Sheet>
     </div>
   );
 }

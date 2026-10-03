@@ -1,15 +1,15 @@
 import { useState, type ReactNode } from "react";
 import { useAsync } from "../../lib/useAsync";
 import { api } from "../../lib/backend";
-import { CreateClientSheet, useFrontDeskCatalog } from "./Members";
+import { CreateClientSheet, useFrontDeskCatalog, useSellableCoaches } from "./Members";
 
 /** The new-client flow, with what it needs loaded only while it's open. */
 export function NewClientModal({ onClose }: { onClose: () => void }) {
   const { data } = useAsync(() => api.clients(), []);
-  const { data: coachData } = useAsync(() => api.coaches(), []);
+  const coaches = useSellableCoaches();
   const { planTypes, series, bundleTypes } = useFrontDeskCatalog();
   return (
-    <CreateClientSheet open onClose={onClose} takenEmails={(data?.clients ?? []).map((c) => c.email ?? "")} planTypes={planTypes} series={series} bundleTypes={bundleTypes} coaches={coachData?.coaches ?? []} />
+    <CreateClientSheet open onClose={onClose} takenEmails={(data?.clients ?? []).map((c) => c.email ?? "")} planTypes={planTypes} series={series} bundleTypes={bundleTypes} coaches={coaches} />
   );
 }
 

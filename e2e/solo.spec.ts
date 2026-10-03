@@ -188,15 +188,16 @@ test("solo: Check in lists everyone with a button each, searchable, and each ans
   expect(sent).toEqual(["c1", "c3"]);
 });
 
-test("solo: Plans is a tab with add/edit/delete, plans only", async ({ page }) => {
+test("solo: Plans opens on her plans, with classes (monthly), bundles and PT back", async ({ page }) => {
   await boot(page, "solo");
   await page.goto("/");
   await page.getByRole("link", { name: "Plans", exact: true }).click();
   await expect(page).toHaveURL(/\/catalog/);
-  await expect(page.getByText("My plans")).toBeVisible();
-  await expect(page.getByRole("button", { name: "CLASSES" })).toHaveCount(0);
-  await expect(page.getByText("Class bundles")).toHaveCount(0);
-  await page.getByRole("button", { name: "+ Plan" }).click();
+  for (const t of ["CLASSES", "PLANS", "PT BUNDLES"]) await expect(page.getByRole("button", { name: t })).toBeVisible();
+  await expect(page.getByText("Locations", { exact: true })).toBeVisible();
+  await expect(page.getByText("Memberships", { exact: true })).toBeVisible();
+  await expect(page.getByText("Class bundles", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "+ Membership" }).click();
   await expect(page.getByText("NEW MEMBERSHIP", { exact: true }).first()).toBeVisible();
 });
 
@@ -333,4 +334,120 @@ test("solo FAB: the three quick actions from any tab, also on desktop", async ({
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto("/");
   await expect(page.getByRole("button", { name: "Quick actions" })).toBeVisible();
+});
+
+
+// ---------- Locations ----------
+const LOCS = { locations: [{ id: "L1", name: "Zamalek" }, { id: "L2", name: "Maadi" }] };
+const inHours = (h: number) => new Date(Date.now() + h * 3600000).toISOString();
+
+async function bootWithLocations(page: import("@playwright/test").Page, extra: Record<string, unknown> = {}) {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await mockBackend(page, "dept_head", {
+    __orgMode: "solo",
+    clients: { clients: [] },
+    revenue: REVENUE,
+    locations: LOCS,
+    classes: { classes: [
+      { id: "k1", title: "Zamalek Flow", description: null, startsAt: inHours(2), price: 0, status: "active", bookedCount: 3, locationId: "L1" },
+      { id: "k2", title: "Maadi Burn", description: null, startsAt: inHours(3), price: 0, status: "active", bookedCount: 1, locationId: "L2" },
+    ] },
+    ...extra,
+  });
+}
+
+test("locations: Today switches between her two locations and Coming up follows", async ({ page }) => {
+  await bootWithLocations(page);
+  await page.goto("/");
+  const group = page.getByRole("group", { name: "Working at" });
+  await expect(group.getByRole("button", { name: "Zamalek" })).toBeVisible();
+  await expect(page.getByText("Zamalek Flow")).toBeVisible();
+  await expect(page.getByText("Maadi Burn")).toHaveCount(0);
+  await group.getByRole("button", { name: "Maadi" }).click();
+  await expect(page.getByText("Maadi Burn")).toBeVisible();
+  await expect(page.getByText("Zamalek Flow")).toHaveCount(0);
+  // The choice is remembered on this phone and carries to Schedule.
+  await page.getByRole("link", { name: "Schedule", exact: true }).click();
+  await expect(page.getByText("Maadi Burn")).toBeVisible();
+  await expect(page.getByText("Zamalek Flow")).toHaveCount(0);
+  await page.getByRole("group", { name: "Location" }).getByRole("button", { name: "All locations" }).click();
+  await expect(page.getByText("Zamalek Flow")).toBeVisible();
+});
+
+test("locations: a new session is created at the location she's working at", async ({ page }) => {
+  const sent: Record<string, unknown>[] = [];
+  await bootWithLocations(page);
+  await page.route("**/functions/v1/make-server-980e1cbf/classes", async (route) => {
+    if (route.request().method() === "POST") {
+      sent.push(route.request().postDataJSON());
+      return route.fulfill({ json: { class: { id: "n1", title: "x", description: null, startsAt: inHours(5), price: 0, status: "active", locationId: "L2" } } });
+    }
+    return route.fallback();
+  });
+  await page.goto("/");
+  await page.getByRole("group", { name: "Working at" }).getByRole("button", { name: "Maadi" }).click();
+  await page.getByRole("link", { name: "Schedule", exact: true }).click();
+  await page.getByRole("button", { name: "New session" }).click();
+  await expect(page.getByText("LOCATION", { exact: true })).toBeVisible();
+  await page.getByPlaceholder("e.g. Sunrise HIIT").fill("Evening Flow");
+  await page.getByRole("button", { name: "Create session" }).click();
+  await expect.poll(() => sent.length).toBe(1);
+  expect(sent[0].locationId).toBe("L2");
+});
+
+test("locations: check-in tells the backend where it's happening", async ({ page }) => {
+  const sent: Record<string, unknown>[] = [];
+  const member = { id: "c1", name: "Mona Ali", age: null, phone: "0100", email: null, conditions: null, assignedCoachId: null, currentPackage: null, currentMembership: null, homeLocationId: "L1",
+    groupPlan: { id: "g1", clientId: "c1", kind: "membership", planTypeId: "p1", seriesId: null, name: "Monthly · Zamalek", priceAtSale: 500, payMethod: "cash", creditsTotal: null, creditsRemaining: null, invitationsRemaining: 0, startsAt: new Date().toISOString(), expiresAt: inHours(24 * 20), status: "active", locationId: "L1" } };
+  await bootWithLocations(page, {
+    clients: { clients: [member] },
+    "check-ins": (b: Record<string, unknown> | null) => { sent.push(b ?? {}); return { status: 400, body: { error: "Mona Ali's Monthly · Zamalek is for Zamalek, not this location.", code: "wrong_location" } }; },
+  });
+  await page.goto("/");
+  await page.getByRole("group", { name: "Working at" }).getByRole("button", { name: "Maadi" }).click();
+  await page.getByRole("button", { name: "Quick actions" }).click();
+  await page.getByRole("group", { name: "Quick actions" }).getByRole("button", { name: "Check in" }).click();
+  await page.getByTestId("checkin-row").filter({ hasText: "Mona Ali" }).getByRole("button", { name: "Check in" }).click();
+  await expect(page.getByRole("alert")).toContainText("is for Zamalek");
+  expect(sent[0]).toMatchObject({ clientId: "c1", locationId: "L2" });
+});
+
+test("locations: plans are created for a location, and PT bundles show theirs", async ({ page }) => {
+  const sent: Record<string, unknown>[] = [];
+  await bootWithLocations(page, {
+    "plan-types": (b: Record<string, unknown> | null) => {
+      if (b) { sent.push(b); return { body: { planType: { id: "p9", ...b, active: true } } }; }
+      return { body: { planTypes: [] } };
+    },
+    "bundle-types": { bundleTypes: [{ id: "b1", name: "PT 10", price: 3000, sessionsIncluded: 10, expiryDays: 60, locationId: "L2" }] },
+  });
+  await page.goto("/catalog");
+  await page.getByRole("button", { name: "+ Bundle" }).click();
+  await page.getByPlaceholder("10-Class Pack").fill("8 Sessions");
+  await page.getByRole("spinbutton", { name: "PRICE · EGP" }).fill("800");
+  await page.getByRole("spinbutton", { name: "CLASSES INCLUDED" }).fill("8");
+  await page.getByRole("button", { name: "Create bundle" }).click();
+  await expect.poll(() => sent.length).toBe(1);
+  expect(sent[0]).toMatchObject({ kind: "bundle", locationId: "L1" });
+  await page.getByRole("button", { name: "PT BUNDLES" }).click();
+  await expect(page.getByText("PT 10")).toBeVisible();
+  await expect(page.getByText("Maadi", { exact: true })).toBeVisible();
+});
+
+test("PT: she sells a PT bundle as the trainer herself and logs today's session", async ({ page }) => {
+  const logged: unknown[] = [];
+  const pkg = { id: "pk1", clientId: "c1", bundleTypeId: "b1", coachId: "prof-zz", purchaseDate: "2026-10-01", expiryDate: "2026-12-01", sessionsIncluded: 10, sessionsRemaining: 9, priceAtSale: 3000, coachCutAtSale: 0, status: "active", createdBy: "prof-zz", locationId: "L1" };
+  const member = { id: "c1", name: "Mona Ali", age: null, phone: "0100", email: null, conditions: null, assignedCoachId: "prof-zz", currentPackage: pkg, currentMembership: null, groupPlan: null, homeLocationId: "L1" };
+  await bootWithLocations(page, {
+    clients: { clients: [member] },
+    "bundle-types": { bundleTypes: [{ id: "b1", name: "PT 10", price: 3000, sessionsIncluded: 10, expiryDays: 60, locationId: "L1" }] },
+    "packages/deliver": (b: Record<string, unknown> | null) => { logged.push(b); return { body: { package: { ...pkg, sessionsRemaining: 8 }, preview: {} } }; },
+  });
+  await page.goto("/members");
+  await page.getByText("Mona Ali").click();
+  await expect(page.getByText("Location: Zamalek")).toBeVisible();
+  await expect(page.getByText(/^Coach:/)).toHaveCount(0);
+  await page.getByRole("button", { name: /Log today's PT session/ }).click();
+  await expect(page.getByText("PT session logged")).toBeVisible();
+  expect(logged).toEqual([{ packageId: "pk1" }]);
 });

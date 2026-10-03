@@ -4,7 +4,7 @@
 // keeps working (see supabaseClient.ts for which project it targets).
 import { FN_SLUG, supabase } from "./supabaseClient";
 import { bump } from "./bus";
-import type { PaymentsSummary,
+import type { PaymentsSummary, Location,
   ActivityEntry,
   BizqwikRole,
   ClassBooking,
@@ -51,6 +51,7 @@ export interface SeriesInput {
   dropInPrice: number;
   monthlyPrice: number;
   imageUrl: string | null;
+  locationId?: string | null;
 }
 
 export interface PlanTypeInput {
@@ -60,6 +61,7 @@ export interface PlanTypeInput {
   durationMonths: number;
   credits: number | null;
   invitationsAllowance: number;
+  locationId?: string | null;
 }
 
 export interface NewClientFields {
@@ -156,10 +158,16 @@ export const api = {
   deleteTier: (id: string) => callFn<void>("tiers/delete", { method: "POST", body: { id } }),
 
   bundleTypes: () => callFn<{ bundleTypes: BundleType[] }>("bundle-types"),
-  createBundleType: (name: string, price: number, sessionsIncluded: number, expiryDays: number) =>
-    callFn<{ bundleType: BundleType }>("bundle-types", { method: "POST", body: { name, price, sessionsIncluded, expiryDays } }),
-  updateBundleType: (id: string, name: string, price: number, sessionsIncluded: number, expiryDays: number) =>
-    callFn<void>("bundle-types/update", { method: "POST", body: { id, name, price, sessionsIncluded, expiryDays } }),
+  createBundleType: (name: string, price: number, sessionsIncluded: number, expiryDays: number, locationId?: string | null) =>
+    callFn<{ bundleType: BundleType }>("bundle-types", { method: "POST", body: { name, price, sessionsIncluded, expiryDays, locationId } }),
+  updateBundleType: (id: string, name: string, price: number, sessionsIncluded: number, expiryDays: number, locationId?: string | null) =>
+    callFn<void>("bundle-types/update", { method: "POST", body: { id, name, price, sessionsIncluded, expiryDays, locationId } }),
+
+  // ===== Locations =====
+  locations: () => callFn<{ locations: Location[] }>("locations"),
+  createLocation: (name: string) => callFn<{ location: Location }>("locations", { method: "POST", body: { name } }),
+  renameLocation: (id: string, name: string) => callFn<{ location: Location }>("locations/update", { method: "POST", body: { id, name } }),
+  setClientLocation: (id: string, locationId: string | null) => callFn<{ ok: true }>("clients/location", { method: "POST", body: { id, locationId } }),
   deleteBundleType: (id: string) => callFn<void>("bundle-types/delete", { method: "POST", body: { id } }),
 
   // The batched client list (one fixed set of queries however many clients);
@@ -184,6 +192,9 @@ export const api = {
   // PT sessions are deducted only by scanning the member's per-bundle code.
   deliverSession: (qrToken: string) =>
     callFn<{ package: PackageInstance; preview: PtScanPreview }>("packages/deliver", { method: "POST", body: { qrToken } }),
+  // A solo owner is her own clients' trainer: she logs today's session from the app.
+  logPtSession: (packageId: string) =>
+    callFn<{ package: PackageInstance; preview: PtScanPreview }>("packages/deliver", { method: "POST", body: { packageId } }),
   // The FAB scanner: what did the coach just scan?
   scan: (token: string) => callFn<ScanResult>("scan", { method: "POST", body: { token } }),
   // Coach payout drill-down (accountant/dept_head/head_coach): every private
@@ -220,8 +231,9 @@ export const api = {
   frontDeskSummary: () => callFn<FrontDeskSummary>("front-desk/summary"),
   // A class bundle loses one session on check-in (at most once a day);
   // memberships, class monthlies and PT don't. `plan` is the plan afterwards.
-  checkIn: (clientId: string, source: "qr" | "manual") =>
-    callFn<{ deducted: boolean; plan: { name: string; kind: string; creditsRemaining: number | null; creditsTotal: number | null } | null }>("check-ins", { method: "POST", body: { clientId, source } }),
+  // `locationId` (where the check-in happens) turns away a plan sold for another location.
+  checkIn: (clientId: string, source: "qr" | "manual", locationId?: string | null) =>
+    callFn<{ deducted: boolean; plan: { name: string; kind: string; creditsRemaining: number | null; creditsTotal: number | null } | null }>("check-ins", { method: "POST", body: { clientId, source, locationId: locationId ?? undefined } }),
   // A walk-in is always recorded against a member: an existing client, or a
   // new one created with the sale (the backend also registers their app invite).
   orgSettings: async () => {
@@ -263,10 +275,10 @@ export const api = {
   classes: (since?: string) => callFn<{ classes: GymClass[] }>(since ? `classes?since=${encodeURIComponent(since)}` : "classes"),
   // `imageUrl` is the session's own photo; a series session sends null and
   // shows its series' photo.
-  createClass: (title: string, description: string | null, startsAt: string, price: number, imageUrl: string | null = null) =>
-    callFn<{ class: GymClass }>("classes", { method: "POST", body: { title, description, startsAt, price, imageUrl } }),
-  updateClass: (id: string, title: string, description: string | null, startsAt: string, price: number, imageUrl: string | null = null) =>
-    callFn<{ class: GymClass }>("classes/update", { method: "POST", body: { id, title, description, startsAt, price, imageUrl } }),
+  createClass: (title: string, description: string | null, startsAt: string, price: number, imageUrl: string | null = null, locationId?: string | null) =>
+    callFn<{ class: GymClass }>("classes", { method: "POST", body: { title, description, startsAt, price, imageUrl, locationId } }),
+  updateClass: (id: string, title: string, description: string | null, startsAt: string, price: number, imageUrl: string | null = null, locationId?: string | null) =>
+    callFn<{ class: GymClass }>("classes/update", { method: "POST", body: { id, title, description, startsAt, price, imageUrl, locationId } }),
   cancelClass: (id: string) => callFn<{ ok: true }>("classes/cancel", { method: "POST", body: { id } }),
 
   // ===== Class roster / attendance / at-desk collection (dept_head + front_desk) =====

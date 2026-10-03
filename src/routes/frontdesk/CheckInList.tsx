@@ -1,3 +1,4 @@
+import { useCurrentLocation } from "../../lib/locations";
 import { useMemo, useState } from "react";
 import { api } from "../../lib/backend";
 import { useAsync } from "../../lib/useAsync";
@@ -13,6 +14,8 @@ type Result = { state: "busy" } | { state: "done"; note: string } | { state: "er
 /** Everyone, searchable, each with a Check in button — for the person who
  * walked in without scanning. Each row answers for itself. */
 export function CheckInList() {
+  // Where this check-in happens (businesses with locations).
+  const { current: here } = useCurrentLocation();
   const { data } = useAsync(() => api.clients(), []);
   const { bundleTypes } = useFrontDeskCatalog();
   const [query, setQuery] = useState("");
@@ -22,7 +25,7 @@ export function CheckInList() {
   const checkIn = async (c: ClientWithPackage) => {
     setResults((r) => ({ ...r, [c.id]: { state: "busy" } }));
     try {
-      const res = await api.checkIn(c.id, "manual");
+      const res = await api.checkIn(c.id, "manual", here?.id);
       const p = res.plan;
       const note = res.deducted && p ? `${p.creditsRemaining} of ${p.creditsTotal} sessions left` : "Checked in";
       setResults((r) => ({ ...r, [c.id]: { state: "done", note } }));

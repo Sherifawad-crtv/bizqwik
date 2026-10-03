@@ -1,3 +1,4 @@
+import { useCurrentLocation } from "../../lib/locations";
 import { useEffect, useState } from "react";
 import { useSetHeader } from "../../lib/header";
 import { useAsync } from "../../lib/useAsync";
@@ -53,6 +54,8 @@ export function CheckIn({ embedded = false, onDropIn, onCreateClient }: { embedd
 }
 
 export function ConfirmCheckInSheet({ client, onClose, onDropIn }: { client: ClientWithPackage | null; onClose: () => void; onDropIn: (c: ClientWithPackage) => void }) {
+  // Where this check-in happens (businesses with locations).
+  const { current: here } = useCurrentLocation();
   const shown = useLatch(client);
   const open = !!client;
   const [busy, setBusy] = useState(false);
@@ -91,7 +94,7 @@ export function ConfirmCheckInSheet({ client, onClose, onDropIn }: { client: Cli
     setBusy(true);
     setError(null);
     try {
-      const res = await api.checkIn(shown.id, "manual");
+      const res = await api.checkIn(shown.id, "manual", here?.id);
       const p = res.plan;
       setDoneLabel(res.deducted && p ? `${shown.name} checked in · ${p.creditsRemaining} of ${p.creditsTotal} sessions left` : `${shown.name} checked in`);
       showSuccess();
