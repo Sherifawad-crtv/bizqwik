@@ -164,3 +164,15 @@ test("solo: Check in lists everyone with a button each, searchable, and each ans
   await expect(page.getByRole("alert")).toContainText("no active plan");
   expect(sent).toEqual(["c1", "c3"]);
 });
+
+test("solo: owner can reach My plans from Today and add a plan (plans only, no classes/bundles)", async ({ page }) => {
+  await boot(page, "solo");
+  await page.goto("/");
+  await page.getByRole("button", { name: "Add plan" }).click();
+  await expect(page).toHaveURL(/\/catalog/);
+  await expect(page.getByText("My plans")).toBeVisible();
+  await expect(page.getByRole("button", { name: "CLASSES" })).toHaveCount(0);
+  await expect(page.getByText("Class bundles")).toHaveCount(0);
+  await page.getByRole("button", { name: "+ Plan" }).click();
+  await expect(page.getByText("NEW MEMBERSHIP", { exact: true }).first()).toBeVisible();
+});
