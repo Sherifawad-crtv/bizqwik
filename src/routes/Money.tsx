@@ -6,10 +6,15 @@ import { fmt, formatDateTime } from "../lib/format";
 import { Segmented } from "../components/Segmented";
 import { Spinner } from "../components/Spinner";
 import { EmptyState } from "../components/EmptyState";
-import type { ActivityEntry } from "../lib/types";
+import { useState } from "react";
+import { useLatch } from "../lib/useLatch";
+import type { ActivityEntry, ClientWithPackage } from "../lib/types";
+import { Sheet } from "../components/Sheet";
+import { Button } from "../components/Button";
+import { Icon } from "../components/Icon";
 import { Card, SectionTitle } from "./frontdesk/shared";
 
-interface Txn { id: string; at: string; clientName: string | null; amount: number; what: string; method: string; refund: boolean }
+interface Txn { id: string; at: string; clientName: string | null; amount: number; what: string; method: string; refund: boolean; entry: ActivityEntry }
 
 const METHOD_LABEL: Record<string, string> = { cash: "Cash", card: "Card", instapay: "InstaPay", wallet: "Wallet" };
 
@@ -24,12 +29,12 @@ function toTransactions(list: ActivityEntry[], months: number): Txn[] {
     const amount = Number(a.amount ?? 0);
     if (a.type.startsWith("sale_") || a.type === "class_collected") {
       const name = (m.name ?? m.title) as string | undefined;
-      out.push({ id: a.id, at: a.at, clientName: a.clientName, amount, what: name ?? (a.type === "sale_package" ? "PT package" : a.type === "class_collected" ? "Class" : a.type === "sale_dropin" ? "Drop-in" : "Sale"), method: METHOD_LABEL[String(m.payMethod ?? "")] ?? "Not recorded", refund: false });
+      out.push({ id: a.id, at: a.at, clientName: a.clientName, amount, what: name ?? (a.type === "sale_package" ? "PT package" : a.type === "class_collected" ? "Class" : a.type === "sale_dropin" ? "Drop-in" : "Sale"), method: METHOD_LABEL[String(m.payMethod ?? "")] ?? "Not recorded", refund: false, entry: a });
     } else if (a.type === "refund_desk") {
       const note = String(m.note ?? "");
-      out.push({ id: a.id, at: a.at, clientName: a.clientName, amount, what: "Refund", method: /^instapay/i.test(note) ? "InstaPay" : "Cash", refund: true });
+      out.push({ id: a.id, at: a.at, clientName: a.clientName, amount, what: "Refund", method: /^instapay/i.test(note) ? "InstaPay" : "Cash", refund: true, entry: a });
     } else if (a.type === "wallet_refund") {
-      out.push({ id: a.id, at: a.at, clientName: a.clientName, amount, what: "Refund", method: "Wallet", refund: true });
+      out.push({ id: a.id, at: a.at, clientName: a.clientName, amount, what: "Refund", method: "Wallet", refund: true, entry: a });
     }
   }
   return out;
@@ -48,9 +53,11 @@ export function Money() {
   useSetHeader({ kicker: "BUSINESS", title: "Money" }, []);
   const [range, setRange] = useSticky<Range>("moneyRange", "1", { valid: (v) => v === "1" || v === "3" || v === "12" });
   const n = Number(range);
+  const [open, setOpen] = useState<Txn | null>(null);
   const { data, error } = useAsync(async () => {
     const [rev, pay, act] = await Promise.all([api.revenue(n), api.paymentsSummary(n), api.activity(300)]);
-    return { rev, pay, txns: toTransactions(act.activity, n) };
+    const cl = await api.clients().catch(() => ({ clients: [] as ClientWithPackage[] }));
+    return { rev, pay, txns: toTransactions(act.activity, n), clients: cl.clients };
   }, [range]);
 
   if (error) return <EmptyState icon="inbox" title="Couldn't load your money" body="Check your connection and try again." />;
@@ -70,37 +77,21 @@ export function Money() {
             <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-muted)", marginTop: 6 }}>
               {data.rev.activeSubscribers.total} active member{data.rev.activeSubscribers.total === 1 ? "" : "s"}
             </div>
-          </Card>
-
-          <SectionTitle>How you were paid</SectionTitle>
-          <Card style={{ padding: "6px 18px" }}>
-            {data.pay.byMethod.map((m, i) => {
-              const share = data.pay.total > 0 ? Math.round((m.amount / data.pay.total) * 100) : 0;
-              return (
-                <div key={m.method} style={{ padding: "14px 0", borderBottom: i === data.pay.byMethod.length - 1 ? "none" : "1px solid var(--line)" }}>
-                  <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-                    <span style={{ font: "700 15px var(--font-body)", flex: 1 }}>{m.label}</span>
-                    <span style={{ font: "800 16px var(--font-mono)" }}>{fmt(m.amount)}</span>
-                    <span style={{ font: "400 12px var(--font-mono)", color: "var(--ink-faint)", width: 40, textAlign: "right" }}>{share}%</span>
-                  </div>
-                  <div style={{ height: 6, borderRadius: 999, background: "var(--sunken)", marginTop: 8, overflow: "hidden" }}>
-                    <div style={{ width: `${share}%`, height: "100%", borderRadius: 999, background: m.method === "instapay" ? "var(--primary)" : "var(--ink-faint)" }} />
-                  </div>
-                  <div style={{ font: "400 12px var(--font-mono)", color: "var(--ink-faint)", marginTop: 6 }}>
-                    {m.count} payment{m.count === 1 ? "" : "s"}
-                  </div>
-                </div>
-              );
-            })}
-            {data.pay.byMethod.length === 0 && (
-              <EmptyState bare icon="wallet" title="No payments yet" body="Sell a plan or take a drop-in and it shows up here, split by InstaPay, cash and card." />
+            {data.pay.byMethod.length > 0 && (
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 14 }}>
+                {data.pay.byMethod.map((m) => (
+                  <span key={m.method} style={{ font: "700 12px var(--font-mono)", borderRadius: 999, padding: "6px 12px", color: m.method === "instapay" ? "var(--primary-pressed)" : "var(--ink-muted)", background: m.method === "instapay" ? "var(--primary-tint)" : "var(--sunken)" }}>
+                    {m.label} · {fmt(m.amount)}
+                  </span>
+                ))}
+              </div>
             )}
           </Card>
 
           <SectionTitle count={data.txns.length}>Transactions</SectionTitle>
           <Card style={{ overflow: "hidden", marginBottom: 12 }}>
             {data.txns.slice(0, 100).map((t, i, arr) => (
-              <div key={t.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "13px 18px", borderBottom: i === arr.length - 1 ? "none" : "1px solid var(--line)" }}>
+              <button key={t.id} data-tap onClick={() => setOpen(t)} style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", border: 0, background: "none", cursor: "pointer", textAlign: "left", padding: "13px 18px", borderBottom: i === arr.length - 1 ? "none" : "1px solid var(--line)" }}>
                 <div style={{ minWidth: 0, flex: 1 }}>
                   <div style={{ font: "700 15px var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t.clientName ?? "Client"}</div>
                   <div style={{ font: "400 12px var(--font-mono)", color: "var(--ink-faint)" }}>
@@ -109,7 +100,8 @@ export function Money() {
                 </div>
                 <span style={{ flex: "none", font: "700 10px var(--font-mono)", letterSpacing: ".06em", borderRadius: 8, padding: "3px 7px", color: t.method === "InstaPay" ? "var(--primary-pressed)" : "var(--ink-muted)", background: t.method === "InstaPay" ? "var(--primary-tint)" : "var(--sunken)" }}>{t.method.toUpperCase()}</span>
                 <div style={{ flex: "none", minWidth: 64, textAlign: "right", font: "800 15px var(--font-mono)", color: t.refund ? "var(--danger-fg)" : "var(--ink)" }}>{t.refund ? "−" : ""}{fmt(t.amount)}</div>
-              </div>
+                <Icon name="chevron-right" size={16} />
+              </button>
             ))}
             {data.txns.length === 0 && (
               <EmptyState bare icon="inbox" title="No transactions yet" body="Sales and refunds are listed here with how each was paid." />
@@ -117,6 +109,51 @@ export function Money() {
           </Card>
         </>
       )}
+      <TxnSheet txn={open} clients={data?.clients ?? []} onClose={() => setOpen(null)} />
     </div>
+  );
+}
+
+function Row({ k, v }: { k: string; v: string | null | undefined }) {
+  if (!v) return null;
+  return (
+    <div style={{ display: "flex", gap: 12, padding: "12px 0", borderBottom: "1px solid var(--line)" }}>
+      <span style={{ width: 110, flex: "none", font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", paddingTop: 2 }}>{k}</span>
+      <span style={{ flex: 1, minWidth: 0, font: "600 15px/1.4 var(--font-body)", wordBreak: "break-word" }}>{v}</span>
+    </div>
+  );
+}
+
+/** Everything about one transaction: the amount, how it was paid, who the
+ * client is and their plan today. */
+function TxnSheet({ txn, clients, onClose }: { txn: Txn | null; clients: ClientWithPackage[]; onClose: () => void }) {
+  const t = useLatch(txn);
+  if (!t) return null;
+  const m = (t.entry.meta ?? {}) as Record<string, unknown>;
+  const matches = clients.filter((c) => c.name === t.clientName);
+  const client = matches.length === 1 ? matches[0] : null;
+  const note = String(m.note ?? "").replace(/^InstaPay\s*·?\s*/i, "");
+  return (
+    <Sheet open={txn !== null} onClose={onClose}>
+      <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>{t.refund ? "REFUND" : "PAYMENT"} · {t.method.toUpperCase()}</div>
+      <div style={{ font: "800 40px/1.1 var(--font-body)", letterSpacing: "-.02em", margin: "6px 0 2px", color: t.refund ? "var(--danger-fg)" : "var(--ink)" }}>{t.refund ? "−" : ""}{fmt(t.amount)} <span style={{ font: "700 16px var(--font-mono)", color: "var(--ink-faint)" }}>EGP</span></div>
+      <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-muted)", marginBottom: 12 }}>{t.what}</div>
+
+      <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", margin: "12px 0 0" }}>TRANSACTION</div>
+      <Row k="WHAT" v={t.what} />
+      <Row k="PAID VIA" v={t.method} />
+      <Row k="DATE & TIME" v={formatDateTime(t.at)} />
+      <Row k="RECORDED BY" v={t.entry.actorName} />
+      <Row k="NOTE" v={note} />
+      <Row k="REFERENCE" v={t.id.slice(0, 8).toUpperCase()} />
+
+      <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", margin: "18px 0 0" }}>CLIENT</div>
+      <Row k="NAME" v={t.clientName ?? "Unknown"} />
+      <Row k="PHONE" v={client?.phone} />
+      <Row k="EMAIL" v={client?.email} />
+      <Row k="PLAN NOW" v={client ? (client.groupPlan ? `${client.groupPlan.name} · ends ${new Date(client.groupPlan.expiresAt).toLocaleDateString()}` : "No active plan") : null} />
+
+      <Button variant="quiet" fullWidth style={{ marginTop: 16 }} onClick={onClose}>Close</Button>
+    </Sheet>
   );
 }
