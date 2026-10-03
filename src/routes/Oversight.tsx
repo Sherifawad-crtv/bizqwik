@@ -51,27 +51,28 @@ const PAY_COLOR = "var(--accent)";
 
 /** Revenue vs coach payouts per month — one EGP axis, two series side by side
  * with a 2px gap; revenue is direct-labelled, the legend names both. */
-function RevenueChart({ months }: { months: RevenueReport["months"] }) {
+export function RevenueChart({ months, revenueOnly = false }: { months: RevenueReport["months"]; revenueOnly?: boolean }) {
   const [ref, W] = useMeasuredWidth(320);
   const H = 210;
   const top = 26;
   const bottom = 172;
-  const max = Math.max(...months.map((m) => Math.max(m.revenue, m.payouts)), 1) * 1.15;
+  const max = Math.max(...months.map((m) => Math.max(m.revenue, revenueOnly ? 0 : m.payouts)), 1) * 1.15;
   const y = (v: number) => bottom - (v / max) * (bottom - top);
   const slot = W / months.length;
   const barW = Math.max(6, Math.min(18, slot / 3));
   const [hover, setHover] = useState<number | null>(null);
-  if (months.every((m) => m.revenue === 0 && m.payouts === 0)) {
+  if (months.every((m) => m.revenue === 0 && (revenueOnly || m.payouts === 0))) {
+    if (revenueOnly) return <EmptyState bare icon="insights" title="No sales yet" body="Once you sell a plan, this chart fills in month by month." />;
     return <EmptyState bare icon="insights" title="No sales or payouts yet" body="Once the front desk starts selling and coaches log sessions, this chart fills in month by month." />;
   }
 
   return (
     <div ref={ref} style={{ width: "100%", position: "relative" }}>
       <div style={{ display: "flex", gap: 16, marginBottom: 8 }}>
-        {[
+        {(revenueOnly ? [["Revenue", REV_COLOR]] : [
           ["Revenue", REV_COLOR],
           ["Coach payouts", PAY_COLOR],
-        ].map(([label, color]) => (
+        ]).map(([label, color]) => (
           <span key={label} style={{ display: "flex", alignItems: "center", gap: 6, font: "700 11px var(--font-mono)", letterSpacing: ".04em", color: "var(--ink-muted)" }}>
             <i style={{ width: 10, height: 10, borderRadius: 3, background: color, display: "block" }} />
             {label.toUpperCase()}
@@ -88,7 +89,7 @@ function RevenueChart({ months }: { months: RevenueReport["months"] }) {
             <g key={m.month} onMouseEnter={() => setHover(i)} onMouseLeave={() => setHover(null)}>
               <rect x={i * slot} y={0} width={slot} height={H} fill="transparent" />
               {m.revenue > 0 && <path d={roundedTopBarPath(cx - barW - 1, y(m.revenue), barW, bottom, 4)} fill={REV_COLOR} />}
-              {m.payouts > 0 && <path d={roundedTopBarPath(cx + 1, y(m.payouts), barW, bottom, 4)} fill={PAY_COLOR} />}
+              {!revenueOnly && m.payouts > 0 && <path d={roundedTopBarPath(cx + 1, y(m.payouts), barW, bottom, 4)} fill={PAY_COLOR} />}
               {m.revenue > 0 && (
                 <text x={cx - barW / 2 - 1} y={y(m.revenue) - 8} textAnchor="middle" style={{ font: "800 11px var(--font-body)", fill: "var(--ink)" }}>
                   {m.revenue >= 1000 ? `${Math.round(m.revenue / 100) / 10}k` : fmt(m.revenue)}
@@ -118,8 +119,8 @@ function RevenueChart({ months }: { months: RevenueReport["months"] }) {
         >
           <div style={{ fontWeight: 800 }}>{monthAbbr(months[hover].month)}</div>
           <div>Revenue {fmt(months[hover].revenue)}</div>
-          <div>Payouts {fmt(months[hover].payouts)}</div>
-          <div>Profit {fmt(months[hover].profit)}</div>
+          {!revenueOnly && <div>Payouts {fmt(months[hover].payouts)}</div>}
+          {!revenueOnly && <div>Profit {fmt(months[hover].profit)}</div>}
         </div>
       )}
     </div>

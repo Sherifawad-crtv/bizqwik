@@ -129,6 +129,20 @@ export function SectionTitle({ children, count, right }: { children: ReactNode; 
   );
 }
 
+/** The "see everything" link that belongs opposite a section's title (the
+ * `right` of SectionTitle), never stranded under its list. */
+export function SectionLink({ children, onClick }: { children: ReactNode; onClick: () => void }) {
+  return (
+    <button
+      data-tap
+      onClick={onClick}
+      style={{ display: "inline-flex", alignItems: "center", gap: 2, border: 0, background: "none", color: "var(--primary-pressed)", font: "700 14px var(--font-body)", cursor: "pointer", padding: "6px 0 6px 8px" }}
+    >
+      {children} <Icon name="chevron-right" size={16} />
+    </button>
+  );
+}
+
 export function Card({ children, style }: { children: ReactNode; style?: React.CSSProperties }) {
   return (
     <div data-sq style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", ...style }}>

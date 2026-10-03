@@ -31,7 +31,7 @@ async function boot(page: import("@playwright/test").Page, mode: "solo" | "team"
 test("solo owner: four tabs, the desk as home, and no team tools", async ({ page }) => {
   await boot(page, "solo");
   await page.goto("/");
-  await expect(page.getByRole("button", { name: "Check someone in" })).toBeVisible();
+  await expect(page.getByText("REVENUE", { exact: true }).first()).toBeVisible();
   for (const l of ["Today", "Members", "Schedule", "Money"]) await expect(page.getByRole("link", { name: l, exact: true })).toBeVisible();
   for (const l of ["Team", "Catalog", "History", "Overview"]) await expect(page.getByRole("link", { name: l, exact: true })).toHaveCount(0);
 });
@@ -52,4 +52,66 @@ test("team owner is unchanged: Overview home with the full roster of tabs", asyn
   await page.goto("/");
   await expect(page).toHaveURL(/\/oversight$/);
   await expect(page.getByRole("link", { name: "Team", exact: true })).toBeVisible();
+});
+
+test("solo home: four insight cards, a revenue chart, two quick actions, links opposite their titles", async ({ page }) => {
+  await boot(page, "solo");
+  const ends = (n: number) => new Date(Date.now() + n * 86400000).toISOString();
+  const gp = (name: string, d: number) => ({ id: "p", clientId: "x", kind: "membership", planTypeId: null, seriesId: null, name, priceAtSale: 500, payMethod: "instapay", creditsTotal: null, creditsRemaining: null, invitationsRemaining: 0, startsAt: ends(-20), expiresAt: ends(d), status: "active" });
+  const c = (id: string, name: string, groupPlan: unknown) => ({ id, name, age: null, phone: "0100", email: null, conditions: null, assignedCoachId: null, currentPackage: null, currentMembership: null, groupPlan });
+  await page.route(/clients$/, (r) => r.fallback());
+  await mockBackend(page, "dept_head", {
+    __orgMode: "solo",
+    "front-desk/summary": { todayCheckIns: 0, todayDropIns: 0, activeNow: 0, recent: [{ id: "r1", kind: "check_in", name: "Mona Ali", detail: "Checked in", at: new Date().toISOString() }] },
+    clients: { clients: [c("1", "Mona Ali", gp("1 Month", 3)), c("2", "Omar Said", gp("3 Months", 60)), c("3", "Lina", null)] },
+    classes: { classes: [] },
+    revenue: { ...REVENUE, months: [{ month: "2026-09", revenue: 2000, payouts: 0, profit: 2000 }, { month: "2026-10", revenue: 3500, payouts: 0, profit: 3500 }] },
+    "payments/summary": PAYMENTS,
+  });
+  await page.goto("/");
+  await expect(page.getByText("MEMBERS", { exact: true })).toBeVisible();
+  await expect(page.getByText("3", { exact: true }).first()).toBeVisible(); // members total
+  await expect(page.getByText("ACTIVE", { exact: true })).toBeVisible();
+  await expect(page.getByText("ENDING SOON", { exact: true })).toBeVisible();
+  await expect(page.getByText("REVENUE BY MONTH · EGP")).toBeVisible();
+  const qa = page.getByRole("group", { name: "Quick actions" });
+  await expect(qa.getByRole("button")).toHaveCount(2);
+  await expect(qa.getByRole("button", { name: "New client" })).toBeVisible();
+  await expect(qa.getByRole("button", { name: "Drop-in" })).toBeVisible();
+  // The links sit on the title's row, not under the list.
+  const titleY = (await page.getByText("Recent activity", { exact: true }).boundingBox())!.y;
+  const linkY = (await page.getByRole("button", { name: /Full activity/ }).boundingBox())!.y;
+  expect(Math.abs(titleY - linkY)).toBeLessThan(14);
+  // Tapping a card lands on Members already filtered.
+  await page.getByText("ENDING SOON", { exact: true }).click();
+  await expect(page).toHaveURL(/\/members$/);
+  await expect(page.getByRole("button", { name: /Ending soon · 1/ })).toBeVisible();
+});
+
+test("solo: a new client picks between two plans as cards", async ({ page }) => {
+  await boot(page, "solo");
+  await page.goto("/");
+  await mockBackend(page, "dept_head", {
+    __orgMode: "solo",
+    "front-desk/summary": { todayCheckIns: 0, todayDropIns: 0, activeNow: 0, recent: [] },
+    clients: { clients: [] },
+    classes: { classes: [] },
+    revenue: REVENUE,
+    "plan-types": { planTypes: [
+      { id: "m1", kind: "membership", name: "1 Month", price: 1200, durationMonths: 1, credits: null, invitationsAllowance: 0, active: true },
+      { id: "m3", kind: "membership", name: "3 Months", price: 3000, durationMonths: 3, credits: null, invitationsAllowance: 0, active: true },
+    ] },
+    "class-series": { series: [] },
+    "bundle-types": { bundleTypes: [] },
+    coaches: { coaches: [] },
+  });
+  await page.goto("/");
+  await page.getByRole("group", { name: "Quick actions" }).getByRole("button", { name: "New client" }).click();
+  await page.getByLabel("FULL NAME").fill("Mona K");
+  await page.getByLabel("PHONE").fill("0122");
+  await page.getByLabel("EMAIL").fill("mona@x.com");
+  await page.getByRole("button", { name: "Next", exact: true }).last().click();
+  await expect(page.getByRole("radio", { name: /1 Month/ })).toBeVisible();
+  await expect(page.getByRole("radio", { name: /3 Months/ })).toBeVisible();
+  await expect(page.getByText("PT PACKAGE")).toHaveCount(0);
 });

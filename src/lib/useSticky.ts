@@ -29,3 +29,9 @@ export function useSticky<T extends string>(key: string, initial: T, opts: { url
   );
   return [value, set];
 }
+
+/** Sets what a screen will show the next time it opens (e.g. the Members filter
+ * a Home card links into). */
+export function setSticky(key: string, value: string): void {
+  memory.set(key, value);
+}
