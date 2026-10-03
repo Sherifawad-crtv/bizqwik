@@ -645,9 +645,11 @@ async function sellGroupPlan(opts: { orgId: string; client: any; planTypeId?: st
   if (plan.location_id) await admin().from("clients").update({ home_location_id: plan.location_id }).eq("id", client.id).is("home_location_id", null);
   await earnPurchasePoints(client.id, orgId, Number(plan.price_at_sale), payMethod);
   await logActivity(orgId, "sale_plan", { actorId, clientId: client.id, amount: Number(plan.price_at_sale), meta: { payMethod, kind: plan.kind, name: plan.name, planId: plan.id, locationId: plan.location_id ?? null } });
+  // A solo gym takes no bookings: they just turn up.
+  const goNow = (await orgModeOf(orgId)) === "solo" ? "Just turn up to a class." : "Book a class to get going.";
   await notifyClient(orgId, client.id, "plan_started", {
     title: `${plan.name} is active`,
-    body: plan.kind === "bundle" ? `${plan.credits_total} sessions to use by ${String(plan.expires_at).slice(0, 10)}. Book a class to get going.` : `Valid until ${String(plan.expires_at).slice(0, 10)}. Book a class to get going.`,
+    body: plan.kind === "bundle" ? `${plan.credits_total} sessions to use by ${String(plan.expires_at).slice(0, 10)}. ${goNow}` : `Valid until ${String(plan.expires_at).slice(0, 10)}. ${goNow}`,
     push: !!actorId,
   });
   return { plan } as const;
