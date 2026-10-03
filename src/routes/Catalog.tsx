@@ -12,6 +12,7 @@ import { WEEKDAY_ORDER, WEEKDAY_SHORT, timeLabel, weekdaysLabel } from "../lib/c
 import { TimeWheelField } from "../components/TimeWheelField";
 import { ClassPhotoField } from "../components/ClassPhotoField";
 import type { ClassSeries, GroupPlanType, GroupPlanTypeKind, Location } from "../lib/types";
+import { CategoryPill } from "../lib/category";
 import { LocationField, LocationPill, LocationSwitcher, atLocation, useCurrentLocation, useLocations } from "../lib/locations";
 import { Segmented } from "../components/Segmented";
 import { Button } from "../components/Button";
@@ -161,7 +162,7 @@ function SeriesRow({ s, last, onEdit, locations = [] }: { s: ClassSeries; last: 
           {weekdaysLabel(s.weekdays)} · {timeLabel(s.startTime)} · {s.durationMin} min
         </div>
         <div style={{ font: "500 13px var(--font-mono)", color: "var(--ink-muted)", marginTop: 2 }}>
-          Drop-in {egp(s.dropInPrice)} · Monthly {egp(s.monthlyPrice)}
+          {s.dropInPrice === 0 && s.monthlyPrice === 0 ? "" : <>Drop-in {egp(s.dropInPrice)} · Monthly {egp(s.monthlyPrice)}</>}
           {s.activeMonthlySubscribers ? ` · ${s.activeMonthlySubscribers} monthly` : ""}
         </div>
       </div>
@@ -218,6 +219,8 @@ export function SeriesSheet({ open, series, onClose }: { open: boolean; series: 
   const [monthly, setMonthly] = useState("");
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [locationId, setLocationId] = useState<string | null>(null);
+  const { orgMode: seriesMode } = useAuth();
+  const seriesSolo = seriesMode === "solo";
   const locations = useLocations();
   const { current } = useCurrentLocation();
   const [confirmEnd, setConfirmEnd] = useState(false);
@@ -249,10 +252,11 @@ export function SeriesSheet({ open, series, onClose }: { open: boolean; series: 
     const monthlyNum = Number(monthly);
     if (!title.trim()) return setError("Give the class a name.");
     if (weekdays.length === 0) return setError("Pick at least one day.");
-    if (dropIn === "" || !Number.isFinite(dropInNum) || dropInNum < 0) return setError("Enter the drop-in price (0 for free).");
-    if (monthly === "" || !Number.isFinite(monthlyNum) || monthlyNum < 0) return setError("Enter the monthly price.");
+    // Her prices live in her packages and drop-ins, not on the class itself.
+    if (!seriesSolo && (dropIn === "" || !Number.isFinite(dropInNum) || dropInNum < 0)) return setError("Enter the drop-in price (0 for free).");
+    if (!seriesSolo && (monthly === "" || !Number.isFinite(monthlyNum) || monthlyNum < 0)) return setError("Enter the monthly price.");
     if (locations.length > 0 && !locationId) return setError("Choose the location.");
-    const input = { title: title.trim(), description: description.trim() || null, weekdays, startTime, durationMin: Number(duration), dropInPrice: dropInNum, monthlyPrice: monthlyNum, imageUrl, ...(locations.length > 0 ? { locationId } : {}) };
+    const input = { title: title.trim(), description: description.trim() || null, weekdays, startTime, durationMin: Number(duration), dropInPrice: seriesSolo ? 0 : dropInNum, monthlyPrice: seriesSolo ? 0 : monthlyNum, imageUrl, ...(locations.length > 0 ? { locationId } : {}) };
     setBusy(true);
     setError(null);
     try {
@@ -290,10 +294,12 @@ export function SeriesSheet({ open, series, onClose }: { open: boolean; series: 
                 <TimeWheelField label="STARTS AT" value={startTime} onChange={setStartTime} />
                 <SelectField label="LENGTH" value={duration} options={DURATION_OPTIONS} onChange={setDuration} />
               </div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-                <TextField label="DROP-IN · EGP" type="number" min={0} inputMode="decimal" value={dropIn} onChange={(e) => setDropIn(e.target.value)} placeholder="Per class" />
-                <TextField label="MONTHLY · EGP" type="number" min={0} inputMode="decimal" value={monthly} onChange={(e) => setMonthly(e.target.value)} placeholder="1 month" />
-              </div>
+              {!seriesSolo && (
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                  <TextField label="DROP-IN · EGP" type="number" min={0} inputMode="decimal" value={dropIn} onChange={(e) => setDropIn(e.target.value)} placeholder="Per class" />
+                  <TextField label="MONTHLY · EGP" type="number" min={0} inputMode="decimal" value={monthly} onChange={(e) => setMonthly(e.target.value)} placeholder="1 month" />
+                </div>
+              )}
             </div>
             <div style={{ marginTop: 10, font: "400 12px/1.5 var(--font-mono)", color: "var(--ink-faint)" }}>
               {series
@@ -367,6 +373,7 @@ function PlansPanel({ solo }: { solo?: boolean }) {
               <div style={{ minWidth: 0, flex: 1 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                   <span style={{ font: "700 16px var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.name}</span>
+                  <CategoryPill name={p.name} />
                   <LocationPill locations={locations} id={p.locationId} />
                   {!p.active && <span style={{ flex: "none", font: "700 10px var(--font-mono)", letterSpacing: ".06em", color: "var(--ink-muted)", background: "var(--sunken)", borderRadius: 8, padding: "3px 7px" }}>OFF SALE</span>}
                 </div>
@@ -392,8 +399,8 @@ function PlansPanel({ solo }: { solo?: boolean }) {
 
   return (
     <div>
-      {section("membership", "Memberships", solo ? "No memberships yet. A membership covers every class at its location for the months you choose." : "No memberships yet. A membership covers every class for the months you choose.")}
-      {section("bundle", "Class bundles", "No bundles yet. A bundle is a pack of sessions: one is used each day the member checks in.")}
+      {!solo && section("membership", "Memberships", solo ? "No memberships yet. A membership covers every class at its location for the months you choose." : "No memberships yet. A membership covers every class for the months you choose.")}
+      {section("bundle", solo ? "Packages" : "Class bundles", solo ? "No packages yet. A package is a number of classes valid for 1 or 3 months; one class is used each day the member checks in." : "No bundles yet. A bundle is a pack of sessions: one is used each day the member checks in.")}
       {!solo && <div style={{ font: "400 12px/1.5 var(--font-mono)", color: "var(--ink-faint)", margin: "-12px 2px 0" }}>
         Each class's monthly is set on the class itself. A member holds one group plan at a time, and a new one can only be bought once the current one is finished.
       </div>}
@@ -417,6 +424,11 @@ function PlansPanel({ solo }: { solo?: boolean }) {
   );
 }
 
+// Her packages are valid for 1 month or 3 months.
+const SOLO_MONTH_OPTIONS = [
+  { value: "1", label: "1 month" },
+  { value: "3", label: "3 months" },
+];
 const MONTH_OPTIONS = Array.from({ length: 12 }, (_, i) => ({ value: String(i + 1), label: `${i + 1} month${i === 0 ? "" : "s"}` }));
 
 export function PlanTypeSheet({ open, kind, planType, onClose }: { open: boolean; kind: GroupPlanTypeKind; planType: GroupPlanType | null; onClose: () => void }) {
@@ -426,6 +438,8 @@ export function PlanTypeSheet({ open, kind, planType, onClose }: { open: boolean
   const [credits, setCredits] = useState("");
   const [invitations, setInvitations] = useState("");
   const [onSale, setOnSale] = useState<"on" | "off">("on");
+  const { orgMode: sheetMode } = useAuth();
+  const sheetSolo = sheetMode === "solo";
   const [locationId, setLocationId] = useState<string | null>(null);
   const locations = useLocations();
   const { current } = useCurrentLocation();
@@ -486,7 +500,7 @@ export function PlanTypeSheet({ open, kind, planType, onClose }: { open: boolean
             <TextField label="PRICE · EGP" type="number" min={0} inputMode="decimal" value={price} onChange={(e) => setPrice(e.target.value)} />
             <LocationField locations={locations} value={locationId} onChange={setLocationId} />
             {isBundle && <TextField label="CLASSES INCLUDED" type="number" min={1} value={credits} onChange={(e) => setCredits(e.target.value)} placeholder="10" />}
-            <SelectField label={isBundle ? "VALID FOR" : "LENGTH"} value={months} options={MONTH_OPTIONS} onChange={setMonths} />
+            <SelectField label={isBundle ? "VALID FOR" : "LENGTH"} value={months} options={sheetSolo ? SOLO_MONTH_OPTIONS : MONTH_OPTIONS} onChange={setMonths} />
             <TextField label="GUEST PASSES INCLUDED" type="number" min={0} value={invitations} onChange={(e) => setInvitations(e.target.value)} placeholder="0" />
             {planType && (
               <Segmented
@@ -545,13 +559,30 @@ function SoloOffer() {
   const { current: catalogCurrent } = useCurrentLocation();
   const [editing, setEditing] = useState(false);
   const [price, setPrice] = useState("");
+  // With locations: the list of drop-ins (e.g. Kids / Adults) being edited.
+  const [rows, setRows] = useState<{ label: string; price: string }[]>([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   if (!settings.data) return null;
   const { instapayQr } = settings.data;
   // With locations, each has its own drop-in price.
   const dropInPrice = catalogHere ? (settings.data.dropInPrices[catalogHere] ?? null) : settings.data.dropInPrice;
+  const dropInList = catalogHere ? (settings.data.dropInOptions[catalogHere] ?? []) : [];
 
+  const saveList = async () => {
+    const clean = rows.map((r) => ({ label: r.label.trim(), price: Number(r.price) }));
+    if (clean.some((r) => !r.label || r.price < 0 || !Number.isFinite(r.price))) return setError("Each drop-in needs a name and a price.");
+    setBusy(true);
+    setError(null);
+    try {
+      await api.saveOrgSettings({ locationId: catalogHere!, dropInOptions: clean });
+      setEditing(false);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Couldn't save.");
+    } finally {
+      setBusy(false);
+    }
+  };
   const savePrice = async () => {
     const n = Number(price);
     if (price.trim() === "" || !Number.isFinite(n) || n < 0) return setError("Enter the drop-in price.");
@@ -583,13 +614,36 @@ function SoloOffer() {
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ font: "700 16px var(--font-body)" }}>Drop-in{catalogCurrent && catalogHere ? ` · ${catalogCurrent.name}` : ""}</div>
-            <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>{dropInPrice === null ? "Not set" : `${fmt(dropInPrice)} EGP · one visit`}</div>
+            <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>
+              {catalogHere ? (dropInList.length === 0 ? "Not set" : dropInList.map((o) => `${o.label} ${fmt(o.price)}`).join(" · ") + " EGP") : dropInPrice === null ? "Not set" : `${fmt(dropInPrice)} EGP · one visit`}
+            </div>
           </div>
-          <Button size="md" variant="secondary" style={{ height: 40, padding: "0 16px" }} onClick={() => { setPrice(dropInPrice === null ? "" : String(dropInPrice)); setEditing(true); }}>
-            {dropInPrice === null ? "Set price" : "Edit"}
+          <Button size="md" variant="secondary" style={{ height: 40, padding: "0 16px" }} onClick={() => {
+            if (catalogHere) setRows(dropInList.length ? dropInList.map((o) => ({ label: o.label, price: String(o.price) })) : [{ label: "Kids", price: "" }, { label: "Adults", price: "" }]);
+            else setPrice(dropInPrice === null ? "" : String(dropInPrice));
+            setError(null);
+            setEditing(true);
+          }}>
+            {(catalogHere ? dropInList.length === 0 : dropInPrice === null) ? "Set price" : "Edit"}
           </Button>
         </div>
-        {editing && (
+        {editing && catalogHere && (
+          <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 10 }}>
+            {rows.map((r, i) => (
+              <div key={i} style={{ display: "grid", gridTemplateColumns: "1fr 1fr auto", gap: 8, alignItems: "end" }}>
+                <TextField label="NAME" value={r.label} onChange={(e) => setRows(rows.map((x, j) => (j === i ? { ...x, label: e.target.value } : x)))} placeholder="Kids" />
+                <TextField label="PRICE · EGP" type="number" min={0} inputMode="decimal" value={r.price} onChange={(e) => setRows(rows.map((x, j) => (j === i ? { ...x, price: e.target.value } : x)))} />
+                <button aria-label="Remove" onClick={() => setRows(rows.filter((_, j) => j !== i))} style={{ ...iconBtn(true), marginBottom: 6 }}><Icon name="trash" size={15} /></button>
+              </div>
+            ))}
+            {rows.length < 6 && <Button variant="quiet" onClick={() => setRows([...rows, { label: "", price: "" }])}>+ Another drop-in</Button>}
+            <div style={{ display: "flex", gap: 8 }}>
+              <Button style={{ flex: 1 }} disabled={busy} onClick={saveList}>{busy ? "Saving…" : "Save"}</Button>
+              <Button variant="quiet" disabled={busy} onClick={() => setEditing(false)}>Cancel</Button>
+            </div>
+          </div>
+        )}
+        {editing && !catalogHere && (
           <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 10 }}>
             <TextField label="DROP-IN PRICE · EGP" type="number" min={0} inputMode="decimal" value={price} onChange={(e) => setPrice(e.target.value)} />
             <div style={{ display: "flex", gap: 8 }}>

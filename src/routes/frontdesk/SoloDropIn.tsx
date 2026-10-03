@@ -21,13 +21,34 @@ export function SoloDropIn({ onDone }: { onDone: () => void }) {
   const { locations, current } = useCurrentLocation();
   const here = locations.length > 1 ? (current?.id ?? null) : null;
   const [method, setMethod] = useState<Method | null>(null);
+  // A location can sell several drop-ins (Kids / Adults): which one.
+  const [kind, setKind] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<Method | null>(null);
 
   if (!settings.data) return <Spinner />;
-  const price = here ? (settings.data.dropInPrices[here] ?? null) : settings.data.dropInPrice;
+  const options = here ? (settings.data.dropInOptions[here] ?? []) : [];
+  const chosen = options.find((o) => o.label === kind) ?? null;
+  const price = options.length > 0 ? (chosen?.price ?? null) : here ? (settings.data.dropInPrices[here] ?? null) : settings.data.dropInPrice;
   const qr = settings.data.instapayQr;
+
+  // Kids / Adults: pick which drop-in first.
+  if (options.length > 0 && !chosen) {
+    return (
+      <div>
+        <div style={{ font: "700 12px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", textAlign: "center", marginBottom: 12 }}>WHO'S DROPPING IN{current ? ` · ${current.name.toUpperCase()}` : ""}</div>
+        <div style={{ display: "grid", gridTemplateColumns: options.length > 2 ? "1fr" : "1fr 1fr", gap: 10 }}>
+          {options.map((o) => (
+            <button key={o.label} data-tap onClick={() => setKind(o.label)} style={{ minHeight: 84, borderRadius: "var(--r-input)", border: "1px solid var(--line)", background: "var(--surface)", cursor: "pointer", padding: 12 }}>
+              <div style={{ font: "800 18px var(--font-body)" }}>{o.label}</div>
+              <div style={{ font: "700 14px var(--font-mono)", color: "var(--primary-pressed)", marginTop: 2 }}>{fmt(o.price)} EGP</div>
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   if (price === null) {
     return (
@@ -44,7 +65,7 @@ export function SoloDropIn({ onDone }: { onDone: () => void }) {
     setBusy(true);
     setError(null);
     try {
-      await api.soloDropIn(method, here);
+      await api.soloDropIn(method, here, chosen?.label);
       setDone(method);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Couldn't record the drop-in.");
@@ -70,7 +91,7 @@ export function SoloDropIn({ onDone }: { onDone: () => void }) {
     <div>
       <div style={{ textAlign: "center", marginBottom: 16 }}>
         <div style={{ font: "800 48px/1.05 var(--font-body)", letterSpacing: "-.03em" }}>{fmt(price)}</div>
-        <div style={{ font: "700 12px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", marginTop: 4 }}>EGP · ONE DROP-IN{here && current ? ` · ${current.name.toUpperCase()}` : ""}</div>
+        <div style={{ font: "700 12px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", marginTop: 4 }}>EGP · {chosen ? `${chosen.label.toUpperCase()} DROP-IN` : "ONE DROP-IN"}{here && current ? ` · ${current.name.toUpperCase()}` : ""}</div>
       </div>
 
       {!method && (
