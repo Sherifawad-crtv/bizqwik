@@ -33,6 +33,7 @@ function toPackageInstance(row: any) {
     coachCutAtSale: Number(row.coach_cut_at_sale),
     status: row.status,
     createdBy: row.created_by,
+    locationId: row.location_id ?? null,
   };
 }
 function toMembershipInstance(row: any) {
@@ -52,7 +53,7 @@ function toGroupPlan(row: any) {
     name: row.name, priceAtSale: Number(row.price_at_sale), payMethod: row.pay_method,
     creditsTotal: row.credits_total ?? null, creditsRemaining: row.credits_remaining ?? null,
     invitationsRemaining: row.invitations_remaining, startsAt: row.starts_at, expiresAt: row.expires_at,
-    status: row.status, createdAt: row.created_at,
+    status: row.status, createdAt: row.created_at, locationId: row.location_id ?? null,
   };
 }
 function toClient(row: any, conditions: string | null, currentPackage: any, currentMembership: any = null) {
@@ -66,6 +67,7 @@ function toClient(row: any, conditions: string | null, currentPackage: any, curr
     assignedCoachId: row.assigned_coach_id,
     currentPackage,
     currentMembership,
+    homeLocationId: row.home_location_id ?? null,
   };
 }
 

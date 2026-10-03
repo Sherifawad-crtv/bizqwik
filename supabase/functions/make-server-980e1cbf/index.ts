@@ -111,6 +111,22 @@ async function isDeskStaff(me: any): Promise<boolean> {
   return (await orgModeOf(me.org_id)) === "solo";
 }
 
+// Locations (optional). An org with none behaves exactly as before; a plan or
+// session with no location is valid everywhere.
+// `undefined` = the field wasn't sent (leave it as it is), null = no location.
+async function locationField(orgId: string, v: unknown): Promise<{ id: string | null | undefined } | { error: string }> {
+  if (v === undefined) return { id: undefined };
+  if (v === null || String(v).trim() === "") return { id: null };
+  const { data } = await admin().from("locations").select("id").eq("id", String(v)).eq("org_id", orgId).maybeSingle();
+  if (!data) return { error: "That location doesn't exist." };
+  return { id: data.id };
+}
+async function locationNameOf(id: string | null | undefined): Promise<string> {
+  if (!id) return "another location";
+  const { data } = await admin().from("locations").select("name").eq("id", id).maybeSingle();
+  return data?.name ?? "another location";
+}
+
 async function tierOf(tierId: string) {
   const { data } = await admin().from("tiers").select("*").eq("id", tierId).maybeSingle();
   return data;
@@ -163,7 +179,7 @@ async function clientOf(userId: string) {
   return data;
 }
 function toClientAccount(row: any) {
-  return { id: row.id, orgId: row.org_id, name: row.name, phone: row.phone ?? null, email: row.email ?? null };
+  return { id: row.id, orgId: row.org_id, name: row.name, phone: row.phone ?? null, email: row.email ?? null, homeLocationId: row.home_location_id ?? null };
 }
 async function orgSettingsOf(orgId: string) {
   const { data } = await admin().from("org_settings").select("*").eq("org_id", orgId).maybeSingle();
@@ -485,7 +501,7 @@ async function generateSeriesSessions(series: any, tz: string) {
     const have = new Set((existing ?? []).map((r: any) => new Date(r.starts_at).toISOString()));
     const rows = wanted.filter((s) => !have.has(s)).map((s) => ({
       org_id: series.org_id, series_id: series.id, title: series.title, description: series.description ?? null,
-      starts_at: s, price_egp: Number(series.drop_in_price), created_by: series.created_by ?? null, status: "active",
+      starts_at: s, price_egp: Number(series.drop_in_price), created_by: series.created_by ?? null, status: "active", location_id: series.location_id ?? null,
     }));
     if (rows.length > 0) {
       const { error } = await admin().from("classes").insert(rows);
@@ -525,13 +541,13 @@ function toClassSeries(row: any) {
     id: row.id, title: row.title, description: row.description ?? null,
     weekdays: (row.weekdays ?? []).map(Number), startTime: String(row.start_time).slice(0, 5), durationMin: row.duration_min,
     dropInPrice: Number(row.drop_in_price), monthlyPrice: Number(row.monthly_price), status: row.status, createdAt: row.created_at,
-    imageUrl: row.image_url ?? null,
+    imageUrl: row.image_url ?? null, locationId: row.location_id ?? null,
   };
 }
 function toGroupPlanType(row: any) {
   return {
     id: row.id, kind: row.kind, name: row.name, price: Number(row.price), durationMonths: row.duration_months,
-    credits: row.credits ?? null, invitationsAllowance: row.invitations_allowance, active: row.active,
+    credits: row.credits ?? null, invitationsAllowance: row.invitations_allowance, active: row.active, locationId: row.location_id ?? null,
   };
 }
 function toGroupPlan(row: any) {
@@ -540,7 +556,7 @@ function toGroupPlan(row: any) {
     name: row.name, priceAtSale: Number(row.price_at_sale), payMethod: row.pay_method,
     creditsTotal: row.credits_total ?? null, creditsRemaining: row.credits_remaining ?? null,
     invitationsRemaining: row.invitations_remaining, startsAt: row.starts_at, expiresAt: row.expires_at,
-    status: row.status, createdAt: row.created_at,
+    status: row.status, createdAt: row.created_at, locationId: row.location_id ?? null,
   };
 }
 
@@ -573,6 +589,7 @@ function planSummary(plan: any): string {
 // Does this plan pay for this class session?
 function planCovers(plan: any, cls: any): boolean {
   if (!plan || plan.status !== "active") return false;
+  if (plan.location_id && cls.location_id && plan.location_id !== cls.location_id) return false;
   const at = Date.parse(cls.starts_at);
   if (at < Date.parse(plan.starts_at) || at >= Date.parse(plan.expires_at)) return false;
   if (plan.kind === "membership") return true;
@@ -592,12 +609,12 @@ async function sellGroupPlan(opts: { orgId: string; client: any; planTypeId?: st
     row = {
       kind: t.kind, plan_type_id: t.id, name: t.name, price_at_sale: Number(t.price), months: t.duration_months,
       credits_total: t.kind === "bundle" ? t.credits : null, credits_remaining: t.kind === "bundle" ? t.credits : null,
-      invitations_remaining: Number(t.invitations_allowance ?? 0),
+      invitations_remaining: Number(t.invitations_allowance ?? 0), location_id: t.location_id ?? null,
     };
   } else if (opts.seriesId) {
     const { data: s } = await admin().from("class_series").select("*").eq("id", opts.seriesId).eq("org_id", orgId).maybeSingle();
     if (!s || s.status !== "active") return { error: "That class isn't running anymore.", status: 404 } as const;
-    row = { kind: "class_monthly", series_id: s.id, name: `${s.title} · Monthly`, price_at_sale: Number(s.monthly_price), months: 1, credits_total: null, credits_remaining: null, invitations_remaining: 0 };
+    row = { kind: "class_monthly", series_id: s.id, name: `${s.title} · Monthly`, price_at_sale: Number(s.monthly_price), months: 1, credits_total: null, credits_remaining: null, invitations_remaining: 0, location_id: s.location_id ?? null };
   } else {
     return { error: "Choose a plan.", status: 400 } as const;
   }
@@ -625,6 +642,7 @@ async function sellGroupPlan(opts: { orgId: string; client: any; planTypeId?: st
       return { error: "Wallet balance doesn't cover this plan.", status: 400, code: "insufficient_wallet" } as const;
     }
   }
+  if (plan.location_id) await admin().from("clients").update({ home_location_id: plan.location_id }).eq("id", client.id).is("home_location_id", null);
   await earnPurchasePoints(client.id, orgId, Number(plan.price_at_sale), payMethod);
   await logActivity(orgId, "sale_plan", { actorId, clientId: client.id, amount: Number(plan.price_at_sale), meta: { payMethod, kind: plan.kind, name: plan.name, planId: plan.id } });
   await notifyClient(orgId, client.id, "plan_started", {
@@ -661,7 +679,7 @@ function toTier(row: any) {
   return { id: row.id, name: row.name, rate: Number(row.hourly_rate), privateCutPct: Number(row.private_cut_pct) };
 }
 function toBundleType(row: any) {
-  return { id: row.id, name: row.name, price: Number(row.price), sessionsIncluded: row.sessions_included, expiryDays: row.expiry_days };
+  return { id: row.id, name: row.name, price: Number(row.price), sessionsIncluded: row.sessions_included, expiryDays: row.expiry_days, locationId: row.location_id ?? null };
 }
 function toClient(row: any, conditions: string | null, currentPackage: any, currentMembership: any = null) {
   return {
@@ -674,6 +692,7 @@ function toClient(row: any, conditions: string | null, currentPackage: any, curr
     assignedCoachId: row.assigned_coach_id,
     currentPackage,
     currentMembership,
+    homeLocationId: row.home_location_id ?? null,
   };
 }
 function toMembershipInstance(row: any) {
@@ -701,6 +720,7 @@ function toPackageInstance(row: any) {
     coachCutAtSale: Number(row.coach_cut_at_sale),
     status: row.status,
     createdBy: row.created_by,
+    locationId: row.location_id ?? null,
   };
 }
 function toSession(row: any) {
@@ -1150,6 +1170,56 @@ app.post(`${P}/tiers/delete`, async (c) => {
 });
 
 // ---- bundle types --------------------------------------------------------
+// ---- locations (staff read; dept_head names them) ----
+function toLocation(row: any) {
+  return { id: row.id, name: row.name };
+}
+app.get(`${P}/locations`, async (c) => {
+  const user = await requireUser(c);
+  const me = user && (await profileOf(user.id));
+  if (!me) return c.json({ error: "Unauthorized" }, 401);
+  const { data, error } = await admin().from("locations").select("*").eq("org_id", me.org_id).order("sort").order("created_at");
+  if (error) throw error;
+  return c.json({ locations: (data ?? []).map(toLocation) });
+});
+app.post(`${P}/locations`, async (c) => {
+  const user = await requireUser(c);
+  const me = user && (await profileOf(user.id));
+  if (me?.role !== "dept_head") return c.json({ error: "Forbidden" }, 403);
+  const name = String((await c.req.json()).name ?? "").trim();
+  if (!name) return c.json({ error: "Give the location a name." }, 400);
+  const { data: existing } = await admin().from("locations").select("id").eq("org_id", me.org_id);
+  if ((existing?.length ?? 0) >= 10) return c.json({ error: "Up to 10 locations." }, 400);
+  const { data, error } = await admin().from("locations").insert({ org_id: me.org_id, name, sort: existing?.length ?? 0 }).select().single();
+  if (error) throw error;
+  return c.json({ location: toLocation(data) });
+});
+app.post(`${P}/locations/update`, async (c) => {
+  const user = await requireUser(c);
+  const me = user && (await profileOf(user.id));
+  if (me?.role !== "dept_head") return c.json({ error: "Forbidden" }, 403);
+  const body = await c.req.json();
+  const name = String(body.name ?? "").trim();
+  if (!name) return c.json({ error: "Give the location a name." }, 400);
+  const { data, error } = await admin().from("locations").update({ name }).eq("id", String(body.id ?? "")).eq("org_id", me.org_id).select().maybeSingle();
+  if (error) throw error;
+  if (!data) return c.json({ error: "No such location" }, 404);
+  return c.json({ location: toLocation(data) });
+});
+// Staff set (or clear) a member's home location.
+app.post(`${P}/clients/location`, async (c) => {
+  const user = await requireUser(c);
+  const me = user && (await profileOf(user.id));
+  if (me?.role !== "dept_head" && me?.role !== "front_desk") return c.json({ error: "Forbidden" }, 403);
+  const body = await c.req.json();
+  const loc = await locationField(me.org_id, body.locationId ?? null);
+  if ("error" in loc) return c.json({ error: loc.error }, 400);
+  const { data, error } = await admin().from("clients").update({ home_location_id: loc.id ?? null }).eq("id", String(body.id ?? "")).eq("org_id", me.org_id).select("id").maybeSingle();
+  if (error) throw error;
+  if (!data) return c.json({ error: "No such client" }, 404);
+  return c.json({ ok: true, homeLocationId: loc.id ?? null });
+});
+
 app.get(`${P}/bundle-types`, async (c) => {
   const user = await requireUser(c);
   const me = user && (await profileOf(user.id));
@@ -1163,10 +1233,12 @@ app.post(`${P}/bundle-types`, async (c) => {
   const user = await requireUser(c);
   const me = user && (await profileOf(user.id));
   if (me?.role !== "dept_head") return c.json({ error: "Forbidden" }, 403);
-  const { name, price, sessionsIncluded, expiryDays } = await c.req.json();
+  const { name, price, sessionsIncluded, expiryDays, locationId } = await c.req.json();
+  const loc = await locationField(me.org_id, locationId);
+  if ("error" in loc) return c.json({ error: loc.error }, 400);
   const { data, error } = await admin()
     .from("bundle_types")
-    .insert({ org_id: me.org_id, name, price: Number(price), sessions_included: Number(sessionsIncluded), expiry_days: Number(expiryDays) })
+    .insert({ org_id: me.org_id, name, price: Number(price), sessions_included: Number(sessionsIncluded), expiry_days: Number(expiryDays), location_id: loc.id ?? null })
     .select()
     .single();
   if (error) throw error;
@@ -1177,10 +1249,14 @@ app.post(`${P}/bundle-types/update`, async (c) => {
   const user = await requireUser(c);
   const me = user && (await profileOf(user.id));
   if (me?.role !== "dept_head") return c.json({ error: "Forbidden" }, 403);
-  const { id, name, price, sessionsIncluded, expiryDays } = await c.req.json();
+  const { id, name, price, sessionsIncluded, expiryDays, locationId } = await c.req.json();
+  const loc = await locationField(me.org_id, locationId);
+  if ("error" in loc) return c.json({ error: loc.error }, 400);
+  const bundlePatch: any = { name, price: Number(price), sessions_included: Number(sessionsIncluded), expiry_days: Number(expiryDays) };
+  if (loc.id !== undefined) bundlePatch.location_id = loc.id;
   const { data, error } = await admin()
     .from("bundle_types")
-    .update({ name, price: Number(price), sessions_included: Number(sessionsIncluded), expiry_days: Number(expiryDays) })
+    .update(bundlePatch)
     .eq("id", id)
     .eq("org_id", me.org_id)
     .select()
@@ -1447,10 +1523,12 @@ async function sellPackageTo(clientId: string, bundleTypeId: string, coachId: st
       status: "active",
       created_by: me.id,
       pay_method: payMethod,
+      location_id: bundleType.location_id ?? null,
     })
     .select()
     .single();
   if (pErr) throw pErr;
+  if (bundleType.location_id) await admin().from("clients").update({ home_location_id: bundleType.location_id }).eq("id", clientId).is("home_location_id", null);
 
   const wasAssignedBefore = client.assigned_coach_id === coachId;
   await admin().from("clients").update({ assigned_coach_id: coachId }).eq("id", clientId);
@@ -1672,8 +1750,15 @@ type CheckInResult =
   | { ok: true; checkIn: any; deducted: boolean; plan: { name: string; kind: string; creditsRemaining: number | null; creditsTotal: number | null } | null }
   | { ok: false; error: string; status: number; code?: string; plan?: any };
 
-async function recordCheckIn(orgId: string, clientId: string, clientName: string, source: "qr" | "manual", actorId: string | null, self: boolean): Promise<CheckInResult> {
+async function recordCheckIn(orgId: string, clientId: string, clientName: string, source: "qr" | "manual", actorId: string | null, self: boolean, locationId: string | null = null): Promise<CheckInResult> {
   const status = await clientPlanStatus(clientId, orgId);
+  // Checking in at a known location with a plan sold for a different one (and
+  // no PT package or legacy membership to fall back on): turn it away.
+  const gp = status.groupPlanRow;
+  if (locationId && gp?.location_id && gp.location_id !== locationId && !(status.package && status.package.status === "active") && !(status.membership && status.membership.status === "active")) {
+    const where = await locationNameOf(gp.location_id);
+    return { ok: false, status: 400, code: "wrong_location", plan: toGroupPlan(gp), error: self ? `Your ${gp.name} is for ${where}.` : `${clientName}'s ${gp.name} is for ${where}, not this location.` };
+  }
   if (!status.eligible) {
     // A bundle that ran out gets its own, clearer answer.
     const { data: last } = await admin().from("group_plans").select("*").eq("client_id", clientId).eq("org_id", orgId)
@@ -1763,11 +1848,13 @@ app.post(`${P}/check-ins`, async (c) => {
   const user = await requireUser(c);
   const me = user && (await profileOf(user.id));
   if (!(await isDeskStaff(me))) return c.json({ error: "Forbidden" }, 403);
-  const { clientId, source } = await c.req.json();
+  const { clientId, source, locationId } = await c.req.json();
   if (source !== "qr" && source !== "manual") return c.json({ error: "Invalid check-in source." }, 400);
   const { data: client } = await admin().from("clients").select("id, name").eq("id", clientId).eq("org_id", me.org_id).maybeSingle();
   if (!client) return c.json({ error: "No such client" }, 404);
-  const r = await recordCheckIn(me.org_id, clientId, client.name, source, me.id, false);
+  const loc = await locationField(me.org_id, locationId);
+  if ("error" in loc) return c.json({ error: loc.error }, 400);
+  const r = await recordCheckIn(me.org_id, clientId, client.name, source, me.id, false, loc.id ?? null);
   if (!r.ok) return c.json({ error: r.error, code: r.code ?? null, plan: r.plan ?? null }, r.status as any);
   const data = r.checkIn;
   return c.json({ checkIn: { id: data.id, clientId: data.client_id, source: data.source, checkedInAt: data.checked_in_at }, deducted: r.deducted, plan: r.plan });
@@ -2037,9 +2124,16 @@ app.post(`${P}/packages/deliver`, async (c) => {
   const user = await requireUser(c);
   const me = user && (await profileOf(user.id));
   if (!me) return c.json({ error: "Unauthorized" }, 401);
-  const { qrToken } = await c.req.json();
-  if (!qrToken) return c.json({ error: "Scan the member's PT code to log the session.", code: "scan_required" }, 400);
-  const r = await resolvePtScan(me, String(qrToken));
+  const { qrToken, packageId } = await c.req.json();
+  let r: { pkg: any } | { error: string; status: number };
+  if (!qrToken && packageId && me.role === "dept_head" && (await orgModeOf(me.org_id)) === "solo") {
+    const { data: row } = await admin().from("package_instances").select("qr_token").eq("id", String(packageId)).eq("org_id", me.org_id).maybeSingle();
+    if (!row?.qr_token) return c.json({ error: "No such PT bundle." }, 404);
+    r = await resolvePtScan(me, String(row.qr_token));
+  } else {
+    if (!qrToken) return c.json({ error: "Scan the member's PT code to log the session.", code: "scan_required" }, 400);
+    r = await resolvePtScan(me, String(qrToken));
+  }
   if ("error" in r) return c.json({ error: r.error }, r.status as any);
   const pkg = r.pkg;
 
@@ -2056,7 +2150,7 @@ app.post(`${P}/packages/deliver`, async (c) => {
   if (uErr) throw uErr;
   if (!updated) return c.json({ error: "This bundle just changed — scan again." }, 409);
 
-  await admin().from("delivery_logs").insert({ org_id: me.org_id, package_instance_id: pkg.id, date: gymToday(), logged_by: me.id, source: "qr" });
+  await admin().from("delivery_logs").insert({ org_id: me.org_id, package_instance_id: pkg.id, date: gymToday(), logged_by: me.id, source: qrToken ? "qr" : "manual" });
 
   await notifyClient(me.org_id, pkg.client_id, "pt_logged", {
     title: "PT session logged",
@@ -2786,7 +2880,7 @@ app.post(`${P}/ops/plans/delete`, async (c) => {
 function toClassRow(row: any) {
   // A series session shows its series' photo unless it has its own.
   const imageUrl = row.image_url ?? row.class_series?.image_url ?? null;
-  return { id: row.id, seriesId: row.series_id ?? null, title: row.title, description: row.description ?? null, startsAt: row.starts_at, price: Number(row.price_egp), status: row.status, imageUrl };
+  return { id: row.id, seriesId: row.series_id ?? null, title: row.title, description: row.description ?? null, startsAt: row.starts_at, price: Number(row.price_egp), status: row.status, imageUrl, locationId: row.location_id ?? null };
 }
 function toBookingRow(row: any) {
   return {
@@ -2830,9 +2924,13 @@ app.get(`${P}/client/branding`, async (c) => {
   const slug = c.req.query("slug") || "";
   const { data: org } = await admin().from("organizations").select("id, name, slug, status").eq("slug", slug).maybeSingle();
   if (!org) return c.json({ error: "Unknown gym" }, 404);
-  const { data: b } = await admin().from("org_branding").select("*").eq("org_id", org.id).maybeSingle();
+  const [{ data: b }, { data: locs }] = await Promise.all([
+    admin().from("org_branding").select("*").eq("org_id", org.id).maybeSingle(),
+    admin().from("locations").select("id, name").eq("org_id", org.id).order("sort").order("created_at"),
+  ]);
   return c.json({
     org: { id: org.id, name: org.name, slug: org.slug, status: org.status },
+    locations: (locs ?? []).map(toLocation),
     branding: {
       appName: b?.app_name ?? org.name,
       logoUrl: b?.logo_url ?? null,
@@ -2842,6 +2940,19 @@ app.get(`${P}/client/branding`, async (c) => {
     },
   });
 });
+
+app.post(`${P}/client/location`, async (c) => {
+  const me = await requireClient(c);
+  if (!me) return c.json({ error: "Unauthorized" }, 401);
+  const loc = await locationField(me.org_id, (await c.req.json().catch(() => ({}))).locationId ?? null);
+  if ("error" in loc) return c.json({ error: loc.error }, 400);
+  await admin().from("clients").update({ home_location_id: loc.id ?? null }).eq("id", me.id);
+  return c.json({ ok: true, homeLocationId: loc.id ?? null });
+});
+
+// A member with a home location sees that location's sessions and plans (plus
+// anything not tied to a location). Without one, they see everything.
+const atMemberLocation = (q: any, me: any) => (me.home_location_id ? q.or(`location_id.is.null,location_id.eq.${me.home_location_id}`) : q);
 
 app.get(`${P}/client/home`, async (c) => {
   const me = await requireClient(c);
@@ -2855,7 +2966,7 @@ app.get(`${P}/client/home`, async (c) => {
     walletBalance(me.id, me.org_id),
     bumpPointsBalance(me.id, me.org_id),
     pointsConfig(me.org_id),
-    admin().from("classes").select("*, class_series(image_url)").eq("org_id", me.org_id).eq("status", "active").gte("starts_at", now.toISOString()).lt("starts_at", new Date(now.getTime() + 7 * 86400000).toISOString()).order("starts_at").limit(80),
+    atMemberLocation(admin().from("classes").select("*, class_series(image_url)").eq("org_id", me.org_id).eq("status", "active").gte("starts_at", now.toISOString()).lt("starts_at", new Date(now.getTime() + 7 * 86400000).toISOString()), me).order("starts_at").limit(80),
     admin().from("class_bookings").select("class_id").eq("client_id", me.id).neq("attendance", "cancelled"),
     classGoing(me.org_id, me.id),
     admin().from("client_notifications").select("id", { count: "exact", head: true }).eq("client_id", me.id).is("read_at", null),
@@ -2883,7 +2994,7 @@ app.get(`${P}/client/classes`, async (c) => {
   if (!me) return c.json({ error: "Unauthorized" }, 401);
   await extendOrgSeries(me.org_id);
   const [{ data }, { data: mine }, plan, going] = await Promise.all([
-    admin().from("classes").select("*, class_series(image_url)").eq("org_id", me.org_id).eq("status", "active").gte("starts_at", new Date().toISOString()).order("starts_at"),
+    atMemberLocation(admin().from("classes").select("*, class_series(image_url)").eq("org_id", me.org_id).eq("status", "active").gte("starts_at", new Date().toISOString()), me).order("starts_at"),
     admin().from("class_bookings").select("class_id").eq("client_id", me.id).neq("attendance", "cancelled"),
     activeGroupPlan(me.id, me.org_id),
     classGoing(me.org_id, me.id),
@@ -2967,8 +3078,8 @@ app.get(`${P}/client/plans`, async (c) => {
   const plan = await activeGroupPlan(me.id, me.org_id);
   const [{ data: history }, { data: types }, { data: series }, wallet] = await Promise.all([
     admin().from("group_plans").select("*").eq("client_id", me.id).order("created_at", { ascending: false }).limit(20),
-    admin().from("group_plan_types").select("*").eq("org_id", me.org_id).eq("active", true).order("price"),
-    admin().from("class_series").select("*").eq("org_id", me.org_id).eq("status", "active").order("title"),
+    atMemberLocation(admin().from("group_plan_types").select("*").eq("org_id", me.org_id).eq("active", true), me).order("price"),
+    atMemberLocation(admin().from("class_series").select("*").eq("org_id", me.org_id).eq("status", "active"), me).order("title"),
     walletBalance(me.id, me.org_id),
   ]);
   return c.json({
@@ -3335,12 +3446,14 @@ app.post(`${P}/classes`, async (c) => {
   const user = await requireUser(c);
   const me = user && (await profileOf(user.id));
   if (me?.role !== "dept_head") return c.json({ error: "Forbidden" }, 403);
-  const { title, description, startsAt, price, imageUrl } = await c.req.json();
+  const { title, description, startsAt, price, imageUrl, locationId } = await c.req.json();
   if (!String(title ?? "").trim()) return c.json({ error: "Title is required." }, 400);
   if (!startsAt) return c.json({ error: "Pick a date and time." }, 400);
   const p = Number(price);
   if (!Number.isFinite(p) || p < 0) return c.json({ error: "Price must be zero or more." }, 400);
-  const { data, error } = await admin().from("classes").insert({ org_id: me.org_id, title: String(title).trim(), description: description ?? null, starts_at: startsAt, price_egp: p, image_url: imageUrlField(imageUrl), created_by: me.id }).select().single();
+  const loc = await locationField(me.org_id, locationId);
+  if ("error" in loc) return c.json({ error: loc.error }, 400);
+  const { data, error } = await admin().from("classes").insert({ org_id: me.org_id, title: String(title).trim(), description: description ?? null, starts_at: startsAt, price_egp: p, image_url: imageUrlField(imageUrl), created_by: me.id, location_id: loc.id ?? null }).select().single();
   if (error) throw error;
   return c.json({ class: toClassRow(data) });
 });
@@ -3348,11 +3461,15 @@ app.post(`${P}/classes/update`, async (c) => {
   const user = await requireUser(c);
   const me = user && (await profileOf(user.id));
   if (me?.role !== "dept_head") return c.json({ error: "Forbidden" }, 403);
-  const { id, title, description, startsAt, price, imageUrl } = await c.req.json();
+  const { id, title, description, startsAt, price, imageUrl, locationId } = await c.req.json();
   const p = Number(price);
   if (!String(title ?? "").trim()) return c.json({ error: "Title is required." }, 400);
   if (!Number.isFinite(p) || p < 0) return c.json({ error: "Price must be zero or more." }, 400);
-  const { data, error } = await admin().from("classes").update({ title: String(title).trim(), description: description ?? null, starts_at: startsAt, price_egp: p, image_url: imageUrlField(imageUrl) }).eq("id", id).eq("org_id", me.org_id).select().maybeSingle();
+  const loc = await locationField(me.org_id, locationId);
+  if ("error" in loc) return c.json({ error: loc.error }, 400);
+  const patch: any = { title: String(title).trim(), description: description ?? null, starts_at: startsAt, price_egp: p, image_url: imageUrlField(imageUrl) };
+  if (loc.id !== undefined) patch.location_id = loc.id;
+  const { data, error } = await admin().from("classes").update(patch).eq("id", id).eq("org_id", me.org_id).select().maybeSingle();
   if (error) throw error;
   if (!data) return c.json({ error: "No such class" }, 404);
   return c.json({ class: toClassRow(data) });
@@ -3427,9 +3544,12 @@ app.post(`${P}/class-series`, async (c) => {
   const user = await requireUser(c);
   const me = user && (await profileOf(user.id));
   if (me?.role !== "dept_head") return c.json({ error: "Forbidden" }, 403);
-  const parsed = seriesFields(await c.req.json());
+  const body = await c.req.json();
+  const parsed = seriesFields(body);
   if ("error" in parsed) return c.json({ error: parsed.error }, 400);
-  const { data, error } = await admin().from("class_series").insert({ org_id: me.org_id, ...parsed.row, created_by: me.id }).select().single();
+  const loc = await locationField(me.org_id, body.locationId);
+  if ("error" in loc) return c.json({ error: loc.error }, 400);
+  const { data, error } = await admin().from("class_series").insert({ org_id: me.org_id, ...parsed.row, created_by: me.id, location_id: loc.id ?? null }).select().single();
   if (error) throw error;
   await generateSeriesSessions(data, await orgTimezone(me.org_id));
   await logActivity(me.org_id, "class_series_created", { actorId: me.id, meta: { seriesId: data.id, title: data.title } });
@@ -3449,11 +3569,15 @@ app.post(`${P}/class-series/update`, async (c) => {
   const { data: existing } = await admin().from("class_series").select("*").eq("id", body.id).eq("org_id", me.org_id).maybeSingle();
   if (!existing) return c.json({ error: "No such class" }, 404);
   if (existing.status !== "active") return c.json({ error: "This class has ended — create a new one instead." }, 400);
-  const { data, error } = await admin().from("class_series").update({ ...parsed.row, generated_until: null }).eq("id", existing.id).select().single();
+  const loc = await locationField(me.org_id, body.locationId);
+  if ("error" in loc) return c.json({ error: loc.error }, 400);
+  const seriesPatch: any = { ...parsed.row, generated_until: null };
+  if (loc.id !== undefined) seriesPatch.location_id = loc.id;
+  const { data, error } = await admin().from("class_series").update(seriesPatch).eq("id", existing.id).select().single();
   if (error) throw error;
   const cleared = await clearFutureUnbookedSessions(existing.id);
-  // Booked future sessions keep their slot/price, but follow the new name.
-  await admin().from("classes").update({ title: data.title, description: data.description }).eq("series_id", existing.id).gt("starts_at", new Date().toISOString());
+  // Booked future sessions keep their slot/price, but follow the new name and place.
+  await admin().from("classes").update({ title: data.title, description: data.description, location_id: data.location_id ?? null }).eq("series_id", existing.id).gt("starts_at", new Date().toISOString());
   await generateSeriesSessions(data, await orgTimezone(me.org_id));
   return c.json({ series: toClassSeries(data), keptBookedSessions: cleared.kept });
 });
@@ -3505,9 +3629,12 @@ app.post(`${P}/plan-types`, async (c) => {
   const user = await requireUser(c);
   const me = user && (await profileOf(user.id));
   if (me?.role !== "dept_head") return c.json({ error: "Forbidden" }, 403);
-  const parsed = planTypeFields(await c.req.json());
+  const body = await c.req.json();
+  const parsed = planTypeFields(body);
   if ("error" in parsed) return c.json({ error: parsed.error }, 400);
-  const { data, error } = await admin().from("group_plan_types").insert({ org_id: me.org_id, ...parsed.row }).select().single();
+  const loc = await locationField(me.org_id, body.locationId);
+  if ("error" in loc) return c.json({ error: loc.error }, 400);
+  const { data, error } = await admin().from("group_plan_types").insert({ org_id: me.org_id, ...parsed.row, location_id: loc.id ?? null }).select().single();
   if (error) throw error;
   return c.json({ planType: toGroupPlanType(data) });
 });
@@ -3524,7 +3651,11 @@ app.post(`${P}/plan-types/update`, async (c) => {
   const parsed = planTypeFields({ ...body, kind: existing.kind });
   if ("error" in parsed) return c.json({ error: parsed.error }, 400);
   const active = body.active === undefined ? existing.active : !!body.active;
-  const { data, error } = await admin().from("group_plan_types").update({ ...parsed.row, active }).eq("id", existing.id).select().single();
+  const loc = await locationField(me.org_id, body.locationId);
+  if ("error" in loc) return c.json({ error: loc.error }, 400);
+  const typePatch: any = { ...parsed.row, active };
+  if (loc.id !== undefined) typePatch.location_id = loc.id;
+  const { data, error } = await admin().from("group_plan_types").update(typePatch).eq("id", existing.id).select().single();
   if (error) throw error;
   return c.json({ planType: toGroupPlanType(data) });
 });
