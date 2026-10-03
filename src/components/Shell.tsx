@@ -3,6 +3,7 @@ import { Spinner } from "./Spinner";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { BottomNav } from "./BottomNav";
 import { RouteTransition } from "./RouteTransition";
+import { PullToRefresh } from "./PullToRefresh";
 import { Sidebar } from "./Sidebar";
 import { Fab } from "./Fab";
 import { Icon } from "./Icon";
@@ -78,7 +79,9 @@ export function Shell() {
         )}
 
         <main style={{ position: "relative", height: "100svh", overflow: "hidden" }}>
-          <RouteTransition tabs={navFor(profile.role, orgMode)} role={profile.role} orgMode={orgMode} />
+          <PullToRefresh>
+            <RouteTransition tabs={navFor(profile.role, orgMode)} role={profile.role} orgMode={orgMode} />
+          </PullToRefresh>
         </main>
 
         <div

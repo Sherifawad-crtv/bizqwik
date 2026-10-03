@@ -15,6 +15,16 @@ const inflight = new Map<string, Promise<unknown>>();
 export function clearAsyncCache() {
   inflight.clear();
 }
+
+// How many screen loads are in progress, so pull-to-refresh can keep its
+// spinner up until the refresh has actually landed.
+let active = 0;
+export async function waitForLoadsToFinish(maxMs = 10000) {
+  // Let the refreshed screens start their requests first.
+  await new Promise((r) => setTimeout(r, 50));
+  const until = Date.now() + maxMs;
+  while (active > 0 && Date.now() < until) await new Promise((r) => setTimeout(r, 80));
+}
 function keyOf(fn: () => unknown, deps: unknown[]): string {
   try {
     return `${fn.toString()}|${JSON.stringify(deps)}`;
@@ -48,7 +58,11 @@ export function useAsync<T>(
     if (!req) {
       req = fnRef.current();
       inflight.set(flight, req);
-      const done = () => inflight.delete(flight);
+      active++;
+      const done = () => {
+        inflight.delete(flight);
+        active--;
+      };
       req.then(done, done);
     }
     req
