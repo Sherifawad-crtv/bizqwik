@@ -180,6 +180,20 @@ export function OrgDetail() {
     }
   };
 
+  const setMode = async (mode: "solo" | "team") => {
+    if (mode === (org.mode ?? "team")) return;
+    setError(null);
+    setBusy(true);
+    try {
+      await api.ops.setOrgMode(id, mode);
+      detail.refetch();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Couldn't update the app type.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const setPlan = async (planId: string) => {
     setError(null);
     setBusy(true);
@@ -215,6 +229,18 @@ export function OrgDetail() {
       <div style={{ marginTop: 22, opacity: busy ? 0.6 : 1, pointerEvents: busy ? "none" : "auto" }}>
         <SectionTitle>Status</SectionTitle>
         <Segmented value={org.status} options={STATUS_OPTIONS} onChange={setStatus} />
+
+        <div style={{ marginTop: 22 }}>
+          <SectionTitle>App type</SectionTitle>
+          <Segmented
+            value={org.mode ?? "team"}
+            options={[{ value: "team", label: "TEAM" }, { value: "solo", label: "SOLO" }]}
+            onChange={setMode}
+          />
+          <div style={{ font: "500 12px/1.6 var(--font-mono)", color: "var(--ink-faint)", padding: "8px 2px 0" }}>
+            Solo: the owner runs everything herself (Today, Members, Schedule, Money). Team: coaches, tiers and payouts.
+          </div>
+        </div>
 
         <div style={{ marginTop: 22 }}>
           <SectionTitle>Plan</SectionTitle>

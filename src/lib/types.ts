@@ -228,6 +228,7 @@ export interface OrgSummary {
   name: string;
   slug: string;
   status: OrgStatus;
+  mode?: "solo" | "team";
   planId: string | null;
   planName: string | null;
   staffCount: number;
@@ -254,6 +255,7 @@ export interface OrgDetail {
     /** Printed in the coaches' room; coaches scan it to log attendance. */
     coachQrToken: string;
     status: OrgStatus;
+    mode?: "solo" | "team";
     planId: string | null;
     planName: string | null;
     createdAt: string;
@@ -426,4 +428,28 @@ export interface RevenueReport {
   byCoach: { coachId: string; name: string; revenue: number; payouts: number }[];
   activeSubscribers: { total: number; groupPlans: number; ptPackages: number; byPlanKind: Record<GroupPlanKind, number> };
   walletLiability: number;
+}
+
+// ===== Money by payment method (dept_head / accountant) =====
+export interface PaymentsSummary {
+  months: number;
+  total: number;
+  byMethod: { method: "instapay" | "cash" | "card" | "other"; label: string; amount: number; count: number }[];
+  transfers: { id: string; at: string; clientName: string | null; amount: number; what: string }[];
+}
+
+// ===== Bringing existing members in =====
+export interface ImportRow {
+  name: string;
+  phone?: string;
+  email?: string;
+  plan?: string;
+  startsOn?: string; // 2026-10-01
+  expiresOn?: string; // 2026-11-01
+  creditsLeft?: number | null;
+  creditsTotal?: number | null;
+}
+export interface ImportResult {
+  imported: number;
+  skipped: { row: number; reason: string }[];
 }

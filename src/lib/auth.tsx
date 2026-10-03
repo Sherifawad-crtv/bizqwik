@@ -7,6 +7,8 @@ import type { BizqwikTeam, Profile, Tier } from "./types";
 interface AuthState {
   profile: Profile | null;
   tier: Tier | null;
+  // "solo": the owner runs everything herself (simpler app); "team": today's app.
+  orgMode: "solo" | "team";
   // Set when the signed-in account is a Bizqwik-team member (ops dashboard).
   // A pure team member has no profile; an org user has no bizqwikTeam.
   bizqwikTeam: BizqwikTeam | null;
@@ -21,6 +23,7 @@ const AuthContext = createContext<AuthState | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [tier, setTier] = useState<Tier | null>(null);
+  const [orgMode, setOrgMode] = useState<"solo" | "team">("team");
   const [bizqwikTeam, setBizqwikTeam] = useState<BizqwikTeam | null>(null);
   const [ready, setReady] = useState(false);
 
@@ -30,6 +33,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .then((me) => {
         setProfile(me.profile);
         setTier(me.tier);
+        setOrgMode(me.orgMode === "solo" ? "solo" : "team");
         setBizqwikTeam(me.bizqwikTeam);
       })
       .catch(() => {
@@ -58,6 +62,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const me = await api.me();
     setProfile(me.profile);
     setTier(me.tier);
+    setOrgMode(me.orgMode === "solo" ? "solo" : "team");
     setBizqwikTeam(me.bizqwikTeam);
   };
 
@@ -65,6 +70,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await authApi.signOut();
     setProfile(null);
     setTier(null);
+    setOrgMode("team");
     setBizqwikTeam(null);
   };
 
@@ -72,10 +78,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const me = await api.me();
     setProfile(me.profile);
     setTier(me.tier);
+    setOrgMode(me.orgMode === "solo" ? "solo" : "team");
     setBizqwikTeam(me.bizqwikTeam);
   };
 
-  return <AuthContext.Provider value={{ profile, tier, bizqwikTeam, ready, login, logout, refreshProfile }}>{children}</AuthContext.Provider>;
+  return <AuthContext.Provider value={{ profile, tier, orgMode, bizqwikTeam, ready, login, logout, refreshProfile }}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth(): AuthState {

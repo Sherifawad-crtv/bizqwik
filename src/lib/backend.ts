@@ -4,7 +4,7 @@
 // keeps working (see supabaseClient.ts for which project it targets).
 import { FN_SLUG, supabase } from "./supabaseClient";
 import { bump } from "./bus";
-import type {
+import type { PaymentsSummary, ImportRow, ImportResult,
   ActivityEntry,
   BizqwikRole,
   ClassBooking,
@@ -138,7 +138,9 @@ export const api = {
   signup: (name: string, email: string, password: string) =>
     callFn<{ profile?: Profile; bizqwikTeam?: BizqwikTeam }>("signup", { method: "POST", body: { name, email, password } }),
 
-  me: () => callFn<{ profile: Profile | null; tier: Tier | null; bizqwikTeam: BizqwikTeam | null }>("me"),
+  me: () => callFn<{ profile: Profile | null; orgMode?: "solo" | "team" | null; tier: Tier | null; bizqwikTeam: BizqwikTeam | null }>("me"),
+  paymentsSummary: (months: number) => callFn<PaymentsSummary>(`payments/summary?months=${months}`),
+  importClients: (rows: ImportRow[]) => callFn<ImportResult>("clients/import", { method: "POST", body: { rows } }),
   updateMe: (name: string) => callFn<{ profile: Profile }>("me/update", { method: "POST", body: { name } }),
   updateAvatar: (avatarUrl: string | null) => callFn<{ profile: Profile }>("me/update", { method: "POST", body: { avatarUrl } }),
 
@@ -287,6 +289,8 @@ export const api = {
     org: (id: string) => callFn<OrgDetail>(`ops/orgs/${id}`),
     setOrgStatus: (id: string, status: OrgStatus) =>
       callFn<{ ok: true; status: OrgStatus }>(`ops/orgs/${id}/status`, { method: "POST", body: { status } }),
+    setOrgMode: (id: string, mode: "solo" | "team") =>
+      callFn<{ ok: true; mode: "solo" | "team" }>(`ops/orgs/${id}/mode`, { method: "POST", body: { mode } }),
     setOrgPlan: (id: string, planId: string | null) =>
       callFn<{ ok: true; planId: string | null }>(`ops/orgs/${id}/plan`, { method: "POST", body: { planId } }),
     // Permanent: removes the org and everything under it. `confirmSlug` must match.

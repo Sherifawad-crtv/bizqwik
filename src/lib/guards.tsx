@@ -22,6 +22,15 @@ export function RequireBizqwikTeam() {
   return <Outlet />;
 }
 
+// Front-desk screens: the front desk, or the owner of a solo business who does
+// that work herself.
+export function RequireDesk() {
+  const { profile, orgMode } = useAuth();
+  if (!profile) return null;
+  if (profile.role === "front_desk" || (profile.role === "dept_head" && orgMode === "solo")) return <Outlet />;
+  return <Navigate to="/" replace />;
+}
+
 export function RequireRole({ roles }: { roles: Role[] }) {
   const { profile } = useAuth();
   if (!profile) return null;

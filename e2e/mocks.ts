@@ -68,7 +68,7 @@ export async function mockBackend(
   await page.route(/\/functions\/v1\/make-server-980e1cbf\//, (route) => {
     if (route.request().method() === "OPTIONS") return route.fulfill({ status: 204, headers: CORS });
     const path = new URL(route.request().url()).pathname;
-    if (path.endsWith("/me")) return json(route, state.signedIn ? { profile: profile(role), tier: null, bizqwikTeam: null } : { profile: null, tier: null, bizqwikTeam: null });
+    if (path.endsWith("/me")) return json(route, state.signedIn ? { profile: profile(role), orgMode: (overrides as any).__orgMode ?? "team", tier: null, bizqwikTeam: null } : { profile: null, tier: null, bizqwikTeam: null });
     // longest matching suffix wins so "membership-types" beats "types"
     const keys = [...Object.keys(overrides), ...Object.keys(defaults)].sort((a, b) => b.length - a.length);
     for (const k of keys) {

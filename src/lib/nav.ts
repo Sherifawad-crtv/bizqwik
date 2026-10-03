@@ -1,4 +1,6 @@
 import type { Role } from "./types";
+
+export type OrgMode = "solo" | "team";
 import type { IconName } from "../components/Icon";
 
 export interface NavItem {
@@ -20,8 +22,8 @@ export function matchTabIndex(pathname: string, items: NavItem[]): number {
  * redirect target, not "/" itself. This is each role's one "home" screen:
  * the only place with no screen-name text and no back button, where the
  * avatar lives blended into the page instead of in any bar. */
-export function homePathForRole(role: Role): string {
-  if (role === "dept_head") return "/oversight";
+export function homePathForRole(role: Role, mode: OrgMode = "team"): string {
+  if (role === "dept_head") return mode === "solo" ? "/" : "/oversight";
   if (role === "accountant") return "/pay";
   return "/";
 }
@@ -37,16 +39,16 @@ export type HeaderMode = "home" | "account" | "plain";
  * "plain": centered screen name only — every other screen, including ones
  * drilled into from within a tab (e.g. a coach's detail page), which keep
  * their own existing in-body back link untouched. */
-export function headerMode(pathname: string, role: Role): HeaderMode {
+export function headerMode(pathname: string, role: Role, mode: OrgMode = "team"): HeaderMode {
   if (ACCOUNT_ROUTES.has(pathname)) return "account";
-  if (pathname === homePathForRole(role)) return "home";
+  if (pathname === homePathForRole(role, mode)) return "home";
   return "plain";
 }
 
 /** Where the account stack's back button goes: /account itself returns to
  * the role's home screen; its children return to /account. */
-export function accountBackTarget(pathname: string, role: Role): string {
-  if (pathname === "/account") return homePathForRole(role);
+export function accountBackTarget(pathname: string, role: Role, mode: OrgMode = "team"): string {
+  if (pathname === "/account") return homePathForRole(role, mode);
   return "/account";
 }
 
@@ -86,3 +88,19 @@ export const NAV: Record<Role, NavItem[]> = {
     { key: "activity", path: "/activity", label: "Activity", icon: "history" },
   ],
 };
+
+/** A solo business: the owner does it all, so four tabs and nothing about
+ * teams, tiers or payouts. */
+export const SOLO_NAV: NavItem[] = [
+  { key: "today", path: "/", label: "Today", icon: "home" },
+  { key: "members", path: "/members", label: "Members", icon: "clients" },
+  { key: "schedule", path: "/bookings", label: "Schedule", icon: "calendar" },
+  { key: "money", path: "/money", label: "Money", icon: "wallet" },
+];
+
+export const isSoloOwner = (role: Role, mode: OrgMode) => role === "dept_head" && mode === "solo";
+
+/** The tabs for who is signed in. */
+export function navFor(role: Role, mode: OrgMode): NavItem[] {
+  return isSoloOwner(role, mode) ? SOLO_NAV : NAV[role];
+}
