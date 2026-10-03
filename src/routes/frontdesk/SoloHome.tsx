@@ -145,7 +145,10 @@ export function SoloHome() {
             </span>
             <span style={{ minWidth: 0, flex: 1 }}>
               <span style={{ display: "block", font: "700 15px var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.title}</span>
-              {c.id === nextUpId && <span style={{ display: "block", font: "700 11px var(--font-mono)", color: "var(--primary-pressed)" }}>NEXT</span>}
+              <span style={{ display: "block", font: "400 12px var(--font-mono)", color: (c.bookedCount ?? 0) > 0 ? "var(--primary-pressed)" : "var(--ink-faint)" }}>
+                {(c.bookedCount ?? 0) > 0 ? `${c.bookedCount} coming` : "No one yet"}
+                {c.id === nextUpId ? " · NEXT" : ""}
+              </span>
             </span>
             <Icon name="chevron-right" size={16} />
           </button>

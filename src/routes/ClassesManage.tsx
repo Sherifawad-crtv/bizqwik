@@ -33,6 +33,8 @@ export interface FormState {
   imageUrl: string | null;
   // Where it happens (businesses with locations); null = no location.
   locationId: string | null;
+  // Solo gyms: who said they're coming (read-only, shown when editing).
+  coming?: string[];
 }
 
 export function emptyForm(): FormState {
@@ -51,6 +53,7 @@ export function formOf(c: GymClass): FormState {
     seriesId: c.seriesId ?? null,
     imageUrl: c.seriesId ? null : (c.imageUrl ?? null),
     locationId: c.locationId ?? null,
+    coming: c.coming,
   };
 }
 
@@ -294,6 +297,12 @@ export function ClassSheet({
         <TextField label="TITLE" value={draft.title} onChange={(e) => setDraft({ ...draft, title: e.target.value })} placeholder="e.g. Sunrise HIIT" />
         {!solo && <TextField label="DESCRIPTION" value={draft.description} onChange={(e) => setDraft({ ...draft, description: e.target.value })} placeholder="Optional — shown to members" />}
         {!solo && !draft.seriesId && <ClassPhotoField value={draft.imageUrl} onChange={(url) => setDraft({ ...draft, imageUrl: url })} title={draft.title} />}
+        {solo && editing && (
+          <div data-sq style={{ background: "var(--sunken)", borderRadius: "var(--r-input)", padding: "12px 14px" }}>
+            <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>COMING · {draft.coming?.length ?? 0}</div>
+            <div style={{ font: "600 14px/1.5 var(--font-body)", marginTop: 4 }}>{draft.coming?.length ? draft.coming.join(", ") : "No one has said they're coming yet."}</div>
+          </div>
+        )}
         <LocationField locations={locations} value={draft.locationId} onChange={(id) => setDraft({ ...draft, locationId: id })} />
         <DateField value={draft.date} min={todayIso()} onChange={(iso) => setDraft({ ...draft, date: iso })} />
         <TimeWheelField label="TIME" value={draft.time} onChange={(v) => setDraft({ ...draft, time: v })} />
