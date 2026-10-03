@@ -210,6 +210,12 @@ export const api = {
     callFn<{ deducted: boolean; plan: { name: string; kind: string; creditsRemaining: number | null; creditsTotal: number | null } | null }>("check-ins", { method: "POST", body: { clientId, source } }),
   // A walk-in is always recorded against a member: an existing client, or a
   // new one created with the sale (the backend also registers their app invite).
+  orgSettings: async () => {
+    const r = await callFn<{ dropInPrice?: number | null; instapayQr?: string | null }>("org-settings");
+    return { dropInPrice: r.dropInPrice ?? null, instapayQr: r.instapayQr ?? null };
+  },
+  saveOrgSettings: (patch: { dropInPrice?: number | null; instapayQr?: string | null }) => callFn<{ ok: true }>("org-settings", { method: "POST", body: patch }),
+  soloDropIn: (payMethod: "cash" | "instapay") => callFn<void>("drop-ins", { method: "POST", body: { anonymous: true, payMethod } }),
   dropIn: (member: { clientId: string } | { newClient: NewClientFields }, category: string, price: number, payMethod?: PayMethod, confirmActivePlan = false) =>
     callFn<void>("drop-ins", { method: "POST", body: { ...member, category, price, payMethod, confirmActivePlan } }),
   // A seat in one class session at its drop-in price; lands on the roster.

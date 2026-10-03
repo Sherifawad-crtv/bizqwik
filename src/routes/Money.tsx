@@ -29,7 +29,7 @@ function toTransactions(list: ActivityEntry[], months: number): Txn[] {
     const amount = Number(a.amount ?? 0);
     if (a.type.startsWith("sale_") || a.type === "class_collected") {
       const name = (m.name ?? m.title) as string | undefined;
-      out.push({ id: a.id, at: a.at, clientName: a.clientName, amount, what: name ?? (a.type === "sale_package" ? "PT package" : a.type === "class_collected" ? "Class" : a.type === "sale_dropin" ? "Drop-in" : "Sale"), method: METHOD_LABEL[String(m.payMethod ?? "")] ?? "Not recorded", refund: false, entry: a });
+      out.push({ id: a.id, at: a.at, clientName: a.clientName ?? (a.type === "sale_dropin" ? "Drop-in guest" : null), amount, what: name ?? (a.type === "sale_package" ? "PT package" : a.type === "class_collected" ? "Class" : a.type === "sale_dropin" ? "Drop-in" : "Sale"), method: METHOD_LABEL[String(m.payMethod ?? "")] ?? "Not recorded", refund: false, entry: a });
     } else if (a.type === "refund_desk") {
       const note = String(m.note ?? "");
       out.push({ id: a.id, at: a.at, clientName: a.clientName, amount, what: "Refund", method: /^instapay/i.test(note) ? "InstaPay" : "Cash", refund: true, entry: a });

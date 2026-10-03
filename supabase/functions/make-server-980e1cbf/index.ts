@@ -1773,6 +1773,43 @@ app.post(`${P}/check-ins`, async (c) => {
   return c.json({ checkIn: { id: data.id, clientId: data.client_id, source: data.source, checkedInAt: data.checked_in_at }, deducted: r.deducted, plan: r.plan });
 });
 
+// ---- solo owner settings: drop-in price + her InstaPay QR ----
+app.get(`${P}/org-settings`, async (c) => {
+  const user = await requireUser(c);
+  const me = user && (await profileOf(user.id));
+  if (!(await isDeskStaff(me)) && me?.role !== "dept_head") return c.json({ error: "Forbidden" }, 403);
+  const { data } = await admin().from("organizations").select("dropin_price, instapay_qr").eq("id", me.org_id).maybeSingle();
+  return c.json({ dropInPrice: data?.dropin_price != null ? Number(data.dropin_price) : null, instapayQr: data?.instapay_qr ?? null });
+});
+
+app.post(`${P}/org-settings`, async (c) => {
+  const user = await requireUser(c);
+  const me = user && (await profileOf(user.id));
+  if (me?.role !== "dept_head") return c.json({ error: "Forbidden" }, 403);
+  const body = await c.req.json();
+  const patch: Record<string, unknown> = {};
+  if ("dropInPrice" in body) {
+    if (body.dropInPrice === null) patch.dropin_price = null;
+    else {
+      const n = Number(body.dropInPrice);
+      if (!Number.isFinite(n) || n < 0) return c.json({ error: "Enter a valid drop-in price." }, 400);
+      patch.dropin_price = n;
+    }
+  }
+  if ("instapayQr" in body) {
+    if (body.instapayQr === null) patch.instapay_qr = null;
+    else {
+      const q = String(body.instapayQr);
+      if (!/^data:image\/(png|jpeg|webp);base64,/.test(q) || q.length > 400_000) return c.json({ error: "Upload a smaller image of your InstaPay QR." }, 400);
+      patch.instapay_qr = q;
+    }
+  }
+  if (Object.keys(patch).length === 0) return c.json({ error: "Nothing to save." }, 400);
+  const { error } = await admin().from("organizations").update(patch).eq("id", me.org_id);
+  if (error) throw error;
+  return c.json({ ok: true });
+});
+
 app.post(`${P}/drop-ins`, async (c) => {
   const user = await requireUser(c);
   const me = user && (await profileOf(user.id));
@@ -1781,6 +1818,19 @@ app.post(`${P}/drop-ins`, async (c) => {
   const { classId } = body;
   let clientId: string | null = body.clientId || null;
   const payMethod = normPayMethod(body.payMethod);
+  // Solo owner's one-off drop-in: no member, no details — the price she set,
+  // paid in cash or by InstaPay.
+  if (body.anonymous) {
+    if ((await orgModeOf(me.org_id)) !== "solo") return c.json({ error: "Add the member — every drop-in is recorded against a member." }, 400);
+    if (payMethod !== "cash" && payMethod !== "instapay") return c.json({ error: "Choose cash or InstaPay." }, 400);
+    const { data: org } = await admin().from("organizations").select("dropin_price").eq("id", me.org_id).maybeSingle();
+    if (org?.dropin_price == null) return c.json({ error: "Set your drop-in price first (Plans tab)." }, 400);
+    const price = Number(org.dropin_price);
+    const { data: row, error: aErr } = await admin().from("drop_ins").insert({ org_id: me.org_id, client_id: null, category: "Drop-in", price, pay_method: payMethod }).select().single();
+    if (aErr) throw aErr;
+    await logActivity(me.org_id, "sale_dropin", { actorId: me.id, clientId: null, amount: price, meta: { payMethod, classId: null, title: "Drop-in" } });
+    return c.json({ dropIn: { id: row.id, clientId: null, classId: null, category: "Drop-in", price, createdAt: row.created_at }, newClientId: null });
+  }
   // Every drop-in is recorded against a member: an existing client, or one
   // created right here from `newClient` (name, phone, email).
   const nc = !clientId && body.newClient ? body.newClient : null;
