@@ -99,6 +99,18 @@ async function profileOf(userId: string) {
   return data;
 }
 
+// In a solo business the owner (dept_head) does the front desk's work too:
+// registering, selling, checking people in. Everywhere else it's front_desk only.
+async function orgModeOf(orgId: string): Promise<"solo" | "team"> {
+  const { data } = await admin().from("organizations").select("mode").eq("id", orgId).maybeSingle();
+  return data?.mode === "solo" ? "solo" : "team";
+}
+async function isDeskStaff(me: any): Promise<boolean> {
+  if (me?.role === "front_desk") return true;
+  if (me?.role !== "dept_head") return false;
+  return (await orgModeOf(me.org_id)) === "solo";
+}
+
 async function tierOf(tierId: string) {
   const { data } = await admin().from("tiers").select("*").eq("id", tierId).maybeSingle();
   return data;
@@ -242,8 +254,8 @@ async function debitWallet(clientId: string, orgId: string, amount: number, cate
 // Desk-sale payment method. cash/card are external (recorded in activity only);
 // "wallet" spends store credit. Default "cash" keeps every existing caller —
 // including the current business app, which sends no payMethod — unchanged.
-function normPayMethod(v: any): "cash" | "card" | "wallet" {
-  return v === "card" ? "card" : v === "wallet" ? "wallet" : "cash";
+function normPayMethod(v: any): "cash" | "card" | "instapay" | "wallet" {
+  return v === "card" ? "card" : v === "instapay" ? "instapay" : v === "wallet" ? "wallet" : "cash";
 }
 
 // ---- points engine (v2) ----
@@ -571,7 +583,7 @@ function planCovers(plan: any, cls: any): boolean {
 // The one place a group plan is sold — front desk (cash/card/wallet) and the
 // member app (wallet only) both land here. `offer` is a catalog item
 // (membership/bundle) or a class series (that class's monthly).
-async function sellGroupPlan(opts: { orgId: string; client: any; planTypeId?: string | null; seriesId?: string | null; payMethod: "cash" | "card" | "wallet"; actorId: string | null }) {
+async function sellGroupPlan(opts: { orgId: string; client: any; planTypeId?: string | null; seriesId?: string | null; payMethod: "cash" | "card" | "instapay" | "wallet"; actorId: string | null }) {
   const { orgId, client, payMethod, actorId } = opts;
   let row: any;
   if (opts.planTypeId) {
@@ -932,8 +944,10 @@ app.get(`${P}/me`, async (c) => {
   const [profile, team, client] = await Promise.all([profileOf(user.id), bizqwikTeamOf(user.id), clientOf(user.id)]);
   if (!profile && !team && !client) return c.json({ error: "No profile" }, 404);
   const tier = profile?.tier_id ? await tierOf(profile.tier_id) : null;
+  const orgMode = profile ? await orgModeOf(profile.org_id) : null;
   return c.json({
     profile: profile ? toProfile(profile) : null,
+    orgMode,
     tier: tier ? toTier(tier) : null,
     bizqwikTeam: team ? toBizqwikTeam(team) : null,
     client: client ? toClientAccount(client) : null,
@@ -1395,7 +1409,7 @@ app.get(`${P}/clients`, async (c) => {
 // clients waiting to be picked up later). If the package leg fails after
 // the client row is written, the client row is rolled back rather than
 // left behind as a half-created record.
-async function sellPackageTo(clientId: string, bundleTypeId: string, coachId: string, me: any, payMethod: "cash" | "card" | "wallet" = "cash") {
+async function sellPackageTo(clientId: string, bundleTypeId: string, coachId: string, me: any, payMethod: "cash" | "card" | "instapay" | "wallet" = "cash") {
   const { data: client, error: cErr } = await admin().from("clients").select("*").eq("id", clientId).eq("org_id", me.org_id).maybeSingle();
   if (cErr) throw cErr;
   if (!client) return { error: "No such client", status: 404 } as const;
@@ -1736,7 +1750,7 @@ async function recordCheckIn(orgId: string, clientId: string, clientName: string
 app.get(`${P}/front-desk/client-status/:id`, async (c) => {
   const user = await requireUser(c);
   const me = user && (await profileOf(user.id));
-  if (me?.role !== "front_desk") return c.json({ error: "Forbidden" }, 403);
+  if (!(await isDeskStaff(me))) return c.json({ error: "Forbidden" }, 403);
   const id = c.req.param("id");
   if (!/^[0-9a-f-]{36}$/i.test(id)) return c.json({ error: "That code isn't a Bizqwik member code." }, 404);
   const { data: client } = await admin().from("clients").select("*").eq("id", id).eq("org_id", me.org_id).maybeSingle();
@@ -1748,7 +1762,7 @@ app.get(`${P}/front-desk/client-status/:id`, async (c) => {
 app.post(`${P}/check-ins`, async (c) => {
   const user = await requireUser(c);
   const me = user && (await profileOf(user.id));
-  if (me?.role !== "front_desk") return c.json({ error: "Forbidden" }, 403);
+  if (!(await isDeskStaff(me))) return c.json({ error: "Forbidden" }, 403);
   const { clientId, source } = await c.req.json();
   if (source !== "qr" && source !== "manual") return c.json({ error: "Invalid check-in source." }, 400);
   const { data: client } = await admin().from("clients").select("id, name").eq("id", clientId).eq("org_id", me.org_id).maybeSingle();
@@ -1762,7 +1776,7 @@ app.post(`${P}/check-ins`, async (c) => {
 app.post(`${P}/drop-ins`, async (c) => {
   const user = await requireUser(c);
   const me = user && (await profileOf(user.id));
-  if (me?.role !== "front_desk") return c.json({ error: "Forbidden" }, 403);
+  if (!(await isDeskStaff(me))) return c.json({ error: "Forbidden" }, 403);
   const body = await c.req.json();
   const { classId } = body;
   let clientId: string | null = body.clientId || null;
@@ -1877,7 +1891,7 @@ app.post(`${P}/drop-ins`, async (c) => {
 app.post(`${P}/invitations`, async (c) => {
   const user = await requireUser(c);
   const me = user && (await profileOf(user.id));
-  if (me?.role !== "front_desk") return c.json({ error: "Forbidden" }, 403);
+  if (!(await isDeskStaff(me))) return c.json({ error: "Forbidden" }, 403);
   const { clientId, inviteeName, inviteePhone, visitDate } = await c.req.json();
   if (!String(inviteeName ?? "").trim() || !String(inviteePhone ?? "").trim() || !visitDate) {
     return c.json({ error: "Name, phone and visit date are all required." }, 400);
@@ -1935,7 +1949,7 @@ app.post(`${P}/invitations`, async (c) => {
 app.get(`${P}/front-desk/summary`, async (c) => {
   const user = await requireUser(c);
   const me = user && (await profileOf(user.id));
-  if (me?.role !== "front_desk") return c.json({ error: "Forbidden" }, 403);
+  if (!(await isDeskStaff(me))) return c.json({ error: "Forbidden" }, 403);
   const dayStart = `${todayIso()}T00:00:00Z`;
   const twoHoursAgo = Date.now() - 2 * 60 * 60 * 1000;
   const recentEnough = (ts: string) => Date.parse(ts) >= twoHoursAgo;
@@ -2445,6 +2459,7 @@ app.get(`${P}/ops/orgs`, async (c) => {
       name: o.name,
       slug: o.slug,
       status: o.status,
+      mode: o.mode === "solo" ? "solo" : "team",
       planId: o.plan_id ?? null,
       planName: o.plan_id ? (planName.get(o.plan_id) ?? null) : null,
       staffCount: counts.staff.get(o.id) ?? 0,
@@ -2570,6 +2585,7 @@ app.get(`${P}/ops/orgs/:id`, async (c) => {
       slug: org.slug,
       coachQrToken: org.coach_qr_token,
       status: org.status,
+      mode: org.mode === "solo" ? "solo" : "team",
       planId: org.plan_id ?? null,
       planName: plan?.name ?? null,
       createdAt: org.created_at,
@@ -2601,6 +2617,18 @@ app.post(`${P}/ops/orgs/:id/status`, async (c) => {
   if (error) throw error;
   if (!data) return c.json({ error: "No such organization" }, 404);
   return c.json({ ok: true, status: data.status });
+});
+
+app.post(`${P}/ops/orgs/:id/mode`, async (c) => {
+  const user = await requireUser(c);
+  const team = user && (await bizqwikTeamOf(user.id));
+  if (!team) return c.json({ error: "Forbidden" }, 403);
+  const { mode } = await c.req.json();
+  if (mode !== "solo" && mode !== "team") return c.json({ error: "Invalid mode." }, 400);
+  const { data, error } = await admin().from("organizations").update({ mode }).eq("id", c.req.param("id")).select().maybeSingle();
+  if (error) throw error;
+  if (!data) return c.json({ error: "No such organization" }, 404);
+  return c.json({ ok: true, mode: data.mode });
 });
 
 app.post(`${P}/ops/orgs/:id/plan`, async (c) => {
@@ -3033,7 +3061,7 @@ async function clientMoneyHistory(clientId: string) {
     admin().from("wallet_transactions").select("id, type, amount, category, description, created_at").eq("client_id", clientId).or("type.eq.credit,category.eq.expiry"),
     admin().from("activity_log").select("id, amount, meta, created_at").eq("subject_client_id", clientId).eq("type", "refund_desk"),
   ]);
-  const tender = (m: any) => (m === "cash" || m === "card" || m === "wallet" ? m : "desk");
+  const tender = (m: any) => (m === "cash" || m === "card" || m === "instapay" || m === "wallet" ? m : "desk");
   const out: any[] = [];
   for (const p of plans.data ?? []) {
     const amt = Number(p.price_at_sale);
@@ -3520,7 +3548,7 @@ app.post(`${P}/plan-types/delete`, async (c) => {
 app.post(`${P}/group-plans/sell`, async (c) => {
   const user = await requireUser(c);
   const me = user && (await profileOf(user.id));
-  if (me?.role !== "front_desk") return c.json({ error: "Forbidden" }, 403);
+  if (!(await isDeskStaff(me))) return c.json({ error: "Forbidden" }, 403);
   const body = await c.req.json();
   const { clientId, name, age, phone, email, planTypeId, seriesId } = body;
   const payMethod = normPayMethod(body.payMethod);
@@ -3588,6 +3616,97 @@ function monthsBack(n: number): string[] {
   }
   return out;
 }
+
+// ---- money by payment method (dept_head / accountant) ---------------------
+// Every sale logs its tender (cash / card / instapay / wallet) in the activity
+// log, so this is read from there: totals per method over the last N months, and
+// the individual InstaPay transfers so they can be checked against a bank statement.
+const TENDER_LABELS: Record<string, string> = { cash: "Cash", card: "Card", instapay: "InstaPay", other: "Not recorded" };
+app.get(`${P}/payments/summary`, async (c) => {
+  const user = await requireUser(c);
+  const me = user && (await profileOf(user.id));
+  if (me?.role !== "dept_head" && me?.role !== "accountant") return c.json({ error: "Forbidden" }, 403);
+  const nMonths = Math.min(Math.max(Number(c.req.query("months") ?? "1") || 1, 1), 24);
+  const since = `${monthsBack(nMonths)[0]}-01T00:00:00Z`;
+  const { data } = await admin()
+    .from("activity_log")
+    .select("id, type, amount, meta, created_at, clients:subject_client_id(name)")
+    .eq("org_id", me.org_id)
+    .in("type", ["sale_plan", "sale_package", "sale_dropin", "class_collected"])
+    .gte("created_at", since)
+    .order("created_at", { ascending: false })
+    .limit(2000);
+  const totals = new Map<string, { amount: number; count: number }>();
+  const transfers: any[] = [];
+  for (const a of data ?? []) {
+    const raw = String((a.meta as any)?.payMethod ?? "");
+    if (raw === "wallet") continue; // store credit is not new money
+    const key = raw === "cash" || raw === "card" || raw === "instapay" ? raw : "other";
+    const amount = Number(a.amount ?? 0);
+    const t = totals.get(key) ?? { amount: 0, count: 0 };
+    t.amount += amount;
+    t.count += 1;
+    totals.set(key, t);
+    if (key === "instapay" && transfers.length < 100) {
+      const m = (a.meta as any) ?? {};
+      transfers.push({ id: a.id, at: a.created_at, clientName: (a as any).clients?.name ?? null, amount, what: m.name ?? m.title ?? (a.type === "sale_package" ? "PT package" : a.type === "class_collected" ? "Class" : "Sale") });
+    }
+  }
+  const byMethod = ["instapay", "cash", "card", "other"]
+    .filter((k) => totals.has(k))
+    .map((k) => ({ method: k, label: TENDER_LABELS[k], amount: totals.get(k)!.amount, count: totals.get(k)!.count }));
+  return c.json({ months: nMonths, total: byMethod.reduce((a, r) => a + r.amount, 0), byMethod, transfers });
+});
+
+// ---- bring existing members in from notes (dept_head / front desk / solo owner) ----
+// One row per member: who they are and the plan they're on today. Historical
+// plans are imported at price 0 so they never count as revenue; a row whose
+// plan has already ended is imported as finished. A client with the same phone
+// is skipped, not duplicated.
+app.post(`${P}/clients/import`, async (c) => {
+  const user = await requireUser(c);
+  const me = user && (await profileOf(user.id));
+  if (me?.role !== "dept_head" && !(await isDeskStaff(me))) return c.json({ error: "Forbidden" }, 403);
+  const { rows } = await c.req.json();
+  if (!Array.isArray(rows) || rows.length === 0) return c.json({ error: "Nothing to import." }, 400);
+  if (rows.length > 500) return c.json({ error: "Import up to 500 members at a time." }, 400);
+  const isDate = (v: any) => typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v) && !Number.isNaN(Date.parse(v));
+  const { data: existing } = await admin().from("clients").select("phone").eq("org_id", me.org_id);
+  const phones = new Set((existing ?? []).map((r: any) => String(r.phone ?? "").replace(/\s/g, "")).filter(Boolean));
+  const result = { imported: 0, skipped: [] as { row: number; reason: string }[] };
+  for (let i = 0; i < rows.length; i++) {
+    const r = rows[i] ?? {};
+    const name = String(r.name ?? "").trim();
+    const phone = String(r.phone ?? "").replace(/\s/g, "");
+    if (!name) { result.skipped.push({ row: i + 1, reason: "No name" }); continue; }
+    if (phone && phones.has(phone)) { result.skipped.push({ row: i + 1, reason: "Already a client (same phone)" }); continue; }
+    const hasPlan = isDate(r.expiresOn);
+    if (r.expiresOn && !hasPlan) { result.skipped.push({ row: i + 1, reason: "Expiry date must look like 2026-11-30" }); continue; }
+    const limitErr = await planLimitError(me.org_id, "client");
+    if (limitErr) { result.skipped.push({ row: i + 1, reason: limitErr }); break; }
+    const client = await insertClient(me, { name, phone: phone || null, email: r.email });
+    if (phone) phones.add(phone);
+    if (hasPlan) {
+      const left = r.creditsLeft === undefined || r.creditsLeft === null || r.creditsLeft === "" ? null : Number(r.creditsLeft);
+      const total = r.creditsTotal === undefined || r.creditsTotal === null || r.creditsTotal === "" ? left : Number(r.creditsTotal);
+      const isBundle = left !== null && Number.isFinite(left);
+      const startsOn = isDate(r.startsOn) ? r.startsOn : todayIso();
+      const endsAt = new Date(`${r.expiresOn}T23:59:59Z`);
+      const live = endsAt.getTime() > Date.now() && (!isBundle || (left as number) > 0);
+      const { error } = await admin().from("group_plans").insert({
+        org_id: me.org_id, client_id: client.id, kind: isBundle ? "bundle" : "membership",
+        name: String(r.plan ?? "").trim() || (isBundle ? "Class pack" : "Membership"), price_at_sale: 0, pay_method: "cash",
+        credits_total: isBundle ? Math.max(Number(total ?? 0), left as number) : null, credits_remaining: isBundle ? left : null,
+        invitations_remaining: 0, starts_at: `${startsOn}T00:00:00Z`, expires_at: endsAt.toISOString(),
+        status: live ? "active" : "finished", created_by: me.id,
+      });
+      if (error) { result.skipped.push({ row: i + 1, reason: `Client added, but the plan couldn't be saved: ${error.message}` }); }
+    }
+    result.imported += 1;
+  }
+  await logActivity(me.org_id, "members_imported", { actorId: me.id, amount: result.imported, meta: { skipped: result.skipped.length } });
+  return c.json(result);
+});
 
 app.get(`${P}/revenue`, async (c) => {
   const user = await requireUser(c);
