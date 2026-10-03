@@ -214,3 +214,47 @@ test("solo: Schedule adds a new session and shows who's coming; Account has no i
   await page.goto("/account");
   await expect(page.getByText("Import members")).toHaveCount(0);
 });
+
+const QR = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==";
+
+async function dropInBoot(page: import("@playwright/test").Page, settings: unknown, sent: unknown[]) {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await mockBackend(page, "dept_head", {
+    __orgMode: "solo",
+    clients: { clients: [] }, classes: { classes: [] }, revenue: REVENUE,
+    "org-settings": settings,
+    "drop-ins": (b: Record<string, unknown> | null) => { sent.push(b); return { body: {} }; },
+  });
+  await page.goto("/");
+  await page.getByRole("group", { name: "Quick actions" }).getByRole("button", { name: "Drop-in" }).click();
+}
+
+test("solo drop-in: the set price, cash received, nothing else asked", async ({ page }) => {
+  const sent: unknown[] = [];
+  await dropInBoot(page, { dropInPrice: 150, instapayQr: QR }, sent);
+  await expect(page.getByText("150", { exact: true })).toBeVisible();
+  await expect(page.getByText("Link member")).toHaveCount(0);
+  await page.getByRole("button", { name: "Cash", exact: true }).click();
+  await page.getByRole("button", { name: "Cash received" }).click();
+  await expect(page.getByText("Drop-in recorded")).toBeVisible();
+  expect(sent).toEqual([{ payMethod: "cash" }]);
+});
+
+test("solo drop-in: InstaPay shows her QR before payment is confirmed", async ({ page }) => {
+  const sent: unknown[] = [];
+  await dropInBoot(page, { dropInPrice: 150, instapayQr: QR }, sent);
+  await page.getByRole("button", { name: "InstaPay", exact: true }).click();
+  await expect(page.getByAltText("InstaPay QR code")).toBeVisible();
+  expect(sent).toEqual([]);
+  await page.getByRole("button", { name: "Payment received" }).click();
+  await expect(page.getByText("Drop-in recorded")).toBeVisible();
+  expect(sent).toEqual([{ payMethod: "instapay" }]);
+});
+
+test("solo drop-in: without a price it sends her to Plans to set one", async ({ page }) => {
+  await dropInBoot(page, { dropInPrice: null, instapayQr: null }, []);
+  await expect(page.getByText("Set your drop-in price first")).toBeVisible();
+  await page.getByRole("button", { name: "Go to Plans" }).click();
+  await expect(page).toHaveURL(/\/catalog/);
+  await expect(page.getByRole("button", { name: "Set price" })).toBeVisible();
+});

@@ -35,7 +35,7 @@ export function Catalog() {
   useSetHeader(solo ? { kicker: "WHAT YOU SELL", title: "My plans" } : { kicker: "WHAT YOU SELL", title: "Catalog" }, [solo]);
 
   // A solo owner sells memberships only: no classes, bundles or PT tabs.
-  if (solo) return <PlansPanel solo />;
+  if (solo) return (<div><SoloOffer /><PlansPanel solo /></div>);
 
   return (
     <div>
@@ -495,5 +495,101 @@ export function PlanTypeSheet({ open, kind, planType, onClose }: { open: boolean
         </>
       )}
     </Sheet>
+  );
+}
+
+
+/** Resize a picked image to at most 700px and return it as a PNG data URL. */
+function readQr(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      const scale = Math.min(1, 700 / Math.max(img.width, img.height));
+      const c = document.createElement("canvas");
+      c.width = Math.round(img.width * scale);
+      c.height = Math.round(img.height * scale);
+      c.getContext("2d")!.drawImage(img, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(url);
+      resolve(c.toDataURL("image/png"));
+    };
+    img.onerror = () => reject(new Error("Couldn't read that image."));
+    img.src = url;
+  });
+}
+
+/** The solo owner's one-off drop-in price and her InstaPay QR. */
+function SoloOffer() {
+  const settings = useAsync(() => api.orgSettings(), []);
+  const [editing, setEditing] = useState(false);
+  const [price, setPrice] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  if (!settings.data) return null;
+  const { dropInPrice, instapayQr } = settings.data;
+
+  const savePrice = async () => {
+    const n = Number(price);
+    if (price.trim() === "" || !Number.isFinite(n) || n < 0) return setError("Enter the drop-in price.");
+    setBusy(true);
+    setError(null);
+    try {
+      await api.saveOrgSettings({ dropInPrice: n });
+      setEditing(false);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Couldn't save.");
+    } finally {
+      setBusy(false);
+    }
+  };
+  const pickQr = async (file: File | undefined) => {
+    if (!file) return;
+    setError(null);
+    try {
+      await api.saveOrgSettings({ instapayQr: await readQr(file) });
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Couldn't save the QR.");
+    }
+  };
+
+  const card: React.CSSProperties = { background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: "16px 20px", marginBottom: 12 };
+  return (
+    <div style={{ marginBottom: 12 }}>
+      <div data-sq style={card}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ font: "700 16px var(--font-body)" }}>Drop-in</div>
+            <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>{dropInPrice === null ? "Not set" : `${fmt(dropInPrice)} EGP · one visit`}</div>
+          </div>
+          <Button size="md" variant="secondary" style={{ height: 40, padding: "0 16px" }} onClick={() => { setPrice(dropInPrice === null ? "" : String(dropInPrice)); setEditing(true); }}>
+            {dropInPrice === null ? "Set price" : "Edit"}
+          </Button>
+        </div>
+        {editing && (
+          <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 10 }}>
+            <TextField label="DROP-IN PRICE · EGP" type="number" min={0} inputMode="decimal" value={price} onChange={(e) => setPrice(e.target.value)} />
+            <div style={{ display: "flex", gap: 8 }}>
+              <Button style={{ flex: 1 }} disabled={busy} onClick={savePrice}>{busy ? "Saving…" : "Save"}</Button>
+              <Button variant="quiet" disabled={busy} onClick={() => setEditing(false)}>Cancel</Button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div data-sq style={card}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          {instapayQr && <img src={instapayQr} alt="Your InstaPay QR" style={{ width: 56, height: 56, objectFit: "contain", borderRadius: 8, background: "#fff", border: "1px solid var(--line)" }} />}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ font: "700 16px var(--font-body)" }}>InstaPay QR</div>
+            <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>{instapayQr ? "Shown when someone pays by InstaPay" : "Add it to show on drop-ins"}</div>
+          </div>
+          <label style={{ flex: "none", display: "inline-flex", alignItems: "center", height: 40, padding: "0 16px", borderRadius: 999, background: "var(--primary-tint)", color: "var(--primary-pressed)", font: "700 14px var(--font-body)", cursor: "pointer" }}>
+            {instapayQr ? "Replace" : "Add QR"}
+            <input type="file" accept="image/*" hidden onChange={(e) => { void pickQr(e.target.files?.[0]); e.target.value = ""; }} />
+          </label>
+        </div>
+      </div>
+      {error && <div style={{ font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px", marginBottom: 12 }}>{error}</div>}
+    </div>
   );
 }

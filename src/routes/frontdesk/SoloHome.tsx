@@ -19,7 +19,7 @@ import { RevenueChart } from "../Oversight";
 import { Card, SectionLink, SectionTitle, SheetHeading, endingSoon, planSummary } from "./shared";
 import { useFrontDeskCatalog } from "./Members";
 import { NewClientModal } from "./NewClientModal";
-import { DropIn } from "./DropIn";
+import { SoloDropIn } from "./SoloDropIn";
 import { CheckInList } from "./CheckInList";
 
 const clockOf = (iso: string) => {
@@ -156,7 +156,7 @@ export function SoloHome() {
       </Sheet>
       <Sheet open={modal === "dropin"} onClose={() => setModal(null)}>
         <SheetHeading kicker="DROP-IN" title="Drop-In" />
-        <DropIn embedded initialClient={null} />
+        {modal === "dropin" && <SoloDropIn onDone={() => setModal(null)} />}
       </Sheet>
       {modal === "new" && <NewClientModal onClose={() => setModal(null)} />}
       <ClassRosterSheet open={roster !== null} onClose={() => setRoster(null)} classId={roster?.id ?? null} title={roster?.title ?? "Class"} onChanged={classes.refetch} />
