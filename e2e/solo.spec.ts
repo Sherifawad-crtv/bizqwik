@@ -237,7 +237,7 @@ test("solo drop-in: the set price, cash received, nothing else asked", async ({ 
   await page.getByRole("button", { name: "Cash", exact: true }).click();
   await page.getByRole("button", { name: "Cash received" }).click();
   await expect(page.getByText("Drop-in recorded")).toBeVisible();
-  expect(sent).toEqual([{ anonymous: true, payMethod: "cash" }]);
+  expect(sent).toEqual([{ payMethod: "cash" }]);
 });
 
 test("solo drop-in: InstaPay shows her QR before payment is confirmed", async ({ page }) => {
@@ -248,7 +248,7 @@ test("solo drop-in: InstaPay shows her QR before payment is confirmed", async ({
   expect(sent).toEqual([]);
   await page.getByRole("button", { name: "Payment received" }).click();
   await expect(page.getByText("Drop-in recorded")).toBeVisible();
-  expect(sent).toEqual([{ anonymous: true, payMethod: "instapay" }]);
+  expect(sent).toEqual([{ payMethod: "instapay" }]);
 });
 
 test("solo drop-in: without a price it sends her to Plans to set one", async ({ page }) => {

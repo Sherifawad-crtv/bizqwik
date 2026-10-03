@@ -65,7 +65,7 @@ export async function mockBackend(
     "drop-ins": {},
   };
 
-  await page.route(/\/functions\/v1\/make-server-980e1cbf\//, (route) => {
+  await page.route(/\/functions\/v1\/(make-server-980e1cbf|solo-desk)\//, (route) => {
     if (route.request().method() === "OPTIONS") return route.fulfill({ status: 204, headers: CORS });
     const path = new URL(route.request().url()).pathname;
     if (path.endsWith("/me")) return json(route, state.signedIn ? { profile: profile(role), orgMode: (overrides as any).__orgMode ?? "team", tier: null, bizqwikTeam: null } : { profile: null, tier: null, bizqwikTeam: null });

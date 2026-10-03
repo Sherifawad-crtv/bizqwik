@@ -84,9 +84,12 @@ export class ApiError extends Error {
   }
 }
 
-async function callFn<T>(path: string, opts?: { method?: Method; body?: Record<string, unknown> }): Promise<T> {
+// The solo owner's small helper function (drop-in price, InstaPay QR, member-less drop-in).
+const SOLO_DESK = "solo-desk";
+
+async function callFn<T>(path: string, opts?: { method?: Method; body?: Record<string, unknown> }, slug: string = FN_SLUG): Promise<T> {
   const method = opts?.method ?? "GET";
-  const { data, error } = await supabase.functions.invoke(`${FN_SLUG}/${path}`, {
+  const { data, error } = await supabase.functions.invoke(`${slug}/${path}`, {
     method,
     body: opts?.body,
   });
@@ -211,11 +214,11 @@ export const api = {
   // A walk-in is always recorded against a member: an existing client, or a
   // new one created with the sale (the backend also registers their app invite).
   orgSettings: async () => {
-    const r = await callFn<{ dropInPrice?: number | null; instapayQr?: string | null }>("org-settings");
+    const r = await callFn<{ dropInPrice?: number | null; instapayQr?: string | null }>("org-settings", undefined, SOLO_DESK);
     return { dropInPrice: r.dropInPrice ?? null, instapayQr: r.instapayQr ?? null };
   },
-  saveOrgSettings: (patch: { dropInPrice?: number | null; instapayQr?: string | null }) => callFn<{ ok: true }>("org-settings", { method: "POST", body: patch }),
-  soloDropIn: (payMethod: "cash" | "instapay") => callFn<void>("drop-ins", { method: "POST", body: { anonymous: true, payMethod } }),
+  saveOrgSettings: (patch: { dropInPrice?: number | null; instapayQr?: string | null }) => callFn<{ ok: true }>("org-settings", { method: "POST", body: patch }, SOLO_DESK),
+  soloDropIn: (payMethod: "cash" | "instapay") => callFn<void>("drop-ins", { method: "POST", body: { payMethod } }, SOLO_DESK),
   dropIn: (member: { clientId: string } | { newClient: NewClientFields }, category: string, price: number, payMethod?: PayMethod, confirmActivePlan = false) =>
     callFn<void>("drop-ins", { method: "POST", body: { ...member, category, price, payMethod, confirmActivePlan } }),
   // A seat in one class session at its drop-in price; lands on the roster.
