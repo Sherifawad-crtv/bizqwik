@@ -21,7 +21,7 @@ import { Icon } from "../../components/Icon";
 import type { PayMethod } from "../../lib/types";
 import { useSticky } from "../../lib/useSticky";
 import { useAuth } from "../../lib/auth";
-import { Card, ErrorBanner, PlanPill, SearchField, SheetHeading, endingSoon, matchesClient, planSummary, renewalMessage, whatsappUrl } from "./shared";
+import { Card, ErrorBanner, PlanPill, SearchField, SectionTitle, SheetHeading, endingSoon, matchesClient, planSummary, renewalMessage, whatsappUrl } from "./shared";
 import { ConfirmCheckInSheet } from "./CheckIn";
 import { DropIn } from "./DropIn";
 
@@ -124,12 +124,22 @@ export function Members() {
             </button>
           );
         })}
-        <Button size="md" style={{ height: 36, padding: "0 14px", marginLeft: "auto", flex: "none" }} onClick={() => setCreating(true)}>
-          + New client
-        </Button>
       </div>
 
-      <Card style={{ marginTop: 10, overflow: "hidden" }}>
+      <div style={{ marginTop: 14 }}>
+        <SectionTitle
+          count={shown.length}
+          right={
+            <Button size="md" style={{ height: 36, padding: "0 14px" }} onClick={() => setCreating(true)}>
+              + New client
+            </Button>
+          }
+        >
+          {{ all: "All clients", active: "Active", soon: "Ending soon", expired: "Expired", none: "No plan" }[filter]}
+        </SectionTitle>
+      </div>
+
+      <Card style={{ overflow: "hidden" }}>
         {shown.map((c, i) => {
           const plan = planSummary(c, bundleTypes);
           const soon = endingSoon(c);
