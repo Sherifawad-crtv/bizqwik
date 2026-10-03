@@ -115,3 +115,21 @@ test("solo: a new client picks between two plans as cards", async ({ page }) => 
   await expect(page.getByRole("radio", { name: /3 Months/ })).toBeVisible();
   await expect(page.getByText("PT PACKAGE")).toHaveCount(0);
 });
+
+test("solo owner never lands on team screens: Activity goes back home, and team URLs bounce to Today", async ({ page }) => {
+  await boot(page, "solo");
+  await mockBackend(page, "dept_head", {
+    __orgMode: "solo",
+    "front-desk/summary": { todayCheckIns: 0, todayDropIns: 0, activeNow: 0, recent: [] },
+    clients: { clients: [] }, classes: { classes: [] }, revenue: REVENUE, activity: { activity: [] },
+  });
+  await page.goto("/");
+  await page.getByRole("button", { name: /Full activity/ }).click();
+  await expect(page).toHaveURL(/\/activity$/);
+  await page.getByRole("button", { name: "Today" }).first().click();
+  await expect(page).toHaveURL(/localhost:\d+\/$/);
+  for (const path of ["/history", "/coaches", "/oversight", "/manage", "/clients"]) {
+    await page.goto(path);
+    await expect(page).toHaveURL(/localhost:\d+\/$/);
+  }
+});
