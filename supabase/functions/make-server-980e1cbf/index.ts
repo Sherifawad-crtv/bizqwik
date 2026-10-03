@@ -230,7 +230,7 @@ async function walletBalance(clientId: string, orgId: string): Promise<number> {
   background(admin().from("wallets").upsert({ client_id: clientId, org_id: orgId, balance: bal, updated_at: new Date().toISOString() }));
   return bal;
 }
-async function creditWallet(clientId: string, orgId: string, amount: number, category: string, description: string, actorId: string | null = null) {
+async function creditWallet(clientId: string, orgId: string, amount: number, category: string, description: string, actorId: string | null = null, meta: any = undefined) {
   const settings = await orgSettingsOf(orgId);
   const ttl = settings?.wallet_credit_ttl_months ?? 12;
   const expires = new Date();
@@ -239,7 +239,7 @@ async function creditWallet(clientId: string, orgId: string, amount: number, cat
     org_id: orgId, client_id: clientId, type: "credit", amount, category, description,
     expires_at: expires.toISOString(), remaining: amount,
   });
-  await logActivity(orgId, `wallet_${category}`, { clientId, amount, actorId });
+  await logActivity(orgId, `wallet_${category}`, { clientId, amount, actorId, meta });
   return await walletBalance(clientId, orgId);
 }
 async function debitWallet(clientId: string, orgId: string, amount: number, category: string, description: string): Promise<{ ok: boolean; balance: number }> {
@@ -644,7 +644,7 @@ async function sellGroupPlan(opts: { orgId: string; client: any; planTypeId?: st
   }
   if (plan.location_id) await admin().from("clients").update({ home_location_id: plan.location_id }).eq("id", client.id).is("home_location_id", null);
   await earnPurchasePoints(client.id, orgId, Number(plan.price_at_sale), payMethod);
-  await logActivity(orgId, "sale_plan", { actorId, clientId: client.id, amount: Number(plan.price_at_sale), meta: { payMethod, kind: plan.kind, name: plan.name, planId: plan.id } });
+  await logActivity(orgId, "sale_plan", { actorId, clientId: client.id, amount: Number(plan.price_at_sale), meta: { payMethod, kind: plan.kind, name: plan.name, planId: plan.id, locationId: plan.location_id ?? null } });
   await notifyClient(orgId, client.id, "plan_started", {
     title: `${plan.name} is active`,
     body: plan.kind === "bundle" ? `${plan.credits_total} sessions to use by ${String(plan.expires_at).slice(0, 10)}. Book a class to get going.` : `Valid until ${String(plan.expires_at).slice(0, 10)}. Book a class to get going.`,
@@ -1592,7 +1592,7 @@ app.post(`${P}/clients`, async (c) => {
     return c.json({ error: result.error }, result.status);
   }
   await earnPurchasePoints(result.client.id, me.org_id, Number(result.package.price_at_sale), payMethod);
-  await logActivity(me.org_id, "sale_package", { actorId: me.id, clientId: result.client.id, amount: Number(result.package.price_at_sale), meta: { payMethod } });
+  await logActivity(me.org_id, "sale_package", { actorId: me.id, clientId: result.client.id, amount: Number(result.package.price_at_sale), meta: { payMethod, locationId: result.package.location_id ?? null } });
   return c.json({ client: toClient(result.client, conditions || null, null), package: toPackageInstance(result.package) });
 });
 
@@ -1679,7 +1679,7 @@ app.post(`${P}/packages`, async (c) => {
     }
   }
   await earnPurchasePoints(clientId, me.org_id, price, payMethod);
-  await logActivity(me.org_id, "sale_package", { actorId: me.id, clientId, amount: price, meta: { payMethod } });
+  await logActivity(me.org_id, "sale_package", { actorId: me.id, clientId, amount: price, meta: { payMethod, locationId: result.package.location_id ?? null } });
   return c.json({ package: toPackageInstance(result.package) });
 });
 
@@ -1971,7 +1971,7 @@ app.post(`${P}/drop-ins`, async (c) => {
     }
   }
   await earnPurchasePoints(data.client_id, me.org_id, amount, payMethod);
-  await logActivity(me.org_id, "sale_dropin", { actorId: me.id, clientId: data.client_id, amount, meta: { payMethod, classId: cls?.id ?? null, title: cat } });
+  await logActivity(me.org_id, "sale_dropin", { actorId: me.id, clientId: data.client_id, amount, meta: { payMethod, classId: cls?.id ?? null, title: cat, locationId: cls?.location_id ?? null } });
   return c.json({ dropIn: { id: data.id, clientId: data.client_id, classId: data.class_id ?? null, category: data.category, price: Number(data.price), createdAt: data.created_at }, newClientId: createdClientId });
 });
 
@@ -3758,17 +3758,21 @@ app.get(`${P}/payments/summary`, async (c) => {
   const me = user && (await profileOf(user.id));
   if (me?.role !== "dept_head" && me?.role !== "accountant") return c.json({ error: "Forbidden" }, 403);
   const nMonths = Math.min(Math.max(Number(c.req.query("months") ?? "1") || 1, 1), 24);
-  const since = `${monthsBack(nMonths)[0]}-01T00:00:00Z`;
-  const { data } = await admin()
+  const months = monthsBack(nMonths);
+  const since = `${months[0]}-01T00:00:00Z`;
+  // Optional: one location's money only (sales are tagged with their location).
+  const locationId = c.req.query("locationId") || null;
+  let q = admin()
     .from("activity_log")
     .select("id, type, amount, meta, created_at, clients:subject_client_id(name)")
     .eq("org_id", me.org_id)
     .in("type", ["sale_plan", "sale_package", "sale_dropin", "class_collected"])
-    .gte("created_at", since)
-    .order("created_at", { ascending: false })
-    .limit(2000);
+    .gte("created_at", since);
+  if (locationId) q = q.eq("meta->>locationId", locationId);
+  const { data } = await q.order("created_at", { ascending: false }).limit(2000);
   const totals = new Map<string, { amount: number; count: number }>();
   const transfers: any[] = [];
+  const perMonth = new Map<string, number>(months.map((m) => [m, 0]));
   for (const a of data ?? []) {
     const raw = String((a.meta as any)?.payMethod ?? "");
     if (raw === "wallet") continue; // store credit is not new money
@@ -3778,6 +3782,8 @@ app.get(`${P}/payments/summary`, async (c) => {
     t.amount += amount;
     t.count += 1;
     totals.set(key, t);
+    const month = String(a.created_at).slice(0, 7);
+    if (perMonth.has(month)) perMonth.set(month, perMonth.get(month)! + amount);
     if (key === "instapay" && transfers.length < 100) {
       const m = (a.meta as any) ?? {};
       transfers.push({ id: a.id, at: a.created_at, clientName: (a as any).clients?.name ?? null, amount, what: m.name ?? m.title ?? (a.type === "sale_package" ? "PT package" : a.type === "class_collected" ? "Class" : "Sale") });
@@ -3786,7 +3792,7 @@ app.get(`${P}/payments/summary`, async (c) => {
   const byMethod = ["instapay", "cash", "card", "other"]
     .filter((k) => totals.has(k))
     .map((k) => ({ method: k, label: TENDER_LABELS[k], amount: totals.get(k)!.amount, count: totals.get(k)!.count }));
-  return c.json({ months: nMonths, total: byMethod.reduce((a, r) => a + r.amount, 0), byMethod, transfers });
+  return c.json({ months: nMonths, total: byMethod.reduce((a, r) => a + r.amount, 0), byMethod, transfers, byMonth: [...perMonth].map(([month, revenue]) => ({ month, revenue })) });
 });
 
 // ---- bring existing members in from notes (dept_head / front desk / solo owner) ----
@@ -3967,7 +3973,8 @@ app.post(`${P}/bookings/collect`, async (c) => {
   // at the desk are recorded as "desk", with the exact tender in the activity log.
   await admin().from("class_bookings").update({ pay_status: "paid", pay_method: payMethod === "wallet" ? "wallet" : "desk" }).eq("id", bookingId);
   await earnPurchasePoints(b.client_id, me.org_id, price, payMethod);
-  await logActivity(me.org_id, "class_collected", { actorId: me.id, clientId: b.client_id, amount: price, meta: { bookingId, payMethod } });
+  const { data: bookedClass } = await admin().from("classes").select("location_id").eq("id", b.class_id).maybeSingle();
+  await logActivity(me.org_id, "class_collected", { actorId: me.id, clientId: b.client_id, amount: price, meta: { bookingId, payMethod, locationId: bookedClass?.location_id ?? null } });
   return c.json({ ok: true });
 });
 
@@ -3980,7 +3987,7 @@ app.post(`${P}/clients/refund`, async (c) => {
   const amt = Math.round(Number(amount) * 100) / 100;
   if (!Number.isFinite(amt) || amt <= 0) return c.json({ error: "Enter a refund amount." }, 400);
   if (destination !== "wallet" && destination !== "desk") return c.json({ error: "Choose where the refund goes." }, 400);
-  const { data: client } = await admin().from("clients").select("id, name").eq("id", clientId).eq("org_id", me.org_id).maybeSingle();
+  const { data: client } = await admin().from("clients").select("id, name, home_location_id").eq("id", clientId).eq("org_id", me.org_id).maybeSingle();
   if (!client) return c.json({ error: "No such client" }, 404);
   const { paid, refunded, refundable } = await refundableFor(clientId, me.org_id);
   if (amt > refundable) {
@@ -3993,13 +4000,13 @@ app.post(`${P}/clients/refund`, async (c) => {
   }
   await clawbackPoints(clientId, me.org_id, amt);
   if (destination === "wallet") {
-    const balance = await creditWallet(clientId, me.org_id, amt, "refund", note ? String(note) : "Refund to wallet", me.id);
+    const balance = await creditWallet(clientId, me.org_id, amt, "refund", note ? String(note) : "Refund to wallet", me.id, { locationId: client.home_location_id ?? null });
     await notifyClient(me.org_id, clientId, "wallet_refund", { title: `${amt} EGP refunded to your wallet`, body: note ? String(note) : "You can use it for classes and plans.", push: true });
     return c.json({ ok: true, walletBalance: balance });
   }
   // "At desk": the real money (cash / card / Stripe) is handled outside Bizqwik;
   // we only record the equivalent for the log.
-  await logActivity(me.org_id, "refund_desk", { actorId: me.id, clientId, amount: amt, meta: { note: note ?? null } });
+  await logActivity(me.org_id, "refund_desk", { actorId: me.id, clientId, amount: amt, meta: { note: note ?? null, locationId: client.home_location_id ?? null } });
   return c.json({ ok: true });
 });
 // How much a client can still be refunded (shown in the desk's refund sheet).
