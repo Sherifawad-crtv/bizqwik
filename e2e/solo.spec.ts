@@ -75,7 +75,8 @@ test("solo home: four insight cards, a revenue chart, two quick actions, links o
   await expect(page.getByText("ENDING SOON", { exact: true })).toBeVisible();
   await expect(page.getByText("REVENUE BY MONTH · EGP")).toBeVisible();
   const qa = page.getByRole("group", { name: "Quick actions" });
-  await expect(qa.getByRole("button")).toHaveCount(2);
+  await expect(qa.getByRole("button")).toHaveCount(3);
+  await expect(qa.getByRole("button", { name: "Check in" })).toBeVisible();
   await expect(qa.getByRole("button", { name: "New client" })).toBeVisible();
   await expect(qa.getByRole("button", { name: "Drop-in" })).toBeVisible();
   // The links sit on the title's row, not under the list.
@@ -132,4 +133,34 @@ test("solo owner never lands on team screens: Activity goes back home, and team 
     await page.goto(path);
     await expect(page).toHaveURL(/localhost:\d+\/$/);
   }
+});
+
+test("solo: Check in lists everyone with a button each, searchable, and each answers for itself", async ({ page }) => {
+  const sent: string[] = [];
+  const ends = (n: number) => new Date(Date.now() + n * 86400000).toISOString();
+  const gp = (name: string) => ({ id: "p", clientId: "x", kind: "membership", planTypeId: null, seriesId: null, name, priceAtSale: 500, payMethod: "instapay", creditsTotal: null, creditsRemaining: null, invitationsRemaining: 0, startsAt: ends(-20), expiresAt: ends(20), status: "active" });
+  const c = (id: string, name: string, groupPlan: unknown) => ({ id, name, age: null, phone: "0100", email: null, conditions: null, assignedCoachId: null, currentPackage: null, currentMembership: null, groupPlan });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await mockBackend(page, "dept_head", {
+    __orgMode: "solo",
+    "front-desk/summary": { todayCheckIns: 0, todayDropIns: 0, activeNow: 0, recent: [] },
+    clients: { clients: [c("c1", "Mona Ali", gp("1 Month")), c("c2", "Omar Said", gp("1 Month")), c("c3", "Lina Hassan", null)] },
+    classes: { classes: [] }, revenue: REVENUE,
+    "check-ins": (body: any) => {
+      sent.push(body.clientId);
+      if (body.clientId === "c3") return { status: 400, body: { error: "Lina Hassan has no active plan or package." } };
+      return { body: { checkIn: { id: "ci" }, deducted: false, plan: null } };
+    },
+  });
+  await page.goto("/");
+  await page.getByRole("group", { name: "Quick actions" }).getByRole("button", { name: "Check in" }).click();
+  await expect(page.getByRole("button", { name: "Check in", exact: true })).toHaveCount(3 + 1); // one per client + the quick action behind the sheet
+  await page.getByLabel("Search name or phone").fill("omar");
+  await expect(page.getByText("Mona Ali")).toHaveCount(0);
+  await page.getByLabel("Search name or phone").fill("");
+  await page.getByTestId("checkin-row").filter({ hasText: "Mona Ali" }).getByRole("button", { name: "Check in" }).click();
+  await expect(page.getByText("Done").first()).toBeVisible();
+  await page.getByTestId("checkin-row").filter({ hasText: "Lina Hassan" }).getByRole("button", { name: "Check in" }).click();
+  await expect(page.getByRole("alert")).toContainText("no active plan");
+  expect(sent).toEqual(["c1", "c3"]);
 });

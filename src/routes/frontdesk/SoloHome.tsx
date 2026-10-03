@@ -20,6 +20,7 @@ import { Card, SectionLink, SectionTitle, SheetHeading, endingSoon, planSummary 
 import { useFrontDeskCatalog } from "./Members";
 import { NewClientModal } from "./NewClientModal";
 import { DropIn } from "./DropIn";
+import { CheckInList } from "./CheckInList";
 
 const clockOf = (iso: string) => {
   const d = new Date(iso);
@@ -73,7 +74,7 @@ export function SoloHome() {
   const revenue = useAsync(() => api.revenue(12), []);
   const classes = useAsync(() => api.classes(new Date(Date.now() - 2 * 3600000).toISOString()), []);
   const { bundleTypes } = useFrontDeskCatalog();
-  const [modal, setModal] = useState<"new" | "dropin" | null>(null);
+  const [modal, setModal] = useState<"new" | "dropin" | "checkin" | null>(null);
   const [roster, setRoster] = useState<GymClass | null>(null);
 
   const stats = useMemo(() => {
@@ -125,9 +126,10 @@ export function SoloHome() {
         <RevenueChart months={trend} revenueOnly />
       </Card>
 
-      <div role="group" aria-label="Quick actions" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", justifyItems: "center", margin: "24px 0 4px", maxWidth: 320, marginInline: "auto" }}>
+      <div role="group" aria-label="Quick actions" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", justifyItems: "center", margin: "24px 0 4px", maxWidth: 360, marginInline: "auto" }}>
         <QuickAction icon="user-plus" label="New client" onClick={() => setModal("new")} />
         <QuickAction icon="ticket" label="Drop-in" onClick={() => setModal("dropin")} />
+        <QuickAction icon="check" label="Check in" onClick={() => setModal("checkin")} />
       </div>
 
       <SectionTitle right={<SectionLink onClick={() => navigate("/bookings")}>All bookings</SectionLink>}>Next up</SectionTitle>
@@ -167,6 +169,10 @@ export function SoloHome() {
         {recent.length === 0 && <EmptyState bare icon="inbox" title="Nothing yet today" body="Check-ins and drop-ins show up here as they happen." />}
       </Card>
 
+      <Sheet open={modal === "checkin"} onClose={() => setModal(null)}>
+        <SheetHeading kicker="NO SCAN?" title="Check in" />
+        <CheckInList />
+      </Sheet>
       <Sheet open={modal === "dropin"} onClose={() => setModal(null)}>
         <SheetHeading kicker="DROP-IN" title="Drop-In" />
         <DropIn embedded initialClient={null} />
