@@ -1,15 +1,16 @@
 import { Icon } from "./Icon";
 import type { PayMethod } from "../lib/types";
 
-const OPTIONS: { value: PayMethod; label: string; icon: "cash" | "card"; note: string }[] = [
+const OPTIONS: { value: PayMethod; label: string; icon: "cash" | "card" | "wallet"; note: string }[] = [
   { value: "cash", label: "Cash", icon: "cash", note: "Paid in cash" },
   { value: "card", label: "Card", icon: "card", note: "Paid by card" },
+  { value: "instapay", label: "InstaPay", icon: "wallet", note: "Bank transfer" },
 ];
 
-/** Cash or card as two big cards, for a sale where the client has no wallet yet. */
+/** Cash, card or InstaPay as big cards, for a sale where the client has no wallet yet. */
 export function PaymentCards({ value, onChange }: { value: PayMethod; onChange: (v: PayMethod) => void }) {
   return (
-    <div role="radiogroup" aria-label="Payment" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+    <div role="radiogroup" aria-label="Payment" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8 }}>
       {OPTIONS.map((o) => {
         const on = value === o.value;
         return (
@@ -21,8 +22,8 @@ export function PaymentCards({ value, onChange }: { value: PayMethod; onChange: 
             data-sq
             onClick={() => onChange(o.value)}
             style={{
-              minHeight: 150,
-              padding: 18,
+              minHeight: 130,
+              padding: 14,
               cursor: "pointer",
               textAlign: "left",
               display: "flex",
@@ -36,7 +37,7 @@ export function PaymentCards({ value, onChange }: { value: PayMethod; onChange: 
           >
             <Icon name={o.icon} size={40} solid={on} />
             <span>
-              <span style={{ display: "block", font: "800 20px var(--font-body)", letterSpacing: "-.01em" }}>{o.label}</span>
+              <span style={{ display: "block", font: "800 17px var(--font-body)", letterSpacing: "-.01em" }}>{o.label}</span>
               <span style={{ display: "block", font: "400 12px var(--font-mono)", color: "var(--ink-muted)", marginTop: 2 }}>{o.note}</span>
             </span>
           </button>

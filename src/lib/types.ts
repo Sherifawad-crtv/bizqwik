@@ -284,7 +284,8 @@ export const ORG_STATUS_LABELS: Record<OrgStatus, string> = {
 
 // How a desk sale is paid. cash/card are external (recorded only); wallet spends
 // the member's store credit. Default cash keeps older callers unchanged.
-export type PayMethod = "cash" | "card" | "wallet";
+export type PayMethod = "cash" | "card" | "instapay" | "wallet";
+export const PAY_METHOD_LABELS: Record<PayMethod, string> = { cash: "Cash", card: "Card", instapay: "InstaPay", wallet: "Wallet" };
 
 // ===== Member app: classes (dept_head manages; members book) =====
 export type GymClassStatus = "active" | "cancelled";

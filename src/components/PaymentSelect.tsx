@@ -1,7 +1,7 @@
 import { Segmented } from "./Segmented";
 import type { PayMethod } from "../lib/types";
 
-/** Cash / card / wallet picker for a desk sale. `wallet` is only offered when a
+/** Cash / card / InstaPay / wallet picker for a desk sale. `wallet` is only offered when a
  * paying member is in context (a brand-new client has no balance yet); when it's
  * hidden and the current value was "wallet", the caller should fall back to cash. */
 export function PaymentSelect({
@@ -16,6 +16,7 @@ export function PaymentSelect({
   const options = [
     { value: "cash" as const, label: "CASH" },
     { value: "card" as const, label: "CARD" },
+    { value: "instapay" as const, label: "INSTAPAY" },
     ...(wallet ? [{ value: "wallet" as const, label: "WALLET" }] : []),
   ];
   return (

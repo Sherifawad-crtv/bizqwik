@@ -3,7 +3,7 @@ import { useState } from "react";
 import { api } from "../lib/backend";
 import { useAsync } from "../lib/useAsync";
 import { egp } from "../lib/format";
-import type { ClassBooking, PayMethod, BookingAttendance } from "../lib/types";
+import { PAY_METHOD_LABELS, type ClassBooking, type PayMethod, type BookingAttendance } from "../lib/types";
 import { Sheet } from "./Sheet";
 import { Button } from "./Button";
 import { Spinner } from "./Spinner";
@@ -131,9 +131,9 @@ function RosterRow({
         <div style={{ marginTop: 10 }}>
           <div style={{ font: "700 10px var(--font-mono)", letterSpacing: ".06em", color: "var(--ink-faint)", marginBottom: 6 }}>COLLECT PAYMENT</div>
           <div style={{ display: "flex", gap: 8 }}>
-            {(["cash", "card", "wallet"] as PayMethod[]).map((pm) => (
+            {(["cash", "card", "instapay", "wallet"] as PayMethod[]).map((pm) => (
               <RowBtn key={pm} disabled={busy} onClick={() => run(() => api.collectBooking(b.id, pm), b.id)}>
-                {pm[0].toUpperCase() + pm.slice(1)}
+                {PAY_METHOD_LABELS[pm]}
               </RowBtn>
             ))}
             <RowBtn disabled={busy} onClick={() => onSetCollecting(false)}>Cancel</RowBtn>
