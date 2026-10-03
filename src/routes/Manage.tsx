@@ -1,3 +1,4 @@
+import { LocationField, LocationPill, useCurrentLocation, useLocations } from "../lib/locations";
 import { EmptyState } from "../components/EmptyState";
 import { useEffect, useState } from "react";
 import { useSetHeader } from "../lib/header";
@@ -224,6 +225,7 @@ export function TierSheet({ open, tier, onClose }: { open: boolean; tier: Tier |
 
 export function BundlesPanel() {
   const { data } = useAsync(() => api.bundleTypes(), []);
+  const locations = useLocations();
   const [editing, setEditing] = useState<BundleType | "new" | null>(null);
   const [deleting, setDeleting] = useState<BundleType | null>(null);
   const shownDeleting = useLatch(deleting);
@@ -244,7 +246,10 @@ export function BundlesPanel() {
         {data.bundleTypes.map((b, i) => (
           <div key={b.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "16px 20px", borderBottom: i === data.bundleTypes.length - 1 ? "none" : "1px solid var(--line)" }}>
             <div style={{ minWidth: 0, flex: 1 }}>
-              <div style={{ font: "700 16px var(--font-body)" }}>{b.name}</div>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <span style={{ font: "700 16px var(--font-body)" }}>{b.name}</span>
+                <LocationPill locations={locations} id={b.locationId} />
+              </div>
               <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>
                 {b.price} EGP · {b.sessionsIncluded} sessions · {b.expiryDays} days
               </div>
@@ -286,6 +291,9 @@ export function BundleSheet({ open, bundleType, onClose }: { open: boolean; bund
   const [price, setPrice] = useState(String(bundleType?.price ?? ""));
   const [sessionsIncluded, setSessionsIncluded] = useState(String(bundleType?.sessionsIncluded ?? ""));
   const [expiryDays, setExpiryDays] = useState(String(bundleType?.expiryDays ?? ""));
+  const [locationId, setLocationId] = useState<string | null>(null);
+  const locations = useLocations();
+  const { current } = useCurrentLocation();
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const { confirmed, iconIn, showSuccess } = useSheetSuccess(open, onClose);
@@ -296,6 +304,7 @@ export function BundleSheet({ open, bundleType, onClose }: { open: boolean; bund
       setPrice(String(bundleType?.price ?? ""));
       setSessionsIncluded(String(bundleType?.sessionsIncluded ?? ""));
       setExpiryDays(String(bundleType?.expiryDays ?? ""));
+      setLocationId(bundleType ? (bundleType.locationId ?? null) : (current?.id ?? null));
       setError(null);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -311,11 +320,16 @@ export function BundleSheet({ open, bundleType, onClose }: { open: boolean; bund
       setError("Enter a name, a price, whole-number sessions, and whole-number expiry days — all greater than 0.");
       return;
     }
+    if (locations.length > 0 && !locationId) {
+      setError("Choose the location it's for.");
+      return;
+    }
+    const loc = locations.length > 0 ? locationId : undefined;
     setBusy(true);
     setError(null);
     try {
-      if (bundleType) await api.updateBundleType(bundleType.id, name.trim(), priceNum, sessionsNum, expiryNum);
-      else await api.createBundleType(name.trim(), priceNum, sessionsNum, expiryNum);
+      if (bundleType) await api.updateBundleType(bundleType.id, name.trim(), priceNum, sessionsNum, expiryNum, loc);
+      else await api.createBundleType(name.trim(), priceNum, sessionsNum, expiryNum, loc);
       showSuccess();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
@@ -335,6 +349,7 @@ export function BundleSheet({ open, bundleType, onClose }: { open: boolean; bund
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             <TextField label="NAME" value={name} onChange={(e) => setName(e.target.value)} placeholder="24-Session Pack" />
             <TextField label="PRICE · EGP" type="number" min={1} value={price} onChange={(e) => setPrice(e.target.value)} />
+            <LocationField locations={locations} value={locationId} onChange={setLocationId} />
             <TextField label="SESSIONS INCLUDED" type="number" min={1} value={sessionsIncluded} onChange={(e) => setSessionsIncluded(e.target.value)} placeholder="24" />
             <TextField label="EXPIRES AFTER · DAYS" type="number" min={1} value={expiryDays} onChange={(e) => setExpiryDays(e.target.value)} placeholder="45" />
           </div>

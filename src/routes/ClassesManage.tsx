@@ -18,6 +18,7 @@ import { pad, whenLabel } from "../lib/classTime";
 import { TimeWheelField } from "../components/TimeWheelField";
 import { ClassPhotoField } from "../components/ClassPhotoField";
 import { SeriesSheet } from "./Catalog";
+import { LocationField, useLocations } from "../lib/locations";
 
 export interface FormState {
   id: string | null; // null = creating
@@ -30,10 +31,12 @@ export interface FormState {
   // series' photo (edited on the class, in Catalog).
   seriesId: string | null;
   imageUrl: string | null;
+  // Where it happens (businesses with locations); null = no location.
+  locationId: string | null;
 }
 
 export function emptyForm(): FormState {
-  return { id: null, title: "", description: "", date: todayIso(), time: "18:00", price: "", seriesId: null, imageUrl: null };
+  return { id: null, title: "", description: "", date: todayIso(), time: "18:00", price: "", seriesId: null, imageUrl: null, locationId: null };
 }
 
 export function formOf(c: GymClass): FormState {
@@ -47,6 +50,7 @@ export function formOf(c: GymClass): FormState {
     price: String(c.price),
     seriesId: c.seriesId ?? null,
     imageUrl: c.seriesId ? null : (c.imageUrl ?? null),
+    locationId: c.locationId ?? null,
   };
 }
 
@@ -246,6 +250,7 @@ export function ClassSheet({
   if (!form && seededId !== undefined) setSeededId(undefined);
 
   const editing = draft.id !== null;
+  const locations = useLocations();
 
 
   const save = async () => {
@@ -259,14 +264,18 @@ export function ClassSheet({
       setError("Price must be zero or more.");
       return;
     }
+    if (locations.length > 0 && !draft.locationId) {
+      setError("Choose the location.");
+      return;
+    }
     const startsAt = new Date(`${draft.date}T${draft.time}:00`).toISOString();
     const desc = draft.description.trim() || null;
     setBusy(true);
     try {
       if (draft.id) {
-        await api.updateClass(draft.id, draft.title.trim(), desc, startsAt, price, draft.seriesId ? null : draft.imageUrl);
+        await api.updateClass(draft.id, draft.title.trim(), desc, startsAt, price, draft.seriesId ? null : draft.imageUrl, locations.length > 0 ? draft.locationId : undefined);
       } else {
-        await api.createClass(draft.title.trim(), desc, startsAt, price, draft.imageUrl);
+        await api.createClass(draft.title.trim(), desc, startsAt, price, draft.imageUrl, locations.length > 0 ? draft.locationId : undefined);
       }
       onSaved();
     } catch (err) {
@@ -285,6 +294,7 @@ export function ClassSheet({
         <TextField label="TITLE" value={draft.title} onChange={(e) => setDraft({ ...draft, title: e.target.value })} placeholder="e.g. Sunrise HIIT" />
         {!solo && <TextField label="DESCRIPTION" value={draft.description} onChange={(e) => setDraft({ ...draft, description: e.target.value })} placeholder="Optional — shown to members" />}
         {!solo && !draft.seriesId && <ClassPhotoField value={draft.imageUrl} onChange={(url) => setDraft({ ...draft, imageUrl: url })} title={draft.title} />}
+        <LocationField locations={locations} value={draft.locationId} onChange={(id) => setDraft({ ...draft, locationId: id })} />
         <DateField value={draft.date} min={todayIso()} onChange={(iso) => setDraft({ ...draft, date: iso })} />
         <TimeWheelField label="TIME" value={draft.time} onChange={(v) => setDraft({ ...draft, time: v })} />
         {!solo && <TextField label="DROP-IN PRICE (EGP)" value={draft.price} onChange={(e) => setDraft({ ...draft, price: e.target.value })} inputMode="numeric" placeholder="0 for free" />}

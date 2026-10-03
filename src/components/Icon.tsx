@@ -30,6 +30,8 @@ import { BellIcon } from "@solar-icons/react/linear/bell";
 import { TicketIcon } from "@solar-icons/react/linear/ticket";
 import { GiftIcon } from "@solar-icons/react/linear/gift";
 import { UserPlusIcon } from "@solar-icons/react/linear/user-plus";
+import { MapPointIcon } from "@solar-icons/react/linear/map-point";
+import { MapPointIcon as MapPointIconBold } from "@solar-icons/react/bold-duotone/map-point";
 import { TicketIcon as TicketIconBold } from "@solar-icons/react/bold-duotone/ticket";
 import { GiftIcon as GiftIconBold } from "@solar-icons/react/bold-duotone/gift";
 import { UserPlusIcon as UserPlusIconBold } from "@solar-icons/react/bold-duotone/user-plus";
@@ -95,6 +97,7 @@ export type IconName =
   | "ticket"
   | "gift"
   | "user-plus"
+  | "map-pin"
   | "search";
 
 const LINEAR = {
@@ -130,6 +133,7 @@ const LINEAR = {
   ticket: TicketIcon,
   gift: GiftIcon,
   "user-plus": UserPlusIcon,
+  "map-pin": MapPointIcon,
   search: MagnifierIcon,
 } satisfies Record<IconName, typeof WalletIcon>;
 
@@ -166,6 +170,7 @@ const BOLD = {
   ticket: TicketIconBold,
   gift: GiftIconBold,
   "user-plus": UserPlusIconBold,
+  "map-pin": MapPointIconBold,
   search: MagnifierIconBold,
 } satisfies Record<IconName, typeof WalletIconBold>;
 

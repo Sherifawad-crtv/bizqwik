@@ -72,6 +72,14 @@ export interface BundleType {
   price: number;
   sessionsIncluded: number;
   expiryDays: number;
+  locationId?: string | null;
+}
+
+// A place the business runs sessions. Plans, PT bundles and sessions can be
+// tied to one; a member has a home location.
+export interface Location {
+  id: string;
+  name: string;
 }
 
 export interface Client {
@@ -82,6 +90,7 @@ export interface Client {
   email?: string | null;
   conditions: string | null;
   assignedCoachId: string | null;
+  homeLocationId?: string | null;
 }
 
 export interface MembershipType {
@@ -140,6 +149,7 @@ export interface PackageInstance {
   coachCutAtSale: number;
   status: PackageStatus;
   createdBy: string;
+  locationId?: string | null;
 }
 
 export interface ClientWithPackage extends Client {
@@ -305,6 +315,7 @@ export interface GymClass {
   bookedCount?: number;
   planSeats?: number;
   dropInSeats?: number;
+  locationId?: string | null;
 }
 
 export type BookingAttendance = "booked" | "arrived" | "no_show" | "cancelled";
@@ -374,6 +385,7 @@ export interface ClassSeries {
   status: "active" | "ended";
   imageUrl?: string | null;
   activeMonthlySubscribers?: number;
+  locationId?: string | null;
 }
 
 // The founder's catalog: an all-access membership, or a class bundle of N
@@ -388,6 +400,7 @@ export interface GroupPlanType {
   credits: number | null;
   invitationsAllowance: number;
   active: boolean;
+  locationId?: string | null;
 }
 
 export type GroupPlanKind = "membership" | "class_monthly" | "bundle";
@@ -406,6 +419,7 @@ export interface GroupPlan {
   startsAt: string;
   expiresAt: string;
   status: "active" | "finished";
+  locationId?: string | null;
 }
 
 export const GROUP_PLAN_KIND_LABELS: Record<GroupPlanKind, string> = {

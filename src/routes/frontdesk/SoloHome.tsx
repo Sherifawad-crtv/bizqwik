@@ -14,6 +14,8 @@ import { EmptyState } from "../../components/EmptyState";
 import { Icon, type IconName } from "../../components/Icon";
 import { Spinner } from "../../components/Spinner";
 import { RevenueChart } from "../Oversight";
+import { Segmented } from "../../components/Segmented";
+import { useCurrentLocation } from "../../lib/locations";
 import { Card, SectionLink, SectionTitle, endingSoon, planSummary } from "./shared";
 
 const clockOf = (iso: string) => {
@@ -87,9 +89,14 @@ export function SoloHome() {
   const lastMonth = revenue.data?.months.at(-2)?.revenue ?? 0;
   const delta = lastMonth > 0 ? Math.round(((thisMonth - lastMonth) / lastMonth) * 100) : null;
 
+  const { locations, current, setCurrent } = useCurrentLocation();
   const nextUp = useMemo(() => {
-    return (classes.data?.classes ?? []).filter((c) => c.status !== "cancelled" && Date.parse(c.startsAt) + 3600000 >= Date.now()).slice(0, 5);
-  }, [classes.data]);
+    // Only what's on at the location she's working at (plus anything untied).
+    return (classes.data?.classes ?? [])
+      .filter((c) => c.status !== "cancelled" && Date.parse(c.startsAt) + 3600000 >= Date.now())
+      .filter((c) => !current || !c.locationId || c.locationId === current.id)
+      .slice(0, 5);
+  }, [classes.data, current]);
 
   const goMembers = (filter: string) => {
     setSticky("memberFilter", filter);
@@ -102,6 +109,11 @@ export function SoloHome() {
   return (
     <div>
       <HomeAvatar name={profile.name} avatarUrl={profile.avatarUrl} greeting={`Hi, ${profile.name.split(" ")[0]}`} />
+      {locations.length > 1 && current && (
+        <div role="group" aria-label="Working at" style={{ display: "flex", justifyContent: "center", margin: "-4px 0 16px" }}>
+          <Segmented value={current.id} options={locations.map((l) => ({ value: l.id, label: l.name }))} onChange={setCurrent} />
+        </div>
+      )}
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
         <Stat label="REVENUE" icon="cash" tone="primary" value={fmt(thisMonth)} sub={delta === null ? "EGP this month" : `${delta >= 0 ? "▲" : "▼"} ${Math.abs(delta)}% this month`} onClick={() => navigate("/money")} />
