@@ -6,6 +6,7 @@ import { isSoloOwner } from "../../lib/nav";
 import { Button } from "../../components/Button";
 import { ConfirmSheet } from "../../components/ConfirmSheet";
 import { ClassSheet, emptyForm, formOf, type FormState } from "../ClassesManage";
+import { SeriesSheet } from "../Catalog";
 import { useAsync } from "../../lib/useAsync";
 import { useSetHeader } from "../../lib/header";
 import { timeLabel, pad } from "../../lib/classTime";
@@ -40,6 +41,8 @@ export function Bookings() {
   const solo = !!profile && isSoloOwner(profile.role, orgMode);
   useSetHeader(solo ? { kicker: "SESSIONS", title: "Schedule" } : { kicker: "FRONT DESK", title: "Bookings" }, [solo]);
   const [form, setForm] = useState<FormState | null>(null);
+  // Add class = the same recurring-class flow as the owner's catalog (pick days, time, length).
+  const [addingClass, setAddingClass] = useState(false);
   const { locations, current, ready: locsReady } = useCurrentLocation();
   // The selected location's sessions only (each location is run separately).
   const place = locations.length > 1 ? (current?.id ?? "all") : "all";
@@ -118,9 +121,17 @@ export function Bookings() {
     <div>
       <LocationSwitcher />
       {solo && (
-        <Button fullWidth size="lg" style={{ marginBottom: 14 }} onClick={() => setForm({ ...emptyForm(), locationId: place !== "all" ? place : (current?.id ?? null) })}>
-          <Icon name="plus" size={18} /> Add class
-        </Button>
+        <div style={{ marginBottom: 14 }}>
+          <Button fullWidth size="lg" onClick={() => setAddingClass(true)}>
+            <Icon name="plus" size={18} /> Add class
+          </Button>
+          <button
+            onClick={() => setForm({ ...emptyForm(), locationId: place !== "all" ? place : (current?.id ?? null) })}
+            style={{ display: "block", margin: "8px auto 0", border: 0, background: "none", cursor: "pointer", font: "600 13px var(--font-body)", color: "var(--primary-pressed)" }}
+          >
+            Just one session
+          </button>
+        </div>
       )}
       <div style={{ display: "flex", justifyContent: "center" }}>
       <Segmented
@@ -168,6 +179,7 @@ export function Bookings() {
 
       {solo && (
         <>
+          <SeriesSheet open={addingClass} series={null} onClose={() => setAddingClass(false)} />
           <ClassSheet solo form={form} onClose={() => setForm(null)} onSaved={() => { setForm(null); classes.refetch(); }} onRequestCancel={(c) => { setForm(null); setCancelling(c); }} />
           <ConfirmSheet
             open={cancelling !== null}

@@ -310,8 +310,10 @@ export function SeriesSheet({ open, series, onClose }: { open: boolean; series: 
             </div>
             <div style={{ marginTop: 10, font: "400 12px/1.5 var(--font-mono)", color: "var(--ink-faint)" }}>
               {series
-                ? "Changes apply to upcoming sessions nobody has booked yet. Booked sessions keep their time and price."
-                : "Repeats every week on these days until you change or end it. Members can drop in per class or buy the monthly."}
+                ? (seriesSolo ? "Changes apply to all upcoming sessions of this class." : "Changes apply to upcoming sessions nobody has booked yet. Booked sessions keep their time and price.")
+                : seriesSolo
+                  ? "Repeats every week on these days until you change or end it. Your members see it in their schedule and can say they're coming."
+                  : "Repeats every week on these days until you change or end it. Members can drop in per class or buy the monthly."}
             </div>
             {error && (
               <div style={{ marginTop: 12, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>{error}</div>
