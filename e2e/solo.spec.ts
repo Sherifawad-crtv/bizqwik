@@ -533,13 +533,22 @@ test("separate locations: the drop-in charges the location's own price", async (
 });
 
 
-test("solo schedule: no bookings, no 'N booked', no roster — a tap edits the class", async ({ page }) => {
-  await bootWithLocations(page);
+test("solo schedule: no bookings or roster — each class shows how many are coming, a tap edits it and lists who", async ({ page }) => {
+  await bootWithLocations(page, {
+    classes: { classes: [
+      { id: "k1", title: "Zamalek Flow", description: null, startsAt: inHours(1), price: 0, status: "active", bookedCount: 2, coming: ["Mona Adel", "Omar Fathy"], locationId: "L1" },
+      { id: "k3", title: "Zamalek Late", description: null, startsAt: inHours(2), price: 0, status: "active", bookedCount: 0, coming: [], locationId: "L1" },
+    ] },
+  });
   await page.goto("/bookings");
   await expect(page.getByText("Zamalek Flow")).toBeVisible();
-  await expect(page.getByText(/booked|coming/)).toHaveCount(0);
+  await expect(page.getByText("2 coming")).toBeVisible();
+  await expect(page.getByText("No one yet")).toBeVisible();
+  await expect(page.getByText(/booked/)).toHaveCount(0);
   await page.getByText("Zamalek Flow").click();
   await expect(page.getByText("THIS SESSION ONLY")).toBeVisible();
+  await expect(page.getByText("COMING · 2")).toBeVisible();
+  await expect(page.getByText("Mona Adel, Omar Fathy")).toBeVisible();
 });
 
 test("solo packages: Kids and Adults show as small labels; PT can have no expiry", async ({ page }) => {

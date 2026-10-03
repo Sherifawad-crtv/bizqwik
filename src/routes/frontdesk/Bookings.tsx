@@ -90,7 +90,11 @@ export function Bookings() {
         <span style={{ width: 84, flex: "none", whiteSpace: "nowrap", font: "700 14px var(--font-mono)", color: happening ? "var(--primary-pressed)" : "var(--ink)" }}>{clock(c.startsAt)}</span>
         <span style={{ minWidth: 0, flex: 1 }}>
           <span style={{ display: "block", font: "700 15px var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.title}</span>
-          {!solo && (
+          {solo ? (
+            <span style={{ display: "block", font: "400 13px var(--font-mono)", color: booked > 0 ? "var(--primary-pressed)" : "var(--ink-faint)" }}>
+              {booked === 0 ? "No one yet" : `${booked} coming`}
+            </span>
+          ) : (
             <span style={{ display: "block", font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>
               {booked === 0 ? "No one booked" : `${booked} booked`}
               {(c.dropInSeats ?? 0) > 0 ? ` · ${c.dropInSeats} pay per class` : ""}

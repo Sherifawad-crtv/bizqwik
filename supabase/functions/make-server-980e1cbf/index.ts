@@ -2917,8 +2917,13 @@ function initialsOf(name: string): string {
   return (first + last).toUpperCase() || "•";
 }
 async function classGoing(orgId: string, meId: string) {
-  const { data } = await admin().from("class_bookings").select("class_id, client_id, clients(name), classes!inner(starts_at)")
-    .eq("org_id", orgId).neq("attendance", "cancelled").gte("classes.starts_at", new Date().toISOString()).order("booked_at");
+  // A solo gym has no bookings — "going" is its members' RSVPs.
+  const solo = (await orgModeOf(orgId)) === "solo";
+  const { data } = solo
+    ? await admin().from("class_rsvps").select("class_id, client_id, clients(name), classes!inner(starts_at)")
+        .eq("org_id", orgId).gte("classes.starts_at", new Date().toISOString()).order("created_at")
+    : await admin().from("class_bookings").select("class_id, client_id, clients(name), classes!inner(starts_at)")
+        .eq("org_id", orgId).neq("attendance", "cancelled").gte("classes.starts_at", new Date().toISOString()).order("booked_at");
   const out = new Map<string, { count: number; initials: string[] }>();
   for (const b of data ?? []) {
     const g = out.get(b.class_id) ?? { count: 0, initials: [] };
@@ -2931,6 +2936,17 @@ async function classGoing(orgId: string, meId: string) {
   return out;
 }
 const NO_ONE = { count: 0, initials: [] as string[] };
+
+// The classes a member is in: bookings, or (solo gyms) RSVPs.
+async function myClassIds(me: any): Promise<Set<string>> {
+  if ((await orgModeOf(me.org_id)) === "solo") {
+    const { data } = await admin().from("class_rsvps").select("class_id").eq("client_id", me.id);
+    return new Set((data ?? []).map((r: any) => r.class_id));
+  }
+  const { data } = await admin().from("class_bookings").select("class_id").eq("client_id", me.id).neq("attendance", "cancelled");
+  return new Set((data ?? []).map((b: any) => b.class_id));
+}
+
 
 async function requireClient(c: any) {
   const user = await requireUser(c);
@@ -2986,11 +3002,11 @@ app.get(`${P}/client/home`, async (c) => {
     bumpPointsBalance(me.id, me.org_id),
     pointsConfig(me.org_id),
     atMemberLocation(admin().from("classes").select("*, class_series(image_url)").eq("org_id", me.org_id).eq("status", "active").gte("starts_at", now.toISOString()).lt("starts_at", new Date(now.getTime() + 7 * 86400000).toISOString()), me).order("starts_at").limit(80),
-    admin().from("class_bookings").select("class_id").eq("client_id", me.id).neq("attendance", "cancelled"),
+    myClassIds(me),
     classGoing(me.org_id, me.id),
     admin().from("client_notifications").select("id", { count: "exact", head: true }).eq("client_id", me.id).is("read_at", null),
   ]);
-  const booked = new Set((mine.data ?? []).map((b: any) => b.class_id));
+  const booked = mine;
   const plan = status.groupPlanRow;
   return c.json({
     name: me.name,
@@ -3012,17 +3028,37 @@ app.get(`${P}/client/classes`, async (c) => {
   const me = await requireClient(c);
   if (!me) return c.json({ error: "Unauthorized" }, 401);
   await extendOrgSeries(me.org_id);
-  const [{ data }, { data: mine }, plan, going] = await Promise.all([
+  const [{ data }, mine, plan, going] = await Promise.all([
     atMemberLocation(admin().from("classes").select("*, class_series(image_url)").eq("org_id", me.org_id).eq("status", "active").gte("starts_at", new Date().toISOString()), me).order("starts_at"),
-    admin().from("class_bookings").select("class_id").eq("client_id", me.id).neq("attendance", "cancelled"),
+    myClassIds(me),
     activeGroupPlan(me.id, me.org_id),
     classGoing(me.org_id, me.id),
   ]);
-  const booked = new Set((mine ?? []).map((b: any) => b.class_id));
+  const booked = mine;
   return c.json({
     activePlan: plan ? toGroupPlan(plan) : null,
     classes: (data ?? []).map((r: any) => ({ ...toClassRow(r), booked: booked.has(r.id), coverage: planCovers(plan, r) ? "plan" : "drop_in", going: going.get(r.id) ?? NO_ONE })),
   });
+});
+
+// Solo gyms: "I'm coming" / "can't make it". No payment, no plan, no limit — it
+// only tells the owner how many to expect.
+app.post(`${P}/client/classes/:id/rsvp`, async (c) => {
+  const me = await requireClient(c);
+  if (!me) return c.json({ error: "Unauthorized" }, 401);
+  if ((await orgModeOf(me.org_id)) !== "solo") return c.json({ error: "Book this class instead." }, 400);
+  const classId = c.req.param("id");
+  const { going } = await c.req.json().catch(() => ({ going: true }));
+  if (going === false) {
+    await admin().from("class_rsvps").delete().eq("class_id", classId).eq("client_id", me.id);
+    return c.json({ ok: true, going: false });
+  }
+  const { data: cls } = await atMemberLocation(admin().from("classes").select("id, starts_at").eq("id", classId).eq("org_id", me.org_id).eq("status", "active"), me).maybeSingle();
+  if (!cls) return c.json({ error: "This class isn't available." }, 404);
+  if (Date.parse(cls.starts_at) <= Date.now()) return c.json({ error: "This class has already started." }, 400);
+  const { error } = await admin().from("class_rsvps").upsert({ class_id: classId, client_id: me.id, org_id: me.org_id }, { onConflict: "class_id,client_id", ignoreDuplicates: true });
+  if (error) throw error;
+  return c.json({ ok: true, going: true });
 });
 
 // Booking resolver. Covered by the active plan -> a plan seat (a bundle's
@@ -3627,7 +3663,14 @@ app.get(`${P}/classes`, async (c) => {
   const since = c.req.query("since") || new Date(Date.now() - 14 * 86400000).toISOString();
   const { data } = await admin().from("classes").select("*, class_series(image_url)").eq("org_id", me.org_id).gte("starts_at", since).order("starts_at", { ascending: true });
   const ids = (data ?? []).map((r: any) => r.id);
-  const { data: seats } = ids.length > 0
+  const solo = (await orgModeOf(me.org_id)) === "solo";
+  // Solo: who said they're coming (names are for her eyes only).
+  const comingBy = new Map<string, string[]>();
+  if (solo && ids.length > 0) {
+    const { data: rs } = await admin().from("class_rsvps").select("class_id, clients(name)").in("class_id", ids).order("created_at");
+    for (const r of rs ?? []) comingBy.set(r.class_id, [...(comingBy.get(r.class_id) ?? []), (r as any).clients?.name ?? "Member"]);
+  }
+  const { data: seats } = ids.length > 0 && !solo
     ? await admin().from("class_bookings").select("class_id, coverage").in("class_id", ids).neq("attendance", "cancelled")
     : { data: [] as any[] };
   const count = new Map<string, { plan: number; dropIn: number }>();
@@ -3639,7 +3682,8 @@ app.get(`${P}/classes`, async (c) => {
   return c.json({
     classes: (data ?? []).map((r: any) => {
       const n = count.get(r.id) ?? { plan: 0, dropIn: 0 };
-      return { ...toClassRow(r), bookedCount: n.plan + n.dropIn, planSeats: n.plan, dropInSeats: n.dropIn };
+      const coming = comingBy.get(r.id) ?? [];
+      return { ...toClassRow(r), bookedCount: solo ? coming.length : n.plan + n.dropIn, planSeats: n.plan, dropInSeats: n.dropIn, ...(solo ? { coming } : {}) };
     }),
   });
 });

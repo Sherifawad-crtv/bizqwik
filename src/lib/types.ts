@@ -313,6 +313,8 @@ export interface GymClass {
   // The card photo members see (a series session shows its series' photo).
   imageUrl?: string | null;
   bookedCount?: number;
+  // Solo gyms: who said they're coming (names), instead of bookings.
+  coming?: string[];
   planSeats?: number;
   dropInSeats?: number;
   locationId?: string | null;
