@@ -580,3 +580,48 @@ test("solo drop-ins: Kids and Adults each have a price at the location", async (
   await expect(page.getByText("Drop-in recorded")).toBeVisible();
   expect(sent).toEqual([{ payMethod: "cash", locationId: "L1", label: "Adults" }]);
 });
+
+const WAITING = [
+  { id: "r1", clientId: "c1", clientName: "Mona Adel", clientPhone: "0100", name: "Adults 8 classes", price: 5000, offerType: "plan_type", createdAt: "2026-10-04T09:30:00Z", proofUrl: null },
+  { id: "r2", clientId: "c2", clientName: "Omar Fathy", clientPhone: null, name: "Kids private 8 sessions", price: 6000, offerType: "bundle_type", createdAt: "2026-10-04T10:10:00Z", proofUrl: null },
+];
+
+test("InstaPay payments: she sees what's waiting, approves one and rejects one with a reason", async ({ page }) => {
+  const calls: string[] = [];
+  const bodies: Record<string, unknown>[] = [];
+  await bootWithLocations(page, {
+    "payment-requests": { requests: WAITING },
+    "payment-requests/r1/approve": () => { calls.push("approve r1"); return { body: { ok: true } }; },
+    "payment-requests/r2/reject": (b: Record<string, unknown> | null) => { calls.push("reject r2"); bodies.push(b ?? {}); return { body: { ok: true } }; },
+  });
+  await page.goto("/");
+  await page.getByRole("button", { name: /2 payments to approve/ }).click();
+  await expect(page.getByText("Mona Adel")).toBeVisible();
+  await expect(page.getByText("Omar Fathy")).toBeVisible();
+  await page.getByText("Mona Adel").locator("xpath=ancestor::div[.//button[normalize-space()='Approve']][1]").getByRole("button", { name: "Approve" }).click();
+  await expect.poll(() => calls).toContain("approve r1");
+  await page.getByText("Omar Fathy").locator("xpath=ancestor::div[.//button[normalize-space()='Reject']][1]").getByRole("button", { name: "Reject" }).click();
+  await page.getByLabel("TELL THEM WHY (OPTIONAL)").fill("Amount didn't match");
+  await page.getByRole("button", { name: "Reject", exact: true }).last().click();
+  await expect.poll(() => calls).toContain("reject r2");
+  expect(bodies[0]).toMatchObject({ note: "Amount didn't match" });
+});
+
+test("InstaPay payments: nothing waiting shows no card; she can set her InstaPay address", async ({ page }) => {
+  const sent: unknown[] = [];
+  await bootWithLocations(page, {
+    "payment-requests": { requests: [] },
+    "org-settings": (b: Record<string, unknown> | null) => {
+      if (b) { sent.push(b); return { body: { ok: true } }; }
+      return { body: { dropInPrice: null, dropInPrices: {}, dropInOptions: {}, instapayQr: null, instapayAddress: null } };
+    },
+  });
+  await page.goto("/");
+  await expect(page.getByText(/to approve/)).toHaveCount(0);
+  await page.goto("/catalog");
+  await page.getByRole("button", { name: "Add", exact: true }).click();
+  await page.getByLabel("INSTAPAY ADDRESS").fill("hh@instapay");
+  await page.getByRole("button", { name: "Save", exact: true }).click();
+  await expect.poll(() => sent.length).toBe(1);
+  expect(sent[0]).toMatchObject({ instapayAddress: "hh@instapay" });
+});
