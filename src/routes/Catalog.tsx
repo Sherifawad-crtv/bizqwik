@@ -12,7 +12,7 @@ import { WEEKDAY_ORDER, WEEKDAY_SHORT, timeLabel, weekdaysLabel } from "../lib/c
 import { TimeWheelField } from "../components/TimeWheelField";
 import { ClassPhotoField } from "../components/ClassPhotoField";
 import type { ClassSeries, GroupPlanType, GroupPlanTypeKind, Location } from "../lib/types";
-import { LocationField, LocationPill, useCurrentLocation, useLocations } from "../lib/locations";
+import { LocationField, LocationPill, LocationSwitcher, atLocation, useCurrentLocation, useLocations } from "../lib/locations";
 import { Segmented } from "../components/Segmented";
 import { Button } from "../components/Button";
 import { Icon } from "../components/Icon";
@@ -38,6 +38,7 @@ export function Catalog() {
 
   return (
     <div>
+      {solo && <LocationSwitcher />}
       <div style={{ display: "flex", justifyContent: "center", marginBottom: 18 }}>
         <Segmented
           value={tab}
@@ -91,10 +92,11 @@ function ClassesPanel({ solo }: { solo?: boolean }) {
   const navigate = useNavigate();
   const { data } = useAsync(() => api.classSeries(), []);
   const locations = useLocations();
+  const catalogHere = useCatalogHere();
   const [editing, setEditing] = useState<ClassSeries | "new" | null>(null);
 
   if (!data) return <Spinner />;
-  const active = data.series.filter((s) => s.status === "active");
+  const active = data.series.filter((s) => s.status === "active" && atLocation(s.locationId, catalogHere));
   const ended = data.series.filter((s) => s.status === "ended");
 
   return (
@@ -339,6 +341,7 @@ export function SeriesSheet({ open, series, onClose }: { open: boolean; series: 
 function PlansPanel({ solo }: { solo?: boolean }) {
   const { data } = useAsync(() => api.planTypes(), []);
   const locations = useLocations();
+  const catalogHere = useCatalogHere();
   const [editing, setEditing] = useState<{ kind: GroupPlanTypeKind; planType: GroupPlanType | null } | null>(null);
   const [deleting, setDeleting] = useState<GroupPlanType | null>(null);
   const shownDeleting = useLatch(deleting);
@@ -346,7 +349,7 @@ function PlansPanel({ solo }: { solo?: boolean }) {
   if (!data) return <Spinner />;
 
   const section = (kind: GroupPlanTypeKind, title: string, empty: string) => {
-    const rows = data.planTypes.filter((p) => p.kind === kind);
+    const rows = data.planTypes.filter((p) => p.kind === kind && atLocation(p.locationId, catalogHere));
     return (
       <div style={{ marginBottom: 28 }}>
         <PanelHeader
@@ -538,12 +541,16 @@ function readQr(file: File): Promise<string> {
 /** The solo owner's one-off drop-in price and her InstaPay QR. */
 function SoloOffer() {
   const settings = useAsync(() => api.orgSettings(), []);
+  const catalogHere = useCatalogHere();
+  const { current: catalogCurrent } = useCurrentLocation();
   const [editing, setEditing] = useState(false);
   const [price, setPrice] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   if (!settings.data) return null;
-  const { dropInPrice, instapayQr } = settings.data;
+  const { instapayQr } = settings.data;
+  // With locations, each has its own drop-in price.
+  const dropInPrice = catalogHere ? (settings.data.dropInPrices[catalogHere] ?? null) : settings.data.dropInPrice;
 
   const savePrice = async () => {
     const n = Number(price);
@@ -551,7 +558,7 @@ function SoloOffer() {
     setBusy(true);
     setError(null);
     try {
-      await api.saveOrgSettings({ dropInPrice: n });
+      await api.saveOrgSettings(catalogHere ? { dropInPrice: n, locationId: catalogHere } : { dropInPrice: n });
       setEditing(false);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Couldn't save.");
@@ -575,7 +582,7 @@ function SoloOffer() {
       <div data-sq style={card}>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ font: "700 16px var(--font-body)" }}>Drop-in</div>
+            <div style={{ font: "700 16px var(--font-body)" }}>Drop-in{catalogCurrent && catalogHere ? ` · ${catalogCurrent.name}` : ""}</div>
             <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>{dropInPrice === null ? "Not set" : `${fmt(dropInPrice)} EGP · one visit`}</div>
           </div>
           <Button size="md" variant="secondary" style={{ height: 40, padding: "0 16px" }} onClick={() => { setPrice(dropInPrice === null ? "" : String(dropInPrice)); setEditing(true); }}>
@@ -672,4 +679,10 @@ function LocationsCard() {
       </Sheet>
     </div>
   );
+}
+
+/** With 2+ locations, the location the Plans tab is showing; else null (all). */
+function useCatalogHere(): string | null {
+  const { locations, current } = useCurrentLocation();
+  return locations.length > 1 ? (current?.id ?? null) : null;
 }

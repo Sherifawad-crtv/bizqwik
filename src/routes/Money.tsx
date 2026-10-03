@@ -8,6 +8,7 @@ import { Spinner } from "../components/Spinner";
 import { EmptyState } from "../components/EmptyState";
 import { useState } from "react";
 import { useLatch } from "../lib/useLatch";
+import { LocationSwitcher, useCurrentLocation } from "../lib/locations";
 import type { ActivityEntry, ClientWithPackage } from "../lib/types";
 import { Sheet } from "../components/Sheet";
 import { Button } from "../components/Button";
@@ -54,15 +55,21 @@ export function Money() {
   const [range, setRange] = useSticky<Range>("moneyRange", "1", { valid: (v) => v === "1" || v === "3" || v === "12" });
   const n = Number(range);
   const [open, setOpen] = useState<Txn | null>(null);
+  // Each location's money, or "All" for the whole business.
+  const { locations, current } = useCurrentLocation();
+  const [allLocations, setAllLocations] = useState(false);
+  const here = locations.length > 1 && !allLocations ? (current?.id ?? null) : null;
   const { data, error } = useAsync(async () => {
-    const [rev, pay, act] = await Promise.all([api.revenue(n), api.paymentsSummary(n), api.activity(300)]);
-    return { rev, pay, txns: toTransactions(act.activity, n) };
-  }, [range]);
+    const [rev, pay, act] = await Promise.all([api.revenue(n), api.paymentsSummary(n, here), api.activity(300)]);
+    const txns = toTransactions(act.activity ?? [], n).filter((t) => !here || (t.entry.meta as Record<string, unknown> | null)?.locationId === here);
+    return { rev, pay, txns };
+  }, [range, here]);
 
   if (error) return <EmptyState icon="inbox" title="Couldn't load your money" body="Check your connection and try again." />;
 
   return (
     <div>
+      <LocationSwitcher all isAll={allLocations} onAll={setAllLocations} />
       <div style={{ display: "flex", justifyContent: "center", marginBottom: 18 }}>
         <Segmented value={range} onChange={setRange} options={RANGES} />
       </div>
@@ -72,9 +79,11 @@ export function Money() {
         <>
           <Card style={{ padding: "22px 22px 20px" }}>
             <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>REVENUE · EGP</div>
-            <div style={{ font: "800 52px/1.05 var(--font-body)", letterSpacing: "-.03em", marginTop: 6 }}>{fmt(data.rev.totals.revenue)}</div>
+            <div style={{ font: "800 52px/1.05 var(--font-body)", letterSpacing: "-.03em", marginTop: 6 }}>{fmt(here ? data.pay.total : data.rev.totals.revenue)}</div>
             <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-muted)", marginTop: 6 }}>
-              {data.rev.activeSubscribers.total} active member{data.rev.activeSubscribers.total === 1 ? "" : "s"}
+              {here
+                ? `${data.pay.byMethod.reduce((a, m) => a + m.count, 0)} payment${data.pay.byMethod.reduce((a, m) => a + m.count, 0) === 1 ? "" : "s"} at ${current?.name ?? "this location"}`
+                : `${data.rev.activeSubscribers.total} active member${data.rev.activeSubscribers.total === 1 ? "" : "s"}`}
             </div>
             {data.pay.byMethod.length > 0 && (
               <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 14 }}>

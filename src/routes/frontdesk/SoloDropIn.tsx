@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../../lib/backend";
 import { useAsync } from "../../lib/useAsync";
+import { useCurrentLocation } from "../../lib/locations";
 import { fmt } from "../../lib/format";
 import { Button } from "../../components/Button";
 import { Icon } from "../../components/Icon";
@@ -16,19 +17,22 @@ type Method = "cash" | "instapay";
 export function SoloDropIn({ onDone }: { onDone: () => void }) {
   const navigate = useNavigate();
   const settings = useAsync(() => api.orgSettings(), []);
+  // With 2+ locations, the price (and the sale) is the current location's.
+  const { locations, current } = useCurrentLocation();
+  const here = locations.length > 1 ? (current?.id ?? null) : null;
   const [method, setMethod] = useState<Method | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<Method | null>(null);
 
   if (!settings.data) return <Spinner />;
-  const price = settings.data.dropInPrice;
+  const price = here ? (settings.data.dropInPrices[here] ?? null) : settings.data.dropInPrice;
   const qr = settings.data.instapayQr;
 
   if (price === null) {
     return (
       <div style={{ textAlign: "center", padding: "8px 0 4px" }}>
-        <div style={{ font: "700 16px var(--font-body)" }}>Set your drop-in price first</div>
+        <div style={{ font: "700 16px var(--font-body)" }}>Set {here && current ? `${current.name}'s` : "your"} drop-in price first</div>
         <div style={{ font: "400 13px/1.5 var(--font-mono)", color: "var(--ink-muted)", margin: "6px 0 16px" }}>It lives with your plans, so you only set it once.</div>
         <Button fullWidth size="lg" onClick={() => navigate("/catalog")}>Go to Plans</Button>
       </div>
@@ -40,7 +44,7 @@ export function SoloDropIn({ onDone }: { onDone: () => void }) {
     setBusy(true);
     setError(null);
     try {
-      await api.soloDropIn(method);
+      await api.soloDropIn(method, here);
       setDone(method);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Couldn't record the drop-in.");
@@ -66,7 +70,7 @@ export function SoloDropIn({ onDone }: { onDone: () => void }) {
     <div>
       <div style={{ textAlign: "center", marginBottom: 16 }}>
         <div style={{ font: "800 48px/1.05 var(--font-body)", letterSpacing: "-.03em" }}>{fmt(price)}</div>
-        <div style={{ font: "700 12px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", marginTop: 4 }}>EGP · ONE DROP-IN</div>
+        <div style={{ font: "700 12px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", marginTop: 4 }}>EGP · ONE DROP-IN{here && current ? ` · ${current.name.toUpperCase()}` : ""}</div>
       </div>
 
       {!method && (

@@ -450,5 +450,7 @@ export interface PaymentsSummary {
   total: number;
   byMethod: { method: "instapay" | "cash" | "card" | "other"; label: string; amount: number; count: number }[];
   transfers: { id: string; at: string; clientName: string | null; amount: number; what: string }[];
+  // Revenue per month across the range (oldest first).
+  byMonth?: { month: string; revenue: number }[];
 }
 

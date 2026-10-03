@@ -1,4 +1,4 @@
-import { LocationField, LocationPill, useCurrentLocation, useLocations } from "../lib/locations";
+import { LocationField, LocationPill, atLocation, useCurrentLocation, useLocations } from "../lib/locations";
 import { EmptyState } from "../components/EmptyState";
 import { useEffect, useState } from "react";
 import { useSetHeader } from "../lib/header";
@@ -224,8 +224,11 @@ export function TierSheet({ open, tier, onClose }: { open: boolean; tier: Tier |
 // ---------- Bundles (private training) ----------
 
 export function BundlesPanel() {
-  const { data } = useAsync(() => api.bundleTypes(), []);
+  const { data: raw } = useAsync(() => api.bundleTypes(), []);
   const locations = useLocations();
+  const { current: bundlesHere } = useCurrentLocation();
+  // With 2+ locations: only the selected location's PT bundles.
+  const data = raw ? { bundleTypes: raw.bundleTypes.filter((b) => atLocation(b.locationId, locations.length > 1 ? (bundlesHere?.id ?? null) : null)) } : null;
   const [editing, setEditing] = useState<BundleType | "new" | null>(null);
   const [deleting, setDeleting] = useState<BundleType | null>(null);
   const shownDeleting = useLatch(deleting);
