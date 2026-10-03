@@ -21,6 +21,7 @@ import { TextField, SelectField } from "../components/FormField";
 import { Spinner } from "../components/Spinner";
 import { SheetSuccessIcon } from "../components/SheetSuccessIcon";
 import { BundlesPanel } from "./Manage";
+import { useAuth } from "../lib/auth";
 
 type Tab = "classes" | "plans" | "pt";
 
@@ -29,7 +30,12 @@ type Tab = "classes" | "plans" | "pt";
  * memberships and class bundles), and private-training bundles. */
 export function Catalog() {
   const [tab, setTab] = useSticky<Tab>("catalogTab", "classes", { valid: (v) => ["classes","plans","pt"].includes(v) });
-  useSetHeader({ kicker: "WHAT YOU SELL", title: "Catalog" }, []);
+  const { orgMode } = useAuth();
+  const solo = orgMode === "solo";
+  useSetHeader(solo ? { kicker: "WHAT YOU SELL", title: "My plans" } : { kicker: "WHAT YOU SELL", title: "Catalog" }, [solo]);
+
+  // A solo owner sells memberships only: no classes, bundles or PT tabs.
+  if (solo) return <PlansPanel solo />;
 
   return (
     <div>
@@ -321,7 +327,7 @@ export function SeriesSheet({ open, series, onClose }: { open: boolean; series: 
 
 // ---------- Group plans (memberships + class bundles) ----------
 
-function PlansPanel() {
+function PlansPanel({ solo }: { solo?: boolean }) {
   const { data } = useAsync(() => api.planTypes(), []);
   const [editing, setEditing] = useState<{ kind: GroupPlanTypeKind; planType: GroupPlanType | null } | null>(null);
   const [deleting, setDeleting] = useState<GroupPlanType | null>(null);
@@ -338,7 +344,7 @@ function PlansPanel() {
           count={rows.length}
           action={
             <Button size="md" style={{ height: 40, padding: "0 16px" }} onClick={() => setEditing({ kind, planType: null })}>
-              + {kind === "membership" ? "Membership" : "Bundle"}
+              + {kind === "membership" ? (solo ? "Plan" : "Membership") : "Bundle"}
             </Button>
           }
         />
@@ -372,11 +378,11 @@ function PlansPanel() {
 
   return (
     <div>
-      {section("membership", "Memberships", "No memberships yet. A membership covers every class for the months you choose.")}
-      {section("bundle", "Class bundles", "No bundles yet. A bundle is a pack of sessions: one is used each day the member checks in.")}
-      <div style={{ font: "400 12px/1.5 var(--font-mono)", color: "var(--ink-faint)", margin: "-12px 2px 0" }}>
+      {section("membership", solo ? "Plans" : "Memberships", solo ? "No plans yet. Add a 1-month and a 3-month plan so you can sign members up." : "No memberships yet. A membership covers every class for the months you choose.")}
+      {!solo && section("bundle", "Class bundles", "No bundles yet. A bundle is a pack of sessions: one is used each day the member checks in.")}
+      {!solo && <div style={{ font: "400 12px/1.5 var(--font-mono)", color: "var(--ink-faint)", margin: "-12px 2px 0" }}>
         Each class's monthly is set on the class itself. A member holds one group plan at a time, and a new one can only be bought once the current one is finished.
-      </div>
+      </div>}
 
       <PlanTypeSheet open={editing !== null} kind={editing?.kind ?? "membership"} planType={editing?.planType ?? null} onClose={() => setEditing(null)} />
       {shownDeleting && (

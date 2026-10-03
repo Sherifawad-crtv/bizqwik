@@ -73,7 +73,8 @@ export function SoloHome() {
   const clients = useAsync(() => api.clients(), []);
   const revenue = useAsync(() => api.revenue(12), []);
   const classes = useAsync(() => api.classes(new Date(Date.now() - 2 * 3600000).toISOString()), []);
-  const { bundleTypes } = useFrontDeskCatalog();
+  const { bundleTypes, planTypes: allPlans } = useFrontDeskCatalog();
+  const planTypes = allPlans.filter((p) => p.kind === "membership" && p.active);
   const [modal, setModal] = useState<"new" | "dropin" | "checkin" | null>(null);
   const [roster, setRoster] = useState<GymClass | null>(null);
 
@@ -150,6 +151,17 @@ export function SoloHome() {
           </button>
         ))}
         {nextUp.length === 0 && <EmptyState bare icon="calendar" title="No more classes today" body="Upcoming classes show up here." />}
+      </Card>
+
+      <SectionTitle right={<SectionLink onClick={() => navigate("/catalog")}>{planTypes.length === 0 ? "Add plan" : "Manage"}</SectionLink>}>Your plans</SectionTitle>
+      <Card style={{ overflow: "hidden", marginBottom: 24 }}>
+        {planTypes.map((p, i) => (
+          <div key={p.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 18px", borderBottom: i === planTypes.length - 1 ? "none" : "1px solid var(--line)" }}>
+            <span style={{ minWidth: 0, flex: 1, font: "700 15px var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.name}</span>
+            <span style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>{fmt(p.price)} EGP · {p.durationMonths} mo</span>
+          </div>
+        ))}
+        {planTypes.length === 0 && <EmptyState bare icon="tag" title="No plans yet" body="Add your 1-month and 3-month plans to start signing members up." action={{ label: "+ New plan", onClick: () => navigate("/catalog") }} />}
       </Card>
 
       <SectionTitle right={<SectionLink onClick={() => navigate("/activity")}>Full activity &amp; logs</SectionLink>}>Recent activity</SectionTitle>
