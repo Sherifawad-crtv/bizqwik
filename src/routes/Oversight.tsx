@@ -217,13 +217,16 @@ export function Oversight() {
     // The report for the range, plus a window twice as long: its older half is
     // the period before, which the comparisons and the "how much history do we
     // have" note come from.
-    const [now, wide] = await Promise.all([api.revenue(n), api.revenue(Math.min(n * 2, 24))]);
+    const [now, wide] = await Promise.all([api.revenue(n), api.revenue(24)]);
     const rows = wide.months;
     const first = rows.findIndex((m) => m.revenue > 0 || m.payouts > 0);
     const before = rows.slice(Math.max(0, rows.length - 2 * n), rows.length - n);
     const sum = (k: "revenue" | "payouts") => before.reduce((a, m) => a + m[k], 0);
     const previous = { revenue: sum("revenue"), payouts: sum("payouts"), profit: sum("revenue") - sum("payouts") };
-    return { report: now, previous, monthsOfData: first < 0 ? 0 : rows.length - first };
+    // The month-by-month chart is the business's whole story so far (up to a
+    // year), whatever range the numbers above are showing.
+    const trend = first < 0 ? rows.slice(-1) : rows.slice(Math.max(first, rows.length - 12));
+    return { report: now, previous, trend, monthsOfData: first < 0 ? 0 : rows.length - first };
   }, [range]);
   useSetHeader({ kicker: "BUSINESS", title: "Overview" }, []);
 
@@ -288,8 +291,8 @@ export function Oversight() {
             <KpiTile label="WALLET CREDIT" icon="wallet" value={fmt(report.walletLiability)} sub="Unspent, owed to members" />
           </div>
 
-          <Card title="REVENUE VS COACH PAYOUTS" sub="BY MONTH · EGP">
-            <RevenueChart months={shown} />
+          <Card title="REVENUE VS COACH PAYOUTS" sub={`${caption(data.trend.map((m) => m.month))} · BY MONTH · EGP`}>
+            <RevenueChart months={data.trend} />
           </Card>
 
           <Card title="WHERE THE MONEY CAME FROM" sub={`${caption(shown.map((m) => m.month))} · EGP`}>
