@@ -8,7 +8,7 @@ import { useSheetSuccess } from "../../lib/useSheetSuccess";
 import { api } from "../../lib/backend";
 import { fmt, dateLabel } from "../../lib/format";
 import type { BundleType, ClassSeries, ClientWithPackage, CoachOption, GroupPlanType, Location } from "../../lib/types";
-import { LocationField, locationName, useLocations } from "../../lib/locations";
+import { LocationField, LocationSwitcher, atLocation, locationName, useCurrentLocation, useLocations } from "../../lib/locations";
 import { Button } from "../../components/Button";
 import { Sheet } from "../../components/Sheet";
 import { Segmented } from "../../components/Segmented";
@@ -95,7 +95,11 @@ export function Members() {
     if (createRequested) setParams({}, { replace: true });
   };
 
-  const clients = data?.clients ?? [];
+  // Each location keeps its own clients. (Clients from before locations show
+  // at both, flagged, until they're given one.)
+  const { locations: memberLocations, current: memberHere } = useCurrentLocation();
+  const here = memberLocations.length > 1 ? (memberHere?.id ?? null) : null;
+  const clients = (data?.clients ?? []).filter((c) => atLocation(c.homeLocationId, here));
   const shown = useMemo(() => clients.filter((c) => matchesClient(c, query) && (filter === "all" || (filter === "soon" ? endingSoon(c) !== null : planSummary(c, bundleTypes).tone === filter))), [clients, query, filter, bundleTypes]);
   const selected = clients.find((c) => c.id === selectedId) ?? null;
 
@@ -103,6 +107,7 @@ export function Members() {
 
   return (
     <div>
+      <LocationSwitcher />
       <SearchField value={query} onChange={setQuery} />
       <div style={{ display: "flex", alignItems: "center", gap: 8, margin: "12px 0 4px", overflowX: "auto" }}>
         {(["all", "active", "soon", "expired", "none"] as const).map((f) => {
@@ -139,6 +144,7 @@ export function Members() {
                 <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                   {plan.title} · {plan.detail}
                   {soon && <span style={{ color: "var(--logging-fg)", fontWeight: 700 }}> · {soon.label}</span>}
+                  {here && !c.homeLocationId && <span style={{ color: "var(--danger-fg)", fontWeight: 700 }}> · No location</span>}
                 </div>
               </div>
               <PlanPill tone={plan.tone} />
@@ -175,8 +181,9 @@ export function Members() {
 
 type PlanKind = "plan" | "service";
 
-const bundleOptions = (types: BundleType[], locations: Location[] = []) =>
-  types.map((b) => ({ value: b.id, label: `${b.name} · ${fmt(b.price)} EGP · ${b.sessionsIncluded} sessions${locationName(locations, b.locationId) ? ` · ${locationName(locations, b.locationId)}` : ""}` }));
+// With 2+ locations, `here` keeps only that location's PT bundles.
+const bundleOptions = (types: BundleType[], locations: Location[] = [], here: string | null = null) =>
+  types.filter((b) => atLocation(b.locationId, locations.length > 1 ? here : null)).map((b) => ({ value: b.id, label: `${b.name} · ${fmt(b.price)} EGP · ${b.sessionsIncluded} sessions${locationName(locations, b.locationId) ? ` · ${locationName(locations, b.locationId)}` : ""}` }));
 const coachOptions = (coaches: CoachOption[]) => coaches.map((c) => ({ value: c.id, label: c.name }));
 
 const CREATE_STEPS = ["Client info", "Package", "Payment", "Summary"] as const;
@@ -213,6 +220,8 @@ export function CreateClientSheet({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const createLocations = useLocations();
+  const { current: createCurrent } = useCurrentLocation();
+  const createHere = createLocations.length > 1 ? (createCurrent?.id ?? null) : null;
   // A solo owner is the trainer on every PT package she sells.
   const soloTrainer = profile?.role === "dept_head" && orgMode === "solo" ? (coaches[0]?.id ?? "") : "";
   useEffect(() => {
@@ -280,6 +289,8 @@ export function CreateClientSheet({
         const { client } = kind === "plan" ? await api.sellGroupPlan(fields, offerOf(offer), payMethod) : await api.createServiceClient(fields, bundleTypeId, coachId, payMethod);
         clientId = client.id;
         setCreatedId(clientId);
+        // A new client belongs to the location she's working at.
+        if (createHere) await api.setClientLocation(clientId, createHere).catch(() => undefined);
       }
       // Register the app invite so the client can sign up with this email.
       try {
@@ -356,7 +367,7 @@ export function CreateClientSheet({
                   <GroupOfferSelect value={offer} onChange={setOffer} planTypes={planTypes} series={series} />
                 ) : (
                   <>
-                    <SelectField label="PACKAGE" value={bundleTypeId} onChange={setBundleTypeId} placeholder="Choose a package" options={bundleOptions(bundleTypes, createLocations)} empty={{ title: "No PT packages yet", body: soloTrainer ? "Add PT bundles in Plans → PT bundles. Once one exists you can sell it here." : "The department head adds PT packages in Catalog → PT bundles. Once one exists you can sell it here." }} />
+                    <SelectField label="PACKAGE" value={bundleTypeId} onChange={setBundleTypeId} placeholder="Choose a package" options={bundleOptions(bundleTypes, createLocations, createHere)} empty={{ title: "No PT packages yet", body: soloTrainer ? "Add PT bundles in Plans → PT bundles. Once one exists you can sell it here." : "The department head adds PT packages in Catalog → PT bundles. Once one exists you can sell it here." }} />
                     {!soloTrainer && <SelectField label="COACH" value={coachId} onChange={setCoachId} placeholder="Choose a coach" options={coachOptions(coaches)} empty={{ title: "No coaches yet", body: "The department head invites coaches from Team → Team & tiers. They appear here once they sign up." }} />}
                   </>
                 )}
@@ -440,6 +451,7 @@ function ClientSheet({
   const { profile: me, orgMode: om } = useAuth();
   const solo = me?.role === "dept_head" && om === "solo";
   const sheetLocations = useLocations();
+  const { current: sheetHere } = useCurrentLocation();
   const [locPick, setLocPick] = useState<string | null>(null);
   const [mode, setMode] = useState<Mode>("view");
   const [pickId, setPickId] = useState("");
@@ -701,7 +713,7 @@ function ClientSheet({
               )}
               {mode === "location" && <LocationField locations={sheetLocations} value={locPick} onChange={setLocPick} />}
               {mode === "sell-plan" && <GroupOfferSelect value={pickId} onChange={setPickId} planTypes={planTypes} series={series} />}
-              {mode === "renew-package" && <SelectField label="PACKAGE" value={pickId} onChange={setPickId} placeholder="Choose a package" options={bundleOptions(bundleTypes, sheetLocations)} empty={{ title: "No PT packages yet", body: solo ? "Add PT bundles in Plans → PT bundles. Once one exists you can sell it here." : "The department head adds PT packages in Catalog → PT bundles. Once one exists you can sell it here." }} />}
+              {mode === "renew-package" && <SelectField label="PACKAGE" value={pickId} onChange={setPickId} placeholder="Choose a package" options={bundleOptions(bundleTypes, sheetLocations, shown.homeLocationId ?? sheetHere?.id ?? null)} empty={{ title: "No PT packages yet", body: solo ? "Add PT bundles in Plans → PT bundles. Once one exists you can sell it here." : "The department head adds PT packages in Catalog → PT bundles. Once one exists you can sell it here." }} />}
               {((mode === "renew-package" && !solo) || mode === "assign") && (
                 <SelectField label="COACH" value={coachId} onChange={setCoachId} placeholder="Choose a coach" options={coachOptions(coaches)} empty={{ title: "No coaches yet", body: "The department head invites coaches from Team → Team & tiers. They appear here once they sign up." }} />
               )}
@@ -733,7 +745,10 @@ function ClientSheet({
 }
 
 function GroupOfferSelect({ value, onChange, planTypes, series }: { value: string; onChange: (v: string) => void; planTypes: GroupPlanType[]; series: ClassSeries[] }) {
-  const options = groupOfferOptions(planTypes, series, useLocations());
+  // Each location has its own prices: only what's sold where she's working.
+  const { locations: offerLocations, current: offerHere } = useCurrentLocation();
+  const at = offerLocations.length > 1 ? (offerHere?.id ?? null) : null;
+  const options = groupOfferOptions(planTypes.filter((t) => atLocation(t.locationId, at)), series.filter((x) => atLocation(x.locationId, at)), offerLocations);
   const { profile, orgMode } = useAuth();
   // A solo owner with a couple of plans picks them as cards, not from a list.
   if (profile?.role === "dept_head" && orgMode === "solo" && options.length > 0 && options.length <= 6) {

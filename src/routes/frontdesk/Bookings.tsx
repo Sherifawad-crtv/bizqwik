@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { api } from "../../lib/backend";
 import { useAuth } from "../../lib/auth";
-import { LocationPill, useCurrentLocation } from "../../lib/locations";
+import { LocationSwitcher, useCurrentLocation } from "../../lib/locations";
 import { isSoloOwner } from "../../lib/nav";
 import { Button } from "../../components/Button";
 import { ConfirmSheet } from "../../components/ConfirmSheet";
@@ -41,9 +41,8 @@ export function Bookings() {
   useSetHeader(solo ? { kicker: "SESSIONS", title: "Schedule" } : { kicker: "FRONT DESK", title: "Bookings" }, [solo]);
   const [form, setForm] = useState<FormState | null>(null);
   const { locations, current } = useCurrentLocation();
-  // Which location's sessions to show: where she's working by default, or all.
-  const [placeFilter, setPlaceFilter] = useState<string>("here");
-  const place = placeFilter === "here" ? (current?.id ?? "all") : placeFilter;
+  // The selected location's sessions only (each location is run separately).
+  const place = locations.length > 1 ? (current?.id ?? "all") : "all";
   const [cancelling, setCancelling] = useState<GymClass | null>(null);
   const [range, setRange] = useState<Range>("today");
   const [open, setOpen] = useState<GymClass | null>(null);
@@ -96,7 +95,6 @@ export function Bookings() {
             {(c.dropInSeats ?? 0) > 0 ? ` · ${c.dropInSeats} pay per class` : ""}
           </span>
         </span>
-        {locations.length > 1 && place === "all" && <LocationPill locations={locations} id={c.locationId} />}
         {happening && <span style={{ font: "700 11px var(--font-mono)", color: "var(--paid-fg)", background: "var(--paid-bg)", padding: "3px 8px", borderRadius: 999 }}>NOW</span>}
         {!happening && c.id === nextId && <span style={{ font: "700 11px var(--font-mono)", color: "var(--primary-pressed)", background: "var(--primary-tint)", padding: "3px 8px", borderRadius: 999 }}>NEXT</span>}
         <Icon name="chevron-right" size={16} />
@@ -112,6 +110,7 @@ export function Bookings() {
 
   return (
     <div>
+      <LocationSwitcher />
       {solo && (
         <Button fullWidth size="lg" style={{ marginBottom: 14 }} onClick={() => setForm({ ...emptyForm(), locationId: place !== "all" ? place : (current?.id ?? null) })}>
           <Icon name="plus" size={18} /> New session
@@ -130,24 +129,6 @@ export function Bookings() {
       />
       </div>
 
-      {locations.length > 1 && (
-        <div role="group" aria-label="Location" style={{ display: "flex", justifyContent: "center", gap: 8, marginTop: 12, flexWrap: "wrap" }}>
-          {[...locations.map((l) => ({ id: l.id, name: l.name })), { id: "all", name: "All locations" }].map((l) => {
-            const on = place === l.id;
-            return (
-              <button
-                key={l.id}
-                data-tap
-                aria-pressed={on}
-                onClick={() => setPlaceFilter(l.id)}
-                style={{ height: 34, padding: "0 14px", borderRadius: 999, border: on ? 0 : "1px solid var(--line)", background: on ? "var(--primary)" : "var(--surface)", color: on ? "var(--surface)" : "var(--ink)", font: "700 13px var(--font-body)", cursor: "pointer" }}
-              >
-                {l.name}
-              </button>
-            );
-          })}
-        </div>
-      )}
       <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 6 }}>
         <SectionLink onClick={() => setMonth(true)}>Open full calendar</SectionLink>
       </div>

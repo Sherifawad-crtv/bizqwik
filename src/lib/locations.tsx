@@ -3,6 +3,7 @@ import { api } from "./backend";
 import { useAsync } from "./useAsync";
 import type { Location } from "./types";
 import { SelectField } from "../components/FormField";
+import { Segmented } from "../components/Segmented";
 
 // Where the owner is working right now (this phone). Remembered per device, so
 // switching location on Today applies to Schedule, check-in and new sessions.
@@ -63,3 +64,31 @@ export function LocationField({ locations, value, onChange }: { locations: Locat
   if (locations.length === 0) return null;
   return <SelectField label="LOCATION" value={value ?? ""} options={locations.map((l) => ({ value: l.id, label: l.name }))} onChange={onChange} placeholder="Choose where" />;
 }
+
+/** Which location this screen is about — the same choice on every tab, so
+ * switching on one switches them all. Renders nothing for a business with
+ * fewer than two locations. `all` adds an "All" option local to the screen
+ * (Money only: each location's clients are kept strictly apart). */
+export function LocationSwitcher({ all, onAll, isAll = false }: { all?: boolean; onAll?: (on: boolean) => void; isAll?: boolean }) {
+  const { locations, current, setCurrent } = useCurrentLocation();
+  if (locations.length < 2 || !current) return null;
+  const options = [...locations.map((l) => ({ value: l.id, label: l.name })), ...(all ? [{ value: "__all", label: "All" }] : [])];
+  return (
+    <div role="group" aria-label="Working at" style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}>
+      <Segmented
+        value={isAll ? "__all" : current.id}
+        options={options}
+        onChange={(v) => {
+          if (v === "__all") return onAll?.(true);
+          onAll?.(false);
+          setCurrent(v);
+        }}
+      />
+    </div>
+  );
+}
+
+/** Does this item belong at `locationId`? Untied items (made before locations
+ * existed) show everywhere so nothing goes missing. */
+export const atLocation = (itemLocationId: string | null | undefined, locationId: string | null | undefined) =>
+  !locationId || !itemLocationId || itemLocationId === locationId;

@@ -1,4 +1,4 @@
-import { useCurrentLocation } from "../../lib/locations";
+import { atLocation, useCurrentLocation } from "../../lib/locations";
 import { useMemo, useState } from "react";
 import { api } from "../../lib/backend";
 import { useAsync } from "../../lib/useAsync";
@@ -20,7 +20,10 @@ export function CheckInList() {
   const { bundleTypes } = useFrontDeskCatalog();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<Record<string, Result>>({});
-  const shown = useMemo(() => (data?.clients ?? []).filter((c) => matchesClient(c, query)).slice(0, 40), [data, query]);
+  // Only clients of the location she's working at.
+  const { locations } = useCurrentLocation();
+  const at = locations.length > 1 ? (here?.id ?? null) : null;
+  const shown = useMemo(() => (data?.clients ?? []).filter((c) => atLocation(c.homeLocationId, at) && matchesClient(c, query)).slice(0, 40), [data, query, at]);
 
   const checkIn = async (c: ClientWithPackage) => {
     setResults((r) => ({ ...r, [c.id]: { state: "busy" } }));

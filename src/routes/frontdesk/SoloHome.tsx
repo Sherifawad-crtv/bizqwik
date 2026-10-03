@@ -14,8 +14,7 @@ import { EmptyState } from "../../components/EmptyState";
 import { Icon, type IconName } from "../../components/Icon";
 import { Spinner } from "../../components/Spinner";
 import { RevenueChart } from "../Oversight";
-import { Segmented } from "../../components/Segmented";
-import { useCurrentLocation } from "../../lib/locations";
+import { LocationSwitcher, atLocation, useCurrentLocation } from "../../lib/locations";
 import { Card, SectionLink, SectionTitle, endingSoon, planSummary } from "./shared";
 
 const clockOf = (iso: string) => {
@@ -70,33 +69,40 @@ export function SoloHome() {
   const bundles = useAsync(() => api.bundleTypes(), []);
   const bundleTypes = bundles.data?.bundleTypes ?? [];
   const [roster, setRoster] = useState<GymClass | null>(null);
+  const { locations, current } = useCurrentLocation();
+  // Two or more locations: everything on Today is the selected location's.
+  const here = locations.length > 1 ? (current?.id ?? null) : null;
+  const locRevenue = useAsync(() => (here ? api.paymentsSummary(12, here) : Promise.resolve(null)), [here]);
 
   const stats = useMemo(() => {
-    const list = clients.data?.clients ?? [];
+    const list = (clients.data?.clients ?? []).filter((c) => atLocation(c.homeLocationId, here));
     return {
       total: list.length,
       active: list.filter((c) => planSummary(c, bundleTypes).tone === "active").length,
       soon: list.filter((c) => endingSoon(c) !== null).length,
     };
-  }, [clients.data, bundleTypes]);
+  }, [clients.data, bundleTypes, here]);
 
+  const months = useMemo(
+    () => (here ? (locRevenue.data?.byMonth ?? []).map((m) => ({ month: m.month, revenue: m.revenue, payouts: 0, profit: m.revenue })) : (revenue.data?.months ?? [])),
+    [here, locRevenue.data, revenue.data],
+  );
   const trend = useMemo(() => {
-    const rows = revenue.data?.months ?? [];
+    const rows = months;
     const first = rows.findIndex((m) => m.revenue > 0);
     return first < 0 ? rows.slice(-1) : rows.slice(Math.max(first, rows.length - 12));
-  }, [revenue.data]);
-  const thisMonth = revenue.data?.months.at(-1)?.revenue ?? 0;
-  const lastMonth = revenue.data?.months.at(-2)?.revenue ?? 0;
+  }, [months]);
+  const thisMonth = months.at(-1)?.revenue ?? 0;
+  const lastMonth = months.at(-2)?.revenue ?? 0;
   const delta = lastMonth > 0 ? Math.round(((thisMonth - lastMonth) / lastMonth) * 100) : null;
 
-  const { locations, current, setCurrent } = useCurrentLocation();
   const nextUp = useMemo(() => {
     // Only what's on at the location she's working at (plus anything untied).
     return (classes.data?.classes ?? [])
       .filter((c) => c.status !== "cancelled" && Date.parse(c.startsAt) + 3600000 >= Date.now())
-      .filter((c) => !current || !c.locationId || c.locationId === current.id)
+      .filter((c) => atLocation(c.locationId, here))
       .slice(0, 5);
-  }, [classes.data, current]);
+  }, [classes.data, here]);
 
   const goMembers = (filter: string) => {
     setSticky("memberFilter", filter);
@@ -104,16 +110,12 @@ export function SoloHome() {
   };
 
   if (!profile) return null;
-  if (!clients.data || !revenue.data) return <Spinner />;
+  if (!clients.data || !revenue.data || (here && !locRevenue.data)) return <Spinner />;
 
   return (
     <div>
       <HomeAvatar name={profile.name} avatarUrl={profile.avatarUrl} greeting={`Hi, ${profile.name.split(" ")[0]}`} />
-      {locations.length > 1 && current && (
-        <div role="group" aria-label="Working at" style={{ display: "flex", justifyContent: "center", margin: "-4px 0 16px" }}>
-          <Segmented value={current.id} options={locations.map((l) => ({ value: l.id, label: l.name }))} onChange={setCurrent} />
-        </div>
-      )}
+      <LocationSwitcher />
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
         <Stat label="REVENUE" icon="cash" tone="primary" value={fmt(thisMonth)} sub={delta === null ? "EGP this month" : `${delta >= 0 ? "▲" : "▼"} ${Math.abs(delta)}% this month`} onClick={() => navigate("/money")} />
