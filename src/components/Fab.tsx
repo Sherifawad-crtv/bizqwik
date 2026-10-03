@@ -1,4 +1,4 @@
-import { useCallback, useState, type ReactNode } from "react";
+import { useCallback, useRef, useState, type ReactNode } from "react";
 import { Icon } from "./Icon";
 import { AddSessionSheet } from "./AddSessionSheet";
 import { Sheet } from "./Sheet";
@@ -109,7 +109,7 @@ function CreateFab({ size }: { size: number }) {
 // The coach's FAB is a scanner. What was scanned decides what happens next:
 // the coaches'-room QR -> the session stepper (locked to today); a member's
 // PT code -> confirm deducting one session from that bundle.
-export function ScanFlow({ trigger }: { trigger: (open: () => void, busy: boolean) => ReactNode }) {
+export function ScanFlow({ trigger, hint }: { trigger: (open: () => void, busy: boolean) => ReactNode; hint?: string }) {
   const { profile } = useAuth();
   const [scanning, setScanning] = useState(false);
   const [checking, setChecking] = useState(false);
@@ -145,7 +145,7 @@ export function ScanFlow({ trigger }: { trigger: (open: () => void, busy: boolea
       {scanning && (
         <QrScanner
           title="Scan"
-          hint="The coaches' room QR to log attendance, or a member's PT code to log their session."
+          hint={hint ?? "The coaches' room QR to log attendance, or a member's PT code to log their session."}
           onClose={() => setScanning(false)}
           onScan={onScan}
         />
@@ -234,26 +234,36 @@ function PtDeliverSheet({ scan, onClose }: { scan: { token: string; preview: PtS
   );
 }
 
-type SoloAction = "new" | "dropin" | "checkin";
+type SoloAction = "new" | "dropin" | "checkin" | "scan";
 
-const SOLO_OPTIONS: { kind: SoloAction; title: string; sub: string; icon: "user-plus" | "ticket" | "check" }[] = [
+const SOLO_OPTIONS: { kind: SoloAction; title: string; sub: string; icon: "user-plus" | "ticket" | "check" | "qr-code" }[] = [
   { kind: "new", title: "New client", sub: "Add someone and sell them a plan", icon: "user-plus" },
   { kind: "dropin", title: "Drop-in", sub: "One visit · cash or InstaPay", icon: "ticket" },
   { kind: "checkin", title: "Check in", sub: "Someone who didn't scan", icon: "check" },
+  { kind: "scan", title: "Scan PT code", sub: "Log a member's PT session", icon: "qr-code" },
 ];
 
 /** The solo owner's FAB: her three everyday actions, from any screen. */
 function SoloFab({ size }: { size: number }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [kind, setKind] = useState<SoloAction | null>(null);
+  // The scanner is opened from the menu, so ScanFlow hands its opener back here.
+  const openScan = useRef<() => void>(() => {});
   const pick = (k: SoloAction) => {
     setMenuOpen(false);
     // Let the menu's close animation finish before the next sheet opens.
-    window.setTimeout(() => setKind(k), 260);
+    window.setTimeout(() => (k === "scan" ? openScan.current() : setKind(k)), 260);
   };
   return (
     <>
       <FabButton size={size} label="Quick actions" onClick={() => setMenuOpen(true)} />
+      <ScanFlow
+        hint="A member's PT code, from their app, to log today's session."
+        trigger={(open) => {
+          openScan.current = open;
+          return null;
+        }}
+      />
       <Sheet open={menuOpen} onClose={() => setMenuOpen(false)}>
         <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>QUICK ACTIONS</div>
         <div style={{ font: "800 26px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 16px" }}>What do you need?</div>

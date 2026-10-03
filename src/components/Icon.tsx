@@ -28,11 +28,13 @@ import { LetterIcon } from "@solar-icons/react/linear/letter";
 import { MenuDotsIcon } from "@solar-icons/react/linear/menu-dots";
 import { BellIcon } from "@solar-icons/react/linear/bell";
 import { TicketIcon } from "@solar-icons/react/linear/ticket";
+import { QrCodeIcon } from "@solar-icons/react/linear/qr-code";
 import { GiftIcon } from "@solar-icons/react/linear/gift";
 import { UserPlusIcon } from "@solar-icons/react/linear/user-plus";
 import { MapPointIcon } from "@solar-icons/react/linear/map-point";
 import { MapPointIcon as MapPointIconBold } from "@solar-icons/react/bold-duotone/map-point";
 import { TicketIcon as TicketIconBold } from "@solar-icons/react/bold-duotone/ticket";
+import { QrCodeIcon as QrCodeIconBold } from "@solar-icons/react/bold-duotone/qr-code";
 import { GiftIcon as GiftIconBold } from "@solar-icons/react/bold-duotone/gift";
 import { UserPlusIcon as UserPlusIconBold } from "@solar-icons/react/bold-duotone/user-plus";
 import { WalletIcon as WalletIconBold } from "@solar-icons/react/bold-duotone/wallet";
@@ -95,6 +97,7 @@ export type IconName =
   | "menu"
   | "bell"
   | "ticket"
+  | "qr-code"
   | "gift"
   | "user-plus"
   | "map-pin"
@@ -131,6 +134,7 @@ const LINEAR = {
   menu: MenuDotsIcon,
   bell: BellIcon,
   ticket: TicketIcon,
+  "qr-code": QrCodeIcon,
   gift: GiftIcon,
   "user-plus": UserPlusIcon,
   "map-pin": MapPointIcon,
@@ -168,6 +172,7 @@ const BOLD = {
   menu: MenuDotsIconBold,
   bell: BellIconBold,
   ticket: TicketIconBold,
+  "qr-code": QrCodeIconBold,
   gift: GiftIconBold,
   "user-plus": UserPlusIconBold,
   "map-pin": MapPointIconBold,
