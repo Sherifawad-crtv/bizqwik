@@ -1,6 +1,6 @@
 import { EmptyState } from "../../components/EmptyState";
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useSetHeader } from "../../lib/header";
 import { useAsync } from "../../lib/useAsync";
 import { useLatch } from "../../lib/useLatch";
@@ -18,7 +18,7 @@ import { PaymentCards } from "../../components/PaymentCards";
 import { Spinner } from "../../components/Spinner";
 import { Icon } from "../../components/Icon";
 import type { PayMethod } from "../../lib/types";
-import { Card, ErrorBanner, PlanPill, SearchField, SheetHeading, matchesClient, planSummary } from "./shared";
+import { Card, ErrorBanner, PlanPill, SearchField, SheetHeading, endingSoon, matchesClient, planSummary, renewalMessage, whatsappUrl } from "./shared";
 import { ConfirmCheckInSheet } from "./CheckIn";
 import { DropIn } from "./DropIn";
 
@@ -55,6 +55,7 @@ function offerOf(v: string): { planTypeId: string } | { seriesId: string } {
 
 export function Members() {
   useSetHeader({ kicker: "FRONT DESK", title: "Clients" }, []);
+  const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
   const createRequested = params.get("new") === "1";
   const { data } = useAsync(() => api.clients(), []);
@@ -63,7 +64,7 @@ export function Members() {
   const coaches = coachData?.coaches ?? [];
 
   const [query, setQuery] = useState("");
-  const [filter, setFilter] = useState<"all" | "active" | "expired" | "none">("all");
+  const [filter, setFilter] = useState<"all" | "active" | "soon" | "expired" | "none">("all");
   const [creating, setCreating] = useState(false);
   const [checkInFor, setCheckInFor] = useState<ClientWithPackage | null>(null);
   const [dropInFor, setDropInFor] = useState<{ id: string; name: string } | null>(null);
@@ -83,7 +84,7 @@ export function Members() {
   };
 
   const clients = data?.clients ?? [];
-  const shown = useMemo(() => clients.filter((c) => matchesClient(c, query) && (filter === "all" || planSummary(c, bundleTypes).tone === filter)), [clients, query, filter, bundleTypes]);
+  const shown = useMemo(() => clients.filter((c) => matchesClient(c, query) && (filter === "all" || (filter === "soon" ? endingSoon(c) !== null : planSummary(c, bundleTypes).tone === filter))), [clients, query, filter, bundleTypes]);
   const selected = clients.find((c) => c.id === selectedId) ?? null;
 
   if (!data) return <Spinner />;
@@ -92,8 +93,8 @@ export function Members() {
     <div>
       <SearchField value={query} onChange={setQuery} />
       <div style={{ display: "flex", alignItems: "center", gap: 8, margin: "12px 0 4px", overflowX: "auto" }}>
-        {(["all", "active", "expired", "none"] as const).map((f) => {
-          const n = f === "all" ? clients.length : clients.filter((c) => planSummary(c, bundleTypes).tone === f).length;
+        {(["all", "active", "soon", "expired", "none"] as const).map((f) => {
+          const n = f === "all" ? clients.length : f === "soon" ? clients.filter((c) => endingSoon(c) !== null).length : clients.filter((c) => planSummary(c, bundleTypes).tone === f).length;
           const on = filter === f;
           return (
             <button
@@ -102,7 +103,7 @@ export function Members() {
               onClick={() => setFilter(f)}
               style={{ flex: "none", height: 36, padding: "0 14px", borderRadius: 999, border: on ? 0 : "1px solid var(--line)", background: on ? "var(--primary)" : "var(--surface)", color: on ? "var(--surface)" : "var(--ink)", font: "700 13px var(--font-body)", cursor: "pointer" }}
             >
-              {{ all: "All", active: "Active", expired: "Expired", none: "No plan" }[f]} · {n}
+              {{ all: "All", active: "Active", soon: "Ending soon", expired: "Expired", none: "No plan" }[f]} · {n}
             </button>
           );
         })}
@@ -114,6 +115,7 @@ export function Members() {
       <Card style={{ marginTop: 10, overflow: "hidden" }}>
         {shown.map((c, i) => {
           const plan = planSummary(c, bundleTypes);
+          const soon = endingSoon(c);
           return (
             <button
               key={c.id}
@@ -124,6 +126,7 @@ export function Members() {
                 <div style={{ font: "700 16px var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.name}</div>
                 <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                   {plan.title} · {plan.detail}
+                  {soon && <span style={{ color: "var(--logging-fg)", fontWeight: 700 }}> · {soon.label}</span>}
                 </div>
               </div>
               <PlanPill tone={plan.tone} />
@@ -133,7 +136,7 @@ export function Members() {
         })}
         {shown.length === 0 && (
           clients.length === 0 ? (
-            <EmptyState bare icon="clients" title="No clients yet" body="Register your first client with + New client. You'll sell them a plan or PT package in the same step, and they get an app invite." />
+            <EmptyState bare icon="clients" title="No clients yet" body="Register your first client with + New client. You'll sell them a plan or PT package in the same step, and they get an app invite." action={{ label: "Import from a sheet", onClick: () => navigate("/import") }} />
           ) : (
             <EmptyState bare icon="search" title="No one matches that search" body="Check the spelling, or search by phone number instead." />
           )
@@ -548,6 +551,17 @@ function ClientSheet({
             ) : (
               <Button fullWidth size="lg" style={{ marginTop: 16 }} onClick={() => setMode(plan ? "renew-package" : "sell-plan")}>
                 Sell a plan
+              </Button>
+            )}
+
+            {(summary.tone !== "active" || endingSoon(shown) !== null) && whatsappUrl(shown.phone, "") && (
+              <Button
+                variant="secondary"
+                fullWidth
+                style={{ marginTop: 8 }}
+                onClick={() => window.open(whatsappUrl(shown.phone, renewalMessage(shown, bundleTypes))!, "_blank", "noopener")}
+              >
+                {summary.tone === "active" ? "Remind to renew on WhatsApp" : "Message on WhatsApp"}
               </Button>
             )}
 
