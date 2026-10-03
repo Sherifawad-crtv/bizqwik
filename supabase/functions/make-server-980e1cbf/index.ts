@@ -819,6 +819,20 @@ async function sendPushToProfile(
  * did (a class cancelled, a refund, a coach logging PT) and reminders push.
  * `ref` makes it idempotent (a second call with the same type+ref is a no-op),
  * which scheduled reminders rely on. Never throws. */
+// A solo gym takes no bookings, so class messages go to everyone who could
+// turn up: members with a running plan or PT package whose home location is
+// the class's (members with no location hear about every class).
+async function classAudience(orgId: string, locationId: string | null): Promise<string[]> {
+  const [plans, pkgs] = await Promise.all([
+    admin().from("group_plans").select("client_id").eq("org_id", orgId).eq("status", "active"),
+    admin().from("package_instances").select("client_id").eq("org_id", orgId).eq("status", "active"),
+  ]);
+  const ids = [...new Set([...(plans.data ?? []), ...(pkgs.data ?? [])].map((r: any) => r.client_id))];
+  if (ids.length === 0) return [];
+  const { data: clients } = await admin().from("clients").select("id, home_location_id").in("id", ids);
+  return (clients ?? []).filter((c: any) => !locationId || !c.home_location_id || c.home_location_id === locationId).map((c: any) => c.id);
+}
+
 async function notifyClient(
   orgId: string,
   clientId: string,
@@ -2922,14 +2936,14 @@ async function requireClient(c: any) {
 // ---- branded onboarding: public pre-auth theming by slug ----
 app.get(`${P}/client/branding`, async (c) => {
   const slug = c.req.query("slug") || "";
-  const { data: org } = await admin().from("organizations").select("id, name, slug, status").eq("slug", slug).maybeSingle();
+  const { data: org } = await admin().from("organizations").select("id, name, slug, status, mode").eq("slug", slug).maybeSingle();
   if (!org) return c.json({ error: "Unknown gym" }, 404);
   const [{ data: b }, { data: locs }] = await Promise.all([
     admin().from("org_branding").select("*").eq("org_id", org.id).maybeSingle(),
     admin().from("locations").select("id, name").eq("org_id", org.id).order("sort").order("created_at"),
   ]);
   return c.json({
-    org: { id: org.id, name: org.name, slug: org.slug, status: org.status },
+    org: { id: org.id, name: org.name, slug: org.slug, status: org.status, mode: org.mode === "solo" ? "solo" : "team" },
     locations: (locs ?? []).map(toLocation),
     branding: {
       appName: b?.app_name ?? org.name,
@@ -3016,6 +3030,7 @@ app.post(`${P}/client/classes/:id/book`, async (c) => {
   if (!me) return c.json({ error: "Unauthorized" }, 401);
   const classId = c.req.param("id");
   const body = await c.req.json().catch(() => ({}));
+  if ((await orgModeOf(me.org_id)) === "solo") return c.json({ error: "Booking isn't open here — just turn up and check in.", code: "booking_closed" }, 400);
   const { data: cls } = await admin().from("classes").select("*").eq("id", classId).eq("org_id", me.org_id).eq("status", "active").maybeSingle();
   if (!cls) return c.json({ error: "This class isn't available." }, 404);
   if (Date.parse(cls.starts_at) <= Date.now()) return c.json({ error: "This class has already started." }, 400);
@@ -3372,6 +3387,26 @@ app.post(`${P}/push/client-reminders`, async (c) => {
     sent++;
   }
 
+  // Solo gyms: no bookings, so everyone at the class's location hears it.
+  const { data: soloOrgs } = await admin().from("organizations").select("id").eq("mode", "solo");
+  for (const org of soloOrgs ?? []) {
+    const { data: upcoming } = await admin().from("classes").select("id, title, starts_at, location_id")
+      .eq("org_id", org.id).eq("status", "active")
+      .gt("starts_at", new Date(now).toISOString()).lte("starts_at", new Date(now + 3600000).toISOString());
+    for (const cls of upcoming ?? []) {
+      const mins = Math.max(1, Math.round((Date.parse(cls.starts_at) - now) / 60000));
+      for (const clientId of await classAudience(org.id, cls.location_id ?? null)) {
+        await notifyClient(org.id, clientId, "class_soon", {
+          title: `${cls.title} starts in ${mins} min`,
+          body: "See you there — scan the check-in QR when you arrive.",
+          ref: cls.id,
+          push: true,
+        });
+        sent++;
+      }
+    }
+  }
+
   // Plan reminders only in daytime at each gym.
   const hourCache = new Map<string, number>();
   const daytime = async (orgId: string) => {
@@ -3495,6 +3530,16 @@ app.post(`${P}/classes/cancel`, async (c) => {
       body: `The gym cancelled ${cls.title} on ${await gymWhen(me.org_id, cls.starts_at)}.${walletBack > 0 ? ` ${walletBack} EGP is back in your wallet.` : ""} Sorry about that!`,
       push: true,
     });
+  }
+  if ((await orgModeOf(me.org_id)) === "solo") {
+    for (const clientId of await classAudience(me.org_id, cls.location_id ?? null)) {
+      await notifyClient(me.org_id, clientId, "class_cancelled", {
+        title: `${cls.title} is cancelled`,
+        body: `${cls.title} on ${await gymWhen(me.org_id, cls.starts_at)} has been cancelled. Sorry about that!`,
+        ref: `cancel-${id}`,
+        push: true,
+      });
+    }
   }
   await admin().from("classes").update({ status: "cancelled" }).eq("id", id);
   await logActivity(me.org_id, "class_cancelled_by_staff", { actorId: me.id, meta: { classId: id, title: cls.title } });

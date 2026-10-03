@@ -195,13 +195,18 @@ test("solo: Plans opens on her plans, with classes (monthly), bundles and PT bac
   await expect(page).toHaveURL(/\/catalog/);
   for (const t of ["CLASSES", "PLANS", "PT BUNDLES"]) await expect(page.getByRole("button", { name: t })).toBeVisible();
   await expect(page.getByText("Locations", { exact: true })).toBeVisible();
-  await expect(page.getByText("Memberships", { exact: true })).toBeVisible();
-  await expect(page.getByText("Class bundles", { exact: true })).toBeVisible();
-  await page.getByRole("button", { name: "+ Membership" }).click();
-  await expect(page.getByText("NEW MEMBERSHIP", { exact: true }).first()).toBeVisible();
+  // Her packages are bundles (a number of classes, valid 1 or 3 months): no unlimited memberships.
+  await expect(page.getByText("Memberships", { exact: true })).toHaveCount(0);
+  await expect(page.getByText("Packages", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "+ Bundle" }).click();
+  await expect(page.getByText("NEW CLASS BUNDLE", { exact: true }).first()).toBeVisible();
+  await page.getByRole("button", { name: /VALID FOR/ }).click();
+  await expect(page.getByRole("button", { name: "1 month" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "3 months" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "2 months" })).toHaveCount(0);
 });
 
-test("solo: Schedule adds a new session and shows who's coming; Account has no import", async ({ page }) => {
+test("solo: Schedule adds a class (no booking counts); Account has no import", async ({ page }) => {
   await boot(page, "solo");
   const created: unknown[] = [];
   await page.route("**/classes", async (route) => {
@@ -213,7 +218,7 @@ test("solo: Schedule adds a new session and shows who's coming; Account has no i
   });
   await page.goto("/");
   await page.getByRole("link", { name: "Schedule", exact: true }).click();
-  await page.getByRole("button", { name: "New session" }).click();
+  await page.getByRole("button", { name: "Add class" }).click();
   await page.getByPlaceholder("e.g. Sunrise HIIT").fill("Morning");
   await expect(page.getByText("DROP-IN PRICE")).toHaveCount(0);
   await page.getByRole("button", { name: "Create session" }).click();
@@ -387,7 +392,7 @@ test("locations: a new session is created at the location she's working at", asy
   await page.goto("/");
   await page.getByRole("group", { name: "Working at" }).getByRole("button", { name: "Maadi" }).click();
   await page.getByRole("link", { name: "Schedule", exact: true }).click();
-  await page.getByRole("button", { name: "New session" }).click();
+  await page.getByRole("button", { name: "Add class" }).click();
   await expect(page.getByText("LOCATION", { exact: true })).toBeVisible();
   await page.getByPlaceholder("e.g. Sunrise HIIT").fill("Evening Flow");
   await page.getByRole("button", { name: "Create session" }).click();
@@ -524,4 +529,54 @@ test("separate locations: the drop-in charges the location's own price", async (
   await page.getByRole("button", { name: "Cash received" }).click();
   await expect(page.getByText("Drop-in recorded")).toBeVisible();
   expect(sent).toEqual([{ payMethod: "cash", locationId: "L2" }]);
+});
+
+
+test("solo schedule: no bookings, no 'N booked', no roster — a tap edits the class", async ({ page }) => {
+  await bootWithLocations(page);
+  await page.goto("/bookings");
+  await expect(page.getByText("Zamalek Flow")).toBeVisible();
+  await expect(page.getByText(/booked|coming/)).toHaveCount(0);
+  await page.getByText("Zamalek Flow").click();
+  await expect(page.getByText("THIS SESSION ONLY")).toBeVisible();
+});
+
+test("solo packages: Kids and Adults show as small labels; PT can have no expiry", async ({ page }) => {
+  const sent: Record<string, unknown>[] = [];
+  await bootWithLocations(page, {
+    "plan-types": { planTypes: [{ id: "p1", kind: "bundle", name: "Kids · 8 classes", price: 3300, durationMonths: 1, credits: 8, invitationsAllowance: 0, active: true, locationId: "L1" }] },
+    "bundle-types": (b: Record<string, unknown> | null) => {
+      if (b) { sent.push(b); return { body: { bundleType: { id: "b9", ...b } } }; }
+      return { body: { bundleTypes: [{ id: "b1", name: "Adults · Personal training", price: 9000, sessionsIncluded: 8, expiryDays: 3650, locationId: "L1" }] } };
+    },
+  });
+  await page.goto("/catalog");
+  await expect(page.getByText("Kids", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "PT BUNDLES" }).click();
+  await expect(page.getByText("Adults", { exact: true })).toBeVisible();
+  await expect(page.getByText(/no expiry/)).toBeVisible();
+  await page.getByRole("button", { name: "+ New bundle" }).click();
+  await page.getByPlaceholder("24-Session Pack").fill("Kids · Private");
+  await page.getByRole("spinbutton", { name: "PRICE · EGP" }).fill("6000");
+  await page.getByRole("spinbutton", { name: "SESSIONS INCLUDED" }).fill("8");
+  await page.getByRole("button", { name: /Create bundle|Save|Create/ }).last().click();
+  await expect.poll(() => sent.length).toBe(1);
+  expect(sent[0]).toMatchObject({ name: "Kids · Private", expiryDays: 3650, locationId: "L1" });
+});
+
+test("solo drop-ins: Kids and Adults each have a price at the location", async ({ page }) => {
+  const sent: unknown[] = [];
+  await bootWithLocations(page, {
+    "org-settings": { dropInPrice: null, dropInPrices: {}, dropInOptions: { L1: [{ label: "Kids", price: 600 }, { label: "Adults", price: 800 }] }, instapayQr: null },
+    "drop-ins": (b: Record<string, unknown> | null) => { sent.push(b); return { body: {} }; },
+  });
+  await page.goto("/");
+  await page.getByRole("button", { name: "Quick actions" }).click();
+  await page.getByRole("group", { name: "Quick actions" }).getByRole("button", { name: "Drop-in" }).click();
+  await page.getByRole("button", { name: /Adults/ }).click();
+  await expect(page.getByText("800", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Cash", exact: true }).click();
+  await page.getByRole("button", { name: "Cash received" }).click();
+  await expect(page.getByText("Drop-in recorded")).toBeVisible();
+  expect(sent).toEqual([{ payMethod: "cash", locationId: "L1", label: "Adults" }]);
 });

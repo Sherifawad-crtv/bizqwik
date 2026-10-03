@@ -41,10 +41,14 @@ app.get(`${P}/org-settings`, async (c) => {
   const o = await soloOwner(c);
   if (!o) return c.json({ error: "Forbidden" }, 403);
   // Businesses with locations price the drop-in per location.
-  const { data: locs } = await admin.from("locations").select("id, dropin_price").eq("org_id", o.me.org_id);
+  const { data: locs } = await admin.from("locations").select("id, dropin_price, dropin_options").eq("org_id", o.me.org_id);
   const dropInPrices: Record<string, number | null> = {};
-  for (const l of locs ?? []) dropInPrices[l.id] = l.dropin_price != null ? Number(l.dropin_price) : null;
-  return c.json({ dropInPrice: o.org.dropin_price != null ? Number(o.org.dropin_price) : null, dropInPrices, instapayQr: o.org.instapay_qr ?? null });
+  const dropInOptions: Record<string, { label: string; price: number }[]> = {};
+  for (const l of locs ?? []) {
+    dropInPrices[l.id] = l.dropin_price != null ? Number(l.dropin_price) : null;
+    dropInOptions[l.id] = Array.isArray(l.dropin_options) ? l.dropin_options : [];
+  }
+  return c.json({ dropInPrice: o.org.dropin_price != null ? Number(o.org.dropin_price) : null, dropInPrices, dropInOptions, instapayQr: o.org.instapay_qr ?? null });
 });
 
 app.post(`${P}/org-settings`, async (c) => {
@@ -52,6 +56,15 @@ app.post(`${P}/org-settings`, async (c) => {
   if (!o) return c.json({ error: "Forbidden" }, 403);
   const body = await c.req.json();
   const patch: Record<string, unknown> = {};
+  // A location's list of drop-ins (e.g. Kids / Adults), each with its own price.
+  if (body.locationId && Array.isArray(body.dropInOptions)) {
+    const opts = body.dropInOptions.slice(0, 6).map((x: any) => ({ label: String(x?.label ?? "").trim().slice(0, 30), price: Number(x?.price) }));
+    if (opts.some((x: any) => !x.label || !Number.isFinite(x.price) || x.price < 0)) return c.json({ error: "Each drop-in needs a name and a price." }, 400);
+    const { data: loc, error: lErr } = await admin.from("locations").update({ dropin_options: opts }).eq("id", String(body.locationId)).eq("org_id", o.me.org_id).select("id").maybeSingle();
+    if (lErr) throw lErr;
+    if (!loc) return c.json({ error: "That location doesn't exist." }, 404);
+    if (!("instapayQr" in body) && !("dropInPrice" in body)) return c.json({ ok: true });
+  }
   // A location's own drop-in price.
   if (body.locationId && "dropInPrice" in body) {
     const n = body.dropInPrice === null ? null : Number(body.dropInPrice);
@@ -88,20 +101,28 @@ app.post(`${P}/org-settings`, async (c) => {
 app.post(`${P}/drop-ins`, async (c) => {
   const o = await soloOwner(c);
   if (!o) return c.json({ error: "Forbidden" }, 403);
-  const { payMethod, locationId } = await c.req.json();
+  const { payMethod, locationId, label } = await c.req.json();
   if (payMethod !== "cash" && payMethod !== "instapay") return c.json({ error: "Choose cash or InstaPay." }, 400);
   // At a location: that location's price. Otherwise the business-wide one.
   let raw: unknown = o.org.dropin_price;
+  let category = "Drop-in";
   if (locationId) {
-    const { data: loc } = await admin.from("locations").select("id, dropin_price").eq("id", String(locationId)).eq("org_id", o.me.org_id).maybeSingle();
+    const { data: loc } = await admin.from("locations").select("id, dropin_price, dropin_options").eq("id", String(locationId)).eq("org_id", o.me.org_id).maybeSingle();
     if (!loc) return c.json({ error: "That location doesn't exist." }, 404);
     raw = loc.dropin_price;
+    const options: { label: string; price: number }[] = Array.isArray(loc.dropin_options) ? loc.dropin_options : [];
+    if (options.length > 0) {
+      const pick = options.find((x) => x.label === label);
+      if (!pick) return c.json({ error: "Choose which drop-in." }, 400);
+      raw = pick.price;
+      category = `Drop-in · ${pick.label}`;
+    }
   }
   if (raw == null) return c.json({ error: "Set this location's drop-in price first (Plans tab)." }, 400);
   const price = Number(raw);
-  const { data: row, error } = await admin.from("drop_ins").insert({ org_id: o.me.org_id, client_id: null, category: "Drop-in", price, pay_method: payMethod }).select().single();
+  const { data: row, error } = await admin.from("drop_ins").insert({ org_id: o.me.org_id, client_id: null, category, price, pay_method: payMethod }).select().single();
   if (error) throw error;
-  await admin.from("activity_log").insert({ org_id: o.me.org_id, actor_id: o.me.id, subject_client_id: null, type: "sale_dropin", amount: price, meta: { payMethod, classId: null, title: "Drop-in", locationId: locationId ?? null } });
+  await admin.from("activity_log").insert({ org_id: o.me.org_id, actor_id: o.me.id, subject_client_id: null, type: "sale_dropin", amount: price, meta: { payMethod, classId: null, title: category, locationId: locationId ?? null } });
   return c.json({ dropIn: { id: row.id, price, createdAt: row.created_at } });
 });
 

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../lib/auth";
 import { useSetHeader } from "../../lib/header";
@@ -7,9 +7,7 @@ import { setSticky } from "../../lib/useSticky";
 import { api } from "../../lib/backend";
 import { fmt } from "../../lib/format";
 import { timeLabel, pad } from "../../lib/classTime";
-import type { GymClass } from "../../lib/types";
 import { HomeAvatar } from "../../components/HomeAvatar";
-import { ClassRosterSheet } from "../../components/ClassRosterSheet";
 import { EmptyState } from "../../components/EmptyState";
 import { Icon, type IconName } from "../../components/Icon";
 import { Spinner } from "../../components/Spinner";
@@ -68,7 +66,6 @@ export function SoloHome() {
   const classes = useAsync(() => api.classes(new Date(Date.now() - 2 * 3600000).toISOString()), []);
   const bundles = useAsync(() => api.bundleTypes(), []);
   const bundleTypes = bundles.data?.bundleTypes ?? [];
-  const [roster, setRoster] = useState<GymClass | null>(null);
   const { locations, current } = useCurrentLocation();
   // Two or more locations: everything on Today is the selected location's.
   const here = locations.length > 1 ? (current?.id ?? null) : null;
@@ -104,6 +101,7 @@ export function SoloHome() {
       .slice(0, 5);
   }, [classes.data, here]);
 
+  const nextUpId = nextUp[0]?.id;
   const goMembers = (filter: string) => {
     setSticky("memberFilter", filter);
     navigate("/members");
@@ -136,7 +134,7 @@ export function SoloHome() {
           <button
             key={c.id}
             data-tap
-            onClick={() => setRoster(c)}
+            onClick={() => navigate("/bookings")}
             style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", minHeight: 60, padding: "12px 18px", border: 0, borderBottom: i === nextUp.length - 1 ? "none" : "1px solid var(--line)", background: "none", cursor: "pointer", textAlign: "left" }}
           >
             <span style={{ width: 84, flex: "none", font: "700 14px var(--font-mono)" }}>
@@ -145,15 +143,14 @@ export function SoloHome() {
             </span>
             <span style={{ minWidth: 0, flex: 1 }}>
               <span style={{ display: "block", font: "700 15px var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.title}</span>
-              <span style={{ display: "block", font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>{(c.bookedCount ?? 0) === 0 ? "No one coming yet" : `${c.bookedCount} coming`}</span>
+              {c.id === nextUpId && <span style={{ display: "block", font: "700 11px var(--font-mono)", color: "var(--primary-pressed)" }}>NEXT</span>}
             </span>
             <Icon name="chevron-right" size={16} />
           </button>
         ))}
-        {nextUp.length === 0 && <EmptyState bare icon="calendar" title="No sessions coming up" body="Add a session on the Schedule tab and who's coming shows up here." />}
+        {nextUp.length === 0 && <EmptyState bare icon="calendar" title="No classes coming up" body="Add a class on the Schedule tab and your members are reminded before it starts." />}
       </Card>
 
-      <ClassRosterSheet open={roster !== null} onClose={() => setRoster(null)} classId={roster?.id ?? null} title={roster?.title ?? "Class"} onChanged={classes.refetch} />
     </div>
   );
 }

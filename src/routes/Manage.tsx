@@ -1,3 +1,4 @@
+import { CategoryPill } from "../lib/category";
 import { LocationField, LocationPill, atLocation, useCurrentLocation, useLocations } from "../lib/locations";
 import { EmptyState } from "../components/EmptyState";
 import { useEffect, useState } from "react";
@@ -251,10 +252,11 @@ export function BundlesPanel() {
             <div style={{ minWidth: 0, flex: 1 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <span style={{ font: "700 16px var(--font-body)" }}>{b.name}</span>
+                <CategoryPill name={b.name} />
                 <LocationPill locations={locations} id={b.locationId} />
               </div>
               <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>
-                {b.price} EGP · {b.sessionsIncluded} sessions · {b.expiryDays} days
+                {b.price} EGP · {b.sessionsIncluded} sessions · {b.expiryDays >= NO_EXPIRY_DAYS ? "no expiry" : `${b.expiryDays} days`}
               </div>
             </div>
             <button onClick={() => setEditing(b)} aria-label="Edit bundle" style={{ width: 36, height: 36, borderRadius: 999, border: 0, background: "var(--primary-tint)", color: "var(--primary-pressed)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -289,12 +291,17 @@ export function BundlesPanel() {
   );
 }
 
+// A PT bundle with no stated validity has no expiry: stored as ten years.
+export const NO_EXPIRY_DAYS = 3650;
+
 export function BundleSheet({ open, bundleType, onClose }: { open: boolean; bundleType: BundleType | null; onClose: () => void }) {
   const [name, setName] = useState(bundleType?.name ?? "");
   const [price, setPrice] = useState(String(bundleType?.price ?? ""));
   const [sessionsIncluded, setSessionsIncluded] = useState(String(bundleType?.sessionsIncluded ?? ""));
   const [expiryDays, setExpiryDays] = useState(String(bundleType?.expiryDays ?? ""));
   const [locationId, setLocationId] = useState<string | null>(null);
+  const { orgMode: bundleMode } = useAuth();
+  const bundleSolo = bundleMode === "solo";
   const locations = useLocations();
   const { current } = useCurrentLocation();
   const [error, setError] = useState<string | null>(null);
@@ -306,7 +313,7 @@ export function BundleSheet({ open, bundleType, onClose }: { open: boolean; bund
       setName(bundleType?.name ?? "");
       setPrice(String(bundleType?.price ?? ""));
       setSessionsIncluded(String(bundleType?.sessionsIncluded ?? ""));
-      setExpiryDays(String(bundleType?.expiryDays ?? ""));
+      setExpiryDays(bundleType && bundleType.expiryDays < NO_EXPIRY_DAYS ? String(bundleType.expiryDays) : "");
       setLocationId(bundleType ? (bundleType.locationId ?? null) : (current?.id ?? null));
       setError(null);
     }
@@ -318,9 +325,11 @@ export function BundleSheet({ open, bundleType, onClose }: { open: boolean; bund
   const save = async () => {
     const priceNum = Number(price);
     const sessionsNum = Number(sessionsIncluded);
-    const expiryNum = Number(expiryDays);
+    // Solo: leave the expiry blank when the package has none.
+    const noExpiry = bundleSolo && expiryDays.trim() === "";
+    const expiryNum = noExpiry ? NO_EXPIRY_DAYS : Number(expiryDays);
     if (!name.trim() || !Number.isFinite(priceNum) || priceNum <= 0 || !Number.isInteger(sessionsNum) || sessionsNum <= 0 || !Number.isInteger(expiryNum) || expiryNum <= 0) {
-      setError("Enter a name, a price, whole-number sessions, and whole-number expiry days — all greater than 0.");
+      setError(bundleSolo ? "Enter a name, a price and whole-number sessions (and whole-number days if it expires)." : "Enter a name, a price, whole-number sessions, and whole-number expiry days — all greater than 0.");
       return;
     }
     if (locations.length > 0 && !locationId) {
@@ -354,7 +363,7 @@ export function BundleSheet({ open, bundleType, onClose }: { open: boolean; bund
             <TextField label="PRICE · EGP" type="number" min={1} value={price} onChange={(e) => setPrice(e.target.value)} />
             <LocationField locations={locations} value={locationId} onChange={setLocationId} />
             <TextField label="SESSIONS INCLUDED" type="number" min={1} value={sessionsIncluded} onChange={(e) => setSessionsIncluded(e.target.value)} placeholder="24" />
-            <TextField label="EXPIRES AFTER · DAYS" type="number" min={1} value={expiryDays} onChange={(e) => setExpiryDays(e.target.value)} placeholder="45" />
+            <TextField label={bundleSolo ? "EXPIRES AFTER · DAYS (BLANK = NO EXPIRY)" : "EXPIRES AFTER · DAYS"} type="number" min={1} value={expiryDays} onChange={(e) => setExpiryDays(e.target.value)} placeholder={bundleSolo ? "No expiry" : "45"} />
           </div>
           {error && (
             <div style={{ marginTop: 12, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>

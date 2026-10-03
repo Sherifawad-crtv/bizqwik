@@ -42,6 +42,12 @@ import type { PaymentsSummary, Location,
   Tier,
 } from "./types";
 
+/** One kind of drop-in at a location (e.g. Kids / Adults) and its price. */
+export interface DropInOption {
+  label: string;
+  price: number;
+}
+
 export interface SeriesInput {
   title: string;
   description: string | null;
@@ -241,12 +247,12 @@ export const api = {
   // A walk-in is always recorded against a member: an existing client, or a
   // new one created with the sale (the backend also registers their app invite).
   orgSettings: async () => {
-    const r = await callFn<{ dropInPrice?: number | null; dropInPrices?: Record<string, number | null>; instapayQr?: string | null }>("org-settings", undefined, SOLO_DESK);
-    return { dropInPrice: r.dropInPrice ?? null, dropInPrices: r.dropInPrices ?? {}, instapayQr: r.instapayQr ?? null };
+    const r = await callFn<{ dropInPrice?: number | null; dropInPrices?: Record<string, number | null>; dropInOptions?: Record<string, DropInOption[]>; instapayQr?: string | null }>("org-settings", undefined, SOLO_DESK);
+    return { dropInPrice: r.dropInPrice ?? null, dropInPrices: r.dropInPrices ?? {}, dropInOptions: r.dropInOptions ?? {}, instapayQr: r.instapayQr ?? null };
   },
   // With `locationId`, sets that location's own drop-in price.
-  saveOrgSettings: (patch: { dropInPrice?: number | null; instapayQr?: string | null; locationId?: string }) => callFn<{ ok: true }>("org-settings", { method: "POST", body: patch }, SOLO_DESK),
-  soloDropIn: (payMethod: "cash" | "instapay", locationId?: string | null) => callFn<void>("drop-ins", { method: "POST", body: { payMethod, locationId: locationId ?? undefined } }, SOLO_DESK),
+  saveOrgSettings: (patch: { dropInPrice?: number | null; instapayQr?: string | null; locationId?: string; dropInOptions?: DropInOption[] }) => callFn<{ ok: true }>("org-settings", { method: "POST", body: patch }, SOLO_DESK),
+  soloDropIn: (payMethod: "cash" | "instapay", locationId?: string | null, label?: string) => callFn<void>("drop-ins", { method: "POST", body: { payMethod, locationId: locationId ?? undefined, label } }, SOLO_DESK),
   dropIn: (member: { clientId: string } | { newClient: NewClientFields }, category: string, price: number, payMethod?: PayMethod, confirmActivePlan = false) =>
     callFn<void>("drop-ins", { method: "POST", body: { ...member, category, price, payMethod, confirmActivePlan } }),
   // A seat in one class session at its drop-in price; lands on the roster.

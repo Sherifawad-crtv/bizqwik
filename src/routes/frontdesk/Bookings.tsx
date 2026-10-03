@@ -84,22 +84,24 @@ export function Bookings() {
     return (
       <div key={c.id} style={{ display: "flex", alignItems: "center", borderBottom: "1px solid var(--line)", opacity: muted ? 0.65 : 1 }}>
       <button
-        onClick={() => setOpen(c)}
+        onClick={() => (solo ? setForm(formOf(c)) : setOpen(c))}
         style={{ display: "flex", alignItems: "center", gap: 12, flex: 1, minWidth: 0, padding: "14px 18px", border: 0, background: "none", cursor: "pointer", textAlign: "left" }}
       >
         <span style={{ width: 84, flex: "none", whiteSpace: "nowrap", font: "700 14px var(--font-mono)", color: happening ? "var(--primary-pressed)" : "var(--ink)" }}>{clock(c.startsAt)}</span>
         <span style={{ minWidth: 0, flex: 1 }}>
           <span style={{ display: "block", font: "700 15px var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.title}</span>
-          <span style={{ display: "block", font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>
-            {booked === 0 ? "No one booked" : `${booked} booked`}
-            {(c.dropInSeats ?? 0) > 0 ? ` · ${c.dropInSeats} pay per class` : ""}
-          </span>
+          {!solo && (
+            <span style={{ display: "block", font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>
+              {booked === 0 ? "No one booked" : `${booked} booked`}
+              {(c.dropInSeats ?? 0) > 0 ? ` · ${c.dropInSeats} pay per class` : ""}
+            </span>
+          )}
         </span>
         {happening && <span style={{ font: "700 11px var(--font-mono)", color: "var(--paid-fg)", background: "var(--paid-bg)", padding: "3px 8px", borderRadius: 999 }}>NOW</span>}
         {!happening && c.id === nextId && <span style={{ font: "700 11px var(--font-mono)", color: "var(--primary-pressed)", background: "var(--primary-tint)", padding: "3px 8px", borderRadius: 999 }}>NEXT</span>}
         <Icon name="chevron-right" size={16} />
       </button>
-      {solo && !muted && (
+      {false && solo && !muted && (
         <button onClick={() => setForm(formOf(c))} aria-label={`Edit ${c.title}`} style={{ flex: "none", width: 36, height: 36, margin: "0 14px 0 0", borderRadius: 999, border: 0, background: "var(--primary-tint)", color: "var(--primary-pressed)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
           <Icon name="pencil" size={15} />
         </button>
@@ -113,7 +115,7 @@ export function Bookings() {
       <LocationSwitcher />
       {solo && (
         <Button fullWidth size="lg" style={{ marginBottom: 14 }} onClick={() => setForm({ ...emptyForm(), locationId: place !== "all" ? place : (current?.id ?? null) })}>
-          <Icon name="plus" size={18} /> New session
+          <Icon name="plus" size={18} /> Add class
         </Button>
       )}
       <div style={{ display: "flex", justifyContent: "center" }}>
@@ -136,7 +138,7 @@ export function Bookings() {
       {groups.length === 0 && earlier.length === 0 && (
         <div style={{ marginTop: 16 }}>
           <Card>
-            <EmptyState bare icon="calendar" title={range === "today" ? "Nothing booked for the rest of today" : "No classes in this range"} body={solo ? "Add a session and the people who book it show up here." : "Classes appear here as soon as they're scheduled."} />
+            <EmptyState bare icon="calendar" title={range === "today" ? (solo ? "No more classes today" : "Nothing booked for the rest of today") : "No classes in this range"} body={solo ? "Add a class and your members are reminded before it starts." : "Classes appear here as soon as they're scheduled."} />
           </Card>
         </div>
       )}
@@ -179,7 +181,7 @@ export function Bookings() {
           />
         </>
       )}
-      <ClassRosterSheet open={open !== null} onClose={() => setOpen(null)} classId={open?.id ?? null} title={open?.title ?? "Class"} onChanged={classes.refetch} />
+      {!solo && <ClassRosterSheet open={open !== null} onClose={() => setOpen(null)} classId={open?.id ?? null} title={open?.title ?? "Class"} onChanged={classes.refetch} />}
     </div>
   );
 }
