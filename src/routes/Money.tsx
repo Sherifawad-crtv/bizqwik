@@ -56,8 +56,7 @@ export function Money() {
   const [open, setOpen] = useState<Txn | null>(null);
   const { data, error } = useAsync(async () => {
     const [rev, pay, act] = await Promise.all([api.revenue(n), api.paymentsSummary(n), api.activity(300)]);
-    const cl = await api.clients().catch(() => ({ clients: [] as ClientWithPackage[] }));
-    return { rev, pay, txns: toTransactions(act.activity, n), clients: cl.clients };
+    return { rev, pay, txns: toTransactions(act.activity, n) };
   }, [range]);
 
   if (error) return <EmptyState icon="inbox" title="Couldn't load your money" body="Check your connection and try again." />;
@@ -109,7 +108,7 @@ export function Money() {
           </Card>
         </>
       )}
-      <TxnSheet txn={open} clients={data?.clients ?? []} onClose={() => setOpen(null)} />
+      <TxnSheet txn={open} onClose={() => setOpen(null)} />
     </div>
   );
 }
@@ -126,8 +125,11 @@ function Row({ k, v }: { k: string; v: string | null | undefined }) {
 
 /** Everything about one transaction: the amount, how it was paid, who the
  * client is and their plan today. */
-function TxnSheet({ txn, clients, onClose }: { txn: Txn | null; clients: ClientWithPackage[]; onClose: () => void }) {
+function TxnSheet({ txn, onClose }: { txn: Txn | null; onClose: () => void }) {
   const t = useLatch(txn);
+  // The client list is only needed once a transaction is opened.
+  const list = useAsync(() => (txn ? api.clients() : Promise.resolve({ clients: [] as ClientWithPackage[] })), [txn !== null]);
+  const clients = list.data?.clients ?? [];
   if (!t) return null;
   const m = (t.entry.meta ?? {}) as Record<string, unknown>;
   const matches = clients.filter((c) => c.name === t.clientName);

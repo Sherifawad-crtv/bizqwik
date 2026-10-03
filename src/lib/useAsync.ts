@@ -7,6 +7,23 @@ interface AsyncState<T> {
   error: string | null;
 }
 
+// Stale-while-revalidate: the last result for a request is shown at once when
+// a screen opens again (no spinner on every tab switch) while a fresh one is
+// fetched. Identical requests made at the same moment share one round trip.
+const cache = new Map<string, unknown>();
+const inflight = new Map<string, Promise<unknown>>();
+export function clearAsyncCache() {
+  cache.clear();
+  inflight.clear();
+}
+function keyOf(fn: () => unknown, deps: unknown[]): string {
+  try {
+    return `${fn.toString()}|${JSON.stringify(deps)}`;
+  } catch {
+    return `${fn.toString()}|${Math.random()}`;
+  }
+}
+
 /**
  * The one shared data-fetching pattern for the app. Every screen reads its
  * data through this hook instead of hand-rolling its own effect/fetch/state.
@@ -15,7 +32,8 @@ export function useAsync<T>(
   fn: () => Promise<T>,
   deps: unknown[],
 ): AsyncState<T> & { refetch: () => void; mutate: (updater: T | ((prev: T | null) => T)) => void } {
-  const [state, setState] = useState<AsyncState<T>>({ data: null, loading: true, error: null });
+  const key = keyOf(fn, deps);
+  const [state, setState] = useState<AsyncState<T>>(() => (cache.has(key) ? { data: cache.get(key) as T, loading: false, error: null } : { data: null, loading: true, error: null }));
   const fnRef = useRef(fn);
   fnRef.current = fn;
   const [tick, setTick] = useState(0);
@@ -25,10 +43,19 @@ export function useAsync<T>(
 
   useEffect(() => {
     let alive = true;
-    setState((s) => ({ ...s, loading: true, error: null }));
-    fnRef
-      .current()
+    if (cache.has(key)) setState({ data: cache.get(key) as T, loading: false, error: null });
+    else setState((s) => ({ ...s, loading: true, error: null }));
+    const flight = `${key}@${dataVersion}@${tick}`;
+    let req = inflight.get(flight) as Promise<T> | undefined;
+    if (!req) {
+      req = fnRef.current();
+      inflight.set(flight, req);
+      const done = () => inflight.delete(flight);
+      req.then(done, done);
+    }
+    req
       .then((data) => {
+        cache.set(key, data);
         if (alive) setState({ data, loading: false, error: null });
       })
       .catch((err: unknown) => {

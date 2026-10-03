@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { useLocation, useOutlet } from "react-router-dom";
+import { Suspense } from "react";
+import { Spinner } from "./Spinner";
 import { matchTabIndex, headerMode, type NavItem, type OrgMode } from "../lib/nav";
 import type { Role } from "../lib/types";
 
@@ -57,7 +59,8 @@ function layerStyle(pathname: string, role: Role, mode: OrgMode): CSSProperties 
 
 export function RouteTransition({ tabs, role, orgMode = "team" }: { tabs: NavItem[]; role: Role; orgMode?: OrgMode }) {
   const location = useLocation();
-  const outlet = useOutlet();
+  const rawOutlet = useOutlet();
+  const outlet = <Suspense fallback={<Spinner />}>{rawOutlet}</Suspense>;
 
   const makeLayer = (pathname: string, node: ReactNode): Layer => {
     const depth = pushDepth(pathname);

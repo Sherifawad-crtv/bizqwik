@@ -17,7 +17,6 @@ import { Sheet } from "../../components/Sheet";
 import { Spinner } from "../../components/Spinner";
 import { RevenueChart } from "../Oversight";
 import { Card, SectionLink, SectionTitle, SheetHeading, endingSoon, planSummary } from "./shared";
-import { useFrontDeskCatalog } from "./Members";
 import { NewClientModal } from "./NewClientModal";
 import { SoloDropIn } from "./SoloDropIn";
 import { CheckInList } from "./CheckInList";
@@ -71,7 +70,8 @@ export function SoloHome() {
   const clients = useAsync(() => api.clients(), []);
   const revenue = useAsync(() => api.revenue(12), []);
   const classes = useAsync(() => api.classes(new Date(Date.now() - 2 * 3600000).toISOString()), []);
-  const { bundleTypes } = useFrontDeskCatalog();
+  const bundles = useAsync(() => api.bundleTypes(), []);
+  const bundleTypes = bundles.data?.bundleTypes ?? [];
   const [modal, setModal] = useState<"new" | "dropin" | "checkin" | null>(null);
   const [roster, setRoster] = useState<GymClass | null>(null);
 
