@@ -219,7 +219,8 @@ test("solo: Schedule's Add class is the recurring flow — pick several days, a 
   });
   await page.goto("/");
   await page.getByRole("link", { name: "Schedule", exact: true }).click();
-  await page.getByRole("button", { name: "Add class" }).click();
+  await page.waitForTimeout(700); // the route transition
+  await page.getByRole("button", { name: "Recurring Schedule" }).click();
   await page.getByPlaceholder("e.g. Sunrise HIIT").fill("Morning");
   await expect(page.getByText("DAYS", { exact: true })).toBeVisible();
   await expect(page.getByText("DROP-IN")).toHaveCount(0); // her prices live in her plans
@@ -236,7 +237,7 @@ test("solo: Schedule's Add class is the recurring flow — pick several days, a 
   await expect(page.getByText("Import members")).toHaveCount(0);
 });
 
-test("solo: 'Just one session' still adds a single class", async ({ page }) => {
+test("solo: One Class still adds a single class", async ({ page }) => {
   await boot(page, "solo");
   const created: unknown[] = [];
   await page.route("**/classes", async (route) => {
@@ -248,7 +249,8 @@ test("solo: 'Just one session' still adds a single class", async ({ page }) => {
   });
   await page.goto("/");
   await page.getByRole("link", { name: "Schedule", exact: true }).click();
-  await page.getByRole("button", { name: "Just one session" }).click();
+  await page.waitForTimeout(700); // the route transition
+  await page.getByRole("button", { name: "One Class", exact: true }).click();
   await page.getByPlaceholder("e.g. Sunrise HIIT").fill("Morning");
   await page.getByRole("button", { name: "Create session" }).click();
   await expect.poll(() => created.length).toBe(1);
@@ -381,8 +383,8 @@ async function bootWithLocations(page: import("@playwright/test").Page, extra: R
     revenue: REVENUE,
     locations: LOCS,
     classes: { classes: [
-      { id: "k1", title: "Zamalek Flow", description: null, startsAt: inHours(2), price: 0, status: "active", bookedCount: 3, locationId: "L1" },
-      { id: "k2", title: "Maadi Burn", description: null, startsAt: inHours(3), price: 0, status: "active", bookedCount: 1, locationId: "L2" },
+      { id: "k1", title: "Zamalek Flow", description: null, startsAt: inHours(0.1), price: 0, status: "active", bookedCount: 3, locationId: "L1" },
+      { id: "k2", title: "Maadi Burn", description: null, startsAt: inHours(0.2), price: 0, status: "active", bookedCount: 1, locationId: "L2" },
     ] },
     ...extra,
   });
@@ -419,7 +421,8 @@ test("locations: a new session is created at the location she's working at", asy
   await page.goto("/");
   await page.getByRole("group", { name: "Working at" }).getByRole("button", { name: "Maadi" }).click();
   await page.getByRole("link", { name: "Schedule", exact: true }).click();
-  await page.getByRole("button", { name: "Just one session" }).click();
+  await page.waitForTimeout(700); // the route transition
+  await page.getByRole("button", { name: "One Class", exact: true }).click();
   await expect(page.getByText("LOCATION", { exact: true })).toBeVisible();
   await page.getByPlaceholder("e.g. Sunrise HIIT").fill("Evening Flow");
   await page.getByRole("button", { name: "Create session" }).click();
@@ -562,8 +565,8 @@ test("separate locations: the drop-in charges the location's own price", async (
 test("solo schedule: no bookings or roster — each class shows how many are coming, a tap edits it and lists who", async ({ page }) => {
   await bootWithLocations(page, {
     classes: { classes: [
-      { id: "k1", title: "Zamalek Flow", description: null, startsAt: inHours(1), price: 0, status: "active", bookedCount: 2, coming: ["Mona Adel", "Omar Fathy"], locationId: "L1" },
-      { id: "k3", title: "Zamalek Late", description: null, startsAt: inHours(2), price: 0, status: "active", bookedCount: 0, coming: [], locationId: "L1" },
+      { id: "k1", title: "Zamalek Flow", description: null, startsAt: inHours(0.1), price: 0, status: "active", bookedCount: 2, coming: ["Mona Adel", "Omar Fathy"], locationId: "L1" },
+      { id: "k3", title: "Zamalek Late", description: null, startsAt: inHours(0.2), price: 0, status: "active", bookedCount: 0, coming: [], locationId: "L1" },
     ] },
   });
   await page.goto("/bookings");
@@ -693,7 +696,8 @@ test("locations: a recurring class is created at the location she's working at",
   await page.goto("/");
   await page.getByRole("group", { name: "Working at" }).getByRole("button", { name: "Maadi" }).click();
   await page.getByRole("link", { name: "Schedule", exact: true }).click();
-  await page.getByRole("button", { name: "Add class" }).click();
+  await page.waitForTimeout(700); // the route transition
+  await page.getByRole("button", { name: "Recurring Schedule" }).click();
   await page.getByPlaceholder("e.g. Sunrise HIIT").fill("Evening Flow");
   await page.getByRole("button", { name: "Tue", exact: true }).click();
   await page.getByRole("button", { name: "Create class" }).click();

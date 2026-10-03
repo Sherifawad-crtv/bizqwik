@@ -1,9 +1,10 @@
 import { useMemo, useState } from "react";
+import { createPortal } from "react-dom";
+import { useIsMobile } from "../../lib/useIsMobile";
 import { api } from "../../lib/backend";
 import { useAuth } from "../../lib/auth";
 import { LocationSwitcher, useCurrentLocation } from "../../lib/locations";
 import { isSoloOwner } from "../../lib/nav";
-import { Button } from "../../components/Button";
 import { ConfirmSheet } from "../../components/ConfirmSheet";
 import { ClassSheet, emptyForm, formOf, type FormState } from "../ClassesManage";
 import { SeriesSheet } from "../Catalog";
@@ -43,6 +44,7 @@ export function Bookings() {
   const [form, setForm] = useState<FormState | null>(null);
   // Add class = the same recurring-class flow as the owner's catalog (pick days, time, length).
   const [addingClass, setAddingClass] = useState(false);
+  const isMobile = useIsMobile();
   const { locations, current, ready: locsReady } = useCurrentLocation();
   // The selected location's sessions only (each location is run separately).
   const place = locations.length > 1 ? (current?.id ?? "all") : "all";
@@ -121,17 +123,12 @@ export function Bookings() {
     <div>
       <LocationSwitcher />
       {solo && (
-        <div style={{ marginBottom: 14 }}>
-          <Button fullWidth size="lg" onClick={() => setAddingClass(true)}>
-            <Icon name="plus" size={18} /> Add class
-          </Button>
-          <button
-            onClick={() => setForm({ ...emptyForm(), locationId: place !== "all" ? place : (current?.id ?? null) })}
-            style={{ display: "block", margin: "8px auto 0", border: 0, background: "none", cursor: "pointer", font: "600 13px var(--font-body)", color: "var(--primary-pressed)" }}
-          >
-            Just one session
-          </button>
-        </div>
+        <AddClassPills
+          hidden={form !== null || addingClass || cancelling !== null}
+          floating={isMobile}
+          onOne={() => setForm({ ...emptyForm(), locationId: place !== "all" ? place : (current?.id ?? null) })}
+          onRecurring={() => setAddingClass(true)}
+        />
       )}
       <div style={{ display: "flex", justifyContent: "center" }}>
       <Segmented
@@ -177,6 +174,7 @@ export function Bookings() {
         </div>
       )}
 
+      {solo && isMobile && <div aria-hidden style={{ height: 84 }} />}
       {solo && (
         <>
           <SeriesSheet open={addingClass} series={null} onClose={() => setAddingClass(false)} />
@@ -199,5 +197,40 @@ export function Bookings() {
       )}
       {!solo && <ClassRosterSheet open={open !== null} onClose={() => setOpen(null)} classId={open?.id ?? null} title={open?.title ?? "Class"} onChanged={classes.refetch} />}
     </div>
+  );
+}
+
+/** "One Class" / "Recurring Schedule". On a phone they float just above the
+ * bottom bar, within thumb reach; on a desktop they sit at the top of the list. */
+function AddClassPills({ floating, hidden, onOne, onRecurring }: { floating: boolean; hidden: boolean; onOne: () => void; onRecurring: () => void }) {
+  const pill: React.CSSProperties = { flex: 1, height: 52, padding: "0 18px", border: 0, borderRadius: 999, cursor: "pointer", font: "700 15px var(--font-body)", whiteSpace: "nowrap" };
+  const group = (
+    <div
+      role="group"
+      aria-label="Add a class"
+      style={{
+        display: "flex",
+        gap: 8,
+        padding: 6,
+        borderRadius: 999,
+        background: "var(--surface)",
+        border: "1px solid var(--line)",
+        boxShadow: floating ? "0 12px 30px rgba(0,0,0,.14)" : "none",
+        ...(floating ? { width: "min(100% - 32px, 420px)", pointerEvents: "auto" as const } : { marginBottom: 14 }),
+      }}
+    >
+      <button data-tap onClick={onOne} style={{ ...pill, background: "var(--primary-tint)", color: "var(--primary-pressed)" }}>One Class</button>
+      <button data-tap onClick={onRecurring} style={{ ...pill, background: "var(--primary)", color: "var(--surface)" }}>Recurring Schedule</button>
+    </div>
+  );
+  if (!floating) return group;
+  // Out of the way while a sheet is open.
+  if (hidden) return null;
+  // Above the bottom bar (a 64px bar + its 12px margins).
+  return createPortal(
+    <div style={{ position: "fixed", left: 0, right: 0, bottom: "calc(92px + var(--safe-bottom))", zIndex: 54, display: "flex", justifyContent: "center", pointerEvents: "none" }}>
+      {group}
+    </div>,
+    document.body,
   );
 }
