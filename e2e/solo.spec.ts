@@ -277,3 +277,23 @@ test("client list: uses the fast list, and falls back to the main backend if it'
   expect(hits[0]).toBe("fast");
   expect(hits).toContain("main");
 });
+
+test("no caching: reopening a screen always shows the server's latest data", async ({ page }) => {
+  let name = "Mona Ali";
+  await page.setViewportSize({ width: 390, height: 844 });
+  await mockBackend(page, "dept_head", {
+    __orgMode: "solo", classes: { classes: [] }, revenue: REVENUE,
+    clients: () => ({ body: { clients: [{ id: "c1", name, age: null, phone: "0100", email: null, conditions: null, assignedCoachId: null, currentPackage: null, currentMembership: null, groupPlan: null }] } }),
+  });
+  await page.goto("/members");
+  await expect(page.getByText("Mona Ali")).toBeVisible();
+  name = "Mona Samir"; // changed on another phone
+  await page.getByRole("link", { name: "Money", exact: true }).click();
+  await page.getByRole("link", { name: "Clients", exact: true }).click();
+  await expect(page.getByText("Mona Samir")).toBeVisible();
+  await expect(page.getByText("Mona Ali")).toHaveCount(0);
+  // Coming back to the app refreshes the open screen too.
+  name = "Mona Hassan";
+  await page.evaluate(() => document.dispatchEvent(new Event("visibilitychange")));
+  await expect(page.getByText("Mona Hassan")).toBeVisible();
+});

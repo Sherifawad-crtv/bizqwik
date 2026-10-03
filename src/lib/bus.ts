@@ -16,3 +16,11 @@ export function subscribe(listener: () => void): () => void {
 export function getVersion() {
   return version;
 }
+
+// Coming back to the app (unlocking the phone, switching back from WhatsApp)
+// re-fetches every open screen, so changes made on other phones show up.
+if (typeof document !== "undefined") {
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") bump();
+  });
+}
