@@ -3,6 +3,7 @@ import { useLocation, useOutlet } from "react-router-dom";
 import { Suspense } from "react";
 import { Spinner } from "./Spinner";
 import { matchTabIndex, headerMode, type NavItem, type OrgMode } from "../lib/nav";
+import { isStandalone } from "../lib/push";
 import type { Role } from "../lib/types";
 
 /** How many levels deep a route sits, for push-transition purposes: 0 is a
@@ -45,12 +46,17 @@ const TAB_EASE = "cubic-bezier(.22,1,.36,1)";
 // Top padding clears the fixed top chrome (Shell.tsx) — the home screen has
 // none at all (just breathing room below the safe area), everything else
 // gets the thin centered-title row's real height.
+//
+// That headroom is only needed in a browser tab. Installed as an app there is
+// no toolbar, so the page ends just below the bar and you can't scroll into
+// blank space.
+const BOTTOM_CLEARANCE = isStandalone() ? 112 : 160;
 function layerStyle(pathname: string, role: Role, mode: OrgMode): CSSProperties {
   const top = headerMode(pathname, role, mode) === "home" ? 20 : 80;
   return {
     position: "absolute",
     inset: 0,
-    padding: `calc(${top}px + var(--safe-top)) 16px calc(230px + var(--safe-bottom))`,
+    padding: `calc(${top}px + var(--safe-top)) 16px calc(${BOTTOM_CLEARANCE}px + var(--safe-bottom))`,
     overflowY: "auto",
     WebkitOverflowScrolling: "touch",
     background: "var(--paper)",
