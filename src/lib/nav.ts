@@ -93,7 +93,7 @@ export const NAV: Record<Role, NavItem[]> = {
  * teams, tiers or payouts. */
 export const SOLO_NAV: NavItem[] = [
   { key: "today", path: "/", label: "Today", icon: "home" },
-  { key: "clients", path: "/members", label: "Clients", icon: "clients" },
+  { key: "clients", path: "/members", label: "Clients", icon: "members" },
   { key: "plans", path: "/catalog", label: "Plans", icon: "tag" },
   { key: "schedule", path: "/bookings", label: "Schedule", icon: "calendar" },
   { key: "money", path: "/money", label: "Money", icon: "wallet" },
