@@ -19,6 +19,9 @@ export function planSummary(client: ClientWithPackage, bundleTypes: BundleType[]
   const p = client.currentPackage;
   const pName = p ? (bundleTypes.find((b) => b.id === p.bundleTypeId)?.name ?? "Package") : "";
 
+  if (g?.frozenUntil) {
+    return { tone: "active", title: g.name, detail: `Frozen until ${dateLabel(g.frozenUntil.slice(0, 10))} · restarts by itself` };
+  }
   if (g) {
     const detail = g.kind === "bundle" ? `${g.creditsRemaining} of ${g.creditsTotal} classes left` : `Until ${dateLabel(g.expiresAt.slice(0, 10))}`;
     return { tone: "active", title: g.name, detail: p?.status === "active" ? `${detail} · + PT` : detail };
