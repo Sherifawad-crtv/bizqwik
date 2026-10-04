@@ -422,6 +422,8 @@ export interface GroupPlan {
   expiresAt: string;
   status: "active" | "finished";
   locationId?: string | null;
+  // A plan can be frozen for a while; it restarts by itself afterwards.
+  frozenUntil?: string | null;
 }
 
 export const GROUP_PLAN_KIND_LABELS: Record<GroupPlanKind, string> = {

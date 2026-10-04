@@ -557,7 +557,22 @@ function toGroupPlan(row: any) {
     creditsTotal: row.credits_total ?? null, creditsRemaining: row.credits_remaining ?? null,
     invitationsRemaining: row.invitations_remaining, startsAt: row.starts_at, expiresAt: row.expires_at,
     status: row.status, createdAt: row.created_at, locationId: row.location_id ?? null,
+    // The freeze this plan includes: its length, whether it's running now, and
+    // whether the member can still use it.
+    freezeDays: Number(row.freeze_days ?? 0),
+    frozenUntil: isFrozen(row) ? row.frozen_until : null,
+    canFreeze: row.status === "active" && Number(row.freeze_days ?? 0) > 0 && !row.freeze_used && !isFrozen(row) && Date.parse(row.expires_at) > Date.now(),
   };
+}
+// A frozen plan is paused until `frozen_until`; after that moment it is simply
+// active again (nothing has to run for it to restart).
+function isFrozen(row: any): boolean {
+  return !!row?.frozen_until && Date.parse(row.frozen_until) > Date.now();
+}
+// 1-month class plans include a 1-week freeze, 3-month ones 2 weeks.
+function freezeDaysFor(kind: string, months: number, solo: boolean): number {
+  if (!solo || kind !== "bundle") return 0;
+  return months === 1 ? 7 : months === 3 ? 14 : 0;
 }
 
 // Lazy finish: a plan past its end, or a bundle with no credits left, stops
@@ -588,7 +603,7 @@ function planSummary(plan: any): string {
 }
 // Does this plan pay for this class session?
 function planCovers(plan: any, cls: any): boolean {
-  if (!plan || plan.status !== "active") return false;
+  if (!plan || plan.status !== "active" || isFrozen(plan)) return false;
   if (plan.location_id && cls.location_id && plan.location_id !== cls.location_id) return false;
   const at = Date.parse(cls.starts_at);
   if (at < Date.parse(plan.starts_at) || at >= Date.parse(plan.expires_at)) return false;
@@ -602,6 +617,7 @@ function planCovers(plan: any, cls: any): boolean {
 // (membership/bundle) or a class series (that class's monthly).
 async function sellGroupPlan(opts: { orgId: string; client: any; planTypeId?: string | null; seriesId?: string | null; payMethod: "cash" | "card" | "instapay" | "wallet"; actorId: string | null }) {
   const { orgId, client, payMethod, actorId } = opts;
+  const soloOrg = (await orgModeOf(orgId)) === "solo";
   let row: any;
   if (opts.planTypeId) {
     const { data: t } = await admin().from("group_plan_types").select("*").eq("id", opts.planTypeId).eq("org_id", orgId).maybeSingle();
@@ -610,6 +626,7 @@ async function sellGroupPlan(opts: { orgId: string; client: any; planTypeId?: st
       kind: t.kind, plan_type_id: t.id, name: t.name, price_at_sale: Number(t.price), months: t.duration_months,
       credits_total: t.kind === "bundle" ? t.credits : null, credits_remaining: t.kind === "bundle" ? t.credits : null,
       invitations_remaining: Number(t.invitations_allowance ?? 0), location_id: t.location_id ?? null,
+      freeze_days: freezeDaysFor(t.kind, t.duration_months, soloOrg),
     };
   } else if (opts.seriesId) {
     const { data: s } = await admin().from("class_series").select("*").eq("id", opts.seriesId).eq("org_id", orgId).maybeSingle();
@@ -826,7 +843,8 @@ async function sendPushToProfile(
 // the class's (members with no location hear about every class).
 async function classAudience(orgId: string, locationId: string | null): Promise<string[]> {
   const [plans, pkgs] = await Promise.all([
-    admin().from("group_plans").select("client_id").eq("org_id", orgId).eq("status", "active"),
+    // A member whose plan is frozen isn't training right now, so no class reminders.
+    admin().from("group_plans").select("client_id").eq("org_id", orgId).eq("status", "active").or(`frozen_until.is.null,frozen_until.lte.${new Date().toISOString()}`),
     admin().from("package_instances").select("client_id").eq("org_id", orgId).eq("status", "active"),
   ]);
   const ids = [...new Set([...(plans.data ?? []), ...(pkgs.data ?? [])].map((r: any) => r.client_id))];
@@ -1775,6 +1793,12 @@ async function recordCheckIn(orgId: string, clientId: string, clientName: string
     const where = await locationNameOf(gp.location_id);
     return { ok: false, status: 400, code: "wrong_location", plan: toGroupPlan(gp), error: self ? `Your ${gp.name} is for ${where}.` : `${clientName}'s ${gp.name} is for ${where}, not this location.` };
   }
+  // A frozen plan is paused: it can't be used to check in until the freeze ends
+  // (a PT package or legacy membership still can).
+  if (gp && isFrozen(gp) && !(status.package && status.package.status === "active") && !(status.membership && status.membership.status === "active")) {
+    const until = String(gp.frozen_until).slice(0, 10);
+    return { ok: false, status: 400, code: "plan_frozen", plan: toGroupPlan(gp), error: self ? `Your ${gp.name} is frozen until ${until}. It restarts by itself.` : `${clientName}'s ${gp.name} is frozen until ${until}.` };
+  }
   if (!status.eligible) {
     // A bundle that ran out gets its own, clearer answer.
     const { data: last } = await admin().from("group_plans").select("*").eq("client_id", clientId).eq("org_id", orgId)
@@ -1791,6 +1815,7 @@ async function recordCheckIn(orgId: string, clientId: string, clientName: string
   }
 
   let plan = status.groupPlanRow;
+  if (plan && isFrozen(plan)) plan = null; // frozen: don't take a session from it
   let deductFrom: string | null = null;
   if (plan && plan.kind === "bundle") {
     const { start, end } = await dayBoundsUtc(orgId);
@@ -3150,6 +3175,34 @@ app.get(`${P}/client/plans`, async (c) => {
   });
 });
 
+// Freeze the member's plan (solo gyms): once per plan, for the length it includes
+// (1 week on a 1-month plan, 2 weeks on a 3-month one). The plan's end date moves
+// out by the same time, and it restarts by itself when the freeze is over.
+app.post(`${P}/client/plans/freeze`, async (c) => {
+  const me = await requireClient(c);
+  if (!me) return c.json({ error: "Unauthorized" }, 401);
+  const plan = await activeGroupPlan(me.id, me.org_id);
+  if (!plan) return c.json({ error: "You don't have an active plan to freeze.", code: "no_plan" }, 400);
+  const days = Number(plan.freeze_days ?? 0);
+  if (days <= 0) return c.json({ error: "This plan doesn't include a freeze.", code: "no_freeze" }, 400);
+  if (isFrozen(plan)) return c.json({ error: `Your plan is already frozen until ${String(plan.frozen_until).slice(0, 10)}.`, code: "already_frozen" }, 400);
+  if (plan.freeze_used) return c.json({ error: "You've already used this plan's freeze.", code: "freeze_used" }, 400);
+  const now = new Date();
+  const until = new Date(now.getTime() + days * 86400000);
+  const newEnd = new Date(Date.parse(plan.expires_at) + days * 86400000);
+  // Compare-and-set so a double tap freezes (and extends) only once.
+  const { data: updated } = await admin().from("group_plans")
+    .update({ frozen_from: now.toISOString(), frozen_until: until.toISOString(), expires_at: newEnd.toISOString(), freeze_used: true, thaw_notified: false })
+    .eq("id", plan.id).eq("freeze_used", false).select().maybeSingle();
+  if (!updated) return c.json({ error: "Your plan was just updated — please try again." }, 409);
+  await logActivity(me.org_id, "plan_frozen", { clientId: me.id, meta: { planId: plan.id, name: plan.name, days } });
+  await notifyClient(me.org_id, me.id, "plan_frozen", {
+    title: `${plan.name} is frozen`,
+    body: `Frozen until ${until.toISOString().slice(0, 10)}. It restarts by itself, and now ends on ${newEnd.toISOString().slice(0, 10)}.`,
+  });
+  return c.json({ plan: toGroupPlan(updated) });
+});
+
 // Members buy with store credit only; cash/card purchases happen at the desk.
 app.post(`${P}/client/plans/buy`, async (c) => {
   const me = await requireClient(c);
@@ -3584,6 +3637,22 @@ app.post(`${P}/push/client-reminders`, async (c) => {
       title: `${cls.title} starts in ${mins} min`,
       body: "Scan the check-in QR at the desk when you arrive.",
       ref: b.id,
+      push: true,
+    });
+    sent++;
+  }
+
+  // A freeze that has run its course: the plan is already active again (that is
+  // computed from the dates); this just tells the member.
+  const { data: thawed } = await admin().from("group_plans").select("id, org_id, client_id, name, expires_at")
+    .eq("thaw_notified", false).not("frozen_until", "is", null).lte("frozen_until", new Date(now).toISOString());
+  for (const p of thawed ?? []) {
+    const { data: done } = await admin().from("group_plans").update({ thaw_notified: true }).eq("id", p.id).eq("thaw_notified", false).select("id").maybeSingle();
+    if (!done) continue;
+    await notifyClient(p.org_id, p.client_id, "plan_unfrozen", {
+      title: `${p.name} is active again`,
+      body: `Your freeze is over. Your plan runs until ${String(p.expires_at).slice(0, 10)}.`,
+      ref: p.id,
       push: true,
     });
     sent++;
