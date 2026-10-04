@@ -3178,15 +3178,17 @@ app.get(`${P}/client/plans`, async (c) => {
 // Freeze the member's plan (solo gyms): once per plan, for the length it includes
 // (1 week on a 1-month plan, 2 weeks on a 3-month one). The plan's end date moves
 // out by the same time, and it restarts by itself when the freeze is over.
-app.post(`${P}/client/plans/freeze`, async (c) => {
-  const me = await requireClient(c);
-  if (!me) return c.json({ error: "Unauthorized" }, 401);
-  const plan = await activeGroupPlan(me.id, me.org_id);
-  if (!plan) return c.json({ error: "You don't have an active plan to freeze.", code: "no_plan" }, 400);
+// The freeze itself, shared by the member's button and the owner's. Returns the
+// updated plan, or an error to show.
+async function freezeGroupPlan(clientId: string, orgId: string, who: "member" | "owner", actorId: string | null) {
+  const plan = await activeGroupPlan(clientId, orgId);
+  const you = who === "member" ? "You don't" : "This member doesn't";
+  if (!plan) return { error: who === "member" ? "You don't have an active plan to freeze." : "This member has no active plan to freeze.", code: "no_plan", status: 400 } as const;
   const days = Number(plan.freeze_days ?? 0);
-  if (days <= 0) return c.json({ error: "This plan doesn't include a freeze.", code: "no_freeze" }, 400);
-  if (isFrozen(plan)) return c.json({ error: `Your plan is already frozen until ${String(plan.frozen_until).slice(0, 10)}.`, code: "already_frozen" }, 400);
-  if (plan.freeze_used) return c.json({ error: "You've already used this plan's freeze.", code: "freeze_used" }, 400);
+  if (days <= 0) return { error: "This plan doesn't include a freeze.", code: "no_freeze", status: 400 } as const;
+  if (isFrozen(plan)) return { error: `The plan is already frozen until ${String(plan.frozen_until).slice(0, 10)}.`, code: "already_frozen", status: 400 } as const;
+  if (plan.freeze_used) return { error: who === "member" ? "You've already used this plan's freeze." : "This plan's freeze has already been used.", code: "freeze_used", status: 400 } as const;
+  void you;
   const now = new Date();
   const until = new Date(now.getTime() + days * 86400000);
   const newEnd = new Date(Date.parse(plan.expires_at) + days * 86400000);
@@ -3194,13 +3196,35 @@ app.post(`${P}/client/plans/freeze`, async (c) => {
   const { data: updated } = await admin().from("group_plans")
     .update({ frozen_from: now.toISOString(), frozen_until: until.toISOString(), expires_at: newEnd.toISOString(), freeze_used: true, thaw_notified: false })
     .eq("id", plan.id).eq("freeze_used", false).select().maybeSingle();
-  if (!updated) return c.json({ error: "Your plan was just updated — please try again." }, 409);
-  await logActivity(me.org_id, "plan_frozen", { clientId: me.id, meta: { planId: plan.id, name: plan.name, days } });
-  await notifyClient(me.org_id, me.id, "plan_frozen", {
+  if (!updated) return { error: "The plan was just updated — please try again.", status: 409 } as const;
+  await logActivity(orgId, "plan_frozen", { actorId, clientId, meta: { planId: plan.id, name: plan.name, days, by: who } });
+  await notifyClient(orgId, clientId, "plan_frozen", {
     title: `${plan.name} is frozen`,
     body: `Frozen until ${until.toISOString().slice(0, 10)}. It restarts by itself, and now ends on ${newEnd.toISOString().slice(0, 10)}.`,
+    push: who === "owner",
   });
-  return c.json({ plan: toGroupPlan(updated) });
+  return { plan: updated } as const;
+}
+
+app.post(`${P}/client/plans/freeze`, async (c) => {
+  const me = await requireClient(c);
+  if (!me) return c.json({ error: "Unauthorized" }, 401);
+  const r = await freezeGroupPlan(me.id, me.org_id, "member", null);
+  if ("error" in r) return c.json({ error: r.error, code: (r as any).code ?? null }, r.status);
+  return c.json({ plan: toGroupPlan(r.plan) });
+});
+
+// The owner (or desk) freezes a member's plan for them.
+app.post(`${P}/group-plans/freeze`, async (c) => {
+  const user = await requireUser(c);
+  const me = user && (await profileOf(user.id));
+  if (!(await isDeskStaff(me))) return c.json({ error: "Forbidden" }, 403);
+  const { clientId } = await c.req.json();
+  const { data: client } = await admin().from("clients").select("id").eq("id", clientId).eq("org_id", me.org_id).maybeSingle();
+  if (!client) return c.json({ error: "No such client" }, 404);
+  const r = await freezeGroupPlan(client.id, me.org_id, "owner", me.id);
+  if ("error" in r) return c.json({ error: r.error, code: (r as any).code ?? null }, r.status);
+  return c.json({ plan: toGroupPlan(r.plan) });
 });
 
 // Members buy with store credit only; cash/card purchases happen at the desk.

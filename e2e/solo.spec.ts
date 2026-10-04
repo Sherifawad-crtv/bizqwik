@@ -704,3 +704,25 @@ test("locations: a recurring class is created at the location she's working at",
   await expect.poll(() => sent.length).toBe(1);
   expect(sent[0]).toMatchObject({ locationId: "L2", title: "Evening Flow" });
 });
+
+test("she freezes a member's plan from their profile; a frozen or used-up freeze shows no button", async ({ page }) => {
+  const frozen: unknown[] = [];
+  const plan = (extra: Record<string, unknown>) => ({ id: "g1", clientId: "c1", kind: "bundle", planTypeId: "p1", seriesId: null, name: "Adults 8 classes", priceAtSale: 5000, payMethod: "cash", creditsTotal: 8, creditsRemaining: 5, invitationsRemaining: 0, startsAt: new Date().toISOString(), expiresAt: inHours(24 * 20), status: "active", freezeDays: 7, ...extra });
+  const client = (id: string, name: string, groupPlan: unknown) => ({ id, name, age: null, phone: "0100", email: null, conditions: null, assignedCoachId: null, currentPackage: null, currentMembership: null, groupPlan });
+  await boot(page, "solo");
+  await page.route("**/clients", async (route) => route.fulfill({ json: { clients: [client("c1", "Mona Ali", plan({ canFreeze: true })), client("c2", "Omar Z", plan({ canFreeze: false, frozenUntil: inHours(24 * 3) }))] } }));
+  await page.route("**/group-plans/freeze", async (route) => { frozen.push(route.request().postDataJSON()); return route.fulfill({ json: { plan: plan({ canFreeze: false }) } }); });
+  await page.goto("/members");
+  await page.waitForTimeout(700);
+  await page.getByText("Omar Z").click();
+  await expect(page.getByText(/Frozen until/).first()).toBeVisible();
+  await expect(page.getByRole("button", { name: /Freeze plan/ })).toHaveCount(0);
+  await page.keyboard.press("Escape");
+  await page.mouse.click(5, 5);
+  await page.getByText("Mona Ali").click();
+  await page.getByRole("button", { name: /Freeze plan · 1 week/ }).click();
+  await expect(page.getByText("It pauses today for 1 week")).toBeVisible();
+  await page.getByRole("button", { name: "Freeze plan", exact: true }).click();
+  await expect.poll(() => frozen.length).toBe(1);
+  expect(frozen[0]).toEqual({ clientId: "c1" });
+});

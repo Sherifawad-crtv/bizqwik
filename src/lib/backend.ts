@@ -281,6 +281,8 @@ export const api = {
 
   // Front desk: sell a group plan to an existing member or a brand-new one.
   // `offer` is a catalog plan or a class series (that class's monthly).
+  // Freeze a member's plan for them (once, for the length it includes); it restarts by itself.
+  freezeGroupPlan: (clientId: string) => callFn<{ plan: unknown }>("group-plans/freeze", { method: "POST", body: { clientId } }),
   sellGroupPlan: (target: { clientId: string } | NewClientFields, offer: { planTypeId: string } | { seriesId: string }, payMethod: PayMethod) =>
     callFn<{ client: ClientWithPackage; plan: GroupPlan }>("group-plans/sell", { method: "POST", body: { ...target, ...offer, payMethod } }),
   clientPlans: (clientId: string) => callFn<{ activePlan: GroupPlan | null; plans: GroupPlan[] }>(`group-plans/client/${clientId}`),

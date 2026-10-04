@@ -424,6 +424,8 @@ export interface GroupPlan {
   locationId?: string | null;
   // A plan can be frozen for a while; it restarts by itself afterwards.
   frozenUntil?: string | null;
+  freezeDays?: number;
+  canFreeze?: boolean;
 }
 
 export const GROUP_PLAN_KIND_LABELS: Record<GroupPlanKind, string> = {

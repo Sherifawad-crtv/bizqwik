@@ -9,6 +9,7 @@ import { api } from "../../lib/backend";
 import { fmt, dateLabel } from "../../lib/format";
 import type { BundleType, ClassSeries, ClientWithPackage, CoachOption, GroupPlanType, Location } from "../../lib/types";
 import { LocationField, LocationSwitcher, atLocation, locationName, useCurrentLocation, useLocations } from "../../lib/locations";
+import { ConfirmSheet } from "../../components/ConfirmSheet";
 import { Button } from "../../components/Button";
 import { Sheet } from "../../components/Sheet";
 import { Segmented } from "../../components/Segmented";
@@ -475,6 +476,7 @@ function ClientSheet({
   const [payMethod, setPayMethod] = useState<PayMethod>("cash");
   const [busy, setBusy] = useState(false);
   const [showMore, setShowMore] = useState(false);
+  const [freezeAsk, setFreezeAsk] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const open = !!client;
   const { confirmed, iconIn, showSuccess } = useSheetSuccess(open, onClose);
@@ -625,6 +627,23 @@ function ClientSheet({
                 Log today's PT session · {pkg.sessionsRemaining} left
               </Button>
             )}
+
+            {shown.groupPlan?.canFreeze && (
+              <Button variant="secondary" fullWidth style={{ marginTop: 12 }} disabled={busy} onClick={() => setFreezeAsk(true)}>
+                Freeze plan · {(shown.groupPlan.freezeDays ?? 0) / 7 === 1 ? "1 week" : `${(shown.groupPlan.freezeDays ?? 0) / 7} weeks`}
+              </Button>
+            )}
+            <ConfirmSheet
+              open={freezeAsk}
+              onClose={() => setFreezeAsk(false)}
+              kicker="FREEZE PLAN"
+              title={`Freeze ${shown.name}'s plan?`}
+              sub={`It pauses today for ${(shown.groupPlan?.freezeDays ?? 0) / 7 === 1 ? "1 week" : `${(shown.groupPlan?.freezeDays ?? 0) / 7} weeks`} and the end date moves out by the same time. It restarts by itself, and they're told. Each plan can be frozen once.`}
+              confirmLabel="Freeze plan"
+              onConfirm={async () => {
+                await api.freezeGroupPlan(shown.id);
+              }}
+            />
 
             {error && <ErrorBanner text={error} />}
 
