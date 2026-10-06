@@ -5,7 +5,7 @@ import { api } from "../../lib/backend";
 import { useAsync } from "../../lib/useAsync";
 import { egp, formatDateTime } from "../../lib/format";
 import { supabase } from "../../lib/supabaseClient";
-import { screenCrop, squareCrop } from "../../lib/image";
+import { extOf, screenCrop, squareCrop } from "../../lib/image";
 import { ROLE_LABELS, type OrgStatus, type OrgConfig } from "../../lib/types";
 import { Spinner } from "../../components/Spinner";
 import { Icon } from "../../components/Icon";
@@ -19,10 +19,10 @@ import { Card, SectionTitle, ErrorBanner, limitLabel } from "./shared";
 const ORG_BRANDING_BUCKET = "org-branding";
 
 async function uploadOrgAsset(orgId: string, assetKey: string, blob: Blob): Promise<string> {
-  const path = `${orgId}/${assetKey}.jpg`;
+  const path = `${orgId}/${assetKey}.${extOf(blob)}`;
   const { error } = await supabase.storage.from(ORG_BRANDING_BUCKET).upload(path, blob, {
     upsert: true,
-    contentType: "image/jpeg",
+    contentType: blob.type,
     cacheControl: "3600",
   });
   if (error) throw new Error(error.message);

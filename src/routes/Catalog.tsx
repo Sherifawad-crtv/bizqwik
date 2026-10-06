@@ -20,6 +20,7 @@ import { Icon } from "../components/Icon";
 import { Sheet } from "../components/Sheet";
 import { ConfirmSheet } from "../components/ConfirmSheet";
 import { TextField, SelectField } from "../components/FormField";
+import { canvasToDataUrl } from "../lib/image";
 import { Spinner } from "../components/Spinner";
 import { SheetSuccessIcon } from "../components/SheetSuccessIcon";
 import { BundlesPanel } from "./Manage";
@@ -542,7 +543,7 @@ export function PlanTypeSheet({ open, kind, planType, onClose }: { open: boolean
 }
 
 
-/** Resize a picked image to at most 700px and return it as a PNG data URL. */
+/** Resize a picked image to at most 700px and return it as a WebP data URL. */
 function readQr(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -554,7 +555,7 @@ function readQr(file: File): Promise<string> {
       c.height = Math.round(img.height * scale);
       c.getContext("2d")!.drawImage(img, 0, 0, c.width, c.height);
       URL.revokeObjectURL(url);
-      resolve(c.toDataURL("image/png"));
+      resolve(canvasToDataUrl(c, 0.92));
     };
     img.onerror = () => reject(new Error("Couldn't read that image."));
     img.src = url;

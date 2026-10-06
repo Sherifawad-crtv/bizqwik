@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { supabase } from "../lib/supabaseClient";
-import { classCardCrop } from "../lib/image";
+import { classCardCrop, extOf } from "../lib/image";
 import { useAuth } from "../lib/auth";
 import { Icon } from "./Icon";
 import { Button } from "./Button";
@@ -8,8 +8,8 @@ import { Button } from "./Button";
 const BUCKET = "class-images";
 
 async function uploadClassPhoto(uid: string, blob: Blob): Promise<string> {
-  const path = `${uid}/${crypto.randomUUID()}.jpg`;
-  const { error } = await supabase.storage.from(BUCKET).upload(path, blob, { contentType: "image/jpeg", cacheControl: "31536000" });
+  const path = `${uid}/${crypto.randomUUID()}.${extOf(blob)}`;
+  const { error } = await supabase.storage.from(BUCKET).upload(path, blob, { contentType: blob.type, cacheControl: "31536000" });
   if (error) throw new Error(error.message);
   return supabase.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
 }
