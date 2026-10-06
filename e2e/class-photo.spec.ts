@@ -29,15 +29,23 @@ test("dept_head: a class photo is cropped to the 4:5 card and saved with the cla
     if (route.request().method() === "OPTIONS") return route.fulfill({ status: 204, headers: { "access-control-allow-origin": "*", "access-control-allow-headers": "*", "access-control-allow-methods": "*" } });
     const path = new URL(route.request().url()).pathname;
     const buf = route.request().postDataBuffer();
-    // JPEG SOF0/SOF2 marker carries the pixel size.
+    // Uploads are WebP: the RIFF/WEBP header carries the pixel size.
     let width = 0;
     let height = 0;
     if (buf) {
-      for (let i = 2; i < buf.length - 9; i++) {
-        if (buf[i] === 0xff && (buf[i + 1] === 0xc0 || buf[i + 1] === 0xc2)) {
-          height = buf.readUInt16BE(i + 5);
-          width = buf.readUInt16BE(i + 7);
-          break;
+      const at = buf.indexOf("RIFF");
+      if (at >= 0 && buf.toString("ascii", at + 8, at + 12) === "WEBP") {
+        const kind = buf.toString("ascii", at + 12, at + 16);
+        if (kind === "VP8 ") {
+          width = buf.readUInt16LE(at + 26) & 0x3fff;
+          height = buf.readUInt16LE(at + 28) & 0x3fff;
+        } else if (kind === "VP8X") {
+          width = 1 + buf.readUIntLE(at + 24, 3);
+          height = 1 + buf.readUIntLE(at + 27, 3);
+        } else if (kind === "VP8L") {
+          const bits = buf.readUInt32LE(at + 21);
+          width = (bits & 0x3fff) + 1;
+          height = ((bits >> 14) & 0x3fff) + 1;
         }
       }
     }
@@ -58,6 +66,7 @@ test("dept_head: a class photo is cropped to the 4:5 card and saved with the cla
   expect(uploaded).not.toBeNull();
   // 900 px tall source → a 720×900 crop (4:5), never upscaled.
   expect(uploaded!.path).toContain("/class-images/prof-zz/");
+  expect(uploaded!.path).toMatch(/\.webp$/);
   expect(uploaded!.width / uploaded!.height).toBeCloseTo(0.8, 2);
   expect(uploaded!.height).toBe(900);
 

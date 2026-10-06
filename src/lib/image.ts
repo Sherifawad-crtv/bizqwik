@@ -1,3 +1,23 @@
+// Every image we store is WebP: the same picture in far fewer bytes. All uploads
+// go through one of the crops below, which end in encodeImage(). A browser that
+// can't write WebP (some older Safari) gets a JPEG instead, so an upload never
+// fails; extOf() says which one a blob is.
+export async function encodeImage(canvas: HTMLCanvasElement, quality = 0.9): Promise<Blob> {
+  const toBlob = (type: string, q: number) => new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, type, q));
+  const webp = await toBlob("image/webp", quality);
+  if (webp && webp.type === "image/webp") return webp;
+  const jpeg = await toBlob("image/jpeg", quality);
+  if (!jpeg) throw new Error("Couldn't process that image.");
+  return jpeg;
+}
+/** File extension for an encoded image blob. */
+export const extOf = (blob: Blob): "webp" | "jpg" => (blob.type === "image/webp" ? "webp" : "jpg");
+/** Same for a data URL (the InstaPay QR is stored as one). */
+export function canvasToDataUrl(canvas: HTMLCanvasElement, quality = 0.9): string {
+  const webp = canvas.toDataURL("image/webp", quality);
+  return webp.startsWith("data:image/webp") ? webp : canvas.toDataURL("image/jpeg", quality);
+}
+
 // Center-crop an arbitrary image file to a square, then downscale to a JPEG
 // blob ready for upload. Shared by every "upload a photo/logo/icon" flow in
 // the app — every one of them renders the result via object-fit: cover, so a
@@ -20,9 +40,7 @@ export async function squareCrop(file: File, targetSize = 512): Promise<Blob> {
     const ctx = canvas.getContext("2d");
     if (!ctx) throw new Error("Couldn't process that image.");
     ctx.drawImage(img, sx, sy, side, side, 0, 0, targetSize, targetSize);
-    return await new Promise<Blob>((resolve, reject) => {
-      canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error("Couldn't process that image."))), "image/jpeg", 0.88);
-    });
+    return await encodeImage(canvas, 0.88);
   } finally {
     URL.revokeObjectURL(objectUrl);
   }
@@ -62,9 +80,7 @@ export async function classCardCrop(file: File, width = 1080, height = 1350): Pr
     if (!ctx) throw new Error("Couldn't process that image.");
     ctx.imageSmoothingQuality = "high";
     ctx.drawImage(img, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
-    return await new Promise<Blob>((resolve, reject) => {
-      canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error("Couldn't process that image."))), "image/jpeg", 0.85);
-    });
+    return await encodeImage(canvas, 0.85);
   } finally {
     URL.revokeObjectURL(objectUrl);
   }
@@ -73,7 +89,7 @@ export async function classCardCrop(file: File, width = 1080, height = 1350): Pr
 /** Onboarding art is shown full screen on a phone, so it keeps a tall 1:2
  * shape and plenty of pixels (1080×2160) instead of the logo's 512px square.
  * A smaller photo is never blown up past its own resolution. Saved as a high
- * quality JPEG, stepped down only if it would pass the 2MB upload limit. */
+ * quality WebP, stepped down only if it would pass the 2MB upload limit. */
 export async function screenCrop(file: File, width = 1080, height = 2160, maxBytes = 1_900_000): Promise<Blob> {
   const objectUrl = URL.createObjectURL(file);
   try {
@@ -105,8 +121,8 @@ export async function screenCrop(file: File, width = 1080, height = 2160, maxByt
     ctx.drawImage(img, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
     let blob: Blob | null = null;
     for (const q of [0.92, 0.86, 0.8, 0.74]) {
-      blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/jpeg", q));
-      if (blob && blob.size <= maxBytes) break;
+      blob = await encodeImage(canvas, q);
+      if (blob.size <= maxBytes) break;
     }
     if (!blob) throw new Error("Couldn't process that image.");
     return blob;

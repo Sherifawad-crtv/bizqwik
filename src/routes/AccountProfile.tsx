@@ -3,7 +3,7 @@ import { useAuth } from "../lib/auth";
 import { useSetHeader } from "../lib/header";
 import { api } from "../lib/backend";
 import { supabase } from "../lib/supabaseClient";
-import { squareCrop } from "../lib/image";
+import { extOf, squareCrop } from "../lib/image";
 import { Avatar } from "../components/Avatar";
 import { Button } from "../components/Button";
 import { Icon } from "../components/Icon";
@@ -15,10 +15,10 @@ import { ROLE_LABELS, hasTier } from "../lib/types";
 const PHOTO_EDIT_ENABLED = false;
 
 async function uploadAvatar(userId: string, blob: Blob): Promise<string> {
-  const path = `${userId}/avatar.jpg`;
+  const path = `${userId}/avatar.${extOf(blob)}`;
   const { error } = await supabase.storage.from("avatars").upload(path, blob, {
     upsert: true,
-    contentType: "image/jpeg",
+    contentType: blob.type,
     cacheControl: "3600",
   });
   if (error) throw new Error(error.message);
