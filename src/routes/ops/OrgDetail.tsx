@@ -5,7 +5,7 @@ import { api } from "../../lib/backend";
 import { useAsync } from "../../lib/useAsync";
 import { egp, formatDateTime } from "../../lib/format";
 import { supabase } from "../../lib/supabaseClient";
-import { squareCrop } from "../../lib/image";
+import { screenCrop, squareCrop } from "../../lib/image";
 import { ROLE_LABELS, type OrgStatus, type OrgConfig } from "../../lib/types";
 import { Spinner } from "../../components/Spinner";
 import { Icon } from "../../components/Icon";
@@ -62,7 +62,8 @@ function ImageUploadField({
     setBusy(true);
     setError(null);
     try {
-      const blob = await squareCrop(file);
+      // Onboarding art is full screen: keep it tall and sharp. Logos and icons stay square.
+      const blob = assetKey.startsWith("art-") ? await screenCrop(file) : await squareCrop(file);
       const url = await uploadOrgAsset(orgId, assetKey, blob);
       onChange(url);
     } catch (err) {
@@ -521,9 +522,9 @@ function OrgAppConfigForm({ id, initial, onSaved }: { id: string; initial: OrgCo
       <ImageUploadField orgId={id} assetKey="logo" label="LOGO" value={logoUrl} onChange={setLogoUrl} hint="Shown on the sign-in screen. Square works best." />
       <ImageUploadField orgId={id} assetKey="icon" label="ICON" value={iconUrl} onChange={setIconUrl} hint="PWA / home-screen icon." />
       <TextField label="PRIMARY COLOR" value={primaryColor} onChange={(e) => setPrimaryColor(e.target.value)} placeholder="#RRGGBB" />
-      <ImageUploadField orgId={id} assetKey="art-0" label="ONBOARDING ART 1" value={asset0} onChange={setAsset0} />
-      <ImageUploadField orgId={id} assetKey="art-1" label="ONBOARDING ART 2" value={asset1} onChange={setAsset1} />
-      <ImageUploadField orgId={id} assetKey="art-2" label="ONBOARDING ART 3" value={asset2} onChange={setAsset2} />
+      <ImageUploadField orgId={id} assetKey="art-0" label="ONBOARDING ART 1" value={asset0} onChange={setAsset0} hint="Shown full screen on phones. Use a tall (portrait) photo, at least 1080 px wide." />
+      <ImageUploadField orgId={id} assetKey="art-1" label="ONBOARDING ART 2" value={asset1} onChange={setAsset1} hint="Shown full screen on phones. Use a tall (portrait) photo, at least 1080 px wide." />
+      <ImageUploadField orgId={id} assetKey="art-2" label="ONBOARDING ART 3" value={asset2} onChange={setAsset2} hint="Shown full screen on phones. Use a tall (portrait) photo, at least 1080 px wide." />
 
       <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", margin: "10px 2px 0" }}>LOYALTY</div>
       <TextField label="POINTS EARNED PER 1 EGP" value={earn} onChange={(e) => setEarn(e.target.value)} inputMode="numeric" placeholder="Blank = points off" />
