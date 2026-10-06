@@ -202,9 +202,9 @@ test("solo: Plans opens on her plans, with classes (monthly), bundles and PT bac
   await page.getByRole("button", { name: "+ Bundle" }).click();
   await expect(page.getByText("NEW CLASS BUNDLE", { exact: true }).first()).toBeVisible();
   await page.getByRole("button", { name: /VALID FOR/ }).click();
-  await expect(page.getByRole("button", { name: "1 month" })).toBeVisible();
-  await expect(page.getByRole("button", { name: "3 months" })).toBeVisible();
-  await expect(page.getByRole("button", { name: "2 months" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "1 month", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "3 months", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "2 months", exact: true })).toHaveCount(0);
 });
 
 test("solo: Schedule's Add class is the recurring flow — pick several days, a time and a length; Account has no import", async ({ page }) => {
