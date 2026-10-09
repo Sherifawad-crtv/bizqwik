@@ -1,7 +1,7 @@
 import type { Session } from "../lib/types";
 import { StatePill } from "./StatePill";
 import { EmptyState } from "./EmptyState";
-import { dateLabel, egp } from "../lib/format";
+import { dateLabel, egp, sessionStamp } from "../lib/format";
 import type { State } from "../lib/types";
 
 interface DayGroup {
@@ -63,6 +63,19 @@ export function DayList({
             <div style={{ font: "700 16px var(--font-body)", letterSpacing: "-.01em" }}>{dateLabel(g.date)}</div>
             <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-muted)" }}>
               {g.sessions.length} {g.sessions.length === 1 ? "session" : "sessions"}
+            </div>
+            {/* When each session was scanned in, so a late scan is easy to spot. */}
+            <div data-testid="session-times" style={{ marginTop: 4, display: "flex", flexDirection: "column", gap: 1 }}>
+              {[...g.sessions]
+                .sort((a, b) => String(a.createdAt ?? "").localeCompare(String(b.createdAt ?? "")))
+                .map((s) => {
+                  const st = sessionStamp(s);
+                  return st ? (
+                    <div key={s.id} style={{ font: "600 13px var(--font-mono)", color: st.scan ? "var(--ink)" : "var(--ink-faint)" }}>
+                      {st.scan ? `Scanned ${st.text}` : st.text}
+                    </div>
+                  ) : null;
+                })}
             </div>
             <div style={{ marginTop: 8 }}>
               <StatePill state={state} />

@@ -743,7 +743,7 @@ function toPackageInstance(row: any) {
   };
 }
 function toSession(row: any) {
-  return { id: row.id, coachId: row.coach_id, month: row.month, date: row.date, createdBy: row.created_by, source: row.source ?? "manual" };
+  return { id: row.id, coachId: row.coach_id, month: row.month, date: row.date, createdBy: row.created_by, source: row.source ?? "manual", createdAt: row.created_at ?? null };
 }
 function toInvite(row: any) {
   return { email: row.email, role: row.role, tierId: row.tier_id, invitedBy: row.invited_by };
