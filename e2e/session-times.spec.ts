@@ -2,8 +2,8 @@ import { test, expect } from "@playwright/test";
 import { mockBackend } from "./mocks";
 
 // Each logged session shows when it was recorded, so a head/founder can see who
-// scans late. Scans read "Scanned 8:42 PM"; hand entries say so; backdated
-// entries say which day they were added.
+// scans late. Each line is the source (QR / MANUAL) + the time; backdated
+// entries say which day they were added. Logged days read green "Logged".
 
 const now = new Date();
 const MONTH = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
@@ -29,8 +29,9 @@ test("coach: day cards show when each session was logged", async ({ page }) => {
   const times = page.getByTestId("session-times");
   await expect(times.first()).toBeVisible();
   const all = (await times.allTextContents()).join(" | ");
-  expect(all).toMatch(/Scanned \d{1,2}:42 [AP]M/);
-  expect(all).toMatch(/\d{1,2}:10 [AP]M · by hand/);
-  expect(all).toMatch(/Added \w{3} 9 · by hand/);
-  expect(all).not.toMatch(/late/i);
+  expect(all).toMatch(/QR\s*\d{1,2}:42 [AP]M/);
+  expect(all).toMatch(/MANUAL\s*\d{1,2}:10 [AP]M/);
+  expect(all).toMatch(/MANUAL\s*Added \w{3} 9/);
+  expect(all).not.toMatch(/late|by hand|Scanned/i);
+  await expect(page.getByText("LOGGED", { exact: true })).toHaveCount(2); // one per day card, not "LOGGING"
 });

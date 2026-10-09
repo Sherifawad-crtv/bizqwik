@@ -92,7 +92,7 @@ export function DaySessionsSheet({ open, onClose, coachId, month, date, sessions
                   <span style={{ font: "700 10px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>{s.source === "qr" ? "QR" : "MANUAL"}</span>
                   {(() => {
                     const st = sessionStamp(s);
-                    return st ? <span data-testid="session-time" style={{ font: "600 13px var(--font-mono)", color: "var(--ink-muted)" }}>{st.scan ? `Scanned ${st.text}` : st.text}</span> : null;
+                    return st ? <span data-testid="session-time" style={{ font: "600 13px var(--font-mono)", color: "var(--ink-muted)", whiteSpace: "nowrap" }}>{st.text}</span> : null;
                   })()}
                   {editable && (
                     <>
