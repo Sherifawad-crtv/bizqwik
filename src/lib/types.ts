@@ -25,6 +25,8 @@ export interface Session {
   createdBy: string;
   /** "qr" = the coach scanned the coaches' QR; "manual" = a head logged it. */
   source?: "qr" | "manual";
+  /** When the session was recorded (the scan time for a QR session). */
+  createdAt?: string | null;
 }
 
 export interface PtScanPreview {

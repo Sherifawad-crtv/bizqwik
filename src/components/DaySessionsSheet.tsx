@@ -7,7 +7,7 @@ import { ConfirmSheet } from "./ConfirmSheet";
 import { useLatch } from "../lib/useLatch";
 import { api } from "../lib/backend";
 import type { Session } from "../lib/types";
-import { dateLabelFull, daysInMonth, egp, isoDate } from "../lib/format";
+import { dateLabelFull, daysInMonth, egp, isoDate, sessionStamp } from "../lib/format";
 
 interface DaySessionsSheetProps {
   open: boolean;
@@ -90,6 +90,10 @@ export function DaySessionsSheet({ open, onClose, coachId, month, date, sessions
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                   <span style={{ font: "600 15px var(--font-body)", color: "var(--ink)" }}>Session {i + 1}</span>
                   <span style={{ font: "700 10px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>{s.source === "qr" ? "QR" : "MANUAL"}</span>
+                  {(() => {
+                    const st = sessionStamp(s);
+                    return st ? <span data-testid="session-time" style={{ font: "600 13px var(--font-mono)", color: "var(--ink-muted)" }}>{st.scan ? `Scanned ${st.text}` : st.text}</span> : null;
+                  })()}
                   {editable && (
                     <>
                       {!scanOnly && (
