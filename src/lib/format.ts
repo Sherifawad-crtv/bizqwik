@@ -100,7 +100,7 @@ export function sessionStamp(s: { date: string; createdAt?: string | null; sourc
   if (!s.createdAt) return null;
   const sameDay = gymDay(s.createdAt) === s.date;
   if (s.source === "qr" && sameDay) return { text: clockLabel(s.createdAt), scan: true };
-  if (sameDay) return { text: `${clockLabel(s.createdAt)} · by hand`, scan: false };
+  if (sameDay) return { text: clockLabel(s.createdAt), scan: false };
   const [y, m, d] = gymDay(s.createdAt).split("-").map(Number);
-  return { text: `Added ${MON[m - 1]} ${d}${y !== Number(s.date.slice(0, 4)) ? ` ${y}` : ""} · by hand`, scan: false };
+  return { text: `Added ${MON[m - 1]} ${d}${y !== Number(s.date.slice(0, 4)) ? ` ${y}` : ""}`, scan: false };
 }

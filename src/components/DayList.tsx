@@ -71,14 +71,16 @@ export function DayList({
                 .map((s) => {
                   const st = sessionStamp(s);
                   return st ? (
-                    <div key={s.id} style={{ font: "600 13px var(--font-mono)", color: st.scan ? "var(--ink)" : "var(--ink-faint)" }}>
-                      {st.scan ? `Scanned ${st.text}` : st.text}
+                    <div key={s.id} style={{ display: "flex", gap: 8, alignItems: "baseline", font: "600 13px var(--font-mono)", color: "var(--ink)" }}>
+                      <span style={{ font: "700 10px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", minWidth: 52 }}>{s.source === "qr" ? "QR" : "MANUAL"}</span>
+                      {st.text}
                     </div>
                   ) : null;
                 })}
             </div>
             <div style={{ marginTop: 8 }}>
-              <StatePill state={state} />
+              {/* A day that's on the books is "Logged"; the coach's month status (Logging / Settled / Paid) lives on their header. */}
+              {state === "logging" ? <StatePill state="paid" label="Logged" /> : <StatePill state={state} />}
             </div>
           </div>
           <div style={{ textAlign: "right", flex: "none" }}>
