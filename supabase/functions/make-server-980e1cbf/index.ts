@@ -1770,15 +1770,20 @@ async function clientPlanStatus(clientId: string, orgId: string) {
 
 // ---- check-in: the one place a visit is recorded -------------------------
 // Everyone with an active plan or PT package can check in (and earns points).
-// A class bundle is used on arrival: checking in takes one session off it, at
-// most once per gym day, and marks today's reserved class (if any) attended.
-// Memberships and class monthlies are time-based, and PT is logged by the
-// coach's scan, so those deduct nothing here.
+// A class bundle is used on arrival: every visit takes one session off it (a
+// member can train twice a day), and it marks today's reserved class (if any)
+// attended; a class already paid for at booking isn't charged again on that
+// first scan. Memberships and class monthlies are time-based, and PT is logged
+// by the coach's scan, so those deduct nothing here.
+// Only an accidental double scan is blocked: a second scan within a minute of
+// the last one. Check-in points are earned once per gym day.
 async function dayBoundsUtc(orgId: string) {
   const tz = await orgTimezone(orgId);
   const today = todayInTz(tz);
   return { start: localToUtcIso(today, "00:00", tz), end: localToUtcIso(addDays(today, 1), "00:00", tz) };
 }
+
+const CHECKIN_BUFFER_MS = 60_000;
 
 type CheckInResult =
   | { ok: true; checkIn: any; deducted: boolean; plan: { name: string; kind: string; creditsRemaining: number | null; creditsTotal: number | null } | null }
@@ -1814,19 +1819,28 @@ async function recordCheckIn(orgId: string, clientId: string, clientName: string
     return { ok: false, status: 400, code: "no_plan", error: self ? "No active plan — please see the front desk." : `${clientName} has no active plan or package.` };
   }
 
+  // An accidental double scan: the same member again within a minute.
+  const { data: lastIn } = await admin().from("check_ins").select("checked_in_at").eq("client_id", clientId).eq("org_id", orgId)
+    .order("checked_in_at", { ascending: false }).limit(1).maybeSingle();
+  if (lastIn && Date.now() - Date.parse(lastIn.checked_in_at) < CHECKIN_BUFFER_MS) {
+    return { ok: false, status: 409, code: "just_checked_in", error: self ? "You're already checked in — enjoy your session!" : `${clientName} was just checked in.` };
+  }
+  const { start, end } = await dayBoundsUtc(orgId);
+  const { data: anyToday } = await admin().from("check_ins").select("id").eq("client_id", clientId).eq("org_id", orgId)
+    .gte("checked_in_at", start).lt("checked_in_at", end).limit(1);
+  const firstToday = !(anyToday?.length);
+
   let plan = status.groupPlanRow;
   if (plan && isFrozen(plan)) plan = null; // frozen: don't take a session from it
   let deductFrom: string | null = null;
   if (plan && plan.kind === "bundle") {
-    const { start, end } = await dayBoundsUtc(orgId);
-    const { data: usedToday } = await admin().from("check_ins").select("id").eq("client_id", clientId)
-      .not("group_plan_id", "is", null).gte("checked_in_at", start).lt("checked_in_at", end).limit(1);
     const { data: todays } = await admin().from("class_bookings").select("id, credit_spent, attendance, classes!inner(starts_at)")
       .eq("client_id", clientId).eq("group_plan_id", plan.id).eq("coverage", "plan").neq("attendance", "cancelled")
       .gte("classes.starts_at", start).lt("classes.starts_at", end);
-    // A class booked before this rule already used its session at booking.
-    const prepaid = (todays ?? []).some((b: any) => b.credit_spent);
-    if (!(usedToday?.length) && !prepaid) {
+    // A class booked before this rule already used its session at booking, so
+    // the day's first scan doesn't charge it again; a later visit does.
+    const prepaid = firstToday && (todays ?? []).some((b: any) => b.credit_spent);
+    if (!prepaid) {
       if (Number(plan.credits_remaining) <= 0) {
         return { ok: false, status: 400, code: "no_sessions", plan: toGroupPlan(plan), error: self ? `You've used all sessions of ${plan.name}. Renew at the front desk to keep training.` : `${clientName} has no sessions left on ${plan.name}.` };
       }
@@ -1849,7 +1863,7 @@ async function recordCheckIn(orgId: string, clientId: string, clientName: string
     if (deductFrom) await admin().from("group_plans").update({ credits_remaining: Number(plan.credits_remaining) + 1 }).eq("id", deductFrom);
     throw error;
   }
-  await earnCheckinPoints(clientId, orgId);
+  if (firstToday) await earnCheckinPoints(clientId, orgId);
   await logActivity(orgId, "check_in", { actorId, clientId, meta: deductFrom ? { bundle: plan.name, sessionsLeft: Number(plan.credits_remaining) } : {} });
   const left = deductFrom ? Number(plan.credits_remaining) : null;
   await notifyClient(orgId, clientId, "checked_in", {
