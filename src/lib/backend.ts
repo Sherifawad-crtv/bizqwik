@@ -240,7 +240,7 @@ export const api = {
     callFn<{ client: Client; package: PackageInstance }>("clients", { method: "POST", body: { ...fields, bundleTypeId, coachId, payMethod } }),
   assignCoach: (id: string, coachId: string) => callFn<{ client: Client }>("clients/assign-coach", { method: "POST", body: { id, coachId } }),
   frontDeskSummary: () => callFn<FrontDeskSummary>("front-desk/summary"),
-  // A class bundle loses one session on check-in (at most once a day);
+  // A class bundle loses one session on every check-in (a second scan within a minute is refused as accidental);
   // memberships, class monthlies and PT don't. `plan` is the plan afterwards.
   // `locationId` (where the check-in happens) turns away a plan sold for another location.
   checkIn: (clientId: string, source: "qr" | "manual", locationId?: string | null) =>
