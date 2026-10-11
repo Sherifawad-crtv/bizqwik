@@ -997,8 +997,8 @@ app.get(`${P}/me`, async (c) => {
   if (!user) return c.json({ error: "Unauthorized" }, 401);
   const [profile, team, client] = await Promise.all([profileOf(user.id), bizqwikTeamOf(user.id), clientOf(user.id)]);
   if (!profile && !team && !client) return c.json({ error: "No profile" }, 404);
-  const tier = profile?.tier_id ? await tierOf(profile.tier_id) : null;
-  const orgMode = profile ? await orgModeOf(profile.org_id) : null;
+  // Independent lookups, so read together rather than one after the other.
+  const [tier, orgMode] = await Promise.all([profile?.tier_id ? tierOf(profile.tier_id) : null, profile ? orgModeOf(profile.org_id) : null]);
   return c.json({
     profile: profile ? toProfile(profile) : null,
     orgMode,
