@@ -20,10 +20,17 @@
     <meta name="description" content="Attendance & payout portal for a calisthenics department." />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Fonts load without holding up the first paint (the launch screen is just a logo): the
+         stylesheet is fetched in the background and applied when it arrives. -->
     <link
       href="https://fonts.googleapis.com/css2?family=Urbanist:wght@500;600;700;800&family=Space+Mono:wght@400;700&display=swap"
       rel="stylesheet"
+      media="print"
+      onload="this.media='all'"
     />
+    <noscript>
+      <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+    </noscript>
     <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32" />
     <link rel="icon" href="/favicon-16.png" type="image/png" sizes="16x16" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />

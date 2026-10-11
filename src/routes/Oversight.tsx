@@ -218,8 +218,8 @@ export function Oversight() {
     // The report for the range, plus a window twice as long: its older half is
     // the period before, which the comparisons and the "how much history do we
     // have" note come from.
-    const [now, wide] = await Promise.all([api.revenue(n), api.revenue(24)]);
-    const rows = wide.months;
+    const now = await api.revenue(n, 24);
+    const rows = now.history ?? now.months;
     const first = rows.findIndex((m) => m.revenue > 0 || m.payouts > 0);
     const before = rows.slice(Math.max(0, rows.length - 2 * n), rows.length - n);
     const sum = (k: "revenue" | "payouts") => before.reduce((a, m) => a + m[k], 0);

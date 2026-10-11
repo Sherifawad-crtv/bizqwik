@@ -98,7 +98,7 @@ const SOLO_DESK = "solo-desk";
 // The fast staff client list.
 const CLIENTS_LIST = "clients-list";
 
-async function callFn<T>(path: string, opts?: { method?: Method; body?: Record<string, unknown> }, slug: string = FN_SLUG): Promise<T> {
+async function callFn<T>(path: string, opts?: { method?: Method; body?: Record<string, unknown>; quiet?: boolean }, slug: string = FN_SLUG): Promise<T> {
   const method = opts?.method ?? "GET";
   const { data, error } = await supabase.functions.invoke(`${slug}/${path}`, {
     method,
@@ -122,7 +122,9 @@ async function callFn<T>(path: string, opts?: { method?: Method; body?: Record<s
   }
   // POSTs are the app's only mutations — bump so every mounted useAsync
   // screen revalidates, not just whichever one happened to trigger this.
-  if (method === "POST") bump();
+  // A `quiet` POST (registering this device for notifications) changes nothing
+  // a screen shows, so it must not make every open screen load again.
+  if (method === "POST" && !opts?.quiet) bump();
   return data as T;
 }
 
@@ -285,7 +287,8 @@ export const api = {
     callFn<{ client: ClientWithPackage; plan: GroupPlan }>("group-plans/sell", { method: "POST", body: { ...target, ...offer, payMethod } }),
   clientPlans: (clientId: string) => callFn<{ activePlan: GroupPlan | null; plans: GroupPlan[] }>(`group-plans/client/${clientId}`),
 
-  revenue: (months = 6) => callFn<RevenueReport>(`revenue?months=${months}`),
+  // `history` also returns the month-by-month series for that many months in the same call.
+  revenue: (months = 6, history?: number) => callFn<RevenueReport>(`revenue?months=${months}${history ? `&history=${history}` : ""}`),
 
   // ===== Classes (staff read; dept_head writes) =====
   classes: (since?: string) => callFn<{ classes: GymClass[] }>(since ? `classes?since=${encodeURIComponent(since)}` : "classes"),
@@ -321,8 +324,8 @@ export const api = {
 
   pushVapidPublicKey: () => callFn<{ publicKey: string }>("push/vapid-public-key"),
   pushSubscribe: (sub: PushSubscriptionJSON, deviceId: string) =>
-    callFn<void>("push/subscribe", { method: "POST", body: { ...sub, deviceId } as Record<string, unknown> }),
-  pushUnsubscribe: (endpoint: string, deviceId: string) => callFn<void>("push/unsubscribe", { method: "POST", body: { endpoint, deviceId } }),
+    callFn<void>("push/subscribe", { method: "POST", body: { ...sub, deviceId } as Record<string, unknown>, quiet: true }),
+  pushUnsubscribe: (endpoint: string, deviceId: string) => callFn<void>("push/unsubscribe", { method: "POST", body: { endpoint, deviceId }, quiet: true }),
 
   // ===== Bizqwik ops dashboard (bizqwik_team only) =====
   ops: {

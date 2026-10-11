@@ -997,8 +997,8 @@ app.get(`${P}/me`, async (c) => {
   if (!user) return c.json({ error: "Unauthorized" }, 401);
   const [profile, team, client] = await Promise.all([profileOf(user.id), bizqwikTeamOf(user.id), clientOf(user.id)]);
   if (!profile && !team && !client) return c.json({ error: "No profile" }, 404);
-  const tier = profile?.tier_id ? await tierOf(profile.tier_id) : null;
-  const orgMode = profile ? await orgModeOf(profile.org_id) : null;
+  // Independent lookups, so read together rather than one after the other.
+  const [tier, orgMode] = await Promise.all([profile?.tier_id ? tierOf(profile.tier_id) : null, profile ? orgModeOf(profile.org_id) : null]);
   return c.json({
     profile: profile ? toProfile(profile) : null,
     orgMode,
@@ -2257,34 +2257,8 @@ app.get(`${P}/packages/by-coach/:coachId/:month`, async (c) => {
 });
 
 // ---- month rollups -----------------------------------------------------
-async function monthRollups(orgId: string, profiles: any[], month: string) {
-  const [tiersRes, settlementsRes, sessionsRes, packagesRes] = await Promise.all([
-    admin().from("tiers").select("*").eq("org_id", orgId),
-    admin().from("settlements").select("*").eq("org_id", orgId).eq("month", month),
-    admin().from("sessions").select("coach_id").eq("org_id", orgId).eq("month", month),
-    admin().from("package_instances").select("*").eq("org_id", orgId),
-  ]);
-  const tiers = tiersRes.data ?? [];
-  const settlements = settlementsRes.data ?? [];
-  const sessions = sessionsRes.data ?? [];
-  const packages = packagesRes.data ?? [];
-
-  const tierById = new Map(tiers.map((t) => [t.id, t]));
-  const settlementByCoach = new Map(settlements.map((s) => [s.coach_id, s]));
-  const sessionCountByCoach = new Map<string, number>();
-  for (const s of sessions) sessionCountByCoach.set(s.coach_id, (sessionCountByCoach.get(s.coach_id) ?? 0) + 1);
-
-  // Private earnings attribute to the SALE month, regardless of the
-  // package's current status — the coach's cut is final the moment it sells.
-  const packagesSoldThisMonth = packages.filter((p) => String(p.purchased_at).slice(0, 7) === month);
-  const privateByCoach = new Map<string, { total: number; count: number }>();
-  for (const p of packagesSoldThisMonth) {
-    const agg = privateByCoach.get(p.coach_id) ?? { total: 0, count: 0 };
-    agg.total += Number(p.coach_cut_at_sale);
-    agg.count += 1;
-    privateByCoach.set(p.coach_id, agg);
-  }
-
+// One coach-per-row payout summary for a month, from the month's already-read data.
+function buildRollupRows(profiles: any[], tierById: Map<any, any>, settlementByCoach: Map<any, any>, sessionCountByCoach: Map<string, number>, privateByCoach: Map<string, { total: number; count: number }>) {
   return profiles.map((profile) => {
     const tier = profile.tier_id ? (tierById.get(profile.tier_id) ?? null) : null;
     const settlement = settlementByCoach.get(profile.id) ?? null;
@@ -2316,6 +2290,79 @@ async function monthRollups(orgId: string, profiles: any[], month: string) {
       paidAt: settlement?.paid_at ?? null,
     };
   });
+}
+
+async function monthRollups(orgId: string, profiles: any[], month: string) {
+  const [tiersRes, settlementsRes, sessionsRes, packagesRes] = await Promise.all([
+    admin().from("tiers").select("*").eq("org_id", orgId),
+    admin().from("settlements").select("*").eq("org_id", orgId).eq("month", month),
+    admin().from("sessions").select("coach_id").eq("org_id", orgId).eq("month", month),
+    admin().from("package_instances").select("*").eq("org_id", orgId),
+  ]);
+  const tiers = tiersRes.data ?? [];
+  const settlements = settlementsRes.data ?? [];
+  const sessions = sessionsRes.data ?? [];
+  const packages = packagesRes.data ?? [];
+
+  const tierById = new Map(tiers.map((t) => [t.id, t]));
+  const settlementByCoach = new Map(settlements.map((s) => [s.coach_id, s]));
+  const sessionCountByCoach = new Map<string, number>();
+  for (const s of sessions) sessionCountByCoach.set(s.coach_id, (sessionCountByCoach.get(s.coach_id) ?? 0) + 1);
+
+  // Private earnings attribute to the SALE month, regardless of the
+  // package's current status — the coach's cut is final the moment it sells.
+  const packagesSoldThisMonth = packages.filter((p) => String(p.purchased_at).slice(0, 7) === month);
+  const privateByCoach = new Map<string, { total: number; count: number }>();
+  for (const p of packagesSoldThisMonth) {
+    const agg = privateByCoach.get(p.coach_id) ?? { total: 0, count: 0 };
+    agg.total += Number(p.coach_cut_at_sale);
+    agg.count += 1;
+    privateByCoach.set(p.coach_id, agg);
+  }
+
+  return buildRollupRows(profiles, tierById, settlementByCoach, sessionCountByCoach, privateByCoach);
+}
+
+// Every row of a query, one 1000-row page at a time (the API's page cap).
+async function fetchAllRows(page: (from: number, to: number) => PromiseLike<{ data: any[] | null; error: any }>): Promise<any[]> {
+  const out: any[] = [];
+  for (let from = 0; ; from += 1000) {
+    const { data, error } = await page(from, from + 999);
+    if (error) throw error;
+    out.push(...(data ?? []));
+    if (!data || data.length < 1000) break;
+  }
+  return out;
+}
+
+// The same numbers as monthRollups, for many months at once: what doesn't
+// depend on the month (tiers, packages sold) is read once, and the rest
+// (settlements, session counts) in one query each, instead of four queries a month.
+async function monthRollupsMany(orgId: string, profiles: any[], months: string[]): Promise<Map<string, any[]>> {
+  const [tiersRes, settlements, countsRes, packages] = await Promise.all([
+    admin().from("tiers").select("*").eq("org_id", orgId),
+    fetchAllRows((a, b) => admin().from("settlements").select("*").eq("org_id", orgId).in("month", months).order("id").range(a, b)),
+    admin().rpc("revenue_session_counts", { p_org: orgId, p_months: months }),
+    fetchAllRows((a, b) => admin().from("package_instances").select("id, coach_id, coach_cut_at_sale, purchased_at").eq("org_id", orgId).gte("purchased_at", `${months[0]}-01T00:00:00Z`).order("id").range(a, b)),
+  ]);
+  if (countsRes.error) throw countsRes.error;
+  const tierById = new Map((tiersRes.data ?? []).map((t: any) => [t.id, t]));
+  const out = new Map<string, any[]>();
+  for (const month of months) {
+    const settlementByCoach = new Map(settlements.filter((s: any) => s.month === month).map((s: any) => [s.coach_id, s]));
+    const sessionCountByCoach = new Map<string, number>();
+    for (const r of countsRes.data ?? []) if (r.month === month) sessionCountByCoach.set(r.coach_id, Number(r.n));
+    const privateByCoach = new Map<string, { total: number; count: number }>();
+    for (const p of packages) {
+      if (String(p.purchased_at).slice(0, 7) !== month) continue;
+      const agg = privateByCoach.get(p.coach_id) ?? { total: 0, count: 0 };
+      agg.total += Number(p.coach_cut_at_sale);
+      agg.count += 1;
+      privateByCoach.set(p.coach_id, agg);
+    }
+    out.set(month, buildRollupRows(profiles, tierById, settlementByCoach, sessionCountByCoach, privateByCoach));
+  }
+  return out;
 }
 
 app.get(`${P}/month/:month`, async (c) => {
@@ -4189,7 +4236,11 @@ app.get(`${P}/revenue`, async (c) => {
   if (me?.role !== "dept_head" && me?.role !== "accountant") return c.json({ error: "Forbidden" }, 403);
   const org = me.org_id;
   const nMonths = Math.min(Math.max(Number(c.req.query("months") ?? "6") || 6, 1), 24);
-  const months = monthsBack(nMonths);
+  // `history` (optional) also returns the month-by-month series for a longer
+  // window in the same call, so the overview needs one request, not two.
+  const nHistory = Math.min(Math.max(Number(c.req.query("history") ?? "0") || 0, nMonths), 24);
+  const months = monthsBack(nHistory); // oldest first; the last nMonths are the report's range
+  const shown = months.slice(-nMonths);
   const since = `${months[0]}-01T00:00:00Z`;
   await sweepOrgGroupPlans(org);
 
@@ -4216,17 +4267,18 @@ app.get(`${P}/revenue`, async (c) => {
   const legacyPrice = new Map((legacyTypes.data ?? []).map((t: any) => [t.id, Number(t.price)]));
   for (const m of legacyMems.data ?? []) sales.push({ month: mo(m.starts_at), amount: legacyPrice.get(m.membership_type_id) ?? 0, service: "group", type: "legacy_membership" });
 
-  const inRange = new Set(months);
+  const inRange = new Set(shown);
   const kept = sales.filter((s) => inRange.has(s.month));
 
   // Coach payouts per month, from the same rollup the payout screens use.
-  const payoutRows = await Promise.all(months.map((m) => monthRollups(org, coaches.data ?? [], m)));
+  const rollups = await monthRollupsMany(org, coaches.data ?? [], months);
+  const payoutRows = months.map((m) => rollups.get(m) ?? []);
   const payoutByMonth = new Map(months.map((m, i) => [m, payoutRows[i].reduce((s: number, r: any) => s + r.total, 0)]));
   const payoutByCoach = new Map<string, number>();
-  for (const rows of payoutRows) for (const r of rows) payoutByCoach.set(r.coachId, (payoutByCoach.get(r.coachId) ?? 0) + r.total);
+  for (const rows of payoutRows.slice(-nMonths)) for (const r of rows) payoutByCoach.set(r.coachId, (payoutByCoach.get(r.coachId) ?? 0) + r.total);
 
   const series = months.map((m) => {
-    const revenue = kept.filter((s) => s.month === m).reduce((a, s) => a + s.amount, 0);
+    const revenue = sales.filter((s) => s.month === m).reduce((a, s) => a + s.amount, 0);
     const payouts = payoutByMonth.get(m) ?? 0;
     return { month: m, revenue, payouts, profit: revenue - payouts };
   });
@@ -4252,10 +4304,11 @@ app.get(`${P}/revenue`, async (c) => {
   const planKinds: Record<string, number> = { membership: 0, class_monthly: 0, bundle: 0 };
   for (const p of activePlans.data ?? []) planKinds[p.kind] = (planKinds[p.kind] ?? 0) + 1;
 
-  const totalRevenue = series.reduce((a, s) => a + s.revenue, 0);
-  const totalPayouts = series.reduce((a, s) => a + s.payouts, 0);
+  const totalRevenue = series.slice(-nMonths).reduce((a, s) => a + s.revenue, 0);
+  const totalPayouts = series.slice(-nMonths).reduce((a, s) => a + s.payouts, 0);
   return c.json({
-    months: series,
+    months: series.slice(-nMonths),
+    history: series,
     totals: { revenue: totalRevenue, payouts: totalPayouts, profit: totalRevenue - totalPayouts },
     byService,
     byType,
