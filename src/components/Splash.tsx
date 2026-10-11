@@ -1,5 +1,6 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { useAuth } from "../lib/auth";
+import { waitForLoadsToFinish } from "../lib/useAsync";
 
 /** The launch screen: the full Bizqwik logo with a small spinner under it.
  * index.html paints the same thing before the app has loaded, so launching
@@ -18,17 +19,32 @@ export function Splash() {
   );
 }
 
-const MIN_MS = 600;
-
-/** Holds the launch screen until we know who's signed in, and just long
- * enough that it reads as a screen rather than a flicker. */
+/** The launch screen covers the whole start-up: first who's signed in, then
+ * the first screen's own data. The app is mounted under it as soon as we know
+ * who's in (so that screen's requests start at once) and the splash lifts when
+ * they've landed, so there is one loader, not a splash followed by a spinner.
+ * No minimum hold: it goes the moment everything is ready. A request that
+ * never answers can't trap the user behind it (capped at 8 seconds). */
 export function LaunchGate({ children }: { children: ReactNode }) {
   const { ready } = useAuth();
-  const [held, setHeld] = useState(true);
+  const [covered, setCovered] = useState(true);
   useEffect(() => {
-    const t = window.setTimeout(() => setHeld(false), MIN_MS);
-    return () => window.clearTimeout(t);
-  }, []);
-  if (!ready || held) return <Splash />;
-  return <>{children}</>;
+    if (!ready) return;
+    let alive = true;
+    waitForLoadsToFinish(8000).then(() => alive && setCovered(false));
+    return () => {
+      alive = false;
+    };
+  }, [ready]);
+  if (!ready) return <Splash />;
+  return (
+    <>
+      {children}
+      {covered && (
+        <div style={{ position: "fixed", inset: 0, zIndex: 1000 }}>
+          <Splash />
+        </div>
+      )}
+    </>
+  );
 }

@@ -285,7 +285,8 @@ export const api = {
     callFn<{ client: ClientWithPackage; plan: GroupPlan }>("group-plans/sell", { method: "POST", body: { ...target, ...offer, payMethod } }),
   clientPlans: (clientId: string) => callFn<{ activePlan: GroupPlan | null; plans: GroupPlan[] }>(`group-plans/client/${clientId}`),
 
-  revenue: (months = 6) => callFn<RevenueReport>(`revenue?months=${months}`),
+  // `history` also returns the month-by-month series for that many months in the same call.
+  revenue: (months = 6, history?: number) => callFn<RevenueReport>(`revenue?months=${months}${history ? `&history=${history}` : ""}`),
 
   // ===== Classes (staff read; dept_head writes) =====
   classes: (since?: string) => callFn<{ classes: GymClass[] }>(since ? `classes?since=${encodeURIComponent(since)}` : "classes"),

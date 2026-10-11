@@ -442,6 +442,8 @@ export interface RevenueSlice {
 }
 export interface RevenueReport {
   months: { month: string; revenue: number; payouts: number; profit: number }[];
+  /** The month-by-month series for the longer window asked for with `history` (oldest first). */
+  history?: { month: string; revenue: number; payouts: number; profit: number }[];
   totals: { revenue: number; payouts: number; profit: number };
   byService: RevenueSlice[];
   byType: RevenueSlice[];
