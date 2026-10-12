@@ -161,9 +161,10 @@ h1,h2,h3,h4{font-weight:800;letter-spacing:-.025em;line-height:1.02}
 .acard h3{font-size:31px;letter-spacing:-.02em;line-height:1.08}
 .acard p{font-size:21px;color:var(--muted);margin-top:14px;line-height:1.3}
 
-.close-art{position:absolute;right:96px;top:150px;width:720px;height:780px}
-.close-art .blob{width:640px;height:640px;left:40px;top:70px}
-.ci{position:absolute}
-.ci .eco-ico{width:150px;height:150px;border-radius:44px}
-.ci .eco-ico svg{width:72px;height:72px}
-.ci0{left:60px;top:90px}.ci1{left:430px;top:60px}.ci2{left:250px;top:300px}.ci3{left:20px;top:500px}.ci4{left:470px;top:470px}
+.close-art{position:absolute;right:120px;top:180px;width:720px;height:720px}
+.orbit{position:absolute;left:60px;top:60px;width:600px;height:600px;border-radius:50%;border:2px solid var(--tint2)}
+.hub{position:absolute;left:250px;top:250px;width:220px;height:220px;border-radius:50%;background:var(--surface);box-shadow:var(--shadow);display:flex;align-items:center;justify-content:center}
+.hub img{width:112px;height:auto;display:block}
+.ci{position:absolute;width:120px;height:120px}
+.ci .eco-ico{width:120px;height:120px;border-radius:34px;background:var(--surface);box-shadow:var(--shadow)}
+.ci .eco-ico svg{width:60px;height:60px}

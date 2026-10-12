@@ -321,8 +321,11 @@ add('''
   <h1>Let's set up<br>your gym.</h1>
   <div class="placeholder"><span>GAP · CONTACT DETAILS</span>[ Contact details to be added: name, phone, email, web address ]</div>
 </div>
-<div class="close-art"><div class="blob"></div>{closing_icons}</div>
-'''.replace("{closing_icons}", "".join(f'<div class="ci ci{i}"><div class="eco-ico">{icon(k, 56)}</div></div>' for i, (k, _, _) in enumerate(APPS))), "cover close")
+<div class="close-art"><div class="orbit"></div>
+  <div class="hub"><img src="assets/mark.png" alt="Bizqwik"></div>{closing_icons}</div>
+'''.replace("{closing_icons}", "".join(
+    f'<div class="ci" style="left:{360 + 300 * __import__("math").cos(__import__("math").radians(-90 + i * 72)) - 60:.1f}px;top:{360 + 300 * __import__("math").sin(__import__("math").radians(-90 + i * 72)) - 60:.1f}px"><div class="eco-ico">{icon(k, 56)}</div></div>'
+    for i, (k, _, _) in enumerate(APPS))), "cover close")
 
 CSS = open("deck.css").read()
 body = "".join(f'<section class="slide {c}">{h}</section>\n' for h, c in slides)
