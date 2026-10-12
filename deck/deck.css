@@ -168,3 +168,7 @@ h1,h2,h3,h4{font-weight:800;letter-spacing:-.025em;line-height:1.02}
 .ci{position:absolute;width:120px;height:120px}
 .ci .eco-ico{width:120px;height:120px;border-radius:34px;background:var(--surface);box-shadow:var(--shadow)}
 .ci .eco-ico svg{width:60px;height:60px}
+
+.duo-wrap{position:relative;width:860px;height:592px}
+.duo-wrap .dev{position:absolute}
+.app-art.duo .blob{width:700px;height:700px}

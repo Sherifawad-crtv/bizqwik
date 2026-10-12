@@ -52,3 +52,19 @@ test("front desk phone", async ({ page }) => {
   await mockBackend(page, "front_desk", { classes: { classes: [7, 9, 18].map((h, i) => { const t = new Date(); t.setHours(h + 9, 0, 0, 0); return { id: "k" + i, seriesId: "s" + i, title: ["Sunrise HIIT", "Power Yoga", "Boxing"][i], description: null, startsAt: t.toISOString(), price: 150, status: "active", bookedCount: 8 - i }; }) }, "front-desk/summary": { todayCheckIns: 14, todayDropIns: 3, activeNow: 6, recent: [] } });
   await page.goto("/"); await shot(page, "desk-home");
 });
+
+test("front desk calendar tablet (day view)", async ({ page }) => {
+  await page.setViewportSize({ width: 1100, height: 826 });
+  await page.clock.install({ time: new Date(new Date().setHours(10, 20, 0, 0)) });
+  const today = (h: number, m = 0) => { const t = new Date(); t.setHours(h, m, 0, 0); return t.toISOString(); };
+  const C = [
+    ["Sunrise HIIT", 7, 0, 18], ["Mobility Flow", 8, 0, 11], ["Strength Club", 9, 30, 16], ["Reformer Flow", 11, 0, 9],
+    ["Power Yoga", 12, 30, 14], ["Mat Pilates", 14, 0, 10], ["Kids Gym", 15, 30, 13], ["Open Gym", 16, 0, 8], ["Boxing Fundamentals", 17, 0, 19], ["Hybrid Engine", 18, 30, 20], ["Evening Yoga", 20, 0, 12],
+  ] as const;
+  const classes = C.map(([title, h, m, n], i) => ({ id: "k" + i, seriesId: "s" + i, title, description: null, startsAt: today(h, m), price: 250, status: "active", bookedCount: n }));
+  await mockBackend(page, "front_desk", { "front-desk/summary": { todayCheckIns: 14, todayDropIns: 3, activeNow: 6, recent: [] }, classes: { classes } });
+  await page.goto("/desk-classes");
+  await page.getByRole("button", { name: "DAY", exact: true }).first().click();
+  await page.waitForTimeout(2500);
+  await page.screenshot({ path: OUT + "/desk-calendar.png" });
+});

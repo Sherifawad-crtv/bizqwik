@@ -166,7 +166,8 @@ app_slide(5, "frontdesk", "Front-desk / reception app", "Front desk", [
     "Take payments: cash, card, wallet or InstaPay.",
     "Book clients into classes and see who is coming.",
     "Freeze a client's membership.",
-], '<div class="blob"></div>' + device("phone", "desk-home.png", 410))
+], '<div class="blob"></div><div class="duo-wrap">' + device("tablet", "desk-calendar.png", 600, "left:0;top:60px")
+   + device("phone", "desk-home.png", 290, "left:570px;top:0") + '</div>', art_cls="duo")
 
 tiers = '<div class="tiers"><span>Junior coach</span><span>Senior coach</span><span class="on">Head coach</span></div>'
 app_slide(6, "coaches", "Coaches app", "Coaches", [
