@@ -42,11 +42,11 @@ h1,h2,h3,h4{font-weight:800;letter-spacing:-.025em;line-height:1.02}
 .dev .screen{position:absolute;overflow:hidden}
 .dev .screen .app.tab{width:100%;height:100%;object-fit:cover;object-position:top;display:block}
 .inner{position:absolute;left:0;top:0;width:390px;height:849px;transform-origin:0 0}
-.inner .app{position:absolute;left:0;top:54px;width:390px;height:761px;object-fit:cover;object-position:top;display:block}
+.inner .app{position:absolute;left:0;top:54px;width:390px;height:795px;object-fit:cover;object-position:top;display:block}
 .sb{position:absolute;left:0;top:0;width:390px;height:54px}
 .sb .t{position:absolute;left:0;width:132px;top:14px;height:28px;display:flex;align-items:center;justify-content:center;font-family:'Urbanist',sans-serif;font-weight:700;font-size:17px;color:#1A1726}
 .sb .ri{position:absolute;right:0;width:132px;top:14px;height:28px;display:flex;align-items:center;justify-content:center;gap:6px}
-.hi{position:absolute;left:50%;bottom:9px;width:134px;height:5px;margin-left:-67px;border-radius:3px;background:#1A1726}
+.hi{z-index:2;position:absolute;left:50%;bottom:9px;width:134px;height:5px;margin-left:-67px;border-radius:3px;background:#1A1726}
 .dev .frm{position:absolute;inset:0;width:100%;height:100%;display:block}
 .slot{display:flex;align-items:center;justify-content:center;border:3px dashed var(--faint);border-radius:36px;color:var(--faint);font-family:'Space Mono',monospace;font-size:18px;text-align:center;padding:20px}
 
@@ -55,7 +55,7 @@ h1,h2,h3,h4{font-weight:800;letter-spacing:-.025em;line-height:1.02}
 .eco{position:absolute;left:96px;right:96px;top:560px;display:grid;grid-template-columns:repeat(5,1fr);gap:28px}
 .eco-line{position:absolute;left:60px;right:60px;top:-60px;height:6px;border-radius:3px;background:var(--tint2)}
 .eco-tile{background:var(--surface);box-shadow:var(--shadow);border-radius:28px;padding:36px 30px 34px;min-height:360px;display:flex;flex-direction:column}
-.eco-ico{--solar-stroke-width:1.7;width:92px;height:92px;border-radius:26px;background:linear-gradient(135deg,#7B5CFF,#4A2FE0);color:#fff;display:flex;align-items:center;justify-content:center}
+.eco-ico{--solar-stroke-width:1.7;width:92px;height:92px;border-radius:26px;background:var(--tint);color:var(--violet);display:flex;align-items:center;justify-content:center}
 .eco-ico.sm{width:72px;height:72px;border-radius:22px;flex:none}
 .eco-n{font-size:18px;color:var(--faint);margin:26px 0 10px;letter-spacing:.1em}
 .eco-tile h3{font-size:34px;margin-bottom:auto}
@@ -82,7 +82,9 @@ h1,h2,h3,h4{font-weight:800;letter-spacing:-.025em;line-height:1.02}
 .app-art{position:absolute;left:940px;right:96px;top:130px;height:910px;display:flex;align-items:center;justify-content:center}
 .app-art .blob{width:720px;height:720px;left:50%;top:50%;margin:-360px 0 0 -360px}
 .app-art .dev{position:relative}
-.trio-wrap{position:relative;width:880px;height:670px}
+.trio-wrap{position:relative;width:880px;height:770px}
+.bn{position:absolute;text-align:center;font-family:'Space Mono',monospace;font-size:15px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.bn.cap{color:var(--faint);font-size:14px}
 .trio-wrap .dev{position:absolute}
 .app-art.trio .dev{position:absolute}
 

@@ -98,7 +98,7 @@ add(f'''
 <div class="cover-art">
   <div class="blob"></div>
   {device("tablet", "founder-oversight.png", 730, "left:30px;top:250px")}
-  {device("phone", "client-home.png", 250, "left:520px;top:400px", "#fff")}
+  {device("phone", "client-grove.png", 250, "left:520px;top:400px", "#EFE8D8")}
 </div>
 ''', "cover")
 
@@ -187,9 +187,13 @@ app_slide(7, "client", "Branded client app", "The gym's clients", [
     "Top up a wallet and earn loyalty points.",
     "Freeze your own plan.",
 ], '<div class="blob"></div><div class="trio-wrap">'
-   + device("phone", "client-home.png", 284, "left:0;top:90px", "#fff")
-   + device("phone", "client-wallet.png", 284, "left:298px;top:0px", "#fff")
-   + device("phone", "client-points.png", 284, "left:596px;top:90px", "#fff") + '</div>',
+   + device("phone", "client-forge.png", 284, "left:0;top:90px", "#fff")
+   + '<div class="bn" style="left:0;top:690px;width:284px">Forge Athletics</div>'
+   + device("phone", "client-grove.png", 284, "left:298px;top:0px", "#EFE8D8")
+   + '<div class="bn" style="left:298px;top:600px;width:284px">Grove Pilates</div>'
+   + device("phone", "client-ember.png", 284, "left:596px;top:90px", "#fff")
+   + '<div class="bn" style="left:596px;top:690px;width:284px">Ember Boxing Club</div>'
+   + '<div class="bn cap" style="left:0;top:740px;width:880px">Same app, three illustrative gym brands</div></div>',
    extra_bottom='<div class="brandnote">This is the app that carries your gym\'s own brand.</div>', art_cls="trio")
 
 # 8 — Plans at a glance
