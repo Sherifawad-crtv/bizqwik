@@ -14,6 +14,12 @@ const cls = (id: string, title: string, startsAt: string, extra: Record<string, 
   coverage: "drop_in", imageUrl: null, going: { count: 0, initials: [] }, ...extra,
 });
 
+// White (instead of black) overlay on the class photos so the frosted nav pill reads clearly over them.
+const LIGHT_CARDS = `
+[data-testid="class-card"] > div.bg-gradient-to-t{background-image:linear-gradient(to top,rgba(255,255,255,.94),rgba(255,255,255,.5) 45%,rgba(255,255,255,.08))!important}
+[data-testid="class-card"] .font-display,[data-testid="class-card"] [class*="text-white"]{color:#1F2937!important}
+[data-testid="class-card"] span.bg-black\\/40{background:rgba(255,255,255,.75)!important}`;
+
 const BRANDS = [
   { key: "forge", name: "Forge Athletics", color: "#141414", plan: "10-Class Pack",
     classes: [["Strength Club", 18], ["Hybrid Engine", 19], ["Open Gym", 20]], css: "" },
@@ -49,7 +55,7 @@ for (const b of BRANDS) {
     await page.locator('input[type="password"]').fill("ZZpass123!");
     await page.getByRole("button", { name: "Sign in" }).click();
     await expect(page.getByRole("heading", { name: /Hi, Zara/ })).toBeVisible();
-    if (b.css) await page.addStyleTag({ content: b.css });
+    await page.addStyleTag({ content: LIGHT_CARDS + b.css });
     await page.waitForTimeout(2500);
     await page.screenshot({ path: `${OUT}/client-${b.key}.png` });
   });
