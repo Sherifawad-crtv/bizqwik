@@ -8,19 +8,23 @@ from html import escape as e
 
 TOTAL = 15
 
-ICONS = {
-    "founder": '<rect x="3" y="3" width="7" height="9" rx="2"/><rect x="14" y="3" width="7" height="5" rx="2"/><rect x="14" y="12" width="7" height="9" rx="2"/><rect x="3" y="16" width="7" height="5" rx="2"/>',
-    "accountant": '<rect x="5" y="2.5" width="14" height="19" rx="3"/><path d="M8.5 7h7"/><path d="M8.5 12h.01M12 12h.01M15.5 12h.01M8.5 16h.01M12 16h.01M15.5 16h.01" stroke-width="2.4"/>',
-    "frontdesk": '<path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/><rect x="8" y="8" width="3" height="3"/><rect x="13" y="8" width="3" height="3"/><rect x="8" y="13" width="3" height="3"/><path d="M13.5 14.5H16"/>',
-    "coaches": '<circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5"/><circle cx="17" cy="9" r="2.5"/><path d="M16.5 14.6c2.8 0 4.5 1.8 4.5 4.4"/>',
-    "client": '<rect x="7" y="2.5" width="10" height="19" rx="3"/><path d="M10.5 18.5h3"/>',
-}
-CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>'
+import json, re as _re
+SOLAR = json.load(open("icons.json"))
+APP_ICON = {"founder": "chart-square", "accountant": "calculator", "frontdesk": "qr-code", "coaches": "users-group-two-rounded", "client": "smartphone"}
+
+
+def solar(name, size=24, weight="bold-duotone"):
+    svg = SOLAR[f"{weight}/{name}"]
+    svg = _re.sub(r' style="[^"]*"', "", svg, count=1)
+    return svg.replace("<svg ", f'<svg width="{size}" height="{size}" ', 1)
+
+
+CHECK = solar("check-circle", 32)
+CHECK_SM = solar("check-circle", 28)
 
 
 def icon(key, size=44):
-    return (f'<svg class="ico" width="{size}" height="{size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" '
-            f'stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">{ICONS[key]}</svg>')
+    return solar(APP_ICON[key], size, "linear")
 
 
 APPS = [
@@ -33,18 +37,34 @@ APPS = [
 
 # Device geometry: screen window inside each supplied frame image (px in the frame file).
 FRAMES = {
-    "phone": dict(img="assets/frame-phone.webp", w=980, h=2000, x=51, y=45, sw=878, sh=1910),
-    "tablet": dict(img="assets/frame-tablet.webp", w=2000, h=1533, x=84, y=79, sw=1832, sh=1375),
+    "phone": dict(img="assets/frame-phone.webp", w=980, h=2000, x=51, y=45, sw=878, sh=1910, r=96),
+    "tablet": dict(img="assets/frame-tablet.webp", w=2000, h=1533, x=84, y=79, sw=1832, sh=1375, r=38),
 }
+STATUS_BAR = (
+    '<div class="sb"><span class="t">9:41</span><span class="ri">'
+    '<svg width="19" height="12" viewBox="0 0 19 12"><rect x="0" y="8" width="3" height="4" rx="1" fill="#1A1726"/><rect x="5" y="5.5" width="3" height="6.5" rx="1" fill="#1A1726"/><rect x="10" y="3" width="3" height="9" rx="1" fill="#1A1726"/><rect x="15" y="0" width="3" height="12" rx="1" fill="#1A1726"/></svg>'
+    '<svg width="17" height="12" viewBox="0 0 17 12" fill="none" stroke="#1A1726" stroke-width="1.8" stroke-linecap="round"><path d="M1.2 4.3a10 10 0 0 1 14.6 0"/><path d="M3.8 7a6.3 6.3 0 0 1 9.4 0"/><circle cx="8.5" cy="10" r="1.2" fill="#1A1726" stroke="none"/></svg>'
+    '<svg width="27" height="13" viewBox="0 0 27 13"><rect x=".5" y=".5" width="23" height="12" rx="3.6" fill="none" stroke="#1A1726" opacity=".4"/><rect x="2" y="2" width="20" height="9" rx="2.4" fill="#1A1726"/><path d="M25 4.5v4a2 2 0 0 0 0-4z" fill="#1A1726" opacity=".45"/></svg>'
+    '</span></div>'
+)
 
 
-def device(kind, shot, width, style=""):
+def device(kind, shot, width, style="", bg="#F3F2EE"):
     f = FRAMES[kind]
     h = round(width * f["h"] / f["w"])
     pct = lambda v, t: f"{v / t * 100:.3f}%"
-    return (f'<div class="dev" style="width:{width}px;height:{h}px;{style}">'
-            f'<img class="scr" src="assets/shots/{shot}" style="left:{pct(f["x"], f["w"])};top:{pct(f["y"], f["h"])};'
-            f'width:{pct(f["sw"], f["w"])};height:{pct(f["sh"], f["h"])}" alt="">'
+    k = width / f["w"]
+    scr = (f'left:{pct(f["x"], f["w"])};top:{pct(f["y"], f["h"])};width:{pct(f["sw"], f["w"])};'
+           f'height:{pct(f["sh"], f["h"])};border-radius:{f["r"] * k:.1f}px;background:{bg}')
+    if kind == "phone":
+        # Virtual 390x849 iPhone screen: status bar on top, app below it, home-indicator strip at the bottom.
+        scale = f["sw"] * k / 390
+        inner = (f'<div class="inner" style="transform:scale({scale:.4f})">{STATUS_BAR}'
+                 f'<img class="app" src="assets/shots/{shot}" alt=""><div class="hi"></div></div>')
+    else:
+        inner = f'<img class="app tab" src="assets/shots/{shot}" alt="">'
+    return (f'<div class="dev" style="width:{width}px;height:{h}px;{style}"><div class="back" style="{scr}"></div>'
+            f'<div class="screen" style="{scr}">{inner}</div>'
             f'<img class="frm" src="{f["img"]}" alt=""></div>')
 
 
@@ -78,7 +98,7 @@ add(f'''
 <div class="cover-art">
   <div class="blob"></div>
   {device("tablet", "founder-oversight.png", 730, "left:30px;top:250px")}
-  {device("phone", "client-home.png", 250, "left:520px;top:400px")}
+  {device("phone", "client-home.png", 250, "left:520px;top:400px", "#fff")}
 </div>
 ''', "cover")
 
@@ -146,7 +166,7 @@ app_slide(5, "frontdesk", "Front-desk / reception app", "Front desk", [
     "Take payments: cash, card, wallet or InstaPay.",
     "Book clients into classes and see who is coming.",
     "Freeze a client's membership.",
-], '<div class="blob"></div>' + device("phone", "desk-home.png", 450))
+], '<div class="blob"></div>' + device("phone", "desk-home.png", 410))
 
 tiers = '<div class="tiers"><span>Junior coach</span><span>Senior coach</span><span class="on">Head coach</span></div>'
 app_slide(6, "coaches", "Coaches app", "Coaches", [
@@ -157,7 +177,7 @@ app_slide(6, "coaches", "Coaches app", "Coaches", [
     "Attendance on your assigned date only: a coach can't log a session outside their assigned slot.",
     ("Hand over a session: a coach can assign or request a swap with another coach, at least 2 hours before the session, and only if the other coach accepts.", "hl"),
     "Head coach: review and edit sessions and handle settlements.",
-], '<div class="blob"></div>' + device("phone", "coach-home.png", 450), extra_top=tiers)
+], '<div class="blob"></div>' + device("phone", "coach-home.png", 410), extra_top=tiers)
 
 app_slide(7, "client", "Branded client app", "The gym's clients", [
     "Your gym's own name, logo, colours and web address.",
@@ -166,10 +186,10 @@ app_slide(7, "client", "Branded client app", "The gym's clients", [
     "Buy memberships and bundles.",
     "Top up a wallet and earn loyalty points.",
     "Freeze your own plan.",
-], '<div class="blob"></div>'
-   + device("phone", "client-home.png", 330, "left:0;top:90px")
-   + device("phone", "client-wallet.png", 330, "left:300px;top:0px")
-   + device("phone", "client-points.png", 330, "left:600px;top:90px"),
+], '<div class="blob"></div><div class="trio-wrap">'
+   + device("phone", "client-home.png", 284, "left:0;top:90px", "#fff")
+   + device("phone", "client-wallet.png", 284, "left:298px;top:0px", "#fff")
+   + device("phone", "client-points.png", 284, "left:596px;top:90px", "#fff") + '</div>',
    extra_bottom='<div class="brandnote">This is the app that carries your gym\'s own brand.</div>', art_cls="trio")
 
 # 8 — Plans at a glance
@@ -247,7 +267,7 @@ def row(label, vals, cls=""):
     return f'<tr class="{cls}"><th>{e(label)}</th>' + "".join(f"<td>{v}</td>" for v in vals) + "</tr>"
 
 
-ok = f'<span class="ok">{CHECK}</span>'
+ok = f'<span class="ok">{CHECK_SM}</span>'
 dash = '<span class="no">—</span>'
 tbl = row("Price (EGP / month)", ["<b>1,290</b>", "<b>4,990</b>", "<b>14,990</b>", "<b>Contact us</b>"], "prow")
 tbl += row("For", [PLANS[c]["who"] for c in cols], "small")
@@ -272,6 +292,7 @@ add(f'''
 ''', "compare")
 
 # 14 — Add-ons
+ADD_ICONS = ["smartphone", "smartphone-update", "stars", "cpu-bolt", "buildings", "map-point-add", "user-plus", "chat-round-dots"]
 ADD = [
     ("Branded native app on the app stores", "Your own app in the App Store and Google Play, under your name"),
     ("Branded client app (PWA)", "Your own installable app for clients, for plans that don't include it"),
@@ -282,7 +303,7 @@ ADD = [
     ("Extra staff member", "Add more team seats"),
     ("WhatsApp / SMS messages", "Send reminders, renewals and announcements to clients"),
 ]
-acards = "".join(f'<div class="acard"><div class="plus">+</div><h3>{e(a)}</h3><p>{e(b)}</p></div>' for a, b in ADD)
+acards = "".join(f'<div class="acard"><div class="plus">{solar(ADD_ICONS[i], 32, "linear")}</div><h3>{e(a)}</h3><p>{e(b)}</p></div>' for i, (a, b) in enumerate(ADD))
 add(f'''
 {chrome(14)}
 <div class="head"><div class="eyebrow">Add-ons</div><h2>Add what you need.</h2></div>

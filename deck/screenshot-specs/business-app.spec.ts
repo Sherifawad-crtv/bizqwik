@@ -29,12 +29,12 @@ test("founder tablet", async ({ page }) => {
   await page.goto("/money"); await shot(page, "founder-money");
 });
 test("coach phone", async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
+  await page.setViewportSize({ width: 390, height: 761 });
   await mockBackend(page, "coach", { ["month/" + THIS]: { rows: [{ ...ROWS[2], coachId: "prof-zz", name: "Coach", tierName: "Senior", count: 16, groupTotal: 2400, total: 2400 }] }, ["prof-zz/" + THIS]: { sessions: [1,2,3,4,5,6,7].map((d) => ({ id: "s" + d, coachId: "prof-zz", month: THIS, date: THIS + "-" + String(d).padStart(2, "0"), createdBy: "prof-zz", source: "qr" })) } });
   await page.goto("/"); await shot(page, "coach-home");
 });
 test("front desk phone", async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
+  await page.setViewportSize({ width: 390, height: 761 });
   await page.clock.install({ time: new Date(new Date().setHours(9, 0, 0, 0)) });
   await mockBackend(page, "front_desk", { classes: { classes: [7, 9, 18].map((h, i) => { const t = new Date(); t.setHours(h + 9, 0, 0, 0); return { id: "k" + i, seriesId: "s" + i, title: ["Sunrise HIIT", "Power Yoga", "Boxing"][i], description: null, startsAt: t.toISOString(), price: 150, status: "active", bookedCount: 8 - i }; }) }, "front-desk/summary": { todayCheckIns: 14, todayDropIns: 3, activeNow: 6, recent: [] } });
   await page.goto("/"); await shot(page, "desk-home");
