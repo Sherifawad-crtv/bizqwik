@@ -236,9 +236,9 @@ app_slide(7, "client", "Branded client app", "The gym's clients",
 
 # ---------------------------------------------------------------- 8 Plans at a glance
 PLANS = {
-    "Start": dict(price="1,290", who="Independent coaches and solo studios", inc="60", extra="25 EGP", staff="1", dept="1", loc="1",
+    "Solopreneur": dict(price="1,290", who="Independent coaches and solo studios", inc="60", extra="25 EGP", staff="1", dept="1", loc="1",
                   exp="Branded booking page", integ="—", line="The founder app and a branded booking page.",
-                  apps=dict(founder="Single-role: the owner does everything")),
+                  apps=dict(founder="")),
     "Grow": dict(price="4,990", who="Studios and gyms with a team", inc="300", extra="20 EGP", staff="10", dept="1", loc="1",
                  exp="Branded client app (PWA)", integ="—", line="All five apps, with a branded client app (PWA).",
                  apps=dict(founder="", accountant="", frontdesk="", coaches="Junior, senior, head", client="PWA")),
@@ -252,27 +252,19 @@ PLANS = {
 ORDER = list(PLANS)
 
 
-def app_dots(p, cls="apps5"):
-    return f'<div class="{cls}">' + "".join(
-        f'<span class="m{"" if k in p["apps"] else " off"}">{icon(k, 22)}</span>' for k, _, _ in APPS) + "</div>"
-
-
 cards = ""
 for name, p in PLANS.items():
     grow = name == "Grow"
     price = (f'<div class="price"><b>{p["price"]}</b><span>EGP / month</span></div>' if p["price"]
              else '<div class="price"><b class="contact">Contact us</b><span>&nbsp;</span></div>')
-    label = '<div class="best flag">Best fit for studios</div>' if grow else ''
-    apps_note = "Custom" if name == "Enterprise" else f'{len(p["apps"])} of 5'
+    label = '<div class="best">Best fit for studios</div>' if grow else '<div class="best ghost">&nbsp;</div>'
     cards += f"""<div class="pcard{' grow' if grow else ''}">
   {label}<h3>{name}</h3><div class="who">{e(p["who"])}</div>{price}
-  <div class="kv2"><div class="kv big"><span>Active clients included</span><b>{p["inc"]}</b></div>
-  <div class="kv"><span>Each extra client</span><b>{p["extra"]}</b></div></div>
-  <div class="apps-row"><span>Apps · {apps_note}</span>{app_dots(p)}</div>
-  <div class="cxl"><span>Client experience</span>{e(p["exp"])}</div></div>"""
+  <div class="pl"><span>Active clients included</span><b>{p["inc"]}</b></div>
+  <div class="pl"><span>Each extra client</span><b>{p["extra"]}</b></div></div>"""
 add(f"""
 {chrome(8, "Plans")}
-<div class="head g one"><h2>Four plans. One monthly price each.</h2>
+<div class="head g"><h2>Four plans.<br>One monthly price each.</h2>
 <p class="lede">Start small. Move up as you grow.</p></div>
 <div class="pgrid">{cards}</div>
 <div class="foot-notes g"><div class="rule"><span class="ri">{solar("star", 28, "bold-duotone")}</span><span><b>Extra clients never cost more than the next plan.</b> If extra-client charges would pass the next plan's price, you simply move up.</span></div>
@@ -282,7 +274,7 @@ add(f"""
 
 # ---------------------------------------------------------------- 9-12 Plans
 NEXT = {
-    "Start": ("Grow", "4,990 EGP / month", "300 clients, 10 staff and all five apps"),
+    "Solopreneur": ("Grow", "4,990 EGP / month", "300 clients, 10 staff and all five apps"),
     "Grow": ("Scale", "14,990 EGP / month", "1,500 clients, 5 departments and a native app on the app stores"),
     "Scale": ("Enterprise", "Contact us", "For large or multi-site communities"),
     "Enterprise": None,
@@ -297,8 +289,36 @@ def stat(label, value, big=False):
     return f'<div class="st{" big" if big else ""}"><span>{e(label)}</span><b>{e(value)}{u}</b></div>'
 
 
+def enterprise_slide(n):
+    p = PLANS["Enterprise"]
+    stepper = "".join(f'<span class="{"on" if x == "Enterprise" else ""}">{x}</span>' for x in ORDER)
+    items = ["Active clients included", "Each extra client", "Staff", "Departments", "Locations",
+             "Apps included", "Client experience", "Physical integrations (e.g. gate access)"]
+    lis = "".join(f'<li><span class="n">{i + 1:02d}</span><span class="l">{e(t)}</span></li>' for i, t in enumerate(items))
+    add(f"""
+{chrome(n, "Plans")}
+<div class="stepper at">{stepper}</div>
+<div class="pp-left dark">
+  <div class="pp-top"><span class="pp-n">Plan 4 of 4</span></div>
+  <h2 class="long" style="font-size:98px">Enterprise</h2>
+  <div class="pp-for">{e(p["who"])}</div>
+  <div class="pp-price"><b class="contact">Contact us</b></div>
+  <div class="pp-line">Everything is custom, built around your community.</div>
+  <div class="pp-next"><span class="lbl">Next step</span><div class="nx"><b>Let's talk</b></div>
+  <div class="nt">Contact us to set yours up.</div></div>
+</div>
+<div class="pp-right ent">
+  <div class="ent-h"><h2>Every part of the plan<br>is set around you.</h2>
+  <p>Large or multi-site communities get all of these tailored.</p></div>
+  <ol class="ent-list">{lis}</ol>
+</div>
+""", "plan")
+
+
 def plan_slide(n, name):
     p = PLANS[name]
+    if name == "Enterprise":
+        return enterprise_slide(n)
     grow = name == "Grow"
     idx = ORDER.index(name)
     tiles = ""
@@ -323,7 +343,7 @@ def plan_slide(n, name):
 <div class="stepper at">{stepper}</div>
 <div class="pp-left{' grow' if grow else ''}">
   <div class="pp-top"><span class="pp-n">Plan {idx + 1} of 4</span>{best}</div>
-  <h2{' class="long"' if len(name) > 7 else ''}>{name}</h2>
+  <h2{' class="long" style="font-size:%dpx"' % (98 if len(name) <= 10 else 82) if len(name) > 7 else ''}>{name}</h2>
   <div class="pp-for">{e(p["who"])}</div>
   {price}
   <div class="pp-line">{e(p["line"])}</div>
@@ -369,7 +389,7 @@ tbl += grp("Experience")
 tbl += row("Client experience", ["Branded booking page", "Branded client app (PWA)", "Native app on the app stores", "Custom"])
 tbl += row("Physical integrations (e.g. gate access)", [dash, dash, "Included", "Custom"])
 tbl += grp("Apps included")
-tbl += row("Founder / C-suite app", [f"{ok} single-role: the owner does everything", ok, f"{ok} per department", "Custom"], "app")
+tbl += row("Founder / C-suite app", [ok, ok, f"{ok} per department", "Custom"], "app")
 tbl += row("Accountant dashboard", [dash, ok, ok, "Custom"], "app")
 tbl += row("Front-desk / reception app", [dash, ok, ok, "Custom"], "app")
 tbl += row("Coaches app (junior, senior, head)", [dash, ok, ok, "Custom"], "app")
