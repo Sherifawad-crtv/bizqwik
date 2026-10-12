@@ -53,18 +53,25 @@ test("front desk phone", async ({ page }) => {
   await page.goto("/"); await shot(page, "desk-home");
 });
 
-test("front desk calendar tablet (day view)", async ({ page }) => {
+test("front desk calendar tablet (week view)", async ({ page }) => {
   await page.setViewportSize({ width: 1100, height: 826 });
   await page.clock.install({ time: new Date(new Date().setHours(10, 20, 0, 0)) });
-  const today = (h: number, m = 0) => { const t = new Date(); t.setHours(h, m, 0, 0); return t.toISOString(); };
-  const C = [
-    ["Sunrise HIIT", 7, 0, 18], ["Mobility Flow", 8, 0, 11], ["Strength Club", 9, 30, 16], ["Reformer Flow", 11, 0, 9],
-    ["Power Yoga", 12, 30, 14], ["Mat Pilates", 14, 0, 10], ["Kids Gym", 15, 30, 13], ["Open Gym", 16, 0, 8], ["Boxing Fundamentals", 17, 0, 19], ["Hybrid Engine", 18, 30, 20], ["Evening Yoga", 20, 0, 12],
-  ] as const;
-  const classes = C.map(([title, h, m, n], i) => ({ id: "k" + i, seriesId: "s" + i, title, description: null, startsAt: today(h, m), price: 250, status: "active", bookedCount: n }));
+  // The calendar's week runs Saturday to Friday; fill every day with a realistic timetable.
+  const sat = new Date(); sat.setHours(0, 0, 0, 0); sat.setDate(sat.getDate() - ((sat.getDay() + 1) % 7));
+  const at = (d: number, h: number, m = 0) => { const t = new Date(sat); t.setDate(t.getDate() + d); t.setHours(h, m, 0, 0); return t.toISOString(); };
+  const T = ["Sunrise HIIT", "Mobility Flow", "Strength Club", "Reformer Flow", "Power Yoga", "Mat Pilates", "Kids Gym", "Boxing Fundamentals", "Hybrid Engine", "Evening Yoga"];
+  const PLAN: [number, number, number][][] = [
+    [[0, 9, 0], [4, 10, 30], [2, 17, 0]],                                  // Sat
+    [[1, 10, 0], [5, 11, 30], [8, 18, 0]],                                 // Sun
+    [[0, 7, 0], [1, 8, 30], [2, 9, 30], [4, 12, 30], [6, 15, 30], [7, 17, 0], [8, 18, 30], [9, 20, 0]], // Mon
+    [[0, 7, 0], [3, 9, 30], [5, 14, 0], [2, 17, 30], [9, 19, 30]],         // Tue
+    [[1, 8, 0], [4, 12, 0], [6, 16, 0], [7, 18, 0], [8, 19, 30]],          // Wed
+    [[0, 7, 0], [2, 9, 30], [3, 11, 0], [5, 15, 0], [7, 17, 30], [9, 20, 0]], // Thu
+    [[1, 8, 0], [4, 10, 30], [8, 17, 0]],                                  // Fri
+  ];
+  const classes = PLAN.flatMap((day, d) => day.map(([t, h, m], i) => ({ id: `k${d}-${i}`, seriesId: `s${t}`, title: T[t], description: null, startsAt: at(d, h, m), price: 250, status: "active", bookedCount: 6 + ((d * 7 + i * 5 + t * 3) % 15) })));
   await mockBackend(page, "front_desk", { "front-desk/summary": { todayCheckIns: 14, todayDropIns: 3, activeNow: 6, recent: [] }, classes: { classes } });
   await page.goto("/desk-classes");
-  await page.getByRole("button", { name: "DAY", exact: true }).first().click();
-  await page.waitForTimeout(2500);
+  await page.waitForTimeout(3000);
   await page.screenshot({ path: OUT + "/desk-calendar.png" });
 });
