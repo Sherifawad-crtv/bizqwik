@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Bizqwik Product &amp; Pricing</title>
+<meta name="viewport" content="width=1920">
+<link rel="stylesheet" href="assets/fonts.css">
+<style>:root{
+  --paper:#F3F2EE;--surface:#FBFAF7;--sunken:#ECEBE5;--line:#E3E1DA;
+  --ink:#1A1726;--muted:#6C687A;--faint:#9A96A6;
+  --violet:#5A41FF;--pressed:#4832D6;--tint:rgba(90,65,255,.10);--tint2:rgba(90,65,255,.12);
+  --amber:#946200;--amberbg:#F6E7C4;--green:#177A4B;--greenbg:#D8EFE0;
+  --shadow:0 1px 2px rgba(26,23,38,.04),0 8px 24px -12px rgba(26,23,38,.10);
+}
+@page{size:1920px 1080px;margin:0}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--paper)}
+body{font-family:'Urbanist',sans-serif;color:var(--ink);font-weight:500;-webkit-font-smoothing:antialiased}
+.slide{position:relative;width:1920px;height:1080px;overflow:hidden;background:var(--paper);page-break-after:always;break-after:page}
+.mono,.eyebrow,.usedby span,.pill,.sub,.eco-n,.eco-by span,.note,.tag,.best,.lim span,.pl span,.cx span,.placeholder span{font-family:'Space Mono',monospace}
+h1,h2,h3,h4{font-weight:800;letter-spacing:-.025em;line-height:1.02}
+.logo{position:absolute;left:96px;top:64px;height:44px;width:auto}
+.pill{position:absolute;right:96px;top:62px;display:flex;gap:8px;align-items:baseline;background:var(--surface);box-shadow:var(--shadow);border-radius:999px;padding:12px 24px;font-size:18px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.pill b{color:var(--ink);font-weight:700}.pill i{font-style:normal}
+.eyebrow{font-size:20px;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);margin-bottom:22px}
+.lede{font-size:34px;line-height:1.3;color:var(--muted);font-weight:500;margin-top:22px}
+.head{position:absolute;left:96px;top:190px;right:96px}
+.head h2{font-size:96px}
+.head.tight{top:136px}.head.tight h2{font-size:56px}.head.tight .eyebrow{margin-bottom:14px}
+.blob{position:absolute;border-radius:50%;background:var(--tint);filter:blur(0)}
+.ico{display:block}
+
+/* cover */
+.cover .cover-logo{height:84px;left:96px;top:96px}
+.cover-copy{position:absolute;left:96px;top:330px;width:1000px}
+.cover h1{font-size:86px;line-height:1;letter-spacing:-.03em}
+.cover .lede{font-size:36px;max-width:720px;margin-top:40px}
+.cover-art{position:absolute;left:1110px;top:0;width:810px;height:1080px}
+.cover-art .blob{width:700px;height:700px;left:60px;top:200px}
+.cover-art .dev{position:absolute}
+.close .close-copy{position:absolute;left:96px;top:330px}
+.close h1{font-size:150px}
+.placeholder{margin-top:70px;border:3px dashed var(--faint);border-radius:28px;padding:30px 36px;font-size:30px;color:var(--muted);width:1000px}
+.placeholder span{display:block;font-size:18px;letter-spacing:.14em;color:var(--amber);margin-bottom:12px}
+
+/* devices */
+.dev{position:relative}
+.dev .scr{position:absolute;object-fit:cover;object-position:top;display:block}
+.dev .frm{position:absolute;inset:0;width:100%;height:100%;display:block}
+.slot{display:flex;align-items:center;justify-content:center;border:3px dashed var(--faint);border-radius:36px;color:var(--faint);font-family:'Space Mono',monospace;font-size:18px;text-align:center;padding:20px}
+
+/* ecosystem */
+.head p.lede{font-size:34px}
+.eco{position:absolute;left:96px;right:96px;top:560px;display:grid;grid-template-columns:repeat(5,1fr);gap:28px}
+.eco-line{position:absolute;left:60px;right:60px;top:-60px;height:6px;border-radius:3px;background:var(--tint2)}
+.eco-tile{background:var(--surface);box-shadow:var(--shadow);border-radius:28px;padding:36px 30px 34px;min-height:360px;display:flex;flex-direction:column}
+.eco-ico{width:92px;height:92px;border-radius:26px;background:linear-gradient(135deg,#7B5CFF,#4A2FE0);color:#fff;display:flex;align-items:center;justify-content:center}
+.eco-ico.sm{width:72px;height:72px;border-radius:22px;flex:none}
+.eco-n{font-size:18px;color:var(--faint);margin:26px 0 10px;letter-spacing:.1em}
+.eco-tile h3{font-size:34px;margin-bottom:auto}
+.eco-by{font-size:24px;color:var(--ink);margin-top:26px;line-height:1.25}
+.eco-by span{display:block;font-size:15px;text-transform:uppercase;letter-spacing:.12em;color:var(--faint);margin-bottom:6px}
+.sync-pill{position:absolute;left:50%;transform:translateX(-50%);top:454px;background:var(--tint2);color:var(--pressed);border-radius:999px;padding:14px 34px;font-size:26px;font-weight:700}
+
+/* app slides */
+.app-copy{position:absolute;left:96px;top:170px;width:790px}
+.app-title{display:flex;align-items:center;gap:22px}
+.app-title h2{font-size:56px}
+.usedby{margin-top:22px;font-size:26px;display:flex;align-items:center;gap:16px}
+.usedby span{font-size:15px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);background:var(--sunken);padding:8px 14px;border-radius:999px}
+.feat{list-style:none;margin-top:34px;display:flex;flex-direction:column;gap:14px}
+.feat li{display:flex;gap:16px;font-size:26px;line-height:1.28;padding:2px 0}
+.feat li.hl{background:var(--tint);border-radius:22px;padding:14px 20px;margin:0 -20px}
+.chk{flex:none;width:34px;height:34px;border-radius:50%;background:var(--tint2);color:var(--violet);display:flex;align-items:center;justify-content:center;margin-top:0}
+.chk svg{width:18px;height:18px}
+.tag{display:inline-block;background:var(--amberbg);color:var(--amber);border-radius:999px;padding:4px 12px;font-size:15px;text-transform:uppercase;letter-spacing:.08em;margin-left:6px;vertical-align:2px}
+.tiers{display:flex;gap:12px;margin-top:26px}
+.tiers span{background:var(--surface);box-shadow:var(--shadow);border-radius:999px;padding:12px 24px;font-size:24px;font-weight:700}
+.tiers span.on{background:var(--tint2);color:var(--pressed)}
+.brandnote{margin-top:30px;font-size:28px;font-weight:700;color:var(--pressed);background:var(--tint2);border-radius:22px;padding:18px 24px}
+.app-art{position:absolute;right:96px;top:170px;width:960px;height:860px}
+.app-art .blob{width:760px;height:760px;right:60px;top:50px}
+.app-art .dev{position:absolute;top:50%;right:0;transform:translateY(-50%)}
+.app-art.trio{width:930px;right:80px}
+.app-art.trio .blob{width:760px;height:760px;left:80px;top:60px}
+.app-art.trio .dev{transform:none}
+
+/* plans glance */
+.pgrid{position:absolute;left:96px;right:96px;top:420px;display:grid;grid-template-columns:repeat(4,1fr);gap:32px}
+.pcard{background:var(--surface);box-shadow:var(--shadow);border-radius:28px;padding:34px 34px 38px;min-height:440px;display:flex;flex-direction:column}
+.pcard h3{font-size:46px;margin-top:6px}
+.pcard .who{font-size:21px;color:var(--muted);margin-top:10px;min-height:56px;line-height:1.3}
+.price{margin:20px 0 22px;display:flex;flex-direction:column;gap:4px}
+.price b{font-size:72px;font-weight:800;letter-spacing:-.03em;font-variant-numeric:tabular-nums;line-height:1;color:var(--violet)}
+.price b.contact,.bigprice b.contact{font-size:54px;letter-spacing:-.025em}
+.price span{font-family:'Space Mono',monospace;font-size:18px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.pl{display:flex;justify-content:space-between;align-items:baseline;padding:11px 0;border-top:1px solid var(--line);gap:10px}
+.pl span{font-size:14px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.pl b{font-size:26px;font-weight:800;font-variant-numeric:tabular-nums}
+.best{display:inline-block;align-self:flex-start;background:rgba(255,255,255,.2);color:#fff;border-radius:999px;padding:6px 14px;font-size:14px;text-transform:uppercase;letter-spacing:.08em}
+.best.ghost{background:transparent;color:transparent}
+.pcard.grow{background:var(--violet);color:#fff}
+.pcard.grow .who,.pcard.grow .price span,.pcard.grow .pl span{color:rgba(255,255,255,.78)}
+.pcard.grow .price b{color:#fff}
+.pcard.grow .pl{border-top-color:rgba(255,255,255,.25)}
+.foot-notes{position:absolute;left:96px;right:96px;top:920px;display:flex;flex-direction:column;gap:14px}
+.note{font-size:18px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.rule{font-size:26px;color:var(--ink)}.rule b{color:var(--pressed)}
+
+/* plan slides */
+.plan-left{position:absolute;left:96px;top:190px;width:700px}
+.plan-name{display:flex;align-items:center;gap:20px}
+.plan-name h2{font-size:124px}
+.best.inline{background:var(--violet);color:#fff;font-size:15px;padding:9px 16px}
+.bigprice{margin-top:34px;display:flex;align-items:baseline;gap:18px}
+.bigprice b{font-size:110px;font-weight:800;letter-spacing:-.03em;font-variant-numeric:tabular-nums;color:var(--violet);line-height:1}
+.bigprice span{font-family:'Space Mono',monospace;font-size:22px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.bigprice b.contact{font-size:84px}
+.who.big{font-size:32px;color:var(--ink);margin-top:34px;line-height:1.25}
+.cx{margin-top:44px;background:var(--surface);box-shadow:var(--shadow);border-radius:28px;padding:30px 34px}
+.cx span{display:block;font-size:15px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:12px}
+.cx b{font-size:40px;font-weight:800;letter-spacing:-.02em}
+.plan-right{position:absolute;left:850px;right:96px;top:190px}
+.sub{font-size:18px;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);margin:0 0 20px}
+.ptiles{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;margin-bottom:54px}
+.ptile{background:var(--surface);box-shadow:var(--shadow);border-radius:24px;padding:22px 16px 20px;display:flex;flex-direction:column;align-items:flex-start;min-height:272px}
+.ptile .eco-ico{width:68px;height:68px;border-radius:20px}
+.ptile h4{font-size:21px;margin-top:18px;letter-spacing:-.01em;line-height:1.1}
+.ptile .cap{font-size:16px;color:var(--muted);margin-top:auto;line-height:1.25;padding-top:10px}
+.ptile.off{background:transparent;box-shadow:none;outline:2px dashed var(--line);outline-offset:-2px}
+.ptile.off .eco-ico{background:var(--sunken);color:var(--faint)}
+.ptile.off h4,.ptile.off .cap{color:var(--faint)}
+.lims{display:grid;grid-template-columns:1fr 1fr;gap:14px 20px}
+.lim{background:var(--surface);box-shadow:var(--shadow);border-radius:22px;padding:22px 26px;display:flex;flex-direction:column;gap:8px}
+.lim span{font-size:14px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.lim b{font-size:38px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+
+/* compare */
+.cmp{position:absolute;left:96px;right:96px;top:262px;table-layout:fixed;width:1728px;border-collapse:collapse;font-size:21px}
+.cmp th,.cmp td{padding:0 18px;height:40px;text-align:left;vertical-align:middle;font-weight:500}
+.cmp thead th{font-size:30px;font-weight:800;letter-spacing:-.02em;height:54px;color:var(--ink)}
+.cmp tbody tr:nth-child(odd){background:var(--sunken)}
+.cmp thead th:first-child,.cmp tbody th{width:420px}.cmp tbody th{font-weight:700;color:var(--ink)}
+.cmp tbody tr:first-child td,.cmp tbody tr.prow td{font-size:26px}
+.cmp td b{font-weight:800;font-variant-numeric:tabular-nums;color:var(--violet)}
+.cmp tr.small td{font-size:16px;line-height:1.15;height:50px;color:var(--muted)}
+.cmp tr.app td{font-size:19px}
+.cmp tbody tr:first-child th{border-radius:16px 0 0 16px}.cmp tbody tr:first-child td:last-child{border-radius:0 16px 16px 0}
+.ok{display:inline-flex;vertical-align:middle;width:28px;height:28px;border-radius:50%;background:var(--greenbg);color:var(--green);align-items:center;justify-content:center;margin-right:8px}
+.ok svg{width:16px;height:16px}.no{color:var(--faint)}
+.compare .foot-notes{top:935px;gap:6px}
+.compare .all{font-size:18px;color:var(--muted);line-height:1.3}
+.compare .note{font-size:16px}
+
+/* add-ons */
+.agrid{position:absolute;left:96px;right:96px;top:390px;display:grid;grid-template-columns:repeat(4,1fr);gap:28px}
+.acard{background:var(--surface);box-shadow:var(--shadow);border-radius:28px;padding:34px 32px 36px;min-height:290px;display:flex;flex-direction:column}
+.plus{width:56px;height:56px;border-radius:50%;background:var(--tint2);color:var(--violet);font-size:38px;font-weight:700;display:flex;align-items:center;justify-content:center;line-height:1;margin-bottom:26px}
+.acard h3{font-size:31px;letter-spacing:-.02em;line-height:1.08}
+.acard p{font-size:21px;color:var(--muted);margin-top:14px;line-height:1.3}
+
+.close-art{position:absolute;right:96px;top:150px;width:720px;height:780px}
+.close-art .blob{width:640px;height:640px;left:40px;top:70px}
+.ci{position:absolute}
+.ci .eco-ico{width:150px;height:150px;border-radius:44px}
+.ci .eco-ico svg{width:72px;height:72px}
+.ci0{left:60px;top:90px}.ci1{left:430px;top:60px}.ci2{left:250px;top:300px}.ci3{left:20px;top:500px}.ci4{left:470px;top:470px}
+</style></head><body>
+<section class="slide cover">
+<img class="logo cover-logo" src="assets/logo.webp" alt="Bizqwik">
+<div class="cover-copy">
+  <div class="eyebrow">Product &amp; pricing</div>
+  <h1>One ecosystem.<br>Your whole community.</h1>
+  <p class="lede">Founder, accountant, front desk, coaches and clients, all in sync.</p>
+</div>
+<div class="cover-art">
+  <div class="blob"></div>
+  <div class="dev" style="width:730px;height:560px;left:30px;top:250px"><img class="scr" src="assets/shots/founder-oversight.png" style="left:4.200%;top:5.153%;width:91.600%;height:89.693%" alt=""><img class="frm" src="assets/frame-tablet.webp" alt=""></div>
+  <div class="dev" style="width:250px;height:510px;left:520px;top:400px"><img class="scr" src="assets/shots/client-home.png" style="left:5.204%;top:2.250%;width:89.592%;height:95.500%" alt=""><img class="frm" src="assets/frame-phone.webp" alt=""></div>
+</div>
+</section>
+<section class="slide ">
+<img class="logo" src="assets/logo.webp" alt="Bizqwik"><div class="pill"><b>02</b><i>/ 15</i></div>
+<div class="head"><div class="eyebrow">The ecosystem</div>
+<h2>Five apps. One connected system.</h2>
+<p class="lede">One for each person who touches the business.</p></div>
+<div class="eco"><div class="eco-line"></div><div class="eco-tile"><div class="eco-ico"><svg class="ico" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="2"/><rect x="14" y="3" width="7" height="5" rx="2"/><rect x="14" y="12" width="7" height="9" rx="2"/><rect x="3" y="16" width="7" height="5" rx="2"/></svg></div><div class="eco-n">01</div><h3>Founder / C-suite app</h3><div class="eco-by"><span>Used by</span>Gym owner, department head</div></div><div class="eco-tile"><div class="eco-ico"><svg class="ico" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2.5" width="14" height="19" rx="3"/><path d="M8.5 7h7"/><path d="M8.5 12h.01M12 12h.01M15.5 12h.01M8.5 16h.01M12 16h.01M15.5 16h.01" stroke-width="2.4"/></svg></div><div class="eco-n">02</div><h3>Accountant dashboard</h3><div class="eco-by"><span>Used by</span>Accountant</div></div><div class="eco-tile"><div class="eco-ico"><svg class="ico" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/><rect x="8" y="8" width="3" height="3"/><rect x="13" y="8" width="3" height="3"/><rect x="8" y="13" width="3" height="3"/><path d="M13.5 14.5H16"/></svg></div><div class="eco-n">03</div><h3>Front-desk / reception app</h3><div class="eco-by"><span>Used by</span>Front desk</div></div><div class="eco-tile"><div class="eco-ico"><svg class="ico" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5"/><circle cx="17" cy="9" r="2.5"/><path d="M16.5 14.6c2.8 0 4.5 1.8 4.5 4.4"/></svg></div><div class="eco-n">04</div><h3>Coaches app</h3><div class="eco-by"><span>Used by</span>Coaches</div></div><div class="eco-tile"><div class="eco-ico"><svg class="ico" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2.5" width="10" height="19" rx="3"/><path d="M10.5 18.5h3"/></svg></div><div class="eco-n">05</div><h3>Branded client app</h3><div class="eco-by"><span>Used by</span>The gym&#x27;s clients</div></div></div>
+<div class="sync-pill">All in sync</div>
+</section>
+<section class="slide app">
+<img class="logo" src="assets/logo.webp" alt="Bizqwik"><div class="pill"><b>03</b><i>/ 15</i></div>
+<div class="app-copy">
+  <div class="eyebrow">App 1 of 5</div>
+  <div class="app-title"><div class="eco-ico sm"><svg class="ico" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="2"/><rect x="14" y="3" width="7" height="5" rx="2"/><rect x="14" y="12" width="7" height="9" rx="2"/><rect x="3" y="16" width="7" height="5" rx="2"/></svg></div><h2>Founder / C-suite app</h2></div>
+  <div class="usedby"><span>Used by</span>Gym owner, department head</div>
+  
+  <ul class="feat"><li class=""><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span>See revenue, profit, coach payouts and active subscribers in one dashboard.</span></li><li class=""><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span>Set prices, memberships, bundles and class schedules.</span></li><li class=""><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span>Manage the team: invite staff, give each a role, assign coach tiers and rates.</span></li><li class=""><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span>Set personal training packages and each tier&#x27;s cut.</span></li><li class=""><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span>Review and approve sessions and InstaPay receipts.</span></li><li class=""><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span>Staff attendance: see who attended and exactly when, with timestamps, and who was late or on time against the assigned session time.</span></li><li class=""><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span>Brand your client app in minutes.</span></li><li class=""><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span>Run several departments and locations, each with its own prices, coaches and sessions. <span class="tag">Scale plan only</span></span></li></ul>
+  
+</div>
+<div class="app-art "><div class="blob"></div><div class="dev" style="width:860px;height:659px;"><img class="scr" src="assets/shots/founder-oversight.png" style="left:4.200%;top:5.153%;width:91.600%;height:89.693%" alt=""><img class="frm" src="assets/frame-tablet.webp" alt=""></div></div>
+</section>
+<section class="slide app">
+<img class="logo" src="assets/logo.webp" alt="Bizqwik"><div class="pill"><b>04</b><i>/ 15</i></div>
+<div class="app-copy">
+  <div class="eyebrow">App 2 of 5</div>
+  <div class="app-title"><div class="eco-ico sm"><svg class="ico" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2.5" width="14" height="19" rx="3"/><path d="M8.5 7h7"/><path d="M8.5 12h.01M12 12h.01M15.5 12h.01M8.5 16h.01M12 16h.01M15.5 16h.01" stroke-width="2.4"/></svg></div><h2>Accountant dashboard</h2></div>
+  <div class="usedby"><span>Used by</span>Accountant</div>
+  
+  <ul class="feat"><li class=""><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span>See revenue and each coach&#x27;s earnings for the month.</span></li><li class=""><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span>Run the monthly payout: settle, pay, mark paid.</span></li><li class=""><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span>Keep a clear record of what was paid and when.</span></li></ul>
+  
+</div>
+<div class="app-art "><div class="blob"></div><div class="dev" style="width:860px;height:659px;"><img class="scr" src="assets/shots/accountant-pay.png" style="left:4.200%;top:5.153%;width:91.600%;height:89.693%" alt=""><img class="frm" src="assets/frame-tablet.webp" alt=""></div></div>
+</section>
+<section class="slide app">
+<img class="logo" src="assets/logo.webp" alt="Bizqwik"><div class="pill"><b>05</b><i>/ 15</i></div>
+<div class="app-copy">
+  <div class="eyebrow">App 3 of 5</div>
+  <div class="app-title"><div class="eco-ico sm"><svg class="ico" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/><rect x="8" y="8" width="3" height="3"/><rect x="13" y="8" width="3" height="3"/><rect x="8" y="13" width="3" height="3"/><path d="M13.5 14.5H16"/></svg></div><h2>Front-desk / reception app</h2></div>
+  <div class="usedby"><span>Used by</span>Front desk</div>
+  
+  <ul class="feat"><li class=""><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span>Check clients in by QR code.</span></li><li class=""><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span>Sell memberships, bundles and drop-in passes.</span></li><li class=""><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span>Take payments: cash, card, wallet or InstaPay.</span></li><li class=""><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span>Book clients into classes and see who is coming.</span></li><li class=""><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span>Freeze a client&#x27;s membership.</span></li></ul>
+  
+</div>
+<div class="app-art "><div class="blob"></div><div class="dev" style="width:450px;height:918px;"><img class="scr" src="assets/shots/desk-home.png" style="left:5.204%;top:2.250%;width:89.592%;height:95.500%" alt=""><img class="frm" src="assets/frame-phone.webp" alt=""></div></div>
+</section>
+<section class="slide app">
+<img class="logo" src="assets/logo.webp" alt="Bizqwik"><div class="pill"><b>06</b><i>/ 15</i></div>
+<div class="app-copy">
+  <div class="eyebrow">App 4 of 5</div>
+  <div class="app-title"><div class="eco-ico sm"><svg class="ico" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5"/><circle cx="17" cy="9" r="2.5"/><path d="M16.5 14.6c2.8 0 4.5 1.8 4.5 4.4"/></svg></div><h2>Coaches app</h2></div>
+  <div class="usedby"><span>Used by</span>Coaches</div>
+  <div class="tiers"><span>Junior coach</span><span>Senior coach</span><span class="on">Head coach</span></div>
+  <ul class="feat"><li class=""><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span>Log sessions by scanning a QR in the coaches&#x27; room.</span></li><li class=""><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span>See what you&#x27;ve earned this month at your tier&#x27;s rate.</span></li><li class=""><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span>Deliver personal training sessions by scanning the client&#x27;s PT code.</span></li><li class="hl"><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span>Monthly scheduling: the head coach sets the whole month up front, with dates and start times, and assigns classes to coaches.</span></li><li class=""><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span>Attendance on your assigned date only: a coach can&#x27;t log a session outside their assigned slot.</span></li><li class="hl"><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span>Hand over a session: a coach can assign or request a swap with another coach, at least 2 hours before the session, and only if the other coach accepts.</span></li><li class=""><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span>Head coach: review and edit sessions and handle settlements.</span></li></ul>
+  
+</div>
+<div class="app-art "><div class="blob"></div><div class="dev" style="width:450px;height:918px;"><img class="scr" src="assets/shots/coach-home.png" style="left:5.204%;top:2.250%;width:89.592%;height:95.500%" alt=""><img class="frm" src="assets/frame-phone.webp" alt=""></div></div>
+</section>
+<section class="slide app">
+<img class="logo" src="assets/logo.webp" alt="Bizqwik"><div class="pill"><b>07</b><i>/ 15</i></div>
+<div class="app-copy">
+  <div class="eyebrow">App 5 of 5</div>
+  <div class="app-title"><div class="eco-ico sm"><svg class="ico" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2.5" width="10" height="19" rx="3"/><path d="M10.5 18.5h3"/></svg></div><h2>Branded client app</h2></div>
+  <div class="usedby"><span>Used by</span>The gym&#x27;s clients</div>
+  
+  <ul class="feat"><li class=""><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span>Your gym&#x27;s own name, logo, colours and web address.</span></li><li class=""><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span>Check in with a QR code.</span></li><li class=""><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span>Book classes and say &quot;I&#x27;m coming&quot;.</span></li><li class=""><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span>Buy memberships and bundles.</span></li><li class=""><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span>Top up a wallet and earn loyalty points.</span></li><li class=""><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span>Freeze your own plan.</span></li></ul>
+  <div class="brandnote">This is the app that carries your gym's own brand.</div>
+</div>
+<div class="app-art trio"><div class="blob"></div><div class="dev" style="width:330px;height:673px;left:0;top:90px"><img class="scr" src="assets/shots/client-home.png" style="left:5.204%;top:2.250%;width:89.592%;height:95.500%" alt=""><img class="frm" src="assets/frame-phone.webp" alt=""></div><div class="dev" style="width:330px;height:673px;left:300px;top:0px"><img class="scr" src="assets/shots/client-wallet.png" style="left:5.204%;top:2.250%;width:89.592%;height:95.500%" alt=""><img class="frm" src="assets/frame-phone.webp" alt=""></div><div class="dev" style="width:330px;height:673px;left:600px;top:90px"><img class="scr" src="assets/shots/client-points.png" style="left:5.204%;top:2.250%;width:89.592%;height:95.500%" alt=""><img class="frm" src="assets/frame-phone.webp" alt=""></div></div>
+</section>
+<section class="slide ">
+<img class="logo" src="assets/logo.webp" alt="Bizqwik"><div class="pill"><b>08</b><i>/ 15</i></div>
+<div class="head"><div class="eyebrow">Plans at a glance</div><h2>Four plans. One monthly price each.</h2></div>
+<div class="pgrid"><div class="pcard">
+  <div class="best ghost">&nbsp;</div><h3>Start</h3><div class="who">Independent coaches and solo studios</div><div class="price"><b>1,290</b><span>EGP / month</span></div>
+  <div class="pl"><span>Active clients included</span><b>60</b></div>
+  <div class="pl"><span>Each extra client</span><b>25 EGP</b></div></div><div class="pcard grow">
+  <div class="best">Best fit for studios</div><h3>Grow</h3><div class="who">Studios and gyms with a team</div><div class="price"><b>4,990</b><span>EGP / month</span></div>
+  <div class="pl"><span>Active clients included</span><b>300</b></div>
+  <div class="pl"><span>Each extra client</span><b>20 EGP</b></div></div><div class="pcard">
+  <div class="best ghost">&nbsp;</div><h3>Scale</h3><div class="who">Clubs with several departments</div><div class="price"><b>14,990</b><span>EGP / month</span></div>
+  <div class="pl"><span>Active clients included</span><b>1,500</b></div>
+  <div class="pl"><span>Each extra client</span><b>12 EGP</b></div></div><div class="pcard">
+  <div class="best ghost">&nbsp;</div><h3>Enterprise</h3><div class="who">Large or multi-site communities</div><div class="price"><b class="contact">Contact us</b><span>&nbsp;</span></div>
+  <div class="pl"><span>Active clients included</span><b>Custom</b></div>
+  <div class="pl"><span>Each extra client</span><b>Custom</b></div></div></div>
+<div class="foot-notes"><div class="note">All prices are EGP per month, excluding 14% VAT. VAT is added on the invoice.</div>
+<div class="rule"><b>Extra clients never cost more than the next plan.</b> If extra-client charges would pass the next plan's price, you simply move up.</div></div>
+</section>
+<section class="slide plan">
+<img class="logo" src="assets/logo.webp" alt="Bizqwik"><div class="pill"><b>09</b><i>/ 15</i></div>
+<div class="plan-left">
+  <div class="eyebrow">Plan</div>
+  <div class="plan-name"><h2>Start</h2></div>
+  <div class="bigprice"><b>1,290</b><span>EGP / month</span></div>
+  <div class="who big">For: Independent coaches and solo studios</div>
+  <div class="cx"><span>Client experience</span><b>Branded booking page</b></div>
+</div>
+<div class="plan-right">
+  <div class="sub">Apps included</div>
+  <div class="ptiles"><div class="ptile"><div class="eco-ico"><svg class="ico" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="2"/><rect x="14" y="3" width="7" height="5" rx="2"/><rect x="14" y="12" width="7" height="9" rx="2"/><rect x="3" y="16" width="7" height="5" rx="2"/></svg></div><h4>Founder / C-suite app</h4><div class="cap">Single-role: the owner does everything</div></div><div class="ptile off"><div class="eco-ico"><svg class="ico" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2.5" width="14" height="19" rx="3"/><path d="M8.5 7h7"/><path d="M8.5 12h.01M12 12h.01M15.5 12h.01M8.5 16h.01M12 16h.01M15.5 16h.01" stroke-width="2.4"/></svg></div><h4>Accountant dashboard</h4><div class="cap">Not included</div></div><div class="ptile off"><div class="eco-ico"><svg class="ico" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/><rect x="8" y="8" width="3" height="3"/><rect x="13" y="8" width="3" height="3"/><rect x="8" y="13" width="3" height="3"/><path d="M13.5 14.5H16"/></svg></div><h4>Front-desk / reception app</h4><div class="cap">Not included</div></div><div class="ptile off"><div class="eco-ico"><svg class="ico" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5"/><circle cx="17" cy="9" r="2.5"/><path d="M16.5 14.6c2.8 0 4.5 1.8 4.5 4.4"/></svg></div><h4>Coaches app</h4><div class="cap">Not included</div></div><div class="ptile off"><div class="eco-ico"><svg class="ico" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2.5" width="10" height="19" rx="3"/><path d="M10.5 18.5h3"/></svg></div><h4>Branded client app</h4><div class="cap">Not included</div></div></div>
+  <div class="sub">Limits</div>
+  <div class="lims"><div class="lim"><span>Active clients included</span><b>60</b></div><div class="lim"><span>Each extra client</span><b>25 EGP</b></div><div class="lim"><span>Staff</span><b>1</b></div><div class="lim"><span>Departments</span><b>1</b></div><div class="lim"><span>Locations</span><b>1</b></div><div class="lim"><span>Physical integrations (e.g. gate access)</span><b>—</b></div></div>
+</div>
+</section>
+<section class="slide plan">
+<img class="logo" src="assets/logo.webp" alt="Bizqwik"><div class="pill"><b>10</b><i>/ 15</i></div>
+<div class="plan-left">
+  <div class="eyebrow">Plan</div>
+  <div class="plan-name"><h2>Grow</h2><span class="best inline">Best fit for studios</span></div>
+  <div class="bigprice"><b>4,990</b><span>EGP / month</span></div>
+  <div class="who big">For: Studios and gyms with a team</div>
+  <div class="cx"><span>Client experience</span><b>Branded client app (PWA)</b></div>
+</div>
+<div class="plan-right">
+  <div class="sub">Apps included</div>
+  <div class="ptiles"><div class="ptile"><div class="eco-ico"><svg class="ico" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="2"/><rect x="14" y="3" width="7" height="5" rx="2"/><rect x="14" y="12" width="7" height="9" rx="2"/><rect x="3" y="16" width="7" height="5" rx="2"/></svg></div><h4>Founder / C-suite app</h4><div class="cap">Included</div></div><div class="ptile"><div class="eco-ico"><svg class="ico" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2.5" width="14" height="19" rx="3"/><path d="M8.5 7h7"/><path d="M8.5 12h.01M12 12h.01M15.5 12h.01M8.5 16h.01M12 16h.01M15.5 16h.01" stroke-width="2.4"/></svg></div><h4>Accountant dashboard</h4><div class="cap">Included</div></div><div class="ptile"><div class="eco-ico"><svg class="ico" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/><rect x="8" y="8" width="3" height="3"/><rect x="13" y="8" width="3" height="3"/><rect x="8" y="13" width="3" height="3"/><path d="M13.5 14.5H16"/></svg></div><h4>Front-desk / reception app</h4><div class="cap">Included</div></div><div class="ptile"><div class="eco-ico"><svg class="ico" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5"/><circle cx="17" cy="9" r="2.5"/><path d="M16.5 14.6c2.8 0 4.5 1.8 4.5 4.4"/></svg></div><h4>Coaches app</h4><div class="cap">Junior, senior, head</div></div><div class="ptile"><div class="eco-ico"><svg class="ico" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2.5" width="10" height="19" rx="3"/><path d="M10.5 18.5h3"/></svg></div><h4>Branded client app</h4><div class="cap">PWA</div></div></div>
+  <div class="sub">Limits</div>
+  <div class="lims"><div class="lim"><span>Active clients included</span><b>300</b></div><div class="lim"><span>Each extra client</span><b>20 EGP</b></div><div class="lim"><span>Staff</span><b>10</b></div><div class="lim"><span>Departments</span><b>1</b></div><div class="lim"><span>Locations</span><b>1</b></div><div class="lim"><span>Physical integrations (e.g. gate access)</span><b>—</b></div></div>
+</div>
+</section>
+<section class="slide plan">
+<img class="logo" src="assets/logo.webp" alt="Bizqwik"><div class="pill"><b>11</b><i>/ 15</i></div>
+<div class="plan-left">
+  <div class="eyebrow">Plan</div>
+  <div class="plan-name"><h2>Scale</h2></div>
+  <div class="bigprice"><b>14,990</b><span>EGP / month</span></div>
+  <div class="who big">For: Clubs with several departments</div>
+  <div class="cx"><span>Client experience</span><b>Native app on the app stores</b></div>
+</div>
+<div class="plan-right">
+  <div class="sub">Apps included</div>
+  <div class="ptiles"><div class="ptile"><div class="eco-ico"><svg class="ico" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="2"/><rect x="14" y="3" width="7" height="5" rx="2"/><rect x="14" y="12" width="7" height="9" rx="2"/><rect x="3" y="16" width="7" height="5" rx="2"/></svg></div><h4>Founder / C-suite app</h4><div class="cap">Per department</div></div><div class="ptile"><div class="eco-ico"><svg class="ico" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2.5" width="14" height="19" rx="3"/><path d="M8.5 7h7"/><path d="M8.5 12h.01M12 12h.01M15.5 12h.01M8.5 16h.01M12 16h.01M15.5 16h.01" stroke-width="2.4"/></svg></div><h4>Accountant dashboard</h4><div class="cap">Included</div></div><div class="ptile"><div class="eco-ico"><svg class="ico" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/><rect x="8" y="8" width="3" height="3"/><rect x="13" y="8" width="3" height="3"/><rect x="8" y="13" width="3" height="3"/><path d="M13.5 14.5H16"/></svg></div><h4>Front-desk / reception app</h4><div class="cap">Included</div></div><div class="ptile"><div class="eco-ico"><svg class="ico" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5"/><circle cx="17" cy="9" r="2.5"/><path d="M16.5 14.6c2.8 0 4.5 1.8 4.5 4.4"/></svg></div><h4>Coaches app</h4><div class="cap">Junior, senior, head</div></div><div class="ptile"><div class="eco-ico"><svg class="ico" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2.5" width="10" height="19" rx="3"/><path d="M10.5 18.5h3"/></svg></div><h4>Branded client app</h4><div class="cap">Native, on the stores</div></div></div>
+  <div class="sub">Limits</div>
+  <div class="lims"><div class="lim"><span>Active clients included</span><b>1,500</b></div><div class="lim"><span>Each extra client</span><b>12 EGP</b></div><div class="lim"><span>Staff</span><b>5 per department</b></div><div class="lim"><span>Departments</span><b>5</b></div><div class="lim"><span>Locations</span><b>2–3</b></div><div class="lim"><span>Physical integrations (e.g. gate access)</span><b>Included</b></div></div>
+</div>
+</section>
+<section class="slide plan">
+<img class="logo" src="assets/logo.webp" alt="Bizqwik"><div class="pill"><b>12</b><i>/ 15</i></div>
+<div class="plan-left">
+  <div class="eyebrow">Plan</div>
+  <div class="plan-name"><h2>Enterprise</h2></div>
+  <div class="bigprice"><b class="contact">Contact us</b></div>
+  <div class="who big">For: Large or multi-site communities</div>
+  <div class="cx"><span>Client experience</span><b>Custom</b></div>
+</div>
+<div class="plan-right">
+  <div class="sub">Apps included</div>
+  <div class="ptiles"><div class="ptile"><div class="eco-ico"><svg class="ico" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="2"/><rect x="14" y="3" width="7" height="5" rx="2"/><rect x="14" y="12" width="7" height="9" rx="2"/><rect x="3" y="16" width="7" height="5" rx="2"/></svg></div><h4>Founder / C-suite app</h4><div class="cap">Custom</div></div><div class="ptile"><div class="eco-ico"><svg class="ico" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2.5" width="14" height="19" rx="3"/><path d="M8.5 7h7"/><path d="M8.5 12h.01M12 12h.01M15.5 12h.01M8.5 16h.01M12 16h.01M15.5 16h.01" stroke-width="2.4"/></svg></div><h4>Accountant dashboard</h4><div class="cap">Custom</div></div><div class="ptile"><div class="eco-ico"><svg class="ico" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/><rect x="8" y="8" width="3" height="3"/><rect x="13" y="8" width="3" height="3"/><rect x="8" y="13" width="3" height="3"/><path d="M13.5 14.5H16"/></svg></div><h4>Front-desk / reception app</h4><div class="cap">Custom</div></div><div class="ptile"><div class="eco-ico"><svg class="ico" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5"/><circle cx="17" cy="9" r="2.5"/><path d="M16.5 14.6c2.8 0 4.5 1.8 4.5 4.4"/></svg></div><h4>Coaches app</h4><div class="cap">Custom</div></div><div class="ptile"><div class="eco-ico"><svg class="ico" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2.5" width="10" height="19" rx="3"/><path d="M10.5 18.5h3"/></svg></div><h4>Branded client app</h4><div class="cap">Custom</div></div></div>
+  <div class="sub">Limits</div>
+  <div class="lims"><div class="lim"><span>Active clients included</span><b>Custom</b></div><div class="lim"><span>Each extra client</span><b>Custom</b></div><div class="lim"><span>Staff</span><b>Custom</b></div><div class="lim"><span>Departments</span><b>Custom</b></div><div class="lim"><span>Locations</span><b>Custom</b></div><div class="lim"><span>Physical integrations (e.g. gate access)</span><b>Custom</b></div></div>
+</div>
+</section>
+<section class="slide compare">
+<img class="logo" src="assets/logo.webp" alt="Bizqwik"><div class="pill"><b>13</b><i>/ 15</i></div>
+<div class="head tight"><div class="eyebrow">Compare plans</div><h2>Every plan side by side</h2></div>
+<table class="cmp"><thead><tr><th></th><th>Start</th><th>Grow</th><th>Scale</th><th>Enterprise</th></tr></thead><tbody><tr class="prow"><th>Price (EGP / month)</th><td><b>1,290</b></td><td><b>4,990</b></td><td><b>14,990</b></td><td><b>Contact us</b></td></tr><tr class="small"><th>For</th><td>Independent coaches and solo studios</td><td>Studios and gyms with a team</td><td>Clubs with several departments</td><td>Large or multi-site communities</td></tr><tr class=""><th>Active clients included</th><td>60</td><td>300</td><td>1,500</td><td>Custom</td></tr><tr class=""><th>Each extra client</th><td>25 EGP</td><td>20 EGP</td><td>12 EGP</td><td>Custom</td></tr><tr class=""><th>Staff</th><td>1</td><td>10</td><td>5 per department</td><td>Custom</td></tr><tr class=""><th>Departments</th><td>1</td><td>1</td><td>5</td><td>Custom</td></tr><tr class=""><th>Locations</th><td>1</td><td>1</td><td>2–3</td><td>Custom</td></tr><tr class=""><th>Client experience</th><td>Branded booking page</td><td>Branded client app (PWA)</td><td>Native app on the app stores</td><td>Custom</td></tr><tr class=""><th>Physical integrations (e.g. gate access)</th><td><span class="no">—</span></td><td><span class="no">—</span></td><td>Included</td><td>Custom</td></tr><tr class="app"><th>Founder / C-suite app</th><td><span class="ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span> single-role: the owner does everything</td><td><span class="ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span></td><td><span class="ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span> per department</td><td>Custom</td></tr><tr class="app"><th>Accountant dashboard</th><td><span class="no">—</span></td><td><span class="ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span></td><td><span class="ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span></td><td>Custom</td></tr><tr class="app"><th>Front-desk / reception app</th><td><span class="no">—</span></td><td><span class="ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span></td><td><span class="ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span></td><td>Custom</td></tr><tr class="app"><th>Coaches app (junior, senior, head)</th><td><span class="no">—</span></td><td><span class="ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span></td><td><span class="ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span></td><td>Custom</td></tr><tr class="app"><th>Branded client app</th><td>Booking page</td><td>PWA</td><td>Native app on the stores</td><td>Custom</td></tr></tbody></table>
+<div class="foot-notes tight"><div class="note">All prices are EGP per month, excluding 14% VAT.</div>
+<div class="all">In every plan: memberships and class bundles (monthly, 3-month, annual, class passes), freezing a membership, class schedule and booking, payment tracking (cash, card, wallet, InstaPay with receipt approval), revenue dashboard, your own branding on the client experience.</div></div>
+</section>
+<section class="slide ">
+<img class="logo" src="assets/logo.webp" alt="Bizqwik"><div class="pill"><b>14</b><i>/ 15</i></div>
+<div class="head"><div class="eyebrow">Add-ons</div><h2>Add what you need.</h2></div>
+<div class="agrid"><div class="acard"><div class="plus">+</div><h3>Branded native app on the app stores</h3><p>Your own app in the App Store and Google Play, under your name</p></div><div class="acard"><div class="plus">+</div><h3>Branded client app (PWA)</h3><p>Your own installable app for clients, for plans that don&#x27;t include it</p></div><div class="acard"><div class="plus">+</div><h3>AI assistant</h3><p>Ask questions about your gym in plain language and get answers and analysis</p></div><div class="acard"><div class="plus">+</div><h3>AI agent</h3><p>An assistant that does tasks for you inside the app, not just answers</p></div><div class="acard"><div class="plus">+</div><h3>Extra department</h3><p>Add another department with its own prices, coaches and sessions</p></div><div class="acard"><div class="plus">+</div><h3>Extra location</h3><p>Add another branch</p></div><div class="acard"><div class="plus">+</div><h3>Extra staff member</h3><p>Add more team seats</p></div><div class="acard"><div class="plus">+</div><h3>WhatsApp / SMS messages</h3><p>Send reminders, renewals and announcements to clients</p></div></div>
+</section>
+<section class="slide cover close">
+<img class="logo cover-logo" src="assets/logo.webp" alt="Bizqwik">
+<div class="close-copy">
+  <h1>Let's set up<br>your gym.</h1>
+  <div class="placeholder"><span>GAP · CONTACT DETAILS</span>[ Contact details to be added: name, phone, email, web address ]</div>
+</div>
+<div class="close-art"><div class="blob"></div><div class="ci ci0"><div class="eco-ico"><svg class="ico" width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="2"/><rect x="14" y="3" width="7" height="5" rx="2"/><rect x="14" y="12" width="7" height="9" rx="2"/><rect x="3" y="16" width="7" height="5" rx="2"/></svg></div></div><div class="ci ci1"><div class="eco-ico"><svg class="ico" width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2.5" width="14" height="19" rx="3"/><path d="M8.5 7h7"/><path d="M8.5 12h.01M12 12h.01M15.5 12h.01M8.5 16h.01M12 16h.01M15.5 16h.01" stroke-width="2.4"/></svg></div></div><div class="ci ci2"><div class="eco-ico"><svg class="ico" width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/><rect x="8" y="8" width="3" height="3"/><rect x="13" y="8" width="3" height="3"/><rect x="8" y="13" width="3" height="3"/><path d="M13.5 14.5H16"/></svg></div></div><div class="ci ci3"><div class="eco-ico"><svg class="ico" width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5"/><circle cx="17" cy="9" r="2.5"/><path d="M16.5 14.6c2.8 0 4.5 1.8 4.5 4.4"/></svg></div></div><div class="ci ci4"><div class="eco-ico"><svg class="ico" width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2.5" width="10" height="19" rx="3"/><path d="M10.5 18.5h3"/></svg></div></div></div>
+</section>
+</body></html>
