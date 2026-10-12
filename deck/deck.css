@@ -46,7 +46,7 @@ h1,h2,h3,h4{font-weight:800;letter-spacing:-.025em;line-height:1.02}
 .sb{position:absolute;left:0;top:0;width:390px;height:54px}
 .sb .t{position:absolute;left:0;width:132px;top:14px;height:28px;display:flex;align-items:center;justify-content:center;font-family:'Urbanist',sans-serif;font-weight:700;font-size:17px;color:#1A1726}
 .sb .ri{position:absolute;right:0;width:132px;top:14px;height:28px;display:flex;align-items:center;justify-content:center;gap:6px}
-.hi{z-index:2;position:absolute;left:50%;bottom:9px;width:134px;height:5px;margin-left:-67px;border-radius:3px;background:#1A1726}
+.hi{display:none;position:absolute;left:50%;bottom:9px;width:134px;height:5px;margin-left:-67px;border-radius:3px;background:#1A1726}
 .dev .frm{position:absolute;inset:0;width:100%;height:100%;display:block}
 .slot{display:flex;align-items:center;justify-content:center;border:3px dashed var(--faint);border-radius:36px;color:var(--faint);font-family:'Space Mono',monospace;font-size:18px;text-align:center;padding:20px}
 

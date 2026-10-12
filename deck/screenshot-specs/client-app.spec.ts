@@ -23,8 +23,8 @@ const BRANDS = [
     css: `:root{--background:#EFE8D8;--card:#F6F1E4;--muted:#E7DFCB;--bq-neutral:#E7DFCB;--bq-secondary:#E7DFCB}
           .bg-white{background-color:#EFE8D8!important}
           [class*="backdrop-blur-xl"]{background:rgba(239,232,216,.55)!important;border-color:rgba(255,255,255,.5)!important}` },
-  { key: "ember", name: "Ember Boxing Club", color: "#F2542D", plan: "Boxing Unlimited",
-    classes: [["Boxing Fundamentals", 18], ["Pad Work", 19], ["Conditioning", 20]], css: "" },
+  { key: "pulse", name: "Pulse Studio", color: "#5A41FF", plan: "10-Class Pack",
+    classes: [["Sunrise HIIT", 18], ["Power Yoga", 19], ["Boxing", 20]], css: "" },
 ] as const;
 
 for (const b of BRANDS) {

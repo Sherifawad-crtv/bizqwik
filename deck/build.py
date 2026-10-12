@@ -98,7 +98,7 @@ add(f'''
 <div class="cover-art">
   <div class="blob"></div>
   {device("tablet", "founder-oversight.png", 730, "left:30px;top:250px")}
-  {device("phone", "client-grove.png", 250, "left:520px;top:400px", "#EFE8D8")}
+  {device("phone", "client-pulse.png", 250, "left:520px;top:400px", "#fff")}
 </div>
 ''', "cover")
 
@@ -112,7 +112,7 @@ add(f'''
 <div class="head"><div class="eyebrow">The ecosystem</div>
 <h2>Five apps. One connected system.</h2>
 <p class="lede">One for each person who touches the business.</p></div>
-<div class="eco"><div class="eco-line"></div>{tiles}</div>
+<div class="eco">{tiles}</div>
 <div class="sync-pill">All in sync</div>
 ''')
 
@@ -191,8 +191,8 @@ app_slide(7, "client", "Branded client app", "The gym's clients", [
    + '<div class="bn" style="left:0;top:690px;width:284px">Forge Athletics</div>'
    + device("phone", "client-grove.png", 284, "left:298px;top:0px", "#EFE8D8")
    + '<div class="bn" style="left:298px;top:600px;width:284px">Grove Pilates</div>'
-   + device("phone", "client-ember.png", 284, "left:596px;top:90px", "#fff")
-   + '<div class="bn" style="left:596px;top:690px;width:284px">Ember Boxing Club</div>'
+   + device("phone", "client-pulse.png", 284, "left:596px;top:90px", "#fff")
+   + '<div class="bn" style="left:596px;top:690px;width:284px">Pulse Studio</div>'
    + '<div class="bn cap" style="left:0;top:740px;width:880px">Same app, three illustrative gym brands</div></div>',
    extra_bottom='<div class="brandnote">This is the app that carries your gym\'s own brand.</div>', art_cls="trio")
 
