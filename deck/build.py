@@ -435,7 +435,10 @@ add(f"""
 <div class="close-copy">
   <h1>Let's set up<br>your gym.</h1>
   <p class="lede">One ecosystem. Your whole community.</p>
-  <div class="placeholder"><span>GAP · CONTACT DETAILS</span>[ Contact details to be added: name, phone, email, web address ]</div>
+  <div class="contact">
+    <div class="ct"><div class="ct-ico">{solar("phone-calling-rounded", 30, "linear")}</div><div><span>Phone</span><b>01000401407</b></div></div>
+    <div class="ct"><div class="ct-ico">{solar("letter", 30, "linear")}</div><div><span>Email</span><b>info@bizqwik.com</b></div></div>
+  </div>
 </div>
 <div class="close-art"><div class="orbit"></div>
   <div class="hub"><img src="assets/mark.png" alt="Bizqwik"></div>{orbit}</div>

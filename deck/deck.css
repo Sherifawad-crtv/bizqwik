@@ -235,3 +235,9 @@ h1,h2,h3,h4{font-weight:800;letter-spacing:-.03em;line-height:1.02;text-wrap:bal
 .ent-list li{display:flex;align-items:baseline;gap:20px;padding:38px 0;border-top:1px solid var(--line)}
 .ent-list .n{font-family:'Space Mono',monospace;font-size:15px;color:var(--violet);letter-spacing:.08em;font-weight:700;flex:none;width:34px}
 .ent-list .l{font-size:30px;font-weight:700;letter-spacing:-.02em;line-height:1.15}
+
+.contact{display:flex;gap:20px;margin-top:56px}
+.ct{display:flex;align-items:center;gap:18px;background:var(--surface);box-shadow:var(--shadow);border-radius:28px;padding:22px 30px 22px 22px}
+.ct-ico{--solar-stroke-width:1.7;width:64px;height:64px;border-radius:20px;background:var(--tint);color:var(--violet);display:flex;align-items:center;justify-content:center;flex:none}
+.ct span{display:block;font-family:'Space Mono',monospace;font-size:14px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.ct b{font-size:34px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums}

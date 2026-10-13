@@ -4,7 +4,7 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { writeFileSync } from "node:fs";
 const base = "/home/user/bizqwik/node_modules/@solar-icons/react/dist/icons";
-const want = ["chart-square", "calculator", "qr-code", "users-group-two-rounded", "smartphone", "check-circle", "smartphone-update", "stars", "cpu-bolt", "buildings", "map-point-add", "user-plus", "chat-round-dots", "add-circle", "alt-arrow-right", "arrow-right", "star"];
+const want = ["chart-square", "calculator", "qr-code", "users-group-two-rounded", "smartphone", "check-circle", "smartphone-update", "stars", "cpu-bolt", "buildings", "map-point-add", "user-plus", "chat-round-dots", "add-circle", "alt-arrow-right", "arrow-right", "star", "phone-calling-rounded", "letter"];
 const out = {};
 for (const w of ["linear", "bold-duotone"]) {
   for (const n of want) {
