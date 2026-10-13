@@ -122,14 +122,14 @@ h1,h2,h3,h4{font-weight:800;letter-spacing:-.03em;line-height:1.02;text-wrap:bal
 
 /* ---------- plans at a glance */
 .pgrid{position:absolute;left:96px;right:96px;top:440px;display:grid;grid-template-columns:repeat(4,1fr);gap:32px}
-.pcard{background:var(--surface);box-shadow:var(--shadow);border-radius:28px;padding:32px 34px 34px;min-height:420px;display:flex;flex-direction:column}
-.pcard h3{font-size:46px;margin-top:6px}
-.pcard .who{font-size:21px;color:var(--muted);margin-top:10px;min-height:56px;line-height:1.3}
+.pcard{background:var(--surface);box-shadow:var(--shadow);border-radius:28px;padding:26px 32px 22px;min-height:0;display:flex;flex-direction:column}
+.pcard h3{font-size:44px;margin-top:4px}
+.pcard .who{font-size:21px;color:var(--muted);margin-top:8px;min-height:54px;line-height:1.3}
 .price{margin:18px 0 20px;display:flex;flex-direction:column;gap:4px}
-.price b{font-size:72px;font-weight:800;letter-spacing:-.03em;font-variant-numeric:tabular-nums;line-height:1;color:var(--violet)}
+.price b{font-size:68px;font-weight:800;letter-spacing:-.03em;font-variant-numeric:tabular-nums;line-height:1;color:var(--violet)}
 .price b.contact,.bigprice b.contact{font-size:54px;letter-spacing:-.025em}
 .price span{font-family:'Space Mono',monospace;font-size:18px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
-.pl{display:flex;justify-content:space-between;align-items:baseline;padding:11px 0;border-top:1px solid var(--line);gap:10px}
+.pl{display:flex;justify-content:space-between;align-items:baseline;padding:9px 0;border-top:1px solid var(--line);gap:10px}
 .pl span{font-size:14px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
 .pl b{font-size:26px;font-weight:800;font-variant-numeric:tabular-nums}
 .best{display:inline-block;align-self:flex-start;background:rgba(255,255,255,.2);color:#fff;border-radius:999px;padding:6px 14px;font-size:14px;text-transform:uppercase;letter-spacing:.08em}
@@ -245,6 +245,15 @@ h1,h2,h3,h4{font-weight:800;letter-spacing:-.03em;line-height:1.02;text-wrap:bal
 .ct-ico{--solar-stroke-width:1.7;width:64px;height:64px;border-radius:20px;background:var(--tint);color:var(--violet);display:flex;align-items:center;justify-content:center;flex:none}
 .ct span{display:block;font-family:'Space Mono',monospace;font-size:14px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
 .ct b{font-size:34px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+
+/* plans at a glance: fit title + cards + notes with clear margins */
+.glance .head.g{top:146px}
+.glance .head.g h2{font-size:80px}
+.glance .head.g .lede{font-size:30px;margin-top:16px}
+.glance .pgrid{top:404px}
+.glance .pcard{min-height:0}
+.glance .best{margin-bottom:2px}
+.glance .foot-notes.g{top:918px}
 </style></head><body>
 <section class="slide cover">
 <img class="logo cover-logo" src="assets/logo.webp" alt="Bizqwik">
