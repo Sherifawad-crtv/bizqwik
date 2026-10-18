@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { useAuth } from "../lib/auth";
 import { waitForLoadsToFinish } from "../lib/useAsync";
+import { track } from "../lib/analytics";
 
 /** The launch screen: the full Bizqwik logo with a small spinner under it.
  * index.html paints the same thing before the app has loaded, so launching
@@ -31,7 +32,12 @@ export function LaunchGate({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!ready) return;
     let alive = true;
-    waitForLoadsToFinish(8000).then(() => alive && setCovered(false));
+    waitForLoadsToFinish(8000).then(() => {
+      if (!alive) return;
+      setCovered(false);
+      // How long the person waited from opening the app to a finished first screen.
+      track("launch_ready", { ms: Math.round(performance.now()) });
+    });
     return () => {
       alive = false;
     };

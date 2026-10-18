@@ -11,9 +11,11 @@
     "test:e2e": "playwright test"
   },
   "dependencies": {
+    "@sentry/react": "^11.8.0",
     "@solar-icons/react": "^2.1.0",
     "@supabase/supabase-js": "^2.115.0",
     "jsqr": "^1.4.0",
+    "posthog-js": "^1.438.12",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-router-dom": "^7.18.3"

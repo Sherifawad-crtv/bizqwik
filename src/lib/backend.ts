@@ -4,6 +4,7 @@
 // keeps working (see supabaseClient.ts for which project it targets).
 import { FN_SLUG, supabase } from "./supabaseClient";
 import { bump } from "./bus";
+import { cleanPath, reportError, track } from "./analytics";
 import type { PaymentsSummary, Location,
   ActivityEntry,
   BizqwikRole,
@@ -100,15 +101,17 @@ const CLIENTS_LIST = "clients-list";
 
 async function callFn<T>(path: string, opts?: { method?: Method; body?: Record<string, unknown>; quiet?: boolean }, slug: string = FN_SLUG): Promise<T> {
   const method = opts?.method ?? "GET";
+  const started = performance.now();
   const { data, error } = await supabase.functions.invoke(`${slug}/${path}`, {
     method,
     body: opts?.body,
   });
+  const took = Math.round(performance.now() - started);
   if (error) {
     let message = error.message;
     let code: string | null = null;
     let body: Record<string, unknown> | null = null;
-    const ctx = (error as { context?: { json?: () => Promise<Record<string, unknown>> } }).context;
+    const ctx = (error as { context?: { json?: () => Promise<Record<string, unknown>>; status?: number } }).context;
     if (ctx?.json) {
       try {
         body = await ctx.json();
@@ -118,8 +121,15 @@ async function callFn<T>(path: string, opts?: { method?: Method; body?: Record<s
         // fall back to the raw error message
       }
     }
+    // Every refusal and failure, by endpoint and reason — the broken flows. Only the
+    // path (ids stripped), the status and the machine code are sent, never the message.
+    const status = (ctx as { status?: number } | undefined)?.status;
+    track("api_error", { path: cleanPath(path), method, status, code, ms: took });
+    if (status === undefined || status >= 500) reportError(error, { path: cleanPath(path), method, status });
     throw new ApiError(message, code, body);
   }
+  if (method === "POST") track("api_ok", { path: cleanPath(path), method, ms: took });
+  else if (took > 3000) track("api_slow", { path: cleanPath(path), method, ms: took });
   // POSTs are the app's only mutations — bump so every mounted useAsync
   // screen revalidates, not just whichever one happened to trigger this.
   // A `quiet` POST (registering this device for notifications) changes nothing
@@ -154,7 +164,7 @@ export const api = {
   signup: (name: string, email: string, password: string) =>
     callFn<{ profile?: Profile; bizqwikTeam?: BizqwikTeam }>("signup", { method: "POST", body: { name, email, password } }),
 
-  me: () => callFn<{ profile: Profile | null; orgMode?: "solo" | "team" | null; tier: Tier | null; bizqwikTeam: BizqwikTeam | null }>("me"),
+  me: () => callFn<{ profile: Profile | null; orgMode?: "solo" | "team" | null; org?: { id: string; name: string; slug: string } | null; tier: Tier | null; bizqwikTeam: BizqwikTeam | null }>("me"),
   // With `locationId`, only that location's sales.
   paymentsSummary: async (months: number, locationId?: string | null): Promise<PaymentsSummary> => {
     const r = await callFn<Partial<PaymentsSummary>>(`payments/summary?months=${months}${locationId ? `&locationId=${encodeURIComponent(locationId)}` : ""}`);

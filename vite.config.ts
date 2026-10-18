@@ -17,4 +17,11 @@ function buildVersion() {
 export default defineConfig({
   plugins: [react(), buildVersion()],
   define: { __BUILD_ID__: JSON.stringify(BUILD_ID) },
+  // Same path as production's /ingest rewrite (vercel.json), for running with the keys locally.
+  server: {
+    proxy: {
+      '/ingest/static': { target: 'https://eu-assets.i.posthog.com', changeOrigin: true, rewrite: (p) => p.replace(/^\/ingest/, '') },
+      '/ingest': { target: 'https://eu.i.posthog.com', changeOrigin: true, rewrite: (p) => p.replace(/^\/ingest/, '') },
+    },
+  },
 })

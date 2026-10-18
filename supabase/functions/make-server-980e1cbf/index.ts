@@ -101,6 +101,10 @@ async function profileOf(userId: string) {
 
 // In a solo business the owner (dept_head) does the front desk's work too:
 // registering, selling, checking people in. Everywhere else it's front_desk only.
+async function orgInfoOf(orgId: string) {
+  const { data } = await admin().from("organizations").select("id, name, slug, mode").eq("id", orgId).maybeSingle();
+  return data;
+}
 async function orgModeOf(orgId: string): Promise<"solo" | "team"> {
   const { data } = await admin().from("organizations").select("mode").eq("id", orgId).maybeSingle();
   return data?.mode === "solo" ? "solo" : "team";
@@ -998,10 +1002,12 @@ app.get(`${P}/me`, async (c) => {
   const [profile, team, client] = await Promise.all([profileOf(user.id), bizqwikTeamOf(user.id), clientOf(user.id)]);
   if (!profile && !team && !client) return c.json({ error: "No profile" }, 404);
   // Independent lookups, so read together rather than one after the other.
-  const [tier, orgMode] = await Promise.all([profile?.tier_id ? tierOf(profile.tier_id) : null, profile ? orgModeOf(profile.org_id) : null]);
+  const [tier, org] = await Promise.all([profile?.tier_id ? tierOf(profile.tier_id) : null, profile ? orgInfoOf(profile.org_id) : null]);
+  const orgMode = org ? (org.mode === "solo" ? "solo" : "team") : null;
   return c.json({
     profile: profile ? toProfile(profile) : null,
     orgMode,
+    org: org ? { id: org.id, name: org.name, slug: org.slug } : null,
     tier: tier ? toTier(tier) : null,
     bizqwikTeam: team ? toBizqwikTeam(team) : null,
     client: client ? toClientAccount(client) : null,
