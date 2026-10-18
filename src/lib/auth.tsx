@@ -3,6 +3,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 import { markWelcomed } from "./welcome";
 import { api, auth as authApi } from "./backend";
 import { autoEnablePushIfPossible } from "./push";
+import { identify, resetAnalytics } from "./analytics";
 import type { BizqwikTeam, Profile, Tier } from "./types";
 
 interface AuthState {
@@ -26,6 +27,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [tier, setTier] = useState<Tier | null>(null);
   const [orgMode, setOrgMode] = useState<"solo" | "team">("team");
   const [bizqwikTeam, setBizqwikTeam] = useState<BizqwikTeam | null>(null);
+  const [org, setOrg] = useState<{ id: string; name: string; slug: string } | null>(null);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
@@ -35,6 +37,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setProfile(me.profile);
         setTier(me.tier);
         setOrgMode(me.orgMode === "solo" ? "solo" : "team");
+        setOrg(me.org ?? null);
         setBizqwikTeam(me.bizqwikTeam);
       })
       .catch(() => {
@@ -58,6 +61,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (profile) autoEnablePushIfPossible();
   }, [profile?.id]);
 
+  // Product analytics: who (by id), their role and gym — never name or email.
+  useEffect(() => {
+    if (profile) identify({ id: profile.id, role: profile.role, orgMode, org });
+    else if (bizqwikTeam) identify({ id: bizqwikTeam.id, role: "bizqwik_team" });
+  }, [profile?.id, bizqwikTeam?.id, org?.id, orgMode]);
+
   const login = async (email: string, password: string) => {
     await authApi.signInWithPassword(email, password);
     clearAsyncCache();
@@ -65,6 +74,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setProfile(me.profile);
     setTier(me.tier);
     setOrgMode(me.orgMode === "solo" ? "solo" : "team");
+        setOrg(me.org ?? null);
     setBizqwikTeam(me.bizqwikTeam);
   };
 
@@ -74,7 +84,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setProfile(null);
     setTier(null);
     setOrgMode("team");
+    setOrg(null);
     setBizqwikTeam(null);
+    resetAnalytics();
   };
 
   const refreshProfile = async () => {
@@ -82,6 +94,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setProfile(me.profile);
     setTier(me.tier);
     setOrgMode(me.orgMode === "solo" ? "solo" : "team");
+        setOrg(me.org ?? null);
     setBizqwikTeam(me.bizqwikTeam);
   };
 
