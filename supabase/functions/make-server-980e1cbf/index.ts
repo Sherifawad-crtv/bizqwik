@@ -5,12 +5,25 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 import webpush from "npm:web-push@3.6.7";
 
 // ---- Supabase admin client --------------------------------------------
+// The gateway mints a fresh token for each database request; now and then the
+// database's clock is a hair behind and refuses it as "issued at future"
+// (PGRST303). That's transient, so wait a moment and send it once more rather
+// than failing the whole request (it once signed a member out of the app).
+async function fetchRetryingClockSkew(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
+  const res = await fetch(input, init);
+  if (res.status !== 401) return res;
+  const body = await res.clone().text().catch(() => "");
+  if (!body.includes("PGRST303")) return res;
+  await new Promise((r) => setTimeout(r, 400));
+  return fetch(input, init);
+}
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 // One client for the whole worker: it holds no user session, and reusing it
 // keeps its connection and the auth signing keys cached between requests.
 const adminClient = createClient(SUPABASE_URL, SERVICE_ROLE, {
   auth: { autoRefreshToken: false, persistSession: false },
+  global: { fetch: fetchRetryingClockSkew },
 });
 const admin = () => adminClient;
 

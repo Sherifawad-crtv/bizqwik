@@ -1,7 +1,7 @@
 import { clearAsyncCache } from "./useAsync";
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { markWelcomed } from "./welcome";
-import { api, auth as authApi } from "./backend";
+import { api, auth as authApi, type ApiError } from "./backend";
 import { autoEnablePushIfPossible } from "./push";
 import { identify, resetAnalytics } from "./analytics";
 import type { BizqwikTeam, Profile, Tier } from "./types";
@@ -22,6 +22,21 @@ interface AuthState {
 
 const AuthContext = createContext<AuthState | null>(null);
 
+// Who's signed in, asked again after a moment if the answer was a server or
+// network hiccup — only "not signed in" (401) or "no account" (404) should
+// land someone on the sign-in screen.
+async function meSurvivingHiccups() {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await api.me();
+    } catch (e) {
+      const status = (e as ApiError).status;
+      if (attempt >= 2 || status === 401 || status === 404) throw e;
+      await new Promise((r) => setTimeout(r, 700 * (attempt + 1)));
+    }
+  }
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [tier, setTier] = useState<Tier | null>(null);
@@ -31,8 +46,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    api
-      .me()
+    meSurvivingHiccups()
       .then((me) => {
         setProfile(me.profile);
         setTier(me.tier);
