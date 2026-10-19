@@ -52,7 +52,7 @@ export function CheckInList() {
                 <div style={{ minWidth: 0, flex: 1 }}>
                   <div style={{ font: "700 16px var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.name}</div>
                   <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 2 }}>
-                    <PlanPill tone={plan.tone} />
+                    <PlanPill client={c} />
                     <span style={{ font: "400 12px var(--font-mono)", color: "var(--ink-faint)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{plan.detail}</span>
                   </div>
                 </div>

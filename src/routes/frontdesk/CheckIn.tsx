@@ -15,6 +15,7 @@ import { useFrontDeskCatalog } from "./Members";
 import { useNewClient } from "./NewClientModal";
 import { DropIn } from "./DropIn";
 import { SheetHeading } from "./shared";
+import { dateLabel } from "../../lib/format";
 
 const hasActivePlan = (c: ClientWithPackage) => !!c.groupPlan || c.currentPackage?.status === "active";
 // A class bundle with nothing left can't be checked in on (unless PT covers them).
@@ -88,7 +89,9 @@ export function ConfirmCheckInSheet({ client, onClose, onDropIn }: { client: Cli
   const plan = planSummary(shown, bundleTypes);
   const bundle = shown.groupPlan?.kind === "bundle" ? shown.groupPlan : null;
   const empty = bundleEmpty(shown) && shown.currentPackage?.status !== "active";
-  const eligible = hasActivePlan(shown) && !empty && !noSessions;
+  // A frozen plan can't be checked in on until it restarts (a PT package still can).
+  const frozenUntil = shown.groupPlan?.frozenUntil && Date.parse(shown.groupPlan.frozenUntil) > Date.now() && shown.currentPackage?.status !== "active" ? shown.groupPlan.frozenUntil : null;
+  const eligible = hasActivePlan(shown) && !empty && !noSessions && !frozenUntil;
 
   const confirm = async () => {
     setBusy(true);
@@ -117,7 +120,7 @@ export function ConfirmCheckInSheet({ client, onClose, onDropIn }: { client: Cli
           <div data-sq style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "12px 16px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", flex: 1 }}>CURRENT PLAN</div>
-              <PlanPill tone={plan.tone} />
+              <PlanPill client={shown} />
             </div>
             <div style={{ font: "700 16px var(--font-body)", marginTop: 4 }}>{plan.title}</div>
             <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-muted)" }}>{plan.detail}</div>
@@ -125,7 +128,7 @@ export function ConfirmCheckInSheet({ client, onClose, onDropIn }: { client: Cli
           {error && <ErrorBanner text={error} />}
           {bundle && eligible && (
             <div style={{ marginTop: 12, font: "600 13px/1.5 var(--font-body)", color: "var(--ink)", background: "var(--primary-tint)", borderRadius: 14, padding: "10px 14px" }}>
-              Checking in uses 1 session of {bundle.name} ({bundle.creditsRemaining} → {Math.max(0, (bundle.creditsRemaining ?? 0) - 1)} left). Only the first check-in of the day counts.
+              Checking in uses 1 session of {bundle.name} ({bundle.creditsRemaining} → {Math.max(0, (bundle.creditsRemaining ?? 0) - 1)} left). Every visit counts, even twice in a day.
             </div>
           )}
           {(empty || noSessions) && (
@@ -143,7 +146,9 @@ export function ConfirmCheckInSheet({ client, onClose, onDropIn }: { client: Cli
           ) : (
             <>
               <div style={{ marginTop: 12, font: "600 13px/1.5 var(--font-body)", color: "var(--logging-fg)", background: "var(--logging-bg)", borderRadius: 14, padding: "10px 14px" }}>
-                {empty || noSessions ? "Nothing to check in on today." : "No active plan or package — they can pay for a drop-in, or buy a plan from their client page."}
+                {frozenUntil
+                  ? `Their plan is frozen until ${dateLabel(frozenUntil.slice(0, 10))} and restarts by itself. Until then they can pay for a drop-in.`
+                  : empty || noSessions ? "Nothing to check in on today." : "No active plan or package — they can pay for a drop-in, or buy a plan from their client page."}
               </div>
               <Button fullWidth size="lg" style={{ marginTop: 16 }} onClick={() => onDropIn(shown)}>
                 Sell a drop-in pass

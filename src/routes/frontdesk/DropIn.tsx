@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useSetHeader } from "../../lib/header";
 import { useAsync } from "../../lib/useAsync";
@@ -60,10 +60,19 @@ export function DropIn({ embedded = false, initialClient = null }: { embedded?: 
     (c) => c.status === "active" && Date.parse(c.startsAt) >= now - 2 * 60 * 60 * 1000 && Date.parse(c.startsAt) <= now + 7 * 86400000,
   );
   const session = sessions.find((c) => c.id === classId) ?? null;
+  // Start on the next class (the one most drop-ins are for); the desk can change it.
+  const nextSessionId = sessions.find((c) => Date.parse(c.startsAt) + 60 * 60 * 1000 >= now)?.id ?? "";
+  useEffect(() => {
+    if (!classId && nextSessionId) setClassId(nextSessionId);
+  }, [nextSessionId, classId]);
 
   // Wallet is only payable for a linked member; a brand-new one has no wallet.
   const effectivePay: PayMethod = !client && payMethod === "wallet" ? "cash" : payMethod;
   const newMember = mode === "walkin" && !client && adding;
+
+  // The amount on the button, like a till: what is about to be charged, and how.
+  const amount = mode === "class" ? (session ? session.price : null) : price !== "" && Number.isFinite(Number(price)) && Number(price) >= 0 ? Number(price) : null;
+  const tender = { cash: "cash", card: "card", instapay: "InstaPay", wallet: "wallet" }[effectivePay] ?? effectivePay;
 
   const reset = () => {
     setCategory("");
@@ -237,7 +246,7 @@ export function DropIn({ embedded = false, initialClient = null }: { embedded?: 
 
       {error && <ErrorBanner text={error} />}
       <Button fullWidth size="lg" style={{ marginTop: 16 }} disabled={busy} onClick={submit}>
-        {busy ? "Saving…" : "Confirm drop-in"}
+        {busy ? "Saving…" : amount !== null ? `Charge ${fmt(amount)} EGP · ${tender}` : "Confirm drop-in"}
       </Button>
       <div style={{ textAlign: "center", font: "400 13px var(--font-mono)", color: "var(--ink-faint)", marginTop: 10 }}>Take payment at the desk before confirming.</div>
 

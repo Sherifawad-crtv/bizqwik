@@ -55,7 +55,7 @@ export function Bookings() {
   const [month, setMonth] = useState(false);
   const classes = useAsync(() => api.classes(startOfDay(new Date()).toISOString()), []);
 
-  const { groups, earlier } = useMemo(() => {
+  const { groups, earlier, ahead } = useMemo(() => {
     const now = Date.now();
     const today = startOfDay(new Date());
     const last = range === "today" ? 1 : range === "tomorrow" ? 2 : range === "week" ? 7 : 366;
@@ -72,7 +72,19 @@ export function Bookings() {
       if (!map.has(k)) map.set(k, { day: d, items: [] });
       map.get(k)!.items.push(c);
     }
-    return { groups: [...map.values()], earlier: live.filter(isPast) };
+    // Today is over: show the next day that has classes, so the desk sees
+    // what's coming instead of an empty page.
+    let ahead: { day: Date; items: GymClass[] } | null = null;
+    if (range === "today" && upcoming.length === 0) {
+      const later = (classes.data?.classes ?? [])
+        .filter((c) => c.status !== "cancelled" && Date.parse(c.startsAt) >= to && (place === "all" || !c.locationId || c.locationId === place))
+        .sort((a, b) => Date.parse(a.startsAt) - Date.parse(b.startsAt));
+      if (later.length) {
+        const day = startOfDay(new Date(later[0].startsAt));
+        ahead = { day, items: later.filter((c) => startOfDay(new Date(c.startsAt)).getTime() === day.getTime()) };
+      }
+    }
+    return { groups: [...map.values()], earlier: live.filter(isPast), ahead };
   }, [classes.data, range, place]);
 
   if (month) return <ClassCalendarScreen onClose={() => setMonth(false)} />;
@@ -147,7 +159,17 @@ export function Bookings() {
         <SectionLink onClick={() => setMonth(true)}>Open full calendar</SectionLink>
       </div>
 
-      {groups.length === 0 && earlier.length === 0 && (
+      {ahead && (
+        <div style={{ marginTop: 16 }} data-testid="next-day">
+          <Card>
+            <EmptyState bare icon="calendar" title="Nothing left today" body={`Here's what's next — ${dayHeading(ahead.day, today).toLowerCase() === "tomorrow" ? "tomorrow" : dayHeading(ahead.day, today)}.`} />
+          </Card>
+          <div style={{ font: "700 12px var(--font-mono)", letterSpacing: 1, color: "var(--ink-faint)", textTransform: "uppercase", margin: "20px 4px 8px" }}>{dayHeading(ahead.day, today)}</div>
+          <Card style={{ overflow: "hidden" }}>{ahead.items.map((c) => row(c))}</Card>
+        </div>
+      )}
+
+      {groups.length === 0 && earlier.length === 0 && !ahead && (
         <div style={{ marginTop: 16 }}>
           <Card>
             <EmptyState bare icon="calendar" title={range === "today" ? (solo ? "No more classes today" : "Nothing booked for the rest of today") : "No classes in this range"} body={solo ? "Add a class and your members are reminded before it starts." : "Classes appear here as soon as they're scheduled."} />

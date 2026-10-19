@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { useAuth } from "../lib/auth";
-import { waitForLoadsToFinish } from "../lib/useAsync";
+import { waitForFirstScreen } from "../lib/useAsync";
 import { track } from "../lib/analytics";
 
 /** The launch screen: the full Bizqwik logo with a small spinner under it.
@@ -27,12 +27,18 @@ export function Splash() {
  * No minimum hold: it goes the moment everything is ready. A request that
  * never answers can't trap the user behind it (capped at 8 seconds). */
 export function LaunchGate({ children }: { children: ReactNode }) {
-  const { ready } = useAuth();
+  const { ready, profile, bizqwikTeam } = useAuth();
+  const signedIn = !!profile || !!bizqwikTeam;
   const [covered, setCovered] = useState(true);
   useEffect(() => {
     if (!ready) return;
+    // Signed out: the sign-in screen has nothing to load, so show it straight away.
+    if (!signedIn) {
+      setCovered(false);
+      return;
+    }
     let alive = true;
-    waitForLoadsToFinish(8000).then(() => {
+    waitForFirstScreen(8000).then(() => {
       if (!alive) return;
       setCovered(false);
       // How long the person waited from opening the app to a finished first screen.
@@ -41,7 +47,7 @@ export function LaunchGate({ children }: { children: ReactNode }) {
     return () => {
       alive = false;
     };
-  }, [ready]);
+  }, [ready, signedIn]);
   if (!ready) return <Splash />;
   return (
     <>
