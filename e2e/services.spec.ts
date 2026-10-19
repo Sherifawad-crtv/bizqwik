@@ -142,9 +142,8 @@ test("front desk: class drop-in asks before charging a member whose plan is runn
   });
   await page.goto("/drop-in?client=cl1&name=Mona%20Ali");
   await expect(page.getByText("Drop into a class")).toBeVisible();
-  await page.getByText("Choose a session (next 7 days)").click();
-  await page.getByText(/Sunrise HIIT · .* · 200 EGP/).click();
-  await page.getByRole("button", { name: "Confirm drop-in" }).click();
+  // The next class is already picked, and the button says what it will charge.
+  await page.getByRole("button", { name: "Charge 200 EGP · cash" }).click();
 
   await expect(page.getByText("Charge a drop-in anyway?").first()).toBeVisible();
   await expect(page.getByText(/still has 10-Class Pack/)).toBeVisible();

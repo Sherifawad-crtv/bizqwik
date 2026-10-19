@@ -19,11 +19,23 @@ export function clearAsyncCache() {
 // How many screen loads are in progress, so pull-to-refresh can keep its
 // spinner up until the refresh has actually landed.
 let active = 0;
+// Every load ever started, so a waiter can tell "started and already done" from "not started yet".
+let started = 0;
 export async function waitForLoadsToFinish(maxMs = 10000) {
   // Let the refreshed screens start their requests first.
   await new Promise((r) => setTimeout(r, 50));
   const until = Date.now() + maxMs;
   while (active > 0 && Date.now() < until) await new Promise((r) => setTimeout(r, 80));
+}
+/** For the launch screen: wait for the first screen to start loading (it mounts
+ * just after sign-in is known — slower on a slow phone), then for those loads to
+ * finish. A screen that loads nothing lifts after `startWindow`. */
+export async function waitForFirstScreen(maxMs = 8000, startWindow = 1200) {
+  const before = started;
+  const startBy = Date.now() + startWindow;
+  while (started === before && Date.now() < startBy) await new Promise((r) => setTimeout(r, 25));
+  const until = Date.now() + maxMs;
+  while (active > 0 && Date.now() < until) await new Promise((r) => setTimeout(r, 50));
 }
 function keyOf(fn: () => unknown, deps: unknown[]): string {
   try {
@@ -59,6 +71,7 @@ export function useAsync<T>(
       req = fnRef.current();
       inflight.set(flight, req);
       active++;
+      started++;
       const done = () => {
         inflight.delete(flight);
         active--;

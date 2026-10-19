@@ -9,7 +9,8 @@ import { HomeAvatar } from "../../components/HomeAvatar";
 import { Icon, type IconName } from "../../components/Icon";
 import { Spinner } from "../../components/Spinner";
 import { Sheet } from "../../components/Sheet";
-import { Card, SectionLink, SectionTitle, SheetHeading, SearchField, PlanPill, planSummary, matchesClient } from "./shared";
+import { Card, SectionLink, SectionTitle, SheetHeading, SearchField, PlanPill, planSummary, matchesClient, deskStatus } from "./shared";
+import { useCurrentLocation } from "../../lib/locations";
 import { NewClientModal } from "./NewClientModal";
 import { CheckIn } from "./CheckIn";
 import { DropIn } from "./DropIn";
@@ -53,11 +54,34 @@ export function FrontDeskHome() {
   const clients = useAsync(() => api.clients(), []);
   const classes = useAsync(() => api.classes(new Date(Date.now() - 2 * 3600000).toISOString()), []);
   const { bundleTypes } = useFrontDeskCatalog();
+  const { current: here } = useCurrentLocation();
+  // Check-ins made straight from the search results (one tap, no sheet).
+  const [quick, setQuick] = useState<Record<string, { state: "busy" } | { state: "done"; note: string } | { state: "error"; text: string }>>({});
+  const quickCheckIn = async (c: ClientWithPackage) => {
+    setQuick((q) => ({ ...q, [c.id]: { state: "busy" } }));
+    try {
+      const res = await api.checkIn(c.id, "manual", here?.id);
+      const p = res.plan;
+      setQuick((q) => ({ ...q, [c.id]: { state: "done", note: res.deducted && p ? `Checked in · ${p.creditsRemaining} of ${p.creditsTotal} left` : "Checked in" } }));
+    } catch (err) {
+      setQuick((q) => ({ ...q, [c.id]: { state: "error", text: err instanceof Error ? err.message : "Couldn't check in." } }));
+    }
+  };
   const matches = useMemo(() => (clients.data?.clients ?? []).filter((c) => matchesClient(c, query)).slice(0, 6), [clients.data, query]);
-  const nextUp = useMemo(() => {
+  // Today's next classes; once today is over, the next day that has any.
+  const { nextUp, nextDay } = useMemo(() => {
     const end = new Date();
     end.setHours(23, 59, 59, 999);
-    return (classes.data?.classes ?? []).filter((c) => c.status !== "cancelled" && Date.parse(c.startsAt) + 3600000 >= Date.now() && Date.parse(c.startsAt) <= end.getTime()).slice(0, 3);
+    const live = (classes.data?.classes ?? []).filter((c) => c.status !== "cancelled").sort((a, b) => Date.parse(a.startsAt) - Date.parse(b.startsAt));
+    const today = live.filter((c) => Date.parse(c.startsAt) + 3600000 >= Date.now() && Date.parse(c.startsAt) <= end.getTime());
+    if (today.length) return { nextUp: today.slice(0, 3), nextDay: null as string | null };
+    const later = live.filter((c) => Date.parse(c.startsAt) > end.getTime());
+    if (!later.length) return { nextUp: [], nextDay: null as string | null };
+    const first = new Date(later[0].startsAt);
+    const sameDay = (iso: string) => new Date(iso).toDateString() === first.toDateString();
+    const tomorrow = new Date(end.getTime() + 1);
+    const label = first.toDateString() === tomorrow.toDateString() ? "Tomorrow" : first.toLocaleDateString(undefined, { weekday: "long" });
+    return { nextUp: later.filter((c) => sameDay(c.startsAt)).slice(0, 3), nextDay: label };
   }, [classes.data]);
   // A check-in that turns out to need a drop-in hands the client over to it.
   const [dropInFor, setDropInFor] = useState<{ id: string; name: string } | null>(null);
@@ -80,21 +104,53 @@ export function FrontDeskHome() {
         <Card style={{ marginTop: 10, overflow: "hidden" }}>
           {matches.map((c, i) => {
             const plan = planSummary(c, bundleTypes);
+            const status = deskStatus(c);
+            const canEnter = status.tone === "good" || status.tone === "warn" || status.tone === "pt";
+            const q = quick[c.id];
             return (
-              <button
-                key={c.id}
-                data-tap
-                onClick={() => setPicked(c)}
-                style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", minHeight: 64, padding: "12px 18px", border: 0, borderBottom: i === matches.length - 1 ? "none" : "1px solid var(--line)", background: "none", cursor: "pointer", textAlign: "left" }}
-              >
-                <div style={{ minWidth: 0, flex: 1 }}>
-                  <div style={{ font: "700 16px var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.name}</div>
-                  <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                    {plan.title} · {plan.detail}
-                  </div>
+              <div key={c.id} data-testid="home-result" style={{ padding: "10px 12px 10px 18px", borderBottom: i === matches.length - 1 ? "none" : "1px solid var(--line)" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                  <button
+                    data-tap
+                    onClick={() => setPicked(c)}
+                    style={{ minWidth: 0, flex: 1, display: "block", border: 0, background: "none", padding: "4px 0", cursor: "pointer", textAlign: "left", color: "var(--ink)" }}
+                  >
+                    <span style={{ display: "block", font: "700 16px var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.name}</span>
+                    <span style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 4, minWidth: 0 }}>
+                      <PlanPill client={c} />
+                      <span style={{ font: "400 12px var(--font-mono)", color: "var(--ink-faint)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", minWidth: 0 }}>{plan.title}</span>
+                    </span>
+                  </button>
+                  {q?.state === "done" ? (
+                    <span style={{ display: "inline-flex", alignItems: "center", gap: 6, color: "var(--paid-fg)", font: "800 14px var(--font-body)", flex: "none" }}>
+                      <Icon name="check" size={18} /> Done
+                    </span>
+                  ) : canEnter ? (
+                    <button
+                      data-tap
+                      disabled={q?.state === "busy"}
+                      onClick={() => quickCheckIn(c)}
+                      style={{ flex: "none", height: 42, padding: "0 18px", border: 0, borderRadius: 999, background: "var(--primary)", color: "#fff", font: "700 14px var(--font-body)", cursor: "pointer", opacity: q?.state === "busy" ? 0.6 : 1 }}
+                    >
+                      {q?.state === "busy" ? "…" : "Check in"}
+                    </button>
+                  ) : (
+                    <button
+                      data-tap
+                      onClick={() => setPicked(c)}
+                      style={{ flex: "none", height: 42, padding: "0 16px", border: "1px solid var(--line)", borderRadius: 999, background: "var(--surface)", color: "var(--ink)", font: "700 14px var(--font-body)", cursor: "pointer" }}
+                    >
+                      Options
+                    </button>
+                  )}
                 </div>
-                <PlanPill tone={plan.tone} />
-              </button>
+                {q?.state === "done" && <div style={{ font: "400 12px var(--font-mono)", color: "var(--paid-fg)", marginTop: 4 }}>{q.note}</div>}
+                {q?.state === "error" && (
+                  <div role="alert" style={{ font: "600 12px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 10, padding: "8px 10px", marginTop: 6 }}>
+                    {q.text}
+                  </div>
+                )}
+              </div>
             );
           })}
           {matches.length === 0 && <EmptyState bare icon="search" title={`No one matches “${query.trim()}”`} body="Check the spelling, or search by phone number." action={{ label: "+ New client", onClick: () => setModal("new") }} />}
@@ -136,6 +192,11 @@ export function FrontDeskHome() {
 
       <SectionTitle right={<SectionLink onClick={() => navigate("/bookings")}>All bookings</SectionLink>}>Next up</SectionTitle>
       <Card style={{ overflow: "hidden", marginBottom: 24 }}>
+        {nextDay && nextUp.length > 0 && (
+          <div data-testid="next-day-label" style={{ padding: "12px 18px 0", font: "600 13px var(--font-body)", color: "var(--ink-muted)" }}>
+            Nothing left today · {nextDay}
+          </div>
+        )}
         {nextUp.map((c, i) => (
           <button
             key={c.id}

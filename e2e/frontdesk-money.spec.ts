@@ -31,7 +31,7 @@ test("front desk: walk-in must be recorded against a member", async ({ page }) =
   // No anonymous walk-ins.
   await page.getByPlaceholder("e.g. Open gym").fill("Calisthenics");
   await page.locator('input[type="number"]').fill("120");
-  await page.getByRole("button", { name: /Confirm drop-in/ }).click();
+  await page.getByRole("button", { name: /Confirm drop-in|^Charge / }).click();
   await expect(page.getByText("Link the member or add their details — every walk-in is recorded against a member.")).toBeVisible();
   expect(sent).toBeNull();
 
@@ -40,11 +40,11 @@ test("front desk: walk-in must be recorded against a member", async ({ page }) =
   await expect(page.getByText("WALLET", { exact: true })).toHaveCount(0);
   await page.getByLabel("FULL NAME", { exact: true }).fill("Nour Adel");
   await page.getByLabel("PHONE", { exact: true }).fill("0100");
-  await page.getByRole("button", { name: /Confirm drop-in/ }).click();
+  await page.getByRole("button", { name: /Confirm drop-in|^Charge / }).click();
   await expect(page.getByText("Enter the member's email — they sign in to the app with it.")).toBeVisible();
   await page.getByLabel("EMAIL", { exact: true }).fill("Nour@Example.com");
   await page.getByText("CARD", { exact: true }).click();
-  await page.getByRole("button", { name: /Confirm drop-in/ }).click();
+  await page.getByRole("button", { name: /Confirm drop-in|^Charge / }).click();
 
   await expect(page.getByText(/Drop-in recorded/)).toBeVisible();
   await expect(page.getByText(/Nour Adel \(new member · app invite ready\) · Calisthenics · 120 EGP/)).toBeVisible();

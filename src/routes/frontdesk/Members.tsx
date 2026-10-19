@@ -157,7 +157,7 @@ export function Members() {
                   {here && !c.homeLocationId && <span style={{ color: "var(--danger-fg)", fontWeight: 700 }}> · No location</span>}
                 </div>
               </div>
-              <PlanPill tone={plan.tone} />
+              <PlanPill client={c} />
               <Icon name="chevron-right" size={16} />
             </button>
           );
@@ -587,7 +587,7 @@ function ClientSheet({
             <div data-sq style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "14px 16px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                 <div style={{ font: "800 18px var(--font-body)", flex: 1, minWidth: 0 }}>{summary.title}</div>
-                <PlanPill tone={summary.tone} />
+                <PlanPill client={shown} />
               </div>
               <div style={{ font: "400 14px var(--font-mono)", color: "var(--ink-muted)", marginTop: 4 }}>{summary.detail}</div>
               {plan && plan.kind === "bundle" && <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)", marginTop: 2 }}>Until {dateLabel(plan.expiresAt.slice(0, 10))}</div>}
@@ -629,9 +629,19 @@ function ClientSheet({
             {error && <ErrorBanner text={error} />}
 
             {summary.tone === "active" ? (
-              <Button fullWidth size="lg" style={{ marginTop: 16 }} onClick={() => onCheckIn(shown)}>
-                Check in
-              </Button>
+              // Selling sits next to checking in — the desk's two jobs. A new group plan
+              // can only start once the running one ends, so "Sell" offers what can be
+              // sold now: a group plan if none is running, else a PT package.
+              <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
+                <Button fullWidth size="lg" style={{ flex: 2 }} onClick={() => onCheckIn(shown)}>
+                  Check in
+                </Button>
+                {(!plan || !packageActive) && (
+                  <Button variant="secondary" size="lg" style={{ flex: 1 }} onClick={() => setMode(!plan ? "sell-plan" : "renew-package")}>
+                    {!plan ? "Sell plan" : "Sell PT"}
+                  </Button>
+                )}
+              </div>
             ) : (
               <Button fullWidth size="lg" style={{ marginTop: 16 }} onClick={() => setMode(plan ? "renew-package" : "sell-plan")}>
                 Sell a plan

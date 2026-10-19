@@ -76,16 +76,51 @@ export function renewalMessage(client: ClientWithPackage, bundleTypes: BundleTyp
     : `Hi ${first}! Just a heads up — your ${what} is almost up (${s.detail}). Want me to renew it for you? 💪`;
 }
 
-const TONE: Record<PlanTone, { fg: string; bg: string; label: string }> = {
-  active: { fg: "var(--paid-fg)", bg: "var(--paid-bg)", label: "ACTIVE" },
-  expired: { fg: "var(--danger-fg)", bg: "var(--danger-bg)", label: "EXPIRED" },
-  none: { fg: "var(--ink-muted)", bg: "var(--sunken)", label: "NO PLAN" },
+export type StatusTone = "good" | "warn" | "frozen" | "pt" | "bad" | "none";
+
+/** What the desk needs to know at a glance: can this person come in, and is
+ * anything about to run out? One short label per client, never a plain
+ * "active" for someone who is frozen, nearly out, or here for PT only. */
+export function deskStatus(client: ClientWithPackage): { tone: StatusTone; label: string } {
+  const g = client.groupPlan ?? null;
+  const p = client.currentPackage && client.currentPackage.status === "active" ? client.currentPackage : null;
+  const now = Date.now();
+  const daysTo = (iso: string) => Math.ceil((Date.parse(iso) - now) / DAY);
+  const ends = (d: number) => (d <= 0 ? "ENDS TODAY" : d === 1 ? "ENDS TOMORROW" : `ENDS IN ${d} DAYS`);
+  if (g?.frozenUntil && Date.parse(g.frozenUntil) > now) return { tone: "frozen", label: "FROZEN" };
+  if (g) {
+    const d = daysTo(g.expiresAt);
+    if (g.kind === "bundle") {
+      const n = g.creditsRemaining ?? 0;
+      if (n <= 0) return p ? { tone: "pt", label: `PT ONLY · ${p.sessionsRemaining} LEFT` } : { tone: "bad", label: "NO SESSIONS" };
+      if (n <= 2) return { tone: "warn", label: `${n} LEFT` };
+      if (d <= 7) return { tone: "warn", label: ends(d) };
+      return { tone: "good", label: `${n} LEFT` };
+    }
+    if (d <= 7) return { tone: "warn", label: ends(d) };
+    return { tone: "good", label: "ACTIVE" };
+  }
+  if (p) return { tone: "pt", label: `PT ONLY · ${p.sessionsRemaining} LEFT` };
+  if (client.currentPackage) return { tone: "bad", label: "EXPIRED" };
+  return { tone: "none", label: "NO PLAN" };
+}
+
+const TONE: Record<StatusTone, { fg: string; bg: string }> = {
+  good: { fg: "var(--paid-fg)", bg: "var(--paid-bg)" },
+  warn: { fg: "var(--logging-fg)", bg: "var(--logging-bg)" },
+  frozen: { fg: "var(--frozen-fg)", bg: "var(--frozen-bg)" },
+  pt: { fg: "var(--settled-fg)", bg: "var(--settled-bg)" },
+  bad: { fg: "var(--danger-fg)", bg: "var(--danger-bg)" },
+  none: { fg: "var(--ink-muted)", bg: "var(--sunken)" },
 };
 
-export function PlanPill({ tone }: { tone: PlanTone }) {
-  const c = TONE[tone];
+export function PlanPill({ client }: { client: ClientWithPackage }) {
+  const s = deskStatus(client);
+  const c = TONE[s.tone];
   return (
     <span
+      data-testid="status-pill"
+      data-tone={s.tone}
       style={{
         display: "inline-flex",
         alignItems: "center",
@@ -95,12 +130,13 @@ export function PlanPill({ tone }: { tone: PlanTone }) {
         background: c.bg,
         color: c.fg,
         font: "700 11px var(--font-mono)",
-        letterSpacing: ".08em",
+        letterSpacing: ".06em",
         whiteSpace: "nowrap",
+        flex: "none",
       }}
     >
       <i style={{ width: 6, height: 6, borderRadius: 999, background: c.fg, display: "block" }} />
-      {c.label}
+      {s.label}
     </span>
   );
 }
@@ -221,7 +257,7 @@ export function ClientPicker({
                   {plan.title} · {plan.detail}
                 </div>
               </div>
-              <PlanPill tone={plan.tone} />
+              <PlanPill client={c} />
             </button>
           );
         })}
