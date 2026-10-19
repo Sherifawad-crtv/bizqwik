@@ -87,10 +87,13 @@ type Method = "GET" | "POST";
 export class ApiError extends Error {
   code: string | null;
   data: Record<string, unknown> | null;
-  constructor(message: string, code: string | null, data: Record<string, unknown> | null) {
+  // HTTP status, or undefined when the request never got an answer (offline, dropped).
+  status?: number;
+  constructor(message: string, code: string | null, data: Record<string, unknown> | null, status?: number) {
     super(message);
     this.code = code;
     this.data = data;
+    this.status = status;
   }
 }
 
@@ -102,10 +105,14 @@ const CLIENTS_LIST = "clients-list";
 async function callFn<T>(path: string, opts?: { method?: Method; body?: Record<string, unknown>; quiet?: boolean }, slug: string = FN_SLUG): Promise<T> {
   const method = opts?.method ?? "GET";
   const started = performance.now();
-  const { data, error } = await supabase.functions.invoke(`${slug}/${path}`, {
-    method,
-    body: opts?.body,
-  });
+  const send = () => supabase.functions.invoke(`${slug}/${path}`, { method, body: opts?.body });
+  let { data, error } = await send();
+  // A read that never got an answer (phone switching networks, app just woken)
+  // is safe to send once more; a POST isn't, it may have gone through.
+  if (error && method === "GET" && !(error as { context?: { status?: number } }).context?.status) {
+    await new Promise((r) => setTimeout(r, 800));
+    ({ data, error } = await send());
+  }
   const took = Math.round(performance.now() - started);
   if (error) {
     let message = error.message;
@@ -125,8 +132,10 @@ async function callFn<T>(path: string, opts?: { method?: Method; body?: Record<s
     // path (ids stripped), the status and the machine code are sent, never the message.
     const status = (ctx as { status?: number } | undefined)?.status;
     track("api_error", { path: cleanPath(path), method, status, code, ms: took });
-    if (status === undefined || status >= 500) reportError(error, { path: cleanPath(path), method, status });
-    throw new ApiError(message, code, body);
+    // No answer while offline or in the background is the phone, not a fault of ours.
+    const unreachable = status === undefined && (!navigator.onLine || document.visibilityState === "hidden");
+    if ((status === undefined || status >= 500) && !unreachable) reportError(error, { path: cleanPath(path), method, status });
+    throw new ApiError(message, code, body, status);
   }
   if (method === "POST") track("api_ok", { path: cleanPath(path), method, ms: took });
   else if (took > 3000) track("api_slow", { path: cleanPath(path), method, ms: took });
