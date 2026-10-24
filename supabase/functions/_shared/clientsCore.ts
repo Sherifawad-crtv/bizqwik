@@ -111,16 +111,21 @@ export async function loadClients(admin: any, me: { id: string; org_id: string; 
   await sweepOrgGroupPlans(admin, org);
 
   const mine = new Set(clients.map((c: any) => c.id));
-  const [pkgRows, memRows, planRows, noteRows] = await Promise.all([
+  // Plans that ended in the last 90 days, so "who needs to renew" can be answered.
+  const recentCutoff = new Date(Date.now() - 90 * 86400000).toISOString();
+  const [pkgRows, memRows, planRows, endedRows, noteRows] = await Promise.all([
     fetchAll(() => admin.from("package_instances").select("*").eq("org_id", org).order("purchased_at", { ascending: false }).order("id")),
     fetchAll(() => admin.from("membership_instances").select("*").eq("org_id", org).order("starts_at", { ascending: false }).order("id")),
     fetchAll(() => admin.from("group_plans").select("*").eq("org_id", org).eq("status", "active").order("id")),
+    fetchAll(() => admin.from("group_plans").select("*").eq("org_id", org).eq("status", "finished").gte("expires_at", recentCutoff).order("expires_at", { ascending: false }).order("id")),
     canSeeConditions ? fetchAll(() => admin.from("client_notes").select("client_id, conditions").eq("org_id", org).order("client_id")) : Promise.resolve([]),
   ]);
 
   const latestPkg = latestPerClient(pkgRows.filter((r) => mine.has(r.client_id)));
   const latestMem = latestPerClient(memRows.filter((r) => mine.has(r.client_id)));
   const planByClient = new Map(planRows.map((p: any) => [p.client_id, p]));
+  const endedByClient = new Map<string, any>();
+  for (const p of endedRows) if (!endedByClient.has(p.client_id)) endedByClient.set(p.client_id, p);
   const notes = new Map(noteRows.filter((n: any) => mine.has(n.client_id)).map((n: any) => [n.client_id, n.conditions ?? null]));
 
   return await Promise.all(
@@ -135,6 +140,7 @@ export async function loadClients(admin: any, me: { id: string; org_id: string; 
       return {
         ...toClient(cl, canSeeConditions ? (notes.get(cl.id) ?? null) : null, pkg ? toPackageInstance(pkg) : null, membership ? toMembershipInstance(membership) : null),
         groupPlan: plan ? toGroupPlan(plan) : null,
+        lastGroupPlan: !plan && endedByClient.has(cl.id) ? toGroupPlan(endedByClient.get(cl.id)) : null,
       };
     }),
   );

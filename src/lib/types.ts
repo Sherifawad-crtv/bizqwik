@@ -159,6 +159,8 @@ export interface ClientWithPackage extends Client {
   currentMembership?: MembershipInstance | null;
   // The member's one active group plan (membership / class monthly / bundle), if any.
   groupPlan?: GroupPlan | null;
+  // When there's no active plan: the one that ended most recently (last 90 days).
+  lastGroupPlan?: GroupPlan | null;
 }
 
 // Coach payout drill-down row — a package plus the names needed to show it
