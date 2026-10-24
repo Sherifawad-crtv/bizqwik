@@ -1,13 +1,12 @@
 import { EmptyState } from "../components/EmptyState";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useAuth } from "../lib/auth";
 import { useSetHeader } from "../lib/header";
 import { useAsync } from "../lib/useAsync";
 import { useLatch } from "../lib/useLatch";
 import { useIsMobile } from "../lib/useIsMobile";
 import { api, MOCK } from "../lib/backend";
-import { dateLabel, egp } from "../lib/format";
-import { canLog } from "../lib/types";
+import { dateLabel, egp, todayIso } from "../lib/format";
 import type { ClientWithPackage, GroupPlan, Role } from "../lib/types";
 import { GROUP_PLAN_KIND_LABELS } from "../lib/types";
 import { Button } from "../components/Button";
@@ -16,7 +15,10 @@ import { Avatar } from "../components/Avatar";
 import { Spinner } from "../components/Spinner";
 import { Sheet } from "../components/Sheet";
 import { ConfirmSheet } from "../components/ConfirmSheet";
-import { TextField } from "../components/FormField";
+import { TextField, SelectField } from "../components/FormField";
+import { DateField } from "../components/DateField";
+import { PlanPill } from "./frontdesk/shared";
+import { NO_FILTERS, filterClients, planFacts, isFiltering, planOptions, LOW_SESSIONS, type ClientFilters, type ExpiryFilter, type SortKey, type StatusFilter } from "../lib/clientFilters";
 import { PackageStatusPill } from "../components/PackageStatusPill";
 import { SheetSuccessIcon } from "../components/SheetSuccessIcon";
 import { useSheetSuccess } from "../lib/useSheetSuccess";
@@ -55,24 +57,28 @@ function groupPlanLine(p: GroupPlan): string {
   return `${GROUP_PLAN_KIND_LABELS[p.kind]} · ${until}`;
 }
 
-function OverviewCards({ clients, showGroupPlans }: { clients: ClientWithPackage[]; showGroupPlans: boolean }) {
-  const stats = [
-    { k: "TOTAL CLIENTS", v: clients.length },
-    ...(showGroupPlans ? [{ k: "ON A GROUP PLAN", v: clients.filter((c) => c.groupPlan).length }] : []),
-    { k: "ACTIVE PACKAGES", v: clients.filter((c) => c.currentPackage?.status === "active").length },
-    { k: "NEEDS RENEWAL", v: clients.filter((c) => c.currentPackage && c.currentPackage.status !== "active").length },
-    {
-      k: "EXPIRING SOON",
-      v: clients.filter((c) => c.currentPackage?.status === "active" && daysLeft(c.currentPackage.expiryDate) <= EXPIRING_SOON_DAYS).length,
-    },
+function OverviewCards({ clients, showGroupPlans, onPick }: { clients: ClientWithPackage[]; showGroupPlans: boolean; onPick: (patch: Partial<ClientFilters>) => void }) {
+  const now = Date.now();
+  const facts = clients.map((c) => planFacts(c, now));
+  const stats: { k: string; v: number; patch: Partial<ClientFilters> }[] = [
+    { k: "TOTAL CLIENTS", v: clients.length, patch: {} },
+    ...(showGroupPlans ? [{ k: "ON A GROUP PLAN", v: clients.filter((c) => c.groupPlan).length, patch: {} }] : []),
+    { k: "ACTIVE", v: facts.filter((f) => f.state === "active").length, patch: { status: "active" } },
+    { k: "NEEDS RENEWAL", v: facts.filter((f) => f.state === "ended").length, patch: { status: "ended" } },
+    { k: "EXPIRING SOON", v: facts.filter((f) => f.state === "active" && f.daysLeft !== null && f.daysLeft <= EXPIRING_SOON_DAYS).length, patch: { status: "active", expiry: "7" } },
   ];
   return (
     <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(140px,1fr))", gap: 10, marginBottom: 18 }}>
       {stats.map((s) => (
-        <div key={s.k} data-sq style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: "16px 18px" }}>
+        <button
+          key={s.k}
+          data-sq
+          onClick={() => onPick({ ...NO_FILTERS, ...s.patch })}
+          style={{ textAlign: "left", background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: "16px 18px", cursor: "pointer" }}
+        >
           <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>{s.k}</div>
-          <div className="tabular" style={{ font: "800 30px var(--font-body)", letterSpacing: "-.02em", marginTop: 6 }}>{s.v}</div>
-        </div>
+          <div className="tabular" style={{ font: "800 30px var(--font-body)", letterSpacing: "-.02em", marginTop: 6, color: "var(--ink)" }}>{s.v}</div>
+        </button>
       ))}
     </div>
   );
@@ -94,7 +100,7 @@ export function Clients() {
   if (!profile) return null;
   if (!data) return <Spinner />;
 
-  const coachOptions: CoachOption[] = (monthData?.rows ?? []).filter((r) => canLog(r.role)).map((r) => ({ id: r.coachId, name: r.name }));
+  const coachOptions: CoachOption[] = (monthData?.rows ?? []).map((r) => ({ id: r.coachId, name: r.name }));
   const visibleClients = isDeptHead ? data.clients : data.clients.filter((c) => c.assignedCoachId === profile.id);
   const coachName = (id: string | null) => (id ? (coachOptions.find((c) => c.id === id)?.name ?? "—") : null);
 
@@ -107,6 +113,95 @@ export function Clients() {
       showAssignedCoach={isDeptHead}
       canManage={isDeptHead}
     />
+  );
+}
+
+const STATUS_OPTIONS: { value: StatusFilter; label: string }[] = [
+  { value: "all", label: "All clients" },
+  { value: "active", label: "Active" },
+  { value: "low", label: `Running low (${LOW_SESSIONS} or fewer left)` },
+  { value: "ended", label: "Ended · needs renewal" },
+  { value: "none", label: "No plan" },
+];
+const EXPIRY_OPTIONS: { value: ExpiryFilter; label: string }[] = [
+  { value: "any", label: "Any time" },
+  { value: "today", label: "Today" },
+  { value: "7", label: "Next 7 days" },
+  { value: "14", label: "Next 14 days" },
+  { value: "30", label: "Next 30 days" },
+  { value: "month", label: "This month" },
+  { value: "custom", label: "Pick dates…" },
+];
+const SORT_OPTIONS: { value: SortKey; label: string }[] = [
+  { value: "name", label: "Name A-Z" },
+  { value: "expiry", label: "Expiry · soonest" },
+  { value: "expiry_late", label: "Expiry · latest" },
+  { value: "left", label: "Sessions left · fewest" },
+  { value: "left_most", label: "Sessions left · most" },
+];
+
+function plusDays(iso: string, days: number): string {
+  const d = new Date(`${iso}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + days);
+  return d.toISOString().slice(0, 10);
+}
+
+function ClientFilterBar({
+  clients,
+  filters,
+  onChange,
+  coaches,
+}: {
+  clients: ClientWithPackage[];
+  filters: ClientFilters;
+  onChange: (f: ClientFilters) => void;
+  coaches: { id: string; name: string }[] | null;
+}) {
+  const set = (patch: Partial<ClientFilters>) => onChange({ ...filters, ...patch });
+  const plans = planOptions(clients);
+  return (
+    <div data-testid="client-filters" style={{ marginBottom: 14 }}>
+      <TextField label="SEARCH" value={filters.q} onChange={(e) => set({ q: e.target.value })} placeholder="Name, phone or email" />
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(170px,1fr))", gap: 8, marginTop: 8 }}>
+        <SelectField label="STATUS" value={filters.status} options={STATUS_OPTIONS} onChange={(v) => set({ status: v as StatusFilter })} />
+        <SelectField
+          label="PLAN"
+          value={filters.plan}
+          options={[{ value: "", label: "All plans" }, ...plans.map((p) => ({ value: p.name, label: `${p.name} · ${p.count}` }))]}
+          onChange={(v) => set({ plan: v })}
+        />
+        <SelectField
+          label="EXPIRES"
+          value={filters.expiry}
+          options={EXPIRY_OPTIONS}
+          onChange={(v) => {
+            const expiry = v as ExpiryFilter;
+            set(expiry === "custom" && !filters.from ? { expiry, from: todayIso(), to: plusDays(todayIso(), 30) } : { expiry });
+          }}
+        />
+        {coaches && (
+          <SelectField
+            label="COACH"
+            value={filters.coach}
+            options={[{ value: "", label: "All coaches" }, { value: "none", label: "Unassigned" }, ...coaches.map((c) => ({ value: c.id, label: c.name }))]}
+            onChange={(v) => set({ coach: v })}
+          />
+        )}
+        <SelectField label="SORT BY" value={filters.sort} options={SORT_OPTIONS} onChange={(v) => set({ sort: v as SortKey })} />
+      </div>
+      {filters.expiry === "custom" && (
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginTop: 8 }}>
+          <div>
+            <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", margin: "0 0 4px 4px" }}>EXPIRES FROM</div>
+            <DateField value={filters.from || todayIso()} max={filters.to || undefined} onChange={(from) => set({ from })} />
+          </div>
+          <div>
+            <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", margin: "0 0 4px 4px" }}>EXPIRES TO</div>
+            <DateField value={filters.to || plusDays(todayIso(), 30)} min={filters.from || undefined} onChange={(to) => set({ to })} />
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -125,6 +220,7 @@ function ClientList({
   showAssignedCoach: boolean;
   canManage: boolean;
 }) {
+  const [filters, setFilters] = useState<ClientFilters>(NO_FILTERS);
   const [selected, setSelected] = useState<ClientWithPackage | null>(null);
   const [editing, setEditing] = useState<ClientWithPackage | null>(null);
   const [deleting, setDeleting] = useState<ClientWithPackage | null>(null);
@@ -134,9 +230,18 @@ function ClientList({
   const shownDeleting = useLatch(deleting);
   const shownActionsFor = useLatch(actionsFor);
 
+  const shown = filterClients(clients, filters);
+  const filtering = isFiltering(filters);
+  const coachChoices = showAssignedCoach
+    ? [...new Set(clients.map((c) => c.assignedCoachId).filter((id): id is string => !!id))]
+        .map((id) => ({ id, name: coachName(id) ?? "—" }))
+        .sort((a, b) => a.name.localeCompare(b.name))
+    : null;
+
   return (
     <div>
-      <OverviewCards clients={clients} showGroupPlans={canManage} />
+      {clients.length > 0 && <ClientFilterBar clients={clients} filters={filters} onChange={setFilters} coaches={coachChoices} />}
+      <OverviewCards clients={clients} showGroupPlans={canManage} onPick={(patch) => setFilters({ ...patch, sort: filters.sort } as ClientFilters)} />
       {canManage && (
         <div style={{ font: "400 12px/1.5 var(--font-mono)", color: "var(--ink-faint)", margin: "-6px 2px 14px" }}>
           New clients, plans and packages are handled at the front desk.
@@ -145,11 +250,22 @@ function ClientList({
 
       <div style={{ display: "flex", alignItems: "baseline", gap: 10, padding: "2px 2px 8px" }}>
         <span style={{ font: "700 20px var(--font-body)", letterSpacing: "-.01em" }}>Roster</span>
-        <span style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>{clients.length} clients</span>
+        <span data-testid="roster-count" style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>
+          {filtering ? `${shown.length} of ${clients.length} clients` : `${clients.length} clients`}
+        </span>
+        {filtering && (
+          <button
+            onClick={() => setFilters({ ...NO_FILTERS, sort: filters.sort })}
+            style={{ marginLeft: "auto", border: 0, background: "none", font: "700 13px var(--font-body)", color: "var(--primary-pressed)", cursor: "pointer", padding: 4 }}
+          >
+            Clear filters
+          </button>
+        )}
       </div>
 
       <ClientRoster
-        clients={clients}
+        clients={shown}
+        filtered={filtering}
         showAssignedCoach={showAssignedCoach}
         canManage={canManage}
         coachName={coachName}
@@ -254,6 +370,7 @@ function RowActionButton({
 
 function ClientRoster({
   clients,
+  filtered,
   showAssignedCoach,
   canManage,
   coachName,
@@ -263,6 +380,7 @@ function ClientRoster({
   onOpenActions,
 }: {
   clients: ClientWithPackage[];
+  filtered?: boolean;
   showAssignedCoach: boolean;
   canManage: boolean;
   coachName: (id: string | null) => string | null;
@@ -273,9 +391,21 @@ function ClientRoster({
 }) {
   const isMobile = useIsMobile();
   const metaFor = (c: ClientWithPackage) => (showAssignedCoach ? (coachName(c.assignedCoachId) ?? "Unassigned") : packageMetaText(c));
-  const subFor = (c: ClientWithPackage) => (showAssignedCoach ? (c.groupPlan ? `${c.groupPlan.name} · ${groupPlanLine(c.groupPlan)}` : countdownText(c)) : null);
+  const subFor = (c: ClientWithPackage) =>
+    showAssignedCoach
+      ? c.groupPlan
+        ? `${c.groupPlan.name} · ${groupPlanLine(c.groupPlan)}`
+        : c.lastGroupPlan
+          ? `${c.lastGroupPlan.name} · ended ${dateLabel(c.lastGroupPlan.expiresAt.slice(0, 10))}`
+          : countdownText(c)
+      : null;
+  // The founder sees the same one-word status as the front desk; a coach sees their PT package's state.
+  const pillFor = (c: ClientWithPackage) => (showAssignedCoach ? <PlanPill client={c} /> : c.currentPackage ? <PackageStatusPill status={c.currentPackage.status} /> : null);
   const valueFor = (c: ClientWithPackage) => (c.currentPackage ? egp(c.currentPackage.priceAtSale) : "—");
 
+  if (clients.length === 0 && filtered) {
+    return <EmptyState icon="clients" title="No clients match" body="Try a different filter, or clear them to see everyone." />;
+  }
   if (clients.length === 0) {
     return showAssignedCoach ? (
       <EmptyState icon="clients" title="No clients yet" body="The front desk registers clients and sells their plans and PT packages. Everyone they add shows up here." />
@@ -299,7 +429,7 @@ function ClientRoster({
               <div style={{ font: "700 16px var(--font-body)", letterSpacing: "-.01em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{c.name}</div>
               <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-muted)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{metaFor(c)}</div>
               <div style={{ marginTop: 8, display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-                {c.currentPackage && <PackageStatusPill status={c.currentPackage.status} />}
+                {pillFor(c)}
                 {subFor(c) && <span style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>{subFor(c)}</span>}
               </div>
             </div>
@@ -337,6 +467,7 @@ function ClientRoster({
           client={c}
           meta={metaFor(c)}
           sub={subFor(c)}
+          pill={pillFor(c)}
           value={valueFor(c)}
           canManage={canManage}
           onClick={() => onSelect(c)}
@@ -352,6 +483,7 @@ function ClientDesktopRow({
   client,
   meta,
   sub,
+  pill,
   value,
   canManage,
   onClick,
@@ -361,6 +493,7 @@ function ClientDesktopRow({
   client: ClientWithPackage;
   meta: string;
   sub: string | null;
+  pill: ReactNode;
   value: string;
   canManage: boolean;
   onClick: () => void;
@@ -393,7 +526,7 @@ function ClientDesktopRow({
         </div>
       </div>
       <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-muted)", minWidth: 0, overflow: "hidden", textOverflow: "ellipsis" }}>{meta}</div>
-      <div>{client.currentPackage && <PackageStatusPill status={client.currentPackage.status} />}</div>
+      <div>{pill}</div>
       <div className="tabular" style={{ textAlign: "right", font: "800 20px var(--font-body)", letterSpacing: "-.01em" }}>{value}</div>
       <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 6, color: "var(--ink-faint)" }}>
         {canManage && (

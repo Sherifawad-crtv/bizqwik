@@ -1519,6 +1519,10 @@ app.get(`${P}/clients`, async (c) => {
   await sweepOrgGroupPlans(me.org_id);
   const { data: plans } = await admin().from("group_plans").select("*").eq("org_id", me.org_id).eq("status", "active");
   const planByClient = new Map((plans ?? []).map((p: any) => [p.client_id, p]));
+  const { data: ended } = await admin().from("group_plans").select("*").eq("org_id", me.org_id).eq("status", "finished")
+    .gte("expires_at", new Date(Date.now() - 90 * 86400000).toISOString()).order("expires_at", { ascending: false });
+  const endedByClient = new Map<string, any>();
+  for (const p of ended ?? []) if (!endedByClient.has(p.client_id)) endedByClient.set(p.client_id, p);
   const rows = await Promise.all(
     (clients ?? []).map(async (cl) => {
       const [pkg, membership, conditions] = await Promise.all([
@@ -1527,7 +1531,7 @@ app.get(`${P}/clients`, async (c) => {
         canSeeConditions ? conditionsOf(cl.id) : Promise.resolve(null),
       ]);
       const plan = planByClient.get(cl.id);
-      return { ...toClient(cl, conditions, pkg ? toPackageInstance(pkg) : null, membership ? toMembershipInstance(membership) : null), groupPlan: plan ? toGroupPlan(plan) : null };
+      return { ...toClient(cl, conditions, pkg ? toPackageInstance(pkg) : null, membership ? toMembershipInstance(membership) : null), groupPlan: plan ? toGroupPlan(plan) : null, lastGroupPlan: !plan && endedByClient.has(cl.id) ? toGroupPlan(endedByClient.get(cl.id)) : null };
     }),
   );
   return c.json({ clients: rows });

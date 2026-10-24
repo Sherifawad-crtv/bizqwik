@@ -101,7 +101,7 @@ export function deskStatus(client: ClientWithPackage): { tone: StatusTone; label
     return { tone: "good", label: "ACTIVE" };
   }
   if (p) return { tone: "pt", label: `PT ONLY · ${p.sessionsRemaining} LEFT` };
-  if (client.currentPackage) return { tone: "bad", label: "EXPIRED" };
+  if (client.currentPackage || client.lastGroupPlan) return { tone: "bad", label: "EXPIRED" };
   return { tone: "none", label: "NO PLAN" };
 }
 
