@@ -30,6 +30,11 @@ export function planSummary(client: ClientWithPackage, bundleTypes: BundleType[]
     return { tone: "active", title: pName, detail: `${p.sessionsRemaining} of ${p.sessionsIncluded} sessions left` };
   }
   if (p) return { tone: "expired", title: pName, detail: p.status === "exhausted" ? "All sessions used" : `Ended ${dateLabel(p.expiryDate)}` };
+  const last = client.lastGroupPlan ?? null;
+  if (last) {
+    const used = last.kind === "bundle" && (last.creditsRemaining ?? 0) <= 0;
+    return { tone: "expired", title: last.name, detail: used ? "All sessions used" : `Ended ${dateLabel(last.expiresAt.slice(0, 10))}` };
+  }
   return { tone: "none", title: "No plan", detail: "Nothing active" };
 }
 

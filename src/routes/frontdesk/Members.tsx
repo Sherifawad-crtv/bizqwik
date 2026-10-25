@@ -440,9 +440,11 @@ export function CreateClientSheet({
 
 type Mode = "view" | "sell-plan" | "renew-package" | "assign" | "invite" | "refund" | "pt-log" | "location";
 
-function ClientSheet({
+export function ClientSheet({
   client,
   onClose,
+  startIn,
+  onSold,
   planTypes,
   series,
   bundleTypes,
@@ -452,6 +454,10 @@ function ClientSheet({
   client: ClientWithPackage | null;
   onClose: () => void;
   onCheckIn: (c: ClientWithPackage) => void;
+  /** Open straight on a selling step (renewing from the check-in sheet). */
+  startIn?: "sell-plan" | "renew-package";
+  /** A plan or package was just sold. */
+  onSold?: () => void;
   planTypes: GroupPlanType[];
   series: ClassSeries[];
   bundleTypes: BundleType[];
@@ -481,9 +487,13 @@ function ClientSheet({
 
   useEffect(() => {
     if (client) {
-      setMode("view");
+      setMode(startIn ?? "view");
       setShowMore(false);
-      setPickId("");
+      // Renewing starts from what they had last, still sellable now: one tap to renew, changeable.
+      const lastPlan = client.lastGroupPlan;
+      const lastOffer = lastPlan?.planTypeId && planTypes.some((t) => t.id === lastPlan.planTypeId) ? `pt:${lastPlan.planTypeId}` : lastPlan?.seriesId && series.some((x) => x.id === lastPlan.seriesId) ? `cs:${lastPlan.seriesId}` : "";
+      const lastBundle = client.currentPackage && bundleTypes.some((b) => b.id === client.currentPackage!.bundleTypeId) ? client.currentPackage.bundleTypeId : "";
+      setPickId(startIn === "sell-plan" ? lastOffer : startIn === "renew-package" ? lastBundle : "");
       setCoachId(client.assignedCoachId ?? "");
       setEmail(client.email ?? "");
       setRefundAmount("");
@@ -520,6 +530,7 @@ function ClientSheet({
     setError(null);
     try {
       await action();
+      if (mode === "sell-plan" || mode === "renew-package") onSold?.();
       showSuccess();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
