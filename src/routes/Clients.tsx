@@ -18,7 +18,7 @@ import { ConfirmSheet } from "../components/ConfirmSheet";
 import { TextField } from "../components/FormField";
 import { DateField } from "../components/DateField";
 import { PlanPill } from "./frontdesk/shared";
-import { NO_FILTERS, filterClients, planFacts, isFiltering, planOptions, LOW_SESSIONS, type ClientFilters, type ExpiryFilter, type SortKey, type StatusFilter } from "../lib/clientFilters";
+import { NO_FILTERS, filterClients, planFacts, isFiltering, planOptions, type ClientFilters, type ExpiryFilter, type SortKey, type StatusFilter } from "../lib/clientFilters";
 import { PackageStatusPill } from "../components/PackageStatusPill";
 import { SheetSuccessIcon } from "../components/SheetSuccessIcon";
 import { useSheetSuccess } from "../lib/useSheetSuccess";
