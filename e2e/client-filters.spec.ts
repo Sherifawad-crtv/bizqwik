@@ -30,9 +30,12 @@ async function boot(page: Page, width = 1200) {
     [`month/${new Date().toISOString().slice(0, 7)}`]: { rows: [{ coachId: "c1", name: "Mohamed Hesham", role: "coach" }, { coachId: "c2", name: "Nour Adel", role: "coach" }] },
   });
 }
-const pick = async (page: Page, label: string, option: string) => {
-  await page.getByTestId("client-filters").getByRole("button", { name: new RegExp(label) }).click();
-  await page.getByRole("button", { name: option, exact: true }).click();
+// Status chips sit on the page; plan, expiry, coach and sort are chips inside the Filters sheet.
+const status = (page: Page, which: string) => page.getByTestId(`status-${which}`).click();
+const inSheet = async (page: Page, ...options: string[]) => {
+  await page.getByTestId("client-filters").getByRole("button", { name: /^Filters/ }).click();
+  for (const o of options) await page.getByRole("button", { name: o, exact: false }).filter({ hasText: o }).first().click();
+  await page.getByRole("button", { name: /^Show \d+ client/ }).click();
 };
 
 test("filters: status, plan, expiry and search narrow the roster, and clear brings everyone back", async ({ page }) => {
@@ -40,21 +43,21 @@ test("filters: status, plan, expiry and search narrow the roster, and clear brin
   await page.goto("/clients");
   await expect(page.getByTestId("roster-count")).toHaveText("7 clients");
 
-  await pick(page, "STATUS", "Ended · needs renewal");
+  await status(page, "ended");
   await expect(page.getByTestId("roster-count")).toHaveText("1 of 7 clients");
   await expect(page.getByText("Mahmoud Ali")).toBeVisible();
   await expect(page.getByTestId("status-pill")).toHaveText("EXPIRED");
 
   await page.getByRole("button", { name: "Clear filters" }).click();
-  await pick(page, "PLAN", "20 Sessions · 2");
+  await inSheet(page, "20 Sessions");
   await expect(page.getByTestId("roster-count")).toHaveText("2 of 7 clients");
-  await pick(page, "EXPIRES", "Next 7 days");
+  await inSheet(page, "Next 7 days");
   await expect(page.getByTestId("roster-count")).toHaveText("1 of 7 clients");
   await expect(page.getByText("Yara Essam")).toBeVisible();
   await expect(page.getByText("Hana Mostafa")).toHaveCount(0);
 
   await page.getByRole("button", { name: "Clear filters" }).click();
-  await page.getByLabel("SEARCH").fill("0100555a3");
+  await page.getByLabel("Search clients").fill("0100555a3");
   await expect(page.getByTestId("roster-count")).toHaveText("1 of 7 clients");
   await expect(page.getByText("Omar Fathy")).toBeVisible();
 });
@@ -72,7 +75,7 @@ test("filters: the summary cards count real plans and open the matching list whe
 test("filters: nothing matching says so, and offers the way out", async ({ page }) => {
   await boot(page);
   await page.goto("/clients");
-  await page.getByLabel("SEARCH").fill("zzzz");
+  await page.getByLabel("Search clients").fill("zzzz");
   await expect(page.getByText("No clients match")).toBeVisible();
   await page.getByRole("button", { name: "Clear filters" }).click();
   await expect(page.getByTestId("roster-count")).toHaveText("7 clients");
@@ -81,19 +84,24 @@ test("filters: nothing matching says so, and offers the way out", async ({ page 
 test("filters: coach and sorting, on a phone", async ({ page }) => {
   await boot(page, 390);
   await page.goto("/clients");
-  await pick(page, "COACH", "Nour Adel");
+  await inSheet(page, "Nour Adel");
   await expect(page.getByTestId("roster-count")).toHaveText("2 of 7 clients");
   await page.getByRole("button", { name: "Clear filters" }).click();
-  await pick(page, "COACH", "Unassigned");
+  await inSheet(page, "Unassigned");
   await expect(page.getByText("Mahmoud Ali")).toBeVisible();
   await page.getByRole("button", { name: "Clear filters" }).click();
-  await pick(page, "SORT BY", "Expiry · soonest");
+  await inSheet(page, "Expiry · soonest");
   const order = await page.locator("[data-sq]", { hasText: /Tantawy|Essam|Mostafa/ }).allTextContents();
   expect(order.length).toBeGreaterThan(0);
   await expect(page.getByTestId("client-filters")).toBeVisible();
-  await page.mouse.click(10, 10);
-  await page.getByTestId("client-filters").scrollIntoViewIfNeeded();
+  // On a phone the chips replace the summary cards: nothing but search and chips above the roster.
+  await expect(page.getByText("TOTAL CLIENTS")).toHaveCount(0);
+  await expect(page.getByTestId("status-ended")).toContainText("1");
+  await page.waitForTimeout(500);
   await page.screenshot({ path: "test-results/filters-phone.png", fullPage: false });
+  await page.getByTestId("client-filters").getByRole("button", { name: /^Filters/ }).click();
+  await page.waitForTimeout(600);
+  await page.screenshot({ path: "test-results/filters-sheet.png", fullPage: false });
 });
 
 test("filters (logic): sorting by expiry and sessions left puts people without a date last", async () => {
