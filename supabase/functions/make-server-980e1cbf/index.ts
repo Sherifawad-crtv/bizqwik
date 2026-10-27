@@ -4253,6 +4253,48 @@ app.post(`${P}/clients/import`, async (c) => {
   return c.json(result);
 });
 
+type Sale = { month: string; amount: number; service: "private_training" | "group"; type: string; coachId?: string };
+
+// Every sale in range, with its month, amount, service and type — the one
+// calculation every revenue figure in the app (the dashboard, the P&L) reads
+// from. Revenue counts a sale when it happens (cash basis), any tender
+// except wallet — wallet-funded sales and wallet credit itself are excluded
+// so client store credit is never counted twice (see Oversight.tsx).
+async function salesInRange(org: string, since: string): Promise<Sale[]> {
+  const [pkgs, plans, drops, bookings, legacyMems, legacyTypes] = await Promise.all([
+    admin().from("package_instances").select("purchased_at, price_at_sale, coach_id, client_id").eq("org_id", org).gte("purchased_at", since).or(NOT_WALLET),
+    admin().from("group_plans").select("created_at, price_at_sale, kind, client_id").eq("org_id", org).gte("created_at", since).neq("pay_method", "wallet"),
+    admin().from("drop_ins").select("created_at, price, class_id").eq("org_id", org).gte("created_at", since).or(NOT_WALLET),
+    admin().from("class_bookings").select("booked_at, price_egp").eq("org_id", org).eq("coverage", "drop_in").eq("pay_status", "paid").is("drop_in_id", null).neq("pay_method", "wallet").gte("booked_at", since),
+    admin().from("membership_instances").select("starts_at, membership_type_id").eq("org_id", org).gte("starts_at", since),
+    admin().from("membership_types").select("id, price").eq("org_id", org),
+  ]);
+  const sales: Sale[] = [];
+  const mo = (ts: string) => String(ts).slice(0, 7);
+  for (const p of pkgs.data ?? []) sales.push({ month: mo(p.purchased_at), amount: Number(p.price_at_sale), service: "private_training", type: "pt_bundle", coachId: p.coach_id });
+  for (const g of plans.data ?? []) sales.push({ month: mo(g.created_at), amount: Number(g.price_at_sale), service: "group", type: g.kind });
+  for (const d of drops.data ?? []) sales.push({ month: mo(d.created_at), amount: Number(d.price), service: "group", type: d.class_id ? "class_drop_in" : "walk_in" });
+  for (const b of bookings.data ?? []) sales.push({ month: mo(b.booked_at), amount: Number(b.price_egp), service: "group", type: "class_drop_in" });
+  const legacyPrice = new Map((legacyTypes.data ?? []).map((t: any) => [t.id, Number(t.price)]));
+  for (const m of legacyMems.data ?? []) sales.push({ month: mo(m.starts_at), amount: legacyPrice.get(m.membership_type_id) ?? 0, service: "group", type: "legacy_membership" });
+  return sales;
+}
+
+// Refunds, by month, from the same two places Money.tsx lists them: a desk
+// refund (cash/card/InstaPay, logged to activity_log) and a wallet refund
+// (wallet_transactions, category "refund" — money that was never handed back
+// but is still money the member no longer owes us for). Compensation and
+// redeemed-points credits are gifts, not refunds, so they're excluded.
+async function refundsInRange(org: string, since: string): Promise<{ month: string; amount: number }[]> {
+  const [desk, wallet] = await Promise.all([
+    admin().from("activity_log").select("amount, created_at").eq("org_id", org).eq("type", "refund_desk").gte("created_at", since),
+    admin().from("wallet_transactions").select("amount, created_at").eq("org_id", org).eq("type", "credit").eq("category", "refund").gte("created_at", since),
+  ]);
+  const mo = (ts: string) => String(ts).slice(0, 7);
+  return [...(desk.data ?? []).map((r: any) => ({ month: mo(r.created_at), amount: Number(r.amount ?? 0) })),
+          ...(wallet.data ?? []).map((r: any) => ({ month: mo(r.created_at), amount: Number(r.amount ?? 0) }))];
+}
+
 app.get(`${P}/revenue`, async (c) => {
   const user = await requireUser(c);
   const me = user && (await profileOf(user.id));
@@ -4267,28 +4309,13 @@ app.get(`${P}/revenue`, async (c) => {
   const since = `${months[0]}-01T00:00:00Z`;
   await sweepOrgGroupPlans(org);
 
-  const [pkgs, plans, drops, bookings, legacyMems, legacyTypes, coaches, activePkgs, activePlans, lots] = await Promise.all([
-    admin().from("package_instances").select("purchased_at, price_at_sale, coach_id, client_id").eq("org_id", org).gte("purchased_at", since).or(NOT_WALLET),
-    admin().from("group_plans").select("created_at, price_at_sale, kind, client_id").eq("org_id", org).gte("created_at", since).neq("pay_method", "wallet"),
-    admin().from("drop_ins").select("created_at, price, class_id").eq("org_id", org).gte("created_at", since).or(NOT_WALLET),
-    admin().from("class_bookings").select("booked_at, price_egp").eq("org_id", org).eq("coverage", "drop_in").eq("pay_status", "paid").is("drop_in_id", null).neq("pay_method", "wallet").gte("booked_at", since),
-    admin().from("membership_instances").select("starts_at, membership_type_id").eq("org_id", org).gte("starts_at", since),
-    admin().from("membership_types").select("id, price").eq("org_id", org),
+  const [sales, coaches, activePkgs, activePlans, lots] = await Promise.all([
+    salesInRange(org, since),
     admin().from("profiles").select("*").eq("org_id", org).in("role", ["coach", "head_coach", "dept_head"]),
     admin().from("package_instances").select("client_id").eq("org_id", org).eq("status", "active").gte("expires_at", `${todayIso()}T00:00:00Z`),
     admin().from("group_plans").select("client_id, kind").eq("org_id", org).eq("status", "active"),
     admin().from("wallet_transactions").select("remaining").eq("org_id", org).eq("type", "credit").gt("remaining", 0).gt("expires_at", new Date().toISOString()),
   ]);
-
-  type Sale = { month: string; amount: number; service: "private_training" | "group"; type: string; coachId?: string };
-  const sales: Sale[] = [];
-  const mo = (ts: string) => String(ts).slice(0, 7);
-  for (const p of pkgs.data ?? []) sales.push({ month: mo(p.purchased_at), amount: Number(p.price_at_sale), service: "private_training", type: "pt_bundle", coachId: p.coach_id });
-  for (const g of plans.data ?? []) sales.push({ month: mo(g.created_at), amount: Number(g.price_at_sale), service: "group", type: g.kind });
-  for (const d of drops.data ?? []) sales.push({ month: mo(d.created_at), amount: Number(d.price), service: "group", type: d.class_id ? "class_drop_in" : "walk_in" });
-  for (const b of bookings.data ?? []) sales.push({ month: mo(b.booked_at), amount: Number(b.price_egp), service: "group", type: "class_drop_in" });
-  const legacyPrice = new Map((legacyTypes.data ?? []).map((t: any) => [t.id, Number(t.price)]));
-  for (const m of legacyMems.data ?? []) sales.push({ month: mo(m.starts_at), amount: legacyPrice.get(m.membership_type_id) ?? 0, service: "group", type: "legacy_membership" });
 
   const inRange = new Set(shown);
   const kept = sales.filter((s) => inRange.has(s.month));
@@ -4338,6 +4365,374 @@ app.get(`${P}/revenue`, async (c) => {
     byCoach,
     activeSubscribers: { total: new Set([...groupSubs, ...ptSubs]).size, groupPlans: groupSubs.size, ptPackages: ptSubs.size, byPlanKind: planKinds },
     walletLiability: (lots.data ?? []).reduce((a: number, l: any) => a + Number(l.remaining), 0),
+  });
+});
+
+// ---- accounting: expenses, recurring expenses, profit & loss ----------
+// Owner and accountant only. Coach payouts aren't a table here — they're
+// read straight from `settlements` (one row per coach per settled month),
+// so there's nothing to re-type and a reopened settlement is reflected
+// automatically, with no separate sync step.
+async function requireAccountingStaff(c: any) {
+  const user = await requireUser(c);
+  const me = user && (await profileOf(user.id));
+  if (!me || (me.role !== "dept_head" && me.role !== "accountant")) return null;
+  return me;
+}
+
+function toExpenseCategory(row: any) {
+  return { id: row.id, name: row.name, sortOrder: row.sort_order, isDefault: row.is_default, archived: !!row.archived_at };
+}
+function toRecurringExpense(row: any, categoryName: string) {
+  return {
+    id: row.id, categoryId: row.category_id, categoryName, amount: Number(row.amount), note: row.note ?? null,
+    dayOfMonth: row.day_of_month, startMonth: row.start_month, endMonth: row.end_month ?? null, active: row.active,
+  };
+}
+function toExpense(row: any, categoryName: string, receiptUrl: string | null) {
+  return {
+    id: row.id, categoryId: row.category_id, categoryName, amount: Number(row.amount),
+    date: row.expense_date, note: row.note ?? null, hasReceipt: !!row.receipt_path, receiptUrl,
+    recurringId: row.recurring_id ?? null, createdBy: row.created_by,
+    editedAfterMonthEnd: row.created_at.slice(0, 7) > row.expense_date.slice(0, 7),
+  };
+}
+
+const EXPENSE_RECEIPT_BUCKET = "expense-receipts";
+
+app.get(`${P}/accounting/categories`, async (c) => {
+  const me = await requireAccountingStaff(c);
+  if (!me) return c.json({ error: "Forbidden" }, 403);
+  const { data } = await admin().from("expense_categories").select("*").eq("org_id", me.org_id).is("archived_at", null).order("sort_order");
+  return c.json({ categories: (data ?? []).map(toExpenseCategory) });
+});
+app.post(`${P}/accounting/categories`, async (c) => {
+  const me = await requireAccountingStaff(c);
+  if (!me) return c.json({ error: "Forbidden" }, 403);
+  const { name } = await c.req.json();
+  const n = String(name ?? "").trim();
+  if (!n) return c.json({ error: "Name is required." }, 400);
+  const { count } = await admin().from("expense_categories").select("id", { count: "exact", head: true }).eq("org_id", me.org_id);
+  const { data, error } = await admin().from("expense_categories").insert({ org_id: me.org_id, name: n, sort_order: (count ?? 0) + 1 }).select().single();
+  if (error) return c.json({ error: error.code === "23505" ? "A category with that name already exists." : error.message }, 400);
+  return c.json({ category: toExpenseCategory(data) });
+});
+app.post(`${P}/accounting/categories/update`, async (c) => {
+  const me = await requireAccountingStaff(c);
+  if (!me) return c.json({ error: "Forbidden" }, 403);
+  const { id, name, archived } = await c.req.json();
+  const updates: Record<string, unknown> = {};
+  if (name !== undefined) {
+    const n = String(name).trim();
+    if (!n) return c.json({ error: "Name is required." }, 400);
+    updates.name = n;
+  }
+  // A category with expenses on it is kept, never hard-deleted — archiving
+  // just takes it out of the picker; its past expenses keep their name.
+  if (archived !== undefined) updates.archived_at = archived ? new Date().toISOString() : null;
+  const { data, error } = await admin().from("expense_categories").update(updates).eq("id", id).eq("org_id", me.org_id).select().maybeSingle();
+  if (error) return c.json({ error: error.code === "23505" ? "A category with that name already exists." : error.message }, 400);
+  if (!data) return c.json({ error: "No such category" }, 404);
+  return c.json({ category: toExpenseCategory(data) });
+});
+
+async function categoryNames(orgId: string): Promise<Map<string, string>> {
+  const { data } = await admin().from("expense_categories").select("id, name").eq("org_id", orgId);
+  return new Map((data ?? []).map((r: any) => [r.id, r.name]));
+}
+
+app.get(`${P}/accounting/expenses`, async (c) => {
+  const me = await requireAccountingStaff(c);
+  if (!me) return c.json({ error: "Forbidden" }, 403);
+  const month = c.req.query("month") || expenseMonthNow();
+  const [{ data: rows }, names] = await Promise.all([
+    admin().from("expenses").select("*").eq("org_id", me.org_id).is("deleted_at", null)
+      .gte("expense_date", `${month}-01`).lt("expense_date", addMonthsIso(`${month}-01`, 1)).order("expense_date", { ascending: false }),
+    categoryNames(me.org_id),
+  ]);
+  const expenses = await Promise.all((rows ?? []).map(async (r: any) => {
+    const url = r.receipt_path ? (await admin().storage.from(EXPENSE_RECEIPT_BUCKET).createSignedUrl(r.receipt_path, 600)).data?.signedUrl ?? null : null;
+    return toExpense(r, names.get(r.category_id) ?? "Other", url);
+  }));
+  return c.json({ expenses });
+});
+
+app.post(`${P}/accounting/expenses`, async (c) => {
+  const me = await requireAccountingStaff(c);
+  if (!me) return c.json({ error: "Forbidden" }, 403);
+  const body = await c.req.json();
+  const amount = Number(body.amount);
+  if (!Number.isFinite(amount) || amount <= 0) return c.json({ error: "Enter an amount." }, 400);
+  const date = String(body.date ?? "");
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || Number.isNaN(Date.parse(date))) return c.json({ error: "Pick a valid date." }, 400);
+  const names = await categoryNames(me.org_id);
+  if (!names.has(body.categoryId)) return c.json({ error: "Choose a category." }, 400);
+
+  let receiptPath: string | null = null;
+  if (body.receipt) {
+    const m = /^data:(image\/(png|jpeg|webp));base64,(.+)$/.exec(String(body.receipt));
+    if (!m) return c.json({ error: "That receipt photo didn't come through — try again." }, 400);
+    const bytes = Uint8Array.from(atob(m[3]), (ch) => ch.charCodeAt(0));
+    if (bytes.length > 2_500_000) return c.json({ error: "That image is too large. Try a smaller photo." }, 400);
+    receiptPath = `${me.org_id}/${crypto.randomUUID()}.${m[2] === "jpeg" ? "jpg" : m[2]}`;
+    const up = await admin().storage.from(EXPENSE_RECEIPT_BUCKET).upload(receiptPath, bytes, { contentType: m[1] });
+    if (up.error) return c.json({ error: "Couldn't upload the receipt. Please try again." }, 500);
+  }
+
+  const { data, error } = await admin().from("expenses").insert({
+    org_id: me.org_id, category_id: body.categoryId, amount, expense_date: date,
+    note: body.note ? String(body.note).trim() : null, receipt_path: receiptPath, created_by: me.id,
+  }).select().single();
+  if (error) throw error;
+  const categoryName = names.get(data.category_id) ?? "Other";
+  await logActivity(me.org_id, "expense_added", { actorId: me.id, amount, meta: { expenseId: data.id, category: categoryName } });
+  const url = receiptPath ? (await admin().storage.from(EXPENSE_RECEIPT_BUCKET).createSignedUrl(receiptPath, 600)).data?.signedUrl ?? null : null;
+  return c.json({ expense: toExpense(data, categoryName, url) });
+});
+
+app.post(`${P}/accounting/expenses/update`, async (c) => {
+  const me = await requireAccountingStaff(c);
+  if (!me) return c.json({ error: "Forbidden" }, 403);
+  const { id, amount, categoryId, date, note } = await c.req.json();
+  const { data: existing } = await admin().from("expenses").select("*").eq("id", id).eq("org_id", me.org_id).is("deleted_at", null).maybeSingle();
+  if (!existing) return c.json({ error: "No such expense" }, 404);
+  // A recurring row stays attached to its template, but it's its own row from
+  // here on — editing it never rewrites the template, and the template never
+  // overwrites it back.
+  const updates: Record<string, unknown> = { updated_at: new Date().toISOString() };
+  if (amount !== undefined) {
+    const n = Number(amount);
+    if (!Number.isFinite(n) || n <= 0) return c.json({ error: "Enter an amount." }, 400);
+    updates.amount = n;
+  }
+  if (categoryId !== undefined) {
+    const { data: cat } = await admin().from("expense_categories").select("id").eq("id", categoryId).eq("org_id", me.org_id).maybeSingle();
+    if (!cat) return c.json({ error: "Choose a category." }, 400);
+    updates.category_id = categoryId;
+  }
+  if (date !== undefined) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || Number.isNaN(Date.parse(date))) return c.json({ error: "Pick a valid date." }, 400);
+    updates.expense_date = date;
+  }
+  if (note !== undefined) updates.note = note ? String(note).trim() : null;
+  const { data, error } = await admin().from("expenses").update(updates).eq("id", id).select().single();
+  if (error) throw error;
+  await logActivity(me.org_id, "expense_edited", { actorId: me.id, amount: Number(data.amount), meta: { expenseId: id } });
+  const [url, names] = await Promise.all([
+    data.receipt_path ? admin().storage.from(EXPENSE_RECEIPT_BUCKET).createSignedUrl(data.receipt_path, 600).then((r) => r.data?.signedUrl ?? null) : Promise.resolve(null),
+    categoryNames(me.org_id),
+  ]);
+  return c.json({ expense: toExpense(data, names.get(data.category_id) ?? "Other", url) });
+});
+
+app.post(`${P}/accounting/expenses/delete`, async (c) => {
+  const me = await requireAccountingStaff(c);
+  if (!me) return c.json({ error: "Forbidden" }, 403);
+  const { id } = await c.req.json();
+  const { data: existing } = await admin().from("expenses").select("amount").eq("id", id).eq("org_id", me.org_id).is("deleted_at", null).maybeSingle();
+  if (!existing) return c.json({ error: "No such expense" }, 404);
+  await admin().from("expenses").update({ deleted_at: new Date().toISOString() }).eq("id", id);
+  await logActivity(me.org_id, "expense_deleted", { actorId: me.id, amount: existing.amount, meta: { expenseId: id } });
+  return c.json({ ok: true });
+});
+
+app.get(`${P}/accounting/recurring`, async (c) => {
+  const me = await requireAccountingStaff(c);
+  if (!me) return c.json({ error: "Forbidden" }, 403);
+  const [{ data: rows }, names] = await Promise.all([
+    admin().from("recurring_expenses").select("*").eq("org_id", me.org_id).order("created_at", { ascending: false }),
+    categoryNames(me.org_id),
+  ]);
+  return c.json({ recurring: (rows ?? []).map((r: any) => toRecurringExpense(r, names.get(r.category_id) ?? "Other")) });
+});
+app.post(`${P}/accounting/recurring`, async (c) => {
+  const me = await requireAccountingStaff(c);
+  if (!me) return c.json({ error: "Forbidden" }, 403);
+  const { categoryId, amount, note, dayOfMonth, endMonth } = await c.req.json();
+  const amt = Number(amount);
+  if (!Number.isFinite(amt) || amt <= 0) return c.json({ error: "Enter an amount." }, 400);
+  const day = Number(dayOfMonth);
+  if (!Number.isInteger(day) || day < 1 || day > 28) return c.json({ error: "Pick a day between 1 and 28." }, 400);
+  const names = await categoryNames(me.org_id);
+  if (!names.has(categoryId)) return c.json({ error: "Choose a category." }, 400);
+  const startMonth = expenseMonthNow();
+  const { data, error } = await admin().from("recurring_expenses").insert({
+    org_id: me.org_id, category_id: categoryId, amount: amt, note: note ? String(note).trim() : null,
+    day_of_month: day, start_month: startMonth, end_month: endMonth || null, created_by: me.id,
+  }).select().single();
+  if (error) throw error;
+  // This month's row is created right away (not left for tonight's job) so
+  // the template visibly does something the moment it's saved.
+  await generateRecurringRow(data, startMonth);
+  return c.json({ recurring: toRecurringExpense(data, names.get(data.category_id) ?? "Other") });
+});
+app.post(`${P}/accounting/recurring/update`, async (c) => {
+  const me = await requireAccountingStaff(c);
+  if (!me) return c.json({ error: "Forbidden" }, 403);
+  const { id, active, amount, categoryId, note, dayOfMonth, endMonth } = await c.req.json();
+  const { data: existing } = await admin().from("recurring_expenses").select("id").eq("id", id).eq("org_id", me.org_id).maybeSingle();
+  if (!existing) return c.json({ error: "No such template" }, 404);
+  // Editing a template only ever changes future months — rows already made
+  // for past or the current month are untouched (spec section 4).
+  const updates: Record<string, unknown> = {};
+  if (active !== undefined) updates.active = !!active;
+  if (amount !== undefined) {
+    const n = Number(amount);
+    if (!Number.isFinite(n) || n <= 0) return c.json({ error: "Enter an amount." }, 400);
+    updates.amount = n;
+  }
+  if (categoryId !== undefined) updates.category_id = categoryId;
+  if (note !== undefined) updates.note = note ? String(note).trim() : null;
+  if (dayOfMonth !== undefined) {
+    const day = Number(dayOfMonth);
+    if (!Number.isInteger(day) || day < 1 || day > 28) return c.json({ error: "Pick a day between 1 and 28." }, 400);
+    updates.day_of_month = day;
+  }
+  if (endMonth !== undefined) updates.end_month = endMonth || null;
+  const { data, error } = await admin().from("recurring_expenses").update(updates).eq("id", id).select().single();
+  if (error) throw error;
+  return c.json({ recurring: toRecurringExpense(data, (await categoryNames(me.org_id)).get(data.category_id) ?? "Other") });
+});
+app.post(`${P}/accounting/recurring/delete`, async (c) => {
+  const me = await requireAccountingStaff(c);
+  if (!me) return c.json({ error: "Forbidden" }, 403);
+  const { id } = await c.req.json();
+  // Deleting the template never touches expense rows it already made (spec
+  // section 7) — it just stops making new ones.
+  await admin().from("recurring_expenses").delete().eq("id", id).eq("org_id", me.org_id);
+  return c.json({ ok: true });
+});
+
+// This month's calendar month, Africa/Cairo (same clock the spec asks for;
+// matches gymToday()'s own reasoning: a job running near midnight UTC must
+// land on the gym's own day/month, not UTC's).
+function expenseMonthNow(): string {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "Africa/Cairo", year: "numeric", month: "2-digit" }).format(new Date()).slice(0, 7);
+}
+function addMonthsIso(dateIso: string, months: number): string {
+  const d = new Date(`${dateIso}T00:00:00Z`);
+  d.setUTCMonth(d.getUTCMonth() + months);
+  return d.toISOString().slice(0, 10);
+}
+function monthRange(startMonth: string, endMonthExclusive: string): string[] {
+  const out: string[] = [];
+  for (let m = startMonth; m < endMonthExclusive; m = addMonthsIso(`${m}-01`, 1).slice(0, 7)) out.push(m);
+  return out;
+}
+
+// One template's row for one month — a no-op if it's outside the template's
+// own range, already made (the unique index on recurring_id+expense_date is
+// the real guard; this check just avoids a wasted write), or paused.
+async function generateRecurringRow(template: any, month: string) {
+  if (!template.active) return;
+  if (month < template.start_month) return;
+  if (template.end_month && month > template.end_month) return;
+  const date = `${month}-${String(template.day_of_month).padStart(2, "0")}`;
+  const { error } = await admin().from("expenses").insert({
+    org_id: template.org_id, category_id: template.category_id, amount: template.amount, expense_date: date,
+    note: template.note, recurring_id: template.id, created_by: template.created_by,
+  });
+  // 23505 = the unique index did its job — this month's row already exists.
+  if (error && error.code !== "23505") console.log("generateRecurringRow failed", template.id, month, error.message);
+}
+
+// Fired nightly by pg_cron. Makes this month's row for every active
+// template, and catches up any month a template's job was missed for
+// (new template, a pause lifted, or the cron itself skipped a day) — the
+// unique index means running this twice, or on a month already covered,
+// never creates a duplicate.
+app.post(`${P}/accounting/run-recurring`, async (c) => {
+  const provided = c.req.header("x-cron-secret") || "";
+  const expected = await getSecret("cron_secret");
+  if (provided !== expected) return c.json({ error: "Forbidden" }, 403);
+  const thisMonth = expenseMonthNow();
+  const { data: templates } = await admin().from("recurring_expenses").select("*").eq("active", true);
+  let made = 0;
+  for (const t of templates ?? []) {
+    const through = t.end_month && t.end_month < thisMonth ? t.end_month : thisMonth;
+    for (const m of monthRange(t.start_month, addMonthsIso(`${through}-01`, 1).slice(0, 7))) {
+      await generateRecurringRow(t, m);
+      made++;
+    }
+  }
+  return c.json({ checked: (templates ?? []).length, attempted: made });
+});
+
+app.get(`${P}/accounting/pnl`, async (c) => {
+  const me = await requireAccountingStaff(c);
+  if (!me) return c.json({ error: "Forbidden" }, 403);
+  const org = me.org_id;
+  const month = c.req.query("month") || expenseMonthNow();
+  // The trend is the 6 months up to and including the chosen one.
+  const trendMonths = monthRange(addMonthsIso(`${month}-01`, -5).slice(0, 7), addMonthsIso(`${month}-01`, 1).slice(0, 7));
+  const since = `${trendMonths[0]}-01T00:00:00Z`;
+
+  const [sales, refunds, settlements, otherRows, names, coaches] = await Promise.all([
+    salesInRange(org, since),
+    refundsInRange(org, since),
+    admin().from("settlements").select("coach_id, month, group_total, private_total").eq("org_id", org).in("month", trendMonths),
+    admin().from("expenses").select("*").eq("org_id", org).is("deleted_at", null).gte("expense_date", `${trendMonths[0]}-01`).lt("expense_date", addMonthsIso(`${trendMonths[trendMonths.length - 1]}-01`, 1)),
+    categoryNames(org),
+    // Full rows, not just id/name — monthRollups needs tier_id etc. to compute each coach's rate.
+    admin().from("profiles").select("*").eq("org_id", org).in("role", ["coach", "head_coach", "dept_head"]),
+  ]);
+
+  const sumByMonth = <T,>(rows: T[], month: (r: T) => string, amount: (r: T) => number) => {
+    const out = new Map<string, number>();
+    for (const r of rows) out.set(month(r), (out.get(month(r)) ?? 0) + amount(r));
+    return out;
+  };
+  const revenueByMonth = sumByMonth(sales, (s) => s.month, (s) => s.amount);
+  const refundsByMonth = sumByMonth(refunds, (r) => r.month, (r) => r.amount);
+  const payoutsByMonth = sumByMonth(settlements.data ?? [], (s: any) => s.month, (s: any) => Number(s.group_total ?? 0) + Number(s.private_total ?? 0));
+  const otherByMonth = sumByMonth(otherRows.data ?? [], (e: any) => e.expense_date.slice(0, 7), (e: any) => Number(e.amount));
+
+  const trend = trendMonths.map((m) => {
+    const gross = revenueByMonth.get(m) ?? 0;
+    const refund = refundsByMonth.get(m) ?? 0;
+    const net = gross - refund;
+    const payouts = payoutsByMonth.get(m) ?? 0;
+    const other = otherByMonth.get(m) ?? 0;
+    return { month: m, grossRevenue: gross, refunds: refund, netRevenue: net, coachPayouts: payouts, otherExpenses: other, totalExpenses: payouts + other, profit: net - payouts - other };
+  });
+  const current = trend[trend.length - 1];
+
+  // Who's logged sessions this month but hasn't settled — the P&L's coach
+  // payouts are settled-only, so this is the gap: real pay this figure
+  // doesn't see yet.
+  const rollups = await monthRollups(org, coaches.data ?? [], month);
+  const unsettled = rollups.filter((r) => r.state === "logging" && r.count > 0);
+
+  // "Where it went": coach payouts first, then categories, largest first (spec section 6).
+  const byCategory = new Map<string, { categoryId: string; name: string; amount: number }>();
+  for (const e of otherRows.data ?? []) {
+    if (e.expense_date.slice(0, 7) !== month) continue;
+    const k = e.category_id;
+    const row = byCategory.get(k) ?? { categoryId: k, name: names.get(k) ?? "Other", amount: 0 };
+    row.amount += Number(e.amount);
+    byCategory.set(k, row);
+  }
+  const expensesBySource: { key: string; label: string; amount: number }[] = [];
+  if (current.coachPayouts > 0) expensesBySource.push({ key: "coach_payouts", label: "Coach payouts", amount: current.coachPayouts });
+  for (const row of [...byCategory.values()].sort((a, b) => b.amount - a.amount)) expensesBySource.push({ key: row.categoryId, label: row.name, amount: row.amount });
+
+  // "Where it came from": same service split Oversight already shows (group vs
+  // private training), for the chosen month only — not a new breakdown.
+  const monthSales = sales.filter((s) => s.month === month);
+  const bySvc = new Map<string, number>();
+  for (const s of monthSales) bySvc.set(s.service, (bySvc.get(s.service) ?? 0) + s.amount);
+  const revenueBySource = [...bySvc.entries()]
+    .map(([key, amount]) => ({ key, label: key === "group" ? "Group training" : "Private training", amount }))
+    .sort((a, b) => b.amount - a.amount);
+
+  return c.json({
+    month,
+    current,
+    trend,
+    revenueBySource,
+    expensesBySource,
+    hasPastExpenses: (otherRows.data ?? []).length > 0 || (settlements.data ?? []).length > 0 || sales.length > 0,
+    unsettledNote: unsettled.length > 0 ? { count: unsettled.length } : null,
   });
 });
 

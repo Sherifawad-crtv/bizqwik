@@ -2,6 +2,7 @@ import { EmptyState } from "../components/EmptyState";
 import { useSticky } from "../lib/useSticky";
 import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../lib/auth";
 import { useSetHeader } from "../lib/header";
 import { useAsync } from "../lib/useAsync";
@@ -13,7 +14,7 @@ import { Icon, type IconName } from "../components/Icon";
 import { Segmented } from "../components/Segmented";
 import { Spinner } from "../components/Spinner";
 
-function Card({ title, sub, children }: { title: string; sub?: string; children: ReactNode }) {
+export function Card({ title, sub, children }: { title: string; sub?: string; children: ReactNode }) {
   return (
     <div data-sq style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-tile)", padding: "16px 18px", marginBottom: 14 }}>
       <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>{title}</div>
@@ -27,7 +28,7 @@ function Empty({ text }: { text: string }) {
   return <EmptyState bare icon="insights" title={text} body="This fills in automatically as the front desk sells plans, packages and drop-ins." />;
 }
 
-function useMeasuredWidth(fallback: number) {
+export function useMeasuredWidth(fallback: number) {
   const ref = useRef<HTMLDivElement>(null);
   const [w, setW] = useState(fallback);
   useEffect(() => {
@@ -41,7 +42,7 @@ function useMeasuredWidth(fallback: number) {
 }
 
 /** A bar's outline: rounded top corners (the "data end"), square at the baseline. */
-function roundedTopBarPath(x: number, yTop: number, w: number, yBottom: number, r: number): string {
+export function roundedTopBarPath(x: number, yTop: number, w: number, yBottom: number, r: number): string {
   const rr = Math.max(0, Math.min(r, w / 2, yBottom - yTop));
   return [`M${x},${yBottom}`, `L${x},${yTop + rr}`, `Q${x},${yTop} ${x + rr},${yTop}`, `L${x + w - rr},${yTop}`, `Q${x + w},${yTop} ${x + w},${yTop + rr}`, `L${x + w},${yBottom}`, "Z"].join(" ");
 }
@@ -128,7 +129,7 @@ export function RevenueChart({ months, revenueOnly = false }: { months: RevenueR
 }
 
 /** Share bars for a breakdown: label, amount and % of the total. */
-function ShareBars({ slices }: { slices: RevenueSlice[] }) {
+export function ShareBars({ slices }: { slices: RevenueSlice[] }) {
   const total = slices.reduce((s, x) => s + x.amount, 0);
   if (total <= 0) return <Empty text="No sales in this period yet." />;
   return (
@@ -157,7 +158,7 @@ type Breakdown = "service" | "type";
 
 /** Change vs the previous equal period. `tone` says how to colour it: revenue
  * and profit going up is good, payouts going up is just information. */
-function Delta({ pct, tone }: { pct: number | null; tone: "good" | "neutral" }) {
+export function Delta({ pct, tone }: { pct: number | null; tone: "good" | "neutral" }) {
   if (pct === null) return null;
   const up = pct >= 0;
   const flat = Math.abs(pct) < 0.05;
@@ -170,11 +171,11 @@ function Delta({ pct, tone }: { pct: number | null; tone: "good" | "neutral" }) 
   );
 }
 
-function pctChange(cur: number, prev: number): number | null {
+export function pctChange(cur: number, prev: number): number | null {
   return prev > 0 ? ((cur - prev) / prev) * 100 : null;
 }
 
-function KpiTile({ label, value, sub, icon, delta }: { label: string; value: string; sub?: string; icon: IconName; delta?: ReactNode }) {
+export function KpiTile({ label, value, sub, icon, delta }: { label: string; value: string; sub?: string; icon: IconName; delta?: ReactNode }) {
   return (
     <div data-sq style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: "14px 16px", minWidth: 0 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -197,7 +198,7 @@ const RANGE_OPTIONS: { value: Range; label: string }[] = [
   { value: "12", label: "12M" },
 ];
 
-function caption(months: string[]): string {
+export function caption(months: string[]): string {
   if (months.length === 0) return "";
   const first = months[0];
   const last = months[months.length - 1];
@@ -211,6 +212,7 @@ function caption(months: string[]): string {
  * is counted when a sale happens (any tender except wallet). */
 export function Oversight() {
   const { profile } = useAuth();
+  const navigate = useNavigate();
   const [range, setRange] = useSticky<Range>("range", "1", { valid: (v) => ["1","3","6","12"].includes(v) });
   const [breakdown, setBreakdown] = useSticky<Breakdown>("breakdown", "service", { valid: (v) => v === "service" || v === "type" });
   const { data, error } = useAsync(async () => {
@@ -330,6 +332,23 @@ export function Oversight() {
               </div>
             )}
           </Card>
+
+          {profile.role === "dept_head" && (
+            <button
+              data-sq
+              data-tap
+              onClick={() => navigate("/accounting")}
+              style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: "16px 18px", marginBottom: 10, cursor: "pointer", textAlign: "left" }}
+            >
+              <span style={{ width: 32, height: 32, flex: "none", borderRadius: 8, background: "var(--primary-tint)", color: "var(--primary-pressed)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <Icon name="cash" size={16} />
+              </span>
+              <span style={{ flex: 1, font: "700 15px var(--font-body)" }}>Profit &amp; loss</span>
+              <span style={{ color: "var(--ink-faint)", display: "flex" }}>
+                <Icon name="chevron-right" size={16} />
+              </span>
+            </button>
+          )}
 
           <div style={{ textAlign: "center", font: "400 12px/1.5 var(--font-mono)", color: "var(--ink-faint)", margin: "8px 0 18px" }}>
             Revenue counts every sale when it happens — cash or card. Wallet top-ups and wallet-paid sales aren't counted twice.

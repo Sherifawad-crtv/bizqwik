@@ -12,6 +12,10 @@ import type { PaymentsSummary, Location,
   BizqwikTeam,
   BizqwikTeamInvite,
   BundleType,
+  ExpenseCategory,
+  Expense,
+  RecurringExpense,
+  PnlReport,
   ClassSeries,
   Client,
   ClientWithPackage,
@@ -201,6 +205,28 @@ export const api = {
   renameLocation: (id: string, name: string) => callFn<{ location: Location }>("locations/update", { method: "POST", body: { id, name } }),
   setClientLocation: (id: string, locationId: string | null) => callFn<{ ok: true }>("clients/location", { method: "POST", body: { id, locationId } }),
   deleteBundleType: (id: string) => callFn<void>("bundle-types/delete", { method: "POST", body: { id } }),
+
+  // ===== Accounting: expenses, recurring expenses, profit & loss =====
+  expenseCategories: () => callFn<{ categories: ExpenseCategory[] }>("accounting/categories"),
+  createExpenseCategory: (name: string) => callFn<{ category: ExpenseCategory }>("accounting/categories", { method: "POST", body: { name } }),
+  renameExpenseCategory: (id: string, name: string) => callFn<{ category: ExpenseCategory }>("accounting/categories/update", { method: "POST", body: { id, name } }),
+  setExpenseCategoryArchived: (id: string, archived: boolean) => callFn<{ category: ExpenseCategory }>("accounting/categories/update", { method: "POST", body: { id, archived } }),
+
+  expenses: (month: string) => callFn<{ expenses: Expense[] }>(`accounting/expenses?month=${month}`),
+  addExpense: (categoryId: string, amount: number, date: string, note?: string, receipt?: string) =>
+    callFn<{ expense: Expense }>("accounting/expenses", { method: "POST", body: { categoryId, amount, date, note, receipt } }),
+  updateExpense: (id: string, patch: { categoryId?: string; amount?: number; date?: string; note?: string }) =>
+    callFn<{ expense: Expense }>("accounting/expenses/update", { method: "POST", body: { id, ...patch } }),
+  deleteExpense: (id: string) => callFn<{ ok: true }>("accounting/expenses/delete", { method: "POST", body: { id } }),
+
+  recurringExpenses: () => callFn<{ recurring: RecurringExpense[] }>("accounting/recurring"),
+  createRecurringExpense: (categoryId: string, amount: number, dayOfMonth: number, note?: string, endMonth?: string) =>
+    callFn<{ recurring: RecurringExpense }>("accounting/recurring", { method: "POST", body: { categoryId, amount, dayOfMonth, note, endMonth } }),
+  updateRecurringExpense: (id: string, patch: { active?: boolean; amount?: number; categoryId?: string; note?: string; dayOfMonth?: number; endMonth?: string | null }) =>
+    callFn<{ recurring: RecurringExpense }>("accounting/recurring/update", { method: "POST", body: { id, ...patch } }),
+  deleteRecurringExpense: (id: string) => callFn<{ ok: true }>("accounting/recurring/delete", { method: "POST", body: { id } }),
+
+  pnl: (month: string) => callFn<PnlReport>(`accounting/pnl?month=${month}`),
 
   // The batched client list (one fixed set of queries however many clients);
   // if it's ever unavailable, the original endpoint answers instead.

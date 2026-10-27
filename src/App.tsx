@@ -37,6 +37,7 @@ const Manage = lazyNamed(() => import("./routes/Manage"), "Manage");
 const Pay = lazyNamed(() => import("./routes/Pay"), "Pay");
 const PayeeDetail = lazyNamed(() => import("./routes/PayeeDetail"), "PayeeDetail");
 const History = lazyNamed(() => import("./routes/History"), "History");
+const Accounting = lazyNamed(() => import("./routes/Accounting"), "Accounting");
 const Clients = lazyNamed(() => import("./routes/Clients"), "Clients");
 const Invitations = lazyNamed(() => import("./routes/frontdesk/Invitations"), "Invitations");
 const DeskClasses = lazyNamed(() => import("./routes/frontdesk/DeskClasses"), "DeskClasses");
@@ -135,6 +136,14 @@ export default function App() {
                     <Route path="/pay/:coachId" element={<PayeeDetail />} />
                     <Route path="/revenue" element={<Oversight />} />
                     <Route path="/transactions" element={<Transactions />} />
+                  </Route>
+
+                  {/* Owner and accountant only (spec: "Coaches, head coaches and
+                      front desk cannot see the P&L"). Not its own bottom-nav tab
+                      for dept_head — she's already at the 5-tab cap, so she
+                      drills in from Overview; accountant has room for a 5th. */}
+                  <Route element={<RequireRole roles={["dept_head", "accountant"]} />}>
+                    <Route path="/accounting" element={<Accounting />} />
                   </Route>
                 </Route>
               </Route>
