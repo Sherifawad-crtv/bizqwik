@@ -86,6 +86,37 @@ export async function classCardCrop(file: File, width = 1080, height = 1350): Pr
   }
 }
 
+/** A receipt photo as a data URL ready to POST through the edge function —
+ * same approach as the member app's InstaPay proof upload (no direct-to-storage
+ * client upload; the server validates and stores it). Any shape, capped to a
+ * sensible long edge and stepped down in quality to clear the server's size limit. */
+export async function receiptDataUrl(file: File, maxEdge = 1600, maxBytes = 2_300_000): Promise<string> {
+  const objectUrl = URL.createObjectURL(file);
+  try {
+    const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const el = new Image();
+      el.onload = () => resolve(el);
+      el.onerror = () => reject(new Error("Couldn't read that image."));
+      el.src = objectUrl;
+    });
+    const scale = Math.min(1, maxEdge / Math.max(img.width, img.height));
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.round(img.width * scale) || img.width;
+    canvas.height = Math.round(img.height * scale) || img.height;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) throw new Error("Couldn't process that image.");
+    ctx.imageSmoothingQuality = "high";
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    for (const q of [0.88, 0.8, 0.7, 0.6]) {
+      const url = canvasToDataUrl(canvas, q);
+      if (url.length * 0.75 <= maxBytes) return url; // base64 is ~4/3 the byte size
+    }
+    return canvasToDataUrl(canvas, 0.5);
+  } finally {
+    URL.revokeObjectURL(objectUrl);
+  }
+}
+
 /** Onboarding art is shown full screen on a phone, so it keeps a tall 1:2
  * shape and plenty of pixels (1080×2160) instead of the logo's 512px square.
  * A smaller photo is never blown up past its own resolution. Saved as a high
