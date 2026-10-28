@@ -38,6 +38,11 @@ const PNL = {
   unsettledNote: { count: 2 },
 };
 
+
+// The option inside the open "Choose one" picker (not a same-named chip on the page behind it).
+const pickOption = (page: Page, name: string) =>
+  page.getByText("Choose one").locator("xpath=following-sibling::div[1]").getByRole("button", { name, exact: true }).click();
+
 async function boot(page: Page, role: "dept_head" | "accountant" | "coach" | "front_desk", extra: Record<string, unknown> = {}) {
   await page.setViewportSize({ width: 390, height: 844 });
   await mockBackend(page, role, {
@@ -100,7 +105,7 @@ test("accounting: expenses list, coach payouts row, and adding a one-off expense
   await page.getByRole("button", { name: "Add expense" }).click();
   await page.getByLabel("AMOUNT (EGP)").fill("850");
   await page.locator("button", { hasText: "CATEGORY" }).click(); // pre-filled with the first category; open it to change
-  await page.getByRole("button", { name: "Salaries", exact: true }).last().click(); // the open picker's own option, not the page's filter chip behind it
+  await pickOption(page, "Salaries");
   await page.getByLabel("NOTE (OPTIONAL)").fill("Part-time cleaner");
   await page.getByRole("button", { name: "Add expense" }).click();
   await expect(page.getByText("Expense added")).toBeVisible();
@@ -135,7 +140,7 @@ test("accounting: recurring list shows templates, and a new one can be added", a
   await page.getByRole("button", { name: "Add a repeating expense" }).click();
   await page.getByLabel("AMOUNT (EGP)").fill("400");
   await page.locator("button", { hasText: "CATEGORY" }).click();
-  await page.getByRole("button", { name: "Utilities", exact: true }).click();
+  await pickOption(page, "Utilities");
   await page.getByLabel("DAY OF MONTH (1–28)").fill("15");
   await page.getByRole("button", { name: "Set up repeating expense" }).click();
   await expect(page.getByText("Repeating expense set up")).toBeVisible();

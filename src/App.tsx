@@ -7,6 +7,7 @@ import { RequireAuth, RequireRole, RequireBizqwikTeam, RequireDesk, RequireTeam 
 import { Spinner } from "./components/Spinner";
 import { Shell } from "./components/Shell";
 import { initSquirclePolyfill } from "./lib/squircle";
+import { isChunkLoadError, reloadForUpdate } from "./lib/chunkReload";
 
 import { Login } from "./routes/Login";
 import { Signup } from "./routes/Signup";
@@ -25,8 +26,17 @@ import { Bookings } from "./routes/frontdesk/Bookings";
 
 
 // Screens most people never open load on demand, keeping the first download small.
+// If one can't be downloaded because the app was updated while it was open, the
+// page reloads once to get the new version; the spinner stays up meanwhile.
 function lazyNamed<T extends Record<string, unknown>>(load: () => Promise<T>, name: keyof T) {
-  return lazy(async () => ({ default: (await load())[name] as ComponentType }));
+  return lazy(async () => {
+    try {
+      return { default: (await load())[name] as ComponentType };
+    } catch (err) {
+      if (isChunkLoadError(err) && reloadForUpdate()) return new Promise<never>(() => {});
+      throw err;
+    }
+  });
 }
 const Welcome = lazyNamed(() => import("./routes/Welcome"), "Welcome");
 const ForgotPassword = lazyNamed(() => import("./routes/ForgotPassword"), "ForgotPassword");
