@@ -388,7 +388,7 @@ function PlansPanel({ solo }: { solo?: boolean }) {
                   {!p.active && <span style={{ flex: "none", font: "700 10px var(--font-mono)", letterSpacing: ".06em", color: "var(--ink-muted)", background: "var(--sunken)", borderRadius: 8, padding: "3px 7px" }}>OFF SALE</span>}
                 </div>
                 <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>
-                  {fmt(p.price)} EGP · {p.kind === "bundle" ? `${p.credits} classes · ` : "all classes · "}
+                  {fmt(p.price)} EGP · {p.kind === "bundle" ? `${p.credits} classes${p.sharedSeats ? ` shared by ${p.sharedSeats}` : ""} · ` : "all classes · "}
                   {p.durationMonths} month{p.durationMonths === 1 ? "" : "s"}
                   {p.invitationsAllowance > 0 ? ` · ${p.invitationsAllowance} guest pass${p.invitationsAllowance === 1 ? "" : "es"}` : ""}
                 </div>
@@ -447,6 +447,7 @@ export function PlanTypeSheet({ open, kind, planType, onClose }: { open: boolean
   const [months, setMonths] = useState("1");
   const [credits, setCredits] = useState("");
   const [invitations, setInvitations] = useState("");
+  const [shared, setShared] = useState("1");
   const [onSale, setOnSale] = useState<"on" | "off">("on");
   const { orgMode: sheetMode } = useAuth();
   const sheetSolo = sheetMode === "solo";
@@ -465,6 +466,7 @@ export function PlanTypeSheet({ open, kind, planType, onClose }: { open: boolean
       setMonths(String(planType?.durationMonths ?? 1));
       setCredits(planType?.credits != null ? String(planType.credits) : "");
       setInvitations(planType ? String(planType.invitationsAllowance) : "");
+      setShared(String(planType?.sharedSeats ?? 1));
       setOnSale(planType && !planType.active ? "off" : "on");
       setLocationId(planType ? (planType.locationId ?? null) : (current?.id ?? null));
       setError(null);
@@ -482,7 +484,9 @@ export function PlanTypeSheet({ open, kind, planType, onClose }: { open: boolean
     if (isBundle && (!Number.isInteger(creditsNum) || creditsNum < 1)) return setError("Enter how many classes the bundle includes.");
     if (!Number.isInteger(invitesNum) || invitesNum < 0) return setError("Guest passes must be a whole number, 0 or more.");
     if (locations.length > 0 && !locationId) return setError("Choose the location it's for.");
-    const input = { kind, name: name.trim(), price: priceNum, durationMonths: Number(months), credits: isBundle ? creditsNum : null, invitationsAllowance: invitesNum, ...(locations.length > 0 ? { locationId } : {}) };
+    const seats = isBundle ? Number(shared) : 1;
+    if (seats > 1 && creditsNum % seats !== 0) return setError(`${creditsNum} classes can't be split evenly between ${seats} people.`);
+    const input = { kind, name: name.trim(), price: priceNum, durationMonths: Number(months), credits: isBundle ? creditsNum : null, invitationsAllowance: invitesNum, sharedSeats: seats > 1 ? seats : null, ...(locations.length > 0 ? { locationId } : {}) };
     setBusy(true);
     setError(null);
     try {
@@ -510,6 +514,14 @@ export function PlanTypeSheet({ open, kind, planType, onClose }: { open: boolean
             <TextField label="PRICE · EGP" type="number" min={0} inputMode="decimal" value={price} onChange={(e) => setPrice(e.target.value)} />
             <LocationField locations={locations} value={locationId} onChange={setLocationId} />
             {isBundle && <TextField label="CLASSES INCLUDED" type="number" min={1} value={credits} onChange={(e) => setCredits(e.target.value)} placeholder="10" />}
+            {isBundle && (
+              <SelectField label="SHARED BY" value={shared} onChange={setShared} options={[{ value: "1", label: "One person" }, { value: "2", label: "2 people" }, { value: "3", label: "3 people" }, { value: "4", label: "4 people" }]} />
+            )}
+            {isBundle && Number(shared) > 1 && (
+              <div style={{ font: "400 12px/1.5 var(--font-mono)", color: "var(--ink-faint)", marginTop: -4 }}>
+                {Number(credits) > 0 && Number(credits) % Number(shared) === 0 ? `Each person gets ${Number(credits) / Number(shared)} classes and ${fmt(Number(price) / Number(shared))} EGP of the price, valid for the months below.` : "Classes and price are split evenly. Classes must divide evenly."} Sold at the desk to everyone at once.
+              </div>
+            )}
             <SelectField label={isBundle ? "VALID FOR" : "LENGTH"} value={months} options={sheetSolo ? SOLO_MONTH_OPTIONS : MONTH_OPTIONS} onChange={setMonths} />
             <TextField label="GUEST PASSES INCLUDED" type="number" min={0} value={invitations} onChange={(e) => setInvitations(e.target.value)} placeholder="0" />
             {planType && (

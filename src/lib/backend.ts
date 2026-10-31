@@ -74,6 +74,7 @@ export interface PlanTypeInput {
   credits: number | null;
   invitationsAllowance: number;
   locationId?: string | null;
+  sharedSeats?: number | null;
 }
 
 export interface NewClientFields {
@@ -328,8 +329,9 @@ export const api = {
 
   // Front desk: sell a group plan to an existing member or a brand-new one.
   // `offer` is a catalog plan or a class series (that class's monthly).
-  sellGroupPlan: (target: { clientId: string } | NewClientFields, offer: { planTypeId: string } | { seriesId: string }, payMethod: PayMethod) =>
-    callFn<{ client: ClientWithPackage; plan: GroupPlan }>("group-plans/sell", { method: "POST", body: { ...target, ...offer, payMethod } }),
+  // `partners` are the other clients of a shared bundle (existing clients).
+  sellGroupPlan: (target: { clientId: string } | NewClientFields, offer: { planTypeId: string } | { seriesId: string }, payMethod: PayMethod, partners?: { clientId: string }[]) =>
+    callFn<{ client: ClientWithPackage; plan: GroupPlan }>("group-plans/sell", { method: "POST", body: { ...target, ...offer, payMethod, ...(partners?.length ? { partners } : {}) } }),
   clientPlans: (clientId: string) => callFn<{ activePlan: GroupPlan | null; plans: GroupPlan[] }>(`group-plans/client/${clientId}`),
 
   // `history` also returns the month-by-month series for that many months in the same call.

@@ -565,6 +565,7 @@ function toGroupPlanType(row: any) {
   return {
     id: row.id, kind: row.kind, name: row.name, price: Number(row.price), durationMonths: row.duration_months,
     credits: row.credits ?? null, invitationsAllowance: row.invitations_allowance, active: row.active, locationId: row.location_id ?? null,
+    sharedSeats: row.shared_seats ?? null,
   };
 }
 function toGroupPlan(row: any) {
@@ -574,6 +575,7 @@ function toGroupPlan(row: any) {
     creditsTotal: row.credits_total ?? null, creditsRemaining: row.credits_remaining ?? null,
     invitationsRemaining: row.invitations_remaining, startsAt: row.starts_at, expiresAt: row.expires_at,
     status: row.status, createdAt: row.created_at, locationId: row.location_id ?? null,
+    shareGroupId: row.share_group_id ?? null,
     // The freeze this plan includes: its length, whether it's running now, and
     // whether the member can still use it.
     freezeDays: Number(row.freeze_days ?? 0),
@@ -632,16 +634,21 @@ function planCovers(plan: any, cls: any): boolean {
 // The one place a group plan is sold — front desk (cash/card/wallet) and the
 // member app (wallet only) both land here. `offer` is a catalog item
 // (membership/bundle) or a class series (that class's monthly).
-async function sellGroupPlan(opts: { orgId: string; client: any; planTypeId?: string | null; seriesId?: string | null; payMethod: "cash" | "card" | "instapay" | "wallet"; actorId: string | null }) {
+async function sellGroupPlan(opts: { orgId: string; client: any; planTypeId?: string | null; seriesId?: string | null; payMethod: "cash" | "card" | "instapay" | "wallet"; actorId: string | null; shareGroupId?: string | null }) {
   const { orgId, client, payMethod, actorId } = opts;
   const soloOrg = (await orgModeOf(orgId)) === "solo";
   let row: any;
   if (opts.planTypeId) {
     const { data: t } = await admin().from("group_plan_types").select("*").eq("id", opts.planTypeId).eq("org_id", orgId).maybeSingle();
     if (!t || !t.active) return { error: "That plan isn't on sale.", status: 404 } as const;
+    // A shared bundle is sold to several clients at once (sellSharedBundle);
+    // each gets an even share of the sessions and of the price.
+    const seats = Number(t.shared_seats ?? 0);
+    if (seats && !opts.shareGroupId) return { error: "This bundle is shared — it's sold to two clients at once.", status: 400 } as const;
+    const credits = seats ? Math.floor(t.credits / seats) : t.credits;
     row = {
-      kind: t.kind, plan_type_id: t.id, name: t.name, price_at_sale: Number(t.price), months: t.duration_months,
-      credits_total: t.kind === "bundle" ? t.credits : null, credits_remaining: t.kind === "bundle" ? t.credits : null,
+      kind: t.kind, plan_type_id: t.id, name: t.name, price_at_sale: seats ? Number(t.price) / seats : Number(t.price), months: t.duration_months,
+      credits_total: t.kind === "bundle" ? credits : null, credits_remaining: t.kind === "bundle" ? credits : null,
       invitations_remaining: Number(t.invitations_allowance ?? 0), location_id: t.location_id ?? null,
       freeze_days: freezeDaysFor(t.kind, t.duration_months, soloOrg),
     };
@@ -661,7 +668,7 @@ async function sellGroupPlan(opts: { orgId: string; client: any; planTypeId?: st
   const start = new Date();
   const { months, ...fields } = row;
   const { data: plan, error } = await admin().from("group_plans").insert({
-    org_id: orgId, client_id: client.id, ...fields, pay_method: payMethod,
+    org_id: orgId, client_id: client.id, ...fields, pay_method: payMethod, share_group_id: opts.shareGroupId ?? null,
     starts_at: start.toISOString(), expires_at: addMonths(start, months).toISOString(), status: "active", created_by: actorId,
   }).select().single();
   if (error) {
@@ -3243,7 +3250,7 @@ app.get(`${P}/client/plans`, async (c) => {
   const plan = await activeGroupPlan(me.id, me.org_id);
   const [{ data: history }, { data: types }, { data: series }, wallet] = await Promise.all([
     admin().from("group_plans").select("*").eq("client_id", me.id).order("created_at", { ascending: false }).limit(20),
-    atMemberLocation(admin().from("group_plan_types").select("*").eq("org_id", me.org_id).eq("active", true), me).order("price"),
+    atMemberLocation(admin().from("group_plan_types").select("*").eq("org_id", me.org_id).eq("active", true).is("shared_seats", null), me).order("price"),
     atMemberLocation(admin().from("class_series").select("*").eq("org_id", me.org_id).eq("status", "active"), me).order("title"),
     walletBalance(me.id, me.org_id),
   ]);
@@ -3329,7 +3336,7 @@ app.get(`${P}/client/prices`, async (c) => {
   const [plan, pkg, { data: types }, { data: bundles }, { data: org }, { data: reqs }] = await Promise.all([
     activeGroupPlan(me.id, me.org_id),
     currentPackageForClient(me.id, me.org_id),
-    atMemberLocation(admin().from("group_plan_types").select("*").eq("org_id", me.org_id).eq("active", true).eq("kind", "bundle"), me).order("price"),
+    atMemberLocation(admin().from("group_plan_types").select("*").eq("org_id", me.org_id).eq("active", true).eq("kind", "bundle").is("shared_seats", null), me).order("price"),
     atMemberLocation(admin().from("bundle_types").select("*").eq("org_id", me.org_id), me).order("price"),
     admin().from("organizations").select("instapay_address, instapay_qr").eq("id", me.org_id).maybeSingle(),
     admin().from("payment_requests").select("*").eq("client_id", me.id).order("created_at", { ascending: false }).limit(5),
@@ -3362,7 +3369,7 @@ app.post(`${P}/client/payment-requests`, async (c) => {
 
   let row: any;
   if (offerType === "plan_type") {
-    const { data: t } = await atMemberLocation(admin().from("group_plan_types").select("*").eq("id", id).eq("org_id", me.org_id).eq("active", true).eq("kind", "bundle"), me).maybeSingle();
+    const { data: t } = await atMemberLocation(admin().from("group_plan_types").select("*").eq("id", id).eq("org_id", me.org_id).eq("active", true).eq("kind", "bundle").is("shared_seats", null), me).maybeSingle();
     if (!t) return c.json({ error: "That plan isn't on sale." }, 404);
     if (await activeGroupPlan(me.id, me.org_id)) return c.json({ error: "You already have an active plan. You can get a new one once it's finished.", code: "active_plan" }, 400);
     row = { offer_type: "plan_type", plan_type_id: t.id, name: t.name, price: Number(t.price), location_id: t.location_id ?? null };
@@ -4013,13 +4020,19 @@ function planTypeFields(body: any) {
   const durationMonths = Number(body.durationMonths);
   const credits = kind === "bundle" ? Number(body.credits) : null;
   const invitationsAllowance = Number(body.invitationsAllowance ?? 0);
+  const sharedSeats = body.sharedSeats ? Number(body.sharedSeats) : null;
   if (!kind) return { error: "Choose a membership or a class bundle." } as const;
   if (!name) return { error: "Name is required." } as const;
   if (!Number.isFinite(price) || price < 0) return { error: "Price must be zero or more." } as const;
   if (!Number.isInteger(durationMonths) || durationMonths < 1) return { error: "Duration must be a whole number of months (1 or more)." } as const;
   if (kind === "bundle" && (!Number.isInteger(credits) || (credits as number) < 1)) return { error: "A bundle needs a whole number of classes (1 or more)." } as const;
   if (!Number.isInteger(invitationsAllowance) || invitationsAllowance < 0) return { error: "Invitations must be a whole number, zero or more." } as const;
-  return { row: { kind, name, price, duration_months: durationMonths, credits, invitations_allowance: invitationsAllowance } } as const;
+  if (sharedSeats !== null) {
+    if (kind !== "bundle") return { error: "Only a bundle can be shared." } as const;
+    if (!Number.isInteger(sharedSeats) || sharedSeats < 2 || sharedSeats > 4) return { error: "A shared bundle is for 2 to 4 people." } as const;
+    if ((credits as number) % sharedSeats !== 0) return { error: `${credits} sessions can't be split evenly between ${sharedSeats} people.` } as const;
+  }
+  return { row: { kind, name, price, duration_months: durationMonths, credits, invitations_allowance: invitationsAllowance, shared_seats: sharedSeats } } as const;
 }
 
 app.get(`${P}/plan-types`, async (c) => {
@@ -4094,28 +4107,78 @@ app.post(`${P}/group-plans/sell`, async (c) => {
   if (payMethod === "wallet" && !clientId) return c.json({ error: "A brand-new client has no wallet balance yet — take cash or card." }, 400);
   if (!planTypeId && !seriesId) return c.json({ error: "Choose a plan." }, 400);
 
-  let client: any;
-  let createdNow = false;
-  if (clientId) {
-    const { data } = await admin().from("clients").select("*").eq("id", clientId).eq("org_id", me.org_id).maybeSingle();
-    if (!data) return c.json({ error: "No such client" }, 404);
-    client = data;
-  } else {
-    if (!name || !String(name).trim()) return c.json({ error: "Name is required." }, 400);
+  // Finds the client being sold to, or creates them in the same step.
+  const made: string[] = [];
+  const resolveClient = async (spec: { clientId?: string; name?: string; age?: unknown; phone?: unknown; email?: unknown }) => {
+    if (spec.clientId) {
+      const { data } = await admin().from("clients").select("*").eq("id", spec.clientId).eq("org_id", me.org_id).maybeSingle();
+      return data ? { client: data } : { error: "No such client", status: 404 };
+    }
+    if (!spec.name || !String(spec.name).trim()) return { error: "Name is required.", status: 400 };
     const limitErr = await planLimitError(me.org_id, "client");
-    if (limitErr) return c.json({ error: limitErr }, 400);
-    client = await insertClient(me, { name, age, phone, email });
-    createdNow = true;
+    if (limitErr) return { error: limitErr, status: 400 };
+    const created = await insertClient(me, { name: spec.name, age: spec.age, phone: spec.phone, email: spec.email });
+    made.push(created.id);
+    return { client: created };
+  };
+  const undoCreated = () => Promise.all(made.map((id) => admin().from("clients").delete().eq("id", id)));
+
+  const first = await resolveClient({ clientId, name, age, phone, email });
+  if ("error" in first) return c.json({ error: first.error }, first.status as 400);
+  const client = first.client;
+
+  // A shared bundle goes to several clients at once, one plan each.
+  let sharedType: any = null;
+  if (planTypeId) {
+    const { data: t } = await admin().from("group_plan_types").select("*").eq("id", planTypeId).eq("org_id", me.org_id).maybeSingle();
+    if (t?.shared_seats) sharedType = t;
   }
+  if (sharedType) {
+    const partners: any[] = Array.isArray(body.partners) ? body.partners : [];
+    const need = Number(sharedType.shared_seats) - 1;
+    if (payMethod === "wallet") { await undoCreated(); return c.json({ error: "A shared bundle is paid at the desk — cash, card or InstaPay.", code: "shared_wallet" }, 400); }
+    if (partners.length !== need) { await undoCreated(); return c.json({ error: `${sharedType.name} is shared by ${sharedType.shared_seats} clients — add ${need === 1 ? "the other client" : `${need} more clients`}.`, code: "shared_partners" }, 400); }
+    const sharing = [client];
+    for (const spec of partners) {
+      const r = await resolveClient(spec ?? {});
+      if ("error" in r) { await undoCreated(); return c.json({ error: r.error }, r.status as 400); }
+      if (sharing.some((x) => x.id === r.client.id)) { await undoCreated(); return c.json({ error: "Each person can only share once — pick someone else.", code: "shared_same" }, 400); }
+      sharing.push(r.client);
+    }
+    // Check everyone up front so a sale doesn't half-happen.
+    for (const person of sharing) {
+      const current = await activeGroupPlan(person.id, me.org_id);
+      if (current) {
+        await undoCreated();
+        return c.json({ error: `${person.name} already has an active plan: ${planSummary(current)}. A new one can be bought once it's finished.`, code: "active_plan", activePlan: toGroupPlan(current) }, 400);
+      }
+    }
+    const shareGroupId = crypto.randomUUID();
+    const sold: any[] = [];
+    try {
+      for (const person of sharing) {
+        const r = await sellGroupPlan({ orgId: me.org_id, client: person, planTypeId, payMethod, actorId: me.id, shareGroupId });
+        if ("error" in r) throw Object.assign(new Error(r.error), { sale: r });
+        sold.push(r.plan);
+      }
+    } catch (err: any) {
+      for (const plan of sold) await admin().from("group_plans").delete().eq("id", plan.id);
+      await undoCreated();
+      if (err?.sale) return c.json({ error: err.sale.error, code: err.sale.code ?? null }, err.sale.status);
+      throw err;
+    }
+    return c.json({ client: { ...toClient(client, null, null), groupPlan: toGroupPlan(sold[0]) }, plan: toGroupPlan(sold[0]), sharedWith: sharing.slice(1).map((x, i) => ({ id: x.id, name: x.name, plan: toGroupPlan(sold[i + 1]) })) });
+  }
+
   let result;
   try {
     result = await sellGroupPlan({ orgId: me.org_id, client, planTypeId, seriesId, payMethod, actorId: me.id });
   } catch (err) {
-    if (createdNow) await admin().from("clients").delete().eq("id", client.id);
+    await undoCreated();
     throw err;
   }
   if ("error" in result) {
-    if (createdNow) await admin().from("clients").delete().eq("id", client.id);
+    await undoCreated();
     return c.json({ error: result.error, code: (result as any).code ?? null, activePlan: (result as any).activePlan ?? null }, result.status);
   }
   return c.json({ client: { ...toClient(client, null, null), groupPlan: toGroupPlan(result.plan) }, plan: toGroupPlan(result.plan) });
