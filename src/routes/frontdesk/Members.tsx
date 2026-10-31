@@ -5,7 +5,7 @@ import { useSetHeader } from "../../lib/header";
 import { useAsync } from "../../lib/useAsync";
 import { useLatch } from "../../lib/useLatch";
 import { useSheetSuccess } from "../../lib/useSheetSuccess";
-import { api } from "../../lib/backend";
+import { api, type SalePartner } from "../../lib/backend";
 import { fmt, dateLabel } from "../../lib/format";
 import type { BundleType, ClassSeries, ClientWithPackage, CoachOption, GroupPlanType, Location } from "../../lib/types";
 import { LocationField, LocationSwitcher, atLocation, locationName, useCurrentLocation, useLocations } from "../../lib/locations";
@@ -229,6 +229,7 @@ export function CreateClientSheet({
   const [bundleTypeId, setBundleTypeId] = useState("");
   const [coachId, setCoachId] = useState("");
   const [payMethod, setPayMethod] = useState<PayMethod>("cash");
+  const [partners, setPartners] = useState<SalePartner[]>([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const createLocations = useLocations();
@@ -241,12 +242,16 @@ export function CreateClientSheet({
   }, [soloTrainer, coachId]);
   // Set once the client exists, so a retry after a failed invite only re-sends the invite.
   const [createdId, setCreatedId] = useState<string | null>(null);
+  // New partners of a shared sale still to be invited (a failed invite is retried on resubmit).
+  const [pendingInvites, setPendingInvites] = useState<{ id: string; email: string }[]>([]);
   const { confirmed, iconIn, showSuccess } = useSheetSuccess(open, onClose);
 
   useEffect(() => {
     if (open) {
       setStep(0);
       setCreatedId(null);
+      setPartners([]);
+      setPendingInvites([]);
       setKind("plan");
       setName("");
       setPhone("");
@@ -262,6 +267,7 @@ export function CreateClientSheet({
   if (!open) return null;
 
   const mail = email.trim().toLowerCase();
+  const sharedType = kind === "plan" && offer.startsWith("pt:") ? (planTypes.find((t) => t.id === offer.slice(3) && t.sharedSeats) ?? null) : null;
 
   // What's wrong with a step, if anything. Email is how the client signs in
   // to the member app, so it's required.
@@ -273,6 +279,7 @@ export function CreateClientSheet({
     }
     if (s === 1) {
       if (kind === "plan" && !offer) return "Choose a plan.";
+      if (sharedType && partners.length < sharedType.sharedSeats! - 1) return "Choose who this client shares the plan with.";
       if (kind === "service" && (!bundleTypeId || !coachId)) return "Choose a package and a coach.";
     }
     return null;
@@ -297,10 +304,14 @@ export function CreateClientSheet({
     setError(null);
     try {
       let clientId = createdId;
+      let invites = pendingInvites;
       if (!clientId) {
-        const { client } = kind === "plan" ? await api.sellGroupPlan(fields, offerOf(offer), payMethod) : await api.createServiceClient(fields, bundleTypeId, coachId, payMethod);
-        clientId = client.id;
+        const res = kind === "plan" ? await api.sellGroupPlan(fields, offerOf(offer), payMethod, sharedType ? partners : undefined) : await api.createServiceClient(fields, bundleTypeId, coachId, payMethod);
+        clientId = res.client.id;
         setCreatedId(clientId);
+        const shared = "sharedWith" in res ? res.sharedWith : undefined;
+        invites = partners.flatMap((p, i) => ("email" in p && shared?.[i] ? [{ id: shared[i].id, email: p.email }] : []));
+        setPendingInvites(invites);
         // A new client belongs to the location she's working at.
         if (createHere) await api.setClientLocation(clientId, createHere).catch(() => undefined);
       }
@@ -310,6 +321,17 @@ export function CreateClientSheet({
       } catch (err) {
         setError(`Client created, but the app invite failed: ${err instanceof Error ? err.message : "try again"}. Submitting again only re-sends the invite.`);
         return;
+      }
+      // The shared bundle's new partners need theirs too.
+      for (const inv of invites) {
+        try {
+          await api.inviteClient(inv.id, inv.email);
+        } catch (err) {
+          setError(`Sold, but an app invite failed: ${err instanceof Error ? err.message : "try again"}. Submitting again only re-sends the invites.`);
+          return;
+        }
+        invites = invites.filter((x) => x.id !== inv.id);
+        setPendingInvites(invites);
       }
       showSuccess();
     } catch (err) {
@@ -329,7 +351,7 @@ export function CreateClientSheet({
       const t = planTypes.find((r) => r.id === offer.slice(3));
       if (!t) return null;
       const months = `${t.durationMonths} month${t.durationMonths === 1 ? "" : "s"}`;
-      return { title: t.name, detail: t.kind === "bundle" ? `${t.credits} classes · ${months}` : `All classes · ${months}`, price: t.price };
+      return { title: t.name, detail: t.kind === "bundle" ? `${t.sharedSeats ? `${t.credits! / t.sharedSeats} classes each` : `${t.credits} classes`} · ${months}` : `All classes · ${months}`, price: t.price };
     }
     const b = bundleTypes.find((r) => r.id === bundleTypeId);
     return b ? { title: b.name, detail: `${b.sessionsIncluded} PT sessions`, price: b.price } : null;
@@ -376,7 +398,10 @@ export function CreateClientSheet({
               )}
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 {kind === "plan" ? (
-                  <GroupOfferSelect value={offer} onChange={setOffer} planTypes={planTypes.filter((t) => !t.sharedSeats)} series={series} />
+                  <>
+                    <GroupOfferSelect value={offer} onChange={(v) => { setOffer(v); setPartners([]); }} planTypes={planTypes} series={series} />
+                    {sharedType && <PartnerPicker type={sharedType} buyerId={null} picked={partners} onChange={setPartners} />}
+                  </>
                 ) : (
                   <>
                     <SelectField label="PACKAGE" value={bundleTypeId} onChange={setBundleTypeId} placeholder="Choose a package" options={bundleOptions(bundleTypes, createLocations, createHere)} empty={{ title: "No PT packages yet", body: soloTrainer ? "Add PT bundles in Plans → PT bundles. Once one exists you can sell it here." : "The department head adds PT packages in Catalog → PT bundles. Once one exists you can sell it here." }} />
@@ -403,6 +428,7 @@ export function CreateClientSheet({
                     ["PHONE", phone.trim()],
                     ["EMAIL", mail],
                     ["PACKAGE", chosen ? `${chosen.title} · ${chosen.detail}` : "—"],
+                    ...(sharedType ? [["SHARED WITH", partners.map((p) => ("name" in p ? p.name : (p.label ?? "client"))).join(", ")]] : []),
                     ...(kind === "service" ? [["COACH", coachName ?? "—"]] : []),
                     ["PAYMENT", payMethod.toUpperCase()],
                   ] as [string, string][]
@@ -481,7 +507,7 @@ export function ClientSheet({
   // What they've paid less what's already been refunded: the most this refund can be.
   const [refundable, setRefundable] = useState<{ paid: number; refunded: number; refundable: number } | null>(null);
   const [payMethod, setPayMethod] = useState<PayMethod>("cash");
-  const [partnerIds, setPartnerIds] = useState<string[]>([]);
+  const [partners, setPartners] = useState<SalePartner[]>([]);
   const [busy, setBusy] = useState(false);
   const [showMore, setShowMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -504,7 +530,7 @@ export function ClientSheet({
       setRefundNote("");
       setRefundable(null);
       setPayMethod("cash");
-      setPartnerIds([]);
+      setPartners([]);
       setLocPick(client.homeLocationId ?? null);
       setError(null);
     }
@@ -547,8 +573,11 @@ export function ClientSheet({
   const confirmMode = () => {
     if (mode === "sell-plan") {
       if (!pickId) return setError("Choose a plan.");
-      if (sharedType && partnerIds.length < sharedType.sharedSeats! - 1) return setError(`Choose who ${shown.name} shares this with.`);
-      return run(() => api.sellGroupPlan({ clientId: shown.id }, offerOf(pickId), payMethod, sharedType ? partnerIds.map((clientId) => ({ clientId })) : undefined));
+      if (sharedType && partners.length < sharedType.sharedSeats! - 1) return setError(`Choose who ${shown.name} shares this with.`);
+      return run(async () => {
+        const res = await api.sellGroupPlan({ clientId: shown.id }, offerOf(pickId), payMethod, sharedType ? partners : undefined);
+        await inviteNewPartners(res.sharedWith, partners);
+      });
     }
     if (mode === "renew-package") {
       const trainer = solo && me ? me.id : coachId;
@@ -749,8 +778,8 @@ export function ClientSheet({
                 </>
               )}
               {mode === "location" && <LocationField locations={sheetLocations} value={locPick} onChange={setLocPick} />}
-              {mode === "sell-plan" && <GroupOfferSelect value={pickId} onChange={(v) => { setPickId(v); setPartnerIds([]); }} planTypes={planTypes} series={series} />}
-              {sharedType && <PartnerPicker seats={sharedType.sharedSeats!} type={sharedType} buyerId={shown.id} picked={partnerIds} onChange={setPartnerIds} />}
+              {mode === "sell-plan" && <GroupOfferSelect value={pickId} onChange={(v) => { setPickId(v); setPartners([]); }} planTypes={planTypes} series={series} />}
+              {sharedType && <PartnerPicker type={sharedType} buyerId={shown.id} picked={partners} onChange={setPartners} />}
               {mode === "renew-package" && <SelectField label="PACKAGE" value={pickId} onChange={setPickId} placeholder="Choose a package" options={bundleOptions(bundleTypes, sheetLocations, shown.homeLocationId ?? sheetHere?.id ?? null)} empty={{ title: "No PT packages yet", body: solo ? "Add PT bundles in Plans → PT bundles. Once one exists you can sell it here." : "The department head adds PT packages in Catalog → PT bundles. Once one exists you can sell it here." }} />}
               {((mode === "renew-package" && !solo) || mode === "assign") && (
                 <SelectField label="COACH" value={coachId} onChange={setCoachId} placeholder="Choose a coach" options={coachOptions(coaches)} empty={{ title: "No coaches yet", body: "The department head invites coaches from Team → Team & tiers. They appear here once they sign up." }} />
@@ -782,37 +811,85 @@ export function ClientSheet({
   );
 }
 
-// Who shares a shared bundle with the client being sold to. Each person gets
-// an even share of the classes and the price, and their own plan.
-function PartnerPicker({ seats, type, buyerId, picked, onChange }: { seats: number; type: GroupPlanType; buyerId: string; picked: string[]; onChange: (ids: string[]) => void }) {
+// A shared sale's new partners have no app invite yet (they didn't exist a
+// moment ago); sending it is what lets them sign in with their email.
+async function inviteNewPartners(sharedWith: { id: string; name: string }[] | undefined, partners: SalePartner[]) {
+  const failed: string[] = [];
+  for (let i = 0; i < partners.length; i++) {
+    const p = partners[i];
+    const made = sharedWith?.[i];
+    if (!("email" in p) || !made) continue;
+    try {
+      await api.inviteClient(made.id, p.email);
+    } catch {
+      failed.push(p.name);
+    }
+  }
+  if (failed.length) throw new Error(`Sold, but the app invite to ${failed.join(", ")} failed — re-invite from their client page.`);
+}
+
+// Who shares a shared bundle with the client being sold to: someone already on
+// file or a brand-new client. Each person gets an even share of the classes and
+// the price, and their own plan.
+function PartnerPicker({ type, buyerId, picked, onChange }: { type: GroupPlanType; buyerId: string | null; picked: SalePartner[]; onChange: (p: SalePartner[]) => void }) {
+  const seats = type.sharedSeats!;
   const [q, setQ] = useState("");
+  const [adding, setAdding] = useState(false);
+  const [nName, setNName] = useState("");
+  const [nPhone, setNPhone] = useState("");
+  const [nEmail, setNEmail] = useState("");
+  const [err, setErr] = useState<string | null>(null);
   const { data } = useAsync(() => api.clients(), []);
   const all = data?.clients ?? [];
-  const byId = (id: string) => all.find((c) => c.id === id);
+  const pickedIds = picked.flatMap((p) => ("clientId" in p ? [p.clientId] : []));
+  const labelOf = (p: SalePartner) => ("clientId" in p ? (all.find((c) => c.id === p.clientId)?.name ?? "Client") : `${p.name} (new)`);
   const each = type.credits! / seats;
-  const results = q.trim()
-    ? all.filter((c) => c.id !== buyerId && !picked.includes(c.id) && matchesClient(c, q)).slice(0, 5)
-    : [];
+  const results = q.trim() ? all.filter((c) => c.id !== buyerId && !pickedIds.includes(c.id) && matchesClient(c, q)).slice(0, 5) : [];
+  const addNew = () => {
+    const mail = nEmail.trim().toLowerCase();
+    if (!nName.trim() || !nPhone.trim()) return setErr("Name and phone number are required.");
+    if (!/^\S+@\S+\.\S+$/.test(mail)) return setErr("Enter their email — they sign in to the app with it.");
+    if (all.some((c) => (c.email ?? "").trim().toLowerCase() === mail)) return setErr("Another client already uses this email — search for them instead.");
+    onChange([...picked, { name: nName.trim(), phone: nPhone.trim(), email: mail }]);
+    setAdding(false);
+    setNName("");
+    setNPhone("");
+    setNEmail("");
+    setErr(null);
+  };
   return (
     <div data-sq style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: 14, display: "flex", flexDirection: "column", gap: 10 }}>
       <div style={{ font: "400 13px/1.5 var(--font-body)", color: "var(--ink-muted)" }}>
         Shared by {seats}: {each} classes and {fmt(type.price / seats)} EGP each, {type.durationMonths} months from today. Each person gets their own plan.
       </div>
-      {picked.map((id) => (
-        <div key={id} style={{ display: "flex", alignItems: "center", gap: 8, font: "700 15px var(--font-body)" }}>
-          <span style={{ flex: 1 }}>{byId(id)?.name ?? "Client"}</span>
-          <button data-tap onClick={() => onChange(picked.filter((x) => x !== id))} aria-label="Remove" style={{ border: 0, background: "none", color: "var(--ink-muted)", cursor: "pointer", font: "600 13px var(--font-body)" }}>Remove</button>
+      {picked.map((p, i) => (
+        <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, font: "700 15px var(--font-body)" }}>
+          <span style={{ flex: 1 }}>{labelOf(p)}</span>
+          <button data-tap onClick={() => onChange(picked.filter((_, j) => j !== i))} aria-label="Remove" style={{ border: 0, background: "none", color: "var(--ink-muted)", cursor: "pointer", font: "600 13px var(--font-body)" }}>Remove</button>
         </div>
       ))}
-      {picked.length < seats - 1 && (
+      {picked.length < seats - 1 && !adding && (
         <>
           <SearchField value={q} onChange={setQ} placeholder="Search the other client" />
           {results.map((c) => (
-            <button key={c.id} data-tap onClick={() => { onChange([...picked, c.id]); setQ(""); }} style={{ textAlign: "left", minHeight: 44, border: 0, background: "none", cursor: "pointer", font: "600 15px var(--font-body)", color: "var(--ink)" }}>
+            <button key={c.id} data-tap onClick={() => { onChange([...picked, { clientId: c.id, label: c.name }]); setQ(""); }} style={{ textAlign: "left", minHeight: 44, border: 0, background: "none", cursor: "pointer", font: "600 15px var(--font-body)", color: "var(--ink)" }}>
               {c.name}
               {c.phone && <span style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}> · {c.phone}</span>}
             </button>
           ))}
+          <Button variant="secondary" onClick={() => setAdding(true)}>Add as a new client</Button>
+        </>
+      )}
+      {adding && (
+        <>
+          <TextField label="FULL NAME" value={nName} onChange={(e) => setNName(e.target.value)} placeholder="Client name" autoComplete="off" />
+          <TextField label="PHONE" type="tel" value={nPhone} onChange={(e) => setNPhone(e.target.value)} placeholder="01xxxxxxxxx" autoComplete="off" />
+          <TextField label="EMAIL" type="email" value={nEmail} onChange={(e) => setNEmail(e.target.value)} autoComplete="off" />
+          {err && <ErrorBanner text={err} />}
+          <div style={{ display: "flex", gap: 8 }}>
+            <Button variant="secondary" style={{ flex: 1 }} onClick={() => { setAdding(false); setErr(null); }}>Cancel</Button>
+            <Button style={{ flex: 1 }} onClick={addNew}>Add client</Button>
+          </div>
         </>
       )}
     </div>

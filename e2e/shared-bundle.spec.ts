@@ -68,3 +68,39 @@ test("shared bundle: a normal plan has no partner step", async ({ page }) => {
   await expect.poll(() => sold.length).toBe(1);
   expect((sold[0].body as Record<string, unknown>).partners).toBeUndefined();
 });
+
+test("shared bundle: the new-client form sells it too, with a brand-new second client who also gets an invite", async ({ page }) => {
+  const sold: { body: unknown }[] = [];
+  const invited: unknown[] = [];
+  await boot(page, sold);
+  await page.route("**/client-invites", (r) => { invited.push(JSON.parse(r.request().postData() ?? "{}")); return r.fulfill({ json: { ok: true } }); });
+  await page.route("**/group-plans/sell", (r) => {
+    sold.push({ body: JSON.parse(r.request().postData() ?? "{}") });
+    return r.fulfill({ json: { client: person("n1", "Omar Ali", "0100999001"), plan: {}, sharedWith: [{ id: "n2", name: "Dina Ali" }] } });
+  });
+  await page.goto("/members");
+  await page.getByRole("button", { name: "+ New client" }).first().click();
+  await page.getByLabel("FULL NAME").fill("Omar Ali");
+  await page.getByLabel("PHONE", { exact: true }).fill("0100999001");
+  await page.getByLabel("EMAIL").fill("omar@example.com");
+  await page.getByRole("button", { name: "Next" }).click();
+  await page.getByRole("button", { name: /^GROUP PLAN\s*\S/ }).filter({ hasNotText: /^GROUP PLAN$/ }).click();
+  await page.getByRole("button", { name: /Shared 100/ }).click();
+  await expect(page.getByText(/Shared by 2: 50 classes/)).toBeVisible();
+  await page.getByRole("button", { name: "Next" }).click();
+  await expect(page.getByText("Choose who this client shares the plan with.")).toBeVisible();
+
+  await page.getByRole("button", { name: "Add as a new client" }).click();
+  await page.getByLabel("FULL NAME").last().fill("Dina Ali");
+  await page.getByLabel("PHONE", { exact: true }).last().fill("0100999002");
+  await page.getByLabel("EMAIL").last().fill("dina@example.com");
+  await page.getByRole("button", { name: "Add client" }).click();
+  await page.getByRole("button", { name: "Next" }).click();
+  await page.getByRole("button", { name: "Next" }).click();
+  await expect(page.getByText("Dina Ali")).toBeVisible();
+  await page.getByRole("button", { name: "Create & start plan" }).click();
+  await expect.poll(() => sold.length).toBe(1);
+  expect(sold[0].body).toMatchObject({ name: "Omar Ali", planTypeId: "pt-sh", partners: [{ name: "Dina Ali", phone: "0100999002", email: "dina@example.com" }] });
+  await expect.poll(() => invited.length).toBe(2); // Omar's and Dina's
+  expect(invited).toEqual(expect.arrayContaining([expect.objectContaining({ clientId: "n2", email: "dina@example.com" })]));
+});
