@@ -77,6 +77,9 @@ export interface PlanTypeInput {
   sharedSeats?: number | null;
 }
 
+/** The other client of a shared bundle: someone already on file, or a new one. */
+export type SalePartner = { clientId: string; label?: string } | { name: string; phone: string; email: string };
+
 export interface NewClientFields {
   name: string;
   phone: string | null;
@@ -330,8 +333,8 @@ export const api = {
   // Front desk: sell a group plan to an existing member or a brand-new one.
   // `offer` is a catalog plan or a class series (that class's monthly).
   // `partners` are the other clients of a shared bundle (existing clients).
-  sellGroupPlan: (target: { clientId: string } | NewClientFields, offer: { planTypeId: string } | { seriesId: string }, payMethod: PayMethod, partners?: { clientId: string }[]) =>
-    callFn<{ client: ClientWithPackage; plan: GroupPlan }>("group-plans/sell", { method: "POST", body: { ...target, ...offer, payMethod, ...(partners?.length ? { partners } : {}) } }),
+  sellGroupPlan: (target: { clientId: string } | NewClientFields, offer: { planTypeId: string } | { seriesId: string }, payMethod: PayMethod, partners?: SalePartner[]) =>
+    callFn<{ client: ClientWithPackage; plan: GroupPlan; sharedWith?: { id: string; name: string }[] }>("group-plans/sell", { method: "POST", body: { ...target, ...offer, payMethod, ...(partners?.length ? { partners } : {}) } }),
   clientPlans: (clientId: string) => callFn<{ activePlan: GroupPlan | null; plans: GroupPlan[] }>(`group-plans/client/${clientId}`),
 
   // `history` also returns the month-by-month series for that many months in the same call.
