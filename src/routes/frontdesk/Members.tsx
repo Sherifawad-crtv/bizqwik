@@ -46,7 +46,9 @@ function groupOfferOptions(planTypes: GroupPlanType[], series: ClassSeries[], lo
     ...planTypes.map((t) => ({
       value: `pt:${t.id}`,
       label:
-        t.kind === "bundle"
+        t.kind === "bundle" && t.sharedSeats
+          ? `${t.name} · ${fmt(t.price)} EGP · ${t.credits! / t.sharedSeats} classes each · ${months(t.durationMonths)}${at(t.locationId)}`
+          : t.kind === "bundle"
           ? `${t.name} · ${fmt(t.price)} EGP · ${t.credits} classes · ${months(t.durationMonths)}${at(t.locationId)}`
           : `${t.name} · ${fmt(t.price)} EGP · all classes · ${months(t.durationMonths)}${at(t.locationId)}`,
     })),
@@ -374,7 +376,7 @@ export function CreateClientSheet({
               )}
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 {kind === "plan" ? (
-                  <GroupOfferSelect value={offer} onChange={setOffer} planTypes={planTypes} series={series} />
+                  <GroupOfferSelect value={offer} onChange={setOffer} planTypes={planTypes.filter((t) => !t.sharedSeats)} series={series} />
                 ) : (
                   <>
                     <SelectField label="PACKAGE" value={bundleTypeId} onChange={setBundleTypeId} placeholder="Choose a package" options={bundleOptions(bundleTypes, createLocations, createHere)} empty={{ title: "No PT packages yet", body: soloTrainer ? "Add PT bundles in Plans → PT bundles. Once one exists you can sell it here." : "The department head adds PT packages in Catalog → PT bundles. Once one exists you can sell it here." }} />
@@ -479,6 +481,7 @@ export function ClientSheet({
   // What they've paid less what's already been refunded: the most this refund can be.
   const [refundable, setRefundable] = useState<{ paid: number; refunded: number; refundable: number } | null>(null);
   const [payMethod, setPayMethod] = useState<PayMethod>("cash");
+  const [partnerIds, setPartnerIds] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
   const [showMore, setShowMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -501,6 +504,7 @@ export function ClientSheet({
       setRefundNote("");
       setRefundable(null);
       setPayMethod("cash");
+      setPartnerIds([]);
       setLocPick(client.homeLocationId ?? null);
       setError(null);
     }
@@ -523,6 +527,7 @@ export function ClientSheet({
   const packageActive = pkg?.status === "active";
   const bType = pkg ? bundleTypes.find((b) => b.id === pkg.bundleTypeId) : undefined;
   const summary = planSummary(shown, bundleTypes);
+  const sharedType = mode === "sell-plan" && pickId.startsWith("pt:") ? planTypes.find((t) => t.id === pickId.slice(3) && t.sharedSeats) ?? null : null;
   const coachName = coaches.find((c) => c.id === shown.assignedCoachId)?.name ?? null;
 
   const run = async (action: () => Promise<unknown>) => {
@@ -542,7 +547,8 @@ export function ClientSheet({
   const confirmMode = () => {
     if (mode === "sell-plan") {
       if (!pickId) return setError("Choose a plan.");
-      return run(() => api.sellGroupPlan({ clientId: shown.id }, offerOf(pickId), payMethod));
+      if (sharedType && partnerIds.length < sharedType.sharedSeats! - 1) return setError(`Choose who ${shown.name} shares this with.`);
+      return run(() => api.sellGroupPlan({ clientId: shown.id }, offerOf(pickId), payMethod, sharedType ? partnerIds.map((clientId) => ({ clientId })) : undefined));
     }
     if (mode === "renew-package") {
       const trainer = solo && me ? me.id : coachId;
@@ -743,13 +749,14 @@ export function ClientSheet({
                 </>
               )}
               {mode === "location" && <LocationField locations={sheetLocations} value={locPick} onChange={setLocPick} />}
-              {mode === "sell-plan" && <GroupOfferSelect value={pickId} onChange={setPickId} planTypes={planTypes} series={series} />}
+              {mode === "sell-plan" && <GroupOfferSelect value={pickId} onChange={(v) => { setPickId(v); setPartnerIds([]); }} planTypes={planTypes} series={series} />}
+              {sharedType && <PartnerPicker seats={sharedType.sharedSeats!} type={sharedType} buyerId={shown.id} picked={partnerIds} onChange={setPartnerIds} />}
               {mode === "renew-package" && <SelectField label="PACKAGE" value={pickId} onChange={setPickId} placeholder="Choose a package" options={bundleOptions(bundleTypes, sheetLocations, shown.homeLocationId ?? sheetHere?.id ?? null)} empty={{ title: "No PT packages yet", body: solo ? "Add PT bundles in Plans → PT bundles. Once one exists you can sell it here." : "The department head adds PT packages in Catalog → PT bundles. Once one exists you can sell it here." }} />}
               {((mode === "renew-package" && !solo) || mode === "assign") && (
                 <SelectField label="COACH" value={coachId} onChange={setCoachId} placeholder="Choose a coach" options={coachOptions(coaches)} empty={{ title: "No coaches yet", body: "The department head invites coaches from Team → Team & tiers. They appear here once they sign up." }} />
               )}
               {(mode === "sell-plan" || mode === "renew-package") && (
-                <PaymentSelect value={payMethod} onChange={setPayMethod} wallet />
+                <PaymentSelect value={payMethod} onChange={setPayMethod} wallet={!sharedType} />
               )}
             </div>
             {error && <ErrorBanner text={error} />}
@@ -772,6 +779,43 @@ export function ClientSheet({
         )}
       </Sheet>
     </>
+  );
+}
+
+// Who shares a shared bundle with the client being sold to. Each person gets
+// an even share of the classes and the price, and their own plan.
+function PartnerPicker({ seats, type, buyerId, picked, onChange }: { seats: number; type: GroupPlanType; buyerId: string; picked: string[]; onChange: (ids: string[]) => void }) {
+  const [q, setQ] = useState("");
+  const { data } = useAsync(() => api.clients(), []);
+  const all = data?.clients ?? [];
+  const byId = (id: string) => all.find((c) => c.id === id);
+  const each = type.credits! / seats;
+  const results = q.trim()
+    ? all.filter((c) => c.id !== buyerId && !picked.includes(c.id) && matchesClient(c, q)).slice(0, 5)
+    : [];
+  return (
+    <div data-sq style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: 14, display: "flex", flexDirection: "column", gap: 10 }}>
+      <div style={{ font: "400 13px/1.5 var(--font-body)", color: "var(--ink-muted)" }}>
+        Shared by {seats}: {each} classes and {fmt(type.price / seats)} EGP each, {type.durationMonths} months from today. Each person gets their own plan.
+      </div>
+      {picked.map((id) => (
+        <div key={id} style={{ display: "flex", alignItems: "center", gap: 8, font: "700 15px var(--font-body)" }}>
+          <span style={{ flex: 1 }}>{byId(id)?.name ?? "Client"}</span>
+          <button data-tap onClick={() => onChange(picked.filter((x) => x !== id))} aria-label="Remove" style={{ border: 0, background: "none", color: "var(--ink-muted)", cursor: "pointer", font: "600 13px var(--font-body)" }}>Remove</button>
+        </div>
+      ))}
+      {picked.length < seats - 1 && (
+        <>
+          <SearchField value={q} onChange={setQ} placeholder="Search the other client" />
+          {results.map((c) => (
+            <button key={c.id} data-tap onClick={() => { onChange([...picked, c.id]); setQ(""); }} style={{ textAlign: "left", minHeight: 44, border: 0, background: "none", cursor: "pointer", font: "600 15px var(--font-body)", color: "var(--ink)" }}>
+              {c.name}
+              {c.phone && <span style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}> · {c.phone}</span>}
+            </button>
+          ))}
+        </>
+      )}
+    </div>
   );
 }
 

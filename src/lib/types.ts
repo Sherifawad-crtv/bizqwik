@@ -464,6 +464,8 @@ export interface GroupPlanType {
   invitationsAllowance: number;
   active: boolean;
   locationId?: string | null;
+  /** Sold to this many clients at once, each getting an even share of the classes and the price. */
+  sharedSeats?: number | null;
 }
 
 export type GroupPlanKind = "membership" | "class_monthly" | "bundle";
@@ -485,6 +487,8 @@ export interface GroupPlan {
   locationId?: string | null;
   // A plan can be frozen for a while; it restarts by itself afterwards.
   frozenUntil?: string | null;
+  /** Plans sold together as one shared bundle have the same id. */
+  shareGroupId?: string | null;
 }
 
 export const GROUP_PLAN_KIND_LABELS: Record<GroupPlanKind, string> = {
