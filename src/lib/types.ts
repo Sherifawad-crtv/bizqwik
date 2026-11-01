@@ -66,6 +66,20 @@ export interface Rollup {
   state: State;
   settledAt: string | null;
   paidAt: string | null;
+  /** Paid out of a settled month so far (all of it once paid), and what's left to pay. */
+  paidAmount: number;
+  remaining: number;
+}
+export type PayMethodOut = "cash" | "bank" | "instapay" | "other";
+/** One payment made against a settled month. */
+export interface SettlementPayment {
+  id: string;
+  amount: number;
+  paidOn: string;
+  method: PayMethodOut;
+  note: string | null;
+  paidBy: string | null;
+  createdAt: string;
 }
 
 // ---- accounting: expenses & profit and loss ----
@@ -104,6 +118,8 @@ export interface MoneySlice {
   key: string;
   label: string;
   amount: number;
+  /** Coach payouts only: how much of it has actually been paid out. */
+  paid?: number;
 }
 export interface PnlMonth {
   month: string;

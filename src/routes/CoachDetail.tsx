@@ -4,6 +4,7 @@ import { useSetHeader } from "../lib/header";
 import { useAsync } from "../lib/useAsync";
 import { api, MOCK } from "../lib/backend";
 import { fmt, monthShort } from "../lib/format";
+import { stateLabel } from "../lib/payables";
 import type { Session } from "../lib/types";
 import { MoneyHero } from "../components/MoneyHero";
 import { LockedBanner } from "../components/LockedBanner";
@@ -101,7 +102,7 @@ export function CoachDetail() {
           { k: "SESSIONS", v: `${row.count} ${row.count === 1 ? "session" : "sessions"}` },
           { k: "GROUP", v: `${fmt(row.groupTotal)} EGP` },
           { k: "PRIVATE", v: `${fmt(row.privateTotal)} EGP` },
-          { k: "STATE", v: row.state.toUpperCase() },
+          { k: "STATE", v: stateLabel(row) },
         ]}
       />
 

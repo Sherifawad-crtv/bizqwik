@@ -17,3 +17,8 @@ export async function loadYearRollups(): Promise<MonthRollups[]> {
 }
 
 export const sumTotal = (rows: Rollup[]) => rows.reduce((s, r) => s + r.total, 0);
+/** What's still to be paid out of settled months (part payments already taken off). */
+export const sumRemaining = (rows: Rollup[]) => rows.reduce((s, r) => s + r.remaining, 0);
+/** A settled month with money already paid out of it. */
+export const isPartPaid = (r: Rollup) => r.state === "settled" && r.paidAmount > 0;
+export const stateLabel = (r: Rollup) => (isPartPaid(r) ? "PART PAID" : r.state.toUpperCase());

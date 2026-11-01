@@ -4,7 +4,7 @@ import { useSetHeader } from "../lib/header";
 import { useAsync } from "../lib/useAsync";
 import { MOCK } from "../lib/backend";
 import { fmt, monthLabel } from "../lib/format";
-import { loadYearRollups, sumTotal } from "../lib/payables";
+import { isPartPaid, loadYearRollups, sumRemaining, sumTotal } from "../lib/payables";
 import { HomeAvatar } from "../components/HomeAvatar";
 import { MoneyHero } from "../components/MoneyHero";
 import { RollupTable, type ListRow } from "../components/RollupTable";
@@ -12,14 +12,13 @@ import { Spinner } from "../components/Spinner";
 import { StatePill } from "../components/StatePill";
 import type { Rollup } from "../lib/types";
 
-/** Where this month stands: paid out, ready to pay, and still being logged. */
+/** Where this month stands: paid out, still to pay, and still being logged. */
 function MonthStatus({ rows }: { rows: Rollup[] }) {
-  const parts = (["paid", "settled", "logging"] as const).map((state) => ({
-    state,
-    total: sumTotal(rows.filter((r) => r.state === state)),
-    n: rows.filter((r) => r.state === state).length,
-    label: state === "paid" ? "Paid" : state === "settled" ? "Ready to pay" : "Still logging",
-  }));
+  const parts = [
+    { state: "paid" as const, total: rows.reduce((s, r) => s + r.paidAmount, 0), n: rows.filter((r) => r.paidAmount > 0).length, label: "Paid out" },
+    { state: "settled" as const, total: sumRemaining(rows), n: rows.filter((r) => r.state === "settled").length, label: "Still to pay" },
+    { state: "logging" as const, total: sumTotal(rows.filter((r) => r.state === "logging")), n: rows.filter((r) => r.state === "logging").length, label: "Still logging" },
+  ];
   return (
     <div data-sq style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-tile)", padding: "16px 18px", marginBottom: 18 }}>
       <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>THIS MONTH · {monthLabel(MOCK.CURRENT_MONTH).toUpperCase()}</div>
@@ -60,9 +59,11 @@ export function Pay() {
       avatarUrl: r.avatarUrl,
       title: r.name,
       meta: `${r.count} ${r.count === 1 ? "SESSION" : "SESSIONS"} · ${r.tierName ?? ""}`,
-      sub: `SETTLED ${r.settledAt ? new Date(r.settledAt).toLocaleDateString("en-GB", { day: "numeric", month: "short" }).toUpperCase() : ""}`.trim(),
+      sub: isPartPaid(r)
+        ? `PART PAID · ${fmt(r.paidAmount)} OF ${fmt(r.total)}`
+        : `SETTLED ${r.settledAt ? new Date(r.settledAt).toLocaleDateString("en-GB", { day: "numeric", month: "short" }).toUpperCase() : ""}`.trim(),
       state: r.state,
-      amount: r.total,
+      amount: r.remaining,
       onClick: () => navigate(`/pay/${r.coachId}`, { state: { month, from: "pay" } }),
     }));
 
@@ -72,7 +73,7 @@ export function Pay() {
 
       <MoneyHero
         label="DUE NOW · EGP"
-        value={fmt(sumTotal(dueRows))}
+        value={fmt(sumRemaining(dueRows))}
         stats={[
           { k: "PAYEES", v: String(dueRows.length) },
           { k: "SESSIONS", v: String(dueRows.reduce((s, r) => s + r.count, 0)) },
@@ -94,7 +95,7 @@ export function Pay() {
           <div key={m.month} style={{ marginBottom: 18 }}>
             <div style={{ display: "flex", alignItems: "baseline", gap: 10, padding: "6px 2px 8px" }}>
               <span style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>{monthLabel(m.month).toUpperCase()}</span>
-              <span className="tabular" style={{ marginLeft: "auto", font: "700 13px var(--font-mono)", color: "var(--ink-muted)" }}>{fmt(sumTotal(m.rows))} EGP</span>
+              <span className="tabular" style={{ marginLeft: "auto", font: "700 13px var(--font-mono)", color: "var(--ink-muted)" }}>{fmt(sumRemaining(m.rows))} EGP</span>
             </div>
             <RollupTable colA="PAYEE" colB="METHOD" rows={listRows(m.month, m.rows)} />
           </div>
