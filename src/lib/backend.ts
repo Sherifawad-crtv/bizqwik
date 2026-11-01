@@ -41,6 +41,7 @@ import type { PaymentsSummary, Location,
   RevenueReport,
   Role,
   Rollup,
+  SettlementPayment,
   Session,
   ScanResult,
   PtScanPreview,
@@ -283,7 +284,10 @@ export const api = {
 
   settle: (coachId: string, month: string) => callFn<void>("settle", { method: "POST", body: { coachId, month } }),
   reopen: (coachId: string, month: string) => callFn<void>("reopen", { method: "POST", body: { coachId, month } }),
-  pay: (coachId: string, month: string) => callFn<void>("pay", { method: "POST", body: { coachId, month } }),
+  // Pays all that's left when no amount is given; otherwise a part payment.
+  pay: (coachId: string, month: string, input?: { amount: number; date: string; method: "cash" | "bank" | "instapay"; note?: string }) =>
+    callFn<{ paidAmount: number; remaining: number }>("pay", { method: "POST", body: { coachId, month, ...input } }),
+  payments: (coachId: string, month: string) => callFn<{ payments: SettlementPayment[] }>(`pay/payments?coachId=${coachId}&month=${month}`),
 
   // Front desk. Coach names only — no payout data, unlike month().
   coaches: () => callFn<{ coaches: CoachOption[] }>("coaches"),

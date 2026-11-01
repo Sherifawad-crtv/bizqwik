@@ -2287,8 +2287,16 @@ app.get(`${P}/packages/by-coach/:coachId/:month`, async (c) => {
 });
 
 // ---- month rollups -----------------------------------------------------
+// What's been paid so far against each settlement (id -> amount).
+async function paidBySettlementMap(settlementIds: string[]): Promise<Map<string, number>> {
+  const out = new Map<string, number>();
+  if (settlementIds.length === 0) return out;
+  const rows = await fetchAllRows((a, b) => admin().from("settlement_payments").select("settlement_id, amount").in("settlement_id", settlementIds).order("id").range(a, b));
+  for (const r of rows) out.set(r.settlement_id, (out.get(r.settlement_id) ?? 0) + Number(r.amount));
+  return out;
+}
 // One coach-per-row payout summary for a month, from the month's already-read data.
-function buildRollupRows(profiles: any[], tierById: Map<any, any>, settlementByCoach: Map<any, any>, sessionCountByCoach: Map<string, number>, privateByCoach: Map<string, { total: number; count: number }>) {
+function buildRollupRows(profiles: any[], tierById: Map<any, any>, settlementByCoach: Map<any, any>, sessionCountByCoach: Map<string, number>, privateByCoach: Map<string, { total: number; count: number }>, paidBySettlement: Map<string, number> = new Map()) {
   return profiles.map((profile) => {
     const tier = profile.tier_id ? (tierById.get(profile.tier_id) ?? null) : null;
     const settlement = settlementByCoach.get(profile.id) ?? null;
@@ -2301,6 +2309,9 @@ function buildRollupRows(profiles: any[], tierById: Map<any, any>, settlementByC
     // already-settled month must not retroactively change it.
     const privateTotal = state === "logging" ? livePrivate.total : Number(settlement?.private_total ?? 0);
     const packageCount = livePrivate.count;
+    // Part payments: what's been paid out of a settled month, and what's left.
+    const total = groupTotal + privateTotal;
+    const paidAmount = settlement ? (state === "paid" ? total : Math.min(total, paidBySettlement.get(settlement.id) ?? 0)) : 0;
     return {
       coachId: profile.id,
       name: profile.name,
@@ -2314,10 +2325,12 @@ function buildRollupRows(profiles: any[], tierById: Map<any, any>, settlementByC
       groupTotal,
       privateTotal,
       packageCount,
-      total: groupTotal + privateTotal,
+      total,
       state,
       settledAt: settlement?.settled_at ?? null,
       paidAt: settlement?.paid_at ?? null,
+      paidAmount,
+      remaining: state === "settled" ? Math.max(0, total - paidAmount) : 0,
     };
   });
 }
@@ -2350,7 +2363,7 @@ async function monthRollups(orgId: string, profiles: any[], month: string) {
     privateByCoach.set(p.coach_id, agg);
   }
 
-  return buildRollupRows(profiles, tierById, settlementByCoach, sessionCountByCoach, privateByCoach);
+  return buildRollupRows(profiles, tierById, settlementByCoach, sessionCountByCoach, privateByCoach, await paidBySettlementMap(settlements.map((x) => x.id)));
 }
 
 // Every row of a query, one 1000-row page at a time (the API's page cap).
@@ -2377,6 +2390,7 @@ async function monthRollupsMany(orgId: string, profiles: any[], months: string[]
   ]);
   if (countsRes.error) throw countsRes.error;
   const tierById = new Map((tiersRes.data ?? []).map((t: any) => [t.id, t]));
+  const paidBySettlement = await paidBySettlementMap(settlements.map((x: any) => x.id));
   const out = new Map<string, any[]>();
   for (const month of months) {
     const settlementByCoach = new Map(settlements.filter((s: any) => s.month === month).map((s: any) => [s.coach_id, s]));
@@ -2390,7 +2404,7 @@ async function monthRollupsMany(orgId: string, profiles: any[], months: string[]
       agg.count += 1;
       privateByCoach.set(p.coach_id, agg);
     }
-    out.set(month, buildRollupRows(profiles, tierById, settlementByCoach, sessionCountByCoach, privateByCoach));
+    out.set(month, buildRollupRows(profiles, tierById, settlementByCoach, sessionCountByCoach, privateByCoach, paidBySettlement));
   }
   return out;
 }
@@ -2578,27 +2592,79 @@ app.post(`${P}/reopen`, async (c) => {
   const state = stateOf(settlement);
   if (state === "paid") return c.json({ error: "Paid months are locked." }, 400);
   if (state !== "settled") return c.json({ error: "Nothing to reopen." }, 400);
+  // Money already handed over can't disappear with the month.
+  const { data: made } = await admin().from("settlement_payments").select("id").eq("settlement_id", settlement.id).limit(1);
+  if ((made?.length ?? 0) > 0) return c.json({ error: "Payments have been recorded for this month, so it can't be reopened.", code: "has_payments" }, 400);
   await admin().from("settlements").delete().eq("id", settlement.id);
   return c.json({ ok: true });
 });
 
+const PAY_METHODS = ["cash", "bank", "instapay"];
+function toSettlementPayment(row: any) {
+  return { id: row.id, amount: Number(row.amount), paidOn: row.paid_on, method: row.method, note: row.note ?? null, paidBy: row.paid_by ?? null, createdAt: row.created_at };
+}
+
+// Records a payment against a settled month — any amount up to what's left.
+// The month turns "paid" when the payments add up to its total. Omitting the
+// amount pays whatever is left (the old one-tap "mark paid").
 app.post(`${P}/pay`, async (c) => {
   const user = await requireUser(c);
   const me = user && (await profileOf(user.id));
   if (!me) return c.json({ error: "Unauthorized" }, 401);
   if (me.role !== "accountant") return c.json({ error: "Forbidden" }, 403);
-  const { coachId, month } = await c.req.json();
+  const body = await c.req.json();
+  const { coachId, month } = body;
   const { data: settlement } = await admin().from("settlements").select("*").eq("org_id", me.org_id).eq("coach_id", coachId).eq("month", month).maybeSingle();
   const state = stateOf(settlement);
   if (state !== "settled") return c.json({ error: "Coach isn't ready to pay." }, 400);
-  const { data: updated, error } = await admin()
-    .from("settlements")
-    .update({ paid_by: me.id, paid_at: new Date().toISOString() })
-    .eq("id", settlement.id)
-    .select()
-    .single();
+
+  const total = Number(settlement.group_total) + Number(settlement.private_total);
+  const paidSoFar = (await paidBySettlementMap([settlement.id])).get(settlement.id) ?? 0;
+  const remaining = Math.round((total - paidSoFar) * 100) / 100;
+  if (remaining <= 0) return c.json({ error: "Nothing left to pay for this month." }, 400);
+
+  const amount = body.amount === undefined || body.amount === null || body.amount === "" ? remaining : Math.round(Number(body.amount) * 100) / 100;
+  if (!Number.isFinite(amount) || amount <= 0) return c.json({ error: "Enter an amount to pay." }, 400);
+  if (amount > remaining) return c.json({ error: `Only ${remaining} EGP is left to pay for this month.`, code: "over_remaining" }, 400);
+  const paidOn = body.date ? String(body.date).slice(0, 10) : gymToday();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(paidOn) || paidOn > gymToday()) return c.json({ error: "Choose today or an earlier date." }, 400);
+  const method = body.method ?? "cash";
+  if (!PAY_METHODS.includes(method)) return c.json({ error: "Choose how it was paid." }, 400);
+  const note = body.note ? String(body.note).trim().slice(0, 200) || null : null;
+
+  const { data: payment, error } = await admin().from("settlement_payments").insert({ org_id: me.org_id, settlement_id: settlement.id, amount, paid_on: paidOn, method, note, paid_by: me.id }).select().single();
   if (error) throw error;
-  return c.json({ settlement: toSettlement(updated) });
+  const left = Math.round((remaining - amount) * 100) / 100;
+  let updated = settlement;
+  if (left <= 0) {
+    const { data } = await admin().from("settlements").update({ paid_by: me.id, paid_at: new Date().toISOString() }).eq("id", settlement.id).select().single();
+    updated = data ?? settlement;
+  }
+
+  const coach = await staffInMyOrg(me, coachId);
+  if (coach) {
+    await sendPushToProfile(me.org_id, coachId, "payment_received", {
+      title: "💰 Payment received",
+      body: left <= 0 ? `${amount} EGP paid for ${month}. Your month is fully paid.` : `${amount} EGP paid for ${month}. ${left} EGP still to come.`,
+      url: homePathForRole(coach.role),
+    });
+  }
+  return c.json({ settlement: toSettlement(updated), payment: toSettlementPayment(payment), paidAmount: total - left, remaining: left });
+});
+
+// The payments made against one coach's month, oldest first. The coach sees
+// their own; heads and the accountant see anyone's in their org.
+app.get(`${P}/pay/payments`, async (c) => {
+  const user = await requireUser(c);
+  const me = user && (await profileOf(user.id));
+  if (!me) return c.json({ error: "Unauthorized" }, 401);
+  const coachId = c.req.query("coachId") ?? me.id;
+  const month = c.req.query("month") ?? "";
+  if (coachId !== me.id && !["accountant", "dept_head", "head_coach"].includes(me.role)) return c.json({ error: "Forbidden" }, 403);
+  const { data: settlement } = await admin().from("settlements").select("id").eq("org_id", me.org_id).eq("coach_id", coachId).eq("month", month).maybeSingle();
+  if (!settlement) return c.json({ payments: [] });
+  const { data } = await admin().from("settlement_payments").select("*").eq("settlement_id", settlement.id).order("paid_on").order("created_at");
+  return c.json({ payments: (data ?? []).map(toSettlementPayment) });
 });
 
 // ================= Bizqwik ops dashboard (bizqwik_team only) =================
@@ -4765,6 +4831,7 @@ app.get(`${P}/accounting/pnl`, async (c) => {
   // doesn't see yet.
   const rollups = await monthRollups(org, coaches.data ?? [], month);
   const unsettled = rollups.filter((r) => r.state === "logging" && r.count > 0);
+  const payoutsPaid = rollups.reduce((sum: number, r: any) => sum + Number(r.paidAmount ?? 0), 0);
 
   // "Where it went": coach payouts first, then categories, largest first (spec section 6).
   const byCategory = new Map<string, { categoryId: string; name: string; amount: number }>();
@@ -4775,8 +4842,8 @@ app.get(`${P}/accounting/pnl`, async (c) => {
     row.amount += Number(e.amount);
     byCategory.set(k, row);
   }
-  const expensesBySource: { key: string; label: string; amount: number }[] = [];
-  if (current.coachPayouts > 0) expensesBySource.push({ key: "coach_payouts", label: "Coach payouts", amount: current.coachPayouts });
+  const expensesBySource: { key: string; label: string; amount: number; paid?: number }[] = [];
+  if (current.coachPayouts > 0) expensesBySource.push({ key: "coach_payouts", label: "Coach payouts", amount: current.coachPayouts, paid: Math.min(current.coachPayouts, payoutsPaid) });
   for (const row of [...byCategory.values()].sort((a, b) => b.amount - a.amount)) expensesBySource.push({ key: row.categoryId, label: row.name, amount: row.amount });
 
   // "Where it came from": same service split Oversight already shows (group vs

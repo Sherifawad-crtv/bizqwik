@@ -10,7 +10,8 @@ const THIS = ym(0);
 const LAST = ym(1);
 const row = (id: string, name: string, state: string, total: number, extra: Record<string, unknown> = {}) => ({
   coachId: id, name, email: `${id}@x.com`, role: "coach", avatarUrl: null, tierId: "t", tierName: "Tier 1", rate: 150, count: 4,
-  groupTotal: total, privateTotal: 0, packageCount: 0, total, state, settledAt: state === "logging" ? null : "2026-08-30T10:00:00Z", paidAt: state === "paid" ? "2026-09-02T10:00:00Z" : null, ...extra,
+  groupTotal: total, privateTotal: 0, packageCount: 0, total, state, settledAt: state === "logging" ? null : "2026-08-30T10:00:00Z", paidAt: state === "paid" ? "2026-09-02T10:00:00Z" : null,
+  paidAmount: state === "paid" ? total : 0, remaining: state === "settled" ? total : 0, ...extra,
 });
 const REVENUE = {
   months: [{ month: THIS, revenue: 9000, payouts: 3000, profit: 6000 }],
@@ -38,6 +39,7 @@ async function boot(page: import("@playwright/test").Page) {
     [`month/${LAST}`]: { rows: [row("c1", "Coach Nour", "settled", 2000)] },
     [`packages/by-coach/c2/${THIS}`]: { packages: [] },
     [`packages/by-coach/c1/${THIS}`]: { packages: [] },
+    "pay/payments": { payments: [] },
     revenue: REVENUE,
     activity: ACTIVITY,
   });
@@ -48,7 +50,7 @@ test("accountant: To Pay shows what is owed from every month, and where this mon
   await page.goto("/pay");
   await expect(page.getByText("DUE NOW · EGP")).toBeVisible();
   await expect(page.getByText("3,200").first()).toBeVisible(); // 1,200 this month + 2,000 still owed from last month
-  await expect(page.getByText("Ready to pay")).toBeVisible();
+  await expect(page.getByText("Still to pay")).toBeVisible();
   await expect(page.getByText("Still logging")).toBeVisible();
   await expect(page.getByText("2 due")).toBeVisible();
 });

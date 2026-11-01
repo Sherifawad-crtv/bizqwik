@@ -229,7 +229,11 @@ function PnlPanel({ report, loading, onAddExpense, onCoachPayouts }: { report: P
               >
                 <span style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ font: "600 14px var(--font-body)" }}>{s.label}</div>
-                  {s.key === "coach_payouts" && <div style={{ font: "400 11px var(--font-mono)", color: "var(--ink-faint)" }}>Locked · settled only</div>}
+                  {s.key === "coach_payouts" && (
+                    <div style={{ font: "400 11px var(--font-mono)", color: "var(--ink-faint)" }}>
+                      {s.paid !== undefined ? `${fmt(s.paid)} paid · ${fmt(Math.max(0, s.amount - s.paid))} still owed · ` : ""}Locked · settled only
+                    </div>
+                  )}
                 </span>
                 <span className="tabular" style={{ font: "800 14px var(--font-body)" }}>{fmt(s.amount)}</span>
                 {s.key === "coach_payouts" && <Icon name="chevron-right" size={14} style={{ color: "var(--ink-faint)" }} />}

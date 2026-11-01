@@ -7,7 +7,7 @@ import { useAsync } from "../lib/useAsync";
 import { api, MOCK } from "../lib/backend";
 import { fmt, formatDateTime, monthLabel } from "../lib/format";
 import { currentYearMonths } from "../lib/months";
-import { loadYearRollups, sumTotal } from "../lib/payables";
+import { loadYearRollups, stateLabel, sumTotal } from "../lib/payables";
 import { MoneyHero } from "../components/MoneyHero";
 import { YearMonthStrip } from "../components/YearMonthStrip";
 import { RollupTable, type ListRow } from "../components/RollupTable";
@@ -48,7 +48,8 @@ function PersonalHistory({ row, sessions }: { row: Rollup | null; sessions: Sess
         stats={[
           { k: "SESSIONS", v: `${row.count} ${row.count === 1 ? "session" : "sessions"}` },
           { k: row.tierName ? row.tierName.toUpperCase() : "RATE", v: `${row.rate} / session` },
-          { k: "STATE", v: row.state.toUpperCase() },
+          { k: "STATE", v: stateLabel(row) },
+          ...(row.paidAmount > 0 && row.state !== "paid" ? [{ k: "RECEIVED", v: `${fmt(row.paidAmount)} of ${fmt(row.total)} EGP` }] : []),
         ]}
       />
       <div style={{ display: "flex", alignItems: "baseline", gap: 10, padding: "2px 2px 8px" }}>

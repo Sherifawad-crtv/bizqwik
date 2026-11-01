@@ -33,7 +33,7 @@ const PNL = {
     coachPayouts: 4000, otherExpenses: i === 1 ? 13500 : 12000, totalExpenses: i === 1 ? 17500 : 16000, profit: i === 1 ? 1500 : 2000,
   })),
   revenueBySource: [{ key: "group", label: "Group training", amount: 15000 }, { key: "private_training", label: "Private training", amount: 4000 }],
-  expensesBySource: [{ key: "coach_payouts", label: "Coach payouts", amount: 4000 }, { key: "cat-rent", label: "Rent", amount: 12000 }, { key: "cat-util", label: "Utilities", amount: 1500 }],
+  expensesBySource: [{ key: "coach_payouts", label: "Coach payouts", amount: 4000, paid: 1500 }, { key: "cat-rent", label: "Rent", amount: 12000 }, { key: "cat-util", label: "Utilities", amount: 1500 }],
   hasPastExpenses: true,
   unsettledNote: { count: 2 },
 };
@@ -67,6 +67,7 @@ test("accounting: accountant has a 5th tab and sees the P&L", async ({ page }) =
   await expect(page.getByText("1,500").first()).toBeVisible(); // profit
   await expect(page.getByText(/2 coach sessions aren't settled yet/)).toBeVisible();
   await expect(page.getByText("Coach payouts").first()).toBeVisible();
+  await expect(page.getByText(/1,500 paid · 2,500 still owed/)).toBeVisible();
   await expect(page.getByText("Group training")).toBeVisible();
 });
 
