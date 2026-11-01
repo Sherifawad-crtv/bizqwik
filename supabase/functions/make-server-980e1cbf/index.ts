@@ -2632,14 +2632,18 @@ app.post(`${P}/pay`, async (c) => {
   if (!PAY_METHODS.includes(method)) return c.json({ error: "Choose how it was paid." }, 400);
   const note = body.note ? String(body.note).trim().slice(0, 200) || null : null;
 
-  const { data: payment, error } = await admin().from("settlement_payments").insert({ org_id: me.org_id, settlement_id: settlement.id, amount, paid_on: paidOn, method, note, paid_by: me.id }).select().single();
-  if (error) throw error;
-  const left = Math.round((remaining - amount) * 100) / 100;
-  let updated = settlement;
-  if (left <= 0) {
-    const { data } = await admin().from("settlements").update({ paid_by: me.id, paid_at: new Date().toISOString() }).eq("id", settlement.id).select().single();
-    updated = data ?? settlement;
+  // Atomic in the database: two taps at once can't pay more than what's left.
+  const { data: made, error } = await admin().rpc("record_settlement_payment", { p_settlement: settlement.id, p_org: me.org_id, p_amount: amount, p_paid_on: paidOn, p_method: method, p_note: note, p_by: me.id });
+  if (error) {
+    const over = /over_remaining:([\d.]+)/.exec(error.message ?? "");
+    if (over) return c.json({ error: `Only ${Number(over[1])} EGP is left to pay for this month.`, code: "over_remaining" }, 400);
+    if (/nothing_left/.test(error.message ?? "")) return c.json({ error: "Nothing left to pay for this month.", code: "nothing_left" }, 400);
+    throw error;
   }
+  const result = Array.isArray(made) ? made[0] : made;
+  const left = Number(result.remaining);
+  const { data: payment } = await admin().from("settlement_payments").select("*").eq("id", result.payment_id).single();
+  const { data: updated } = await admin().from("settlements").select("*").eq("id", settlement.id).single();
 
   const coach = await staffInMyOrg(me, coachId);
   if (coach) {
@@ -2649,7 +2653,7 @@ app.post(`${P}/pay`, async (c) => {
       url: homePathForRole(coach.role),
     });
   }
-  return c.json({ settlement: toSettlement(updated), payment: toSettlementPayment(payment), paidAmount: total - left, remaining: left });
+  return c.json({ settlement: toSettlement(updated ?? settlement), payment: toSettlementPayment(payment), paidAmount: total - left, remaining: left });
 });
 
 // The payments made against one coach's month, oldest first. The coach sees
