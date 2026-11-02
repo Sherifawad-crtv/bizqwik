@@ -365,7 +365,8 @@ function PlansPanel({ solo }: { solo?: boolean }) {
   if (!data) return <Spinner />;
 
   const section = (kind: GroupPlanTypeKind, title: string, empty: string) => {
-    const rows = data.planTypes.filter((p) => p.kind === kind && atLocation(p.locationId, catalogHere));
+    // Plans taken off sale are gone from the list; people who hold one keep it.
+    const rows = data.planTypes.filter((p) => p.kind === kind && p.active && atLocation(p.locationId, catalogHere));
     return (
       <div style={{ marginBottom: 28 }}>
         <PanelHeader
@@ -403,6 +404,7 @@ function PlansPanel({ solo }: { solo?: boolean }) {
           ))}
           {rows.length === 0 && <EmptyRow text={empty} action={{ label: kind === "bundle" ? "+ New class bundle" : "+ New membership", onClick: () => setEditing({ kind, planType: null }) }} />}
         </div>
+
       </div>
     );
   };

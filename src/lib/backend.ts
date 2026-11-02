@@ -201,8 +201,8 @@ export const api = {
   bundleTypes: () => callFn<{ bundleTypes: BundleType[] }>("bundle-types"),
   createBundleType: (name: string, price: number, sessionsIncluded: number, expiryDays: number, locationId?: string | null) =>
     callFn<{ bundleType: BundleType }>("bundle-types", { method: "POST", body: { name, price, sessionsIncluded, expiryDays, locationId } }),
-  updateBundleType: (id: string, name: string, price: number, sessionsIncluded: number, expiryDays: number, locationId?: string | null) =>
-    callFn<void>("bundle-types/update", { method: "POST", body: { id, name, price, sessionsIncluded, expiryDays, locationId } }),
+  updateBundleType: (id: string, name: string, price: number, sessionsIncluded: number, expiryDays: number, locationId?: string | null, active?: boolean) =>
+    callFn<void>("bundle-types/update", { method: "POST", body: { id, name, price, sessionsIncluded, expiryDays, locationId, active } }),
 
   // ===== Locations =====
   locations: () => callFn<{ locations: Location[] }>("locations"),

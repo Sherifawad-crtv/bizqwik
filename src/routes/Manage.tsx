@@ -235,20 +235,22 @@ export function BundlesPanel() {
   const shownDeleting = useLatch(deleting);
 
   if (!data) return <Spinner />;
+  // Packages taken off sale are gone from the list; people who hold one keep it.
+  const rows = data.bundleTypes.filter((b) => b.active !== false);
 
   return (
     <div>
       <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
         <span style={{ font: "700 20px var(--font-body)", letterSpacing: "-.01em" }}>Private training bundles</span>
-        <span style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>{data.bundleTypes.length}</span>
+        <span style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>{rows.length}</span>
         <Button size="md" style={{ marginLeft: "auto", height: 40, padding: "0 16px" }} onClick={() => setEditing("new")}>
           + New bundle
         </Button>
       </div>
 
       <div data-sq style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", overflow: "hidden" }}>
-        {data.bundleTypes.map((b, i) => (
-          <div key={b.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "16px 20px", borderBottom: i === data.bundleTypes.length - 1 ? "none" : "1px solid var(--line)" }}>
+        {rows.map((b, i) => (
+          <div key={b.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "16px 20px", borderBottom: i === rows.length - 1 ? "none" : "1px solid var(--line)" }}>
             <div style={{ minWidth: 0, flex: 1 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <span style={{ font: "700 16px var(--font-body)" }}>{b.name}</span>
@@ -267,7 +269,7 @@ export function BundlesPanel() {
             </button>
           </div>
         ))}
-        {data.bundleTypes.length === 0 && (
+        {rows.length === 0 && (
           <EmptyState bare icon="coaches" title="No PT bundles yet" body="A PT bundle is a pack of private sessions with one coach (e.g. 8 sessions, valid 30 days). The front desk sells them once they exist." action={{ label: "+ New PT bundle", onClick: () => setEditing("new") }} />
         )}
       </div>
@@ -300,6 +302,7 @@ export function BundleSheet({ open, bundleType, onClose }: { open: boolean; bund
   const [sessionsIncluded, setSessionsIncluded] = useState(String(bundleType?.sessionsIncluded ?? ""));
   const [expiryDays, setExpiryDays] = useState(String(bundleType?.expiryDays ?? ""));
   const [locationId, setLocationId] = useState<string | null>(null);
+  const [onSale, setOnSale] = useState<"on" | "off">("on");
   const { orgMode: bundleMode } = useAuth();
   const bundleSolo = bundleMode === "solo";
   const locations = useLocations();
@@ -315,6 +318,7 @@ export function BundleSheet({ open, bundleType, onClose }: { open: boolean; bund
       setSessionsIncluded(String(bundleType?.sessionsIncluded ?? ""));
       setExpiryDays(bundleType && bundleType.expiryDays < NO_EXPIRY_DAYS ? String(bundleType.expiryDays) : "");
       setLocationId(bundleType ? (bundleType.locationId ?? null) : (current?.id ?? null));
+      setOnSale(bundleType && bundleType.active === false ? "off" : "on");
       setError(null);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -340,7 +344,7 @@ export function BundleSheet({ open, bundleType, onClose }: { open: boolean; bund
     setBusy(true);
     setError(null);
     try {
-      if (bundleType) await api.updateBundleType(bundleType.id, name.trim(), priceNum, sessionsNum, expiryNum, loc);
+      if (bundleType) await api.updateBundleType(bundleType.id, name.trim(), priceNum, sessionsNum, expiryNum, loc, onSale === "on");
       else await api.createBundleType(name.trim(), priceNum, sessionsNum, expiryNum, loc);
       showSuccess();
     } catch (err) {
@@ -364,6 +368,9 @@ export function BundleSheet({ open, bundleType, onClose }: { open: boolean; bund
             <LocationField locations={locations} value={locationId} onChange={setLocationId} />
             <TextField label="SESSIONS INCLUDED" type="number" min={1} value={sessionsIncluded} onChange={(e) => setSessionsIncluded(e.target.value)} placeholder="24" />
             <TextField label={bundleSolo ? "EXPIRES AFTER · DAYS (BLANK = NO EXPIRY)" : "EXPIRES AFTER · DAYS"} type="number" min={1} value={expiryDays} onChange={(e) => setExpiryDays(e.target.value)} placeholder={bundleSolo ? "No expiry" : "45"} />
+            {bundleType && (
+              <Segmented value={onSale} onChange={setOnSale} options={[{ value: "on", label: "ON SALE" }, { value: "off", label: "OFF SALE" }]} />
+            )}
           </div>
           {error && (
             <div style={{ marginTop: 12, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>
