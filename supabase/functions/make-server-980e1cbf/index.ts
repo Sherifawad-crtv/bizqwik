@@ -722,7 +722,7 @@ function toTier(row: any) {
   return { id: row.id, name: row.name, rate: Number(row.hourly_rate), privateCutPct: Number(row.private_cut_pct) };
 }
 function toBundleType(row: any) {
-  return { id: row.id, name: row.name, price: Number(row.price), sessionsIncluded: row.sessions_included, expiryDays: row.expiry_days, locationId: row.location_id ?? null };
+  return { id: row.id, name: row.name, price: Number(row.price), sessionsIncluded: row.sessions_included, expiryDays: row.expiry_days, locationId: row.location_id ?? null, active: row.active !== false };
 }
 function toClient(row: any, conditions: string | null, currentPackage: any, currentMembership: any = null) {
   return {
@@ -1309,10 +1309,11 @@ app.post(`${P}/bundle-types/update`, async (c) => {
   const user = await requireUser(c);
   const me = user && (await profileOf(user.id));
   if (me?.role !== "dept_head") return c.json({ error: "Forbidden" }, 403);
-  const { id, name, price, sessionsIncluded, expiryDays, locationId } = await c.req.json();
+  const { id, name, price, sessionsIncluded, expiryDays, locationId, active } = await c.req.json();
   const loc = await locationField(me.org_id, locationId);
   if ("error" in loc) return c.json({ error: loc.error }, 400);
   const bundlePatch: any = { name, price: Number(price), sessions_included: Number(sessionsIncluded), expiry_days: Number(expiryDays) };
+  if (active !== undefined) bundlePatch.active = !!active;
   if (loc.id !== undefined) bundlePatch.location_id = loc.id;
   const { data, error } = await admin()
     .from("bundle_types")
@@ -1561,6 +1562,7 @@ async function sellPackageTo(clientId: string, bundleTypeId: string, coachId: st
 
   const { data: bundleType } = await admin().from("bundle_types").select("*").eq("id", bundleTypeId).eq("org_id", me.org_id).maybeSingle();
   if (!bundleType) return { error: "No such bundle type", status: 404 } as const;
+  if (bundleType.active === false) return { error: "That package isn't on sale anymore.", status: 400 } as const;
   const coach = await profileOf(coachId);
   if (!coach || coach.org_id !== me.org_id) return { error: "No such coach", status: 404 } as const;
   const tier = coach.tier_id ? await tierOf(coach.tier_id) : null;
@@ -3407,7 +3409,7 @@ app.get(`${P}/client/prices`, async (c) => {
     activeGroupPlan(me.id, me.org_id),
     currentPackageForClient(me.id, me.org_id),
     atMemberLocation(admin().from("group_plan_types").select("*").eq("org_id", me.org_id).eq("active", true).eq("kind", "bundle").is("shared_seats", null), me).order("price"),
-    atMemberLocation(admin().from("bundle_types").select("*").eq("org_id", me.org_id), me).order("price"),
+    atMemberLocation(admin().from("bundle_types").select("*").eq("org_id", me.org_id).eq("active", true), me).order("price"),
     admin().from("organizations").select("instapay_address, instapay_qr").eq("id", me.org_id).maybeSingle(),
     admin().from("payment_requests").select("*").eq("client_id", me.id).order("created_at", { ascending: false }).limit(5),
   ]);
@@ -3444,7 +3446,7 @@ app.post(`${P}/client/payment-requests`, async (c) => {
     if (await activeGroupPlan(me.id, me.org_id)) return c.json({ error: "You already have an active plan. You can get a new one once it's finished.", code: "active_plan" }, 400);
     row = { offer_type: "plan_type", plan_type_id: t.id, name: t.name, price: Number(t.price), location_id: t.location_id ?? null };
   } else if (offerType === "bundle_type") {
-    const { data: b } = await atMemberLocation(admin().from("bundle_types").select("*").eq("id", id).eq("org_id", me.org_id), me).maybeSingle();
+    const { data: b } = await atMemberLocation(admin().from("bundle_types").select("*").eq("id", id).eq("org_id", me.org_id).eq("active", true), me).maybeSingle();
     if (!b) return c.json({ error: "That package isn't on sale." }, 404);
     const pkg = await currentPackageForClient(me.id, me.org_id);
     if (pkg && pkg.status === "active") return c.json({ error: "You already have an active package.", code: "active_package" }, 400);

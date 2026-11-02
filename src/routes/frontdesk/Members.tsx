@@ -195,7 +195,7 @@ type PlanKind = "plan" | "service";
 
 // With 2+ locations, `here` keeps only that location's PT bundles.
 const bundleOptions = (types: BundleType[], locations: Location[] = [], here: string | null = null) =>
-  types.filter((b) => atLocation(b.locationId, locations.length > 1 ? here : null)).map((b) => ({ value: b.id, label: `${b.name} · ${fmt(b.price)} EGP · ${b.sessionsIncluded} sessions${locationName(locations, b.locationId) ? ` · ${locationName(locations, b.locationId)}` : ""}` }));
+  types.filter((b) => b.active !== false && atLocation(b.locationId, locations.length > 1 ? here : null)).map((b) => ({ value: b.id, label: `${b.name} · ${fmt(b.price)} EGP · ${b.sessionsIncluded} sessions${locationName(locations, b.locationId) ? ` · ${locationName(locations, b.locationId)}` : ""}` }));
 const coachOptions = (coaches: CoachOption[]) => coaches.map((c) => ({ value: c.id, label: c.name }));
 
 const CREATE_STEPS = ["Client info", "Package", "Payment", "Summary"] as const;

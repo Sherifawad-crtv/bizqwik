@@ -148,6 +148,8 @@ export interface BundleType {
   sessionsIncluded: number;
   expiryDays: number;
   locationId?: string | null;
+  /** False once taken off sale; people who already hold one keep it. */
+  active?: boolean;
 }
 
 // A place the business runs sessions. Plans, PT bundles and sessions can be
