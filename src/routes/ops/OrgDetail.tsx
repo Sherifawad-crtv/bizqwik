@@ -78,7 +78,6 @@ function ImageUploadField({
       <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", margin: "0 2px 6px" }}>{label}</div>
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
         <div
-          data-sq
           style={{
             width: 56,
             height: 56,

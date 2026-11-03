@@ -280,7 +280,6 @@ function TimeGrid({ days, today, now, on, narrow, onDay, onOpen }: { days: Date[
                     <button
                       key={e.c.id}
                       type="button"
-                      data-sq
                       data-testid="calendar-class"
                       onClick={() => onOpen(e.c)}
                       style={{

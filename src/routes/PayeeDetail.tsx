@@ -113,7 +113,7 @@ function RecordPaymentSheet({ open, onClose, row, month }: { open: boolean; onCl
 
 function PackageRow({ pkg }: { pkg: PackageWithNames }) {
   return (
-    <div data-sq style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-tile)", padding: "14px 16px", marginBottom: 10 }}>
+    <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-tile)", padding: "14px 16px", marginBottom: 10 }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 6 }}>
         <span style={{ font: "700 16px var(--font-body)", letterSpacing: "-.01em" }}>{pkg.clientName}</span>
         <PackageStatusPill status={pkg.status} />
@@ -176,7 +176,7 @@ export function PayeeDetail() {
         ]}
       />
 
-      <div data-sq style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-tile)", padding: "16px 18px", marginBottom: 18 }}>
+      <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-tile)", padding: "16px 18px", marginBottom: 18 }}>
         <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>WHERE IT'S COMING FROM</div>
         <div style={{ marginTop: 12 }}>
           <div style={{ font: "600 13px var(--font-mono)", color: "var(--ink-muted)" }}>GROUP SESSIONS</div>
@@ -192,7 +192,7 @@ export function PayeeDetail() {
         </div>
       </div>
 
-      <div data-sq style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-tile)", padding: "16px 18px", marginBottom: 18 }}>
+      <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-tile)", padding: "16px 18px", marginBottom: 18 }}>
         <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>PAYMENT RECORD</div>
         {[
           ["Month", monthShort(month)],

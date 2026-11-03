@@ -79,7 +79,6 @@ function CreateFab({ size }: { size: number }) {
             <button
               key={o.kind}
               onClick={() => pick(o.kind)}
-              data-sq
               style={{ textAlign: "left", background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "14px 16px", cursor: "pointer", display: "flex", alignItems: "center", gap: 14 }}
             >
               <span style={{ width: 40, height: 40, flex: "none", borderRadius: 12, background: "var(--primary-tint)", color: "var(--primary-pressed)", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -272,7 +271,6 @@ function SoloFab({ size }: { size: number }) {
             <button
               key={o.kind}
               onClick={() => pick(o.kind)}
-              data-sq
               style={{ textAlign: "left", background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "14px 16px", cursor: "pointer", display: "flex", alignItems: "center", gap: 14 }}
             >
               <span style={{ width: 40, height: 40, flex: "none", borderRadius: 12, background: "var(--primary-tint)", color: "var(--primary-pressed)", display: "flex", alignItems: "center", justifyContent: "center" }}>

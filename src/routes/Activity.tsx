@@ -164,7 +164,7 @@ function Feed({ entries }: { entries: ActivityEntry[] }) {
         const tone = CAT_TONE[catOf(e.type)];
         const amt = amountLabel(e);
         return (
-          <div key={e.id} data-sq style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: "12px 14px", display: "flex", alignItems: "center", gap: 12 }}>
+          <div key={e.id} style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: "12px 14px", display: "flex", alignItems: "center", gap: 12 }}>
             <span style={{ flex: "none", font: "700 10px var(--font-mono)", letterSpacing: ".06em", color: tone.fg, background: tone.bg, borderRadius: 8, padding: "5px 8px", minWidth: 74, textAlign: "center" }}>{tone.label}</span>
             <span style={{ flex: 1, minWidth: 0 }}>
               <span style={{ display: "block", font: "600 14px/1.35 var(--font-body)" }}>{describe(e)}</span>
@@ -181,7 +181,7 @@ function Feed({ entries }: { entries: ActivityEntry[] }) {
 function Logs({ entries }: { entries: ActivityEntry[] }) {
   if (entries.length === 0) return null;
   return (
-    <div data-sq style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", overflow: "hidden" }}>
+    <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", overflow: "hidden" }}>
       {entries.map((e, i) => {
         const amt = amountLabel(e);
         return (
@@ -225,7 +225,7 @@ export function Transactions() {
             ["WALLET CHANGES", sum("wallet"), "Credits, rewards, expiries"],
           ] as const
         ).map(([label, value, hint]) => (
-          <div key={label} data-sq style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: "14px 16px" }}>
+          <div key={label} style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: "14px 16px" }}>
             <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>{label}</div>
             <div className="tabular" style={{ font: "800 22px/1.15 var(--font-body)", letterSpacing: "-.02em", marginTop: 4 }}>{egp(value)}</div>
             <div style={{ font: "400 12px var(--font-mono)", color: "var(--ink-faint)", marginTop: 4 }}>{hint}</div>

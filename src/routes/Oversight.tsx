@@ -16,7 +16,7 @@ import { Spinner } from "../components/Spinner";
 
 export function Card({ title, sub, children }: { title: string; sub?: string; children: ReactNode }) {
   return (
-    <div data-sq style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-tile)", padding: "16px 18px", marginBottom: 14 }}>
+    <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-tile)", padding: "16px 18px", marginBottom: 14 }}>
       <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>{title}</div>
       {sub && <div style={{ font: "400 12px var(--font-mono)", color: "var(--ink-faint)", marginTop: 2 }}>{sub}</div>}
       <div style={{ marginTop: 14 }}>{children}</div>
@@ -177,7 +177,7 @@ export function pctChange(cur: number, prev: number): number | null {
 
 export function KpiTile({ label, value, sub, icon, delta }: { label: string; value: string; sub?: string; icon: IconName; delta?: ReactNode }) {
   return (
-    <div data-sq style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: "14px 16px", minWidth: 0 }}>
+    <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: "14px 16px", minWidth: 0 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
         <span style={{ width: 28, height: 28, flex: "none", borderRadius: 8, background: "var(--primary-tint)", color: "var(--primary-pressed)", display: "flex", alignItems: "center", justifyContent: "center" }}>
           <Icon name={icon} size={16} />
@@ -276,7 +276,7 @@ export function Oversight() {
             </div>
           )}
 
-          <div data-sq style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: "20px 20px 18px", marginBottom: 10 }}>
+          <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: "20px 20px 18px", marginBottom: 10 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <span style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>REVENUE · EGP</span>
               <span style={{ marginLeft: "auto" }}>{compare && <Delta pct={pctChange(report.totals.revenue, compare.revenue)} tone="good" />}</span>
@@ -335,7 +335,6 @@ export function Oversight() {
 
           {profile.role === "dept_head" && (
             <button
-              data-sq
               data-tap
               onClick={() => navigate("/accounting")}
               style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: "16px 18px", marginBottom: 10, cursor: "pointer", textAlign: "left" }}

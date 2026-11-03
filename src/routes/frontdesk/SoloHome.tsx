@@ -39,7 +39,6 @@ const TONES: Record<"primary" | "good" | "warn" | "neutral", Tone> = {
 function Stat({ label, value, sub, icon, tone, onClick }: { label: string; value: string; sub: string; icon: IconName; tone: keyof typeof TONES; onClick?: () => void }) {
   return (
     <button
-      data-sq
       data-tap
       onClick={onClick}
       style={{ textAlign: "left", background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: "16px 18px", cursor: onClick ? "pointer" : "default", minWidth: 0 }}

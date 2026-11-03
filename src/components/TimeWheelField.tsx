@@ -105,7 +105,6 @@ export function TimeWheelField({ label, value, onChange }: { label: string; valu
     <>
       <button
         type="button"
-        data-sq
         onClick={() => setOpen(true)}
         aria-label={`${label}: ${timeLabel(value)}`}
         style={{ display: "block", width: "100%", textAlign: "left", background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "10px 16px", cursor: "pointer" }}

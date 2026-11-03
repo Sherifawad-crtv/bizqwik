@@ -91,7 +91,7 @@ test("filters: coach and sorting, on a phone", async ({ page }) => {
   await expect(page.getByText("Mahmoud Ali")).toBeVisible();
   await page.getByRole("button", { name: "Clear filters" }).click();
   await inSheet(page, "Expiry · soonest");
-  const order = await page.locator("[data-sq]", { hasText: /Tantawy|Essam|Mostafa/ }).allTextContents();
+  const order = await page.getByText(/Tantawy|Essam|Mostafa/).allTextContents();
   expect(order.length).toBeGreaterThan(0);
   await expect(page.getByTestId("client-filters")).toBeVisible();
   // On a phone the chips replace the summary cards: nothing but search and chips above the roster.

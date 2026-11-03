@@ -167,7 +167,7 @@ export function DropIn({ embedded = false, initialClient = null }: { embedded?: 
       )}
 
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-        <div data-sq style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "10px 16px", display: "flex", alignItems: "center", gap: 10 }}>
+        <div style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "10px 16px", display: "flex", alignItems: "center", gap: 10 }}>
           <div style={{ minWidth: 0, flex: 1 }}>
             <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>MEMBER</div>
             <div style={{ font: "600 16px var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{client ? client.name : newMember ? "New member" : "Not linked"}</div>

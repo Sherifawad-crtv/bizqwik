@@ -51,7 +51,6 @@ export function CoachesOverview() {
       {profile?.role === "dept_head" && (
         <button
           onClick={() => navigate("/manage")}
-          data-sq
           style={{ width: "100%", marginBottom: 14, textAlign: "left", background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-tile)", padding: "14px 18px", cursor: "pointer", display: "flex", alignItems: "center", gap: 12 }}
         >
           <span style={{ color: "var(--primary-pressed)", display: "flex" }}>

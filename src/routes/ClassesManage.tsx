@@ -181,7 +181,6 @@ function ClassCard({ c, onEdit, onRoster }: { c: GymClass; onEdit?: () => void; 
   const cancelled = c.status === "cancelled";
   return (
     <div
-      data-sq
       style={{
         background: "var(--surface)",
         border: "1px solid var(--line)",
@@ -298,7 +297,7 @@ export function ClassSheet({
         {!solo && <TextField label="DESCRIPTION" value={draft.description} onChange={(e) => setDraft({ ...draft, description: e.target.value })} placeholder="Optional — shown to members" />}
         {!solo && !draft.seriesId && <ClassPhotoField value={draft.imageUrl} onChange={(url) => setDraft({ ...draft, imageUrl: url })} title={draft.title} />}
         {solo && editing && (
-          <div data-sq style={{ background: "var(--sunken)", borderRadius: "var(--r-input)", padding: "12px 14px" }}>
+          <div style={{ background: "var(--sunken)", borderRadius: "var(--r-input)", padding: "12px 14px" }}>
             <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>COMING · {draft.coming?.length ?? 0}</div>
             <div style={{ font: "600 14px/1.5 var(--font-body)", marginTop: 4 }}>{draft.coming?.length ? draft.coming.join(", ") : "No one has said they're coming yet."}</div>
           </div>

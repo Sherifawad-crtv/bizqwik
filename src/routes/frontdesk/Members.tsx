@@ -633,7 +633,7 @@ export function ClientSheet({
             <SheetHeading kicker="CLIENT" title={shown.name} />
             {shown.phone && <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-muted)", marginTop: -8, marginBottom: 14 }}>{shown.phone}</div>}
 
-            <div data-sq style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "14px 16px" }}>
+            <div style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "14px 16px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                 <div style={{ font: "800 18px var(--font-body)", flex: 1, minWidth: 0 }}>{summary.title}</div>
                 <PlanPill client={shown} />
@@ -861,7 +861,7 @@ function PartnerPicker({ type, buyerId, picked, onChange }: { type: GroupPlanTyp
     setErr(null);
   };
   return (
-    <div data-sq style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: 14, display: "flex", flexDirection: "column", gap: 10 }}>
+    <div style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: 14, display: "flex", flexDirection: "column", gap: 10 }}>
       <div style={{ font: "400 13px/1.5 var(--font-body)", color: "var(--ink-muted)" }}>
         Shared by {seats}: {each} classes and {fmt(type.price / seats)} EGP each, {type.durationMonths} months from today. Each person gets their own plan.
       </div>
@@ -918,7 +918,6 @@ function GroupOfferSelect({ value, onChange, planTypes, series }: { value: strin
               type="button"
               role="radio"
               aria-checked={on}
-              data-sq
               data-tap
               onClick={() => onChange(o.value)}
               style={{ display: "flex", alignItems: "center", gap: 12, padding: "16px 18px", cursor: "pointer", textAlign: "left", borderRadius: "var(--r-card)", border: on ? "2px solid var(--primary)" : "1px solid var(--line)", background: on ? "var(--primary-tint)" : "var(--surface)", color: "var(--ink)" }}

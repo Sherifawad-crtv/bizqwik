@@ -4,7 +4,7 @@ import { ORG_STATUS_LABELS } from "../../lib/types";
 
 export function Card({ children, style }: { children: ReactNode; style?: React.CSSProperties }) {
   return (
-    <div data-sq style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", ...style }}>
+    <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", ...style }}>
       {children}
     </div>
   );

@@ -30,7 +30,7 @@ export function Account() {
         <div style={{ font: "600 14px var(--font-body)", color: "var(--ink-faint)" }}>{ROLE_LABELS[profile.role]}</div>
       </div>
 
-      <div data-sq style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: "6px 4px", marginBottom: 16 }}>
+      <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: "6px 4px", marginBottom: 16 }}>
         <NotificationsRow />
         <SettingsRow icon="account" label="Account Settings" onClick={() => navigate("/account/profile")} />
         <SettingsRow icon="lock" label="Password Settings" onClick={() => navigate("/account/password")} last />

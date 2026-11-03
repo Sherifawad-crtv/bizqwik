@@ -194,7 +194,7 @@ function PnlPanel({ report, loading, onAddExpense, onCoachPayouts }: { report: P
         </div>
       )}
 
-      <div data-sq style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: "20px 20px 18px", marginBottom: 10 }}>
+      <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: "20px 20px 18px", marginBottom: 10 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <span style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>REVENUE · EGP</span>
           {prev && <span style={{ marginLeft: "auto" }}><Delta pct={pctChange(current.netRevenue, prev.netRevenue)} tone="good" /></span>}
@@ -305,7 +305,7 @@ function ExpensesPanel({
   return (
     <div>
       <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
-        <label data-sq style={{ flex: 1, minWidth: 0, display: "flex", alignItems: "center", gap: 10, height: 48, padding: "0 14px", background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)" }}>
+        <label style={{ flex: 1, minWidth: 0, display: "flex", alignItems: "center", gap: 10, height: 48, padding: "0 14px", background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)" }}>
           <span style={{ color: "var(--ink-faint)", display: "flex" }}><Icon name="search" size={18} /></span>
           <input
             aria-label="Search expense notes"
@@ -494,7 +494,7 @@ function ExpenseSheet({
             {editing ? editing.categoryName : "What did the business spend on?"}
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            <label data-sq style={{ display: "block", background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "10px 16px" }}>
+            <label style={{ display: "block", background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "10px 16px" }}>
               <span style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>AMOUNT (EGP)</span>
               <input
                 ref={amountInput}
@@ -513,7 +513,6 @@ function ExpenseSheet({
               <>
                 <input ref={fileInput} type="file" accept="image/*" capture="environment" onChange={onPickReceipt} style={{ display: "none" }} data-testid="receipt-input" />
                 <button
-                  data-sq
                   onClick={() => fileInput.current?.click()}
                   style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", textAlign: "left", background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "12px 16px", cursor: "pointer" }}
                 >
@@ -528,7 +527,6 @@ function ExpenseSheet({
                 type="button"
                 role="switch"
                 aria-checked={repeat}
-                data-sq
                 onClick={() => setRepeat(!repeat)}
                 style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", textAlign: "left", background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "12px 16px", cursor: "pointer", color: "var(--ink)" }}
               >
@@ -612,7 +610,7 @@ function CategoriesSheet({ open, categories, onClose, onChanged }: { open: boole
       <div style={{ font: "800 26px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "0 0 16px" }}>Expense categories</div>
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
         {categories.map((c) => (
-          <div key={c.id} data-sq style={{ display: "flex", alignItems: "center", gap: 10, background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "10px 14px" }}>
+          <div key={c.id} style={{ display: "flex", alignItems: "center", gap: 10, background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "10px 14px" }}>
             <span style={{ flex: 1, font: "600 15px var(--font-body)" }}>{c.name}</span>
             {!c.isDefault && (
               <button

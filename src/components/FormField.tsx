@@ -6,7 +6,7 @@ import { EmptyState } from "./EmptyState";
 
 export function TextField({ label, ...rest }: { label: string } & InputHTMLAttributes<HTMLInputElement>) {
   return (
-    <label data-sq style={{ display: "block", background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "10px 16px" }}>
+    <label style={{ display: "block", background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "10px 16px" }}>
       <span style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>{label}</span>
       <input
         {...rest}
@@ -42,7 +42,6 @@ export function SelectField({ label, value, options, onChange, placeholder, disa
     <>
       <button
         type="button"
-        data-sq
         onClick={() => setOpen(true)}
         disabled={disabled}
         style={{
@@ -91,7 +90,6 @@ export function SelectField({ label, value, options, onChange, placeholder, disa
                   onChange(o.value);
                   setOpen(false);
                 }}
-                data-sq
                 style={{
                   display: "flex",
                   alignItems: "center",

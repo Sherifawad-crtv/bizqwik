@@ -120,7 +120,7 @@ function ClassesPanel({ solo }: { solo?: boolean }) {
           </Button>
         }
       />
-      <div data-sq style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", overflow: "hidden" }}>
+      <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", overflow: "hidden" }}>
         {active.map((s, i) => (
           <SeriesRow key={s.id} s={s} last={i === active.length - 1} onEdit={() => setEditing(s)} locations={locations} />
         ))}
@@ -129,7 +129,6 @@ function ClassesPanel({ solo }: { solo?: boolean }) {
 
       <button
         onClick={() => navigate(solo ? "/bookings" : "/classes")}
-        data-sq
         style={{ width: "100%", marginTop: 12, textAlign: "left", background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-tile)", padding: "14px 18px", cursor: "pointer", display: "flex", alignItems: "center", gap: 12 }}
       >
         <span style={{ color: "var(--primary-pressed)", display: "flex" }}>
@@ -145,7 +144,7 @@ function ClassesPanel({ solo }: { solo?: boolean }) {
       {ended.length > 0 && (
         <>
           <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", margin: "24px 2px 10px" }}>ENDED · {ended.length}</div>
-          <div data-sq style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", overflow: "hidden", opacity: 0.6 }}>
+          <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", overflow: "hidden", opacity: 0.6 }}>
             {ended.map((s, i) => (
               <SeriesRow key={s.id} s={s} last={i === ended.length - 1} />
             ))}
@@ -381,7 +380,7 @@ function PlansPanel({ solo }: { solo?: boolean }) {
             </Button>
           }
         />
-        <div data-sq style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", overflow: "hidden" }}>
+        <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", overflow: "hidden" }}>
           {rows.map((p, i) => (
             <div key={p.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "16px 20px", borderBottom: i === rows.length - 1 ? "none" : "1px solid var(--line)", opacity: p.active ? 1 : 0.6 }}>
               <div style={{ minWidth: 0, flex: 1 }}>
@@ -654,7 +653,7 @@ function SoloOffer() {
   const card: React.CSSProperties = { background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: "16px 20px", marginBottom: 12 };
   return (
     <div style={{ marginBottom: 12 }}>
-      <div data-sq style={card}>
+      <div style={card}>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ font: "700 16px var(--font-body)" }}>Drop-in{catalogCurrent && catalogHere ? ` · ${catalogCurrent.name}` : ""}</div>
@@ -698,7 +697,7 @@ function SoloOffer() {
         )}
       </div>
 
-      <div data-sq style={card}>
+      <div style={card}>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           {instapayQr && <img src={instapayQr} alt="Your InstaPay QR" style={{ width: 56, height: 56, objectFit: "contain", borderRadius: 8, background: "#fff", border: "1px solid var(--line)" }} />}
           <div style={{ flex: 1, minWidth: 0 }}>
@@ -711,7 +710,7 @@ function SoloOffer() {
           </label>
         </div>
       </div>
-      <div data-sq style={card}>
+      <div style={card}>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ font: "700 16px var(--font-body)" }}>InstaPay address</div>
@@ -767,7 +766,7 @@ function LocationsCard() {
 
   return (
     <div style={{ marginBottom: 12 }}>
-      <div data-sq style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: "16px 20px" }}>
+      <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: "16px 20px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: list.length ? 8 : 0 }}>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ font: "700 16px var(--font-body)" }}>Locations</div>

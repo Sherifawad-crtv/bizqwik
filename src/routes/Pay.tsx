@@ -20,7 +20,7 @@ function MonthStatus({ rows }: { rows: Rollup[] }) {
     { state: "logging" as const, total: sumTotal(rows.filter((r) => r.state === "logging")), n: rows.filter((r) => r.state === "logging").length, label: "Still logging" },
   ];
   return (
-    <div data-sq style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-tile)", padding: "16px 18px", marginBottom: 18 }}>
+    <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-tile)", padding: "16px 18px", marginBottom: 18 }}>
       <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>THIS MONTH · {monthLabel(MOCK.CURRENT_MONTH).toUpperCase()}</div>
       <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 10 }}>
         {parts.map((p) => (

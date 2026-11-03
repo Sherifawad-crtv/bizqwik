@@ -98,7 +98,7 @@ export function AccountProfile() {
 
   return (
     <div>
-      <div data-sq style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: 20, marginBottom: 16, display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
+      <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: 20, marginBottom: 16, display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
         {PHOTO_EDIT_ENABLED ? (
           <>
             <input ref={fileInput} type="file" accept="image/*" onChange={onPhotoSelected} style={{ display: "none" }} />
@@ -155,7 +155,7 @@ export function AccountProfile() {
         )}
       </div>
 
-      <div data-sq style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: 20, marginBottom: 16 }}>
+      <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: 20, marginBottom: 16 }}>
         <TextField
           label="NAME"
           value={name}
@@ -179,7 +179,7 @@ export function AccountProfile() {
         </Button>
       </div>
 
-      <div data-sq style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: "6px 4px", marginBottom: 12 }}>
+      <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: "6px 4px", marginBottom: 12 }}>
         <Row k="EMAIL" v={profile.email} />
         <Row k="ROLE" v={ROLE_LABELS[profile.role]} last={!hasTier(profile.role)} />
         {hasTier(profile.role) && (

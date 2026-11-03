@@ -47,11 +47,8 @@
   --dur-press: 160ms;
 
   --shadow-float: 0 14px 34px rgba(26, 23, 38, 0.18);
-  /* Same shadow as --shadow-float, as a filter instead of box-shadow — for a
-     wrapper around a [data-sq] element. box-shadow gets clipped away by the
-     squircle clip-path polyfill (clip-path clips box-shadow too); drop-shadow
-     traces the clipped child's actual silhouette instead, so it must live on
-     an unclipped ancestor, never on the [data-sq] element itself. */
+  /* Same shadow as --shadow-float, as a filter instead of box-shadow, for a
+     wrapper around a rounded panel (the sheet). */
   --shadow-float-filter: drop-shadow(0 14px 34px rgba(26, 23, 38, 0.18));
   --shadow-card: 0 24px 60px rgba(26, 23, 38, 0.1);
 
@@ -151,10 +148,6 @@ select,
 textarea {
   font-family: inherit;
   font-size: 16px; /* prevents iOS focus auto-zoom */
-}
-
-[data-sq] {
-  corner-shape: squircle;
 }
 
 [data-scroll] {

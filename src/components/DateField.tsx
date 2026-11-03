@@ -22,7 +22,6 @@ export function DateField({ value, min, max, onChange }: DateFieldProps) {
   return (
     <>
       <div
-        data-sq
         onClick={() => setOpen(true)}
         style={{
           position: "relative",
@@ -64,7 +63,6 @@ export function DateField({ value, min, max, onChange }: DateFieldProps) {
                   onChange(iso);
                   setOpen(false);
                 }}
-                data-sq
                 style={{
                   aspectRatio: "1",
                   border: 0,

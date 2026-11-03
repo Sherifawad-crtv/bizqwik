@@ -46,7 +46,6 @@ export function DayList({
       {groups.map((g) => (
         <div
           key={g.date}
-          data-sq
           onClick={() => onOpenDay(g)}
           style={{
             background: "var(--surface)",

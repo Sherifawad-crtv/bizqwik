@@ -16,7 +16,6 @@ function NavItem({ to, label, icon, end, onNavigate }: { to: string; label: stri
     <NavLink to={to} end={end} onClick={onNavigate} style={{ textDecoration: "none" }}>
       {({ isActive }) => (
         <div
-          data-sq
           style={{
             display: "flex",
             alignItems: "center",

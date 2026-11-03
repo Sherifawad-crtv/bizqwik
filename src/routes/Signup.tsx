@@ -52,7 +52,7 @@ export function Signup() {
   };
 
   const card = (
-    <div data-sq style={{ width: isMobile ? "min(420px, 100%)" : "min(580px, 100%)", background: "var(--surface)", border: "1px solid var(--line)", borderRadius: isMobile ? "var(--r-card)" : 40, padding: isMobile ? 30 : 48 }}>
+    <div style={{ width: isMobile ? "min(420px, 100%)" : "min(580px, 100%)", background: "var(--surface)", border: "1px solid var(--line)", borderRadius: isMobile ? "var(--r-card)" : 40, padding: isMobile ? 30 : 48 }}>
         <div style={{ font: "800 30px/1.1 var(--font-body)", letterSpacing: "-.02em" }}>Create account</div>
         <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-muted)", marginTop: 6, marginBottom: 22 }}>
           USE THE EMAIL YOU WERE INVITED WITH

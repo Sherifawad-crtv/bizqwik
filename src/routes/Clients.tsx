@@ -73,7 +73,6 @@ function OverviewCards({ clients, showGroupPlans, onPick }: { clients: ClientWit
       {stats.map((s) => (
         <button
           key={s.k}
-          data-sq
           onClick={() => onPick({ ...NO_FILTERS, ...s.patch })}
           style={{ textAlign: "left", background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: "16px 18px", cursor: "pointer" }}
         >
@@ -208,7 +207,6 @@ function ClientFilterBar({
     <div data-testid="client-filters" style={{ marginBottom: 14 }}>
       <div style={{ display: "flex", gap: 8 }}>
         <label
-          data-sq
           style={{ flex: 1, minWidth: 0, display: "flex", alignItems: "center", gap: 10, height: 48, padding: "0 14px", background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)" }}
         >
           <span style={{ color: "var(--ink-faint)", display: "flex" }}>
@@ -224,7 +222,6 @@ function ClientFilterBar({
         </label>
         <button
           type="button"
-          data-sq
           onClick={() => setOpen(true)}
           style={{ flex: "none", height: 48, padding: "0 16px", display: "flex", alignItems: "center", gap: 8, background: inSheet ? "var(--primary-tint)" : "var(--surface)", color: inSheet ? "var(--primary-pressed)" : "var(--ink)", border: `1px solid ${inSheet ? "var(--primary)" : "var(--line)"}`, borderRadius: "var(--r-input)", font: "700 15px var(--font-body)", cursor: "pointer" }}
         >
@@ -528,7 +525,6 @@ function ClientRoster({
         {clients.map((c) => (
           <div
             key={c.id}
-            data-sq
             onClick={() => onSelect(c)}
             style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-tile)", padding: "14px 16px", display: "flex", gap: 14, alignItems: "center", cursor: "pointer" }}
           >
@@ -561,7 +557,7 @@ function ClientRoster({
   }
 
   return (
-    <div data-sq style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", overflow: "hidden" }}>
+    <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", overflow: "hidden" }}>
       <div style={{ display: "grid", gridTemplateColumns: rosterGrid(canManage), gap: 12, padding: "10px 20px", background: "var(--sunken)", font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-muted)" }}>
         <span>CLIENT</span>
         <span>{showAssignedCoach ? "COACH" : "PACKAGE"}</span>
@@ -721,19 +717,19 @@ function ClientDetailSheet({
           {mode === "view" && (
             <>
               {client.conditions && (
-                <div data-sq style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "12px 16px", marginBottom: 10 }}>
+                <div style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "12px 16px", marginBottom: 10 }}>
                   <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>CONDITIONS</div>
                   <div style={{ font: "600 15px/1.4 var(--font-body)" }}>{client.conditions}</div>
                 </div>
               )}
 
-              <div data-sq style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "12px 16px", marginBottom: 10 }}>
+              <div style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "12px 16px", marginBottom: 10 }}>
                 <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>COACH</div>
                 <div style={{ font: "600 16px var(--font-body)" }}>{coachName(client.assignedCoachId) ?? "Unassigned"}</div>
               </div>
 
               {role === "dept_head" && (
-                <div data-sq style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "12px 16px", marginBottom: 10 }}>
+                <div style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "12px 16px", marginBottom: 10 }}>
                   <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>GROUP PLAN</div>
                   {client.groupPlan ? (
                     <>
@@ -749,7 +745,7 @@ function ClientDetailSheet({
               )}
 
               {pkg ? (
-                <div data-sq style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "12px 16px", marginBottom: 10 }}>
+                <div style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "12px 16px", marginBottom: 10 }}>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
                     <span style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>CURRENT PACKAGE</span>
                     <PackageStatusPill status={pkg.status} />

@@ -83,7 +83,6 @@ export function RollupTable({
         {rows.map((r) => (
           <div
             key={r.id}
-            data-sq
             onClick={r.onClick}
             style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-tile)", padding: "14px 16px", display: "flex", gap: 14, alignItems: "center", cursor: r.onClick ? "pointer" : "default" }}
           >
@@ -112,7 +111,7 @@ export function RollupTable({
   }
 
   return (
-    <div data-sq style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", overflow: "hidden" }}>
+    <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", overflow: "hidden" }}>
       <div style={{ display: "grid", gridTemplateColumns: "2fr 1.3fr 1fr 1.1fr 20px", gap: 12, padding: "10px 20px", background: "var(--sunken)", font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-muted)" }}>
         <span>{colA}</span>
         <span>{colB}</span>

@@ -75,7 +75,7 @@ function TiersPanel({ onOpenPeople, onOpenInvites }: { onOpenPeople: () => void;
         </Button>
       </div>
 
-      <div data-sq style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", overflow: "hidden" }}>
+      <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", overflow: "hidden" }}>
         {data.tiers.map((t, i) => (
           <div key={t.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "16px 20px", borderBottom: i === data.tiers.length - 1 ? "none" : "1px solid var(--line)" }}>
             <div style={{ minWidth: 0, flex: 1 }}>
@@ -101,7 +101,7 @@ function TiersPanel({ onOpenPeople, onOpenInvites }: { onOpenPeople: () => void;
           <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>DELETE TIER</div>
           <div style={{ font: "800 26px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 4px" }}>{shownDeleting.name} is still in use</div>
           <div style={{ font: "400 13px/1.5 var(--font-mono)", color: "var(--ink-muted)", marginBottom: 14 }}>Move these to another tier first, then delete it.</div>
-          <div data-sq style={{ background: "var(--sunken)", borderRadius: "var(--r-input)", padding: "6px 16px", marginBottom: 16 }}>
+          <div style={{ background: "var(--sunken)", borderRadius: "var(--r-input)", padding: "6px 16px", marginBottom: 16 }}>
             {onTier(shownDeleting.id).map((p) => (
               <div key={p.id} style={{ display: "flex", alignItems: "baseline", gap: 10, padding: "10px 0" }}>
                 <span style={{ font: "700 15px var(--font-body)" }}>{p.name}</span>
@@ -251,7 +251,7 @@ export function BundlesPanel() {
         </Button>
       </div>
 
-      <div data-sq style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", overflow: "hidden" }}>
+      <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", overflow: "hidden" }}>
         {rows.map((b, i) => (
           <div key={b.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "16px 20px", borderBottom: i === rows.length - 1 ? "none" : "1px solid var(--line)" }}>
             <div style={{ minWidth: 0, flex: 1 }}>
@@ -418,7 +418,7 @@ function InvitesPanel() {
         </Button>
       </div>
 
-      <div data-sq style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", overflow: "hidden" }}>
+      <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", overflow: "hidden" }}>
         {data.invites.map((inv, i) => (
           <div key={inv.email} style={{ display: "flex", alignItems: "center", gap: 12, padding: "16px 20px", borderBottom: i === data.invites.length - 1 ? "none" : "1px solid var(--line)" }}>
             <div style={{ minWidth: 0, flex: 1 }}>
@@ -566,7 +566,7 @@ function PeoplePanel() {
         <span style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>{data.profiles.length}</span>
       </div>
 
-      <div data-sq style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", overflow: "hidden" }}>
+      <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", overflow: "hidden" }}>
         {data.profiles.map((p, i) => (
           <button
             key={p.id}
@@ -652,7 +652,7 @@ function PersonSheet({
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-          <div data-sq style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "12px 16px" }}>
+          <div style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "12px 16px" }}>
             <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>ROLE</div>
             <div style={{ font: "600 16px var(--font-body)" }}>{ROLE_LABELS[shown.role]}</div>
           </div>

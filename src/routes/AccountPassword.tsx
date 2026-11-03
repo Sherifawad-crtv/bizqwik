@@ -46,7 +46,7 @@ export function AccountPassword() {
 
   return (
     <div>
-      <div data-sq style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: 20 }}>
+      <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: 20 }}>
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           <TextField
             label="CURRENT PASSWORD"

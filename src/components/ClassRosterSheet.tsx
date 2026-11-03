@@ -111,7 +111,7 @@ function RosterRow({
   const paid = b.payStatus === "paid";
   const onPlan = b.coverage === "plan";
   return (
-    <div data-sq style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "12px 14px", opacity: busy ? 0.6 : 1 }}>
+    <div style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "12px 14px", opacity: busy ? 0.6 : 1 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
         <div style={{ minWidth: 0, flex: 1 }}>
           <div style={{ font: "700 15px var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{b.clientName ?? "Member"}</div>
@@ -153,7 +153,6 @@ function RowBtn({ children, onClick, disabled, active, primary }: { children: Re
   return (
     <button
       type="button"
-      data-sq
       disabled={disabled}
       onClick={onClick}
       style={{

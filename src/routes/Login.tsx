@@ -46,14 +46,14 @@ export function Login() {
   };
 
   const card = (
-    <div data-sq style={{ width: isMobile ? "min(420px, 100%)" : "min(580px, 100%)", background: "var(--surface)", border: "1px solid var(--line)", borderRadius: isMobile ? "var(--r-card)" : 40, padding: isMobile ? 30 : 48 }}>
+    <div style={{ width: isMobile ? "min(420px, 100%)" : "min(580px, 100%)", background: "var(--surface)", border: "1px solid var(--line)", borderRadius: isMobile ? "var(--r-card)" : 40, padding: isMobile ? 30 : 48 }}>
         <div style={{ font: "800 30px/1.1 var(--font-body)", letterSpacing: "-.02em" }}>Sign in</div>
         <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-muted)", marginTop: 6, marginBottom: 22 }}>
           ATTENDANCE &amp; PAYOUT PORTAL
         </div>
 
         <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-          <label data-sq style={{ display: "block", background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "10px 16px" }}>
+          <label style={{ display: "block", background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "10px 16px" }}>
             <span style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>EMAIL</span>
             <input
               type="email"
@@ -65,7 +65,7 @@ export function Login() {
               style={{ display: "block", width: "100%", border: 0, background: "none", outline: "none", font: "600 16px var(--font-body)", color: "var(--ink)", padding: "2px 0 0" }}
             />
           </label>
-          <label data-sq style={{ display: "block", background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "10px 16px" }}>
+          <label style={{ display: "block", background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "10px 16px" }}>
             <span style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>PASSWORD</span>
             <input
               type="password"

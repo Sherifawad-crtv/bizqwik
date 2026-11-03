@@ -1,4 +1,4 @@
-import { Suspense, lazy, useEffect, type ComponentType } from "react";
+import { Suspense, lazy, type ComponentType } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./lib/auth";
 import { HeaderProvider } from "./lib/header";
@@ -6,7 +6,6 @@ import { OwnMonthProvider } from "./lib/ownMonth";
 import { RequireAuth, RequireRole, RequireBizqwikTeam, RequireDesk, RequireTeam } from "./lib/guards";
 import { Spinner } from "./components/Spinner";
 import { Shell } from "./components/Shell";
-import { initSquirclePolyfill } from "./lib/squircle";
 import { isChunkLoadError, reloadForUpdate } from "./lib/chunkReload";
 
 import { Login } from "./routes/Login";
@@ -61,10 +60,6 @@ const OpsTeam = lazyNamed(() => import("./routes/ops/Team"), "Team");
 const OpsPlans = lazyNamed(() => import("./routes/ops/Plans"), "Plans");
 
 export default function App() {
-  useEffect(() => {
-    initSquirclePolyfill();
-  }, []);
-
   return (
     <BrowserRouter>
       <AuthProvider>

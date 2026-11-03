@@ -12,7 +12,6 @@ function SidebarItem({ item }: { item: NavItem }) {
     <NavLink to={item.path} end={item.path === "/"} style={{ textDecoration: "none" }} onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}>
       {({ isActive }) => (
         <div
-          data-sq
           style={{
             display: "flex",
             alignItems: "center",

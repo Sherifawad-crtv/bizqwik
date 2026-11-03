@@ -83,7 +83,7 @@ export function DaySessionsSheet({ open, onClose, coachId, month, date, sessions
 
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           {shownSessions.map((s, i) => (
-            <div key={s.id} data-sq style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "10px 14px" }}>
+            <div key={s.id} style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "10px 14px" }}>
               {movingId === s.id ? (
                 <DateField value={s.date} min={min} max={max} onChange={(d) => move(s.id, d)} />
               ) : (

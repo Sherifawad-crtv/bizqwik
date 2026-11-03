@@ -22,7 +22,7 @@ export function EmptyState({
 }) {
   return (
     <div
-      data-sq={bare ? undefined : true}
+
       data-testid={testId ?? "empty-state"}
       style={{
         background: bare ? "transparent" : "var(--surface)",

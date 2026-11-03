@@ -24,7 +24,6 @@ export function PaymentCards({ value, onChange }: { value: PayMethod; onChange: 
             type="button"
             role="radio"
             aria-checked={on}
-            data-sq
             onClick={() => onChange(o.value)}
             style={{
               minHeight: 130,
