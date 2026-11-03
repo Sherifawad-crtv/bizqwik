@@ -72,7 +72,7 @@ export function ClassRosterSheet({
 
       {roster.loading && <Spinner />}
       {error && (
-        <div style={{ marginBottom: 12, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>{error}</div>
+        <div className="bq-rise" style={{ marginBottom: 12, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>{error}</div>
       )}
       {!roster.loading && live.length === 0 && (
         <EmptyState bare icon="clients" title="No one has booked this class yet" body="Members book from the app, or the front desk can add a drop-in from Drop-In → Class session." />

@@ -165,6 +165,7 @@ function Chip({ on, onClick, children, testId }: { on: boolean; onClick: () => v
         font: "700 14px var(--font-body)",
         whiteSpace: "nowrap",
         cursor: "pointer",
+        transition: "background .2s ease, color .2s ease, border-color .2s ease",
       }}
     >
       {children}
@@ -766,7 +767,7 @@ function ClientDetailSheet({
               )}
 
               {error && (
-                <div style={{ marginBottom: 10, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>
+                <div className="bq-rise" style={{ marginBottom: 10, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>
                   {error}
                 </div>
               )}
@@ -798,7 +799,7 @@ function ClientDetailSheet({
                 Adds store credit to {client.name}'s wallet. They can spend it on classes and desk purchases.
               </div>
               {error && (
-                <div style={{ marginTop: 12, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>
+                <div className="bq-rise" style={{ marginTop: 12, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>
                   {error}
                 </div>
               )}
@@ -902,7 +903,7 @@ function ClientEditSheet({ open, client, onClose }: { open: boolean; client: Cli
             <TextField label="CONDITIONS (OPTIONAL)" value={conditions} onChange={(e) => setConditions(e.target.value)} placeholder="Only visible to their coach and heads" />
           </div>
           {error && (
-            <div style={{ marginTop: 12, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>
+            <div className="bq-rise" style={{ marginTop: 12, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>
               {error}
             </div>
           )}

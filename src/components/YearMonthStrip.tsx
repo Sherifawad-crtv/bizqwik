@@ -1,9 +1,10 @@
 import { useEffect, useRef } from "react";
+import { useSlidingThumb } from "./Segmented";
 import { monthAbbr } from "../lib/format";
 import { MOCK } from "../lib/backend";
 
 export function YearMonthStrip({ months, value, onChange }: { months: string[]; value: string; onChange: (m: string) => void }) {
-  const trackRef = useRef<HTMLDivElement>(null);
+  const { ref: trackRef, thumb } = useSlidingThumb(value);
   const selectedRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -15,6 +16,7 @@ export function YearMonthStrip({ months, value, onChange }: { months: string[]; 
     <div
       ref={trackRef}
       style={{
+        position: "relative",
         display: "flex",
         gap: 6,
         background: "var(--sunken)",
@@ -26,6 +28,7 @@ export function YearMonthStrip({ months, value, onChange }: { months: string[]; 
         marginBottom: 18,
       }}
     >
+      {thumb}
       {months.map((m) => {
         const on = m === value;
         const isNow = m === MOCK.CURRENT_MONTH;
@@ -34,15 +37,18 @@ export function YearMonthStrip({ months, value, onChange }: { months: string[]; 
           <button
             key={m}
             ref={on ? selectedRef : undefined}
+            data-thumb-on={on ? "" : undefined}
             onClick={() => !future && onChange(m)}
             disabled={future}
             style={{
               border: 0,
               cursor: future ? "default" : "pointer",
               flex: "none",
+              position: "relative",
               padding: "9px 14px",
               borderRadius: 999,
-              background: on ? "var(--surface)" : "transparent",
+              background: "transparent",
+              transition: "color .2s ease",
               color: future ? "var(--ink-faint)" : on ? "var(--ink)" : "var(--ink-muted)",
               opacity: future ? 0.45 : 1,
               font: "700 12px var(--font-mono)",

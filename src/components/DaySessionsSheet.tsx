@@ -123,7 +123,7 @@ export function DaySessionsSheet({ open, onClose, coachId, month, date, sessions
         </div>
 
         {error && (
-          <div style={{ marginTop: 12, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>
+          <div className="bq-rise" style={{ marginTop: 12, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>
             {error}
           </div>
         )}

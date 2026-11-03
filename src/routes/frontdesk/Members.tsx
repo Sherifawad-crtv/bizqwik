@@ -1,4 +1,5 @@
 import { EmptyState } from "../../components/EmptyState";
+import { Reveal } from "../../components/Reveal";
 import { useMountedThroughExit } from "../../lib/useLatch";
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -715,7 +716,7 @@ export function ClientSheet({
             >
               {showMore ? "Fewer options" : "More options"}
             </button>
-            {showMore && (
+            <Reveal show={showMore}>
               <div style={{ border: "1px solid var(--line)", borderRadius: "var(--r-input)", overflow: "hidden" }}>
                 {[
                   !plan && summary.tone === "active" ? { label: "Sell a group plan", go: () => setMode("sell-plan") } : null,
@@ -738,7 +739,7 @@ export function ClientSheet({
                     </button>
                   ))}
               </div>
-            )}
+            </Reveal>
           </>
         ) : (
           <>

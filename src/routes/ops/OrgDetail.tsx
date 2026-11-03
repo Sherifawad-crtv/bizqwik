@@ -113,7 +113,7 @@ function ImageUploadField({
       </div>
       {hint && <div style={{ font: "400 12px/1.5 var(--font-mono)", color: "var(--ink-faint)", margin: "6px 2px 0" }}>{hint}</div>}
       {error && (
-        <div style={{ marginTop: 8, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>
+        <div className="bq-rise" style={{ marginTop: 8, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>
           {error}
         </div>
       )}

@@ -261,6 +261,10 @@ a[href] {
   }
 }
 
+.bq-rise {
+  animation: bqRise 0.24s var(--ease-standard) both;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

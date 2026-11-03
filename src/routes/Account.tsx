@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { SwitchVisual } from "../components/Switch";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../lib/auth";
 import { useSetHeader } from "../lib/header";
@@ -86,17 +87,18 @@ function NotificationsRow() {
   }, []);
 
   const toggle = async () => {
+    if (busy) return;
+    // The switch moves the moment you tap; it goes back only if turning it on
+    // or off didn't work (permission refused, offline).
+    const next = !on;
+    setOn(next);
     setBusy(true);
     setError(null);
     try {
-      if (on) {
-        await disablePush();
-        setOn(false);
-      } else {
-        await enablePush();
-        setOn(true);
-      }
+      if (next) await enablePush();
+      else await disablePush();
     } catch (err) {
+      setOn(!next);
       setError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
       setBusy(false);
@@ -127,7 +129,8 @@ function NotificationsRow() {
     <div style={{ borderBottom: "1px solid var(--line)" }}>
       <button
         onClick={toggle}
-        disabled={busy}
+        role="switch"
+        aria-checked={on}
         style={{
           display: "flex",
           alignItems: "center",
@@ -135,7 +138,7 @@ function NotificationsRow() {
           width: "100%",
           border: 0,
           background: "none",
-          cursor: busy ? "default" : "pointer",
+          cursor: "pointer",
           padding: "14px 16px",
           font: "600 15px var(--font-body)",
           color: "var(--ink)",
@@ -146,34 +149,7 @@ function NotificationsRow() {
           <Icon name="bell" size={19} />
         </span>
         <span style={{ flex: 1 }}>Push Notifications</span>
-        <span
-          aria-hidden
-          style={{
-            flex: "none",
-            width: 44,
-            height: 26,
-            borderRadius: 999,
-            background: on ? "var(--primary)" : "var(--sunken)",
-            border: on ? "none" : "1px solid var(--line)",
-            position: "relative",
-            transition: ready ? "background .2s ease" : "none",
-            opacity: busy ? 0.6 : 1,
-          }}
-        >
-          <span
-            style={{
-              position: "absolute",
-              top: 2,
-              left: on ? 21 : 2,
-              width: 21,
-              height: 21,
-              borderRadius: 999,
-              background: "var(--surface)",
-              boxShadow: "0 1px 3px rgba(0,0,0,.25)",
-              transition: ready ? "left .2s ease" : "none",
-            }}
-          />
-        </span>
+        <SwitchVisual checked={on} animate={ready} busy={busy} />
       </button>
       {error && (
         <div style={{ margin: "0 16px 12px", font: "600 12px/1.4 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 10, padding: "8px 10px" }}>

@@ -1,3 +1,55 @@
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { EASE } from "../lib/motion";
+
+const THUMB_MS = 300;
+
+/** The sliding highlight behind a row of pill options (the selected pill glides
+ * to the new choice instead of jumping). Give the container `ref`, render
+ * `thumb` as its first child, mark the selected option `data-thumb-on`. */
+export function useSlidingThumb(value: string) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [box, setBox] = useState<{ x: number; w: number } | null>(null);
+  const [armed, setArmed] = useState(false);
+
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const measure = () => {
+      const on = el.querySelector<HTMLElement>("[data-thumb-on]");
+      setBox(on ? { x: on.offsetLeft, w: on.offsetWidth } : null);
+    };
+    measure();
+    const ro = new ResizeObserver(measure); // fonts loading or a resize change the widths
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [value]);
+
+  // No slide on first paint, only on real changes.
+  useEffect(() => {
+    const raf = requestAnimationFrame(() => setArmed(true));
+    return () => cancelAnimationFrame(raf);
+  }, []);
+
+  const thumb = box ? (
+    <span
+      aria-hidden
+      style={{
+        position: "absolute",
+        top: 4,
+        bottom: 4,
+        left: 0,
+        width: box.w,
+        transform: `translateX(${box.x}px)`,
+        borderRadius: 999,
+        background: "var(--surface)",
+        pointerEvents: "none",
+        transition: armed ? `transform ${THUMB_MS}ms ${EASE}, width ${THUMB_MS}ms ${EASE}` : "none",
+      }}
+    />
+  ) : null;
+  return { ref, thumb };
+}
+
 export function Segmented<T extends string>({
   value,
   options,
@@ -7,24 +59,29 @@ export function Segmented<T extends string>({
   options: { value: T; label: string }[];
   onChange: (v: T) => void;
 }) {
+  const { ref, thumb } = useSlidingThumb(value);
   return (
-    <div style={{ display: "flex", gap: 6, background: "var(--sunken)", borderRadius: 999, padding: 4, width: "fit-content", maxWidth: "100%", overflowX: "auto" }}>
+    <div ref={ref} style={{ position: "relative", display: "flex", gap: 6, background: "var(--sunken)", borderRadius: 999, padding: 4, width: "fit-content", maxWidth: "100%", overflowX: "auto" }}>
+      {thumb}
       {options.map((o) => {
         const on = o.value === value;
         return (
           <button
             key={o.value}
             data-hit
+            data-thumb-on={on ? "" : undefined}
             onClick={() => onChange(o.value)}
-            aria-pressed={o.value === value}
+            aria-pressed={on}
             style={{
               border: 0,
               cursor: "pointer",
               flex: "none",
+              position: "relative",
               padding: "9px 14px",
               borderRadius: 999,
-              background: on ? "var(--surface)" : "transparent",
+              background: "transparent",
               color: on ? "var(--ink)" : "var(--ink-muted)",
+              transition: "color .2s ease",
               font: "700 12px var(--font-mono)",
               letterSpacing: ".06em",
               whiteSpace: "nowrap",

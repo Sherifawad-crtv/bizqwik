@@ -136,7 +136,9 @@ export function History() {
             ]}
           />
         </div>
-        {view === "payouts" ? <LedgerHistory /> : <ActivityPanel />}
+        <div key={view} className="bq-rise">
+          {view === "payouts" ? <LedgerHistory /> : <ActivityPanel />}
+        </div>
       </div>
     );
   }

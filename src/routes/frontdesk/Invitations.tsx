@@ -129,7 +129,7 @@ export function Invitations({ embedded = false, onCreateClient }: { embedded?: b
               </Button>
             </>
           ) : (
-            <div style={{ font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>
+            <div className="bq-rise" style={{ font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>
               {member.name} has used every guest pass on this plan.
             </div>
           )}

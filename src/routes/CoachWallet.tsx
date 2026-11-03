@@ -107,7 +107,7 @@ export function CoachWallet() {
         </div>
       )}
       {actionError && (
-        <div style={{ marginBottom: 14, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>
+        <div className="bq-rise" style={{ marginBottom: 14, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>
           {actionError}
         </div>
       )}

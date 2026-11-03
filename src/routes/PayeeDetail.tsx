@@ -100,7 +100,7 @@ function RecordPaymentSheet({ open, onClose, row, month }: { open: boolean; onCl
           <div style={{ font: "400 12px/1.5 var(--font-mono)", color: "var(--ink-faint)", margin: "10px 2px 0" }}>
             {Number.isFinite(leftAfter) && leftAfter > 0 ? `${fmt(leftAfter)} EGP will still be left to pay.` : leftAfter === 0 ? "This pays the month in full." : ""} The coach is notified.
           </div>
-          {error && <div style={{ marginTop: 12, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>{error}</div>}
+          {error && <div className="bq-rise" style={{ marginTop: 12, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>{error}</div>}
           <Button fullWidth size="lg" style={{ marginTop: 16 }} disabled={busy} onClick={submit}>
             {busy ? "Working…" : `Record payment · ${Number.isFinite(amt) && amt > 0 ? fmt(amt) : "0"} EGP`}
           </Button>

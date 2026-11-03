@@ -97,7 +97,7 @@ export function ClassesManage() {
 
       {classes.loading && <Spinner />}
       {classes.error && (
-        <div style={{ font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>{classes.error}</div>
+        <div className="bq-rise" style={{ font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>{classes.error}</div>
       )}
 
       {!classes.loading && list.length === 0 && (
@@ -310,7 +310,7 @@ export function ClassSheet({
       </div>
 
       {error && (
-        <div style={{ marginTop: 12, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>{error}</div>
+        <div className="bq-rise" style={{ marginTop: 12, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>{error}</div>
       )}
 
       <Button fullWidth size="lg" style={{ marginTop: 16 }} disabled={busy} onClick={save}>

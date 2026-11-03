@@ -57,11 +57,11 @@ export function Catalog() {
       {!locsReady ? (
         <Spinner />
       ) : (
-        <>
+        <div key={tab} className="bq-rise">
           {tab === "classes" && <ClassesPanel solo={solo} />}
           {tab === "plans" && (solo ? (<div><LocationsCard /><SoloOffer /><PlansPanel solo /></div>) : <PlansPanel />)}
           {tab === "pt" && <BundlesPanel />}
-        </>
+        </div>
       )}
     </div>
   );
@@ -320,7 +320,7 @@ export function SeriesSheet({ open, series: seriesProp, onClose }: { open: boole
                   : "Repeats every week on these days until you change or end it. Members can drop in per class or buy the monthly."}
             </div>
             {error && (
-              <div style={{ marginTop: 12, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>{error}</div>
+              <div className="bq-rise" style={{ marginTop: 12, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>{error}</div>
             )}
             <Button fullWidth size="lg" style={{ marginTop: 16 }} disabled={busy} onClick={save}>
               {busy ? "Saving…" : series ? "Save changes" : "Create class"}
@@ -548,7 +548,7 @@ export function PlanTypeSheet({ open, kind: kindProp, planType: planTypeProp, on
             Runs from the day it's bought. Changes apply to future sales only.
           </div>
           {error && (
-            <div style={{ marginTop: 12, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>{error}</div>
+            <div className="bq-rise" style={{ marginTop: 12, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>{error}</div>
           )}
           <Button fullWidth size="lg" style={{ marginTop: 16 }} disabled={busy} onClick={save}>
             {busy ? "Saving…" : planType ? "Save changes" : `Create ${noun}`}
@@ -733,7 +733,7 @@ function SoloOffer() {
           </div>
         )}
       </div>
-      {error && <div style={{ font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px", marginBottom: 12 }}>{error}</div>}
+      {error && <div className="bq-rise" style={{ font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px", marginBottom: 12 }}>{error}</div>}
     </div>
   );
 }
@@ -793,7 +793,7 @@ function LocationsCard() {
         <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>{editing?.id ? "RENAME LOCATION" : "NEW LOCATION"}</div>
         <div style={{ font: "800 26px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 16px" }}>{editing?.id ? "Rename" : "Add a location"}</div>
         <TextField label="NAME" value={editing?.name ?? ""} onChange={(e) => setEditing((x) => (x ? { ...x, name: e.target.value } : x))} placeholder="e.g. Zamalek studio" />
-        {error && <div style={{ marginTop: 12, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>{error}</div>}
+        {error && <div className="bq-rise" style={{ marginTop: 12, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>{error}</div>}
         <Button fullWidth size="lg" style={{ marginTop: 16 }} disabled={busy} onClick={save}>{busy ? "Saving…" : "Save"}</Button>
         <Button variant="secondary" fullWidth style={{ marginTop: 8 }} disabled={busy} onClick={() => setEditing(null)}>Cancel</Button>
       </Sheet>

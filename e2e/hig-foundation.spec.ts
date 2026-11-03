@@ -3,6 +3,10 @@ import { mockBackend } from "./mocks";
 
 // Apple HIG foundation: how sheets, taps and tab switches behave.
 
+// A flick is judged on how fast the pointer moved, which a busy test machine can
+// stretch; a retry is enough to tell a real regression from a slow run.
+test.describe.configure({ retries: 2 });
+
 const PLAN_TYPES = [{ id: "m1", kind: "membership", name: "Calisthenics - 1 Month", price: 2800, durationMonths: 1, credits: null, invitationsAllowance: 0, active: true }];
 const BUNDLES = [{ id: "b1", name: "PT - 10 Sessions", price: 4000, sessionsIncluded: 10, expiryDays: 30, active: true }];
 
@@ -135,4 +139,45 @@ test("press: a tapped button dims while your finger is down", async ({ page }) =
   const down = await btn.evaluate((el) => Number(getComputedStyle(el).opacity));
   await page.mouse.up({ button: "left" });
   expect(down).toBeLessThan(0.8);
+});
+
+test("segmented control: the selected pill glides to the new choice instead of jumping", async ({ page }) => {
+  await boot(page);
+  await page.goto("/catalog");
+  await page.waitForTimeout(500);
+  const thumbX = () => page.evaluate(() => {
+    const seg = document.querySelector('[aria-pressed="true"]')!.parentElement!;
+    const t = seg.firstElementChild as HTMLElement; // the sliding pill
+    return new DOMMatrixReadOnly(getComputedStyle(t).transform).m41;
+  });
+  const before = await thumbX();
+  await page.getByRole("button", { name: "PT BUNDLES" }).click();
+  await page.waitForTimeout(90);
+  const mid = await thumbX();
+  await page.waitForTimeout(500);
+  const after = await thumbX();
+  expect(after).toBeGreaterThan(before + 50);
+  expect(mid).toBeGreaterThan(before);
+  expect(mid).toBeLessThan(after); // still on its way
+});
+
+test("switch: Repeat monthly answers the tap at once and reveals its field smoothly", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await mockBackend(page, "accountant", {
+    "accounting/categories": { categories: [{ id: "c1", name: "Rent", sortOrder: 1, isDefault: true, archived: false }] },
+    "accounting/expenses": { expenses: [] }, "accounting/recurring": { recurring: [] },
+    "accounting/pnl": { month: "2026-11", current: { month: "2026-11", grossRevenue: 0, refunds: 0, netRevenue: 0, coachPayouts: 0, otherExpenses: 0, totalExpenses: 0, profit: 0 }, trend: [], revenueBySource: [], expensesBySource: [], hasPastExpenses: false, unsettledNote: null },
+    revenue: { months: [], totals: { revenue: 0, payouts: 0, profit: 0 }, byService: [], byType: [], byCoach: [], activeSubscribers: { total: 0, groupPlans: 0, ptPackages: 0, byPlanKind: {} }, walletLiability: 0 },
+  });
+  await page.goto("/accounting");
+  await page.getByRole("button", { name: "EXPENSES" }).click();
+  await page.getByRole("button", { name: "Add expense" }).click();
+  const sw = page.getByRole("switch", { name: "Repeat monthly" });
+  await expect(sw).toHaveAttribute("aria-checked", "false");
+  await sw.click();
+  await expect(sw).toHaveAttribute("aria-checked", "true");
+  await expect(page.getByLabel("DAY OF MONTH (1–28)")).toBeVisible();
+  await page.waitForTimeout(450);
+  const knobX = await sw.evaluate((el) => new DOMMatrixReadOnly(getComputedStyle(el.querySelector("span span")!).transform).m41);
+  expect(knobX).toBeGreaterThan(15);
 });

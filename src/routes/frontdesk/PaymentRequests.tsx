@@ -98,7 +98,7 @@ function RequestRow({ r, onDone }: { r: PaymentRequest; onDone: () => void }) {
           <Button variant="quiet" disabled={busy} onClick={() => setRejecting(true)}>Reject</Button>
         </div>
       )}
-      {error && <div style={{ font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px", marginTop: 10 }}>{error}</div>}
+      {error && <div className="bq-rise" style={{ font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px", marginTop: 10 }}>{error}</div>}
     </Card>
   );
 }

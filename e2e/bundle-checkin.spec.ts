@@ -57,8 +57,8 @@ test("front desk: the client sheet shows one status, one main action, and tucks 
   await page.goto("/members");
   await page.getByRole("button", { name: /Mona Samir/ }).click();
   await expect(page.getByRole("button", { name: "Check in", exact: true })).toBeVisible();
-  await expect(page.getByText("Issue a refund")).toHaveCount(0);
-  await expect(page.getByText("Assign a coach")).toHaveCount(0);
+  await expect(page.getByText("Issue a refund")).toBeHidden();
+  await expect(page.getByText("Assign a coach")).toBeHidden();
   await page.getByRole("button", { name: "More options" }).click();
   await expect(page.getByText("Issue a refund")).toBeVisible();
   await expect(page.getByText("Invite to app")).toBeVisible();

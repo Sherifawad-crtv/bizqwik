@@ -1,4 +1,6 @@
 import { EmptyState } from "../components/EmptyState";
+import { SwitchVisual } from "../components/Switch";
+import { Reveal } from "../components/Reveal";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSetHeader } from "../lib/header";
 import { useSticky } from "../lib/useSticky";
@@ -65,32 +67,34 @@ export function Accounting() {
 
       {tab !== "recurring" && <YearMonthStrip months={months} value={month} onChange={setMonth} />}
 
-      {tab === "pnl" && (
-        <PnlPanel
-          report={pnl.data ?? null}
-          loading={!pnl.data}
-          onAddExpense={() => {
-            setTab("expenses");
-            window.setTimeout(() => setAddingExpense(true), 280);
-          }}
-          onCoachPayouts={() => navigate("/pay")}
-        />
-      )}
-      {tab === "expenses" && (
-        <ExpensesPanel
-          month={month}
-          categories={cats.data?.categories ?? []}
-          coachPayouts={pnl.data?.current.coachPayouts ?? 0}
-          openAdd={addingExpense}
-          onAddHandled={() => setAddingExpense(false)}
-          onCoachPayouts={() => navigate("/pay")}
-          onChanged={bump.bump}
-          onCategoriesChanged={cats.refetch}
-        />
-      )}
-      {tab === "recurring" && (
-        <RecurringPanel categories={cats.data?.categories ?? []} onChanged={bump.bump} onCategoriesChanged={cats.refetch} />
-      )}
+      <div key={tab} className="bq-rise">
+        {tab === "pnl" && (
+          <PnlPanel
+            report={pnl.data ?? null}
+            loading={!pnl.data}
+            onAddExpense={() => {
+              setTab("expenses");
+              window.setTimeout(() => setAddingExpense(true), 280);
+            }}
+            onCoachPayouts={() => navigate("/pay")}
+          />
+        )}
+        {tab === "expenses" && (
+          <ExpensesPanel
+            month={month}
+            categories={cats.data?.categories ?? []}
+            coachPayouts={pnl.data?.current.coachPayouts ?? 0}
+            openAdd={addingExpense}
+            onAddHandled={() => setAddingExpense(false)}
+            onCoachPayouts={() => navigate("/pay")}
+            onChanged={bump.bump}
+            onCategoriesChanged={cats.refetch}
+          />
+        )}
+        {tab === "recurring" && (
+          <RecurringPanel categories={cats.data?.categories ?? []} onChanged={bump.bump} onCategoriesChanged={cats.refetch} />
+        )}
+      </div>
     </div>
   );
 }
@@ -520,17 +524,26 @@ function ExpenseSheet({
             )}
 
             {!editing && (
-              <label data-sq style={{ display: "flex", alignItems: "center", gap: 10, background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "12px 16px", cursor: "pointer" }}>
-                <input type="checkbox" checked={repeat} onChange={(e) => setRepeat(e.target.checked)} style={{ width: 18, height: 18 }} />
-                <span style={{ font: "600 14px var(--font-body)" }}>Repeat monthly</span>
-              </label>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={repeat}
+                data-sq
+                onClick={() => setRepeat(!repeat)}
+                style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", textAlign: "left", background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "12px 16px", cursor: "pointer", color: "var(--ink)" }}
+              >
+                <span style={{ flex: 1, font: "600 14px var(--font-body)" }}>Repeat monthly</span>
+                <SwitchVisual checked={repeat} />
+              </button>
             )}
-            {!editing && repeat && (
-              <TextField label="DAY OF MONTH (1–28)" value={dayOfMonth} onChange={(e) => setDayOfMonth(e.target.value)} inputMode="numeric" />
+            {!editing && (
+              <Reveal show={repeat} gap={10}>
+                <TextField label="DAY OF MONTH (1–28)" value={dayOfMonth} onChange={(e) => setDayOfMonth(e.target.value)} inputMode="numeric" />
+              </Reveal>
             )}
           </div>
           {error && (
-            <div style={{ marginTop: 12, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>{error}</div>
+            <div className="bq-rise" style={{ marginTop: 12, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>{error}</div>
           )}
           <Button fullWidth size="lg" style={{ marginTop: 16 }} disabled={busy} onClick={save}>
             {busy ? "Saving…" : editing ? "Save changes" : repeat ? "Set up repeating expense" : "Add expense"}
@@ -769,7 +782,7 @@ function RecurringSheet({ template, categories, onClose, onSaved }: { template: 
           <div style={{ marginTop: 8, font: "400 12px/1.5 var(--font-mono)", color: "var(--ink-faint)" }}>
             {isNew ? "Changing this later only affects future months — rows already made stay as they are." : "Editing changes future months only. Rows already made for past months are untouched."}
           </div>
-          {error && <div style={{ marginTop: 12, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>{error}</div>}
+          {error && <div className="bq-rise" style={{ marginTop: 12, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>{error}</div>}
           <Button fullWidth size="lg" style={{ marginTop: 16 }} disabled={busy} onClick={save}>
             {busy ? "Saving…" : isNew ? "Set up repeating expense" : "Save changes"}
           </Button>
