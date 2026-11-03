@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { startTransition, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { EASE } from "../lib/motion";
 
 const THUMB_MS = 300;
@@ -59,18 +59,28 @@ export function Segmented<T extends string>({
   options: { value: T; label: string }[];
   onChange: (v: T) => void;
 }) {
-  const { ref, thumb } = useSlidingThumb(value);
+  // The pill moves the moment you tap. The screen behind may be heavy to
+  // redraw, so that update runs after, as a transition, instead of holding the
+  // pill back.
+  const [shown, setShown] = useState(value);
+  useEffect(() => setShown(value), [value]);
+  const { ref, thumb } = useSlidingThumb(shown);
+  const pick = (v: T) => {
+    setShown(v);
+    startTransition(() => onChange(v));
+  };
   return (
     <div ref={ref} style={{ position: "relative", display: "flex", gap: 6, background: "var(--sunken)", borderRadius: 999, padding: 4, width: "fit-content", maxWidth: "100%", overflowX: "auto" }}>
       {thumb}
       {options.map((o) => {
-        const on = o.value === value;
+        const on = o.value === shown;
         return (
           <button
             key={o.value}
             data-hit
+            data-nopress
             data-thumb-on={on ? "" : undefined}
-            onClick={() => onChange(o.value)}
+            onClick={() => pick(o.value)}
             aria-pressed={on}
             style={{
               border: 0,

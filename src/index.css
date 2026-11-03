@@ -173,16 +173,19 @@ textarea {
 /* Press feedback, the same everywhere: anything you tap dims the moment your
    finger lands and eases back when you let go. (Items that scale instead use
    data-tap; rows use data-row-press.) */
-button:not(:disabled):not([data-tap]):active,
-[role="button"]:not([data-tap]):active,
-a[href]:not([data-tap]):active {
+button:not(:disabled):not([data-tap]):not([data-nopress]):active,
+[role="button"]:not([data-tap]):not([data-nopress]):active,
+a[href]:not([data-tap]):not([data-nopress]):active {
   opacity: 0.7 !important;
+  transition-duration: 0s !important; /* the dim lands the instant you touch */
 }
-button,
-[role="button"],
-a[href] {
-  transition-timing-function: var(--ease-standard);
+/* ...and eases back when you let go. */
+button:not([data-tap]):not([data-nopress]),
+[role="button"]:not([data-tap]):not([data-nopress]) {
+  transition: opacity 0.25s var(--ease-standard);
 }
+/* Options inside a segmented control, month strip or filter chips show their
+   state with the sliding pill / colour, so they never dim. */
 [data-row-press]:active {
   background: var(--sunken) !important;
 }

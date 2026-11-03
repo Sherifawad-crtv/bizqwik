@@ -1,10 +1,12 @@
-import { useEffect, useRef } from "react";
+import { startTransition, useEffect, useRef, useState } from "react";
 import { useSlidingThumb } from "./Segmented";
 import { monthAbbr } from "../lib/format";
 import { MOCK } from "../lib/backend";
 
 export function YearMonthStrip({ months, value, onChange }: { months: string[]; value: string; onChange: (m: string) => void }) {
-  const { ref: trackRef, thumb } = useSlidingThumb(value);
+  const [shown, setShown] = useState(value);
+  useEffect(() => setShown(value), [value]);
+  const { ref: trackRef, thumb } = useSlidingThumb(shown);
   const selectedRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -30,7 +32,7 @@ export function YearMonthStrip({ months, value, onChange }: { months: string[]; 
     >
       {thumb}
       {months.map((m) => {
-        const on = m === value;
+        const on = m === shown;
         const isNow = m === MOCK.CURRENT_MONTH;
         const future = m > MOCK.CURRENT_MONTH;
         return (
@@ -38,7 +40,12 @@ export function YearMonthStrip({ months, value, onChange }: { months: string[]; 
             key={m}
             ref={on ? selectedRef : undefined}
             data-thumb-on={on ? "" : undefined}
-            onClick={() => !future && onChange(m)}
+            data-nopress
+            onClick={() => {
+              if (future) return;
+              setShown(m);
+              startTransition(() => onChange(m));
+            }}
             disabled={future}
             style={{
               border: 0,

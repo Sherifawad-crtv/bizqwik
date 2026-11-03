@@ -181,3 +181,22 @@ test("switch: Repeat monthly answers the tap at once and reveals its field smoot
   const knobX = await sw.evaluate((el) => new DOMMatrixReadOnly(getComputedStyle(el.querySelector("span span")!).transform).m41);
   expect(knobX).toBeGreaterThan(15);
 });
+
+test("segmented control: an option you press doesn't flash pale, and the pill starts moving straight away", async ({ page }) => {
+  await boot(page);
+  await page.goto("/catalog");
+  await page.waitForTimeout(500);
+  const opt = page.getByRole("button", { name: "PT BUNDLES" });
+  const box = (await opt.boundingBox())!;
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await page.mouse.down();
+  await page.waitForTimeout(60);
+  // finger down: the label keeps its full strength
+  expect(await opt.evaluate((el) => Number(getComputedStyle(el).opacity))).toBe(1);
+  const pillX = () => page.evaluate(() => new DOMMatrixReadOnly(getComputedStyle(document.querySelector('[aria-pressed="true"]')!.parentElement!.firstElementChild as HTMLElement).transform).m41);
+  const before = await pillX();
+  await page.mouse.up();
+  await page.waitForTimeout(80);
+  expect(await pillX()).toBeGreaterThan(before); // already on its way, not waiting for the page behind
+  await page.waitForTimeout(400);
+});

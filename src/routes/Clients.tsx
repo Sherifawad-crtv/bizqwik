@@ -153,6 +153,7 @@ function Chip({ on, onClick, children, testId }: { on: boolean; onClick: () => v
       type="button"
       data-testid={testId}
       aria-pressed={on}
+      data-nopress
       onClick={onClick}
       style={{
         flex: "none",
