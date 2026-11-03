@@ -19,6 +19,7 @@ export function YearMonthStrip({ months, value, onChange }: { months: string[]; 
       ref={trackRef}
       style={{
         position: "relative",
+        isolation: "isolate",
         display: "flex",
         gap: 6,
         background: "var(--sunken)",

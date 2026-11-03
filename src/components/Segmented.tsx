@@ -42,6 +42,10 @@ export function useSlidingThumb(value: string) {
         transform: `translateX(${box.x}px)`,
         borderRadius: 999,
         background: "var(--surface)",
+        // Always underneath the labels: in an isolated stack, below everything
+        // in the control. (Without this Safari can paint the sliding pill over
+        // the text as it passes.)
+        zIndex: -1,
         pointerEvents: "none",
         transition: armed ? `transform ${THUMB_MS}ms ${EASE}, width ${THUMB_MS}ms ${EASE}` : "none",
       }}
@@ -70,7 +74,7 @@ export function Segmented<T extends string>({
     startTransition(() => onChange(v));
   };
   return (
-    <div ref={ref} style={{ position: "relative", display: "flex", gap: 6, background: "var(--sunken)", borderRadius: 999, padding: 4, width: "fit-content", maxWidth: "100%", overflowX: "auto" }}>
+    <div ref={ref} style={{ position: "relative", isolation: "isolate", display: "flex", gap: 6, background: "var(--sunken)", borderRadius: 999, padding: 4, width: "fit-content", maxWidth: "100%", overflowX: "auto" }}>
       {thumb}
       {options.map((o) => {
         const on = o.value === shown;
