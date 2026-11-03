@@ -27,6 +27,7 @@ function DesktopRow({ r }: { r: ListRow }) {
   return (
     <div
       onClick={r.onClick}
+      data-row-press={r.onClick ? "" : undefined}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{

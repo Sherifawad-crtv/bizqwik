@@ -74,6 +74,7 @@ test("dept_head: a class photo is cropped to the 4:5 card and saved with the cla
   await page.getByPlaceholder("Per class").fill("180");
   await page.getByPlaceholder("1 month").fill("1400");
   await page.getByRole("button", { name: "Create class" }).click();
-  await expect(page.getByText("Class created")).toBeVisible();
+  // A routine save closes quietly (no checkmark): the sheet is gone and the class was sent.
+  await expect(page.getByTestId("sheet-backdrop")).toHaveCount(0, { timeout: 3000 });
   expect(String(posted!.imageUrl)).toContain("/storage/v1/object/public/class-images/prof-zz/");
 });

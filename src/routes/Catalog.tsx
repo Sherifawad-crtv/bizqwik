@@ -1,4 +1,5 @@
 import { EmptyState } from "../components/EmptyState";
+import { useFrozen, useMountedThroughExit } from "../lib/useLatch";
 import { useSticky } from "../lib/useSticky";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -175,7 +176,7 @@ function SeriesRow({ s, last, onEdit, locations = [] }: { s: ClassSeries; last: 
         </div>
       </div>
       {onEdit && (
-        <button onClick={onEdit} aria-label={`Edit ${s.title}`} style={iconBtn()}>
+        <button data-hit onClick={onEdit} aria-label={`Edit ${s.title}`} style={iconBtn()}>
           <Icon name="pencil" size={15} />
         </button>
       )}
@@ -217,7 +218,9 @@ function WeekdayPicker({ value, onChange }: { value: number[]; onChange: (v: num
 
 const DURATION_OPTIONS = [30, 45, 60, 75, 90, 120].map((m) => ({ value: String(m), label: `${m} min` }));
 
-export function SeriesSheet({ open, series, onClose }: { open: boolean; series: ClassSeries | null; onClose: () => void }) {
+export function SeriesSheet({ open, series: seriesProp, onClose }: { open: boolean; series: ClassSeries | null; onClose: () => void }) {
+  const mounted = useMountedThroughExit(open);
+  const series = useFrozen(open, seriesProp);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [weekdays, setWeekdays] = useState<number[]>([]);
@@ -235,7 +238,7 @@ export function SeriesSheet({ open, series, onClose }: { open: boolean; series: 
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [successLabel, setSuccessLabel] = useState("");
-  const { confirmed, iconIn, showSuccess } = useSheetSuccess(open, onClose);
+  const { confirmed, iconIn, showSuccess } = useSheetSuccess(open, onClose, { quiet: true });
 
   useEffect(() => {
     if (open) {
@@ -253,7 +256,7 @@ export function SeriesSheet({ open, series, onClose }: { open: boolean; series: 
     }
   }, [open, series]);
 
-  if (!open) return null;
+  if (!mounted) return null;
 
   const save = async () => {
     const dropInNum = Number(dropIn);
@@ -394,10 +397,10 @@ function PlansPanel({ solo }: { solo?: boolean }) {
                   {p.invitationsAllowance > 0 ? ` · ${p.invitationsAllowance} guest pass${p.invitationsAllowance === 1 ? "" : "es"}` : ""}
                 </div>
               </div>
-              <button onClick={() => setEditing({ kind, planType: p })} aria-label={`Edit ${p.name}`} style={iconBtn()}>
+              <button data-hit onClick={() => setEditing({ kind, planType: p })} aria-label={`Edit ${p.name}`} style={iconBtn()}>
                 <Icon name="pencil" size={15} />
               </button>
-              <button onClick={() => setDeleting(p)} aria-label={`Delete ${p.name}`} style={iconBtn(true)}>
+              <button data-hit onClick={() => setDeleting(p)} aria-label={`Delete ${p.name}`} style={iconBtn(true)}>
                 <Icon name="trash" size={15} />
               </button>
             </div>
@@ -443,7 +446,10 @@ const SOLO_MONTH_OPTIONS = [
 ];
 const MONTH_OPTIONS = Array.from({ length: 12 }, (_, i) => ({ value: String(i + 1), label: `${i + 1} month${i === 0 ? "" : "s"}` }));
 
-export function PlanTypeSheet({ open, kind, planType, onClose }: { open: boolean; kind: GroupPlanTypeKind; planType: GroupPlanType | null; onClose: () => void }) {
+export function PlanTypeSheet({ open, kind: kindProp, planType: planTypeProp, onClose }: { open: boolean; kind: GroupPlanTypeKind; planType: GroupPlanType | null; onClose: () => void }) {
+  const mounted = useMountedThroughExit(open);
+  const kind = useFrozen(open, kindProp);
+  const planType = useFrozen(open, planTypeProp);
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
   const [months, setMonths] = useState("1");
@@ -458,7 +464,7 @@ export function PlanTypeSheet({ open, kind, planType, onClose }: { open: boolean
   const { current } = useCurrentLocation();
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const { confirmed, iconIn, showSuccess } = useSheetSuccess(open, onClose);
+  const { confirmed, iconIn, showSuccess } = useSheetSuccess(open, onClose, { quiet: true });
   const isBundle = kind === "bundle";
 
   useEffect(() => {
@@ -475,7 +481,7 @@ export function PlanTypeSheet({ open, kind, planType, onClose }: { open: boolean
     }
   }, [open, planType]);
 
-  if (!open) return null;
+  if (!mounted) return null;
 
   const save = async () => {
     const priceNum = Number(price);
@@ -671,7 +677,7 @@ function SoloOffer() {
               <div key={i} style={{ display: "grid", gridTemplateColumns: "1fr 1fr auto", gap: 8, alignItems: "end" }}>
                 <TextField label="NAME" value={r.label} onChange={(e) => setRows(rows.map((x, j) => (j === i ? { ...x, label: e.target.value } : x)))} placeholder="Kids" />
                 <TextField label="PRICE · EGP" type="number" min={0} inputMode="decimal" value={r.price} onChange={(e) => setRows(rows.map((x, j) => (j === i ? { ...x, price: e.target.value } : x)))} />
-                <button aria-label="Remove" onClick={() => setRows(rows.filter((_, j) => j !== i))} style={{ ...iconBtn(true), marginBottom: 6 }}><Icon name="trash" size={15} /></button>
+                <button data-hit aria-label="Remove" onClick={() => setRows(rows.filter((_, j) => j !== i))} style={{ ...iconBtn(true), marginBottom: 6 }}><Icon name="trash" size={15} /></button>
               </div>
             ))}
             {rows.length < 6 && <Button variant="quiet" onClick={() => setRows([...rows, { label: "", price: "" }])}>+ Another drop-in</Button>}

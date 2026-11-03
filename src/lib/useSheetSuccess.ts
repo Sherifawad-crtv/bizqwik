@@ -1,16 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { playSuccessChime } from "./sound";
-
-// How long the success icon holds before the sheet auto-dismisses — long
-// enough to register as a deliberate confirmation, short enough not to feel
-// like it's blocking you from moving on.
-const SUCCESS_HOLD_MS = 900;
+import { SUCCESS_HOLD_MS } from "./motion";
 
 /** Shared "show a big checkmark inside this sheet, then auto-close" behavior
  * for every sheet action that succeeds — confirmations, creates, and edits
  * alike. `open` resets the animation state each time the sheet reopens, so
  * the same component instance is safe to reuse across multiple uses. */
-export function useSheetSuccess(open: boolean, onClose: () => void) {
+export function useSheetSuccess(open: boolean, onClose: () => void, opts?: { quiet?: boolean }) {
   const [confirmed, setConfirmed] = useState(false);
   const [iconIn, setIconIn] = useState(false);
   const closeTimer = useRef<number | undefined>(undefined);
@@ -34,6 +30,13 @@ export function useSheetSuccess(open: boolean, onClose: () => void) {
   );
 
   const showSuccess = () => {
+    // A routine edit (renaming a tier, changing a plan) just closes: people
+    // expect it to work and see the change in the list. The checkmark and
+    // chime are kept for money, records, sends and deletes.
+    if (opts?.quiet) {
+      onClose();
+      return;
+    }
     setConfirmed(true);
     playSuccessChime();
     // Two rAFs so the "scaled down" starting state actually paints before

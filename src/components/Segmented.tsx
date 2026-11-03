@@ -14,6 +14,7 @@ export function Segmented<T extends string>({
         return (
           <button
             key={o.value}
+            data-hit
             onClick={() => onChange(o.value)}
             aria-pressed={o.value === value}
             style={{

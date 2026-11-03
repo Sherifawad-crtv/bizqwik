@@ -1,4 +1,5 @@
 import { EmptyState } from "../../components/EmptyState";
+import { useMountedThroughExit } from "../../lib/useLatch";
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useSetHeader } from "../../lib/header";
@@ -219,6 +220,7 @@ export function CreateClientSheet({
   bundleTypes: BundleType[];
   coaches: CoachOption[];
 }) {
+  const mounted = useMountedThroughExit(open);
   const { profile, orgMode } = useAuth();
   const [step, setStep] = useState(0);
   const [kind, setKind] = useState<PlanKind>("plan");
@@ -264,7 +266,7 @@ export function CreateClientSheet({
     }
   }, [open]);
 
-  if (!open) return null;
+  if (!mounted) return null;
 
   const mail = email.trim().toLowerCase();
   const sharedType = kind === "plan" && offer.startsWith("pt:") ? (planTypes.find((t) => t.id === offer.slice(3) && t.sharedSeats) ?? null) : null;

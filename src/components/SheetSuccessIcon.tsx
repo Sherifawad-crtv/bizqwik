@@ -8,7 +8,7 @@ const CHECK_LEN = 42; // length of the two-segment check path
  * the destructive/non-destructive distinction clear. */
 export function SheetSuccessIcon({ label, iconIn }: { label: string; iconIn: boolean }) {
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "28px 4px 10px" }}>
+    <div data-sheet-clean style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "28px 4px 10px" }}>
       <div
         aria-hidden
         style={{

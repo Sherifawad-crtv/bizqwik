@@ -90,7 +90,8 @@ test("dept_head: Create FAB → new group class with weekday picker posts a seri
   await page.getByPlaceholder("Per class").fill("180");
   await page.getByPlaceholder("1 month").fill("1400");
   await page.getByRole("button", { name: "Create class" }).click();
-  await expect(page.getByText("Class created")).toBeVisible();
+  // A routine save closes quietly (no checkmark): the sheet is gone and the class was sent.
+  await expect(page.getByTestId("sheet-backdrop")).toHaveCount(0, { timeout: 3000 });
   expect(posted).toMatchObject({ title: "Evening Yoga", weekdays: [1, 3], startTime: "18:00", durationMin: 60, dropInPrice: 180, monthlyPrice: 1400 });
 });
 
@@ -205,7 +206,8 @@ test("dept_head: class start time is picked on hour/minute/AM-PM wheels", async 
   await expect(page.getByRole("button", { name: /STARTS AT: 7:30 AM/ })).toBeVisible();
 
   await page.getByRole("button", { name: "Create class" }).click();
-  await expect(page.getByText("Class created")).toBeVisible();
+  // A routine save closes quietly (no checkmark): the sheet is gone and the class was sent.
+  await expect(page.getByTestId("sheet-backdrop")).toHaveCount(0, { timeout: 3000 });
   expect(posted).toMatchObject({ title: "Early Bird", weekdays: [6], startTime: "07:30" });
 });
 

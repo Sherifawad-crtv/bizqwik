@@ -5,6 +5,7 @@ import { Spinner } from "./Spinner";
 import { matchTabIndex, headerMode, type NavItem, type OrgMode } from "../lib/nav";
 import { isStandalone } from "../lib/push";
 import type { Role } from "../lib/types";
+import { EASE, FADE_MS, PUSH_MS } from "../lib/motion";
 
 /** How many levels deep a route sits, for push-transition purposes: 0 is a
  * tab-level route (switched via tab-slide); 1+ is reached by drilling in
@@ -28,12 +29,10 @@ interface Layer {
 
 type Anim = { type: "none" } | { type: "push-in" | "push-out" } | { type: "tab-slide"; dir: 1 | -1 };
 
-const PUSH_MS = 340;
-const PUSH_EASE = "cubic-bezier(.32,.72,0,1)";
-// Same duration/easing as the bottom nav's sliding pill (BottomNav.tsx), so
-// the content and the pill read as one connected motion.
-const TAB_MS = 320;
-const TAB_EASE = "cubic-bezier(.22,1,.36,1)";
+const PUSH_EASE = EASE;
+// Switching tabs is the most frequent thing people do, so the content just
+// fades in under the bar's sliding pill — no travel to wait for.
+const TAB_MS = FADE_MS;
 
 // Bottom clearance for the fixed bottom-nav bar (BottomNav.tsx: 64px icons +
 // 12px padding = ~76px real footprint) needs real headroom beyond that, not
@@ -138,22 +137,35 @@ export function RouteTransition({ tabs, role, orgMode = "team" }: { tabs: NavIte
     [],
   );
 
-  if (!previous) {
+  // Resting, and during a tab switch, the screen is always the same element
+  // tree (a stage holding the current layer, plus the old one while it fades
+  // under). If it were rebuilt when the fade ends, anything just opened on the
+  // screen would be reset.
+  if (!previous || anim.type === "none" || anim.type === "tab-slide") {
+    const fading = !!previous && anim.type === "tab-slide";
     return (
-      <div data-scroll style={layerStyle(current.pathname, role, orgMode)}>
-        {current.outlet}
+      <div style={{ position: "relative", height: "100%", overflow: "hidden" }}>
+        {fading && (
+          <div key="prev" data-scroll aria-hidden style={{ ...layerStyle(previous.pathname, role, orgMode), pointerEvents: "none" }}>
+            {previous.outlet}
+          </div>
+        )}
+        <div
+          key="cur"
+          data-scroll
+          style={{
+            ...layerStyle(current.pathname, role, orgMode),
+            opacity: fading && !entered ? 0 : 1,
+            transition: fading ? `opacity ${TAB_MS}ms ease-out` : undefined,
+          }}
+        >
+          {current.outlet}
+        </div>
       </div>
     );
   }
 
   switch (anim.type) {
-    case "none":
-      return (
-        <div data-scroll style={layerStyle(current.pathname, role, orgMode)}>
-          {current.outlet}
-        </div>
-      );
-
     case "push-in":
     case "push-out": {
       const overLayer = anim.type === "push-in" ? current : previous;
@@ -190,32 +202,5 @@ export function RouteTransition({ tabs, role, orgMode = "team" }: { tabs: NavIte
       );
     }
 
-    case "tab-slide": {
-      const dir = anim.dir;
-      return (
-        <div style={{ position: "relative", height: "100%", overflow: "hidden" }}>
-          <div
-            data-scroll
-            style={{
-              ...layerStyle(previous.pathname, role, orgMode),
-              transform: entered ? `translateX(${-dir * 100}%)` : "translateX(0)",
-              transition: `transform ${TAB_MS}ms ${TAB_EASE}`,
-            }}
-          >
-            {previous.outlet}
-          </div>
-          <div
-            data-scroll
-            style={{
-              ...layerStyle(current.pathname, role, orgMode),
-              transform: entered ? "translateX(0)" : `translateX(${dir * 100}%)`,
-              transition: `transform ${TAB_MS}ms ${TAB_EASE}`,
-            }}
-          >
-            {current.outlet}
-          </div>
-        </div>
-      );
-    }
   }
 }

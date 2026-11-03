@@ -1,4 +1,5 @@
 import { CategoryPill } from "../lib/category";
+import { useFrozen, useMountedThroughExit } from "../lib/useLatch";
 import { LocationField, LocationPill, atLocation, useCurrentLocation, useLocations } from "../lib/locations";
 import { EmptyState } from "../components/EmptyState";
 import { useEffect, useState } from "react";
@@ -81,10 +82,10 @@ function TiersPanel({ onOpenPeople, onOpenInvites }: { onOpenPeople: () => void;
               <div style={{ font: "700 16px var(--font-body)" }}>{t.name}</div>
               <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>{t.rate} EGP / session · {t.privateCutPct}% private cut</div>
             </div>
-            <button onClick={() => setEditing(t)} aria-label="Edit tier" style={{ width: 36, height: 36, borderRadius: 999, border: 0, background: "var(--primary-tint)", color: "var(--primary-pressed)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <button data-hit onClick={() => setEditing(t)} aria-label="Edit tier" style={{ width: 36, height: 36, borderRadius: 999, border: 0, background: "var(--primary-tint)", color: "var(--primary-pressed)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <Icon name="pencil" size={15} />
             </button>
-            <button onClick={() => setDeleting(t)} aria-label="Delete tier" style={{ width: 36, height: 36, borderRadius: 999, border: 0, background: "var(--danger-bg)", color: "var(--danger-fg)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <button data-hit onClick={() => setDeleting(t)} aria-label="Delete tier" style={{ width: 36, height: 36, borderRadius: 999, border: 0, background: "var(--danger-bg)", color: "var(--danger-fg)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <Icon name="trash" size={15} />
             </button>
           </div>
@@ -148,13 +149,15 @@ function TiersPanel({ onOpenPeople, onOpenInvites }: { onOpenPeople: () => void;
   );
 }
 
-export function TierSheet({ open, tier, onClose }: { open: boolean; tier: Tier | null; onClose: () => void }) {
+export function TierSheet({ open, tier: tierProp, onClose }: { open: boolean; tier: Tier | null; onClose: () => void }) {
+  const mounted = useMountedThroughExit(open);
+  const tier = useFrozen(open, tierProp);
   const [name, setName] = useState(tier?.name ?? "");
   const [rate, setRate] = useState(String(tier?.rate ?? ""));
   const [privateCutPct, setPrivateCutPct] = useState(String(tier?.privateCutPct ?? ""));
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const { confirmed, iconIn, showSuccess } = useSheetSuccess(open, onClose);
+  const { confirmed, iconIn, showSuccess } = useSheetSuccess(open, onClose, { quiet: true });
 
   useEffect(() => {
     if (open) {
@@ -166,7 +169,7 @@ export function TierSheet({ open, tier, onClose }: { open: boolean; tier: Tier |
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, tier]);
 
-  if (!open) return null;
+  if (!mounted) return null;
 
   const save = async () => {
     const rateNum = Number(rate);
@@ -261,10 +264,10 @@ export function BundlesPanel() {
                 {b.price} EGP · {b.sessionsIncluded} sessions · {b.expiryDays >= NO_EXPIRY_DAYS ? "no expiry" : `${b.expiryDays} days`}
               </div>
             </div>
-            <button onClick={() => setEditing(b)} aria-label="Edit bundle" style={{ width: 36, height: 36, borderRadius: 999, border: 0, background: "var(--primary-tint)", color: "var(--primary-pressed)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <button data-hit onClick={() => setEditing(b)} aria-label="Edit bundle" style={{ width: 36, height: 36, borderRadius: 999, border: 0, background: "var(--primary-tint)", color: "var(--primary-pressed)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <Icon name="pencil" size={15} />
             </button>
-            <button onClick={() => setDeleting(b)} aria-label="Delete bundle" style={{ width: 36, height: 36, borderRadius: 999, border: 0, background: "var(--danger-bg)", color: "var(--danger-fg)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <button data-hit onClick={() => setDeleting(b)} aria-label="Delete bundle" style={{ width: 36, height: 36, borderRadius: 999, border: 0, background: "var(--danger-bg)", color: "var(--danger-fg)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <Icon name="trash" size={15} />
             </button>
           </div>
@@ -296,7 +299,9 @@ export function BundlesPanel() {
 // A PT bundle with no stated validity has no expiry: stored as ten years.
 export const NO_EXPIRY_DAYS = 3650;
 
-export function BundleSheet({ open, bundleType, onClose }: { open: boolean; bundleType: BundleType | null; onClose: () => void }) {
+export function BundleSheet({ open, bundleType: bundleTypeProp, onClose }: { open: boolean; bundleType: BundleType | null; onClose: () => void }) {
+  const mounted = useMountedThroughExit(open);
+  const bundleType = useFrozen(open, bundleTypeProp);
   const [name, setName] = useState(bundleType?.name ?? "");
   const [price, setPrice] = useState(String(bundleType?.price ?? ""));
   const [sessionsIncluded, setSessionsIncluded] = useState(String(bundleType?.sessionsIncluded ?? ""));
@@ -309,7 +314,7 @@ export function BundleSheet({ open, bundleType, onClose }: { open: boolean; bund
   const { current } = useCurrentLocation();
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const { confirmed, iconIn, showSuccess } = useSheetSuccess(open, onClose);
+  const { confirmed, iconIn, showSuccess } = useSheetSuccess(open, onClose, { quiet: true });
 
   useEffect(() => {
     if (open) {
@@ -324,7 +329,7 @@ export function BundleSheet({ open, bundleType, onClose }: { open: boolean; bund
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, bundleType]);
 
-  if (!open) return null;
+  if (!mounted) return null;
 
   const save = async () => {
     const priceNum = Number(price);
@@ -423,7 +428,7 @@ function InvitesPanel() {
                 {inv.tierId ? ` · ${tiers.find((t) => t.id === inv.tierId)?.name ?? ""}` : ""}
               </div>
             </div>
-            <button onClick={() => setDeleting(inv)} aria-label="Cancel invite" style={{ width: 36, height: 36, borderRadius: 999, border: 0, background: "var(--danger-bg)", color: "var(--danger-fg)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <button data-hit onClick={() => setDeleting(inv)} aria-label="Cancel invite" style={{ width: 36, height: 36, borderRadius: 999, border: 0, background: "var(--danger-bg)", color: "var(--danger-fg)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <Icon name="trash" size={15} />
             </button>
           </div>
@@ -458,7 +463,9 @@ export function InviteFlow({ open, onClose }: { open: boolean; onClose: () => vo
   return <InviteSheet open={open} tiers={data?.tiers ?? []} onClose={onClose} />;
 }
 
-function InviteSheet({ open, tiers, onClose }: { open: boolean; tiers: Tier[]; onClose: () => void }) {
+function InviteSheet({ open, tiers: tiersProp, onClose }: { open: boolean; tiers: Tier[]; onClose: () => void }) {
+  const mounted = useMountedThroughExit(open);
+  const tiers = useFrozen(open, tiersProp);
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<Role>("coach");
   const [tierId, setTierId] = useState<string>("");
@@ -475,7 +482,7 @@ function InviteSheet({ open, tiers, onClose }: { open: boolean; tiers: Tier[]; o
     }
   }, [open]);
 
-  if (!open) return null;
+  if (!mounted) return null;
 
   const save = async () => {
     if (!/^\S+@\S+\.\S+$/.test(email)) {

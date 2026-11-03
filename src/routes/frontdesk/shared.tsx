@@ -205,6 +205,7 @@ export function SearchField({ value, onChange, placeholder = "Search by name or 
         <Icon name="search" size={18} />
       </span>
       <input
+        data-no-dirty
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}

@@ -14,6 +14,7 @@ import { Sheet } from "../components/Sheet";
 import { Segmented } from "../components/Segmented";
 import { TextField } from "../components/FormField";
 import { useSheetSuccess } from "../lib/useSheetSuccess";
+import { useMountedThroughExit } from "../lib/useLatch";
 import { SheetSuccessIcon } from "../components/SheetSuccessIcon";
 import { isPartPaid, stateLabel } from "../lib/payables";
 import { PackageStatusPill } from "../components/PackageStatusPill";
@@ -23,6 +24,7 @@ const METHOD_LABELS: Record<string, string> = { cash: "Cash", bank: "Bank", inst
 
 /** Record a payment against a settled month: any amount up to what's left. */
 function RecordPaymentSheet({ open, onClose, row, month }: { open: boolean; onClose: () => void; row: Rollup; month: string }) {
+  const mounted = useMountedThroughExit(open);
   const [amount, setAmount] = useState("");
   const [date, setDate] = useState(todayIso());
   const [method, setMethod] = useState<"cash" | "bank" | "instapay">("cash");
@@ -41,7 +43,7 @@ function RecordPaymentSheet({ open, onClose, row, month }: { open: boolean; onCl
   };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { if (open) reset(); }, [open]);
-  if (!open) return null;
+  if (!mounted) return null;
 
   const amt = Number(amount);
   const leftAfter = Number.isFinite(amt) ? row.remaining - amt : row.remaining;

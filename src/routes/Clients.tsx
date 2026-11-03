@@ -1,4 +1,5 @@
 import { EmptyState } from "../components/EmptyState";
+import { useMountedThroughExit } from "../lib/useLatch";
 import { useEffect, useState, type ReactNode } from "react";
 import { useAuth } from "../lib/auth";
 import { useSetHeader } from "../lib/header";
@@ -851,12 +852,13 @@ function ClientActionSheet({
 }
 
 function ClientEditSheet({ open, client, onClose }: { open: boolean; client: ClientWithPackage; onClose: () => void }) {
+  const mounted = useMountedThroughExit(open);
   const [name, setName] = useState(client.name);
   const [age, setAge] = useState(client.age != null ? String(client.age) : "");
   const [conditions, setConditions] = useState(client.conditions ?? "");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { confirmed, iconIn, showSuccess } = useSheetSuccess(open, onClose);
+  const { confirmed, iconIn, showSuccess } = useSheetSuccess(open, onClose, { quiet: true });
 
   useEffect(() => {
     if (open) {
@@ -867,7 +869,7 @@ function ClientEditSheet({ open, client, onClose }: { open: boolean; client: Cli
     }
   }, [open, client]);
 
-  if (!open) return null;
+  if (!mounted) return null;
 
   const save = async () => {
     if (!name.trim()) {

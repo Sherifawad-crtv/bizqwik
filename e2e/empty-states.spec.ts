@@ -123,7 +123,10 @@ test("dept head: the Create button offers Invite and Pay tier on any screen and 
   await page.getByText("Invite someone", { exact: true }).click();
   await expect(page.getByText("NEW INVITE")).toBeVisible();
   await expect(page).toHaveURL(/\/oversight$/);
+  // The Create menu slides away while the invite sheet comes up; wait until it's gone.
+  await expect(page.getByRole("button", { name: "Cancel" })).toHaveCount(1);
   await page.getByRole("button", { name: "Cancel" }).click();
+  await expect(page.getByText("NEW INVITE")).toHaveCount(0);
   await page.getByRole("button", { name: "Create" }).click();
   await page.getByText("Pay tier", { exact: true }).click();
   await expect(page.getByText("NEW TIER", { exact: true })).toBeVisible();

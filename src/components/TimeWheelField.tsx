@@ -48,6 +48,7 @@ function Wheel({ items, index, onIndex, label }: { items: string[]; index: numbe
       role="listbox"
       aria-label={label}
       data-wheel={label}
+      data-no-drag
       onScroll={onScroll}
       style={{
         flex: 1,

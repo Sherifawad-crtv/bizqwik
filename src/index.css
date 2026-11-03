@@ -41,6 +41,11 @@
   --font-body: "Urbanist", system-ui, sans-serif;
   --font-mono: "Space Mono", ui-monospace, monospace;
 
+  /* Motion: the same values as src/lib/motion.ts. */
+  --ease-standard: cubic-bezier(0.32, 0.72, 0, 1);
+  --dur-fade: 150ms;
+  --dur-press: 160ms;
+
   --shadow-float: 0 14px 34px rgba(26, 23, 38, 0.18);
   /* Same shadow as --shadow-float, as a filter instead of box-shadow — for a
      wrapper around a [data-sq] element. box-shadow gets clipped away by the
@@ -162,7 +167,35 @@ textarea {
   transition: transform 0.12s ease;
 }
 [data-tap]:active {
-  transform: scale(0.88);
+  transform: scale(0.92);
+}
+
+/* Press feedback, the same everywhere: anything you tap dims the moment your
+   finger lands and eases back when you let go. (Items that scale instead use
+   data-tap; rows use data-row-press.) */
+button:not(:disabled):not([data-tap]):active,
+[role="button"]:not([data-tap]):active,
+a[href]:not([data-tap]):active {
+  opacity: 0.7 !important;
+}
+button,
+[role="button"],
+a[href] {
+  transition-timing-function: var(--ease-standard);
+}
+[data-row-press]:active {
+  background: var(--sunken) !important;
+}
+
+/* A bigger invisible tap area (Apple asks for at least 44pt) without changing
+   how the control looks. */
+[data-hit] {
+  position: relative;
+}
+[data-hit]::after {
+  content: "";
+  position: absolute;
+  inset: -5px;
 }
 
 /* Pointer-driven hover feedback — only on real mice/trackpads (desktop),

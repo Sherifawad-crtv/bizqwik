@@ -147,7 +147,7 @@ export function QrScanner({ title, hint, onClose, onScan }: { title: string; hin
           <div style={{ font: "800 22px/1.2 var(--font-body)" }}>{title}</div>
           <div style={{ font: "400 13px/1.4 var(--font-mono)", color: "rgba(255,255,255,.7)", marginTop: 4 }}>{hint}</div>
         </div>
-        <button
+        <button data-hit
           onClick={onClose}
           aria-label="Close scanner"
           style={{ width: 40, height: 40, flex: "none", borderRadius: 999, border: 0, background: "rgba(255,255,255,.14)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}
