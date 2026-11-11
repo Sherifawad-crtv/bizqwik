@@ -28,7 +28,12 @@ export function noteTabTap() {
   lastTabTap = Date.now();
 }
 
+let layerIds = 0;
+
 interface Layer {
+  /** Stable for the life of a screen: it is the React key, so a screen is never
+   * rebuilt when it changes role (arriving, resting, sliding away, kept below). */
+  id: number;
   pathname: string;
   outlet: ReactNode;
   kind: "tab" | "push";
@@ -71,6 +76,10 @@ function layerStyle(pathname: string, role: Role, mode: OrgMode): CSSProperties 
   };
 }
 
+// How many screens stay alive underneath the one you're on (so going back is
+// instant, with your place kept, instead of rebuilding the screen).
+const KEEP = 2;
+
 export function RouteTransition({ tabs, role, orgMode = "team" }: { tabs: NavItem[]; role: Role; orgMode?: OrgMode }) {
   const location = useLocation();
   const rawOutlet = useOutlet();
@@ -79,12 +88,14 @@ export function RouteTransition({ tabs, role, orgMode = "team" }: { tabs: NavIte
   const makeLayer = (pathname: string, node: ReactNode): Layer => {
     const depth = pushDepth(pathname, tabs);
     return depth > 0
-      ? { pathname, outlet: node, kind: "push", index: -1, depth }
-      : { pathname, outlet: node, kind: "tab", index: matchTabIndex(pathname, tabs), depth: 0 };
+      ? { id: ++layerIds, pathname, outlet: node, kind: "push", index: -1, depth }
+      : { id: ++layerIds, pathname, outlet: node, kind: "tab", index: matchTabIndex(pathname, tabs), depth: 0 };
   };
 
   const [current, setCurrent] = useState<Layer>(() => makeLayer(location.pathname, outlet));
   const [previous, setPrevious] = useState<Layer | null>(null);
+  // Screens kept alive (hidden) beneath the current one, shallowest first.
+  const [kept, setKept] = useState<Layer[]>([]);
   const [anim, setAnim] = useState<Anim>({ type: "none" });
   const [entered, setEntered] = useState(false);
 
@@ -96,28 +107,46 @@ export function RouteTransition({ tabs, role, orgMode = "team" }: { tabs: NavIte
     const path = location.pathname;
 
     if (path === current.pathname) {
-      setCurrent(makeLayer(path, outlet));
+      setCurrent((c) => ({ ...c, outlet })); // same screen, new content: keep it mounted
       return;
     }
 
-    const next = makeLayer(path, outlet);
+    const depth = pushDepth(path, tabs);
+    const viaTab = Date.now() - lastTabTap < 700;
+    let next: Layer;
+    let nextKept: Layer[] = kept;
     let nextAnim: Anim;
-    if ((next.depth === 0 && current.depth === 0) || Date.now() - lastTabTap < 700) {
+
+    if (viaTab || (depth === 0 && current.depth === 0)) {
+      // peers (tabs): a fade; whatever was kept under the old section is let go
+      next = makeLayer(path, outlet);
+      nextKept = [];
       nextAnim = { type: "tab-slide", dir: next.index >= current.index ? 1 : -1 };
-    } else if (next.depth > current.depth) {
+    } else if (depth > current.depth) {
+      // going deeper: the screen you leave stays alive underneath
+      next = makeLayer(path, outlet);
+      nextKept = [...kept, current].slice(-KEEP);
       nextAnim = { type: "push-in" };
-    } else if (next.depth < current.depth) {
+    } else if (depth < current.depth) {
+      // going back: reveal the screen that was kept, exactly as you left it
+      const at = kept.map((l) => l.pathname).lastIndexOf(path);
+      if (at >= 0) {
+        next = { ...kept[at], outlet };
+        nextKept = kept.slice(0, at);
+      } else {
+        next = makeLayer(path, outlet);
+        nextKept = [];
+      }
       nextAnim = { type: "push-out" };
     } else {
-      // Same nonzero depth, different route — a lateral move between two
-      // push destinations. Not reachable through this app's UI today (every
-      // push route is left via its own "‹ back" link, one level at a time),
-      // but push-in is the sane default if it ever is.
+      // sideways between two deeper screens
+      next = makeLayer(path, outlet);
       nextAnim = { type: "push-in" };
     }
 
     setPrevious(current);
     setCurrent(next);
+    setKept(nextKept);
     setAnim(nextAnim);
     setEntered(false);
 
@@ -146,78 +175,98 @@ export function RouteTransition({ tabs, role, orgMode = "team" }: { tabs: NavIte
     [],
   );
 
-  // Resting, and during a tab switch, the screen is always the same element
-  // tree (a stage holding the current layer, plus the old one while it fades
-  // under). If it were rebuilt when the fade ends, anything just opened on the
-  // screen would be reset.
-  if (!previous || anim.type === "none" || anim.type === "tab-slide") {
-    const fading = !!previous && anim.type === "tab-slide";
-    return (
-      <div style={{ position: "relative", height: "100%", overflow: "hidden" }}>
-        {fading && (
-          <div key="prev" data-scroll aria-hidden style={{ ...layerStyle(previous.pathname, role, orgMode), pointerEvents: "none" }}>
-            {previous.outlet}
-          </div>
-        )}
+  // Every screen is one stable element (keyed by its id) whatever it is doing,
+  // so nothing is torn down and rebuilt when a slide starts or ends.
+  const moving = !!previous && anim.type !== "none";
+  const pushIn = moving && anim.type === "push-in";
+  const pushOut = moving && anim.type === "push-out";
+  const fading = moving && anim.type === "tab-slide";
+
+  const styleFor = (l: Layer): CSSProperties => {
+    const base = layerStyle(l.pathname, role, orgMode);
+    if (l.id === current.id) {
+      if (fading) return { ...base, opacity: entered ? 1 : 0, transition: `opacity ${TAB_MS}ms ease-out`, willChange: "opacity" };
+      if (pushIn) {
+        return {
+          ...base,
+          boxShadow: entered ? "none" : "-8px 0 24px rgba(0,0,0,.12)",
+          transform: entered ? "translate3d(0,0,0)" : "translate3d(100%,0,0)",
+          transition: `transform ${PUSH_MS}ms ${PUSH_EASE}`,
+          willChange: "transform",
+        };
+      }
+      if (pushOut) {
+        // the screen you are returning to eases back into place
+        return { ...base, transform: entered ? "translate3d(0,0,0)" : "translate3d(-28%,0,0)", transition: `transform ${PUSH_MS}ms ${PUSH_EASE}`, willChange: "transform" };
+      }
+      return base;
+    }
+    if (previous && l.id === previous.id) {
+      if (fading) return { ...base, pointerEvents: "none" };
+      if (pushIn) {
+        // the screen underneath eases back a little as the new one covers it, like iOS
+        return { ...base, transform: entered ? "translate3d(-28%,0,0)" : "translate3d(0,0,0)", transition: `transform ${PUSH_MS}ms ${PUSH_EASE}`, willChange: "transform", pointerEvents: "none" };
+      }
+      if (pushOut) {
+        return {
+          ...base,
+          boxShadow: entered ? "none" : "-8px 0 24px rgba(0,0,0,.12)",
+          transform: entered ? "translate3d(100%,0,0)" : "translate3d(0,0,0)",
+          transition: `transform ${PUSH_MS}ms ${PUSH_EASE}`,
+          willChange: "transform",
+          pointerEvents: "none",
+        };
+      }
+    }
+    // kept alive underneath: out of sight and out of reach, but not unmounted
+    return { ...base, visibility: "hidden", pointerEvents: "none" };
+  };
+
+  // bottom to top
+  const seen = new Set<number>();
+  const order: Layer[] = [];
+  const add = (l: Layer | null) => {
+    if (l && !seen.has(l.id)) {
+      seen.add(l.id);
+      order.push(l);
+    }
+  };
+  kept.forEach(add);
+  if (pushOut) {
+    add(current); // under
+    add(previous); // over, leaving
+  } else {
+    add(previous);
+    add(current);
+  }
+
+  const topId = pushIn ? current.id : pushOut ? previous!.id : -1;
+  const children: ReactNode[] = [];
+  for (const l of order) {
+    if (l.id === topId) {
+      children.push(
         <div
-          key="cur"
-          data-scroll
+          key="dim"
+          aria-hidden
           style={{
-            ...layerStyle(current.pathname, role, orgMode),
-            opacity: fading && !entered ? 0 : 1,
-            transition: fading ? `opacity ${TAB_MS}ms ease-out` : undefined,
+            position: "absolute",
+            inset: 0,
+            background: "rgba(0,0,0,.14)",
+            // dims the screen underneath as the new one covers it (and lifts as it leaves)
+            opacity: pushIn ? (entered ? 1 : 0) : entered ? 0 : 1,
+            transition: `opacity ${PUSH_MS}ms ${PUSH_EASE}`,
+            pointerEvents: "none",
           }}
-        >
-          {current.outlet}
-        </div>
-      </div>
+        />,
+      );
+    }
+    const isHidden = l.id !== current.id && !(previous && l.id === previous.id);
+    children.push(
+      <div key={l.id} data-scroll aria-hidden={isHidden || undefined} inert={isHidden} style={styleFor(l)}>
+        {l.outlet}
+      </div>,
     );
   }
 
-  switch (anim.type) {
-    case "push-in":
-    case "push-out": {
-      const overLayer = anim.type === "push-in" ? current : previous;
-      const underLayer = anim.type === "push-in" ? previous : current;
-      const overShown = anim.type === "push-in" ? entered : !entered;
-      return (
-        <div style={{ position: "relative", height: "100%", overflow: "hidden" }}>
-          <div
-            data-scroll
-            style={{
-              ...layerStyle(underLayer.pathname, role, orgMode),
-              // The screen underneath eases back a little as the new one covers it (and returns as it leaves), like iOS.
-              transform: overShown ? "translateX(-28%)" : "translateX(0)",
-              transition: `transform ${PUSH_MS}ms ${PUSH_EASE}`,
-            }}
-          >
-            {underLayer.outlet}
-          </div>
-          <div
-            aria-hidden
-            style={{
-              position: "absolute",
-              inset: 0,
-              background: "rgba(0,0,0,.14)",
-              opacity: overShown ? 1 : 0,
-              transition: `opacity ${PUSH_MS}ms ${PUSH_EASE}`,
-              pointerEvents: "none",
-            }}
-          />
-          <div
-            data-scroll
-            style={{
-              ...layerStyle(overLayer.pathname, role, orgMode),
-              boxShadow: overShown ? "-8px 0 24px rgba(0,0,0,.12)" : "none",
-              transform: overShown ? "translateX(0)" : "translateX(100%)",
-              transition: `transform ${PUSH_MS}ms ${PUSH_EASE}`,
-            }}
-          >
-            {overLayer.outlet}
-          </div>
-        </div>
-      );
-    }
-
-  }
+  return <div style={{ position: "relative", height: "100%", overflow: "hidden" }}>{children}</div>;
 }

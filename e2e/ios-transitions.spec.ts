@@ -108,3 +108,23 @@ test("the back button on a deeper screen slides it away to the right", async ({ 
   expect(slides(await offsets(page))).toBe(true);
   await expect(page).toHaveURL(/\/pay$/);
 });
+
+test("screens are never rebuilt: the new one survives its slide, and going back returns the same list at the same place", async ({ page }) => {
+  await boot(page, "dept_head");
+  await page.route(/\/month\//, (route) => route.fallback()); // (data comes from boot)
+  await page.goto("/coaches"); await page.waitForTimeout(1200);
+  await page.evaluate(() => { const l = document.querySelector("main [data-scroll]") as HTMLElement & { __mark?: string }; l.scrollTop = 40; l.__mark = "team"; });
+  await page.getByText("Coach Nour").click();
+  await page.waitForTimeout(150);
+  await page.evaluate(() => { const ls = [...document.querySelectorAll("main [data-scroll]")] as (HTMLElement & { __mark?: string })[]; ls[ls.length - 1].__mark = "detail"; });
+  await settle(page);
+  const kept = await page.evaluate(() => {
+    const ls = [...document.querySelectorAll("main [data-scroll]")] as (HTMLElement & { __mark?: string })[];
+    return { detailSurvived: ls.some((l) => l.__mark === "detail" && getComputedStyle(l).visibility === "visible"), teamKeptHidden: ls.some((l) => l.__mark === "team" && getComputedStyle(l).visibility === "hidden") };
+  });
+  expect(kept).toEqual({ detailSurvived: true, teamKeptHidden: true });
+  await page.getByRole("button", { name: /Team/ }).first().click();
+  await settle(page);
+  const back = await page.evaluate(() => { const l = ([...document.querySelectorAll("main [data-scroll]")] as (HTMLElement & { __mark?: string })[]).find((x) => x.__mark === "team"); return { same: !!l, visible: l ? getComputedStyle(l).visibility : null }; });
+  expect(back).toEqual({ same: true, visible: "visible" });
+});
