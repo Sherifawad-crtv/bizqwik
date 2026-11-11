@@ -2,6 +2,7 @@ import { NavLink, useLocation } from "react-router-dom";
 import { Icon } from "./Icon";
 import { matchTabIndex, type NavItem } from "../lib/nav";
 import { useIsNarrowPhone } from "../lib/useIsMobile";
+import { noteTabTap } from "./RouteTransition";
 
 const BAR_BORDER = 1;
 
@@ -76,6 +77,7 @@ export function BottomNav({ items }: { items: NavItem[] }) {
           title={t.label}
           aria-label={t.label}
           data-tap
+          onClick={noteTabTap}
           style={{ position: "relative", zIndex: 1, flex: "none", width: ITEM, height: ITEM, background: "none", border: 0, padding: 0, display: "flex", alignItems: "center", justifyContent: "center" }}
         >
           {({ isActive }) => (

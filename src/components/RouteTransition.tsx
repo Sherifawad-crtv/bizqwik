@@ -7,16 +7,25 @@ import { isStandalone } from "../lib/push";
 import type { Role } from "../lib/types";
 import { EASE, FADE_MS, PUSH_MS } from "../lib/motion";
 
-/** How many levels deep a route sits, for push-transition purposes: 0 is a
- * tab-level route (switched via tab-slide); 1+ is reached by drilling in
- * from a shallower route, one level at a time — direction is decided by
- * comparing depth, not just "is this a push route", so a route that's
- * itself a push destination (e.g. /account) can still have its own deeper
- * children (/account/profile) without the two directions flipping. */
-function pushDepth(pathname: string): number {
+/** How the app moves between screens, the way iOS does it:
+ *  - the sections in the tab bar are peers: switching between them is a quick
+ *    fade, never a slide;
+ *  - anything else is a level deeper than where you came from (a coach's page,
+ *    a payee, Accounting, Team & tiers, Sessions, Activity, Account), and going
+ *    in slides in from the right, going back slides away to the right;
+ *  - settings go one level further (Account, then Profile or Password).
+ * One rule for every screen, so similar moves always feel alike. */
+function pushDepth(pathname: string, tabs: NavItem[]): number {
   if (pathname === "/account/profile" || pathname === "/account/password") return 2;
-  if (pathname === "/account" || pathname === "/classes" || pathname === "/activity" || pathname === "/desk-classes" || /^\/coaches\/[^/]+$/.test(pathname)) return 1;
-  return 0;
+  if (pathname === "/" || tabs.some((t) => t.path === pathname)) return 0;
+  return 1;
+}
+
+// Tapping a tab is a switch between peers, even when you were a level deep
+// (it must not play a "back" slide), so the bar says so just before navigating.
+let lastTabTap = 0;
+export function noteTabTap() {
+  lastTabTap = Date.now();
 }
 
 interface Layer {
@@ -68,7 +77,7 @@ export function RouteTransition({ tabs, role, orgMode = "team" }: { tabs: NavIte
   const outlet = <Suspense fallback={<Spinner />}>{rawOutlet}</Suspense>;
 
   const makeLayer = (pathname: string, node: ReactNode): Layer => {
-    const depth = pushDepth(pathname);
+    const depth = pushDepth(pathname, tabs);
     return depth > 0
       ? { pathname, outlet: node, kind: "push", index: -1, depth }
       : { pathname, outlet: node, kind: "tab", index: matchTabIndex(pathname, tabs), depth: 0 };
@@ -93,7 +102,7 @@ export function RouteTransition({ tabs, role, orgMode = "team" }: { tabs: NavIte
 
     const next = makeLayer(path, outlet);
     let nextAnim: Anim;
-    if (next.depth === 0 && current.depth === 0) {
+    if ((next.depth === 0 && current.depth === 0) || Date.now() - lastTabTap < 700) {
       nextAnim = { type: "tab-slide", dir: next.index >= current.index ? 1 : -1 };
     } else if (next.depth > current.depth) {
       nextAnim = { type: "push-in" };
@@ -173,7 +182,15 @@ export function RouteTransition({ tabs, role, orgMode = "team" }: { tabs: NavIte
       const overShown = anim.type === "push-in" ? entered : !entered;
       return (
         <div style={{ position: "relative", height: "100%", overflow: "hidden" }}>
-          <div data-scroll style={layerStyle(underLayer.pathname, role, orgMode)}>
+          <div
+            data-scroll
+            style={{
+              ...layerStyle(underLayer.pathname, role, orgMode),
+              // The screen underneath eases back a little as the new one covers it (and returns as it leaves), like iOS.
+              transform: overShown ? "translateX(-28%)" : "translateX(0)",
+              transition: `transform ${PUSH_MS}ms ${PUSH_EASE}`,
+            }}
+          >
             {underLayer.outlet}
           </div>
           <div
