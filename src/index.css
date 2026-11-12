@@ -254,6 +254,9 @@ textarea {
     transform: translateY(0);
   }
 }
+@keyframes bqFadeOut {
+  to { opacity: 0; }
+}
 @keyframes bqFade {
   from {
     opacity: 0;

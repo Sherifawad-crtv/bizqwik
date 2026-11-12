@@ -162,3 +162,19 @@ test("how long each screen takes, and how the phone feels, are measured (numbers
   expect(vitals).toBeTruthy();
   for (const [k, v] of Object.entries(vitals!.props)) if (k !== "net") expect(["number", "object"]).toContain(typeof v); // numbers (or null); the only word is the connection type (4g, 3g…)
 });
+
+test("the title follows the screen you're on: it fades between screens and comes back right after going back", async ({ page }) => {
+  await boot(page, "dept_head");
+  await page.goto("/coaches"); await page.waitForTimeout(1200);
+  const pill = page.locator("div[style*='position: fixed'][style*='top: 0'] span[style*='display: grid']");
+  const team = (await pill.innerText()).trim();
+  await page.getByText("Coach Nour").click();
+  // mid-change both titles are present (old fading out, new fading in)
+  await expect.poll(() => pill.locator("span").count(), { intervals: [15], timeout: 2500 }).toBeGreaterThanOrEqual(2);
+  await settle(page);
+  const detail = (await pill.innerText()).trim();
+  expect(detail).not.toBe(team);
+  await page.getByRole("button", { name: /Team/ }).first().click();
+  await settle(page);
+  expect((await pill.innerText()).trim()).toBe(team);
+});

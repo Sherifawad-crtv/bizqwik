@@ -1,3 +1,4 @@
+import { useScreenActive } from "./screenActive";
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 
 export interface HeaderSpec {
@@ -31,8 +32,11 @@ export function useHeader(): HeaderSpec {
 /** Screens call this to publish their title into the Shell's sticky bar. */
 export function useSetHeader(spec: HeaderSpec | null, deps: unknown[]) {
   const { setHeader } = useHeaderCtx();
+  // Only the screen you're looking at owns the title: one kept underneath must
+  // not overwrite it, and it republishes its own when you come back to it.
+  const active = useScreenActive();
   useEffect(() => {
-    if (spec) setHeader(spec); // null: shown inside a modal, so the page title stays
+    if (spec && active) setHeader(spec); // null: shown inside a modal, so the page title stays
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, deps);
+  }, [...deps, active]);
 }

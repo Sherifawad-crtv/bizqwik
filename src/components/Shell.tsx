@@ -1,4 +1,4 @@
-import { Suspense } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { Spinner } from "./Spinner";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { BottomNav } from "./BottomNav";
@@ -11,7 +11,33 @@ import { useAuth } from "../lib/auth";
 import { useHeader } from "../lib/header";
 import { useIsMobile, useIsNarrowPhone } from "../lib/useIsMobile";
 import { LocationsProvider } from "../lib/locations";
+import { FADE_MS } from "../lib/motion";
 import { navFor, headerMode, accountBackTarget, isSoloOwner } from "../lib/nav";
+
+/** The title in the top pill: when it changes, the old words fade out as the new
+ * ones fade in (stacked in one spot), instead of snapping. */
+function TitleSwap({ title }: { title: string }) {
+  const [shown, setShown] = useState(title);
+  const [leaving, setLeaving] = useState<string | null>(null);
+  const last = useRef(title);
+  useEffect(() => {
+    if (title === last.current) return;
+    setLeaving(last.current);
+    setShown(title);
+    last.current = title;
+    const id = window.setTimeout(() => setLeaving(null), FADE_MS + 30);
+    return () => window.clearTimeout(id);
+  }, [title]);
+  const cell = { gridArea: "1 / 1", overflow: "hidden", textOverflow: "ellipsis" } as const;
+  return (
+    <span style={{ display: "grid", maxWidth: "100%" }}>
+      {leaving !== null && (
+        <span key={`out-${leaving}`} aria-hidden style={{ ...cell, animation: `bqFadeOut ${FADE_MS}ms ease forwards` }}>{leaving}</span>
+      )}
+      <span key={shown} style={{ ...cell, animation: leaving !== null ? `bqFade ${FADE_MS}ms ease both` : undefined }}>{shown}</span>
+    </span>
+  );
+}
 
 function ShellInner() {
   const { profile, orgMode } = useAuth();
@@ -33,9 +59,13 @@ function ShellInner() {
     const mode = headerMode(pathname, profile.role, orgMode);
     return (
       <div style={{ minHeight: "100svh", background: "var(--paper)", position: "relative", overflow: "hidden" }}>
-        {mode !== "home" && (
+        {(
           <div
+            aria-hidden={mode === "home"}
             style={{
+              opacity: mode === "home" ? 0 : 1,
+              pointerEvents: mode === "home" ? "none" : "auto",
+              transition: `opacity ${FADE_MS}ms ease`,
               position: "fixed",
               top: 0,
               left: 0,
@@ -72,7 +102,7 @@ function ShellInner() {
                   textOverflow: "ellipsis",
                 }}
               >
-                {header.title}
+                <TitleSwap title={header.title} />
               </div>
             </div>
             <div style={{ width: 30, flex: "none" }} />
