@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { getVersion, subscribe } from "./bus";
+import { useScreenActive } from "./screenActive";
 
 interface AsyncState<T> {
   data: T | null;
@@ -62,10 +63,18 @@ export function useAsync<T>(
   // so every mounted useAsync revalidates together — no stale screens.
   const dataVersion = useSyncExternalStore(subscribe, getVersion, getVersion);
 
+  const active_ = useScreenActive();
+  // Whether this screen has loaded at least once (a hidden screen that never
+  // loaded still must, once).
+  const lastFlight = useRef("");
+
   useEffect(() => {
+    const flight = `${key}@${dataVersion}@${tick}`;
+    // A screen kept underneath (or leaving) doesn't re-request anything.
+    if (!active_ && lastFlight.current) return;
+    lastFlight.current = flight;
     let alive = true;
     setState((s) => ({ ...s, loading: true, error: null }));
-    const flight = `${key}@${dataVersion}@${tick}`;
     let req = inflight.get(flight) as Promise<T> | undefined;
     if (!req) {
       req = fnRef.current();
@@ -89,7 +98,7 @@ export function useAsync<T>(
       alive = false;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [...deps, tick, dataVersion]);
+  }, [...deps, tick, dataVersion, active_]);
 
   const refetch = useCallback(() => setTick((t) => t + 1), []);
   // Lets a caller update the cached data immediately (an optimistic UI

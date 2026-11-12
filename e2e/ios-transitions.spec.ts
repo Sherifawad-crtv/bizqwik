@@ -128,3 +128,22 @@ test("screens are never rebuilt: the new one survives its slide, and going back 
   const back = await page.evaluate(() => { const l = ([...document.querySelectorAll("main [data-scroll]")] as (HTMLElement & { __mark?: string })[]).find((x) => x.__mark === "team"); return { same: !!l, visible: l ? getComputedStyle(l).visibility : null }; });
   expect(back).toEqual({ same: true, visible: "visible" });
 });
+
+test("a screen kept underneath does not re-request data when the app refreshes", async ({ page }) => {
+  await boot(page, "dept_head");
+  await page.goto("/coaches"); await page.waitForTimeout(1200);
+  await page.getByText("Coach Nour").click();
+  await expect(page).toHaveURL(/\/coaches\/c1$/);
+  await settle(page);
+  let monthCalls = 0;
+  page.on("request", (r) => { if (/\/month\//.test(r.url())) monthCalls++; });
+  // Coming back to the app refreshes what's open.
+  await page.evaluate(() => document.dispatchEvent(new Event("visibilitychange")));
+  await page.waitForTimeout(800);
+  // Only the open screen asks (Coach detail: one month call); Team underneath stays quiet.
+  expect(monthCalls).toBe(1);
+  // Going back shows Team, which catches up once.
+  await page.getByRole("button", { name: /Team/ }).first().click();
+  await settle(page);
+  expect(monthCalls).toBe(2);
+});

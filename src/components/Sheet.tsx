@@ -175,6 +175,8 @@ export function Sheet({ open, onClose, children, width = 460 }: SheetProps) {
       tracking = e.touches.length === 1 && el.scrollTop <= 0 && !target.closest("input, textarea, select, [data-no-drag]");
       pulling = false;
       startY = e.touches[0].clientY;
+      // Blocking listener only while a finger that began at the top is down.
+      if (tracking) el.addEventListener("touchmove", onMove, { passive: false });
     };
     const onMove = (e: TouchEvent) => {
       if (!tracking) return;
@@ -190,12 +192,12 @@ export function Sheet({ open, onClose, children, width = 460 }: SheetProps) {
       live.current.moveDrag(y);
     };
     const onEnd = () => {
+      el.removeEventListener("touchmove", onMove);
       if (pulling) live.current.endDrag();
       pulling = false;
       tracking = false;
     };
     el.addEventListener("touchstart", onStart, { passive: true });
-    el.addEventListener("touchmove", onMove, { passive: false });
     el.addEventListener("touchend", onEnd);
     el.addEventListener("touchcancel", onEnd);
     return () => {
@@ -259,7 +261,6 @@ export function Sheet({ open, onClose, children, width = 460 }: SheetProps) {
             maxHeight: "calc(88svh - 16px)",
             display: "flex",
             flexDirection: "column",
-            filter: "var(--shadow-float-filter)",
             transform,
             transition,
             touchAction: "none",
@@ -273,6 +274,7 @@ export function Sheet({ open, onClose, children, width = 460 }: SheetProps) {
               background: "var(--surface)",
               borderRadius: 40,
               border: "1px solid var(--line)",
+              boxShadow: "var(--shadow-float)",
               padding: "10px 20px 20px",
             }}
           >

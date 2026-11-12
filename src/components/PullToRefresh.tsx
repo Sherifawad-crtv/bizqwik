@@ -31,6 +31,9 @@ export function PullToRefresh({ children }: { children: ReactNode }) {
       s.startY = e.touches[0].clientY;
       s.startX = e.touches[0].clientX;
       s.dist = 0;
+      // The blocking listener exists only while a finger that began at the
+      // very top is down. Everywhere else scrolling never waits on script.
+      el.addEventListener("touchmove", onMove, { passive: false });
     };
     const onMove = (e: TouchEvent) => {
       if (!s.tracking) return;
@@ -50,6 +53,7 @@ export function PullToRefresh({ children }: { children: ReactNode }) {
       setPull(s.dist);
     };
     const onEnd = async () => {
+      el.removeEventListener("touchmove", onMove);
       if (!s.tracking) return;
       s.tracking = false;
       if (!s.pulling) return;
@@ -73,7 +77,6 @@ export function PullToRefresh({ children }: { children: ReactNode }) {
     };
 
     el.addEventListener("touchstart", onStart, { passive: true });
-    el.addEventListener("touchmove", onMove, { passive: false });
     el.addEventListener("touchend", onEnd);
     el.addEventListener("touchcancel", onEnd);
     return () => {

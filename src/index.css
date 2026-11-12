@@ -47,9 +47,6 @@
   --dur-press: 160ms;
 
   --shadow-float: 0 14px 34px rgba(26, 23, 38, 0.18);
-  /* Same shadow as --shadow-float, as a filter instead of box-shadow, for a
-     wrapper around a rounded panel (the sheet). */
-  --shadow-float-filter: drop-shadow(0 14px 34px rgba(26, 23, 38, 0.18));
   --shadow-card: 0 24px 60px rgba(26, 23, 38, 0.1);
 
   --safe-top: env(safe-area-inset-top, 0px);
