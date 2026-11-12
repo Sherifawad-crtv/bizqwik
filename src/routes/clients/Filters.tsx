@@ -7,6 +7,7 @@ import { Sheet } from "../../components/Sheet";
 import { DateField } from "../../components/DateField";
 import { NO_FILTERS, filterClients, planOptions, type ClientFilters, type ExpiryFilter, type SortKey, type StatusFilter } from "../../lib/clientFilters";
 import { plusDays } from "./helpers";
+import { useNow } from "../../lib/useNow";
 
 const STATUS_CHIPS: { value: StatusFilter; label: string }[] = [
   { value: "all", label: "All" },
@@ -85,7 +86,7 @@ export function ClientFilterBar({
 }) {
   const [open, setOpen] = useState(false);
   const set = (patch: Partial<ClientFilters>) => onChange({ ...filters, ...patch });
-  const now = Date.now();
+  const now = useNow();
   const plans = planOptions(clients, now);
   const inSheet = (filters.plan ? 1 : 0) + (filters.coach ? 1 : 0) + (filters.expiry !== "any" ? 1 : 0);
   const count = (status: StatusFilter) => filterClients(clients, { ...NO_FILTERS, status }, now).length;

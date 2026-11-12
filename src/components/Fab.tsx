@@ -3,8 +3,11 @@ import { Icon } from "./Icon";
 import { AddSessionSheet } from "./AddSessionSheet";
 import { Sheet } from "./Sheet";
 import { Button } from "./Button";
-import { SeriesSheet, PlanTypeSheet } from "../routes/Catalog";
-import { BundleSheet, InviteFlow, TierSheet } from "../routes/Manage";
+import { SeriesSheet } from "../routes/catalog/Classes";
+import { PlanTypeSheet } from "../routes/catalog/Plans";
+import { BundleSheet } from "../routes/manage/BundlesPanel";
+import { InviteFlow } from "../routes/manage/Invites";
+import { TierSheet } from "../routes/manage/TiersPanel";
 import { useAuth } from "../lib/auth";
 import { isSoloOwner } from "../lib/nav";
 import { NewClientModal } from "../routes/frontdesk/NewClientModal";
@@ -72,8 +75,8 @@ function CreateFab({ size }: { size: number }) {
     <>
       <FabButton size={size} label="Create" onClick={() => setMenuOpen(true)} />
       <Sheet open={menuOpen} onClose={() => setMenuOpen(false)}>
-        <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>CREATE</div>
-        <div style={{ font: "800 26px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 16px" }}>What are you adding?</div>
+        <div className="bq-label">CREATE</div>
+        <div className="bq-title">What are you adding?</div>
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           {CREATE_OPTIONS.map((o) => (
             <button
@@ -84,7 +87,7 @@ function CreateFab({ size }: { size: number }) {
               <span style={{ width: 40, height: 40, flex: "none", borderRadius: 12, background: "var(--primary-tint)", color: "var(--primary-pressed)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <Icon name={o.icon} size={20} />
               </span>
-              <span style={{ flex: 1, minWidth: 0 }}>
+              <span className="bq-grow">
                 <span style={{ display: "block", font: "700 16px var(--font-body)" }}>{o.title}</span>
                 <span style={{ display: "block", font: "400 12px var(--font-mono)", color: "var(--ink-faint)", marginTop: 2 }}>{o.sub}</span>
               </span>
@@ -150,7 +153,7 @@ export function ScanFlow({ trigger, hint }: { trigger: (open: () => void, busy: 
         />
       )}
       <Sheet open={!!problem} onClose={() => setProblem(null)}>
-        <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>SCAN</div>
+        <div className="bq-label">SCAN</div>
         <div style={{ font: "800 26px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 12px" }}>That didn't work</div>
         <div role="alert" style={{ font: "600 14px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "12px 14px" }}>
           {problem}
@@ -204,17 +207,17 @@ function PtDeliverSheet({ scan, onClose }: { scan: { token: string; preview: PtS
         <SheetSuccessIcon label={`Session logged · ${left ?? 0} left`} iconIn={iconIn} />
       ) : p ? (
         <>
-          <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>PRIVATE TRAINING</div>
+          <div className="bq-label">PRIVATE TRAINING</div>
           <div style={{ font: "800 30px/1.1 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 4px" }}>{p.clientName}</div>
           <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-muted)", marginBottom: 16 }}>
             {p.bundleName} · expires {p.expiryDate}
           </div>
           <div style={{ display: "flex", alignItems: "baseline", gap: 10, background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "14px 16px" }}>
-            <span style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>SESSIONS LEFT</span>
+            <span className="bq-label">SESSIONS LEFT</span>
             <span className="tabular" style={{ marginLeft: "auto", font: "800 26px var(--font-body)" }}>
               {p.sessionsRemaining} → {p.sessionsRemaining - 1}
             </span>
-            <span style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>of {p.sessionsIncluded}</span>
+            <span className="bq-meta">of {p.sessionsIncluded}</span>
           </div>
           {error && (
             <div role="alert" style={{ marginTop: 12, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>
@@ -264,8 +267,8 @@ function SoloFab({ size }: { size: number }) {
         }}
       />
       <Sheet open={menuOpen} onClose={() => setMenuOpen(false)}>
-        <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>QUICK ACTIONS</div>
-        <div style={{ font: "800 26px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 16px" }}>What do you need?</div>
+        <div className="bq-label">QUICK ACTIONS</div>
+        <div className="bq-title">What do you need?</div>
         <div role="group" aria-label="Quick actions" style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           {SOLO_OPTIONS.map((o) => (
             <button
@@ -276,7 +279,7 @@ function SoloFab({ size }: { size: number }) {
               <span style={{ width: 40, height: 40, flex: "none", borderRadius: 12, background: "var(--primary-tint)", color: "var(--primary-pressed)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <Icon name={o.icon} size={20} />
               </span>
-              <span style={{ flex: 1, minWidth: 0 }}>
+              <span className="bq-grow">
                 <span style={{ display: "block", font: "700 16px var(--font-body)" }}>{o.title}</span>
                 <span style={{ display: "block", font: "400 12px var(--font-mono)", color: "var(--ink-faint)", marginTop: 2 }}>{o.sub}</span>
               </span>

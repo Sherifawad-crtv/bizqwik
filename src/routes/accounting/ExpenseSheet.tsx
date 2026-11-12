@@ -66,6 +66,7 @@ export function ExpenseSheet({
     setReceipt(null);
     setError(null);
     window.setTimeout(() => amountInput.current?.focus(), 50);
+    // Deliberate: Reset the form only when the sheet opens or its subject changes; re-running on every prop change would wipe what's being typed.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, editing?.id]);
 
@@ -111,13 +112,13 @@ export function ExpenseSheet({
         <SheetSuccessIcon label={editing ? "Expense updated" : repeat ? "Repeating expense set up" : "Expense added"} iconIn={iconIn} />
       ) : (
         <>
-          <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>{editing ? "EDIT EXPENSE" : "ADD EXPENSE"}</div>
-          <div style={{ font: "800 26px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 16px" }}>
+          <div className="bq-label">{editing ? "EDIT EXPENSE" : "ADD EXPENSE"}</div>
+          <div className="bq-title">
             {editing ? editing.categoryName : "What did the business spend on?"}
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             <label style={{ display: "block", background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "10px 16px" }}>
-              <span style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>AMOUNT (EGP)</span>
+              <span className="bq-label">AMOUNT (EGP)</span>
               <input
                 ref={amountInput}
                 value={amount}

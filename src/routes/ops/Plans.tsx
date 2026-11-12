@@ -61,8 +61,8 @@ function PlanSheet({ open, onClose, plan, onDone }: { open: boolean; onClose: ()
 
   return (
     <Sheet open={open} onClose={close}>
-      <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>{plan ? "EDIT PLAN" : "NEW PLAN"}</div>
-      <div style={{ font: "800 26px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 16px" }}>{plan ? plan.name : "Create a SaaS plan"}</div>
+      <div className="bq-label">{plan ? "EDIT PLAN" : "NEW PLAN"}</div>
+      <div className="bq-title">{plan ? plan.name : "Create a SaaS plan"}</div>
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
         <TextField label="NAME" value={name} onChange={(e) => setName(e.target.value)} placeholder="Growth" />
         <TextField label="PRICE (EGP / MONTH)" type="number" inputMode="numeric" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="0" />
@@ -110,7 +110,7 @@ export function Plans() {
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
         {plans.map((p) => (
           <Card key={p.id} style={{ padding: "16px 18px", display: "flex", alignItems: "center", gap: 12 }}>
-            <div style={{ minWidth: 0, flex: 1 }}>
+            <div className="bq-grow">
               <div style={{ font: "700 17px var(--font-body)" }}>{p.name}</div>
               <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)", marginTop: 3 }}>
                 {egp(p.price)}/mo · {limitLabel(p.teamSizeLimit)} staff · {limitLabel(p.clientSizeLimit)} clients

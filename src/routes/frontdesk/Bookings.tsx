@@ -7,7 +7,7 @@ import { LocationSwitcher, useCurrentLocation } from "../../lib/locations";
 import { isSoloOwner } from "../../lib/nav";
 import { ConfirmSheet } from "../../components/ConfirmSheet";
 import { ClassSheet, emptyForm, formOf, type FormState } from "../ClassesManage";
-import { SeriesSheet } from "../Catalog";
+import { SeriesSheet } from "../catalog/Classes";
 import { useAsync } from "../../lib/useAsync";
 import { useSetHeader } from "../../lib/header";
 import { timeLabel, pad } from "../../lib/classTime";
@@ -19,6 +19,7 @@ import { Icon } from "../../components/Icon";
 import { ClassRosterSheet } from "../../components/ClassRosterSheet";
 import { Card, SectionLink } from "./shared";
 import { ClassCalendarScreen } from "./ClassCalendar";
+import { useNow } from "../../lib/useNow";
 
 type Range = "today" | "tomorrow" | "week" | "all";
 
@@ -54,10 +55,11 @@ export function Bookings() {
   const [showEarlier, setShowEarlier] = useState(false);
   const [month, setMonth] = useState(false);
   const classes = useAsync(() => api.classes(startOfDay(new Date()).toISOString()), []);
+  const nowMs = useNow();
 
   const { groups, earlier, ahead } = useMemo(() => {
-    const now = Date.now();
-    const today = startOfDay(new Date());
+    const now = nowMs;
+    const today = startOfDay(new Date(nowMs));
     const last = range === "today" ? 1 : range === "tomorrow" ? 2 : range === "week" ? 7 : 366;
     const first = range === "tomorrow" ? 1 : 0;
     const from = addDays(today, first).getTime();
@@ -85,13 +87,12 @@ export function Bookings() {
       }
     }
     return { groups: [...map.values()], earlier: live.filter(isPast), ahead };
-  }, [classes.data, range, place]);
+  }, [classes.data, range, place, nowMs]);
 
   if (month) return <ClassCalendarScreen onClose={() => setMonth(false)} />;
   if (!locsReady || !classes.data) return <Spinner />;
 
-  const today = startOfDay(new Date());
-  const nowMs = Date.now();
+  const today = startOfDay(new Date(nowMs));
   const nextId = groups[0]?.items.find((c) => Date.parse(c.startsAt) + 60 * 60000 >= nowMs)?.id;
 
   const row = (c: GymClass, muted = false) => {
@@ -105,7 +106,7 @@ export function Bookings() {
         style={{ display: "flex", alignItems: "center", gap: 12, flex: 1, minWidth: 0, padding: "14px 18px", border: 0, background: "none", cursor: "pointer", textAlign: "left" }}
       >
         <span style={{ width: 84, flex: "none", whiteSpace: "nowrap", font: "700 14px var(--font-mono)", color: happening ? "var(--primary-pressed)" : "var(--ink)" }}>{clock(c.startsAt)}</span>
-        <span style={{ minWidth: 0, flex: 1 }}>
+        <span className="bq-grow">
           <span style={{ display: "block", font: "700 15px var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.title}</span>
           {solo ? (
             <span style={{ display: "block", font: "400 13px var(--font-mono)", color: booked > 0 ? "var(--primary-pressed)" : "var(--ink-faint)" }}>
@@ -122,11 +123,6 @@ export function Bookings() {
         {!happening && c.id === nextId && <span style={{ font: "700 11px var(--font-mono)", color: "var(--primary-pressed)", background: "var(--primary-tint)", padding: "3px 8px", borderRadius: 999 }}>NEXT</span>}
         <Icon name="chevron-right" size={16} />
       </button>
-      {false && solo && !muted && (
-        <button onClick={() => setForm(formOf(c))} aria-label={`Edit ${c.title}`} style={{ flex: "none", width: 36, height: 36, margin: "0 14px 0 0", borderRadius: 999, border: 0, background: "var(--primary-tint)", color: "var(--primary-pressed)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <Icon name="pencil" size={15} />
-        </button>
-      )}
       </div>
     );
   };

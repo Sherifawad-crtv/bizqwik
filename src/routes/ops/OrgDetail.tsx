@@ -258,7 +258,7 @@ export function OrgDetail() {
       <div style={{ marginTop: 26 }}>
         <SectionTitle>QR codes</SectionTitle>
         <Card style={{ padding: 18, display: "flex", alignItems: "center", gap: 14 }}>
-          <div style={{ flex: 1, minWidth: 0 }}>
+          <div className="bq-grow">
             <div style={{ font: "700 15px var(--font-body)" }}>Lifetime check-in code</div>
             <div style={{ font: "400 13px/1.5 var(--font-mono)", color: "var(--ink-faint)", marginTop: 2 }}>
               Print it for {org.name}'s front desk — members scan it in the app to check in.
@@ -269,7 +269,7 @@ export function OrgDetail() {
           </Button>
         </Card>
         <Card style={{ padding: 18, display: "flex", alignItems: "center", gap: 14, marginTop: 10 }}>
-          <div style={{ flex: 1, minWidth: 0 }}>
+          <div className="bq-grow">
             <div style={{ font: "700 15px var(--font-body)" }}>Coaches' attendance code</div>
             <div style={{ font: "400 13px/1.5 var(--font-mono)", color: "var(--ink-faint)", marginTop: 2 }}>
               Print it for the coaches' room — coaches scan it with the + button to log their sessions.
@@ -303,7 +303,7 @@ export function OrgDetail() {
           {staff.map((p, i) => (
             <div key={p.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 18px", borderBottom: i === staff.length - 1 ? "none" : "1px solid var(--line)" }}>
               <Avatar name={p.name} size={34} src={p.avatarUrl} />
-              <div style={{ minWidth: 0, flex: 1 }}>
+              <div className="bq-grow">
                 <div style={{ font: "700 15px var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.name}</div>
                 <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.email}</div>
               </div>
@@ -339,7 +339,7 @@ export function OrgDetail() {
       <div style={{ marginTop: 26 }}>
         <SectionTitle>Danger zone</SectionTitle>
         <Card style={{ padding: 18, display: "flex", alignItems: "center", gap: 14 }}>
-          <div style={{ flex: 1, minWidth: 0 }}>
+          <div className="bq-grow">
             <div style={{ font: "700 15px var(--font-body)" }}>Delete organization</div>
             <div style={{ font: "400 13px/1.5 var(--font-mono)", color: "var(--ink-faint)", marginTop: 2 }}>
               Permanently removes {org.name} and all its staff, members, sales, sessions, wallets and points. This can't be undone.

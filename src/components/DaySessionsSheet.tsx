@@ -75,7 +75,7 @@ export function DaySessionsSheet({ open, onClose, coachId, month, date, sessions
   return (
     <>
       <Sheet open={open} onClose={onClose}>
-        <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>{editable ? "EDIT DAY" : "DAY"}</div>
+        <div className="bq-label">{editable ? "EDIT DAY" : "DAY"}</div>
         <div style={{ font: "800 30px/1.1 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 4px" }}>{dateLabelFull(shown.date)}</div>
         <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-muted)", marginBottom: 16 }}>
           {shownSessions.length} {shownSessions.length === 1 ? "session" : "sessions"} · {egp(shownSessions.length * rate)}

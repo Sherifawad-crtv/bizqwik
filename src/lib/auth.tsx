@@ -73,12 +73,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // having to find the Account screen toggle.
   useEffect(() => {
     if (profile) autoEnablePushIfPossible();
+    // Deliberate: only when a different person signs in, not on every profile edit.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profile?.id]);
 
   // Product analytics: who (by id), their role and gym — never name or email.
   useEffect(() => {
     if (profile) identify({ id: profile.id, role: profile.role, orgMode, org });
     else if (bizqwikTeam) identify({ id: bizqwikTeam.id, role: "bizqwik_team" });
+    // Deliberate: re-identify when who/where changes, not on every profile edit.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profile?.id, bizqwikTeam?.id, org?.id, orgMode]);
 
   const login = async (email: string, password: string) => {

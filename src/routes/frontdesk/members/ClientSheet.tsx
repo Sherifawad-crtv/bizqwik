@@ -87,6 +87,7 @@ export function ClientSheet({
       setLocPick(client.homeLocationId ?? null);
       setError(null);
     }
+    // Deliberate: Reset the form only when the sheet opens or its subject changes; re-running on every prop change would wipe what's being typed.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [client?.id]);
 
@@ -97,6 +98,8 @@ export function ClientSheet({
     return () => {
       alive = false;
     };
+    // Deliberate: fetch when the mode or the person changes, not on every edit of the client.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode, client?.id]);
 
   if (!shown) return null;

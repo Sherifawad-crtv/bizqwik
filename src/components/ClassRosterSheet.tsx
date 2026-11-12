@@ -64,7 +64,7 @@ export function ClassRosterSheet({
 
   return (
     <Sheet open={open} onClose={busyId ? () => {} : onClose}>
-      <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>CLASS ROSTER</div>
+      <div className="bq-label">CLASS ROSTER</div>
       <div style={{ font: "800 24px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 4px" }}>{title}</div>
       <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)", marginBottom: 16 }}>
         {live.length} booked{live.length > 0 ? ` · ${live.filter((b) => b.coverage === "plan").length} on a plan · ${live.filter((b) => b.attendance === "arrived").length} arrived` : ""}
@@ -113,7 +113,7 @@ function RosterRow({
   return (
     <div style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "12px 14px", opacity: busy ? 0.6 : 1 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-        <div style={{ minWidth: 0, flex: 1 }}>
+        <div className="bq-grow">
           <div style={{ font: "700 15px var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{b.clientName ?? "Member"}</div>
           <div style={{ font: "500 12px var(--font-mono)", color: "var(--ink-faint)", marginTop: 2 }}>
             {onPlan ? "On their plan" : `Drop-in · ${b.price > 0 ? egp(b.price) : "Free"} · ${paid ? "Paid" : "Unpaid"}`}

@@ -30,8 +30,8 @@ export function InvitesPanel() {
   return (
     <div>
       <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
-        <span style={{ font: "700 20px var(--font-body)", letterSpacing: "-.01em" }}>Pending invites</span>
-        <span style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>{data.invites.length}</span>
+        <span className="bq-h2">Pending invites</span>
+        <span className="bq-meta">{data.invites.length}</span>
         <Button size="md" style={{ marginLeft: "auto", height: 40, padding: "0 16px" }} onClick={() => setOpen(true)}>
           + Invite
         </Button>
@@ -40,9 +40,9 @@ export function InvitesPanel() {
       <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", overflow: "hidden" }}>
         {data.invites.map((inv, i) => (
           <div key={inv.email} style={{ display: "flex", alignItems: "center", gap: 12, padding: "16px 20px", borderBottom: i === data.invites.length - 1 ? "none" : "1px solid var(--line)" }}>
-            <div style={{ minWidth: 0, flex: 1 }}>
+            <div className="bq-grow">
               <div style={{ font: "700 16px var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{inv.email}</div>
-              <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>
+              <div className="bq-meta">
                 {ROLE_LABELS[inv.role].toUpperCase()}
                 {inv.tierId ? ` · ${tiers.find((t) => t.id === inv.tierId)?.name ?? ""}` : ""}
               </div>
@@ -126,8 +126,8 @@ function InviteSheet({ open, tiers: tiersProp, onClose }: { open: boolean; tiers
         <SheetSuccessIcon label="Invite sent" iconIn={iconIn} />
       ) : (
         <>
-          <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>NEW INVITE</div>
-          <div style={{ font: "800 26px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 16px" }}>Invite someone</div>
+          <div className="bq-label">NEW INVITE</div>
+          <div className="bq-title">Invite someone</div>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             <TextField label="EMAIL" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@bizqwik.app" />
             <SelectField

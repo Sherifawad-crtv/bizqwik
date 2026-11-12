@@ -138,7 +138,7 @@ export function ActivityPanel() {
           ]}
           onChange={(v) => setTab(v as "feed" | "logs")}
         />
-        <span style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>
+        <span className="bq-meta">
           {tab === "feed" ? "Recent member activity" : "Every transaction and event"}
         </span>
       </div>
@@ -166,7 +166,7 @@ function Feed({ entries }: { entries: ActivityEntry[] }) {
         return (
           <div key={e.id} style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: "12px 14px", display: "flex", alignItems: "center", gap: 12 }}>
             <span style={{ flex: "none", font: "700 10px var(--font-mono)", letterSpacing: ".06em", color: tone.fg, background: tone.bg, borderRadius: 8, padding: "5px 8px", minWidth: 74, textAlign: "center" }}>{tone.label}</span>
-            <span style={{ flex: 1, minWidth: 0 }}>
+            <span className="bq-grow">
               <span style={{ display: "block", font: "600 14px/1.35 var(--font-body)" }}>{describe(e)}</span>
               <span style={{ display: "block", font: "400 12px var(--font-mono)", color: "var(--ink-faint)", marginTop: 2 }}>{timeLabel(e.at)}{e.actorName ? ` · by ${e.actorName}` : ""}</span>
             </span>
@@ -226,7 +226,7 @@ export function Transactions() {
           ] as const
         ).map(([label, value, hint]) => (
           <div key={label} style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: "14px 16px" }}>
-            <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>{label}</div>
+            <div className="bq-label">{label}</div>
             <div className="tabular" style={{ font: "800 22px/1.15 var(--font-body)", letterSpacing: "-.02em", marginTop: 4 }}>{egp(value)}</div>
             <div style={{ font: "400 12px var(--font-mono)", color: "var(--ink-faint)", marginTop: 4 }}>{hint}</div>
           </div>

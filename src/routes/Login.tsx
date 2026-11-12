@@ -54,7 +54,7 @@ export function Login() {
 
         <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           <label style={{ display: "block", background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "10px 16px" }}>
-            <span style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>EMAIL</span>
+            <span className="bq-label">EMAIL</span>
             <input
               type="email"
               required
@@ -66,7 +66,7 @@ export function Login() {
             />
           </label>
           <label style={{ display: "block", background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "10px 16px" }}>
-            <span style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>PASSWORD</span>
+            <span className="bq-label">PASSWORD</span>
             <input
               type="password"
               required

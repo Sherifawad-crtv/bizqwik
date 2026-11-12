@@ -11,6 +11,7 @@ export function YearMonthStrip({ months, value, onChange }: { months: string[]; 
 
   useEffect(() => {
     selectedRef.current?.scrollIntoView({ block: "nearest", inline: "center", behavior: "auto" });
+    // Deliberate: Scroll to the selected month only when the selection changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

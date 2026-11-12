@@ -89,7 +89,7 @@ export function CoachDetail() {
         <Avatar name={row.name} size={44} src={row.avatarUrl} />
         <div>
           <div style={{ font: "800 22px var(--font-body)", letterSpacing: "-.01em" }}>{row.name}</div>
-          <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>{row.tierName ?? "No tier"} · {row.email}</div>
+          <div className="bq-meta">{row.tierName ?? "No tier"} · {row.email}</div>
         </div>
       </div>
 
@@ -130,7 +130,7 @@ export function CoachDetail() {
       )}
 
       <div style={{ display: "flex", alignItems: "baseline", gap: 10, padding: "2px 2px 8px" }}>
-        <span style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>DAYS LOGGED</span>
+        <span className="bq-label">DAYS LOGGED</span>
         <span style={{ marginLeft: "auto", font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>
           {new Set(sessions.map((s) => s.date)).size} {new Set(sessions.map((s) => s.date)).size === 1 ? "DAY" : "DAYS"}
         </span>

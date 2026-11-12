@@ -145,6 +145,7 @@ export function Sheet({ open, onClose, children, width = 460 }: SheetProps) {
       el?.removeEventListener("transitionend", onEnd);
       window.clearTimeout(fallback);
     };
+    // Deliberate: Runs when the exit starts; the callbacks are read at that moment.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 

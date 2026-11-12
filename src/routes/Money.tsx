@@ -79,7 +79,7 @@ export function Money() {
       ) : (
         <>
           <Card style={{ padding: "22px 22px 20px" }}>
-            <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>REVENUE · EGP</div>
+            <div className="bq-label">REVENUE · EGP</div>
             <div style={{ font: "800 52px/1.05 var(--font-body)", letterSpacing: "-.03em", marginTop: 6 }}>{fmt(here ? data.pay.total : data.rev.totals.revenue)}</div>
             <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-muted)", marginTop: 6 }}>
               {here
@@ -101,7 +101,7 @@ export function Money() {
           <Card style={{ overflow: "hidden", marginBottom: 12 }}>
             {data.txns.slice(0, 100).map((t, i, arr) => (
               <button key={t.id} className="bq-scale" onClick={() => setOpen(t)} style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", border: 0, background: "none", cursor: "pointer", textAlign: "left", padding: "13px 18px", borderBottom: i === arr.length - 1 ? "none" : "1px solid var(--line)" }}>
-                <div style={{ minWidth: 0, flex: 1 }}>
+                <div className="bq-grow">
                   <div style={{ font: "700 15px var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t.clientName ?? "Client"}</div>
                   <div style={{ font: "400 12px var(--font-mono)", color: "var(--ink-faint)" }}>
                     {t.what} · {formatDateTime(t.at)}
@@ -147,7 +147,7 @@ function TxnSheet({ txn, onClose }: { txn: Txn | null; onClose: () => void }) {
   const note = String(m.note ?? "").replace(/^InstaPay\s*·?\s*/i, "");
   return (
     <Sheet open={txn !== null} onClose={onClose}>
-      <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>{t.refund ? "REFUND" : "PAYMENT"} · {t.method.toUpperCase()}</div>
+      <div className="bq-label">{t.refund ? "REFUND" : "PAYMENT"} · {t.method.toUpperCase()}</div>
       <div style={{ font: "800 40px/1.1 var(--font-body)", letterSpacing: "-.02em", margin: "6px 0 2px", color: t.refund ? "var(--danger-fg)" : "var(--ink)" }}>{t.refund ? "−" : ""}{fmt(t.amount)} <span style={{ font: "700 16px var(--font-mono)", color: "var(--ink-faint)" }}>EGP</span></div>
       <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-muted)", marginBottom: 12 }}>{t.what}</div>
 

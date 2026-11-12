@@ -42,6 +42,7 @@ export function ClientDetailSheet({
       setCompNote("");
       setError(null);
     }
+    // Deliberate: Reset the form only when the sheet opens or its subject changes; re-running on every prop change would wipe what's being typed.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, client.id]);
 
@@ -77,7 +78,7 @@ export function ClientDetailSheet({
             <Avatar name={client.name} size={44} />
             <div>
               <div style={{ font: "800 22px var(--font-body)", letterSpacing: "-.01em" }}>{client.name}</div>
-              {client.age != null && <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>Age {client.age}</div>}
+              {client.age != null && <div className="bq-meta">Age {client.age}</div>}
             </div>
           </div>
 
@@ -85,19 +86,19 @@ export function ClientDetailSheet({
             <>
               {client.conditions && (
                 <div style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "12px 16px", marginBottom: 10 }}>
-                  <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>CONDITIONS</div>
+                  <div className="bq-label">CONDITIONS</div>
                   <div style={{ font: "600 15px/1.4 var(--font-body)" }}>{client.conditions}</div>
                 </div>
               )}
 
               <div style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "12px 16px", marginBottom: 10 }}>
-                <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>COACH</div>
+                <div className="bq-label">COACH</div>
                 <div style={{ font: "600 16px var(--font-body)" }}>{coachName(client.assignedCoachId) ?? "Unassigned"}</div>
               </div>
 
               {role === "dept_head" && (
                 <div style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "12px 16px", marginBottom: 10 }}>
-                  <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>GROUP PLAN</div>
+                  <div className="bq-label">GROUP PLAN</div>
                   {client.groupPlan ? (
                     <>
                       <div style={{ font: "600 16px var(--font-body)" }}>{client.groupPlan.name}</div>
@@ -114,7 +115,7 @@ export function ClientDetailSheet({
               {pkg ? (
                 <div style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "12px 16px", marginBottom: 10 }}>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
-                    <span style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>CURRENT PACKAGE</span>
+                    <span className="bq-label">CURRENT PACKAGE</span>
                     <PackageStatusPill status={pkg.status} />
                   </div>
                   {pkg.status === "active" && (
@@ -259,8 +260,8 @@ export function ClientEditSheet({ open, client, onClose }: { open: boolean; clie
         <SheetSuccessIcon label="Client updated" iconIn={iconIn} />
       ) : (
         <>
-          <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>EDIT CLIENT</div>
-          <div style={{ font: "800 26px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 16px" }}>{client.name}</div>
+          <div className="bq-label">EDIT CLIENT</div>
+          <div className="bq-title">{client.name}</div>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             <TextField label="NAME" value={name} onChange={(e) => setName(e.target.value)} placeholder="Client name" />
             <TextField label="AGE (OPTIONAL)" type="number" min={0} value={age} onChange={(e) => setAge(e.target.value)} />

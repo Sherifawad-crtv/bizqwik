@@ -34,7 +34,7 @@ export function DateField({ value, min, max, onChange }: DateFieldProps) {
           cursor: "pointer",
         }}
       >
-        <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>DATE</div>
+        <div className="bq-label">DATE</div>
         <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
           <span style={{ font: "600 16px var(--font-body)", color: "var(--ink)" }}>{dateLabel(value)}</span>
           <span style={{ marginLeft: "auto", font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>TAP TO CHANGE</span>
@@ -42,8 +42,8 @@ export function DateField({ value, min, max, onChange }: DateFieldProps) {
       </div>
 
       <Sheet open={open} onClose={() => setOpen(false)}>
-        <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>DATE</div>
-        <div style={{ font: "800 26px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 16px" }}>{monthLabel(month)}</div>
+        <div className="bq-label">DATE</div>
+        <div className="bq-title">{monthLabel(month)}</div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 6, marginBottom: 4 }}>
           {DOW.map((d, i) => (
             <div key={i} style={{ textAlign: "center", font: "700 11px var(--font-mono)", letterSpacing: ".04em", color: "var(--ink-faint)", padding: "4px 0" }}>

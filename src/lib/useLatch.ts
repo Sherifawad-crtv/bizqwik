@@ -1,3 +1,6 @@
+/* oxlint-disable react/refs -- Deliberate: these two hold "the last value" in a ref that is read while
+   rendering. Callers pass a fresh object on every render, so keeping it in state would re-render
+   forever (this was tried: "Too many re-renders"). */
 import { useEffect, useRef, useState } from "react";
 
 // Keeps returning the last non-null value even after `value` itself goes
@@ -22,11 +25,9 @@ export function useFrozen<T>(open: boolean, value: T): T {
  * component keeps rendering (and can slide out) instead of vanishing. */
 export function useMountedThroughExit(open: boolean, ms = 450): boolean {
   const [mounted, setMounted] = useState(open);
+  if (open && !mounted) setMounted(true);
   useEffect(() => {
-    if (open) {
-      setMounted(true);
-      return;
-    }
+    if (open) return;
     const t = window.setTimeout(() => setMounted(false), ms);
     return () => window.clearTimeout(t);
   }, [open, ms]);

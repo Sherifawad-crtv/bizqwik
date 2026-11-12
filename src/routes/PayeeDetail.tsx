@@ -41,6 +41,7 @@ function RecordPaymentSheet({ open, onClose, row, month }: { open: boolean; onCl
     setNote("");
     setError(null);
   };
+  // Deliberate: Reset the form only when the sheet opens or its subject changes; re-running on every prop change would wipe what's being typed.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { if (open) reset(); }, [open]);
   if (!mounted) return null;
@@ -70,7 +71,7 @@ function RecordPaymentSheet({ open, onClose, row, month }: { open: boolean; onCl
         <SheetSuccessIcon label={doneLabel} iconIn={iconIn} />
       ) : (
         <>
-          <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>RECORD PAYMENT</div>
+          <div className="bq-label">RECORD PAYMENT</div>
           <div style={{ font: "800 26px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 4px" }}>Pay {row.name}</div>
           <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-muted)", marginBottom: 16 }}>
             {fmt(row.total)} EGP for {monthShort(month)} · {fmt(row.paidAmount)} paid · {fmt(row.remaining)} left
@@ -162,7 +163,7 @@ export function PayeeDetail() {
         <Avatar name={row.name} size={44} src={row.avatarUrl} />
         <div>
           <div style={{ font: "800 22px var(--font-body)", letterSpacing: "-.01em" }}>{row.name}</div>
-          <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>{row.tierName ?? "No tier"} · {row.email}</div>
+          <div className="bq-meta">{row.tierName ?? "No tier"} · {row.email}</div>
         </div>
       </div>
 
@@ -177,7 +178,7 @@ export function PayeeDetail() {
       />
 
       <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-tile)", padding: "16px 18px", marginBottom: 18 }}>
-        <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>WHERE IT'S COMING FROM</div>
+        <div className="bq-label">WHERE IT'S COMING FROM</div>
         <div style={{ marginTop: 12 }}>
           <div style={{ font: "600 13px var(--font-mono)", color: "var(--ink-muted)" }}>GROUP SESSIONS</div>
           <div className="tabular" style={{ font: "700 15px var(--font-body)", marginTop: 2 }}>
@@ -193,7 +194,7 @@ export function PayeeDetail() {
       </div>
 
       <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-tile)", padding: "16px 18px", marginBottom: 18 }}>
-        <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>PAYMENT RECORD</div>
+        <div className="bq-label">PAYMENT RECORD</div>
         {[
           ["Month", monthShort(month)],
           ["Settled", row.settledAt ? formatDateTime(row.settledAt) : "Not settled yet"],
@@ -207,7 +208,7 @@ export function PayeeDetail() {
         ))}
         {payments.length > 0 && (
           <div style={{ marginTop: 14, paddingTop: 12, borderTop: "1px solid var(--line)" }}>
-            <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>PAYMENTS</div>
+            <div className="bq-label">PAYMENTS</div>
             {payments.map((p) => (
               <div key={p.id} style={{ display: "flex", alignItems: "baseline", gap: 10, marginTop: 10 }}>
                 <span style={{ minWidth: 0 }}>
@@ -228,8 +229,8 @@ export function PayeeDetail() {
       )}
 
       <div style={{ display: "flex", alignItems: "baseline", gap: 10, padding: "2px 2px 8px" }}>
-        <span style={{ font: "700 20px var(--font-body)", letterSpacing: "-.01em" }}>Private training</span>
-        <span style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>{packages.length} sold this month</span>
+        <span className="bq-h2">Private training</span>
+        <span className="bq-meta">{packages.length} sold this month</span>
       </div>
 
       {packages.length === 0 ? (

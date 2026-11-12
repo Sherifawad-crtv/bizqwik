@@ -97,6 +97,7 @@ export function useAsync<T>(
     return () => {
       alive = false;
     };
+    // Deliberate: `fn` is read through a ref; the caller's `deps` decide when to re-run.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [...deps, tick, dataVersion, active_]);
 

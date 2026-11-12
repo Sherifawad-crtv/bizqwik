@@ -47,7 +47,7 @@ export function RecurringPanel({ categories, onChanged, onCategoriesChanged }: {
           const next = nextOccurrence(r);
           return (
             <button key={r.id} className="bq-scale" onClick={() => setEditing(r)} style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", border: 0, background: "none", cursor: "pointer", textAlign: "left", padding: "13px 18px", borderBottom: i === recurring.length - 1 ? "none" : "1px solid var(--line)", opacity: r.active ? 1 : 0.5 }}>
-              <div style={{ minWidth: 0, flex: 1 }}>
+              <div className="bq-grow">
                 <div style={{ font: "700 15px var(--font-body)" }}>{r.categoryName}{r.note ? ` · ${r.note}` : ""}</div>
                 <div style={{ font: "400 12px var(--font-mono)", color: "var(--ink-faint)" }}>
                   Day {r.dayOfMonth} · {r.active ? (next ? `Next ${next.slice(8, 10)} ${monthAbbr(next.slice(0, 7))}` : "Ended") : "Paused"}
@@ -101,6 +101,7 @@ function RecurringSheet({ template, categories, onClose, onSaved }: { template: 
     setDayOfMonth(String(shown.dayOfMonth));
     setEndMonth(shown.endMonth ?? "");
     setError(null);
+    // Deliberate: Reset the form only when the sheet opens or its subject changes; re-running on every prop change would wipe what's being typed.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, shown?.id]);
 
@@ -145,8 +146,8 @@ function RecurringSheet({ template, categories, onClose, onSaved }: { template: 
         <SheetSuccessIcon label={isNew ? "Repeating expense set up" : "Saved"} iconIn={iconIn} />
       ) : (
         <>
-          <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>{isNew ? "ADD REPEATING EXPENSE" : "EDIT TEMPLATE"}</div>
-          <div style={{ font: "800 26px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 16px" }}>{isNew ? "Every month" : shown.categoryName}</div>
+          <div className="bq-label">{isNew ? "ADD REPEATING EXPENSE" : "EDIT TEMPLATE"}</div>
+          <div className="bq-title">{isNew ? "Every month" : shown.categoryName}</div>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             <TextField label="AMOUNT (EGP)" value={amount} onChange={(e) => setAmount(e.target.value)} inputMode="decimal" placeholder="0" />
             <SelectField label="CATEGORY" value={categoryId} onChange={setCategoryId} placeholder="Choose a category" options={catOptions(categories)} />

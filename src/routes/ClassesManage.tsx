@@ -17,8 +17,9 @@ import { ClassRosterSheet } from "../components/ClassRosterSheet";
 import { pad, whenLabel } from "../lib/classTime";
 import { TimeWheelField } from "../components/TimeWheelField";
 import { ClassPhotoField } from "../components/ClassPhotoField";
-import { SeriesSheet } from "./Catalog";
+import { SeriesSheet } from "./catalog/Classes";
 import { LocationField, useLocations } from "../lib/locations";
+import { useNow } from "../lib/useNow";
 
 export interface FormState {
   id: string | null; // null = creating
@@ -65,11 +66,12 @@ export function ClassesManage() {
   const [confirmCancel, setConfirmCancel] = useState<GymClass | null>(null);
   const [roster, setRoster] = useState<GymClass | null>(null);
   useSetHeader({ kicker: "CATALOG", title: "Sessions" }, []);
+  const now = useNow();
 
   // Sessions come from the recurring classes (Catalog → Classes). This screen
   // is the day-to-day view: who's booked, rosters, and one-off changes.
   const list = classes.data?.classes ?? [];
-  const cutoff = Date.now() - 3 * 60 * 60 * 1000;
+  const cutoff = now - 3 * 60 * 60 * 1000;
   const scheduled = list.filter((c) => c.status === "active" && Date.parse(c.startsAt) >= cutoff);
   const past = list.filter((c) => c.status === "active" && Date.parse(c.startsAt) < cutoff).reverse();
   const cancelled = list.filter((c) => c.status === "cancelled");
@@ -84,7 +86,7 @@ export function ClassesManage() {
       </button>
 
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
-        <div style={{ flex: 1, minWidth: 0 }}>
+        <div className="bq-grow">
           <div style={{ font: "800 26px/1.1 var(--font-body)", letterSpacing: "-.02em" }}>Sessions</div>
           <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)", marginTop: 4 }}>
             Upcoming sessions from your classes. Tap one to edit just that session.
@@ -190,7 +192,7 @@ function ClassCard({ c, onEdit, onRoster }: { c: GymClass; onEdit?: () => void; 
       }}
     >
       <div onClick={onEdit} style={{ display: "flex", alignItems: "center", gap: 12, cursor: onEdit ? "pointer" : "default" }}>
-        <div style={{ minWidth: 0, flex: 1 }}>
+        <div className="bq-grow">
           <div style={{ font: "700 16px var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", textDecoration: cancelled ? "line-through" : "none" }}>{c.title}</div>
           <div style={{ font: "500 13px var(--font-mono)", color: "var(--ink-muted)", marginTop: 3 }}>{whenLabel(c.startsAt)}</div>
           {!cancelled && (c.bookedCount ?? 0) > 0 && (
@@ -289,8 +291,8 @@ export function ClassSheet({
 
   return (
     <Sheet open={form !== null} onClose={busy ? () => {} : onClose}>
-      <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>{editing ? "THIS SESSION ONLY" : "ONE-OFF SESSION"}</div>
-      <div style={{ font: "800 26px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 16px" }}>{editing ? "Edit session" : solo ? "New session" : "One-off session"}</div>
+      <div className="bq-label">{editing ? "THIS SESSION ONLY" : "ONE-OFF SESSION"}</div>
+      <div className="bq-title">{editing ? "Edit session" : solo ? "New session" : "One-off session"}</div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
         <TextField label="TITLE" value={draft.title} onChange={(e) => setDraft({ ...draft, title: e.target.value })} placeholder="e.g. Sunrise HIIT" />
@@ -298,7 +300,7 @@ export function ClassSheet({
         {!solo && !draft.seriesId && <ClassPhotoField value={draft.imageUrl} onChange={(url) => setDraft({ ...draft, imageUrl: url })} title={draft.title} />}
         {solo && editing && (
           <div style={{ background: "var(--sunken)", borderRadius: "var(--r-input)", padding: "12px 14px" }}>
-            <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>COMING · {draft.coming?.length ?? 0}</div>
+            <div className="bq-label">COMING · {draft.coming?.length ?? 0}</div>
             <div style={{ font: "600 14px/1.5 var(--font-body)", marginTop: 4 }}>{draft.coming?.length ? draft.coming.join(", ") : "No one has said they're coming yet."}</div>
           </div>
         )}

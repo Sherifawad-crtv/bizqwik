@@ -208,6 +208,7 @@ function TimeGrid({ days, today, now, on, narrow, onDay, onOpen }: { days: Date[
       const i = days.findIndex((d) => dayKey(d) === dayKey(today));
       if (colMin && i > 0) el.scrollLeft = Math.max(0, (i - 1) * colMin);
     }
+    // Deliberate: Scroll once when the calendar opens, not on every data change.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rangeKey]);
 

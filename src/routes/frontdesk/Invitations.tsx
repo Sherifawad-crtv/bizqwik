@@ -9,7 +9,7 @@ import { Icon } from "../../components/Icon";
 import { Spinner } from "../../components/Spinner";
 import { Card, ClientPicker, ErrorBanner, SectionTitle } from "./shared";
 import { useNewClient } from "./NewClientModal";
-import { useFrontDeskCatalog } from "./Members";
+import { useFrontDeskCatalog } from "./members/offers";
 
 export function Invitations({ embedded = false, onCreateClient }: { embedded?: boolean; onCreateClient?: () => void } = {}) {
   useSetHeader(embedded ? null : { kicker: "FRONT DESK", title: "Invitations" }, []);
@@ -62,7 +62,7 @@ export function Invitations({ embedded = false, onCreateClient }: { embedded?: b
           <Icon name="gift" size={22} />
         </span>
         <div>
-          <div style={{ font: "700 16px var(--font-body)" }}>Guest invitations</div>
+          <div className="bq-h3">Guest invitations</div>
           <div style={{ font: "400 13px/1.5 var(--font-mono)", color: "var(--ink-muted)" }}>Members on an active plan can bring guests, up to the guest passes their plan includes.</div>
         </div>
       </Card>
@@ -93,8 +93,8 @@ export function Invitations({ embedded = false, onCreateClient }: { embedded?: b
         <>
           <Card style={{ padding: "16px 18px", marginBottom: 14 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <div style={{ minWidth: 0, flex: 1 }}>
-                <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>MEMBER</div>
+              <div className="bq-grow">
+                <div className="bq-label">MEMBER</div>
                 <div style={{ font: "800 20px var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{member.name}</div>
               </div>
               <Button

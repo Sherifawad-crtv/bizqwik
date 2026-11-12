@@ -27,7 +27,7 @@ export function installNativeFeel() {
   // Stay upright where the browser lets a web app do that (installed Android
   // app / fullscreen). iOS ignores this; there the OS decides.
   try {
-    void (screen.orientation as any)?.lock?.("portrait")?.catch?.(() => {});
+    void (screen.orientation as ScreenOrientation & { lock?: (o: string) => Promise<void> }).lock?.("portrait")?.catch?.(() => {});
   } catch {
     // Not supported or not allowed here — the manifest's orientation covers installs.
   }

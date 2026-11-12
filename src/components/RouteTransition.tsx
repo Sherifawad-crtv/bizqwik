@@ -182,6 +182,8 @@ export function RouteTransition({ tabs, role, orgMode = "team" }: { tabs: NavIte
       setAnim({ type: "none" });
     }, duration);
 
+    // Deliberate: Runs on navigation only; everything else is read fresh at that moment.
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname]);
 

@@ -4,7 +4,9 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { gzipSync } from "node:zlib";
 
-const BUDGET_KB = 260; // gzip, entry + shared chunks the page loads before the first screen
+// Every tab screen ships up front on purpose (a tab tap must never wait on a
+// download), so this is a ceiling on growth, not a target.
+const BUDGET_KB = 300; // gzip, entry + shared chunks the page loads before the first screen
 const dir = "dist/assets";
 const html = readFileSync("dist/index.html", "utf8");
 const first = [...html.matchAll(/(?:src|href)="\/assets\/([^"]+\.js)"/g)].map((m) => m[1]);

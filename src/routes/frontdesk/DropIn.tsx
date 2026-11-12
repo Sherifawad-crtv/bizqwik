@@ -15,8 +15,9 @@ import { PaymentSelect } from "../../components/PaymentSelect";
 import { Icon } from "../../components/Icon";
 import { Card, ClientPicker, ErrorBanner } from "./shared";
 import { useNewClient } from "./NewClientModal";
-import { useFrontDeskCatalog } from "./Members";
+import { useFrontDeskCatalog } from "./members/offers";
 import type { PayMethod } from "../../lib/types";
+import { useNow } from "../../lib/useNow";
 
 type Mode = "class" | "walkin";
 
@@ -55,7 +56,7 @@ export function DropIn({ embedded = false, initialClient = null }: { embedded?: 
   const [confirmPlan, setConfirmPlan] = useState<string | null>(null);
 
   const classes = useAsync(() => api.classes(), []);
-  const now = Date.now();
+  const now = useNow();
   const sessions = (classes.data?.classes ?? []).filter(
     (c) => c.status === "active" && Date.parse(c.startsAt) >= now - 2 * 60 * 60 * 1000 && Date.parse(c.startsAt) <= now + 7 * 86400000,
   );
@@ -151,7 +152,7 @@ export function DropIn({ embedded = false, initialClient = null }: { embedded?: 
           <Icon name={mode === "class" ? "calendar" : "ticket"} size={22} />
         </span>
         <div>
-          <div style={{ font: "700 16px var(--font-body)" }}>{mode === "class" ? "Drop into a class" : "One-time entry"}</div>
+          <div className="bq-h3">{mode === "class" ? "Drop into a class" : "One-time entry"}</div>
           <div style={{ font: "400 13px/1.5 var(--font-mono)", color: "var(--ink-muted)" }}>
             {mode === "class"
               ? "Charges that class's drop-in price and adds the member to its roster as arrived."
@@ -168,8 +169,8 @@ export function DropIn({ embedded = false, initialClient = null }: { embedded?: 
 
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
         <div style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "10px 16px", display: "flex", alignItems: "center", gap: 10 }}>
-          <div style={{ minWidth: 0, flex: 1 }}>
-            <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>MEMBER</div>
+          <div className="bq-grow">
+            <div className="bq-label">MEMBER</div>
             <div style={{ font: "600 16px var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{client ? client.name : newMember ? "New member" : "Not linked"}</div>
           </div>
           {client || newMember ? (
@@ -279,8 +280,8 @@ function PickClientSheet({ open, onClose, onPick }: { open: boolean; onClose: ()
   const { bundleTypes } = useFrontDeskCatalog();
   return (
     <Sheet open={open} onClose={onClose}>
-      <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>DROP-IN</div>
-      <div style={{ font: "800 26px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 16px" }}>Link a member</div>
+      <div className="bq-label">DROP-IN</div>
+      <div className="bq-title">Link a member</div>
       <ClientPicker clients={data?.clients ?? []} bundleTypes={bundleTypes} onPick={onPick} onCreate={newClient.open} />
       <Button variant="quiet" fullWidth style={{ marginTop: 10 }} onClick={onClose}>
         Cancel

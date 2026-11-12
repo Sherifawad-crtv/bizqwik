@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { findWideLens, setCameraZoom, startQrCamera, type WideLens } from "../lib/qrCamera";
 import { Icon } from "./Icon";
@@ -50,7 +50,6 @@ export function QrScanner({ title, hint, onClose, onScan }: { title: string; hin
   const [stalled, setStalled] = useState(false);
   const doneRef = useRef(false);
   const onScanRef = useRef(onScan);
-  onScanRef.current = onScan;
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
@@ -59,7 +58,11 @@ export function QrScanner({ title, hint, onClose, onScan }: { title: string; hin
   const [lens, setLens] = useState<Lens>(savedLens);
   const [cameraDevice, setCameraDevice] = useState<string | undefined>(undefined);
   const lensRef = useRef(lens);
-  lensRef.current = lens;
+  // Latest values for the camera callbacks, which outlive a render.
+  useLayoutEffect(() => {
+    onScanRef.current = onScan;
+    lensRef.current = lens;
+  });
   const wideRef = useRef<WideLens | null>(null);
   const trackRef = useRef<MediaStreamTrack | undefined>(undefined);
 
@@ -143,7 +146,7 @@ export function QrScanner({ title, hint, onClose, onScan }: { title: string; hin
       style={{ position: "fixed", inset: 0, zIndex: 200, background: "#000", display: "flex", flexDirection: "column", color: "#fff" }}
     >
       <div style={{ display: "flex", alignItems: "flex-start", gap: 12, padding: "calc(env(safe-area-inset-top) + 18px) 18px 12px" }}>
-        <div style={{ flex: 1, minWidth: 0 }}>
+        <div className="bq-grow">
           <div style={{ font: "800 22px/1.2 var(--font-body)" }}>{title}</div>
           <div style={{ font: "400 13px/1.4 var(--font-mono)", color: "rgba(255,255,255,.7)", marginTop: 4 }}>{hint}</div>
         </div>

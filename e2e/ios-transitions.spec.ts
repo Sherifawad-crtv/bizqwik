@@ -103,6 +103,8 @@ test("the back button on a deeper screen slides it away to the right", async ({ 
   await boot(page, "accountant");
   await page.goto("/pay"); await page.waitForTimeout(1200);
   await page.getByText("Coach Nour").first().click();
+  await expect(page).toHaveURL(/\/pay\/c1$/);
+  await expect(page.getByRole("button", { name: /To Pay/ })).toBeVisible();
   await settle(page);
   await page.getByRole("button", { name: /To Pay/ }).click();
   expect(slides(await offsets(page))).toBe(true);
@@ -166,11 +168,11 @@ test("how long each screen takes, and how the phone feels, are measured (numbers
 test("the title follows the screen you're on: it fades between screens and comes back right after going back", async ({ page }) => {
   await boot(page, "dept_head");
   await page.goto("/coaches"); await page.waitForTimeout(1200);
-  const pill = page.locator("div[style*='position: fixed'][style*='top: 0'] span[style*='display: grid']");
+  const pill = page.locator("div[style*='position: fixed'][style*='top: 0'] div[style*='border-radius: 999px']");
   const team = (await pill.innerText()).trim();
   await page.getByText("Coach Nour").click();
   // mid-change both titles are present (old fading out, new fading in)
-  await expect.poll(() => pill.locator("span").count(), { intervals: [15], timeout: 2500 }).toBeGreaterThanOrEqual(2);
+  await expect.poll(() => pill.locator("span").count(), { intervals: [15], timeout: 2500 }).toBeGreaterThanOrEqual(3);
   await settle(page);
   const detail = (await pill.innerText()).trim();
   expect(detail).not.toBe(team);

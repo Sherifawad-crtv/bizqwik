@@ -1,5 +1,5 @@
 import { useScreenActive } from "./screenActive";
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, useContext, useLayoutEffect, useMemo, useState, type ReactNode } from "react";
 
 export interface HeaderSpec {
   kicker: string;
@@ -16,7 +16,8 @@ const Ctx = createContext<HeaderCtx | null>(null);
 
 export function HeaderProvider({ children }: { children: ReactNode }) {
   const [header, setHeader] = useState<HeaderSpec>({ kicker: "", title: "" });
-  return <Ctx.Provider value={{ header, setHeader }}>{children}</Ctx.Provider>;
+  const value = useMemo(() => ({ header, setHeader }), [header]);
+  return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
 
 function useHeaderCtx(): HeaderCtx {
@@ -35,8 +36,11 @@ export function useSetHeader(spec: HeaderSpec | null, deps: unknown[]) {
   // Only the screen you're looking at owns the title: one kept underneath must
   // not overwrite it, and it republishes its own when you come back to it.
   const active = useScreenActive();
-  useEffect(() => {
+  // A layout effect: the title changes in the same frame the screen appears,
+  // not a moment later.
+  useLayoutEffect(() => {
     if (spec && active) setHeader(spec); // null: shown inside a modal, so the page title stays
+    // Deliberate: `spec` is a new object every render; `deps` says when it really changed.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [...deps, active]);
 }

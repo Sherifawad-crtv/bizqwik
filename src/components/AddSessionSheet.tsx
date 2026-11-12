@@ -52,6 +52,7 @@ export function AddSessionSheet({ open, onClose, coachId, coachName, month: mont
       setError(null);
       setSavedCount(null);
     }
+    // Deliberate: Reset the form only when the sheet opens or its subject changes; re-running on every prop change would wipe what's being typed.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, month, scan?.date]);
 
@@ -84,7 +85,7 @@ export function AddSessionSheet({ open, onClose, coachId, coachName, month: mont
         <SheetSuccessIcon label={`Added ${qty} ${qty === 1 ? "session" : "sessions"} · ${egp(qty * rate)}`} iconIn={iconIn} />
       ) : (
         <>
-          <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>NEW ENTRY</div>
+          <div className="bq-label">NEW ENTRY</div>
           <div style={{ font: "800 30px/1.1 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 4px" }}>Log a session</div>
           <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-muted)", marginBottom: 16 }}>
             {coachName ? `Adds to ${coachName}'s ${monthLabel(month)} total.` : `Adds to your ${monthLabel(month)} total.`}
@@ -102,7 +103,7 @@ export function AddSessionSheet({ open, onClose, coachId, coachName, month: mont
             )}
             <Stepper value={qty} onChange={setQty} />
             <div style={{ display: "flex", alignItems: "baseline", gap: 10, padding: "6px 6px 0" }}>
-              <span style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>ADDS</span>
+              <span className="bq-label">ADDS</span>
               <span className="tabular" style={{ marginLeft: "auto", font: "800 30px var(--font-body)", letterSpacing: "-.02em", color: "var(--primary)" }}>
                 +{qty * rate}
               </span>

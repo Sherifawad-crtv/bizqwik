@@ -73,7 +73,7 @@ export function PartnerPicker({ type, buyerId, picked, onChange }: { type: Group
           {results.map((c) => (
             <button key={c.id} className="bq-scale" onClick={() => { onChange([...picked, { clientId: c.id, label: c.name }]); setQ(""); }} style={{ textAlign: "left", minHeight: 44, border: 0, background: "none", cursor: "pointer", font: "600 15px var(--font-body)", color: "var(--ink)" }}>
               {c.name}
-              {c.phone && <span style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}> · {c.phone}</span>}
+              {c.phone && <span className="bq-meta"> · {c.phone}</span>}
             </button>
           ))}
           <Button variant="secondary" onClick={() => setAdding(true)}>Add as a new client</Button>
@@ -118,7 +118,7 @@ export function GroupOfferSelect({ value, onChange, planTypes, series }: { value
               onClick={() => onChange(o.value)}
               style={{ display: "flex", alignItems: "center", gap: 12, padding: "16px 18px", cursor: "pointer", textAlign: "left", borderRadius: "var(--r-card)", border: on ? "2px solid var(--primary)" : "1px solid var(--line)", background: on ? "var(--primary-tint)" : "var(--surface)", color: "var(--ink)" }}
             >
-              <span style={{ flex: 1, minWidth: 0 }}>
+              <span className="bq-grow">
                 <span style={{ display: "block", font: "800 18px var(--font-body)", letterSpacing: "-.01em" }}>{name}</span>
                 <span style={{ display: "block", font: "400 12px var(--font-mono)", color: "var(--ink-muted)", marginTop: 2 }}>{rest.join(" · ")}</span>
               </span>

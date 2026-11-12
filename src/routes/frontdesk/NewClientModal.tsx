@@ -1,7 +1,8 @@
 import { useState, type ReactNode } from "react";
 import { useAsync } from "../../lib/useAsync";
 import { api } from "../../lib/backend";
-import { CreateClientSheet, useFrontDeskCatalog, useSellableCoaches } from "./Members";
+import { CreateClientSheet } from "./members/CreateClientSheet";
+import { useFrontDeskCatalog, useSellableCoaches } from "./members/offers";
 
 /** The new-client flow, with what it needs loaded only while it's open. */
 export function NewClientModal({ onClose }: { onClose: () => void }) {

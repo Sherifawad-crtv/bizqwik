@@ -26,8 +26,8 @@ export function PeoplePanel() {
   return (
     <div>
       <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
-        <span style={{ font: "700 20px var(--font-body)", letterSpacing: "-.01em" }}>People</span>
-        <span style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>{data.profiles.length}</span>
+        <span className="bq-h2">People</span>
+        <span className="bq-meta">{data.profiles.length}</span>
       </div>
 
       <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", overflow: "hidden" }}>
@@ -38,9 +38,9 @@ export function PeoplePanel() {
             style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 20px", border: 0, borderBottom: i === data.profiles.length - 1 ? "none" : "1px solid var(--line)", width: "100%", background: "none", cursor: "pointer", textAlign: "left" }}
         >
             <Avatar name={p.name} size={36} src={p.avatarUrl} />
-            <div style={{ minWidth: 0, flex: 1 }}>
-              <div style={{ font: "700 16px var(--font-body)" }}>{p.name}</div>
-              <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>
+            <div className="bq-grow">
+              <div className="bq-h3">{p.name}</div>
+              <div className="bq-meta">
                 {ROLE_LABELS[p.role].toUpperCase()}
                 {p.tierId ? ` · ${tiers.find((t) => t.id === p.tierId)?.name ?? ""}` : ""}
               </div>
@@ -83,6 +83,7 @@ function PersonSheet({
       setConfirmRemove(false);
       setError(null);
     }
+    // Deliberate: Reset the form only when the sheet opens or its subject changes; re-running on every prop change would wipe what's being typed.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, profile]);
 
@@ -111,13 +112,13 @@ function PersonSheet({
           <Avatar name={shown.name} size={44} src={shown.avatarUrl} />
           <div>
             <div style={{ font: "800 22px var(--font-body)", letterSpacing: "-.01em" }}>{shown.name}</div>
-            <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>{shown.email}</div>
+            <div className="bq-meta">{shown.email}</div>
           </div>
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           <div style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "12px 16px" }}>
-            <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>ROLE</div>
+            <div className="bq-label">ROLE</div>
             <div style={{ font: "600 16px var(--font-body)" }}>{ROLE_LABELS[shown.role]}</div>
           </div>
           {hasTier(shown.role) && (

@@ -103,9 +103,9 @@ export function SoloOffer() {
     <div style={{ marginBottom: 12 }}>
       <div style={card}>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ font: "700 16px var(--font-body)" }}>Drop-in{catalogCurrent && catalogHere ? ` · ${catalogCurrent.name}` : ""}</div>
-            <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>
+          <div className="bq-grow">
+            <div className="bq-h3">Drop-in{catalogCurrent && catalogHere ? ` · ${catalogCurrent.name}` : ""}</div>
+            <div className="bq-meta">
               {catalogHere ? (dropInList.length === 0 ? "Not set" : dropInList.map((o) => `${o.label} ${fmt(o.price)}`).join(" · ") + " EGP") : dropInPrice === null ? "Not set" : `${fmt(dropInPrice)} EGP · one visit`}
             </div>
           </div>
@@ -148,9 +148,9 @@ export function SoloOffer() {
       <div style={card}>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           {instapayQr && <img src={instapayQr} alt="Your InstaPay QR" style={{ width: 56, height: 56, objectFit: "contain", borderRadius: 8, background: "#fff", border: "1px solid var(--line)" }} />}
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ font: "700 16px var(--font-body)" }}>InstaPay QR</div>
-            <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>{instapayQr ? "Shown when someone pays by InstaPay" : "Add it to show on drop-ins"}</div>
+          <div className="bq-grow">
+            <div className="bq-h3">InstaPay QR</div>
+            <div className="bq-meta">{instapayQr ? "Shown when someone pays by InstaPay" : "Add it to show on drop-ins"}</div>
           </div>
           <label style={{ flex: "none", display: "inline-flex", alignItems: "center", height: 40, padding: "0 16px", borderRadius: 999, background: "var(--primary-tint)", color: "var(--primary-pressed)", font: "700 14px var(--font-body)", cursor: "pointer" }}>
             {instapayQr ? "Replace" : "Add QR"}
@@ -160,8 +160,8 @@ export function SoloOffer() {
       </div>
       <div style={card}>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ font: "700 16px var(--font-body)" }}>InstaPay address</div>
+          <div className="bq-grow">
+            <div className="bq-h3">InstaPay address</div>
             <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{instapayAddress ?? "Members copy this to pay you"}</div>
           </div>
           {address === null && (
@@ -215,9 +215,9 @@ export function LocationsCard() {
     <div style={{ marginBottom: 12 }}>
       <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: "16px 20px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: list.length ? 8 : 0 }}>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ font: "700 16px var(--font-body)" }}>Locations</div>
-            <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>{list.length === 0 ? "Working in more than one place? Add them." : "Each plan, PT bundle and session belongs to one."}</div>
+          <div className="bq-grow">
+            <div className="bq-h3">Locations</div>
+            <div className="bq-meta">{list.length === 0 ? "Working in more than one place? Add them." : "Each plan, PT bundle and session belongs to one."}</div>
           </div>
           {list.length < 10 && (
             <Button size="md" variant="secondary" style={{ height: 40, padding: "0 16px" }} onClick={() => { setError(null); setEditing({ id: null, name: "" }); }}>
@@ -236,8 +236,8 @@ export function LocationsCard() {
         ))}
       </div>
       <Sheet open={editing !== null} onClose={busy ? () => {} : () => setEditing(null)}>
-        <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>{editing?.id ? "RENAME LOCATION" : "NEW LOCATION"}</div>
-        <div style={{ font: "800 26px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 16px" }}>{editing?.id ? "Rename" : "Add a location"}</div>
+        <div className="bq-label">{editing?.id ? "RENAME LOCATION" : "NEW LOCATION"}</div>
+        <div className="bq-title">{editing?.id ? "Rename" : "Add a location"}</div>
         <TextField label="NAME" value={editing?.name ?? ""} onChange={(e) => setEditing((x) => (x ? { ...x, name: e.target.value } : x))} placeholder="e.g. Zamalek studio" />
         {error && <div className="bq-rise" style={{ marginTop: 12, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>{error}</div>}
         <Button fullWidth size="lg" style={{ marginTop: 16 }} disabled={busy} onClick={save}>{busy ? "Saving…" : "Save"}</Button>

@@ -55,8 +55,8 @@ export function ClientList({
       )}
 
       <div style={{ display: "flex", alignItems: "baseline", gap: 10, padding: "2px 2px 8px" }}>
-        <span style={{ font: "700 20px var(--font-body)", letterSpacing: "-.01em" }}>Roster</span>
-        <span data-testid="roster-count" style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>
+        <span className="bq-h2">Roster</span>
+        <span data-testid="roster-count" className="bq-meta">
           {filtering ? `${shown.length} of ${clients.length} clients` : `${clients.length} clients`}
         </span>
         {filtering && (

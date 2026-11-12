@@ -1,9 +1,12 @@
+import { existsSync } from "node:fs";
 import { defineConfig, devices } from "@playwright/test";
 
 // Mocked-network smoke tests for the business/ops app. Every Supabase call
 // (auth + edge function) is intercepted in-test, so this runs fully offline
 // against the Vite dev server. Chromium is the pre-installed system build.
-const CHROMIUM = process.env.PLAYWRIGHT_CHROMIUM_PATH || "/opt/pw-browsers/chromium";
+// A browser path can be forced (cloud agents ship one); otherwise Playwright
+// uses the browser it installed itself (`npx playwright install chromium`).
+const FORCED = process.env.PLAYWRIGHT_CHROMIUM_PATH || (existsSync("/opt/pw-browsers/chromium") ? "/opt/pw-browsers/chromium" : undefined);
 
 export default defineConfig({
   testDir: "./e2e",
@@ -16,7 +19,7 @@ export default defineConfig({
   use: {
     baseURL: "http://localhost:5174",
     trace: "off",
-    launchOptions: { executablePath: CHROMIUM },
+    launchOptions: FORCED ? { executablePath: FORCED } : {},
   },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"], browserName: "chromium" } }],
   webServer: {

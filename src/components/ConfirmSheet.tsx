@@ -44,7 +44,7 @@ export function ConfirmSheet({ open, onClose, kicker, title, sub, confirmLabel, 
         <SheetSuccessIcon label={confirmLabel} iconIn={iconIn} />
       ) : (
         <>
-          <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>{kicker}</div>
+          <div className="bq-label">{kicker}</div>
           <div style={{ font: "800 26px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 4px" }}>{title}</div>
           {sub && <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-muted)", marginBottom: 16 }}>{sub}</div>}
           {error && (

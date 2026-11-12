@@ -13,8 +13,8 @@ export function Card({ children, style }: { children: ReactNode; style?: React.C
 export function SectionTitle({ children, count, right }: { children: ReactNode; count?: number | string; right?: ReactNode }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 10, margin: "4px 2px 12px" }}>
-      <span style={{ font: "700 20px var(--font-body)", letterSpacing: "-.01em" }}>{children}</span>
-      {count !== undefined && <span style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>{count}</span>}
+      <span className="bq-h2">{children}</span>
+      {count !== undefined && <span className="bq-meta">{count}</span>}
       {right && <div style={{ marginLeft: "auto" }}>{right}</div>}
     </div>
   );

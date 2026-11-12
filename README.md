@@ -1,8 +1,12 @@
 # Bizqwik
 
-Internal attendance & payout portal for a calisthenics department. Coaches log training
-sessions; heads review and settle; an accountant pays. Built as a mobile-first PWA (native
-tab bar + FAB on mobile, sidebar + tables on desktop ≥1024px).
+Bizqwik is a multi-tenant gym platform: front desk, coaches, accounting and owner tools for
+gyms and studios (this repo is the business app; members use the separate client app). Built
+as a mobile-first PWA (tab bar + FAB on phones, sidebar + tables on desktop ≥1024px) on React,
+Vite and one Supabase edge function.
+
+Checks before shipping: `npm run check` (build, lint, first-download size budget), then
+`npm run test:e2e` (mocked backend; `npx playwright install chromium` once).
 
 ## Roles
 

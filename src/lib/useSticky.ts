@@ -24,6 +24,7 @@ export function useSticky<T extends string>(key: string, initial: T, opts: { url
         setParams(next, { replace: true });
       }
     },
+    // Deliberate: `key` and `opts` are fixed for the life of the hook.
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [key, opts.url],
   );

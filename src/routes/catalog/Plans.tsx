@@ -46,14 +46,14 @@ export function PlansPanel({ solo }: { solo?: boolean }) {
         <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", overflow: "hidden" }}>
           {rows.map((p, i) => (
             <div key={p.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "16px 20px", borderBottom: i === rows.length - 1 ? "none" : "1px solid var(--line)", opacity: p.active ? 1 : 0.6 }}>
-              <div style={{ minWidth: 0, flex: 1 }}>
+              <div className="bq-grow">
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                   <span style={{ font: "700 16px var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.name}</span>
                   <CategoryPill name={p.name} />
                   <LocationPill locations={locations} id={p.locationId} />
                   {!p.active && <span style={{ flex: "none", font: "700 10px var(--font-mono)", letterSpacing: ".06em", color: "var(--ink-muted)", background: "var(--sunken)", borderRadius: 8, padding: "3px 7px" }}>OFF SALE</span>}
                 </div>
-                <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>
+                <div className="bq-meta">
                   {fmt(p.price)} EGP · {p.kind === "bundle" ? `${p.credits} classes${p.sharedSeats ? ` shared by ${p.sharedSeats}` : ""} · ` : "all classes · "}
                   {p.durationMonths} month{p.durationMonths === 1 ? "" : "s"}
                   {p.invitationsAllowance > 0 ? ` · ${p.invitationsAllowance} guest pass${p.invitationsAllowance === 1 ? "" : "es"}` : ""}
@@ -142,6 +142,8 @@ export function PlanTypeSheet({ open, kind: kindProp, planType: planTypeProp, on
       setLocationId(planType ? (planType.locationId ?? null) : (current?.id ?? null));
       setError(null);
     }
+    // Deliberate: Reset the form when the sheet opens or its subject changes; the default location is read at that moment (a late-arriving location must not wipe the form).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, planType]);
 
   if (!mounted) return null;
@@ -178,8 +180,8 @@ export function PlanTypeSheet({ open, kind: kindProp, planType: planTypeProp, on
         <SheetSuccessIcon label={planType ? "Plan updated" : `${isBundle ? "Bundle" : "Membership"} created`} iconIn={iconIn} />
       ) : (
         <>
-          <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>{planType ? `EDIT ${noun.toUpperCase()}` : isBundle ? "NEW CLASS BUNDLE" : "NEW MEMBERSHIP"}</div>
-          <div style={{ font: "800 26px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 16px" }}>{planType ? planType.name : isBundle ? "New bundle" : "New membership"}</div>
+          <div className="bq-label">{planType ? `EDIT ${noun.toUpperCase()}` : isBundle ? "NEW CLASS BUNDLE" : "NEW MEMBERSHIP"}</div>
+          <div className="bq-title">{planType ? planType.name : isBundle ? "New bundle" : "New membership"}</div>
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             <TextField label="NAME" value={name} onChange={(e) => setName(e.target.value)} placeholder={isBundle ? "10-Class Pack" : "All-Access · 3 Months"} />
             <TextField label="PRICE · EGP" type="number" min={0} inputMode="decimal" value={price} onChange={(e) => setPrice(e.target.value)} />

@@ -35,8 +35,8 @@ export function BundlesPanel() {
   return (
     <div>
       <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
-        <span style={{ font: "700 20px var(--font-body)", letterSpacing: "-.01em" }}>Private training bundles</span>
-        <span style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>{rows.length}</span>
+        <span className="bq-h2">Private training bundles</span>
+        <span className="bq-meta">{rows.length}</span>
         <Button size="md" style={{ marginLeft: "auto", height: 40, padding: "0 16px" }} onClick={() => setEditing("new")}>
           + New bundle
         </Button>
@@ -45,13 +45,13 @@ export function BundlesPanel() {
       <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", overflow: "hidden" }}>
         {rows.map((b, i) => (
           <div key={b.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "16px 20px", borderBottom: i === rows.length - 1 ? "none" : "1px solid var(--line)" }}>
-            <div style={{ minWidth: 0, flex: 1 }}>
+            <div className="bq-grow">
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <span style={{ font: "700 16px var(--font-body)" }}>{b.name}</span>
+                <span className="bq-h3">{b.name}</span>
                 <CategoryPill name={b.name} />
                 <LocationPill locations={locations} id={b.locationId} />
               </div>
-              <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>
+              <div className="bq-meta">
                 {b.price} EGP · {b.sessionsIncluded} sessions · {b.expiryDays >= NO_EXPIRY_DAYS ? "no expiry" : `${b.expiryDays} days`}
               </div>
             </div>
@@ -117,6 +117,7 @@ export function BundleSheet({ open, bundleType: bundleTypeProp, onClose }: { ope
       setOnSale(bundleType && bundleType.active === false ? "off" : "on");
       setError(null);
     }
+    // Deliberate: Reset the form only when the sheet opens or its subject changes; re-running on every prop change would wipe what's being typed.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, bundleType]);
 
@@ -156,8 +157,8 @@ export function BundleSheet({ open, bundleType: bundleTypeProp, onClose }: { ope
         <SheetSuccessIcon label={bundleType ? "Bundle updated" : "Bundle created"} iconIn={iconIn} />
       ) : (
         <>
-          <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>{bundleType ? "EDIT BUNDLE" : "NEW BUNDLE"}</div>
-          <div style={{ font: "800 26px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 16px" }}>{bundleType ? bundleType.name : "New bundle"}</div>
+          <div className="bq-label">{bundleType ? "EDIT BUNDLE" : "NEW BUNDLE"}</div>
+          <div className="bq-title">{bundleType ? bundleType.name : "New bundle"}</div>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             <TextField label="NAME" value={name} onChange={(e) => setName(e.target.value)} placeholder="24-Session Pack" />
             <TextField label="PRICE · EGP" type="number" min={1} value={price} onChange={(e) => setPrice(e.target.value)} />

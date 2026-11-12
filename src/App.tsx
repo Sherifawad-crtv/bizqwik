@@ -6,6 +6,25 @@ import { OwnMonthProvider } from "./lib/ownMonth";
 import { RequireAuth, RequireRole, RequireBizqwikTeam, RequireDesk, RequireTeam } from "./lib/guards";
 import { Spinner } from "./components/Spinner";
 import { Shell } from "./components/Shell";
+import { Login } from "./routes/Login";
+import { Signup } from "./routes/Signup";
+import { Home } from "./routes/Home";
+import { Account } from "./routes/Account";
+import { Oversight } from "./routes/Oversight";
+import { Money } from "./routes/Money";
+import { Activity, Transactions } from "./routes/Activity";
+import { Catalog } from "./routes/Catalog";
+import { Accounting } from "./routes/Accounting";
+import { Pay } from "./routes/Pay";
+import { History } from "./routes/History";
+import { Clients } from "./routes/Clients";
+import { CoachesOverview } from "./routes/CoachesOverview";
+import { Members } from "./routes/frontdesk/Members";
+import { CheckIn } from "./routes/frontdesk/CheckIn";
+import { DropIn } from "./routes/frontdesk/DropIn";
+import { Bookings } from "./routes/frontdesk/Bookings";
+import { Invitations } from "./routes/frontdesk/Invitations";
+import { ClassesManage } from "./routes/ClassesManage";
 import { isChunkLoadError, reloadForUpdate } from "./lib/chunkReload";
 
 import { LaunchGate } from "./components/Splash";
@@ -24,32 +43,12 @@ function lazyNamed<T extends Record<string, unknown>>(load: () => Promise<T>, na
     }
   });
 }
-const Login = lazyNamed(() => import("./routes/Login"), "Login");
-const Signup = lazyNamed(() => import("./routes/Signup"), "Signup");
-const Money = lazyNamed(() => import("./routes/Money"), "Money");
-const Home = lazyNamed(() => import("./routes/Home"), "Home");
-const Oversight = lazyNamed(() => import("./routes/Oversight"), "Oversight");
-const ClassesManage = lazyNamed(() => import("./routes/ClassesManage"), "ClassesManage");
-const Activity = lazyNamed(() => import("./routes/Activity"), "Activity");
-const Transactions = lazyNamed(() => import("./routes/Activity"), "Transactions");
-const Catalog = lazyNamed(() => import("./routes/Catalog"), "Catalog");
-const Account = lazyNamed(() => import("./routes/Account"), "Account");
-const Members = lazyNamed(() => import("./routes/frontdesk/Members"), "Members");
-const CheckIn = lazyNamed(() => import("./routes/frontdesk/CheckIn"), "CheckIn");
-const DropIn = lazyNamed(() => import("./routes/frontdesk/DropIn"), "DropIn");
-const Bookings = lazyNamed(() => import("./routes/frontdesk/Bookings"), "Bookings");
 const Welcome = lazyNamed(() => import("./routes/Welcome"), "Welcome");
 const ForgotPassword = lazyNamed(() => import("./routes/ForgotPassword"), "ForgotPassword");
 const ResetPassword = lazyNamed(() => import("./routes/ResetPassword"), "ResetPassword");
-const CoachesOverview = lazyNamed(() => import("./routes/CoachesOverview"), "CoachesOverview");
 const CoachDetail = lazyNamed(() => import("./routes/CoachDetail"), "CoachDetail");
 const Manage = lazyNamed(() => import("./routes/Manage"), "Manage");
-const Pay = lazyNamed(() => import("./routes/Pay"), "Pay");
 const PayeeDetail = lazyNamed(() => import("./routes/PayeeDetail"), "PayeeDetail");
-const History = lazyNamed(() => import("./routes/History"), "History");
-const Accounting = lazyNamed(() => import("./routes/Accounting"), "Accounting");
-const Clients = lazyNamed(() => import("./routes/Clients"), "Clients");
-const Invitations = lazyNamed(() => import("./routes/frontdesk/Invitations"), "Invitations");
 const DeskClasses = lazyNamed(() => import("./routes/frontdesk/DeskClasses"), "DeskClasses");
 const AccountProfile = lazyNamed(() => import("./routes/AccountProfile"), "AccountProfile");
 const AccountPassword = lazyNamed(() => import("./routes/AccountPassword"), "AccountPassword");
@@ -60,8 +59,9 @@ const OpsOrgQr = lazyNamed(() => import("./routes/ops/OrgQr"), "OrgQr");
 const OpsTeam = lazyNamed(() => import("./routes/ops/Team"), "Team");
 const OpsPlans = lazyNamed(() => import("./routes/ops/Plans"), "Plans");
 
-// Once the first screen is up and the phone is idle, quietly download the
-// other screens so tapping a tab never waits on a download.
+// Every screen in a tab bar loads up front, so a tab tap never waits on a
+// download. The rest (detail pages, settings, sign-up) load on demand; once
+// the phone is idle they are fetched quietly too.
 const warmed = { done: false };
 function WarmScreens() {
   const { profile } = useAuth();
@@ -71,11 +71,9 @@ function WarmScreens() {
     const w = window as Window & { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number };
     const run = () => {
       for (const load of [
-        () => import("./routes/Home"), () => import("./routes/Money"), () => import("./routes/Oversight"),
-        () => import("./routes/ClassesManage"), () => import("./routes/Activity"), () => import("./routes/Catalog"),
-        () => import("./routes/Account"), () => import("./routes/frontdesk/Members"), () => import("./routes/frontdesk/CheckIn"),
-        () => import("./routes/frontdesk/DropIn"), () => import("./routes/frontdesk/Bookings"), () => import("./routes/CoachesOverview"),
-        () => import("./routes/Clients"), () => import("./routes/History"),
+        () => import("./routes/CoachDetail"), () => import("./routes/PayeeDetail"), () => import("./routes/Manage"),
+        () => import("./routes/frontdesk/DeskClasses"),
+        () => import("./routes/AccountProfile"), () => import("./routes/AccountPassword"),
       ]) load().catch(() => {});
     };
     if (w.requestIdleCallback) w.requestIdleCallback(run, { timeout: 6000 });

@@ -7,7 +7,7 @@ import { EmptyState } from "./EmptyState";
 export function TextField({ label, ...rest }: { label: string } & InputHTMLAttributes<HTMLInputElement>) {
   return (
     <label style={{ display: "block", background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "10px 16px" }}>
-      <span style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>{label}</span>
+      <span className="bq-label">{label}</span>
       <input
         {...rest}
         style={{ display: "block", width: "100%", border: 0, background: "none", outline: "none", font: "600 16px var(--font-body)", color: "var(--ink)", padding: "2px 0 0" }}
@@ -56,7 +56,7 @@ export function SelectField({ label, value, options, onChange, placeholder, disa
           opacity: disabled ? 0.6 : 1,
         }}
       >
-        <span style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>{label}</span>
+        <span className="bq-label">{label}</span>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <span style={{ font: "600 16px var(--font-body)", color: selected ? "var(--ink)" : "var(--ink-faint)" }}>
             {selected?.label ?? (options.length === 0 ? (empty?.title ?? "Nothing to choose yet") : (placeholder ?? "Select…"))}
@@ -68,7 +68,7 @@ export function SelectField({ label, value, options, onChange, placeholder, disa
       </button>
 
       <Sheet open={open} onClose={() => setOpen(false)}>
-        <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>{label}</div>
+        <div className="bq-label">{label}</div>
         {options.length === 0 ? (
           <>
             <EmptyState bare icon="inbox" title={empty?.title ?? "Nothing to choose yet"} body={empty?.body ?? "There are no options here yet."} />
@@ -77,7 +77,7 @@ export function SelectField({ label, value, options, onChange, placeholder, disa
             </Button>
           </>
         ) : (
-          <div style={{ font: "800 26px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 16px" }}>Choose one</div>
+          <div className="bq-title">Choose one</div>
         )}
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           {options.map((o) => {

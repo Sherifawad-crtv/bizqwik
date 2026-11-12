@@ -15,6 +15,7 @@ import { RevenueChart } from "../Oversight";
 import { LocationSwitcher, atLocation, useCurrentLocation } from "../../lib/locations";
 import { PaymentRequestsCard } from "./PaymentRequests";
 import { Card, SectionLink, SectionTitle, endingSoon, planSummary } from "./shared";
+import { useNow } from "../../lib/useNow";
 
 const clockOf = (iso: string) => {
   const d = new Date(iso);
@@ -47,7 +48,7 @@ function Stat({ label, value, sub, icon, tone, onClick }: { label: string; value
         <span style={{ width: 32, height: 32, borderRadius: 999, flex: "none", display: "flex", alignItems: "center", justifyContent: "center", background: TONES[tone].bg, color: TONES[tone].fg }}>
           <Icon name={icon} size={17} />
         </span>
-        <span style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>{label}</span>
+        <span className="bq-label">{label}</span>
       </div>
       <div style={{ font: "800 30px/1.1 var(--font-body)", letterSpacing: "-.02em", marginTop: 10, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{value}</div>
       <div style={{ font: "400 12px var(--font-mono)", color: "var(--ink-muted)", marginTop: 4 }}>{sub}</div>
@@ -65,7 +66,7 @@ export function SoloHome() {
   const revenue = useAsync(() => api.revenue(12), []);
   const classes = useAsync(() => api.classes(new Date(Date.now() - 2 * 3600000).toISOString()), []);
   const bundles = useAsync(() => api.bundleTypes(), []);
-  const bundleTypes = bundles.data?.bundleTypes ?? [];
+  const bundleTypes = useMemo(() => bundles.data?.bundleTypes ?? [], [bundles.data]);
   const { locations, current, ready: locsReady } = useCurrentLocation();
   // Two or more locations: everything on Today is the selected location's.
   const here = locations.length > 1 ? (current?.id ?? null) : null;
@@ -93,13 +94,14 @@ export function SoloHome() {
   const lastMonth = months.at(-2)?.revenue ?? 0;
   const delta = lastMonth > 0 ? Math.round(((thisMonth - lastMonth) / lastMonth) * 100) : null;
 
+  const now = useNow();
   const nextUp = useMemo(() => {
     // Only what's on at the location she's working at (plus anything untied).
     return (classes.data?.classes ?? [])
-      .filter((c) => c.status !== "cancelled" && Date.parse(c.startsAt) + 3600000 >= Date.now())
+      .filter((c) => c.status !== "cancelled" && Date.parse(c.startsAt) + 3600000 >= now)
       .filter((c) => atLocation(c.locationId, here))
       .slice(0, 5);
-  }, [classes.data, here]);
+  }, [classes.data, here, now]);
 
   const nextUpId = nextUp[0]?.id;
   const goMembers = (filter: string) => {
@@ -142,7 +144,7 @@ export function SoloHome() {
               <span style={{ display: "block", whiteSpace: "nowrap" }}>{clockOf(c.startsAt)}</span>
               <span style={{ display: "block", font: "400 11px var(--font-mono)", color: "var(--ink-faint)" }}>{dayOf(c.startsAt)}</span>
             </span>
-            <span style={{ minWidth: 0, flex: 1 }}>
+            <span className="bq-grow">
               <span style={{ display: "block", font: "700 15px var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.title}</span>
               <span style={{ display: "block", font: "400 12px var(--font-mono)", color: (c.bookedCount ?? 0) > 0 ? "var(--primary-pressed)" : "var(--ink-faint)" }}>
                 {(c.bookedCount ?? 0) > 0 ? `${c.bookedCount} coming` : "No one yet"}

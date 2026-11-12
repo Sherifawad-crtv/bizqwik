@@ -101,8 +101,8 @@ export function CreateOrgSheet({ open, onClose, plans, onCreated }: { open: bool
 
   return (
     <Sheet open={open} onClose={close}>
-      <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>NEW ORGANIZATION</div>
-      <div style={{ font: "800 26px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 16px" }}>Onboard a gym</div>
+      <div className="bq-label">NEW ORGANIZATION</div>
+      <div className="bq-title">Onboard a gym</div>
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
         <TextField label="ORGANIZATION NAME" value={name} onChange={(e) => setName(e.target.value)} placeholder="Iron Athletics" />
         <TextField

@@ -31,8 +31,8 @@ export function TiersPanel({ onOpenPeople, onOpenInvites }: { onOpenPeople: () =
   return (
     <div>
       <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
-        <span style={{ font: "700 20px var(--font-body)", letterSpacing: "-.01em" }}>Tiers</span>
-        <span style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>{data.tiers.length}</span>
+        <span className="bq-h2">Tiers</span>
+        <span className="bq-meta">{data.tiers.length}</span>
         <Button size="md" style={{ marginLeft: "auto", height: 40, padding: "0 16px" }} onClick={() => setEditing("new")}>
           + New tier
         </Button>
@@ -41,9 +41,9 @@ export function TiersPanel({ onOpenPeople, onOpenInvites }: { onOpenPeople: () =
       <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", overflow: "hidden" }}>
         {data.tiers.map((t, i) => (
           <div key={t.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "16px 20px", borderBottom: i === data.tiers.length - 1 ? "none" : "1px solid var(--line)" }}>
-            <div style={{ minWidth: 0, flex: 1 }}>
-              <div style={{ font: "700 16px var(--font-body)" }}>{t.name}</div>
-              <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>{t.rate} EGP / session · {t.privateCutPct}% private cut</div>
+            <div className="bq-grow">
+              <div className="bq-h3">{t.name}</div>
+              <div className="bq-meta">{t.rate} EGP / session · {t.privateCutPct}% private cut</div>
             </div>
             <button className="bq-hit" onClick={() => setEditing(t)} aria-label="Edit tier" style={{ width: 36, height: 36, borderRadius: 999, border: 0, background: "var(--primary-tint)", color: "var(--primary-pressed)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <Icon name="pencil" size={15} />
@@ -61,7 +61,7 @@ export function TiersPanel({ onOpenPeople, onOpenInvites }: { onOpenPeople: () =
       <TierSheet open={editing !== null} tier={editing === "new" ? null : editing} onClose={() => setEditing(null)} />
       {shownDeleting && (onTier(shownDeleting.id).length > 0 || invitedTo(shownDeleting.id).length > 0) ? (
         <Sheet open={!!deleting} onClose={() => setDeleting(null)}>
-          <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>DELETE TIER</div>
+          <div className="bq-label">DELETE TIER</div>
           <div style={{ font: "800 26px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 4px" }}>{shownDeleting.name} is still in use</div>
           <div style={{ font: "400 13px/1.5 var(--font-mono)", color: "var(--ink-muted)", marginBottom: 14 }}>Move these to another tier first, then delete it.</div>
           <div style={{ background: "var(--sunken)", borderRadius: "var(--r-input)", padding: "6px 16px", marginBottom: 16 }}>
@@ -129,6 +129,7 @@ export function TierSheet({ open, tier: tierProp, onClose }: { open: boolean; ti
       setPrivateCutPct(String(tier?.privateCutPct ?? ""));
       setError(null);
     }
+    // Deliberate: Reset the form only when the sheet opens or its subject changes; re-running on every prop change would wipe what's being typed.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, tier]);
 
@@ -164,8 +165,8 @@ export function TierSheet({ open, tier: tierProp, onClose }: { open: boolean; ti
         <SheetSuccessIcon label={tier ? "Tier updated" : "Tier created"} iconIn={iconIn} />
       ) : (
         <>
-          <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>{tier ? "EDIT TIER" : "NEW TIER"}</div>
-          <div style={{ font: "800 26px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 16px" }}>{tier ? tier.name : "New tier"}</div>
+          <div className="bq-label">{tier ? "EDIT TIER" : "NEW TIER"}</div>
+          <div className="bq-title">{tier ? tier.name : "New tier"}</div>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             <TextField label="NAME" value={name} onChange={(e) => setName(e.target.value)} placeholder="Tier 2 · Intermediate" />
             <TextField label="RATE · EGP / SESSION" type="number" min={1} value={rate} onChange={(e) => setRate(e.target.value)} />

@@ -27,7 +27,7 @@ export function PaymentRequestsCard() {
         <span style={{ width: 34, height: 34, borderRadius: 999, flex: "none", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--surface)", color: "var(--logging-fg)" }}>
           <Icon name="cash" size={18} />
         </span>
-        <span style={{ flex: 1, minWidth: 0 }}>
+        <span className="bq-grow">
           <span style={{ display: "block", font: "700 15px var(--font-body)", color: "var(--logging-fg)" }}>
             {list.length} payment{list.length === 1 ? "" : "s"} to approve
           </span>
@@ -36,7 +36,7 @@ export function PaymentRequestsCard() {
         <Icon name="chevron-right" size={16} />
       </button>
       <Sheet open={open} onClose={() => setOpen(false)}>
-        <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>INSTAPAY</div>
+        <div className="bq-label">INSTAPAY</div>
         <div style={{ font: "800 26px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 14px" }}>Payments to approve</div>
         {list.length === 0 && <div style={{ font: "400 14px var(--font-body)", color: "var(--ink-muted)", padding: "12px 0 8px" }}>All caught up.</div>}
         <div style={{ display: "flex", flexDirection: "column", gap: 12, maxHeight: "60vh", overflowY: "auto" }}>
@@ -76,8 +76,8 @@ function RequestRow({ r, onDone }: { r: PaymentRequest; onDone: () => void }) {
         ) : (
           <span style={{ width: 72, height: 96, flex: "none", borderRadius: 10, background: "var(--sunken)" }} />
         )}
-        <div style={{ minWidth: 0, flex: 1 }}>
-          <div style={{ font: "700 16px var(--font-body)" }}>{r.clientName}</div>
+        <div className="bq-grow">
+          <div className="bq-h3">{r.clientName}</div>
           <div style={{ font: "400 14px var(--font-body)", marginTop: 2 }}>{r.name}</div>
           <div style={{ font: "800 20px var(--font-body)", marginTop: 4 }}>{egp(r.price)}</div>
           <div style={{ font: "400 12px var(--font-mono)", color: "var(--ink-faint)", marginTop: 2 }}>{when(r.createdAt)}</div>

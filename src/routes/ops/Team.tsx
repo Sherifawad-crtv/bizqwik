@@ -48,8 +48,8 @@ function InviteSheet({ open, onClose, onDone }: { open: boolean; onClose: () => 
 
   return (
     <Sheet open={open} onClose={close}>
-      <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>INVITE TEAMMATE</div>
-      <div style={{ font: "800 26px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 16px" }}>Add to Bizqwik team</div>
+      <div className="bq-label">INVITE TEAMMATE</div>
+      <div className="bq-title">Add to Bizqwik team</div>
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
         <TextField label="NAME" value={name} onChange={(e) => setName(e.target.value)} placeholder="Optional" />
         <TextField label="EMAIL" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="teammate@bizqwik.com" />
@@ -102,7 +102,7 @@ export function Team() {
         {members.map((m, i) => (
           <div key={m.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 18px", borderBottom: i === members.length - 1 ? "none" : "1px solid var(--line)" }}>
             <Avatar name={m.name} size={34} />
-            <div style={{ minWidth: 0, flex: 1 }}>
+            <div className="bq-grow">
               <div style={{ font: "700 15px var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{m.name}</div>
               <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{m.email}</div>
             </div>
@@ -121,7 +121,7 @@ export function Team() {
             {invites.map((inv, i) => (
               <div key={inv.email} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 18px", borderBottom: i === invites.length - 1 ? "none" : "1px solid var(--line)" }}>
                 <span style={{ color: "var(--ink-faint)", display: "flex" }}><Icon name="envelope" size={18} /></span>
-                <div style={{ minWidth: 0, flex: 1 }}>
+                <div className="bq-grow">
                   <div style={{ font: "600 15px var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{inv.email}</div>
                   <div style={{ font: "400 12px var(--font-mono)", color: "var(--ink-faint)" }}>{BIZQWIK_ROLE_LABELS[inv.role]}</div>
                 </div>

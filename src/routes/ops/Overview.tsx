@@ -13,7 +13,7 @@ import { CreateOrgSheet } from "./CreateOrgSheet";
 function StatTile({ label, value }: { label: string; value: string }) {
   return (
     <Card style={{ padding: "16px 18px" }}>
-      <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>{label}</div>
+      <div className="bq-label">{label}</div>
       <div style={{ font: "800 26px/1.1 var(--font-body)", letterSpacing: "-.02em", marginTop: 6 }} className="tabular">{value}</div>
     </Card>
   );
@@ -36,7 +36,7 @@ export function Overview() {
     <div>
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
         <div>
-          <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>BIZQWIK OPS</div>
+          <div className="bq-label">BIZQWIK OPS</div>
           <div style={{ font: "800 30px/1.1 var(--font-body)", letterSpacing: "-.02em", marginTop: 4 }}>Overview</div>
         </div>
         <Button onClick={() => setSheetOpen(true)} style={{ marginLeft: "auto" }}>
@@ -72,9 +72,9 @@ export function Overview() {
               textAlign: "left",
             }}
           >
-            <div style={{ minWidth: 0, flex: 1 }}>
+            <div className="bq-grow">
               <div style={{ font: "700 16px var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{o.name}</div>
-              <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>
+              <div className="bq-meta">
                 {o.planName ?? "No plan"} · {o.staffCount} staff · {o.clientCount} clients
               </div>
             </div>

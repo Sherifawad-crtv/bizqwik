@@ -94,7 +94,7 @@ export function PnlPanel({ report, loading, onAddExpense, onCoachPayouts }: { re
 
       <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: "20px 20px 18px", marginBottom: 10 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>REVENUE · EGP</span>
+          <span className="bq-label">REVENUE · EGP</span>
           {prev && <span style={{ marginLeft: "auto" }}><Delta pct={pctChange(current.netRevenue, prev.netRevenue)} tone="good" /></span>}
         </div>
         <div className="tabular" style={{ font: "800 48px/1 var(--font-body)", letterSpacing: "-.03em", margin: "8px 0 0", overflowWrap: "anywhere" }}>{fmt(current.netRevenue)}</div>
@@ -129,7 +129,7 @@ export function PnlPanel({ report, loading, onAddExpense, onCoachPayouts }: { re
                 disabled={s.key !== "coach_payouts"}
                 style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", border: 0, background: "none", padding: "6px 0", cursor: s.key === "coach_payouts" ? "pointer" : "default", textAlign: "left" }}
               >
-                <span style={{ flex: 1, minWidth: 0 }}>
+                <span className="bq-grow">
                   <div style={{ font: "600 14px var(--font-body)" }}>{s.label}</div>
                   {s.key === "coach_payouts" && (
                     <div style={{ font: "400 11px var(--font-mono)", color: "var(--ink-faint)" }}>

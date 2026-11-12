@@ -11,11 +11,13 @@ import { Sheet } from "../../components/Sheet";
 import { SheetSuccessIcon } from "../../components/SheetSuccessIcon";
 import { Spinner } from "../../components/Spinner";
 import { ClientPicker, ErrorBanner, PlanPill, planSummary } from "./shared";
-import { ClientSheet, useFrontDeskCatalog, useSellableCoaches } from "./Members";
+import { ClientSheet } from "./members/ClientSheet";
+import { useFrontDeskCatalog, useSellableCoaches } from "./members/offers";
 import { useNewClient } from "./NewClientModal";
 import { DropIn } from "./DropIn";
 import { SheetHeading } from "./shared";
 import { dateLabel } from "../../lib/format";
+import { useNow } from "../../lib/useNow";
 
 const hasActivePlan = (c: ClientWithPackage) => !!c.groupPlan || c.currentPackage?.status === "active";
 // A class bundle with nothing left can't be checked in on (unless PT covers them).
@@ -59,6 +61,7 @@ export function ConfirmCheckInSheet({ client, onClose, onDropIn }: { client: Cli
   const { current: here } = useCurrentLocation();
   const shown = useLatch(client);
   const open = !!client;
+  const now = useNow();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [noSessions, setNoSessions] = useState<string | null>(null);
@@ -107,7 +110,7 @@ export function ConfirmCheckInSheet({ client, onClose, onDropIn }: { client: Cli
   const bundle = current.groupPlan?.kind === "bundle" ? current.groupPlan : null;
   const empty = bundleEmpty(current) && current.currentPackage?.status !== "active";
   // A frozen plan can't be checked in on until it restarts (a PT package still can).
-  const frozenUntil = current.groupPlan?.frozenUntil && Date.parse(current.groupPlan.frozenUntil) > Date.now() && current.currentPackage?.status !== "active" ? current.groupPlan.frozenUntil : null;
+  const frozenUntil = current.groupPlan?.frozenUntil && Date.parse(current.groupPlan.frozenUntil) > now && current.currentPackage?.status !== "active" ? current.groupPlan.frozenUntil : null;
   const eligible = hasActivePlan(current) && !empty && !noSessions && !frozenUntil;
 
   const confirm = async () => {
@@ -133,8 +136,8 @@ export function ConfirmCheckInSheet({ client, onClose, onDropIn }: { client: Cli
         <SheetSuccessIcon label={doneLabel || `${shown.name} checked in`} iconIn={iconIn} />
       ) : (
         <>
-          <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>CHECK-IN</div>
-          <div style={{ font: "800 26px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 16px" }}>{shown.name}</div>
+          <div className="bq-label">CHECK-IN</div>
+          <div className="bq-title">{shown.name}</div>
           <div style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "12px 16px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", flex: 1 }}>CURRENT PLAN</div>

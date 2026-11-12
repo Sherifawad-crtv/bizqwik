@@ -83,7 +83,7 @@ export function ExpensesPanel({
       <PlainCard style={{ overflow: "hidden", marginBottom: 14 }}>
         {coachPayouts > 0 && !categoryFilter && !query && (
           <button className="bq-scale" onClick={onCoachPayouts} style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", border: 0, borderBottom: "1px solid var(--line)", background: "var(--sunken)", cursor: "pointer", textAlign: "left", padding: "13px 18px" }}>
-            <div style={{ minWidth: 0, flex: 1 }}>
+            <div className="bq-grow">
               <div style={{ font: "700 15px var(--font-body)" }}>Coach payouts</div>
               <div style={{ font: "400 12px var(--font-mono)", color: "var(--ink-faint)" }}>Settled this month · locked</div>
             </div>
@@ -93,7 +93,7 @@ export function ExpensesPanel({
         )}
         {expenses.map((e, i) => (
           <button key={e.id} className="bq-scale" onClick={() => setSheetMode(e)} style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", border: 0, background: "none", cursor: "pointer", textAlign: "left", padding: "13px 18px", borderBottom: i === expenses.length - 1 ? "none" : "1px solid var(--line)" }}>
-            <div style={{ minWidth: 0, flex: 1 }}>
+            <div className="bq-grow">
               <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                 <span style={{ font: "700 15px var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{e.categoryName}</span>
                 <ReceiptIcon has={e.hasReceipt} />

@@ -3,13 +3,11 @@ import { useSetHeader } from "../lib/header";
 import { LocationSwitcher, useCurrentLocation } from "../lib/locations";
 import { Segmented } from "../components/Segmented";
 import { Spinner } from "../components/Spinner";
-import { BundlesPanel } from "./Manage";
+import { BundlesPanel } from "./manage/BundlesPanel";
 import { useAuth } from "../lib/auth";
 import { ClassesPanel } from "./catalog/Classes";
 import { PlansPanel } from "./catalog/Plans";
 import { LocationsCard, SoloOffer } from "./catalog/Solo";
-export { SeriesSheet } from "./catalog/Classes";
-export { PlanTypeSheet } from "./catalog/Plans";
 
 type Tab = "classes" | "plans" | "pt";
 

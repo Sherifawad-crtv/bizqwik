@@ -10,7 +10,7 @@ import { Spinner } from "../components/Spinner";
 import { canLog } from "../lib/types";
 import { useAuth } from "../lib/auth";
 import { Icon } from "../components/Icon";
-import { InviteFlow } from "./Manage";
+import { InviteFlow } from "./manage/Invites";
 
 export function CoachesOverview() {
   const month = MOCK.CURRENT_MONTH;
@@ -56,7 +56,7 @@ export function CoachesOverview() {
           <span style={{ color: "var(--primary-pressed)", display: "flex" }}>
             <Icon name="settings" size={20} />
           </span>
-          <span style={{ flex: 1, minWidth: 0 }}>
+          <span className="bq-grow">
             <span style={{ display: "block", font: "700 15px var(--font-body)" }}>Team & tiers</span>
             <span style={{ display: "block", font: "400 12px var(--font-mono)", color: "var(--ink-faint)", marginTop: 2 }}>Pay tiers, staff invites and people</span>
           </span>
@@ -64,8 +64,8 @@ export function CoachesOverview() {
         </button>
       )}
       <div style={{ display: "flex", alignItems: "baseline", gap: 10, padding: "2px 2px 8px" }}>
-        <span style={{ font: "700 20px var(--font-body)", letterSpacing: "-.01em" }}>Roster</span>
-        <span style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>{rows.length} coaches</span>
+        <span className="bq-h2">Roster</span>
+        <span className="bq-meta">{rows.length} coaches</span>
       </div>
       <RollupTable
         colA="COACH"

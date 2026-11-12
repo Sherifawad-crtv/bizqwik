@@ -18,8 +18,8 @@ export const iconBtn = (danger?: boolean): React.CSSProperties => ({
 export function PanelHeader({ title, count, action }: { title: string; count: number; action?: React.ReactNode }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
-      <span style={{ font: "700 20px var(--font-body)", letterSpacing: "-.01em" }}>{title}</span>
-      <span style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>{count}</span>
+      <span className="bq-h2">{title}</span>
+      <span className="bq-meta">{count}</span>
       {action && <div style={{ marginLeft: "auto" }}>{action}</div>}
     </div>
   );

@@ -16,10 +16,11 @@ import { CheckIn } from "./CheckIn";
 import { DropIn } from "./DropIn";
 import { Invitations } from "./Invitations";
 import { ConfirmCheckInSheet } from "./CheckIn";
-import { useFrontDeskCatalog } from "./Members";
+import { useFrontDeskCatalog } from "./members/offers";
 import { ClassRosterSheet } from "../../components/ClassRosterSheet";
 import { timeLabel, pad } from "../../lib/classTime";
 import type { ClientWithPackage, GymClass } from "../../lib/types";
+import { useNow } from "../../lib/useNow";
 
 type Modal = "checkin" | "new" | "dropin" | "invite";
 
@@ -69,11 +70,12 @@ export function FrontDeskHome() {
   };
   const matches = useMemo(() => (clients.data?.clients ?? []).filter((c) => matchesClient(c, query)).slice(0, 6), [clients.data, query]);
   // Today's next classes; once today is over, the next day that has any.
+  const now = useNow();
   const { nextUp, nextDay } = useMemo(() => {
-    const end = new Date();
+    const end = new Date(now);
     end.setHours(23, 59, 59, 999);
     const live = (classes.data?.classes ?? []).filter((c) => c.status !== "cancelled").sort((a, b) => Date.parse(a.startsAt) - Date.parse(b.startsAt));
-    const today = live.filter((c) => Date.parse(c.startsAt) + 3600000 >= Date.now() && Date.parse(c.startsAt) <= end.getTime());
+    const today = live.filter((c) => Date.parse(c.startsAt) + 3600000 >= now && Date.parse(c.startsAt) <= end.getTime());
     if (today.length) return { nextUp: today.slice(0, 3), nextDay: null as string | null };
     const later = live.filter((c) => Date.parse(c.startsAt) > end.getTime());
     if (!later.length) return { nextUp: [], nextDay: null as string | null };
@@ -82,7 +84,7 @@ export function FrontDeskHome() {
     const tomorrow = new Date(end.getTime() + 1);
     const label = first.toDateString() === tomorrow.toDateString() ? "Tomorrow" : first.toLocaleDateString(undefined, { weekday: "long" });
     return { nextUp: later.filter((c) => sameDay(c.startsAt)).slice(0, 3), nextDay: label };
-  }, [classes.data]);
+  }, [classes.data, now]);
   // A check-in that turns out to need a drop-in hands the client over to it.
   const [dropInFor, setDropInFor] = useState<{ id: string; name: string } | null>(null);
   const close = () => {
@@ -205,7 +207,7 @@ export function FrontDeskHome() {
             style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", minHeight: 60, padding: "12px 18px", border: 0, borderBottom: i === nextUp.length - 1 ? "none" : "1px solid var(--line)", background: "none", cursor: "pointer", textAlign: "left" }}
           >
             <span style={{ width: 84, flex: "none", whiteSpace: "nowrap", font: "700 14px var(--font-mono)" }}>{clockOf(c.startsAt)}</span>
-            <span style={{ minWidth: 0, flex: 1 }}>
+            <span className="bq-grow">
               <span style={{ display: "block", font: "700 15px var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.title}</span>
               <span style={{ display: "block", font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>{(c.bookedCount ?? 0) === 0 ? "No one booked" : `${c.bookedCount} booked`}</span>
             </span>
@@ -234,9 +236,9 @@ export function FrontDeskHome() {
             >
               <Icon name={r.kind === "check_in" ? "check" : "ticket"} size={18} />
             </span>
-            <div style={{ minWidth: 0, flex: 1 }}>
+            <div className="bq-grow">
               <div style={{ font: "700 15px var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.name}</div>
-              <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>{r.detail}</div>
+              <div className="bq-meta">{r.detail}</div>
             </div>
             <span style={{ font: "400 12px var(--font-mono)", color: "var(--ink-faint)", whiteSpace: "nowrap" }}>{timeAgo(r.at)}</span>
           </div>

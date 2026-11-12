@@ -21,12 +21,12 @@ function MonthStatus({ rows }: { rows: Rollup[] }) {
   ];
   return (
     <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-tile)", padding: "16px 18px", marginBottom: 18 }}>
-      <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>THIS MONTH · {monthLabel(MOCK.CURRENT_MONTH).toUpperCase()}</div>
+      <div className="bq-label">THIS MONTH · {monthLabel(MOCK.CURRENT_MONTH).toUpperCase()}</div>
       <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 10 }}>
         {parts.map((p) => (
           <div key={p.state} style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <StatePill state={p.state} label={p.label} />
-            <span style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>{p.n} {p.n === 1 ? "coach" : "coaches"}</span>
+            <span className="bq-meta">{p.n} {p.n === 1 ? "coach" : "coaches"}</span>
             <span className="tabular" style={{ marginLeft: "auto", font: "800 16px var(--font-body)" }}>{fmt(p.total)} EGP</span>
           </div>
         ))}
@@ -84,8 +84,8 @@ export function Pay() {
       <MonthStatus rows={thisMonth} />
 
       <div style={{ display: "flex", alignItems: "baseline", gap: 10, padding: "2px 2px 8px" }}>
-        <span style={{ font: "700 20px var(--font-body)", letterSpacing: "-.01em" }}>Payout queue</span>
-        <span style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>{dueRows.length} due</span>
+        <span className="bq-h2">Payout queue</span>
+        <span className="bq-meta">{dueRows.length} due</span>
       </div>
 
       {due.length === 0 ? (
@@ -94,7 +94,7 @@ export function Pay() {
         due.map((m) => (
           <div key={m.month} style={{ marginBottom: 18 }}>
             <div style={{ display: "flex", alignItems: "baseline", gap: 10, padding: "6px 2px 8px" }}>
-              <span style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>{monthLabel(m.month).toUpperCase()}</span>
+              <span className="bq-label">{monthLabel(m.month).toUpperCase()}</span>
               <span className="tabular" style={{ marginLeft: "auto", font: "700 13px var(--font-mono)", color: "var(--ink-muted)" }}>{fmt(sumRemaining(m.rows))} EGP</span>
             </div>
             <RollupTable colA="PAYEE" colB="METHOD" rows={listRows(m.month, m.rows)} />

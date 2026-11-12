@@ -1,15 +1,16 @@
 {
-  "name": "app",
+  "name": "bizqwik-business-app",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "lint": "oxlint",
+    "lint": "oxlint src e2e",
     "preview": "vite preview",
     "size": "node scripts/check-size.mjs",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "check": "npm run build && npm run lint && npm run size"
   },
   "dependencies": {
     "@sentry/react": "^11.8.0",
@@ -32,5 +33,8 @@
     "qrcode": "^1.5.4",
     "typescript": "~6.0.2",
     "vite": "^8.2.2"
+  },
+  "engines": {
+    "node": ">=20.19"
   }
 }

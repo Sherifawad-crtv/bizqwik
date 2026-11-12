@@ -58,7 +58,7 @@ export function ClassPhotoField({ value, onChange, title }: { value: string | nu
             <Icon name="plus" size={20} style={{ color: "var(--ink-faint)" }} />
           )}
         </div>
-        <div style={{ minWidth: 0, flex: 1 }}>
+        <div className="bq-grow">
           <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
             <input ref={input} type="file" accept="image/*" onChange={onPick} style={{ display: "none" }} data-testid="class-photo-input" />
             <Button variant="secondary" size="md" disabled={busy} onClick={() => input.current?.click()}>

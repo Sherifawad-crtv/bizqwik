@@ -1,4 +1,4 @@
-import { Suspense, useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Spinner } from "./Spinner";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { BottomNav } from "./BottomNav";
@@ -14,28 +14,50 @@ import { LocationsProvider } from "../lib/locations";
 import { FADE_MS } from "../lib/motion";
 import { navFor, headerMode, accountBackTarget, isSoloOwner } from "../lib/nav";
 
-/** The title in the top pill: when it changes, the old words fade out as the new
- * ones fade in (stacked in one spot), instead of snapping. */
-function TitleSwap({ title }: { title: string }) {
-  const [shown, setShown] = useState(title);
-  const [leaving, setLeaving] = useState<string | null>(null);
-  const last = useRef(title);
+/** The top pill with the screen's title. When the title changes, the old words
+ * fade out as the new ones fade in (stacked), and the pill eases to the new
+ * width instead of snapping. */
+function TitlePill({ title }: { title: string }) {
+  const [st, setSt] = useState({ shown: title, leaving: null as string | null });
+  // Derived while rendering (no effect hop), so it switches in the same frame.
+  if (title !== st.shown) setSt({ shown: title, leaving: st.shown });
   useEffect(() => {
-    if (title === last.current) return;
-    setLeaving(last.current);
-    setShown(title);
-    last.current = title;
-    const id = window.setTimeout(() => setLeaving(null), FADE_MS + 30);
+    if (st.leaving === null) return;
+    const id = window.setTimeout(() => setSt((s) => ({ ...s, leaving: null })), FADE_MS + 30);
     return () => window.clearTimeout(id);
-  }, [title]);
-  const cell = { gridArea: "1 / 1", overflow: "hidden", textOverflow: "ellipsis" } as const;
+  }, [st.shown, st.leaving]);
+
+  const sizer = useRef<HTMLSpanElement>(null);
+  const [width, setWidth] = useState<number | null>(null);
+  useLayoutEffect(() => {
+    if (sizer.current) setWidth(Math.ceil(sizer.current.getBoundingClientRect().width) + 36);
+  }, [st.shown]);
+
+  const cell = { gridArea: "1 / 1", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } as const;
   return (
-    <span style={{ display: "grid", maxWidth: "100%" }}>
-      {leaving !== null && (
-        <span key={`out-${leaving}`} aria-hidden style={{ ...cell, animation: `bqFadeOut ${FADE_MS}ms ease forwards` }}>{leaving}</span>
+    <div
+      style={{
+        position: "relative",
+        maxWidth: "100%",
+        width: width ?? undefined,
+        boxSizing: "border-box",
+        padding: "8px 18px",
+        borderRadius: 999,
+        background: "rgba(243,242,238,.82)",
+        font: "800 17px var(--font-body)",
+        letterSpacing: "-.01em",
+        overflow: "hidden",
+        display: "grid",
+        justifyItems: "center",
+        transition: width !== null ? `width ${FADE_MS}ms ease` : undefined,
+      }}
+    >
+      <span ref={sizer} aria-hidden style={{ position: "absolute", visibility: "hidden", whiteSpace: "nowrap", pointerEvents: "none" }}>{st.shown}</span>
+      {st.leaving !== null && (
+        <span key={`out-${st.leaving}`} aria-hidden style={{ ...cell, animation: `bqFadeOut ${FADE_MS}ms ease forwards` }}>{st.leaving}</span>
       )}
-      <span key={shown} style={{ ...cell, animation: leaving !== null ? `bqFade ${FADE_MS}ms ease both` : undefined }}>{shown}</span>
-    </span>
+      <span key={st.shown} style={{ ...cell, animation: st.leaving !== null ? `bqFade ${FADE_MS}ms ease both` : undefined }}>{st.shown}</span>
+    </div>
   );
 }
 
@@ -89,21 +111,7 @@ function ShellInner() {
               )}
             </div>
             <div style={{ flex: 1, minWidth: 0, display: "flex", justifyContent: "center" }}>
-              <div
-                style={{
-                  maxWidth: "100%",
-                  padding: "8px 18px",
-                  borderRadius: 999,
-                  background: "rgba(243,242,238,.82)",
-                  font: "800 17px var(--font-body)",
-                  letterSpacing: "-.01em",
-                  whiteSpace: "nowrap",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                }}
-              >
-                <TitleSwap title={header.title} />
-              </div>
+              <TitlePill title={header.title} />
             </div>
             <div style={{ width: 30, flex: "none" }} />
           </div>
@@ -144,7 +152,7 @@ function ShellInner() {
           <Fab />
         </div>
       )}
-      <div style={{ flex: 1, minWidth: 0 }}>
+      <div className="bq-grow">
         <div
           style={{
             position: "sticky",
@@ -160,7 +168,7 @@ function ShellInner() {
           }}
         >
           <div>
-            <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>{header.kicker}</div>
+            <div className="bq-label">{header.kicker}</div>
             <div style={{ font: "800 30px/1.1 var(--font-body)", letterSpacing: "-.02em" }}>{header.title}</div>
           </div>
           {header.right && <div style={{ marginLeft: "auto" }}>{header.right}</div>}

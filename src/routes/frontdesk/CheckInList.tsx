@@ -7,7 +7,7 @@ import { Icon } from "../../components/Icon";
 import { Spinner } from "../../components/Spinner";
 import { EmptyState } from "../../components/EmptyState";
 import { Card, PlanPill, SearchField, matchesClient, planSummary } from "./shared";
-import { useFrontDeskCatalog } from "./Members";
+import { useFrontDeskCatalog } from "./members/offers";
 
 type Result = { state: "busy" } | { state: "done"; note: string } | { state: "error"; text: string };
 
@@ -49,7 +49,7 @@ export function CheckInList() {
           return (
             <div key={c.id} data-testid="checkin-row" style={{ padding: "12px 16px", borderBottom: i === shown.length - 1 ? "none" : "1px solid var(--line)" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <div style={{ minWidth: 0, flex: 1 }}>
+                <div className="bq-grow">
                   <div style={{ font: "700 16px var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.name}</div>
                   <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 2 }}>
                     <PlanPill client={c} />

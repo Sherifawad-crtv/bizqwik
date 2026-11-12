@@ -30,6 +30,8 @@ test("pull down from the top reloads the screen from the server", async ({ page 
   });
   await page.goto("/members");
   await expect(page.getByText("Mona Ali")).toBeVisible();
+  // The app also refreshes by itself when the page first becomes visible; let that settle so only the pull is measured.
+  await page.waitForTimeout(800);
   name = "Mona Samir"; // changed on another phone
   const before = calls;
 

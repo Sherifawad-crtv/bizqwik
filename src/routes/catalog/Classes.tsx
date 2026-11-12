@@ -56,7 +56,7 @@ export function ClassesPanel({ solo }: { solo?: boolean }) {
         <span style={{ color: "var(--primary-pressed)", display: "flex" }}>
           <Icon name="calendar" size={20} />
         </span>
-        <span style={{ flex: 1, minWidth: 0 }}>
+        <span className="bq-grow">
           <span style={{ display: "block", font: "700 15px var(--font-body)" }}>Upcoming sessions & rosters</span>
           <span style={{ display: "block", font: "400 12px var(--font-mono)", color: "var(--ink-faint)", marginTop: 2 }}>Who's booked, attendance, one-off changes</span>
         </span>
@@ -83,12 +83,12 @@ function SeriesRow({ s, last, onEdit, locations = [] }: { s: ClassSeries; last: 
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "16px 20px", borderBottom: last ? "none" : "1px solid var(--line)" }}>
       {s.imageUrl && <img src={s.imageUrl} alt="" style={{ width: 40, height: 50, flex: "none", borderRadius: 10, objectFit: "cover" }} />}
-      <div style={{ minWidth: 0, flex: 1 }}>
+      <div className="bq-grow">
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <span style={{ font: "700 16px var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s.title}</span>
           <LocationPill locations={locations} id={s.locationId} />
         </div>
-        <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>
+        <div className="bq-meta">
           {weekdaysLabel(s.weekdays)} · {timeLabel(s.startTime)} · {s.durationMin} min
         </div>
         <div style={{ font: "500 13px var(--font-mono)", color: "var(--ink-muted)", marginTop: 2 }}>
@@ -175,6 +175,8 @@ export function SeriesSheet({ open, series: seriesProp, onClose }: { open: boole
       setConfirmEnd(false);
       setError(null);
     }
+    // Deliberate: Reset the form when the sheet opens or its subject changes; the default location is read at that moment (a late-arriving location must not wipe the form).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, series]);
 
   if (!mounted) return null;
@@ -214,8 +216,8 @@ export function SeriesSheet({ open, series: seriesProp, onClose }: { open: boole
           <SheetSuccessIcon label={successLabel} iconIn={iconIn} />
         ) : (
           <>
-            <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>{series ? "EDIT CLASS" : "NEW GROUP CLASS"}</div>
-            <div style={{ font: "800 26px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 16px" }}>{series ? series.title : "New class"}</div>
+            <div className="bq-label">{series ? "EDIT CLASS" : "NEW GROUP CLASS"}</div>
+            <div className="bq-title">{series ? series.title : "New class"}</div>
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               <TextField label="NAME" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Sunrise HIIT" />
               <TextField label="DESCRIPTION" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Optional — shown to members" />

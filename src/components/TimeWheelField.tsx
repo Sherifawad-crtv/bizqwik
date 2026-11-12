@@ -109,7 +109,7 @@ export function TimeWheelField({ label, value, onChange }: { label: string; valu
         aria-label={`${label}: ${timeLabel(value)}`}
         style={{ display: "block", width: "100%", textAlign: "left", background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "10px 16px", cursor: "pointer" }}
       >
-        <span style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>{label}</span>
+        <span className="bq-label">{label}</span>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <span style={{ font: "600 16px var(--font-body)", color: "var(--ink)" }}>{timeLabel(value)}</span>
           <span style={{ marginLeft: "auto", color: "var(--ink-faint)", display: "flex" }}>
@@ -119,7 +119,7 @@ export function TimeWheelField({ label, value, onChange }: { label: string; valu
       </button>
 
       <Sheet open={open} onClose={() => setOpen(false)}>
-        <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>{label}</div>
+        <div className="bq-label">{label}</div>
         <div style={{ font: "800 26px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 12px" }}>{timeLabel(join(draft.h, draft.m, draft.pm))}</div>
         <div style={{ position: "relative", display: "flex", gap: 4 }}>
           {/* selection band behind the middle row */}

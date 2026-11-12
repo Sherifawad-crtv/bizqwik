@@ -149,8 +149,8 @@ export function PlanPill({ client }: { client: ClientWithPackage }) {
 export function SheetHeading({ kicker, title }: { kicker: string; title: string }) {
   return (
     <>
-      <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>{kicker}</div>
-      <div style={{ font: "800 26px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 16px" }}>{title}</div>
+      <div className="bq-label">{kicker}</div>
+      <div className="bq-title">{title}</div>
     </>
   );
 }
@@ -166,8 +166,8 @@ export function ErrorBanner({ text }: { text: string }) {
 export function SectionTitle({ children, count, right }: { children: ReactNode; count?: number | string; right?: ReactNode }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 10, margin: "4px 2px 12px" }}>
-      <span style={{ font: "700 20px var(--font-body)", letterSpacing: "-.01em" }}>{children}</span>
-      {count !== undefined && <span style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>{count}</span>}
+      <span className="bq-h2">{children}</span>
+      {count !== undefined && <span className="bq-meta">{count}</span>}
       {right && <div style={{ marginLeft: "auto" }}>{right}</div>}
     </div>
   );
@@ -256,7 +256,7 @@ export function ClientPicker({
               onClick={() => onPick(c)}
               style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", minHeight: 64, padding: "12px 18px", border: 0, borderBottom: i === shown.length - 1 ? "none" : "1px solid var(--line)", background: "none", cursor: "pointer", textAlign: "left" }}
             >
-              <div style={{ minWidth: 0, flex: 1 }}>
+              <div className="bq-grow">
                 <div style={{ font: "700 16px var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.name}</div>
                 <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                   {plan.title} · {plan.detail}

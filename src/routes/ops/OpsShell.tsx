@@ -56,7 +56,7 @@ export function OpsShell() {
         >
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <img src="/wordmark.png" alt="Bizqwik" style={{ height: 22, width: "auto", display: "block" }} />
-            <span style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>OPS</span>
+            <span className="bq-label">OPS</span>
             <button
               onClick={logout}
               aria-label="Sign out"

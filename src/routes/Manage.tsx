@@ -4,9 +4,6 @@ import { Segmented } from "../components/Segmented";
 import { TiersPanel } from "./manage/TiersPanel";
 import { InvitesPanel } from "./manage/Invites";
 import { PeoplePanel } from "./manage/People";
-export { TierSheet } from "./manage/TiersPanel";
-export { BundleSheet, BundlesPanel, NO_EXPIRY_DAYS } from "./manage/BundlesPanel";
-export { InviteFlow } from "./manage/Invites";
 
 type Tab = "tiers" | "invites" | "people";
 

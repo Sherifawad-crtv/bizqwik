@@ -39,7 +39,7 @@ function DesktopRow({ r }: { r: ListRow }) {
         <Avatar name={r.name} size={32} src={r.avatarUrl} />
         <div style={{ minWidth: 0 }}>
           <div style={{ font: "600 16px var(--font-body)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{r.title}</div>
-          {r.sub && <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>{r.sub}</div>}
+          {r.sub && <div className="bq-meta">{r.sub}</div>}
         </div>
       </div>
       <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-muted)", minWidth: 0, overflow: "hidden", textOverflow: "ellipsis" }}>{r.meta}</div>
@@ -80,17 +80,17 @@ export function RollupTable({
             style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-tile)", padding: "14px 16px", display: "flex", gap: 14, alignItems: "center", cursor: r.onClick ? "pointer" : "default" }}
           >
             <Avatar name={r.name} size={38} src={r.avatarUrl} />
-            <div style={{ minWidth: 0, flex: 1 }}>
+            <div className="bq-grow">
               <div style={{ font: "700 16px var(--font-body)", letterSpacing: "-.01em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{r.title}</div>
               <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-muted)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{r.meta}</div>
               <div style={{ marginTop: 8, display: "flex", gap: 8, alignItems: "center" }}>
                 {r.state && <StatePill state={r.state} />}
-                {r.sub && <span style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>{r.sub}</span>}
+                {r.sub && <span className="bq-meta">{r.sub}</span>}
               </div>
             </div>
             <div style={{ textAlign: "right", flex: "none" }}>
               <div className="tabular" style={{ font: "800 20px var(--font-body)", letterSpacing: "-.01em" }}>{egp(r.amount).split(" ")[0]}</div>
-              <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>EGP</div>
+              <div className="bq-label">EGP</div>
             </div>
             {r.onClick && (
               <span style={{ flex: "none", color: "var(--ink-faint)", display: "flex" }}>

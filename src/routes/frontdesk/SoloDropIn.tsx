@@ -53,7 +53,7 @@ export function SoloDropIn({ onDone }: { onDone: () => void }) {
   if (price === null) {
     return (
       <div style={{ textAlign: "center", padding: "8px 0 4px" }}>
-        <div style={{ font: "700 16px var(--font-body)" }}>Set {here && current ? `${current.name}'s` : "your"} drop-in price first</div>
+        <div className="bq-h3">Set {here && current ? `${current.name}'s` : "your"} drop-in price first</div>
         <div style={{ font: "400 13px/1.5 var(--font-mono)", color: "var(--ink-muted)", margin: "6px 0 16px" }}>It lives with your plans, so you only set it once.</div>
         <Button fullWidth size="lg" onClick={() => navigate("/catalog")}>Go to Plans</Button>
       </div>
