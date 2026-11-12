@@ -192,3 +192,27 @@ test("the title bar vanishes at once on the home screen (no stale title fading o
   await expect(bar).toHaveCSS("visibility", "hidden");
   await expect(bar).toHaveCSS("opacity", "0");
 });
+
+test("the title bar never shows another screen's title: not when leaving home, not when returning to it", async ({ page }) => {
+  await boot(page, "dept_head");
+  await page.goto("/oversight"); await page.waitForTimeout(1500);
+  await page.evaluate(() => {
+    const w = window as unknown as { __bad: string[] };
+    w.__bad = [];
+    const tick = () => {
+      const bar = document.querySelector("div[style*='position: fixed'][style*='top: 0']") as HTMLElement | null;
+      if (bar) {
+        const cs = getComputedStyle(bar);
+        const text = (bar.innerText || "").trim();
+        if (cs.visibility === "visible" && Number(cs.opacity) > 0.02 && /Overview/.test(text) && location.pathname !== "/oversight") w.__bad.push(`${location.pathname}:${text}:${cs.opacity}`);
+      }
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  });
+  for (const [name, wait] of [["Team", 700], ["Overview", 700], ["Clients", 700], ["Overview", 700]] as const) {
+    await page.getByRole("link", { name, exact: true }).first().click();
+    await page.waitForTimeout(wait);
+  }
+  expect(await page.evaluate(() => (window as unknown as { __bad: string[] }).__bad)).toEqual([]);
+});

@@ -6,7 +6,7 @@ import { matchTabIndex, headerMode, type NavItem, type OrgMode } from "../lib/na
 import { isStandalone } from "../lib/push";
 import type { Role } from "../lib/types";
 import { EASE, FADE_MS, PUSH_MS } from "../lib/motion";
-import { ScreenActive } from "../lib/screenActive";
+import { ScreenActive, ScreenPath } from "../lib/screenActive";
 import { waitForFirstScreen } from "../lib/useAsync";
 import { reportScreenReady } from "../lib/vitals";
 
@@ -284,7 +284,9 @@ export function RouteTransition({ tabs, role, orgMode = "team" }: { tabs: NavIte
     const isHidden = l.id !== current.id && !(previous && l.id === previous.id);
     children.push(
       <div key={l.id} data-scroll aria-hidden={isHidden || undefined} inert={isHidden} style={styleFor(l)}>
-        <ScreenActive.Provider value={l.id === current.id}>{l.outlet}</ScreenActive.Provider>
+        <ScreenPath.Provider value={l.pathname}>
+          <ScreenActive.Provider value={l.id === current.id}>{l.outlet}</ScreenActive.Provider>
+        </ScreenPath.Provider>
       </div>,
     );
   }

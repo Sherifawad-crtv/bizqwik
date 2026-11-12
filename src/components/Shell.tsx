@@ -69,6 +69,20 @@ function ShellInner() {
   const { pathname } = useLocation();
   const navigate = useNavigate();
 
+  // The title bar appears only once the screen you're going to has published
+  // its own title; until then (coming from a home screen, which has none) it
+  // stays hidden rather than flashing the previous screen's title.
+  const wantBar = !!profile && headerMode(pathname, profile.role, orgMode) !== "home";
+  const [barOn, setBarOn] = useState(false);
+  // Each time the bar appears it is built fresh with the right title, so it
+  // never crossfades from whatever the last screen was called.
+  const [barEpoch, setBarEpoch] = useState(0);
+  if (!wantBar && barOn) setBarOn(false);
+  if (wantBar && !barOn && header.path === pathname) {
+    setBarOn(true);
+    setBarEpoch((e) => e + 1);
+  }
+
   if (!profile) return null;
   // Everyone but accountant and front desk gets a FAB — what it does depends
   // on role (Fab.tsx branches: dept_head gets the "Create" menu for the
@@ -83,13 +97,13 @@ function ShellInner() {
       <div style={{ minHeight: "100svh", background: "var(--paper)", position: "relative", overflow: "hidden" }}>
         {(
           <div
-            aria-hidden={mode === "home"}
+            aria-hidden={!barOn}
             style={{
-              opacity: mode === "home" ? 0 : 1,
-              pointerEvents: mode === "home" ? "none" : "auto",
+              opacity: barOn ? 1 : 0,
+              pointerEvents: barOn ? "auto" : "none",
               // Gone at once on the home screen (which has no title bar); only fades IN elsewhere.
-              transition: mode === "home" ? "none" : `opacity ${FADE_MS}ms ease`,
-              visibility: mode === "home" ? "hidden" : "visible",
+              transition: barOn ? `opacity ${FADE_MS}ms ease` : "none",
+              visibility: barOn ? "visible" : "hidden",
               position: "fixed",
               top: 0,
               left: 0,
@@ -113,7 +127,7 @@ function ShellInner() {
               )}
             </div>
             <div style={{ flex: 1, minWidth: 0, display: "flex", justifyContent: "center" }}>
-              <TitlePill title={header.title} />
+              <TitlePill key={barEpoch} title={header.title} />
             </div>
             <div style={{ width: 30, flex: "none" }} />
           </div>
