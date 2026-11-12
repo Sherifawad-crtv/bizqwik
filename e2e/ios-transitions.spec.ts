@@ -180,3 +180,15 @@ test("the title follows the screen you're on: it fades between screens and comes
   await settle(page);
   expect((await pill.innerText()).trim()).toBe(team);
 });
+
+test("the title bar vanishes at once on the home screen (no stale title fading out)", async ({ page }) => {
+  await boot(page, "dept_head");
+  await page.goto("/coaches"); await page.waitForTimeout(1200);
+  const bar = page.locator("div[style*='position: fixed'][style*='top: 0']").first();
+  await expect(bar).toHaveCSS("visibility", "visible");
+  // Overview is the founder's home: the bar must be gone in the very first frames, not fading with the old title.
+  await page.getByRole("link", { name: "Overview", exact: true }).click();
+  await page.waitForTimeout(40);
+  await expect(bar).toHaveCSS("visibility", "hidden");
+  await expect(bar).toHaveCSS("opacity", "0");
+});

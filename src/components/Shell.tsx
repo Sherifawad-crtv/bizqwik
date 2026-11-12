@@ -87,7 +87,9 @@ function ShellInner() {
             style={{
               opacity: mode === "home" ? 0 : 1,
               pointerEvents: mode === "home" ? "none" : "auto",
-              transition: `opacity ${FADE_MS}ms ease`,
+              // Gone at once on the home screen (which has no title bar); only fades IN elsewhere.
+              transition: mode === "home" ? "none" : `opacity ${FADE_MS}ms ease`,
+              visibility: mode === "home" ? "hidden" : "visible",
               position: "fixed",
               top: 0,
               left: 0,
