@@ -52,7 +52,7 @@ export function Login() {
           ATTENDANCE &amp; PAYOUT PORTAL
         </div>
 
-        <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        <form onSubmit={submit} className="bq-stack">
           <label style={{ display: "block", background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "10px 16px" }}>
             <span className="bq-label">EMAIL</span>
             <input
@@ -85,7 +85,7 @@ export function Login() {
           </Link>
 
           {error && (
-            <div className="bq-rise" style={{ font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>
+            <div  className="bq-error bq-rise">
               {error}
             </div>
           )}

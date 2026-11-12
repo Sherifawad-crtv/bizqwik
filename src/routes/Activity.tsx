@@ -138,14 +138,14 @@ export function ActivityPanel() {
           ]}
           onChange={(v) => setTab(v as "feed" | "logs")}
         />
-        <span className="bq-meta">
+        <span className="bq-meta bq-rise">
           {tab === "feed" ? "Recent member activity" : "Every transaction and event"}
         </span>
       </div>
 
       {loading && <InlineSpinner />}
       {error && (
-        <div className="bq-rise" style={{ font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>{error}</div>
+        <div  className="bq-error">{error}</div>
       )}
       {!loading && entries.length === 0 && (
         <EmptyState icon="history" title="Nothing has happened yet" body="Sales, check-ins, bookings, refunds and wallet changes are listed here as they happen." />
@@ -181,7 +181,7 @@ function Feed({ entries }: { entries: ActivityEntry[] }) {
 function Logs({ entries }: { entries: ActivityEntry[] }) {
   if (entries.length === 0) return null;
   return (
-    <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", overflow: "hidden" }}>
+    <div className="bq-panel">
       {entries.map((e, i) => {
         const amt = amountLabel(e);
         return (
@@ -245,7 +245,7 @@ export function Transactions() {
         />
       </div>
       {loading && <InlineSpinner />}
-      {error && <div className="bq-rise" style={{ font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>{error}</div>}
+      {error && <div  className="bq-error bq-rise">{error}</div>}
       {!loading && shown.length === 0 && <EmptyState icon="history" title="No transactions yet" body="Sales, refunds and wallet changes are listed here, newest first, as they happen." />}
       {shown.length > 0 && <Feed entries={shown} />}
       {all.length >= 300 && <div style={{ textAlign: "center", font: "400 12px var(--font-mono)", color: "var(--ink-faint)", margin: "14px 0" }}>Showing the latest 300 transactions.</div>}

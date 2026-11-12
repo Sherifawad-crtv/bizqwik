@@ -145,7 +145,7 @@ export function AccountProfile() {
               </button>
             )}
             {photoError && (
-              <div className="bq-rise" style={{ width: "100%", font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>
+              <div className="bq-rise" style={{ width: "100%", font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: "var(--r-md)", padding: "10px 14px" }}>
                 {photoError}
               </div>
             )}
@@ -165,12 +165,12 @@ export function AccountProfile() {
           }}
         />
         {error && (
-          <div className="bq-rise" style={{ marginTop: 12, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>
+          <div  className="bq-error bq-error--spaced bq-rise">
             {error}
           </div>
         )}
         {saved && !error && (
-          <div style={{ marginTop: 12, font: "600 13px/1.5 var(--font-body)", color: "var(--primary-pressed)", background: "var(--primary-tint)", borderRadius: 14, padding: "10px 14px" }}>
+          <div style={{ marginTop: 12, font: "600 13px/1.5 var(--font-body)", color: "var(--primary-pressed)", background: "var(--primary-tint)", borderRadius: "var(--r-md)", padding: "10px 14px" }}>
             Saved.
           </div>
         )}

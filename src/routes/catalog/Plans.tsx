@@ -43,7 +43,7 @@ export function PlansPanel({ solo }: { solo?: boolean }) {
             </Button>
           }
         />
-        <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", overflow: "hidden" }}>
+        <div className="bq-panel">
           {rows.map((p, i) => (
             <div key={p.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "16px 20px", borderBottom: i === rows.length - 1 ? "none" : "1px solid var(--line)", opacity: p.active ? 1 : 0.6 }}>
               <div className="bq-grow">
@@ -213,7 +213,7 @@ export function PlanTypeSheet({ open, kind: kindProp, planType: planTypeProp, on
             Runs from the day it's bought. Changes apply to future sales only.
           </div>
           {error && (
-            <div className="bq-rise" style={{ marginTop: 12, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>{error}</div>
+            <div  className="bq-error bq-error--spaced bq-rise">{error}</div>
           )}
           <Button fullWidth size="lg" style={{ marginTop: 16 }} disabled={busy} onClick={save}>
             {busy ? "Saving…" : planType ? "Save changes" : `Create ${noun}`}

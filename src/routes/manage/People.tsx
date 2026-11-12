@@ -30,7 +30,7 @@ export function PeoplePanel() {
         <span className="bq-meta">{data.profiles.length}</span>
       </div>
 
-      <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", overflow: "hidden" }}>
+      <div className="bq-panel">
         {data.profiles.map((p, i) => (
           <button
             key={p.id}
@@ -116,7 +116,7 @@ function PersonSheet({
           </div>
         </div>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        <div className="bq-stack">
           <div style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "12px 16px" }}>
             <div className="bq-label">ROLE</div>
             <div style={{ font: "600 16px var(--font-body)" }}>{ROLE_LABELS[shown.role]}</div>
@@ -138,7 +138,7 @@ function PersonSheet({
         </div>
 
         {error && (
-          <div className="bq-rise" style={{ marginTop: 12, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>
+          <div  className="bq-error bq-error--spaced bq-rise">
             {error}
           </div>
         )}

@@ -162,12 +162,12 @@ export function DropIn({ embedded = false, initialClient = null }: { embedded?: 
       </Card>
 
       {done && (
-        <div style={{ marginBottom: 14, font: "600 13px/1.5 var(--font-body)", color: "var(--paid-fg)", background: "var(--paid-bg)", borderRadius: 14, padding: "10px 14px" }}>
+        <div style={{ marginBottom: 14, font: "600 13px/1.5 var(--font-body)", color: "var(--paid-fg)", background: "var(--paid-bg)", borderRadius: "var(--r-md)", padding: "10px 14px" }}>
           Drop-in recorded — {done}
         </div>
       )}
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+      <div className="bq-stack">
         <div style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "10px 16px", display: "flex", alignItems: "center", gap: 10 }}>
           <div className="bq-grow">
             <div className="bq-label">MEMBER</div>

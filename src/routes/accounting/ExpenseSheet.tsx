@@ -116,7 +116,7 @@ export function ExpenseSheet({
           <div className="bq-title">
             {editing ? editing.categoryName : "What did the business spend on?"}
           </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          <div className="bq-stack">
             <label style={{ display: "block", background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "10px 16px" }}>
               <span className="bq-label">AMOUNT (EGP)</span>
               <input
@@ -164,7 +164,7 @@ export function ExpenseSheet({
             )}
           </div>
           {error && (
-            <div className="bq-rise" style={{ marginTop: 12, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>{error}</div>
+            <div  className="bq-error bq-error--spaced bq-rise">{error}</div>
           )}
           <Button fullWidth size="lg" style={{ marginTop: 16 }} disabled={busy} onClick={save}>
             {busy ? "Saving…" : editing ? "Save changes" : repeat ? "Set up repeating expense" : "Add expense"}

@@ -68,7 +68,7 @@ export function Invitations({ embedded = false, onCreateClient }: { embedded?: b
       </Card>
 
       {done && (
-        <div style={{ marginBottom: 14, font: "600 13px/1.5 var(--font-body)", color: "var(--paid-fg)", background: "var(--paid-bg)", borderRadius: 14, padding: "10px 14px" }}>
+        <div style={{ marginBottom: 14, font: "600 13px/1.5 var(--font-body)", color: "var(--paid-fg)", background: "var(--paid-bg)", borderRadius: "var(--r-md)", padding: "10px 14px" }}>
           Invitation recorded — {done}
         </div>
       )}
@@ -118,7 +118,7 @@ export function Invitations({ embedded = false, onCreateClient }: { embedded?: b
 
           {left > 0 ? (
             <>
-              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              <div className="bq-stack">
                 <TextField label="GUEST NAME" value={guestName} onChange={(e) => setGuestName(e.target.value)} autoComplete="off" />
                 <TextField label="GUEST PHONE" type="tel" value={guestPhone} onChange={(e) => setGuestPhone(e.target.value)} autoComplete="off" />
                 <TextField label="VISIT DATE" type="date" min={todayIso()} value={visitDate} onChange={(e) => setVisitDate(e.target.value)} />
@@ -129,7 +129,7 @@ export function Invitations({ embedded = false, onCreateClient }: { embedded?: b
               </Button>
             </>
           ) : (
-            <div className="bq-rise" style={{ font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>
+            <div  className="bq-error bq-rise">
               {member.name} has used every guest pass on this plan.
             </div>
           )}

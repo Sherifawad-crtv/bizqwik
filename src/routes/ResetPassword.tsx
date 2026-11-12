@@ -62,7 +62,7 @@ export function ResetPassword() {
           CHOOSE A NEW PASSWORD
         </div>
 
-        <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        <form onSubmit={submit} className="bq-stack">
           <TextField
             label="NEW PASSWORD"
             type="password"
@@ -81,7 +81,7 @@ export function ResetPassword() {
           />
 
           {error && (
-            <div className="bq-rise" style={{ font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>
+            <div  className="bq-error bq-rise">
               {error}
               {error.toLowerCase().includes("session") && (
                 <>

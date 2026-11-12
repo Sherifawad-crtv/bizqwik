@@ -96,7 +96,7 @@ export function ClientRoster({
 
   if (isMobile) {
     return (
-      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+      <div className="bq-stack">
         {clients.map((c) => (
           <div
             key={c.id}
@@ -132,7 +132,7 @@ export function ClientRoster({
   }
 
   return (
-    <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", overflow: "hidden" }}>
+    <div className="bq-panel">
       <div style={{ display: "grid", gridTemplateColumns: rosterGrid(canManage), gap: 12, padding: "10px 20px", background: "var(--sunken)", font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-muted)" }}>
         <span>CLIENT</span>
         <span>{showAssignedCoach ? "COACH" : "PACKAGE"}</span>

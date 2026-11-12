@@ -5,7 +5,9 @@ import type { PnlReport } from "../../lib/types";
 import { Button } from "../../components/Button";
 import { Icon } from "../../components/Icon";
 import { Spinner } from "../../components/Spinner";
-import { Card, KpiTile, Delta, pctChange, caption, ShareBars, useMeasuredWidth, roundedTopBarPath } from "../Oversight";
+import { Card, KpiTile, Delta } from "../overview/Cards";
+import { pctChange, caption, useMeasuredWidth, roundedTopBarPath } from "../overview/helpers";
+import { ShareBars } from "../overview/Charts";
 
 function PnlChart({ trend }: { trend: PnlReport["trend"] }) {
   const [ref, W] = useMeasuredWidth(320);
@@ -82,7 +84,7 @@ export function PnlPanel({ report, loading, onAddExpense, onCoachPayouts }: { re
   return (
     <>
       {report.unsettledNote && (
-        <div style={{ display: "flex", gap: 10, alignItems: "flex-start", background: "var(--logging-bg)", borderRadius: 14, padding: "12px 14px", marginBottom: 14 }}>
+        <div style={{ display: "flex", gap: 10, alignItems: "flex-start", background: "var(--logging-bg)", borderRadius: "var(--r-md)", padding: "12px 14px", marginBottom: 14 }}>
           <span style={{ color: "var(--logging-fg)", display: "flex", flex: "none", marginTop: 1 }}>
             <Icon name="insights" size={18} />
           </span>
@@ -120,7 +122,7 @@ export function PnlPanel({ report, loading, onAddExpense, onCoachPayouts }: { re
         {report.expensesBySource.length === 0 ? (
           <EmptyState bare icon="insights" title="No expenses this month" body="Coach payouts and whatever you log show up here, largest first." />
         ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          <div className="bq-stack">
             {report.expensesBySource.map((s) => (
               <button
                 key={s.key}

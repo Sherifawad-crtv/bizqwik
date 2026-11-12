@@ -132,13 +132,13 @@ export function ClientDetailSheet({
               )}
 
               {error && (
-                <div className="bq-rise" style={{ marginBottom: 10, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>
+                <div className="bq-rise" style={{ marginBottom: 10, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: "var(--r-md)", padding: "10px 14px" }}>
                   {error}
                 </div>
               )}
 
               {canDeliver && (
-                <div data-testid="pt-scan-hint" style={{ marginTop: 6, font: "500 13px/1.5 var(--font-body)", color: "var(--ink-muted)", background: "var(--primary-tint)", borderRadius: 14, padding: "10px 14px" }}>
+                <div data-testid="pt-scan-hint" style={{ marginTop: 6, font: "500 13px/1.5 var(--font-body)", color: "var(--ink-muted)", background: "var(--primary-tint)", borderRadius: "var(--r-md)", padding: "10px 14px" }}>
                   To log a session, scan the PT code in {client.name.split(" ")[0]}'s app (the + button, or Scan QR).
                 </div>
               )}
@@ -156,7 +156,7 @@ export function ClientDetailSheet({
           {mode === "compensate" && (
             <>
               <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", marginBottom: 10 }}>GOODWILL WALLET CREDIT</div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              <div className="bq-stack bq-rise">
                 <TextField label="AMOUNT (EGP)" value={compAmount} onChange={(e) => setCompAmount(e.target.value)} inputMode="numeric" placeholder="0" />
                 <TextField label="NOTE (OPTIONAL)" value={compNote} onChange={(e) => setCompNote(e.target.value)} placeholder="Why you're compensating them" />
               </div>
@@ -164,7 +164,7 @@ export function ClientDetailSheet({
                 Adds store credit to {client.name}'s wallet. They can spend it on classes and desk purchases.
               </div>
               {error && (
-                <div className="bq-rise" style={{ marginTop: 12, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>
+                <div  className="bq-error bq-error--spaced">
                   {error}
                 </div>
               )}
@@ -262,13 +262,13 @@ export function ClientEditSheet({ open, client, onClose }: { open: boolean; clie
         <>
           <div className="bq-label">EDIT CLIENT</div>
           <div className="bq-title">{client.name}</div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          <div className="bq-stack bq-rise">
             <TextField label="NAME" value={name} onChange={(e) => setName(e.target.value)} placeholder="Client name" />
             <TextField label="AGE (OPTIONAL)" type="number" min={0} value={age} onChange={(e) => setAge(e.target.value)} />
             <TextField label="CONDITIONS (OPTIONAL)" value={conditions} onChange={(e) => setConditions(e.target.value)} placeholder="Only visible to their coach and heads" />
           </div>
           {error && (
-            <div className="bq-rise" style={{ marginTop: 12, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>
+            <div  className="bq-error bq-error--spaced">
               {error}
             </div>
           )}

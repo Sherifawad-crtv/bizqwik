@@ -1,3 +1,4 @@
+import { existsSync } from "node:fs";
 import { test, expect } from "@playwright/test";
 import { writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -34,7 +35,7 @@ test.use({
   viewport: { width: 390, height: 844 },
   permissions: ["camera"],
   launchOptions: {
-    executablePath: process.env.PLAYWRIGHT_CHROMIUM_PATH || "/opt/pw-browsers/chromium",
+    ...(process.env.PLAYWRIGHT_CHROMIUM_PATH || existsSync("/opt/pw-browsers/chromium") ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_PATH || "/opt/pw-browsers/chromium" } : {}),
     args: ["--use-fake-device-for-media-stream", "--use-fake-ui-for-media-stream", `--use-file-for-fake-video-capture=${writeQrVideo(TOKEN)}`],
   },
 });

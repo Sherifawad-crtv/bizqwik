@@ -150,14 +150,14 @@ export function SheetHeading({ kicker, title }: { kicker: string; title: string 
   return (
     <>
       <div className="bq-label">{kicker}</div>
-      <div className="bq-title">{title}</div>
+      <div className="bq-title bq-rise">{title}</div>
     </>
   );
 }
 
 export function ErrorBanner({ text }: { text: string }) {
   return (
-    <div className="bq-rise" style={{ marginTop: 12, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>
+    <div  className="bq-error bq-error--spaced">
       {text}
     </div>
   );

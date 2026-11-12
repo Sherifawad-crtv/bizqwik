@@ -14,7 +14,7 @@ export function SectionTitle({ children, count, right }: { children: ReactNode; 
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 10, margin: "4px 2px 12px" }}>
       <span className="bq-h2">{children}</span>
-      {count !== undefined && <span className="bq-meta">{count}</span>}
+      {count !== undefined && <span className="bq-meta bq-rise">{count}</span>}
       {right && <div style={{ marginLeft: "auto" }}>{right}</div>}
     </div>
   );
@@ -22,7 +22,7 @@ export function SectionTitle({ children, count, right }: { children: ReactNode; 
 
 export function ErrorBanner({ text }: { text: string }) {
   return (
-    <div className="bq-rise" style={{ marginTop: 12, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>
+    <div  className="bq-error bq-error--spaced">
       {text}
     </div>
   );

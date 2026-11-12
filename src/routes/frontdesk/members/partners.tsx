@@ -104,7 +104,7 @@ export function GroupOfferSelect({ value, onChange, planTypes, series }: { value
   // A solo owner with a couple of plans picks them as cards, not from a list.
   if (profile?.role === "dept_head" && orgMode === "solo" && options.length > 0 && options.length <= 6) {
     return (
-      <div role="radiogroup" aria-label="Plan" style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+      <div role="radiogroup" aria-label="Plan" className="bq-stack">
         {options.map((o) => {
           const [name, price, ...rest] = o.label.split(" · ");
           const on = value === o.value;

@@ -42,7 +42,7 @@ export function DayList({
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+    <div className="bq-stack">
       {groups.map((g) => (
         <div
           key={g.date}

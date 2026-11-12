@@ -11,7 +11,7 @@ import { HomeAvatar } from "../../components/HomeAvatar";
 import { EmptyState } from "../../components/EmptyState";
 import { Icon, type IconName } from "../../components/Icon";
 import { Spinner } from "../../components/Spinner";
-import { RevenueChart } from "../Oversight";
+import { RevenueChart } from "../overview/Charts";
 import { LocationSwitcher, atLocation, useCurrentLocation } from "../../lib/locations";
 import { PaymentRequestsCard } from "./PaymentRequests";
 import { Card, SectionLink, SectionTitle, endingSoon, planSummary } from "./shared";

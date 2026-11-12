@@ -47,6 +47,7 @@
   --dur-press: 160ms;
 
   --shadow-float: 0 14px 34px rgba(26, 23, 38, 0.18);
+  --r-md: 14px; /* inputs, banners, small cards */
   --shadow-card: 0 24px 60px rgba(26, 23, 38, 0.1);
 
   --safe-top: env(safe-area-inset-top, 0px);
@@ -334,3 +335,16 @@ textarea {
 .bq-h3 { font: 700 16px var(--font-body); }
 /* A flexible child that is allowed to shrink (so long text truncates, not overflows). */
 .bq-grow { min-width: 0; flex: 1; }
+
+/* ───────────────────────────── Layout helpers ───────────────────────────── */
+.bq-stack { display: flex; flex-direction: column; gap: 10px; }
+.bq-panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-card); overflow: hidden; }
+/* A form or action error under its field. */
+.bq-error {
+  background: var(--danger-bg);
+  color: var(--danger-fg);
+  border-radius: var(--r-md);
+  padding: 10px 14px;
+  font: 600 13px/1.5 var(--font-body);
+}
+.bq-error--spaced { margin-top: 12px; }

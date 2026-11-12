@@ -148,7 +148,7 @@ function RecurringSheet({ template, categories, onClose, onSaved }: { template: 
         <>
           <div className="bq-label">{isNew ? "ADD REPEATING EXPENSE" : "EDIT TEMPLATE"}</div>
           <div className="bq-title">{isNew ? "Every month" : shown.categoryName}</div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          <div className="bq-stack">
             <TextField label="AMOUNT (EGP)" value={amount} onChange={(e) => setAmount(e.target.value)} inputMode="decimal" placeholder="0" />
             <SelectField label="CATEGORY" value={categoryId} onChange={setCategoryId} placeholder="Choose a category" options={catOptions(categories)} />
             <TextField label="DAY OF MONTH (1–28)" value={dayOfMonth} onChange={(e) => setDayOfMonth(e.target.value)} inputMode="numeric" />
@@ -158,7 +158,7 @@ function RecurringSheet({ template, categories, onClose, onSaved }: { template: 
           <div style={{ marginTop: 8, font: "400 12px/1.5 var(--font-mono)", color: "var(--ink-faint)" }}>
             {isNew ? "Changing this later only affects future months — rows already made stay as they are." : "Editing changes future months only. Rows already made for past months are untouched."}
           </div>
-          {error && <div className="bq-rise" style={{ marginTop: 12, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>{error}</div>}
+          {error && <div  className="bq-error bq-error--spaced bq-rise">{error}</div>}
           <Button fullWidth size="lg" style={{ marginTop: 16 }} disabled={busy} onClick={save}>
             {busy ? "Saving…" : isNew ? "Set up repeating expense" : "Save changes"}
           </Button>

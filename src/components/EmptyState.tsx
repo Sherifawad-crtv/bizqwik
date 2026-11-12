@@ -36,7 +36,7 @@ export function EmptyState({
         gap: 6,
       }}
     >
-      <span style={{ width: 44, height: 44, borderRadius: 14, background: "var(--primary-tint)", color: "var(--primary-pressed)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 4 }}>
+      <span style={{ width: 44, height: 44, borderRadius: "var(--r-md)", background: "var(--primary-tint)", color: "var(--primary-pressed)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 4 }}>
         <Icon name={icon} size={22} />
       </span>
       <div style={{ font: "700 16px/1.3 var(--font-body)", color: "var(--ink)" }}>{title}</div>

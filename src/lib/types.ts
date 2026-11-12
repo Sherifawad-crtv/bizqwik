@@ -543,3 +543,6 @@ export interface PaymentsSummary {
   byMonth?: { month: string; revenue: number }[];
 }
 
+
+/** A member's InstaPay receipt waiting for the front desk to approve. */
+export interface PaymentRequest { id: string; clientId: string; clientName: string; clientPhone: string | null; name: string; price: number; offerType: "plan_type" | "bundle_type"; createdAt: string; proofUrl: string | null }

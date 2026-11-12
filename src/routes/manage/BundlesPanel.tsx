@@ -42,7 +42,7 @@ export function BundlesPanel() {
         </Button>
       </div>
 
-      <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", overflow: "hidden" }}>
+      <div className="bq-panel">
         {rows.map((b, i) => (
           <div key={b.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "16px 20px", borderBottom: i === rows.length - 1 ? "none" : "1px solid var(--line)" }}>
             <div className="bq-grow">
@@ -159,7 +159,7 @@ export function BundleSheet({ open, bundleType: bundleTypeProp, onClose }: { ope
         <>
           <div className="bq-label">{bundleType ? "EDIT BUNDLE" : "NEW BUNDLE"}</div>
           <div className="bq-title">{bundleType ? bundleType.name : "New bundle"}</div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          <div className="bq-stack">
             <TextField label="NAME" value={name} onChange={(e) => setName(e.target.value)} placeholder="24-Session Pack" />
             <TextField label="PRICE · EGP" type="number" min={1} value={price} onChange={(e) => setPrice(e.target.value)} />
             <LocationField locations={locations} value={locationId} onChange={setLocationId} />
@@ -170,7 +170,7 @@ export function BundleSheet({ open, bundleType: bundleTypeProp, onClose }: { ope
             )}
           </div>
           {error && (
-            <div className="bq-rise" style={{ marginTop: 12, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>
+            <div  className="bq-error bq-error--spaced bq-rise">
               {error}
             </div>
           )}

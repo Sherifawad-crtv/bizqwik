@@ -5,7 +5,7 @@
 import { FN_SLUG, supabase } from "./supabaseClient";
 import { bump } from "./bus";
 import { cleanPath, reportError, track } from "./analytics";
-import type { PaymentsSummary, Location,
+import type { PaymentRequest, PaymentsSummary, Location,
   ActivityEntry,
   BizqwikRole,
   ClassBooking,
@@ -49,7 +49,6 @@ import type { PaymentsSummary, Location,
 } from "./types";
 
 /** One kind of drop-in at a location (e.g. Kids / Adults) and its price. */
-export interface PaymentRequest { id: string; clientId: string; clientName: string; clientPhone: string | null; name: string; price: number; offerType: "plan_type" | "bundle_type"; createdAt: string; proofUrl: string | null }
 export interface DropInOption {
   label: string;
   price: number;

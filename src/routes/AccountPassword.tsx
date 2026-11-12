@@ -47,7 +47,7 @@ export function AccountPassword() {
   return (
     <div>
       <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: 20 }}>
-        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        <div className="bq-stack">
           <TextField
             label="CURRENT PASSWORD"
             type="password"
@@ -71,7 +71,7 @@ export function AccountPassword() {
           />
         </div>
         {error && (
-          <div className="bq-rise" style={{ marginTop: 12, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>
+          <div  className="bq-error bq-error--spaced bq-rise">
             {error}
           </div>
         )}

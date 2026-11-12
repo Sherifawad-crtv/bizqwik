@@ -91,7 +91,7 @@ export function AddSessionSheet({ open, onClose, coachId, coachName, month: mont
             {coachName ? `Adds to ${coachName}'s ${monthLabel(month)} total.` : `Adds to your ${monthLabel(month)} total.`}
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          <div className="bq-stack">
             {scan ? (
               <div data-testid="scan-date" style={{ display: "flex", alignItems: "center", gap: 10, background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "14px 16px" }}>
                 <Icon name="check" size={18} />
@@ -104,7 +104,7 @@ export function AddSessionSheet({ open, onClose, coachId, coachName, month: mont
             <Stepper value={qty} onChange={setQty} />
             <div style={{ display: "flex", alignItems: "baseline", gap: 10, padding: "6px 6px 0" }}>
               <span className="bq-label">ADDS</span>
-              <span className="tabular" style={{ marginLeft: "auto", font: "800 30px var(--font-body)", letterSpacing: "-.02em", color: "var(--primary)" }}>
+              <span className="tabular bq-rise" style={{ marginLeft: "auto", font: "800 30px var(--font-body)", letterSpacing: "-.02em", color: "var(--primary)" }}>
                 +{qty * rate}
               </span>
               <span style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--primary)" }}>EGP</span>
@@ -112,7 +112,7 @@ export function AddSessionSheet({ open, onClose, coachId, coachName, month: mont
           </div>
 
           {error && (
-            <div className="bq-rise" style={{ marginTop: 12, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>
+            <div  className="bq-error bq-error--spaced">
               {error}
             </div>
           )}

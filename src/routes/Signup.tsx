@@ -58,7 +58,7 @@ export function Signup() {
           USE THE EMAIL YOU WERE INVITED WITH
         </div>
 
-        <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        <form onSubmit={submit} className="bq-stack">
           <TextField label="NAME" type="text" required autoComplete="name" value={name} onChange={(e) => setName(e.target.value)} onFocus={focusIntoView} />
           <TextField label="EMAIL" type="email" required autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} onFocus={focusIntoView} />
           <TextField
@@ -73,7 +73,7 @@ export function Signup() {
           />
 
           {error && (
-            <div className="bq-rise" style={{ font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>
+            <div  className="bq-error bq-rise">
               {error}
             </div>
           )}

@@ -50,7 +50,7 @@ function InviteSheet({ open, onClose, onDone }: { open: boolean; onClose: () => 
     <Sheet open={open} onClose={close}>
       <div className="bq-label">INVITE TEAMMATE</div>
       <div className="bq-title">Add to Bizqwik team</div>
-      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+      <div className="bq-stack">
         <TextField label="NAME" value={name} onChange={(e) => setName(e.target.value)} placeholder="Optional" />
         <TextField label="EMAIL" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="teammate@bizqwik.com" />
         <SelectField label="ROLE" value={role} options={INVITE_ROLES} onChange={(v) => setRole(v as BizqwikRole)} />

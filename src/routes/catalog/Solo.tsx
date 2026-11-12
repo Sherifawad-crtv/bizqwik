@@ -180,7 +180,7 @@ export function SoloOffer() {
           </div>
         )}
       </div>
-      {error && <div className="bq-rise" style={{ font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px", marginBottom: 12 }}>{error}</div>}
+      {error && <div className="bq-rise" style={{ font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: "var(--r-md)", padding: "10px 14px", marginBottom: 12 }}>{error}</div>}
     </div>
   );
 }
@@ -237,9 +237,9 @@ export function LocationsCard() {
       </div>
       <Sheet open={editing !== null} onClose={busy ? () => {} : () => setEditing(null)}>
         <div className="bq-label">{editing?.id ? "RENAME LOCATION" : "NEW LOCATION"}</div>
-        <div className="bq-title">{editing?.id ? "Rename" : "Add a location"}</div>
+        <div className="bq-title bq-rise">{editing?.id ? "Rename" : "Add a location"}</div>
         <TextField label="NAME" value={editing?.name ?? ""} onChange={(e) => setEditing((x) => (x ? { ...x, name: e.target.value } : x))} placeholder="e.g. Zamalek studio" />
-        {error && <div className="bq-rise" style={{ marginTop: 12, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>{error}</div>}
+        {error && <div  className="bq-error bq-error--spaced">{error}</div>}
         <Button fullWidth size="lg" style={{ marginTop: 16 }} disabled={busy} onClick={save}>{busy ? "Saving…" : "Save"}</Button>
         <Button variant="secondary" fullWidth style={{ marginTop: 8 }} disabled={busy} onClick={() => setEditing(null)}>Cancel</Button>
       </Sheet>

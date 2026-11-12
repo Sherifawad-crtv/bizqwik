@@ -300,7 +300,7 @@ export function ClientSheet({
               kicker={shown.name.toUpperCase()}
               title={mode === "assign" ? "Assign a coach" : mode === "invite" ? "Invite to app" : mode === "refund" ? "Issue a refund" : mode === "sell-plan" ? "Choose a plan" : "Choose package"}
             />
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            <div className="bq-stack">
               {mode === "refund" && (
                 <>
                   <TextField label="AMOUNT (EGP)" value={refundAmount} onChange={(e) => setRefundAmount(e.target.value)} inputMode="decimal" placeholder="0" />

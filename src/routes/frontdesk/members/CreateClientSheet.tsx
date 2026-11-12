@@ -192,7 +192,7 @@ export function CreateClientSheet({
           </div>
 
           {step === 0 && (
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            <div className="bq-stack">
               <TextField label="FULL NAME" value={name} onChange={(e) => setName(e.target.value)} placeholder="Client name" autoComplete="off" />
               <TextField label="PHONE" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="01xxxxxxxxx" autoComplete="off" />
               <TextField label="EMAIL" type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="off" />
@@ -216,7 +216,7 @@ export function CreateClientSheet({
                 />
               </div>
               )}
-              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              <div className="bq-stack">
                 {kind === "plan" ? (
                   <>
                     <GroupOfferSelect value={offer} onChange={(v) => { setOffer(v); setPartners([]); }} planTypes={planTypes} series={series} />

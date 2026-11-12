@@ -38,7 +38,7 @@ export function TiersPanel({ onOpenPeople, onOpenInvites }: { onOpenPeople: () =
         </Button>
       </div>
 
-      <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", overflow: "hidden" }}>
+      <div className="bq-panel">
         {data.tiers.map((t, i) => (
           <div key={t.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "16px 20px", borderBottom: i === data.tiers.length - 1 ? "none" : "1px solid var(--line)" }}>
             <div className="bq-grow">
@@ -167,13 +167,13 @@ export function TierSheet({ open, tier: tierProp, onClose }: { open: boolean; ti
         <>
           <div className="bq-label">{tier ? "EDIT TIER" : "NEW TIER"}</div>
           <div className="bq-title">{tier ? tier.name : "New tier"}</div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          <div className="bq-stack bq-rise">
             <TextField label="NAME" value={name} onChange={(e) => setName(e.target.value)} placeholder="Tier 2 · Intermediate" />
             <TextField label="RATE · EGP / SESSION" type="number" min={1} value={rate} onChange={(e) => setRate(e.target.value)} />
             <TextField label="PRIVATE TRAINING CUT · %" type="number" min={0} max={100} value={privateCutPct} onChange={(e) => setPrivateCutPct(e.target.value)} placeholder="50" />
           </div>
           {error && (
-            <div className="bq-rise" style={{ marginTop: 12, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>
+            <div  className="bq-error bq-error--spaced">
               {error}
             </div>
           )}

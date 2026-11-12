@@ -114,7 +114,7 @@ export function SoloDropIn({ onDone }: { onDone: () => void }) {
           {qr ? (
             <img src={qr} alt="InstaPay QR code" style={{ width: "100%", maxWidth: 280, aspectRatio: "1", objectFit: "contain", background: "#fff", borderRadius: 16, border: "1px solid var(--line)" }} />
           ) : (
-            <div style={{ font: "400 13px/1.5 var(--font-mono)", color: "var(--ink-muted)", background: "var(--sunken)", borderRadius: 14, padding: "14px 16px" }}>
+            <div style={{ font: "400 13px/1.5 var(--font-mono)", color: "var(--ink-muted)", background: "var(--sunken)", borderRadius: "var(--r-md)", padding: "14px 16px" }}>
               Add your InstaPay QR on the Plans tab to show it here.
               <div><button onClick={() => navigate("/catalog")} style={{ border: 0, background: "none", color: "var(--primary-pressed)", font: "700 14px var(--font-body)", cursor: "pointer", padding: "8px 0 0" }}>Add QR</button></div>
             </div>

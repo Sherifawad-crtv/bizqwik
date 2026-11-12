@@ -37,7 +37,7 @@ export function InvitesPanel() {
         </Button>
       </div>
 
-      <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", overflow: "hidden" }}>
+      <div className="bq-panel">
         {data.invites.map((inv, i) => (
           <div key={inv.email} style={{ display: "flex", alignItems: "center", gap: 12, padding: "16px 20px", borderBottom: i === data.invites.length - 1 ? "none" : "1px solid var(--line)" }}>
             <div className="bq-grow">
@@ -128,7 +128,7 @@ function InviteSheet({ open, tiers: tiersProp, onClose }: { open: boolean; tiers
         <>
           <div className="bq-label">NEW INVITE</div>
           <div className="bq-title">Invite someone</div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          <div className="bq-stack">
             <TextField label="EMAIL" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@bizqwik.app" />
             <SelectField
               label="ROLE"
@@ -151,7 +151,7 @@ function InviteSheet({ open, tiers: tiersProp, onClose }: { open: boolean; tiers
             )}
           </div>
           {error && (
-            <div className="bq-rise" style={{ marginTop: 12, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>
+            <div  className="bq-error bq-error--spaced bq-rise">
               {error}
             </div>
           )}

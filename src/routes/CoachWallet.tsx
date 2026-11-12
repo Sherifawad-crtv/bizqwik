@@ -13,7 +13,7 @@ import { DayList } from "../components/DayList";
 import { DaySessionsSheet } from "../components/DaySessionsSheet";
 import { AddSessionSheet } from "../components/AddSessionSheet";
 import { Button } from "../components/Button";
-import { ScanFlow } from "../components/Fab";
+import { ScanFlow } from "../components/fab/ScanFlow";
 import { Spinner } from "../components/Spinner";
 
 export function CoachWallet() {
@@ -107,7 +107,7 @@ export function CoachWallet() {
         </div>
       )}
       {actionError && (
-        <div className="bq-rise" style={{ marginBottom: 14, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>
+        <div className="bq-rise" style={{ marginBottom: 14, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: "var(--r-md)", padding: "10px 14px" }}>
           {actionError}
         </div>
       )}

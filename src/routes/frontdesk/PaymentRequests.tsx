@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { api, type PaymentRequest } from "../../lib/backend";
+import { api } from "../../lib/backend";
+import type { PaymentRequest } from "../../lib/types";
 import { useAsync } from "../../lib/useAsync";
 import { egp } from "../../lib/format";
 import { Button } from "../../components/Button";
@@ -97,7 +98,7 @@ function RequestRow({ r, onDone }: { r: PaymentRequest; onDone: () => void }) {
           <Button variant="quiet" disabled={busy} onClick={() => setRejecting(true)}>Reject</Button>
         </div>
       )}
-      {error && <div className="bq-rise" style={{ font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px", marginTop: 10 }}>{error}</div>}
+      {error && <div className="bq-rise" style={{ font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: "var(--r-md)", padding: "10px 14px", marginTop: 10 }}>{error}</div>}
     </Card>
   );
 }

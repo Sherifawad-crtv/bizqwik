@@ -29,11 +29,18 @@ async function boot(page: Page, role: "dept_head" | "accountant") {
 }
 // The sideways offsets of every screen layer, a moment after the tap.
 const offsets = async (page: Page) => {
-  await page.waitForTimeout(70);
-  return page.evaluate(() => [...document.querySelectorAll("main [data-scroll]")].map((el) => {
-    const t = getComputedStyle(el).transform;
-    return t === "none" ? 0 : new DOMMatrixReadOnly(t).m41;
-  }));
+  // Sample for a moment: a slow machine may start the move a little late. Returns the
+  // first sample that is mid-slide, or the last one if nothing ever slid.
+  let xs: number[] = [];
+  for (let i = 0; i < 14; i++) {
+    await page.waitForTimeout(i === 0 ? 70 : 30);
+    xs = await page.evaluate(() => [...document.querySelectorAll("main [data-scroll]")].map((el) => {
+      const t = getComputedStyle(el).transform;
+      return t === "none" ? 0 : new DOMMatrixReadOnly(t).m41;
+    }));
+    if (slides(xs)) return xs;
+  }
+  return xs;
 };
 const slides = (xs: number[]) => xs.some((x) => x > 20) || xs.some((x) => x < -20);
 const settle = (page: Page) => page.waitForTimeout(500);

@@ -63,7 +63,7 @@ function PlanSheet({ open, onClose, plan, onDone }: { open: boolean; onClose: ()
     <Sheet open={open} onClose={close}>
       <div className="bq-label">{plan ? "EDIT PLAN" : "NEW PLAN"}</div>
       <div className="bq-title">{plan ? plan.name : "Create a SaaS plan"}</div>
-      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+      <div className="bq-stack">
         <TextField label="NAME" value={name} onChange={(e) => setName(e.target.value)} placeholder="Growth" />
         <TextField label="PRICE (EGP / MONTH)" type="number" inputMode="numeric" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="0" />
         <TextField label="TEAM LIMIT (BLANK = UNLIMITED)" type="number" inputMode="numeric" value={team} onChange={(e) => setTeam(e.target.value)} placeholder="Unlimited" />
@@ -107,7 +107,7 @@ export function Plans() {
       {plansRes.error && <ErrorBanner text={plansRes.error} />}
 
       <SectionTitle count={plans.length}>SaaS plans</SectionTitle>
-      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+      <div className="bq-stack">
         {plans.map((p) => (
           <Card key={p.id} style={{ padding: "16px 18px", display: "flex", alignItems: "center", gap: 12 }}>
             <div className="bq-grow">
