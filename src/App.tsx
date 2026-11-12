@@ -1,6 +1,6 @@
-import { Suspense, lazy, type ComponentType } from "react";
+import { Suspense, lazy, useEffect, type ComponentType } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider } from "./lib/auth";
+import { AuthProvider, useAuth } from "./lib/auth";
 import { HeaderProvider } from "./lib/header";
 import { OwnMonthProvider } from "./lib/ownMonth";
 import { RequireAuth, RequireRole, RequireBizqwikTeam, RequireDesk, RequireTeam } from "./lib/guards";
@@ -8,20 +8,7 @@ import { Spinner } from "./components/Spinner";
 import { Shell } from "./components/Shell";
 import { isChunkLoadError, reloadForUpdate } from "./lib/chunkReload";
 
-import { Login } from "./routes/Login";
-import { Signup } from "./routes/Signup";
 import { LaunchGate } from "./components/Splash";
-import { Money } from "./routes/Money";
-import { Home } from "./routes/Home";
-import { Oversight } from "./routes/Oversight";
-import { ClassesManage } from "./routes/ClassesManage";
-import { Activity, Transactions } from "./routes/Activity";
-import { Catalog } from "./routes/Catalog";
-import { Account } from "./routes/Account";
-import { Members } from "./routes/frontdesk/Members";
-import { CheckIn } from "./routes/frontdesk/CheckIn";
-import { DropIn } from "./routes/frontdesk/DropIn";
-import { Bookings } from "./routes/frontdesk/Bookings";
 
 
 // Screens most people never open load on demand, keeping the first download small.
@@ -37,6 +24,20 @@ function lazyNamed<T extends Record<string, unknown>>(load: () => Promise<T>, na
     }
   });
 }
+const Login = lazyNamed(() => import("./routes/Login"), "Login");
+const Signup = lazyNamed(() => import("./routes/Signup"), "Signup");
+const Money = lazyNamed(() => import("./routes/Money"), "Money");
+const Home = lazyNamed(() => import("./routes/Home"), "Home");
+const Oversight = lazyNamed(() => import("./routes/Oversight"), "Oversight");
+const ClassesManage = lazyNamed(() => import("./routes/ClassesManage"), "ClassesManage");
+const Activity = lazyNamed(() => import("./routes/Activity"), "Activity");
+const Transactions = lazyNamed(() => import("./routes/Activity"), "Transactions");
+const Catalog = lazyNamed(() => import("./routes/Catalog"), "Catalog");
+const Account = lazyNamed(() => import("./routes/Account"), "Account");
+const Members = lazyNamed(() => import("./routes/frontdesk/Members"), "Members");
+const CheckIn = lazyNamed(() => import("./routes/frontdesk/CheckIn"), "CheckIn");
+const DropIn = lazyNamed(() => import("./routes/frontdesk/DropIn"), "DropIn");
+const Bookings = lazyNamed(() => import("./routes/frontdesk/Bookings"), "Bookings");
 const Welcome = lazyNamed(() => import("./routes/Welcome"), "Welcome");
 const ForgotPassword = lazyNamed(() => import("./routes/ForgotPassword"), "ForgotPassword");
 const ResetPassword = lazyNamed(() => import("./routes/ResetPassword"), "ResetPassword");
@@ -59,6 +60,30 @@ const OpsOrgQr = lazyNamed(() => import("./routes/ops/OrgQr"), "OrgQr");
 const OpsTeam = lazyNamed(() => import("./routes/ops/Team"), "Team");
 const OpsPlans = lazyNamed(() => import("./routes/ops/Plans"), "Plans");
 
+// Once the first screen is up and the phone is idle, quietly download the
+// other screens so tapping a tab never waits on a download.
+const warmed = { done: false };
+function WarmScreens() {
+  const { profile } = useAuth();
+  useEffect(() => {
+    if (!profile || warmed.done) return;
+    warmed.done = true;
+    const w = window as Window & { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number };
+    const run = () => {
+      for (const load of [
+        () => import("./routes/Home"), () => import("./routes/Money"), () => import("./routes/Oversight"),
+        () => import("./routes/ClassesManage"), () => import("./routes/Activity"), () => import("./routes/Catalog"),
+        () => import("./routes/Account"), () => import("./routes/frontdesk/Members"), () => import("./routes/frontdesk/CheckIn"),
+        () => import("./routes/frontdesk/DropIn"), () => import("./routes/frontdesk/Bookings"), () => import("./routes/CoachesOverview"),
+        () => import("./routes/Clients"), () => import("./routes/History"),
+      ]) load().catch(() => {});
+    };
+    if (w.requestIdleCallback) w.requestIdleCallback(run, { timeout: 6000 });
+    else setTimeout(run, 3000);
+  }, [profile]);
+  return null;
+}
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -66,6 +91,7 @@ export default function App() {
         <HeaderProvider>
           <OwnMonthProvider>
             <LaunchGate>
+            <WarmScreens />
             <Suspense fallback={<Spinner />}>
             <Routes>
               <Route path="/welcome" element={<Welcome />} />
