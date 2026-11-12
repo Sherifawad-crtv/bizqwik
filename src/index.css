@@ -243,6 +243,12 @@ button:not([data-tap]):not([data-nopress]),
     transform: rotate(360deg);
   }
 }
+/* Loading placeholders breathe (opacity only, so it never costs layout). */
+@keyframes bqSkel {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+.bq-skel { animation: bqSkel 1.3s ease-in-out infinite; }
 @keyframes bqRise {
   from {
     opacity: 0;

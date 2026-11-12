@@ -20,12 +20,11 @@ export function Splash() {
   );
 }
 
-/** The launch screen covers the whole start-up: first who's signed in, then
- * the first screen's own data. The app is mounted under it as soon as we know
- * who's in (so that screen's requests start at once) and the splash lifts when
- * they've landed, so there is one loader, not a splash followed by a spinner.
- * No minimum hold: it goes the moment everything is ready. A request that
- * never answers can't trap the user behind it (capped at 8 seconds). */
+/** The launch screen covers start-up until we know who's signed in. The app is
+ * mounted under it at once (so the first screen's requests start immediately)
+ * and the splash lifts when that data lands, or after at most 450 ms, whichever
+ * is first. A slow connection then shows the screen's placeholders, not a
+ * logo. No minimum hold. */
 export function LaunchGate({ children }: { children: ReactNode }) {
   const { ready, profile, bizqwikTeam } = useAuth();
   const signedIn = !!profile || !!bizqwikTeam;
@@ -38,7 +37,7 @@ export function LaunchGate({ children }: { children: ReactNode }) {
       return;
     }
     let alive = true;
-    waitForFirstScreen(8000).then(() => {
+    waitForFirstScreen(450).then(() => {
       if (!alive) return;
       setCovered(false);
       // How long the person waited from opening the app to a finished first screen.

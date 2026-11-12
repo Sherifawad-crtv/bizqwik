@@ -8,7 +8,7 @@ import { egp } from "../lib/format";
 import { PAY_METHOD_LABELS, type ClassBooking, type PayMethod, type BookingAttendance } from "../lib/types";
 import { Sheet } from "./Sheet";
 import { Button } from "./Button";
-import { Spinner } from "./Spinner";
+import { InlineSpinner } from "./Spinner";
 
 const ATT_LABEL: Record<BookingAttendance, string> = {
   booked: "Booked",
@@ -70,7 +70,7 @@ export function ClassRosterSheet({
         {live.length} booked{live.length > 0 ? ` · ${live.filter((b) => b.coverage === "plan").length} on a plan · ${live.filter((b) => b.attendance === "arrived").length} arrived` : ""}
       </div>
 
-      {roster.loading && <Spinner />}
+      {roster.loading && <InlineSpinner />}
       {error && (
         <div className="bq-rise" style={{ marginBottom: 12, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>{error}</div>
       )}

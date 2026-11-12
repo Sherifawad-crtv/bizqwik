@@ -7,6 +7,8 @@ import { isStandalone } from "../lib/push";
 import type { Role } from "../lib/types";
 import { EASE, FADE_MS, PUSH_MS } from "../lib/motion";
 import { ScreenActive } from "../lib/screenActive";
+import { waitForFirstScreen } from "../lib/useAsync";
+import { reportScreenReady } from "../lib/vitals";
 
 /** How the app moves between screens, the way iOS does it:
  *  - the sections in the tab bar are peers: switching between them is a quick
@@ -103,6 +105,22 @@ export function RouteTransition({ tabs, role, orgMode = "team" }: { tabs: NavIte
   const timer = useRef<number | undefined>(undefined);
   const frame1 = useRef<number | undefined>(undefined);
   const frame2 = useRef<number | undefined>(undefined);
+
+  // How long each screen takes from the tap to its data being on screen.
+  const firstPath = useRef(true);
+  useEffect(() => {
+    if (firstPath.current) {
+      firstPath.current = false;
+      return;
+    }
+    const t0 = performance.now();
+    const path = location.pathname;
+    let alive = true;
+    waitForFirstScreen(10000, 800).then(() => alive && reportScreenReady(path, performance.now() - t0));
+    return () => {
+      alive = false;
+    };
+  }, [location.pathname]);
 
   useEffect(() => {
     const path = location.pathname;

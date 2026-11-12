@@ -7,7 +7,7 @@ import { useAuth } from "../lib/auth";
 import { useSetHeader } from "../lib/header";
 import { egp } from "../lib/format";
 import type { ActivityEntry } from "../lib/types";
-import { Spinner } from "../components/Spinner";
+import { InlineSpinner } from "../components/Spinner";
 import { Icon } from "../components/Icon";
 import { Segmented } from "../components/Segmented";
 
@@ -143,7 +143,7 @@ export function ActivityPanel() {
         </span>
       </div>
 
-      {loading && <Spinner />}
+      {loading && <InlineSpinner />}
       {error && (
         <div className="bq-rise" style={{ font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>{error}</div>
       )}
@@ -244,7 +244,7 @@ export function Transactions() {
           ]}
         />
       </div>
-      {loading && <Spinner />}
+      {loading && <InlineSpinner />}
       {error && <div className="bq-rise" style={{ font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>{error}</div>}
       {!loading && shown.length === 0 && <EmptyState icon="history" title="No transactions yet" body="Sales, refunds and wallet changes are listed here, newest first, as they happen." />}
       {shown.length > 0 && <Feed entries={shown} />}

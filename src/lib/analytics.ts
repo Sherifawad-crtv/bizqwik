@@ -51,6 +51,8 @@ export function startAnalytics() {
   if (started || typeof window === "undefined") return;
   started = true;
   if (!import.meta.env.PROD) window.__bqEvents = [];
+  // Measured always (cheap); only sent where analytics keys exist, like every event.
+  void import("./vitals").then((v) => v.startVitals());
   if (!PH_KEY && !SENTRY_DSN) return;
 
   window.addEventListener("error", (e) => reportError(e.error ?? e.message, { source: "window" }));

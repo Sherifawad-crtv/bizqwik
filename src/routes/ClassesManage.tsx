@@ -6,7 +6,7 @@ import { useAsync } from "../lib/useAsync";
 import { useSetHeader } from "../lib/header";
 import { egp, todayIso } from "../lib/format";
 import type { GymClass } from "../lib/types";
-import { Spinner } from "../components/Spinner";
+import { InlineSpinner } from "../components/Spinner";
 import { Button } from "../components/Button";
 import { Icon } from "../components/Icon";
 import { Sheet } from "../components/Sheet";
@@ -95,7 +95,7 @@ export function ClassesManage() {
         </Button>
       </div>
 
-      {classes.loading && <Spinner />}
+      {classes.loading && <InlineSpinner />}
       {classes.error && (
         <div className="bq-rise" style={{ font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 14, padding: "10px 14px" }}>{classes.error}</div>
       )}

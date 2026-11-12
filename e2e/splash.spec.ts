@@ -21,7 +21,7 @@ test("launch: it shows once per launch, not on every screen change", async ({ pa
   await expect(page.getByTestId("splash")).toHaveCount(0);
 });
 
-test("launch: the splash stays until the founder's overview has its data (one loader, one request)", async ({ page }) => {
+test("launch: a slow overview doesn't hold the logo — the splash lifts, placeholders show, then the numbers settle in (one request)", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   const m = new Date();
   const month = `${m.getFullYear()}-${String(m.getMonth() + 1).padStart(2, "0")}`;
@@ -37,17 +37,18 @@ test("launch: the splash stays until the founder's overview has its data (one lo
   // Registered after the mock, so it sees the request first: hold the answer, then hand it on.
   await page.route(/\/revenue\?/, async (route) => {
     if (route.request().method() !== "OPTIONS") calls.push(route.request().url());
-    await new Promise((r) => setTimeout(r, 1500));
+    await new Promise((r) => setTimeout(r, 2500));
     await route.fallback();
   });
   await page.goto("/");
   const splash = page.getByTestId("splash");
   await expect(splash).toBeVisible();
-  await page.waitForTimeout(900); // still waiting on the overview's numbers: the splash is still up
-  await expect(splash).toBeVisible();
-  await expect(splash).toHaveCount(0, { timeout: 5000 });
-  // The moment it lifts, the page is already filled in — no second spinner.
-  await expect(page.getByText("REVENUE VS COACH PAYOUTS")).toBeVisible({ timeout: 300 });
+  // The logo goes after a moment even though the numbers are still on their way...
+  await expect(splash).toHaveCount(0, { timeout: 1800 });
+  // ...and the screen shows the shape of what's coming, not a blank or a spinner.
+  await expect(page.getByTestId("skeleton").first()).toBeVisible();
+  await expect(page.getByText("REVENUE VS COACH PAYOUTS")).toBeVisible({ timeout: 5000 });
+  await expect(page.getByTestId("skeleton")).toHaveCount(0);
   expect(calls).toHaveLength(1);
   expect(calls[0]).toContain("history=24");
 });

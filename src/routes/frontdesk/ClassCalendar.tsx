@@ -8,7 +8,7 @@ import type { GymClass } from "../../lib/types";
 import { Segmented } from "../../components/Segmented";
 import { Button } from "../../components/Button";
 import { Icon } from "../../components/Icon";
-import { Spinner } from "../../components/Spinner";
+import { InlineSpinner } from "../../components/Spinner";
 import { ClassRosterSheet } from "../../components/ClassRosterSheet";
 
 type View = "day" | "week" | "month";
@@ -161,7 +161,7 @@ export function ClassCalendarScreen({ onClose }: { onClose: () => void }) {
 
       <div style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
         {classes.loading && !classes.data ? (
-          <Spinner />
+          <InlineSpinner />
         ) : view === "month" ? (
           <MonthGrid
             cursor={cursor}

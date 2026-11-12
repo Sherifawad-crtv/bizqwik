@@ -147,3 +147,18 @@ test("a screen kept underneath does not re-request data when the app refreshes",
   await settle(page);
   expect(monthCalls).toBe(2);
 });
+
+test("how long each screen takes, and how the phone feels, are measured (numbers only)", async ({ page }) => {
+  await boot(page, "dept_head");
+  await page.goto("/"); await page.waitForTimeout(1500);
+  await page.getByRole("link", { name: "Team", exact: true }).click();
+  await page.waitForTimeout(1500);
+  await page.evaluate(() => { Object.defineProperty(document, "visibilityState", { value: "hidden", configurable: true }); document.dispatchEvent(new Event("visibilitychange")); });
+  const events = await page.evaluate(() => (window as unknown as { __bqEvents: { name: string; props: Record<string, unknown> }[] }).__bqEvents);
+  const screen = events.find((e) => e.name === "screen_ready" && e.props.path === "/coaches");
+  expect(screen).toBeTruthy();
+  expect(typeof screen?.props.ms).toBe("number");
+  const vitals = events.find((e) => e.name === "web_vitals");
+  expect(vitals).toBeTruthy();
+  for (const [k, v] of Object.entries(vitals!.props)) if (k !== "net") expect(["number", "object"]).toContain(typeof v); // numbers (or null); the only word is the connection type (4g, 3g…)
+});
