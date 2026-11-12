@@ -241,8 +241,8 @@ function AddClassPills({ floating, hidden, onOne, onRecurring }: { floating: boo
         ...(floating ? { width: "min(100% - 32px, 420px)", pointerEvents: "auto" as const } : { marginBottom: 14 }),
       }}
     >
-      <button data-tap onClick={onOne} style={{ ...pill, background: "var(--primary-tint)", color: "var(--primary-pressed)" }}>One Class</button>
-      <button data-tap onClick={onRecurring} style={{ ...pill, background: "var(--primary)", color: "var(--surface)" }}>Recurring Schedule</button>
+      <button className="bq-scale" onClick={onOne} style={{ ...pill, background: "var(--primary-tint)", color: "var(--primary-pressed)" }}>One Class</button>
+      <button className="bq-scale" onClick={onRecurring} style={{ ...pill, background: "var(--primary)", color: "var(--surface)" }}>Recurring Schedule</button>
     </div>
   );
   if (!floating) return group;

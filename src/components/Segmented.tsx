@@ -81,8 +81,7 @@ export function Segmented<T extends string>({
         return (
           <button
             key={o.value}
-            data-hit
-            data-nopress
+            className="bq-hit bq-still"
             data-thumb-on={on ? "" : undefined}
             onClick={() => pick(o.value)}
             aria-pressed={on}

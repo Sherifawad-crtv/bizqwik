@@ -100,7 +100,7 @@ export function Money() {
           <SectionTitle count={data.txns.length}>Transactions</SectionTitle>
           <Card style={{ overflow: "hidden", marginBottom: 12 }}>
             {data.txns.slice(0, 100).map((t, i, arr) => (
-              <button key={t.id} data-tap onClick={() => setOpen(t)} style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", border: 0, background: "none", cursor: "pointer", textAlign: "left", padding: "13px 18px", borderBottom: i === arr.length - 1 ? "none" : "1px solid var(--line)" }}>
+              <button key={t.id} className="bq-scale" onClick={() => setOpen(t)} style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", border: 0, background: "none", cursor: "pointer", textAlign: "left", padding: "13px 18px", borderBottom: i === arr.length - 1 ? "none" : "1px solid var(--line)" }}>
                 <div style={{ minWidth: 0, flex: 1 }}>
                   <div style={{ font: "700 15px var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t.clientName ?? "Client"}</div>
                   <div style={{ font: "400 12px var(--font-mono)", color: "var(--ink-faint)" }}>

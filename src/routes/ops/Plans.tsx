@@ -116,10 +116,10 @@ export function Plans() {
                 {egp(p.price)}/mo · {limitLabel(p.teamSizeLimit)} staff · {limitLabel(p.clientSizeLimit)} clients
               </div>
             </div>
-            <button data-hit onClick={() => openEdit(p)} aria-label={`Edit ${p.name}`} style={{ border: 0, background: "var(--sunken)", borderRadius: 12, width: 38, height: 38, display: "flex", alignItems: "center", justifyContent: "center", color: "var(--ink-muted)", cursor: "pointer", flex: "none" }}>
+            <button className="bq-hit" onClick={() => openEdit(p)} aria-label={`Edit ${p.name}`} style={{ border: 0, background: "var(--sunken)", borderRadius: 12, width: 38, height: 38, display: "flex", alignItems: "center", justifyContent: "center", color: "var(--ink-muted)", cursor: "pointer", flex: "none" }}>
               <Icon name="pencil" size={17} />
             </button>
-            <button data-hit onClick={() => setDeleting(p)} aria-label={`Delete ${p.name}`} style={{ border: 0, background: "var(--danger-bg)", borderRadius: 12, width: 38, height: 38, display: "flex", alignItems: "center", justifyContent: "center", color: "var(--danger-fg)", cursor: "pointer", flex: "none" }}>
+            <button className="bq-hit" onClick={() => setDeleting(p)} aria-label={`Delete ${p.name}`} style={{ border: 0, background: "var(--danger-bg)", borderRadius: 12, width: 38, height: 38, display: "flex", alignItems: "center", justifyContent: "center", color: "var(--danger-fg)", cursor: "pointer", flex: "none" }}>
               <Icon name="trash" size={17} />
             </button>
           </Card>

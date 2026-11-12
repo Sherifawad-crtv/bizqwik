@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Avatar } from "./Avatar";
 import { StatePill } from "./StatePill";
 import { Icon } from "./Icon";
@@ -23,13 +22,10 @@ export interface ListRow {
 }
 
 function DesktopRow({ r }: { r: ListRow }) {
-  const [hovered, setHovered] = useState(false);
   return (
     <div
       onClick={r.onClick}
-      data-row-press={r.onClick ? "" : undefined}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+      className={r.onClick ? "bq-row" : undefined}
       style={{
         display: "grid",
         gridTemplateColumns: "2fr 1.3fr 1fr 1.1fr 20px",
@@ -37,9 +33,6 @@ function DesktopRow({ r }: { r: ListRow }) {
         padding: "14px 20px",
         borderBottom: "1px solid var(--line)",
         alignItems: "center",
-        cursor: r.onClick ? "pointer" : "default",
-        background: r.onClick && hovered ? "var(--sunken)" : "transparent",
-        transition: "background .15s ease",
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>

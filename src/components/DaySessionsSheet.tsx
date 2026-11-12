@@ -97,7 +97,7 @@ export function DaySessionsSheet({ open, onClose, coachId, month, date, sessions
                   {editable && (
                     <>
                       {!scanOnly && (
-                      <button data-hit
+                      <button className="bq-hit"
                         aria-label="Change date"
                         onClick={() => setMovingId(s.id)}
                         disabled={busyId === s.id}
@@ -106,7 +106,7 @@ export function DaySessionsSheet({ open, onClose, coachId, month, date, sessions
                         <Icon name="pencil" size={15} />
                       </button>
                       )}
-                      <button data-hit
+                      <button className="bq-hit"
                         aria-label="Remove session"
                         onClick={() => setRemovingId(s.id)}
                         disabled={busyId === s.id}

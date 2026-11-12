@@ -48,7 +48,7 @@ export function Switch({ checked, onChange, label, disabled }: { checked: boolea
       aria-checked={checked}
       aria-label={label}
       disabled={disabled}
-      data-hit
+      className="bq-hit"
       onClick={() => onChange(!checked)}
       style={{ border: 0, background: "none", padding: 0, cursor: disabled ? "default" : "pointer", display: "flex" }}
     >

@@ -82,10 +82,10 @@ function TiersPanel({ onOpenPeople, onOpenInvites }: { onOpenPeople: () => void;
               <div style={{ font: "700 16px var(--font-body)" }}>{t.name}</div>
               <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>{t.rate} EGP / session · {t.privateCutPct}% private cut</div>
             </div>
-            <button data-hit onClick={() => setEditing(t)} aria-label="Edit tier" style={{ width: 36, height: 36, borderRadius: 999, border: 0, background: "var(--primary-tint)", color: "var(--primary-pressed)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <button className="bq-hit" onClick={() => setEditing(t)} aria-label="Edit tier" style={{ width: 36, height: 36, borderRadius: 999, border: 0, background: "var(--primary-tint)", color: "var(--primary-pressed)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <Icon name="pencil" size={15} />
             </button>
-            <button data-hit onClick={() => setDeleting(t)} aria-label="Delete tier" style={{ width: 36, height: 36, borderRadius: 999, border: 0, background: "var(--danger-bg)", color: "var(--danger-fg)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <button className="bq-hit" onClick={() => setDeleting(t)} aria-label="Delete tier" style={{ width: 36, height: 36, borderRadius: 999, border: 0, background: "var(--danger-bg)", color: "var(--danger-fg)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <Icon name="trash" size={15} />
             </button>
           </div>
@@ -264,10 +264,10 @@ export function BundlesPanel() {
                 {b.price} EGP · {b.sessionsIncluded} sessions · {b.expiryDays >= NO_EXPIRY_DAYS ? "no expiry" : `${b.expiryDays} days`}
               </div>
             </div>
-            <button data-hit onClick={() => setEditing(b)} aria-label="Edit bundle" style={{ width: 36, height: 36, borderRadius: 999, border: 0, background: "var(--primary-tint)", color: "var(--primary-pressed)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <button className="bq-hit" onClick={() => setEditing(b)} aria-label="Edit bundle" style={{ width: 36, height: 36, borderRadius: 999, border: 0, background: "var(--primary-tint)", color: "var(--primary-pressed)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <Icon name="pencil" size={15} />
             </button>
-            <button data-hit onClick={() => setDeleting(b)} aria-label="Delete bundle" style={{ width: 36, height: 36, borderRadius: 999, border: 0, background: "var(--danger-bg)", color: "var(--danger-fg)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <button className="bq-hit" onClick={() => setDeleting(b)} aria-label="Delete bundle" style={{ width: 36, height: 36, borderRadius: 999, border: 0, background: "var(--danger-bg)", color: "var(--danger-fg)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <Icon name="trash" size={15} />
             </button>
           </div>
@@ -428,7 +428,7 @@ function InvitesPanel() {
                 {inv.tierId ? ` · ${tiers.find((t) => t.id === inv.tierId)?.name ?? ""}` : ""}
               </div>
             </div>
-            <button data-hit onClick={() => setDeleting(inv)} aria-label="Cancel invite" style={{ width: 36, height: 36, borderRadius: 999, border: 0, background: "var(--danger-bg)", color: "var(--danger-fg)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <button className="bq-hit" onClick={() => setDeleting(inv)} aria-label="Cancel invite" style={{ width: 36, height: 36, borderRadius: 999, border: 0, background: "var(--danger-bg)", color: "var(--danger-fg)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <Icon name="trash" size={15} />
             </button>
           </div>

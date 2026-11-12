@@ -20,7 +20,7 @@ export function PaymentRequestsCard() {
   return (
     <>
       <button
-        data-tap
+        className="bq-scale"
         onClick={() => setOpen(true)}
         style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", marginBottom: 10, textAlign: "left", cursor: "pointer", background: "var(--logging-bg)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: "14px 18px" }}
       >

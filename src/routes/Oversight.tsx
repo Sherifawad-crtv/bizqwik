@@ -335,7 +335,7 @@ export function Oversight() {
 
           {profile.role === "dept_head" && (
             <button
-              data-tap
+              className="bq-scale"
               onClick={() => navigate("/accounting")}
               style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: "16px 18px", marginBottom: 10, cursor: "pointer", textAlign: "left" }}
             >

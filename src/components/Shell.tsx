@@ -51,7 +51,7 @@ function ShellInner() {
                 <button
                   onClick={() => navigate(accountBackTarget(pathname, profile.role, orgMode))}
                   aria-label="Back"
-                  data-hit
+                  className="bq-hit"
                   style={{ border: 0, background: "none", padding: 7, margin: -7, cursor: "pointer", color: "var(--ink)", display: "flex" }}
                 >
                   <Icon name="chevron-left" size={22} />

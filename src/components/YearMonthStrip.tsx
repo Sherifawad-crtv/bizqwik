@@ -41,7 +41,7 @@ export function YearMonthStrip({ months, value, onChange }: { months: string[]; 
             key={m}
             ref={on ? selectedRef : undefined}
             data-thumb-on={on ? "" : undefined}
-            data-nopress
+            className="bq-still"
             onClick={() => {
               if (future) return;
               setShown(m);

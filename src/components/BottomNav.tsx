@@ -76,7 +76,7 @@ export function BottomNav({ items }: { items: NavItem[] }) {
           end={t.path === "/"}
           title={t.label}
           aria-label={t.label}
-          data-tap
+          className="bq-scale"
           onClick={noteTabTap}
           style={{ position: "relative", zIndex: 1, flex: "none", width: ITEM, height: ITEM, background: "none", border: 0, padding: 0, display: "flex", alignItems: "center", justifyContent: "center" }}
         >

@@ -40,7 +40,7 @@ export function SoloDropIn({ onDone }: { onDone: () => void }) {
         <div style={{ font: "700 12px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", textAlign: "center", marginBottom: 12 }}>WHO'S DROPPING IN{current ? ` · ${current.name.toUpperCase()}` : ""}</div>
         <div style={{ display: "grid", gridTemplateColumns: options.length > 2 ? "1fr" : "1fr 1fr", gap: 10 }}>
           {options.map((o) => (
-            <button key={o.label} data-tap onClick={() => setKind(o.label)} style={{ minHeight: 84, borderRadius: "var(--r-input)", border: "1px solid var(--line)", background: "var(--surface)", cursor: "pointer", padding: 12 }}>
+            <button key={o.label} className="bq-scale" onClick={() => setKind(o.label)} style={{ minHeight: 84, borderRadius: "var(--r-input)", border: "1px solid var(--line)", background: "var(--surface)", cursor: "pointer", padding: 12 }}>
               <div style={{ font: "800 18px var(--font-body)" }}>{o.label}</div>
               <div style={{ font: "700 14px var(--font-mono)", color: "var(--primary-pressed)", marginTop: 2 }}>{fmt(o.price)} EGP</div>
             </button>
@@ -99,7 +99,7 @@ export function SoloDropIn({ onDone }: { onDone: () => void }) {
           {(["cash", "instapay"] as const).map((m) => (
             <button
               key={m}
-              data-tap
+              className="bq-scale"
               onClick={() => setMethod(m)}
               style={{ height: 64, borderRadius: "var(--r-input)", border: "1px solid var(--line)", background: "var(--surface)", font: "700 16px var(--font-body)", cursor: "pointer" }}
             >

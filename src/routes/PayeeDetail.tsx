@@ -85,7 +85,7 @@ function RecordPaymentSheet({ open, onClose, row, month }: { open: boolean; onCl
               ]
                 .filter((q) => q.value > 0 && q.value <= row.remaining)
                 .map((q) => (
-                  <button key={q.label} type="button" data-tap onClick={() => setAmount(String(q.value))} style={{ border: "1px solid var(--line)", background: "var(--sunken)", borderRadius: 999, padding: "8px 14px", font: "600 13px var(--font-body)", color: "var(--ink)", cursor: "pointer" }}>
+                  <button key={q.label} type="button" className="bq-scale" onClick={() => setAmount(String(q.value))} style={{ border: "1px solid var(--line)", background: "var(--sunken)", borderRadius: 999, padding: "8px 14px", font: "600 13px var(--font-body)", color: "var(--ink)", cursor: "pointer" }}>
                     {q.label}
                   </button>
                 ))}

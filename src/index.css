@@ -153,56 +153,90 @@ textarea {
   scrollbar-width: thin;
 }
 
-[data-tap] {
-  transition: transform 0.12s ease;
-}
-[data-tap]:active {
-  transform: scale(0.92);
-}
+/* ───────────────────────── Interaction primitives ─────────────────────────
+   How things respond to a finger or a mouse lives here, once, as classes.
+   Components pick a class; they don't hand-code press, hover or tap size.
 
-/* Press feedback, the same everywhere: anything you tap dims the moment your
-   finger lands and eases back when you let go. (Items that scale instead use
-   data-tap; rows use data-row-press.) */
-button:not(:disabled):not([data-tap]):not([data-nopress]):active,
-[role="button"]:not([data-tap]):not([data-nopress]):active,
-a[href]:not([data-tap]):not([data-nopress]):active {
-  opacity: 0.7 !important;
-  transition-duration: 0s !important; /* the dim lands the instant you touch */
-}
-/* ...and eases back when you let go. */
-button:not([data-tap]):not([data-nopress]),
-[role="button"]:not([data-tap]):not([data-nopress]) {
+   Base rules use :where() (no specificity) so any class below simply wins. */
+
+/* Every tappable thing dims the instant a finger lands and eases back on release. */
+:where(button, [role="button"], a[href]) {
   transition: opacity 0.25s var(--ease-standard);
 }
-/* Options inside a segmented control, month strip or filter chips show their
-   state with the sliding pill / colour, so they never dim. */
-[data-row-press]:active {
-  background: var(--sunken) !important;
+:where(button:not(:disabled), [role="button"], a[href]):active {
+  opacity: 0.7;
+  transition-duration: 0s;
 }
 
-/* A bigger invisible tap area (Apple asks for at least 44pt) without changing
-   how the control looks. */
-[data-hit] {
+/* .bq-scale: tiles and big targets that shrink under the finger instead of dimming. */
+.bq-scale {
+  transition: transform 0.12s ease;
+}
+.bq-scale:active {
+  transform: scale(0.92);
+  opacity: 1;
+  transition-duration: 0.12s;
+}
+
+/* .bq-still: options whose state is shown another way (the sliding pill), so they never dim. */
+.bq-still,
+.bq-still:active {
+  opacity: 1;
+}
+
+/* .bq-hit: a bigger invisible tap area (Apple asks for 44pt) without changing the look. */
+.bq-hit {
   position: relative;
 }
-[data-hit]::after {
+.bq-hit::after {
   content: "";
   position: absolute;
   inset: -5px;
 }
 
-/* Pointer-driven hover feedback — only on real mice/trackpads (desktop),
-   never on touch, so it can't get "stuck" after a tap. Uses filter/transform
-   so it never fights an element's own inline background color. */
+/* .bq-row: a tappable list row. */
+.bq-row {
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.bq-row:active {
+  background: var(--sunken);
+}
 @media (hover: hover) and (pointer: fine) {
-  [data-hover-fx] {
-    transition: filter 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+  .bq-row:hover {
+    background: var(--sunken);
   }
-  [data-hover-fx]:not(:disabled):hover {
+}
+
+/* .bq-btn: the one button. Variants and sizes are modifiers; callers can still
+   override a single property with `style`. */
+.bq-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 48px;
+  padding: 0 22px;
+  border: 0;
+  border-radius: var(--r-button);
+  font: 700 16px var(--font-body);
+  cursor: pointer;
+  transition: opacity 0.25s var(--ease-standard), transform 0.15s ease, filter 0.15s ease;
+}
+.bq-btn--lg { height: 56px; }
+.bq-btn--full { width: 100%; }
+.bq-btn--primary { background: var(--primary); color: var(--surface); }
+.bq-btn--secondary { background: var(--primary-tint); color: var(--primary-pressed); }
+.bq-btn--quiet { background: var(--paper); color: var(--ink-muted); border: 1px solid var(--line); }
+.bq-btn--danger { background: var(--danger-bg); color: var(--danger-fg); }
+.bq-btn:disabled { opacity: 0.45; cursor: default; }
+/* Mouse only, never touch, so hover can't get "stuck" after a tap. */
+@media (hover: hover) and (pointer: fine) {
+  .bq-btn:not(:disabled):hover {
     filter: brightness(1.05);
     transform: translateY(-1px);
   }
-  [data-hover-fx]:not(:disabled):active {
+  .bq-btn:not(:disabled):active {
     transform: translateY(0);
     filter: brightness(0.98);
   }

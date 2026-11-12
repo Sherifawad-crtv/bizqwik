@@ -24,7 +24,7 @@ function FabButton({ size, label, onClick, opacity = 1 }: { size: number; label:
       title={label}
       aria-label={label}
       onClick={onClick}
-      data-tap
+      className="bq-scale"
       style={{
         flex: "none",
         width: size,

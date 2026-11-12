@@ -175,7 +175,7 @@ function SeriesRow({ s, last, onEdit, locations = [] }: { s: ClassSeries; last: 
         </div>
       </div>
       {onEdit && (
-        <button data-hit onClick={onEdit} aria-label={`Edit ${s.title}`} style={iconBtn()}>
+        <button className="bq-hit" onClick={onEdit} aria-label={`Edit ${s.title}`} style={iconBtn()}>
           <Icon name="pencil" size={15} />
         </button>
       )}
@@ -396,10 +396,10 @@ function PlansPanel({ solo }: { solo?: boolean }) {
                   {p.invitationsAllowance > 0 ? ` · ${p.invitationsAllowance} guest pass${p.invitationsAllowance === 1 ? "" : "es"}` : ""}
                 </div>
               </div>
-              <button data-hit onClick={() => setEditing({ kind, planType: p })} aria-label={`Edit ${p.name}`} style={iconBtn()}>
+              <button className="bq-hit" onClick={() => setEditing({ kind, planType: p })} aria-label={`Edit ${p.name}`} style={iconBtn()}>
                 <Icon name="pencil" size={15} />
               </button>
-              <button data-hit onClick={() => setDeleting(p)} aria-label={`Delete ${p.name}`} style={iconBtn(true)}>
+              <button className="bq-hit" onClick={() => setDeleting(p)} aria-label={`Delete ${p.name}`} style={iconBtn(true)}>
                 <Icon name="trash" size={15} />
               </button>
             </div>
@@ -676,7 +676,7 @@ function SoloOffer() {
               <div key={i} style={{ display: "grid", gridTemplateColumns: "1fr 1fr auto", gap: 8, alignItems: "end" }}>
                 <TextField label="NAME" value={r.label} onChange={(e) => setRows(rows.map((x, j) => (j === i ? { ...x, label: e.target.value } : x)))} placeholder="Kids" />
                 <TextField label="PRICE · EGP" type="number" min={0} inputMode="decimal" value={r.price} onChange={(e) => setRows(rows.map((x, j) => (j === i ? { ...x, price: e.target.value } : x)))} />
-                <button data-hit aria-label="Remove" onClick={() => setRows(rows.filter((_, j) => j !== i))} style={{ ...iconBtn(true), marginBottom: 6 }}><Icon name="trash" size={15} /></button>
+                <button className="bq-hit" aria-label="Remove" onClick={() => setRows(rows.filter((_, j) => j !== i))} style={{ ...iconBtn(true), marginBottom: 6 }}><Icon name="trash" size={15} /></button>
               </div>
             ))}
             {rows.length < 6 && <Button variant="quiet" onClick={() => setRows([...rows, { label: "", price: "" }])}>+ Another drop-in</Button>}

@@ -62,7 +62,7 @@ export function CheckInList() {
                   </span>
                 ) : (
                   <button
-                    data-tap
+                    className="bq-scale"
                     disabled={r?.state === "busy"}
                     onClick={() => checkIn(c)}
                     style={{ flex: "none", height: 42, padding: "0 18px", border: 0, borderRadius: 999, background: "var(--primary)", color: "#fff", font: "700 14px var(--font-body)", cursor: "pointer", opacity: r?.state === "busy" ? 0.6 : 1 }}

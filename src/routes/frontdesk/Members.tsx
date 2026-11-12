@@ -120,7 +120,7 @@ export function Members() {
           return (
             <button
               key={f}
-              data-tap
+              className="bq-scale"
               onClick={() => setFilter(f)}
               style={{ flex: "none", height: 36, padding: "0 14px", borderRadius: 999, border: on ? 0 : "1px solid var(--line)", background: on ? "var(--primary)" : "var(--surface)", color: on ? "var(--surface)" : "var(--ink)", font: "700 13px var(--font-body)", cursor: "pointer" }}
             >
@@ -709,7 +709,7 @@ export function ClientSheet({
             )}
 
             <button
-              data-tap
+              className="bq-scale"
               onClick={() => setShowMore((v) => !v)}
               aria-expanded={showMore}
               style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 4, width: "100%", height: 48, marginTop: 6, border: 0, background: "none", color: "var(--primary-pressed)", font: "700 14px var(--font-body)", cursor: "pointer" }}
@@ -730,7 +730,7 @@ export function ClientSheet({
                   .map((x, i, arr) => (
                     <button
                       key={x.label}
-                      data-tap
+                      className="bq-scale"
                       onClick={x.go}
                       style={{ display: "flex", alignItems: "center", width: "100%", minHeight: 52, padding: "0 16px", border: 0, borderBottom: i === arr.length - 1 ? "none" : "1px solid var(--line)", background: "none", cursor: "pointer", textAlign: "left", font: "600 15px var(--font-body)", color: x.danger ? "var(--danger-fg)" : "var(--ink)" }}
                     >
@@ -868,14 +868,14 @@ function PartnerPicker({ type, buyerId, picked, onChange }: { type: GroupPlanTyp
       {picked.map((p, i) => (
         <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, font: "700 15px var(--font-body)" }}>
           <span style={{ flex: 1 }}>{labelOf(p)}</span>
-          <button data-tap onClick={() => onChange(picked.filter((_, j) => j !== i))} aria-label="Remove" style={{ border: 0, background: "none", color: "var(--ink-muted)", cursor: "pointer", font: "600 13px var(--font-body)" }}>Remove</button>
+          <button className="bq-scale" onClick={() => onChange(picked.filter((_, j) => j !== i))} aria-label="Remove" style={{ border: 0, background: "none", color: "var(--ink-muted)", cursor: "pointer", font: "600 13px var(--font-body)" }}>Remove</button>
         </div>
       ))}
       {picked.length < seats - 1 && !adding && (
         <>
           <SearchField value={q} onChange={setQ} placeholder="Search the other client" />
           {results.map((c) => (
-            <button key={c.id} data-tap onClick={() => { onChange([...picked, { clientId: c.id, label: c.name }]); setQ(""); }} style={{ textAlign: "left", minHeight: 44, border: 0, background: "none", cursor: "pointer", font: "600 15px var(--font-body)", color: "var(--ink)" }}>
+            <button key={c.id} className="bq-scale" onClick={() => { onChange([...picked, { clientId: c.id, label: c.name }]); setQ(""); }} style={{ textAlign: "left", minHeight: 44, border: 0, background: "none", cursor: "pointer", font: "600 15px var(--font-body)", color: "var(--ink)" }}>
               {c.name}
               {c.phone && <span style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}> · {c.phone}</span>}
             </button>
@@ -918,7 +918,7 @@ function GroupOfferSelect({ value, onChange, planTypes, series }: { value: strin
               type="button"
               role="radio"
               aria-checked={on}
-              data-tap
+              className="bq-scale"
               onClick={() => onChange(o.value)}
               style={{ display: "flex", alignItems: "center", gap: 12, padding: "16px 18px", cursor: "pointer", textAlign: "left", borderRadius: "var(--r-card)", border: on ? "2px solid var(--primary)" : "1px solid var(--line)", background: on ? "var(--primary-tint)" : "var(--surface)", color: "var(--ink)" }}
             >

@@ -39,7 +39,7 @@ const TONES: Record<"primary" | "good" | "warn" | "neutral", Tone> = {
 function Stat({ label, value, sub, icon, tone, onClick }: { label: string; value: string; sub: string; icon: IconName; tone: keyof typeof TONES; onClick?: () => void }) {
   return (
     <button
-      data-tap
+      className="bq-scale"
       onClick={onClick}
       style={{ textAlign: "left", background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: "16px 18px", cursor: onClick ? "pointer" : "default", minWidth: 0 }}
     >
@@ -134,7 +134,7 @@ export function SoloHome() {
         {nextUp.map((c, i) => (
           <button
             key={c.id}
-            data-tap
+            className="bq-scale"
             onClick={() => navigate("/bookings")}
             style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", minHeight: 60, padding: "12px 18px", border: 0, borderBottom: i === nextUp.length - 1 ? "none" : "1px solid var(--line)", background: "none", cursor: "pointer", textAlign: "left" }}
           >

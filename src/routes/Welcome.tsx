@@ -50,14 +50,14 @@ export function Welcome() {
             Easily manage your coaching operations, bookings, revenue, reward your clients and more.
           </p>
           <button
-            data-tap
+            className="bq-scale"
             onClick={() => go("/signup")}
             style={{ width: "100%", height: 60, border: 0, borderRadius: 999, background: "var(--primary)", color: "#fff", font: "700 19px var(--font-body)", cursor: "pointer" }}
           >
             Get Started
           </button>
           <button
-            data-tap
+            className="bq-scale"
             onClick={() => go("/login")}
             style={{ width: "100%", height: 60, marginTop: 10, border: 0, borderRadius: 999, background: "var(--primary-tint)", color: "var(--primary-pressed)", font: "700 20px var(--font-body)", cursor: "pointer" }}
           >

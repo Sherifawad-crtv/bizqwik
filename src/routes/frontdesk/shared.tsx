@@ -178,7 +178,7 @@ export function SectionTitle({ children, count, right }: { children: ReactNode; 
 export function SectionLink({ children, onClick }: { children: ReactNode; onClick: () => void }) {
   return (
     <button
-      data-tap
+      className="bq-scale"
       onClick={onClick}
       style={{ display: "inline-flex", alignItems: "center", gap: 2, border: 0, background: "none", color: "var(--primary-pressed)", font: "700 14px var(--font-body)", cursor: "pointer", padding: "6px 0 6px 8px" }}
     >

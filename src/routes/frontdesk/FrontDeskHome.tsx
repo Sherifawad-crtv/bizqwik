@@ -111,7 +111,7 @@ export function FrontDeskHome() {
               <div key={c.id} data-testid="home-result" style={{ padding: "10px 12px 10px 18px", borderBottom: i === matches.length - 1 ? "none" : "1px solid var(--line)" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                   <button
-                    data-tap
+                    className="bq-scale"
                     onClick={() => setPicked(c)}
                     style={{ minWidth: 0, flex: 1, display: "block", border: 0, background: "none", padding: "4px 0", cursor: "pointer", textAlign: "left", color: "var(--ink)" }}
                   >
@@ -127,7 +127,7 @@ export function FrontDeskHome() {
                     </span>
                   ) : canEnter ? (
                     <button
-                      data-tap
+                      className="bq-scale"
                       disabled={q?.state === "busy"}
                       onClick={() => quickCheckIn(c)}
                       style={{ flex: "none", height: 42, padding: "0 18px", border: 0, borderRadius: 999, background: "var(--primary)", color: "#fff", font: "700 14px var(--font-body)", cursor: "pointer", opacity: q?.state === "busy" ? 0.6 : 1 }}
@@ -136,7 +136,7 @@ export function FrontDeskHome() {
                     </button>
                   ) : (
                     <button
-                      data-tap
+                      className="bq-scale"
                       onClick={() => setPicked(c)}
                       style={{ flex: "none", height: 42, padding: "0 16px", border: "1px solid var(--line)", borderRadius: 999, background: "var(--surface)", color: "var(--ink)", font: "700 14px var(--font-body)", cursor: "pointer" }}
                     >
@@ -158,7 +158,7 @@ export function FrontDeskHome() {
       )}
 
       <button
-        data-tap
+        className="bq-scale"
         onClick={() => setModal("checkin")}
         style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, width: "100%", height: 64, marginTop: 14, border: 0, borderRadius: "var(--r-card)", background: "var(--primary)", color: "var(--surface)", font: "800 18px var(--font-body)", cursor: "pointer", boxShadow: "0 12px 30px rgba(90,65,255,.28)" }}
       >
@@ -168,7 +168,7 @@ export function FrontDeskHome() {
         {ACTIONS.map((a) => (
           <button
             key={a.key}
-            data-tap
+            className="bq-scale"
             onClick={() => setModal(a.key)}
             style={{ minHeight: 76, borderRadius: "var(--r-card)", border: "1px solid var(--line)", background: "var(--surface)", color: "var(--ink)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 6, padding: 8, cursor: "pointer", font: "700 13px/1.2 var(--font-body)", textAlign: "center" }}
           >
@@ -200,7 +200,7 @@ export function FrontDeskHome() {
         {nextUp.map((c, i) => (
           <button
             key={c.id}
-            data-tap
+            className="bq-scale"
             onClick={() => setRoster(c)}
             style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", minHeight: 60, padding: "12px 18px", border: 0, borderBottom: i === nextUp.length - 1 ? "none" : "1px solid var(--line)", background: "none", cursor: "pointer", textAlign: "left" }}
           >
