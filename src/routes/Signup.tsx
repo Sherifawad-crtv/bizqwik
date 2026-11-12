@@ -53,8 +53,8 @@ export function Signup() {
 
   const card = (
     <div style={{ width: isMobile ? "min(420px, 100%)" : "min(580px, 100%)", background: "var(--surface)", border: "1px solid var(--line)", borderRadius: isMobile ? "var(--r-card)" : 40, padding: isMobile ? 30 : 48 }}>
-        <div style={{ font: "800 30px/1.1 var(--font-body)", letterSpacing: "-.02em" }}>Create account</div>
-        <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-muted)", marginTop: 6, marginBottom: 22 }}>
+        <div style={{ font: "800 var(--fs-display)/1.1 var(--font-body)", letterSpacing: "-.02em" }}>Create account</div>
+        <div style={{ font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-muted)", marginTop: 6, marginBottom: 22 }}>
           USE THE EMAIL YOU WERE INVITED WITH
         </div>
 
@@ -81,7 +81,7 @@ export function Signup() {
           <Button type="submit" fullWidth size="lg" disabled={busy} style={{ marginTop: 4 }}>
             {busy ? "Creating account…" : "Create account"}
           </Button>
-          <Link to="/login" style={{ textAlign: "center", font: "700 13px var(--font-body)", color: "var(--ink-muted)", marginTop: 4 }}>
+          <Link to="/login" style={{ textAlign: "center", font: "700 var(--fs-note) var(--font-body)", color: "var(--ink-muted)", marginTop: 4 }}>
             Already have an account? <span style={{ color: "var(--primary)" }}>Sign in</span>
           </Link>
         </form>

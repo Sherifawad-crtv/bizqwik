@@ -46,7 +46,7 @@ export function StatusPill({ status }: { status: OrgStatus }) {
         borderRadius: 999,
         background: c.bg,
         color: c.fg,
-        font: "700 11px var(--font-mono)",
+        font: "700 var(--fs-caption) var(--font-mono)",
         letterSpacing: ".08em",
         whiteSpace: "nowrap",
       }}
@@ -55,8 +55,4 @@ export function StatusPill({ status }: { status: OrgStatus }) {
       {ORG_STATUS_LABELS[status].toUpperCase()}
     </span>
   );
-}
-
-export function limitLabel(n: number | null): string {
-  return n === null ? "Unlimited" : String(n);
 }

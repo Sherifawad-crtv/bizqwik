@@ -80,7 +80,7 @@ export function CoachDetail() {
     <div>
       <button
         onClick={goBack}
-        style={{ display: "flex", alignItems: "center", gap: 4, border: 0, background: "none", cursor: "pointer", color: "var(--ink-muted)", font: "600 13px var(--font-body)", padding: "0 0 14px" }}
+        style={{ display: "flex", alignItems: "center", gap: 4, border: 0, background: "none", cursor: "pointer", color: "var(--ink-muted)", font: "600 var(--fs-note) var(--font-body)", padding: "0 0 14px" }}
       >
         <Icon name="chevron-left" size={16} /> {from === "history" ? "History" : "Team"}
       </button>
@@ -124,14 +124,14 @@ export function CoachDetail() {
         )}
       </div>
       {actionError && (
-        <div className="bq-rise" style={{ marginBottom: 14, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: "var(--r-md)", padding: "10px 14px" }}>
+        <div className="bq-rise" style={{ marginBottom: 14, font: "600 var(--fs-note)/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: "var(--r-md)", padding: "10px 14px" }}>
           {actionError}
         </div>
       )}
 
       <div style={{ display: "flex", alignItems: "baseline", gap: 10, padding: "2px 2px 8px" }}>
         <span className="bq-label">DAYS LOGGED</span>
-        <span style={{ marginLeft: "auto", font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>
+        <span style={{ marginLeft: "auto", font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-faint)" }}>
           {new Set(sessions.map((s) => s.date)).size} {new Set(sessions.map((s) => s.date)).size === 1 ? "DAY" : "DAYS"}
         </span>
       </div>

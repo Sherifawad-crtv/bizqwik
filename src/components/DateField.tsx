@@ -36,8 +36,8 @@ export function DateField({ value, min, max, onChange }: DateFieldProps) {
       >
         <div className="bq-label">DATE</div>
         <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-          <span style={{ font: "600 16px var(--font-body)", color: "var(--ink)" }}>{dateLabel(value)}</span>
-          <span style={{ marginLeft: "auto", font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>TAP TO CHANGE</span>
+          <span style={{ font: "600 var(--fs-base) var(--font-body)", color: "var(--ink)" }}>{dateLabel(value)}</span>
+          <span style={{ marginLeft: "auto", font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-faint)" }}>TAP TO CHANGE</span>
         </div>
       </div>
 
@@ -46,7 +46,7 @@ export function DateField({ value, min, max, onChange }: DateFieldProps) {
         <div className="bq-title">{monthLabel(month)}</div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 6, marginBottom: 4 }}>
           {DOW.map((d, i) => (
-            <div key={i} style={{ textAlign: "center", font: "700 11px var(--font-mono)", letterSpacing: ".04em", color: "var(--ink-faint)", padding: "4px 0" }}>
+            <div key={i} style={{ textAlign: "center", font: "700 var(--fs-caption) var(--font-mono)", letterSpacing: ".04em", color: "var(--ink-faint)", padding: "4px 0" }}>
               {d}
             </div>
           ))}
@@ -70,7 +70,7 @@ export function DateField({ value, min, max, onChange }: DateFieldProps) {
                   background: on ? "var(--primary)" : "var(--sunken)",
                   color: disabled ? "var(--ink-faint)" : on ? "#fff" : "var(--ink)",
                   opacity: disabled ? 0.4 : 1,
-                  font: "700 15px var(--font-body)",
+                  font: "700 var(--fs-body) var(--font-body)",
                   cursor: disabled ? "not-allowed" : "pointer",
                 }}
               >

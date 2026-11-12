@@ -54,7 +54,7 @@ function InviteSheet({ open, onClose, onDone }: { open: boolean; onClose: () => 
         <TextField label="NAME" value={name} onChange={(e) => setName(e.target.value)} placeholder="Optional" />
         <TextField label="EMAIL" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="teammate@bizqwik.com" />
         <SelectField label="ROLE" value={role} options={INVITE_ROLES} onChange={(v) => setRole(v as BizqwikRole)} />
-        <div style={{ font: "500 12px/1.5 var(--font-mono)", color: "var(--ink-faint)", padding: "0 2px" }}>
+        <div style={{ font: "500 var(--fs-small)/1.5 var(--font-mono)", color: "var(--ink-faint)", padding: "0 2px" }}>
           They'll sign up with this email to join the ops team.
         </div>
         {error && <ErrorBanner text={error} />}
@@ -89,7 +89,7 @@ export function Team() {
   return (
     <div>
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
-        <div style={{ font: "800 30px/1.1 var(--font-body)", letterSpacing: "-.02em" }}>Team</div>
+        <div style={{ font: "800 var(--fs-display)/1.1 var(--font-body)", letterSpacing: "-.02em" }}>Team</div>
         <Button onClick={() => setSheetOpen(true)} style={{ marginLeft: "auto" }}>
           <Icon name="user-plus" size={18} /> Invite
         </Button>
@@ -103,10 +103,10 @@ export function Team() {
           <div key={m.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 18px", borderBottom: i === members.length - 1 ? "none" : "1px solid var(--line)" }}>
             <Avatar name={m.name} size={34} />
             <div className="bq-grow">
-              <div style={{ font: "700 15px var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{m.name}</div>
-              <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{m.email}</div>
+              <div style={{ font: "700 var(--fs-body) var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{m.name}</div>
+              <div style={{ font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-faint)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{m.email}</div>
             </div>
-            <span style={{ font: "700 11px var(--font-mono)", letterSpacing: ".06em", color: "var(--ink-muted)", flex: "none" }}>{BIZQWIK_ROLE_LABELS[m.role].toUpperCase()}</span>
+            <span style={{ font: "700 var(--fs-caption) var(--font-mono)", letterSpacing: ".06em", color: "var(--ink-muted)", flex: "none" }}>{BIZQWIK_ROLE_LABELS[m.role].toUpperCase()}</span>
           </div>
         ))}
         {members.length === 0 && (
@@ -122,8 +122,8 @@ export function Team() {
               <div key={inv.email} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 18px", borderBottom: i === invites.length - 1 ? "none" : "1px solid var(--line)" }}>
                 <span style={{ color: "var(--ink-faint)", display: "flex" }}><Icon name="envelope" size={18} /></span>
                 <div className="bq-grow">
-                  <div style={{ font: "600 15px var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{inv.email}</div>
-                  <div style={{ font: "400 12px var(--font-mono)", color: "var(--ink-faint)" }}>{BIZQWIK_ROLE_LABELS[inv.role]}</div>
+                  <div style={{ font: "600 var(--fs-body) var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{inv.email}</div>
+                  <div style={{ font: "400 var(--fs-small) var(--font-mono)", color: "var(--ink-faint)" }}>{BIZQWIK_ROLE_LABELS[inv.role]}</div>
                 </div>
                 <button
                   onClick={() => cancel(inv.email)}

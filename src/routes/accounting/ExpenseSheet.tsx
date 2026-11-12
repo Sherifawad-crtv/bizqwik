@@ -13,7 +13,7 @@ import { ConfirmSheet } from "../../components/ConfirmSheet";
 import { TextField, SelectField } from "../../components/FormField";
 import { DateField } from "../../components/DateField";
 import { SheetSuccessIcon } from "../../components/SheetSuccessIcon";
-import { catOptions } from "./Expenses";
+import { catOptions } from "./options";
 
 /** Add or edit one expense: amount, category, date (today by default), note,
  * an optional receipt photo, and — add mode only — "repeat monthly", which
@@ -140,7 +140,7 @@ export function ExpenseSheet({
                   style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", textAlign: "left", background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "12px 16px", cursor: "pointer" }}
                 >
                   <Icon name="card" size={18} style={{ color: "var(--ink-faint)" }} />
-                  <span style={{ font: "600 14px var(--font-body)" }}>{receipt ? "Receipt attached" : "Attach a receipt photo (optional)"}</span>
+                  <span style={{ font: "600 var(--fs-body-sm) var(--font-body)" }}>{receipt ? "Receipt attached" : "Attach a receipt photo (optional)"}</span>
                 </button>
               </>
             )}
@@ -153,7 +153,7 @@ export function ExpenseSheet({
                 onClick={() => setRepeat(!repeat)}
                 style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", textAlign: "left", background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "12px 16px", cursor: "pointer", color: "var(--ink)" }}
               >
-                <span style={{ flex: 1, font: "600 14px var(--font-body)" }}>Repeat monthly</span>
+                <span style={{ flex: 1, font: "600 var(--fs-body-sm) var(--font-body)" }}>Repeat monthly</span>
                 <SwitchVisual checked={repeat} />
               </button>
             )}
@@ -230,15 +230,15 @@ export function CategoriesSheet({ open, categories, onClose, onChanged }: { open
 
   return (
     <Sheet open={open} onClose={onClose}>
-      <div style={{ font: "800 26px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "0 0 16px" }}>Expense categories</div>
+      <div style={{ font: "800 var(--fs-title)/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "0 0 16px" }}>Expense categories</div>
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
         {categories.map((c) => (
           <div key={c.id} style={{ display: "flex", alignItems: "center", gap: 10, background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "10px 14px" }}>
-            <span style={{ flex: 1, font: "600 15px var(--font-body)" }}>{c.name}</span>
+            <span style={{ flex: 1, font: "600 var(--fs-body) var(--font-body)" }}>{c.name}</span>
             {!c.isDefault && (
               <button
                 onClick={() => api.setExpenseCategoryArchived(c.id, true).then(onChanged)}
-                style={{ border: 0, background: "none", color: "var(--danger-fg)", font: "700 12px var(--font-mono)", cursor: "pointer" }}
+                style={{ border: 0, background: "none", color: "var(--danger-fg)", font: "700 var(--fs-small) var(--font-mono)", cursor: "pointer" }}
               >
                 ARCHIVE
               </button>
@@ -249,7 +249,7 @@ export function CategoriesSheet({ open, categories, onClose, onChanged }: { open
       {adding ? (
         <div style={{ marginTop: 12 }}>
           <TextField label="NEW CATEGORY" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Insurance" />
-          {error && <div style={{ marginTop: 8, font: "600 13px var(--font-body)", color: "var(--danger-fg)" }}>{error}</div>}
+          {error && <div style={{ marginTop: 8, font: "600 var(--fs-note) var(--font-body)", color: "var(--danger-fg)" }}>{error}</div>}
           <Button fullWidth style={{ marginTop: 10 }} disabled={busy} onClick={add}>{busy ? "Adding…" : "Add category"}</Button>
         </div>
       ) : (

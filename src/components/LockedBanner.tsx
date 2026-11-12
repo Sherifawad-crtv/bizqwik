@@ -12,8 +12,8 @@ export function LockedBanner({ state }: { state: State }) {
     <div style={{ display: "flex", gap: 12, alignItems: "flex-start", background: copy.bg, borderRadius: "var(--r-tile)", padding: "14px 16px", marginBottom: 14 }}>
       <i style={{ width: 8, height: 8, borderRadius: 999, flex: "none", marginTop: 6, background: copy.fg, display: "block" }} />
       <div>
-        <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: copy.fg }}>{copy.label}</div>
-        <div style={{ font: "500 16px/1.35 var(--font-body)", color: "var(--ink)" }}>{copy.text}</div>
+        <div style={{ font: "700 var(--fs-caption) var(--font-mono)", letterSpacing: ".08em", color: copy.fg }}>{copy.label}</div>
+        <div style={{ font: "500 var(--fs-base)/1.35 var(--font-body)", color: "var(--ink)" }}>{copy.text}</div>
       </div>
     </div>
   );

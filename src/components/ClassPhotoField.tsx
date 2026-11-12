@@ -39,7 +39,7 @@ export function ClassPhotoField({ value, onChange, title }: { value: string | nu
 
   return (
     <div>
-      <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", margin: "0 2px 6px" }}>PHOTO</div>
+      <div style={{ font: "700 var(--fs-caption) var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", margin: "0 2px 6px" }}>PHOTO</div>
       <div style={{ display: "flex", gap: 14, alignItems: "center" }}>
         <div
           data-testid="class-photo-preview"
@@ -52,7 +52,7 @@ export function ClassPhotoField({ value, onChange, title }: { value: string | nu
             <>
               <img src={value} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
               <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(0,0,0,.7), transparent 60%)" }} />
-              <div style={{ position: "absolute", left: 8, right: 8, bottom: 8, color: "#fff", font: "800 11px/1.15 var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{title || "Class"}</div>
+              <div style={{ position: "absolute", left: 8, right: 8, bottom: 8, color: "#fff", font: "800 var(--fs-caption)/1.15 var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{title || "Class"}</div>
             </>
           ) : (
             <Icon name="plus" size={20} style={{ color: "var(--ink-faint)" }} />
@@ -65,15 +65,15 @@ export function ClassPhotoField({ value, onChange, title }: { value: string | nu
               {busy ? "Uploading…" : value ? "Replace" : "Add photo"}
             </Button>
             {value && !busy && (
-              <button onClick={() => onChange(null)} style={{ border: 0, background: "none", padding: 0, cursor: "pointer", font: "600 13px var(--font-body)", color: "var(--ink-faint)" }}>
+              <button onClick={() => onChange(null)} style={{ border: 0, background: "none", padding: 0, cursor: "pointer", font: "600 var(--fs-note) var(--font-body)", color: "var(--ink-faint)" }}>
                 Remove
               </button>
             )}
           </div>
-          <div style={{ marginTop: 6, font: "400 12px/1.45 var(--font-mono)", color: "var(--ink-faint)" }}>
+          <div style={{ marginTop: 6, font: "400 var(--fs-small)/1.45 var(--font-mono)", color: "var(--ink-faint)" }}>
             {value ? "Cropped to fit the class card in the members' app." : "Members see a Bizqwik photo until you add one. Any photo works; it's cropped to fit."}
           </div>
-          {error && <div style={{ marginTop: 6, font: "600 12px/1.4 var(--font-body)", color: "var(--danger-fg)" }}>{error}</div>}
+          {error && <div style={{ marginTop: 6, font: "600 var(--fs-small)/1.4 var(--font-body)", color: "var(--danger-fg)" }}>{error}</div>}
         </div>
       </div>
     </div>

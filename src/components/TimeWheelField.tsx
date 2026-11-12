@@ -111,7 +111,7 @@ export function TimeWheelField({ label, value, onChange }: { label: string; valu
       >
         <span className="bq-label">{label}</span>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{ font: "600 16px var(--font-body)", color: "var(--ink)" }}>{timeLabel(value)}</span>
+          <span style={{ font: "600 var(--fs-base) var(--font-body)", color: "var(--ink)" }}>{timeLabel(value)}</span>
           <span style={{ marginLeft: "auto", color: "var(--ink-faint)", display: "flex" }}>
             <Icon name="chevron-down" size={15} />
           </span>
@@ -120,7 +120,7 @@ export function TimeWheelField({ label, value, onChange }: { label: string; valu
 
       <Sheet open={open} onClose={() => setOpen(false)}>
         <div className="bq-label">{label}</div>
-        <div style={{ font: "800 26px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 12px" }}>{timeLabel(join(draft.h, draft.m, draft.pm))}</div>
+        <div style={{ font: "800 var(--fs-title)/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 12px" }}>{timeLabel(join(draft.h, draft.m, draft.pm))}</div>
         <div style={{ position: "relative", display: "flex", gap: 4 }}>
           {/* selection band behind the middle row */}
           <div aria-hidden style={{ position: "absolute", left: 0, right: 0, top: ITEM_H * 2, height: ITEM_H, borderRadius: 12, background: "var(--accent-tint)" }} />

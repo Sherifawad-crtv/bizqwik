@@ -21,7 +21,7 @@ function SidebarItem({ item }: { item: NavItem }) {
             cursor: "pointer",
             background: isActive ? "var(--primary-tint)" : hovered ? "var(--sunken)" : "transparent",
             color: isActive ? "var(--primary-pressed)" : hovered ? "var(--ink)" : "var(--ink-muted)",
-            font: "600 16px var(--font-body)",
+            font: "600 var(--fs-base) var(--font-body)",
             transition: "background .15s ease, color .15s ease",
           }}
         >
@@ -54,7 +54,7 @@ export function Sidebar() {
       }}
     >
       <img src="/wordmark.png" alt="Bizqwik" style={{ height: 24, width: "auto", alignSelf: "flex-start", margin: "0 8px 12px", display: "block" }} />
-      <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", padding: "0 8px 20px" }}>
+      <div style={{ font: "700 var(--fs-caption) var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", padding: "0 8px 20px" }}>
         {ROLE_LABELS[profile.role].toUpperCase()}
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
@@ -66,8 +66,8 @@ export function Sidebar() {
         <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 8px 0", borderTop: "1px solid var(--line)" }}>
           <Avatar name={profile.name} size={34} src={profile.avatarUrl} />
           <div style={{ minWidth: 0 }}>
-            <div style={{ font: "600 16px var(--font-body)", lineHeight: 1.1, color: "var(--ink)" }}>{profile.name}</div>
-            <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)", display: "flex", alignItems: "center", gap: 4 }}>
+            <div style={{ font: "600 var(--fs-base) var(--font-body)", lineHeight: 1.1, color: "var(--ink)" }}>{profile.name}</div>
+            <div style={{ font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-faint)", display: "flex", alignItems: "center", gap: 4 }}>
               Account <Icon name="chevron-right" size={13} />
             </div>
           </div>

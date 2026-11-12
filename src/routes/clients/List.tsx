@@ -49,7 +49,7 @@ export function ClientList({
       {clients.length > 0 && <ClientFilterBar clients={clients} filters={filters} onChange={setFilters} coaches={coachChoices} />}
       {!isMobile && <OverviewCards clients={clients} showGroupPlans={canManage} onPick={(patch) => setFilters({ ...patch, sort: filters.sort } as ClientFilters)} />}
       {canManage && !isMobile && (
-        <div style={{ font: "400 12px/1.5 var(--font-mono)", color: "var(--ink-faint)", margin: "-6px 2px 14px" }}>
+        <div style={{ font: "400 var(--fs-small)/1.5 var(--font-mono)", color: "var(--ink-faint)", margin: "-6px 2px 14px" }}>
           New clients, plans and packages are handled at the front desk.
         </div>
       )}
@@ -62,7 +62,7 @@ export function ClientList({
         {filtering && (
           <button
             onClick={() => setFilters({ ...NO_FILTERS, sort: filters.sort })}
-            style={{ marginLeft: "auto", border: 0, background: "none", font: "700 13px var(--font-body)", color: "var(--primary-pressed)", cursor: "pointer", padding: 4 }}
+            style={{ marginLeft: "auto", border: 0, background: "none", font: "700 var(--fs-note) var(--font-body)", color: "var(--primary-pressed)", cursor: "pointer", padding: 4 }}
           >
             Clear filters
           </button>

@@ -39,15 +39,15 @@ export function ClassesManage() {
     <div>
       <button
         onClick={() => navigate("/catalog")}
-        style={{ display: "inline-flex", alignItems: "center", gap: 4, border: 0, background: "none", color: "var(--ink-muted)", cursor: "pointer", font: "700 14px var(--font-body)", marginBottom: 14, padding: 0 }}
+        style={{ display: "inline-flex", alignItems: "center", gap: 4, border: 0, background: "none", color: "var(--ink-muted)", cursor: "pointer", font: "700 var(--fs-body-sm) var(--font-body)", marginBottom: 14, padding: 0 }}
       >
         <Icon name="chevron-left" size={16} /> Catalog
       </button>
 
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
         <div className="bq-grow">
-          <div style={{ font: "800 26px/1.1 var(--font-body)", letterSpacing: "-.02em" }}>Sessions</div>
-          <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)", marginTop: 4 }}>
+          <div style={{ font: "800 var(--fs-title)/1.1 var(--font-body)", letterSpacing: "-.02em" }}>Sessions</div>
+          <div style={{ font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-faint)", marginTop: 4 }}>
             Upcoming sessions from your classes. Tap one to edit just that session.
           </div>
         </div>
@@ -75,7 +75,7 @@ export function ClassesManage() {
 
       {past.length > 0 && (
         <>
-          <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", margin: "24px 2px 10px" }}>
+          <div style={{ font: "700 var(--fs-caption) var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", margin: "24px 2px 10px" }}>
             LAST 2 WEEKS · {past.length}
           </div>
           <div className="bq-stack">
@@ -88,7 +88,7 @@ export function ClassesManage() {
 
       {cancelled.length > 0 && (
         <>
-          <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", margin: "24px 2px 10px" }}>
+          <div style={{ font: "700 var(--fs-caption) var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", margin: "24px 2px 10px" }}>
             CANCELLED · {cancelled.length}
           </div>
           <div className="bq-stack">
@@ -152,30 +152,30 @@ function ClassCard({ c, onEdit, onRoster }: { c: GymClass; onEdit?: () => void; 
     >
       <div onClick={onEdit} style={{ display: "flex", alignItems: "center", gap: 12, cursor: onEdit ? "pointer" : "default" }}>
         <div className="bq-grow">
-          <div style={{ font: "700 16px var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", textDecoration: cancelled ? "line-through" : "none" }}>{c.title}</div>
-          <div style={{ font: "500 13px var(--font-mono)", color: "var(--ink-muted)", marginTop: 3 }}>{whenLabel(c.startsAt)}</div>
+          <div style={{ font: "700 var(--fs-base) var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", textDecoration: cancelled ? "line-through" : "none" }}>{c.title}</div>
+          <div style={{ font: "500 var(--fs-note) var(--font-mono)", color: "var(--ink-muted)", marginTop: 3 }}>{whenLabel(c.startsAt)}</div>
           {!cancelled && (c.bookedCount ?? 0) > 0 && (
-            <div style={{ font: "500 12px var(--font-mono)", color: "var(--ink-faint)", marginTop: 3 }}>
+            <div style={{ font: "500 var(--fs-small) var(--font-mono)", color: "var(--ink-faint)", marginTop: 3 }}>
               {c.bookedCount} booked · {c.planSeats ?? 0} on a plan · {c.dropInSeats ?? 0} drop-in
             </div>
           )}
           {c.description && (
-            <div style={{ font: "400 13px/1.4 var(--font-body)", color: "var(--ink-faint)", marginTop: 6, overflow: "hidden", textOverflow: "ellipsis", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>
+            <div style={{ font: "400 var(--fs-note)/1.4 var(--font-body)", color: "var(--ink-faint)", marginTop: 6, overflow: "hidden", textOverflow: "ellipsis", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>
               {c.description}
             </div>
           )}
         </div>
         <div style={{ flex: "none", textAlign: "right" }}>
-          <div className="tabular" style={{ font: "800 16px var(--font-body)" }}>{c.price > 0 ? egp(c.price) : "Free"}</div>
+          <div className="tabular" style={{ font: "800 var(--fs-base) var(--font-body)" }}>{c.price > 0 ? egp(c.price) : "Free"}</div>
           <div style={{ font: "600 10px var(--font-mono)", letterSpacing: ".06em", color: "var(--ink-faint)" }}>DROP-IN</div>
-          {onEdit && <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".06em", color: "var(--ink-faint)", marginTop: 4 }}>EDIT</div>}
+          {onEdit && <div style={{ font: "700 var(--fs-caption) var(--font-mono)", letterSpacing: ".06em", color: "var(--ink-faint)", marginTop: 4 }}>EDIT</div>}
         </div>
       </div>
       {onRoster && (
         <button
           type="button"
           onClick={onRoster}
-          style={{ marginTop: 12, width: "100%", border: "1px solid var(--line)", background: "var(--paper)", color: "var(--ink-muted)", borderRadius: 10, padding: "8px 0", font: "700 13px var(--font-body)", cursor: "pointer" }}
+          style={{ marginTop: 12, width: "100%", border: "1px solid var(--line)", background: "var(--paper)", color: "var(--ink-muted)", borderRadius: 10, padding: "8px 0", font: "700 var(--fs-note) var(--font-body)", cursor: "pointer" }}
         >
           View roster
         </button>

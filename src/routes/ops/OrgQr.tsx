@@ -96,7 +96,7 @@ export function OrgQr() {
     <div>
       <button
         onClick={() => navigate(`/bizqwik/orgs/${id}`)}
-        style={{ display: "inline-flex", alignItems: "center", gap: 4, border: 0, background: "none", color: "var(--ink-muted)", cursor: "pointer", font: "700 14px var(--font-body)", marginBottom: 12, padding: 0 }}
+        style={{ display: "inline-flex", alignItems: "center", gap: 4, border: 0, background: "none", color: "var(--ink-muted)", cursor: "pointer", font: "700 var(--fs-body-sm) var(--font-body)", marginBottom: 12, padding: 0 }}
       >
         <Icon name="chevron-left" size={16} /> {org.name}
       </button>
@@ -108,19 +108,19 @@ export function OrgQr() {
           onChange={(v) => setParams(v === "coaches" ? { for: "coaches" } : {}, { replace: true })}
         />
       </div>
-      <div style={{ font: "800 30px/1.1 var(--font-body)", letterSpacing: "-.02em" }}>{copy.title}</div>
-      <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)", marginTop: 6 }}>{copy.intro}</div>
+      <div style={{ font: "800 var(--fs-display)/1.1 var(--font-body)", letterSpacing: "-.02em" }}>{copy.title}</div>
+      <div style={{ font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-faint)", marginTop: 6 }}>{copy.intro}</div>
 
       <div style={{ marginTop: 22, maxWidth: 520 }}>
         <SectionTitle>Code</SectionTitle>
         <Card style={{ padding: 24, display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
           {qrError && <ErrorBanner text={qrError} />}
-          {!pngUrl && !qrError && <div style={{ padding: "40px 0", color: "var(--ink-faint)", font: "500 14px var(--font-body)" }}>Rendering…</div>}
+          {!pngUrl && !qrError && <div style={{ padding: "40px 0", color: "var(--ink-faint)", font: "500 var(--fs-body-sm) var(--font-body)" }}>Rendering…</div>}
           {pngUrl && (
             <>
               <img src={pngUrl} alt={`${org.name} ${copy.title}`} width={260} height={260} style={{ width: 260, height: 260, imageRendering: "pixelated" }} />
               <div style={{ font: "700 18px var(--font-body)", marginTop: 14 }}>{org.name}</div>
-              <div style={{ font: "400 13px/1.6 var(--font-mono)", color: "var(--ink-faint)", marginTop: 4 }}>
+              <div style={{ font: "400 var(--fs-note)/1.6 var(--font-mono)", color: "var(--ink-faint)", marginTop: 4 }}>
                 {forCoaches ? copy.label : <>Encodes check-in code <b>{org.slug}</b></>}
               </div>
             </>

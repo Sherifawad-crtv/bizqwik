@@ -47,6 +47,16 @@
   --dur-press: 160ms;
 
   --shadow-float: 0 14px 34px rgba(26, 23, 38, 0.18);
+  /* Type scale: the sizes that carry nearly every screen. */
+  --fs-caption: 11px;
+  --fs-small: 12px;
+  --fs-note: 13px;
+  --fs-body-sm: 14px;
+  --fs-body: 15px;
+  --fs-base: 16px;
+  --fs-title-sm: 20px;
+  --fs-title: 26px;
+  --fs-display: 30px;
   --r-md: 14px; /* inputs, banners, small cards */
   --shadow-card: 0 24px 60px rgba(26, 23, 38, 0.1);
 
@@ -220,7 +230,7 @@ textarea {
   padding: 0 22px;
   border: 0;
   border-radius: var(--r-button);
-  font: 700 16px var(--font-body);
+  font: 700 var(--fs-base) var(--font-body);
   cursor: pointer;
   transition: opacity 0.25s var(--ease-standard), transform 0.15s ease, filter 0.15s ease;
 }
@@ -328,11 +338,11 @@ textarea {
 
 /* ───────────────────────────── Type helpers ─────────────────────────────
    The text styles screens repeat most, once. */
-.bq-label { font: 700 11px var(--font-mono); letter-spacing: 0.08em; color: var(--ink-faint); }
-.bq-meta { font: 400 13px var(--font-mono); color: var(--ink-faint); }
-.bq-title { font: 800 26px/1.2 var(--font-body); letter-spacing: -0.02em; margin: 4px 0 16px; }
-.bq-h2 { font: 700 20px var(--font-body); letter-spacing: -0.01em; }
-.bq-h3 { font: 700 16px var(--font-body); }
+.bq-label { font: 700 var(--fs-caption) var(--font-mono); letter-spacing: 0.08em; color: var(--ink-faint); }
+.bq-meta { font: 400 var(--fs-note) var(--font-mono); color: var(--ink-faint); }
+.bq-title { font: 800 var(--fs-title)/1.2 var(--font-body); letter-spacing: -0.02em; margin: 4px 0 16px; }
+.bq-h2 { font: 700 var(--fs-title-sm) var(--font-body); letter-spacing: -0.01em; }
+.bq-h3 { font: 700 var(--fs-base) var(--font-body); }
 /* A flexible child that is allowed to shrink (so long text truncates, not overflows). */
 .bq-grow { min-width: 0; flex: 1; }
 
@@ -345,6 +355,6 @@ textarea {
   color: var(--danger-fg);
   border-radius: var(--r-md);
   padding: 10px 14px;
-  font: 600 13px/1.5 var(--font-body);
+  font: 600 var(--fs-note)/1.5 var(--font-body);
 }
 .bq-error--spaced { margin-top: 12px; }

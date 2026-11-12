@@ -227,8 +227,8 @@ export function Sheet({ open, onClose, children, width = 460 }: SheetProps) {
       style={{ position: "absolute", inset: 0, zIndex: 2, background: "rgba(26,23,38,.34)", display: "flex", alignItems: isMobile ? "flex-end" : "center", justifyContent: "center", padding: isMobile ? "0 8px calc(8px + var(--safe-bottom))" : 0, animation: "bqFade .18s ease" }}
     >
       <div role="alertdialog" aria-modal="true" aria-label="Discard changes?" onClick={stop} style={{ width: "100%", maxWidth: 420, background: "var(--surface)", borderRadius: 28, border: "1px solid var(--line)", padding: 20, animation: "bqRise .22s ease" }}>
-        <div style={{ font: "800 20px var(--font-body)", letterSpacing: "-.01em" }}>Discard changes?</div>
-        <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-muted)", margin: "4px 0 16px" }}>What you've entered here won't be saved.</div>
+        <div style={{ font: "800 var(--fs-title-sm) var(--font-body)", letterSpacing: "-.01em" }}>Discard changes?</div>
+        <div style={{ font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-muted)", margin: "4px 0 16px" }}>What you've entered here won't be saved.</div>
         <Button variant="danger" fullWidth onClick={() => { dirty.current = false; setAsking(false); onClose(); }}>
           Discard changes
         </Button>

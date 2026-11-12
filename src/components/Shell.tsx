@@ -185,7 +185,7 @@ function ShellInner() {
         >
           <div>
             <div className="bq-label">{header.kicker}</div>
-            <div style={{ font: "800 30px/1.1 var(--font-body)", letterSpacing: "-.02em" }}>{header.title}</div>
+            <div style={{ font: "800 var(--fs-display)/1.1 var(--font-body)", letterSpacing: "-.02em" }}>{header.title}</div>
           </div>
           {header.right && <div style={{ marginLeft: "auto" }}>{header.right}</div>}
         </div>

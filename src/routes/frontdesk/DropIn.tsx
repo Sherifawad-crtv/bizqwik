@@ -153,7 +153,7 @@ export function DropIn({ embedded = false, initialClient = null }: { embedded?: 
         </span>
         <div>
           <div className="bq-h3">{mode === "class" ? "Drop into a class" : "One-time entry"}</div>
-          <div style={{ font: "400 13px/1.5 var(--font-mono)", color: "var(--ink-muted)" }}>
+          <div style={{ font: "400 var(--fs-note)/1.5 var(--font-mono)", color: "var(--ink-muted)" }}>
             {mode === "class"
               ? "Charges that class's drop-in price and adds the member to its roster as arrived."
               : "Valid for a single visit. Link the member, or add a new one with their details."}
@@ -162,7 +162,7 @@ export function DropIn({ embedded = false, initialClient = null }: { embedded?: 
       </Card>
 
       {done && (
-        <div style={{ marginBottom: 14, font: "600 13px/1.5 var(--font-body)", color: "var(--paid-fg)", background: "var(--paid-bg)", borderRadius: "var(--r-md)", padding: "10px 14px" }}>
+        <div style={{ marginBottom: 14, font: "600 var(--fs-note)/1.5 var(--font-body)", color: "var(--paid-fg)", background: "var(--paid-bg)", borderRadius: "var(--r-md)", padding: "10px 14px" }}>
           Drop-in recorded — {done}
         </div>
       )}
@@ -171,7 +171,7 @@ export function DropIn({ embedded = false, initialClient = null }: { embedded?: 
         <div style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "10px 16px", display: "flex", alignItems: "center", gap: 10 }}>
           <div className="bq-grow">
             <div className="bq-label">MEMBER</div>
-            <div style={{ font: "600 16px var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{client ? client.name : newMember ? "New member" : "Not linked"}</div>
+            <div style={{ font: "600 var(--fs-base) var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{client ? client.name : newMember ? "New member" : "Not linked"}</div>
           </div>
           {client || newMember ? (
             <Button
@@ -221,7 +221,7 @@ export function DropIn({ embedded = false, initialClient = null }: { embedded?: 
               empty={{ title: "No class sessions in the next 7 days", body: "Classes are scheduled by the department head in Catalog → Classes. For a visit that isn't a class, use Walk-in." }}
             />
             {session && (
-              <div style={{ font: "600 14px var(--font-body)", padding: "0 4px" }}>
+              <div style={{ font: "600 var(--fs-body-sm) var(--font-body)", padding: "0 4px" }}>
                 Drop-in price: <span className="tabular">{fmt(session.price)} EGP</span>
               </div>
             )}
@@ -249,7 +249,7 @@ export function DropIn({ embedded = false, initialClient = null }: { embedded?: 
       <Button fullWidth size="lg" style={{ marginTop: 16 }} disabled={busy} onClick={submit}>
         {busy ? "Saving…" : amount !== null ? `Charge ${fmt(amount)} EGP · ${tender}` : "Confirm drop-in"}
       </Button>
-      <div style={{ textAlign: "center", font: "400 13px var(--font-mono)", color: "var(--ink-faint)", marginTop: 10 }}>Take payment at the desk before confirming.</div>
+      <div style={{ textAlign: "center", font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-faint)", marginTop: 10 }}>Take payment at the desk before confirming.</div>
 
       <PickClientSheet
         open={pickerOpen}

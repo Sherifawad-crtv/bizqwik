@@ -48,8 +48,8 @@ export function CreateFab({ size }: { size: number }) {
                 <Icon name={o.icon} size={20} />
               </span>
               <span className="bq-grow">
-                <span style={{ display: "block", font: "700 16px var(--font-body)" }}>{o.title}</span>
-                <span style={{ display: "block", font: "400 12px var(--font-mono)", color: "var(--ink-faint)", marginTop: 2 }}>{o.sub}</span>
+                <span style={{ display: "block", font: "700 var(--fs-base) var(--font-body)" }}>{o.title}</span>
+                <span style={{ display: "block", font: "400 var(--fs-small) var(--font-mono)", color: "var(--ink-faint)", marginTop: 2 }}>{o.sub}</span>
               </span>
               <Icon name="chevron-right" size={18} />
             </button>

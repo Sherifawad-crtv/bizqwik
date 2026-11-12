@@ -66,8 +66,8 @@ export function ClassCalendarScreen({ onClose }: { onClose: () => void }) {
         <Button variant="quiet" aria-label="Close calendar" style={{ width: 44, height: 44, padding: 0 }} onClick={onClose}>
           <Icon name="close" size={18} />
         </Button>
-        {!isMobile && <span style={{ font: "800 20px var(--font-body)", letterSpacing: "-.01em", marginRight: 8 }}>Classes</span>}
-        <Button variant="secondary" style={{ height: 44, padding: "0 14px", font: "700 12px var(--font-mono)", letterSpacing: ".06em" }} onClick={() => setCursor(today)}>
+        {!isMobile && <span style={{ font: "800 var(--fs-title-sm) var(--font-body)", letterSpacing: "-.01em", marginRight: 8 }}>Classes</span>}
+        <Button variant="secondary" style={{ height: 44, padding: "0 14px", font: "700 var(--fs-small) var(--font-mono)", letterSpacing: ".06em" }} onClick={() => setCursor(today)}>
           TODAY
         </Button>
         <Button variant="quiet" aria-label="Previous" style={{ width: 44, height: 44, padding: 0 }} onClick={() => step(-1)}>
@@ -91,7 +91,7 @@ export function ClassCalendarScreen({ onClose }: { onClose: () => void }) {
       </div>
 
       {classes.error && (
-        <div style={{ flex: "none", font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", padding: "10px 20px" }}>{classes.error}</div>
+        <div style={{ flex: "none", font: "600 var(--fs-note)/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", padding: "10px 20px" }}>{classes.error}</div>
       )}
 
       <div style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>

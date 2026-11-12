@@ -48,14 +48,14 @@ export function ForgotPassword() {
     >
       <img src="/wordmark.png" alt="Bizqwik" style={{ height: "clamp(34px, 8vw, 42px)", width: "auto", display: "block" }} />
       <div style={{ width: "min(420px, 100%)", background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: 30 }}>
-        <div style={{ font: "800 30px/1.1 var(--font-body)", letterSpacing: "-.02em" }}>Reset password</div>
-        <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-muted)", marginTop: 6, marginBottom: 22 }}>
+        <div style={{ font: "800 var(--fs-display)/1.1 var(--font-body)", letterSpacing: "-.02em" }}>Reset password</div>
+        <div style={{ font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-muted)", marginTop: 6, marginBottom: 22 }}>
           {sent ? "CHECK YOUR EMAIL" : "WE'LL EMAIL YOU A RESET LINK"}
         </div>
 
         {sent ? (
           <>
-            <div style={{ font: "500 15px/1.5 var(--font-body)", color: "var(--ink)" }}>
+            <div style={{ font: "500 var(--fs-body)/1.5 var(--font-body)", color: "var(--ink)" }}>
               If an account exists for <strong>{email}</strong>, a password reset link is on its way.
             </div>
             <Link to="/login" style={{ display: "block", marginTop: 22 }}>
@@ -86,7 +86,7 @@ export function ForgotPassword() {
             </Button>
             <Link
               to="/login"
-              style={{ textAlign: "center", font: "700 13px var(--font-body)", color: "var(--ink-muted)", marginTop: 4 }}
+              style={{ textAlign: "center", font: "700 var(--fs-note) var(--font-body)", color: "var(--ink-muted)", marginTop: 4 }}
             >
               Back to sign in
             </Link>

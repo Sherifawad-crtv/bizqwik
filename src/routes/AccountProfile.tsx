@@ -132,20 +132,20 @@ export function AccountProfile() {
             <button
               onClick={pickPhoto}
               disabled={photoBusy}
-              style={{ border: 0, background: "none", padding: 0, cursor: photoBusy ? "default" : "pointer", font: "700 13px var(--font-body)", color: "var(--primary-pressed)" }}
+              style={{ border: 0, background: "none", padding: 0, cursor: photoBusy ? "default" : "pointer", font: "700 var(--fs-note) var(--font-body)", color: "var(--primary-pressed)" }}
             >
               {photoBusy ? "Uploading…" : "Change photo"}
             </button>
             {profile.avatarUrl && !photoBusy && (
               <button
                 onClick={removePhoto}
-                style={{ border: 0, background: "none", padding: 0, cursor: "pointer", font: "600 13px var(--font-body)", color: "var(--ink-faint)" }}
+                style={{ border: 0, background: "none", padding: 0, cursor: "pointer", font: "600 var(--fs-note) var(--font-body)", color: "var(--ink-faint)" }}
               >
                 Remove photo
               </button>
             )}
             {photoError && (
-              <div className="bq-rise" style={{ width: "100%", font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: "var(--r-md)", padding: "10px 14px" }}>
+              <div className="bq-rise" style={{ width: "100%", font: "600 var(--fs-note)/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: "var(--r-md)", padding: "10px 14px" }}>
                 {photoError}
               </div>
             )}
@@ -170,7 +170,7 @@ export function AccountProfile() {
           </div>
         )}
         {saved && !error && (
-          <div style={{ marginTop: 12, font: "600 13px/1.5 var(--font-body)", color: "var(--primary-pressed)", background: "var(--primary-tint)", borderRadius: "var(--r-md)", padding: "10px 14px" }}>
+          <div style={{ marginTop: 12, font: "600 var(--fs-note)/1.5 var(--font-body)", color: "var(--primary-pressed)", background: "var(--primary-tint)", borderRadius: "var(--r-md)", padding: "10px 14px" }}>
             Saved.
           </div>
         )}
@@ -186,7 +186,7 @@ export function AccountProfile() {
           <Row k="TIER" v={tier ? `${tier.name} · ${tier.rate} EGP / session` : "Not assigned"} last />
         )}
       </div>
-      <div style={{ padding: "0 4px", font: "400 13px/1.5 var(--font-mono)", color: "var(--ink-faint)" }}>
+      <div style={{ padding: "0 4px", font: "400 var(--fs-note)/1.5 var(--font-mono)", color: "var(--ink-faint)" }}>
         Email, role, and tier are managed by a department head.
       </div>
     </div>
@@ -196,8 +196,8 @@ export function AccountProfile() {
 function Row({ k, v, last }: { k: string; v: string; last?: boolean }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 16px", borderBottom: last ? "none" : "1px solid var(--line)" }}>
-      <span style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", width: 90, flex: "none" }}>{k}</span>
-      <span style={{ font: "600 15px var(--font-body)", color: "var(--ink)", flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{v}</span>
+      <span style={{ font: "700 var(--fs-caption) var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", width: 90, flex: "none" }}>{k}</span>
+      <span style={{ font: "600 var(--fs-body) var(--font-body)", color: "var(--ink)", flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{v}</span>
     </div>
   );
 }

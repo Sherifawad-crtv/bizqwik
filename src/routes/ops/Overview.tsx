@@ -14,7 +14,7 @@ function StatTile({ label, value }: { label: string; value: string }) {
   return (
     <Card style={{ padding: "16px 18px" }}>
       <div className="bq-label">{label}</div>
-      <div style={{ font: "800 26px/1.1 var(--font-body)", letterSpacing: "-.02em", marginTop: 6 }} className="tabular">{value}</div>
+      <div style={{ font: "800 var(--fs-title)/1.1 var(--font-body)", letterSpacing: "-.02em", marginTop: 6 }} className="tabular">{value}</div>
     </Card>
   );
 }
@@ -37,7 +37,7 @@ export function Overview() {
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
         <div>
           <div className="bq-label">BIZQWIK OPS</div>
-          <div style={{ font: "800 30px/1.1 var(--font-body)", letterSpacing: "-.02em", marginTop: 4 }}>Overview</div>
+          <div style={{ font: "800 var(--fs-display)/1.1 var(--font-body)", letterSpacing: "-.02em", marginTop: 4 }}>Overview</div>
         </div>
         <Button onClick={() => setSheetOpen(true)} style={{ marginLeft: "auto" }}>
           <Icon name="plus" size={18} /> New org
@@ -73,13 +73,13 @@ export function Overview() {
             }}
           >
             <div className="bq-grow">
-              <div style={{ font: "700 16px var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{o.name}</div>
+              <div style={{ font: "700 var(--fs-base) var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{o.name}</div>
               <div className="bq-meta">
                 {o.planName ?? "No plan"} · {o.staffCount} staff · {o.clientCount} clients
               </div>
             </div>
             <div style={{ textAlign: "right", flex: "none" }}>
-              <div style={{ font: "700 15px var(--font-body)" }} className="tabular">{egp(o.gmv)}</div>
+              <div style={{ font: "700 var(--fs-body) var(--font-body)" }} className="tabular">{egp(o.gmv)}</div>
               <div style={{ marginTop: 4 }}>
                 <StatusPill status={o.status} />
               </div>

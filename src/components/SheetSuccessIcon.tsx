@@ -52,7 +52,7 @@ export function SheetSuccessIcon({ label, iconIn }: { label: string; iconIn: boo
           />
         </svg>
       </div>
-      <div style={{ marginTop: 16, font: "700 16px var(--font-body)", color: "var(--ink)" }}>{label}</div>
+      <div style={{ marginTop: 16, font: "700 var(--fs-base) var(--font-body)", color: "var(--ink)" }}>{label}</div>
     </div>
   );
 }

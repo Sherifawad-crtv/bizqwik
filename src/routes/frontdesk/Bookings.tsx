@@ -106,22 +106,22 @@ export function Bookings() {
         onClick={() => (solo ? setForm(formOf(c)) : setOpen(c))}
         style={{ display: "flex", alignItems: "center", gap: 12, flex: 1, minWidth: 0, padding: "14px 18px", border: 0, background: "none", cursor: "pointer", textAlign: "left" }}
       >
-        <span style={{ width: 84, flex: "none", whiteSpace: "nowrap", font: "700 14px var(--font-mono)", color: happening ? "var(--primary-pressed)" : "var(--ink)" }}>{clock(c.startsAt)}</span>
+        <span style={{ width: 84, flex: "none", whiteSpace: "nowrap", font: "700 var(--fs-body-sm) var(--font-mono)", color: happening ? "var(--primary-pressed)" : "var(--ink)" }}>{clock(c.startsAt)}</span>
         <span className="bq-grow">
-          <span style={{ display: "block", font: "700 15px var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.title}</span>
+          <span style={{ display: "block", font: "700 var(--fs-body) var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.title}</span>
           {solo ? (
-            <span style={{ display: "block", font: "400 13px var(--font-mono)", color: booked > 0 ? "var(--primary-pressed)" : "var(--ink-faint)" }}>
+            <span style={{ display: "block", font: "400 var(--fs-note) var(--font-mono)", color: booked > 0 ? "var(--primary-pressed)" : "var(--ink-faint)" }}>
               {booked === 0 ? "No one yet" : `${booked} coming`}
             </span>
           ) : (
-            <span style={{ display: "block", font: "400 13px var(--font-mono)", color: "var(--ink-faint)" }}>
+            <span style={{ display: "block", font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-faint)" }}>
               {booked === 0 ? "No one booked" : `${booked} booked`}
               {(c.dropInSeats ?? 0) > 0 ? ` · ${c.dropInSeats} pay per class` : ""}
             </span>
           )}
         </span>
-        {happening && <span style={{ font: "700 11px var(--font-mono)", color: "var(--paid-fg)", background: "var(--paid-bg)", padding: "3px 8px", borderRadius: 999 }}>NOW</span>}
-        {!happening && c.id === nextId && <span style={{ font: "700 11px var(--font-mono)", color: "var(--primary-pressed)", background: "var(--primary-tint)", padding: "3px 8px", borderRadius: 999 }}>NEXT</span>}
+        {happening && <span style={{ font: "700 var(--fs-caption) var(--font-mono)", color: "var(--paid-fg)", background: "var(--paid-bg)", padding: "3px 8px", borderRadius: 999 }}>NOW</span>}
+        {!happening && c.id === nextId && <span style={{ font: "700 var(--fs-caption) var(--font-mono)", color: "var(--primary-pressed)", background: "var(--primary-tint)", padding: "3px 8px", borderRadius: 999 }}>NEXT</span>}
         <Icon name="chevron-right" size={16} />
       </button>
       </div>
@@ -161,7 +161,7 @@ export function Bookings() {
           <Card>
             <EmptyState bare icon="calendar" title="Nothing left today" body={`Here's what's next — ${dayHeading(ahead.day, today).toLowerCase() === "tomorrow" ? "tomorrow" : dayHeading(ahead.day, today)}.`} />
           </Card>
-          <div style={{ font: "700 12px var(--font-mono)", letterSpacing: 1, color: "var(--ink-faint)", textTransform: "uppercase", margin: "20px 4px 8px" }}>{dayHeading(ahead.day, today)}</div>
+          <div style={{ font: "700 var(--fs-small) var(--font-mono)", letterSpacing: 1, color: "var(--ink-faint)", textTransform: "uppercase", margin: "20px 4px 8px" }}>{dayHeading(ahead.day, today)}</div>
           <Card style={{ overflow: "hidden" }}>{ahead.items.map((c) => row(c))}</Card>
         </div>
       )}
@@ -176,7 +176,7 @@ export function Bookings() {
 
       {groups.map((g) => (
         <div key={g.day.toISOString()} style={{ marginTop: 20 }}>
-          <div style={{ font: "700 12px var(--font-mono)", letterSpacing: 1, color: "var(--ink-faint)", textTransform: "uppercase", margin: "0 4px 8px" }}>{dayHeading(g.day, today)}</div>
+          <div style={{ font: "700 var(--fs-small) var(--font-mono)", letterSpacing: 1, color: "var(--ink-faint)", textTransform: "uppercase", margin: "0 4px 8px" }}>{dayHeading(g.day, today)}</div>
           <Card style={{ overflow: "hidden" }}>{g.items.map((c) => row(c))}</Card>
         </div>
       ))}
@@ -185,7 +185,7 @@ export function Bookings() {
         <div style={{ marginTop: 20 }}>
           <button
             onClick={() => setShowEarlier((v) => !v)}
-            style={{ border: 0, background: "none", cursor: "pointer", font: "700 14px var(--font-body)", color: "var(--primary-pressed)", padding: "4px 0" }}
+            style={{ border: 0, background: "none", cursor: "pointer", font: "700 var(--fs-body-sm) var(--font-body)", color: "var(--primary-pressed)", padding: "4px 0" }}
           >
             {showEarlier ? "Hide" : "Show"} earlier today ({earlier.length})
           </button>
@@ -222,7 +222,7 @@ export function Bookings() {
 /** "One Class" / "Recurring Schedule". On a phone they float just above the
  * bottom bar, within thumb reach; on a desktop they sit at the top of the list. */
 function AddClassPills({ floating, hidden, onOne, onRecurring }: { floating: boolean; hidden: boolean; onOne: () => void; onRecurring: () => void }) {
-  const pill: React.CSSProperties = { flex: 1, height: 52, padding: "0 18px", border: 0, borderRadius: 999, cursor: "pointer", font: "700 15px var(--font-body)", whiteSpace: "nowrap" };
+  const pill: React.CSSProperties = { flex: 1, height: 52, padding: "0 18px", border: 0, borderRadius: 999, cursor: "pointer", font: "700 var(--fs-body) var(--font-body)", whiteSpace: "nowrap" };
   const group = (
     <div
       role="group"

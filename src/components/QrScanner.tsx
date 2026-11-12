@@ -148,7 +148,7 @@ export function QrScanner({ title, hint, onClose, onScan }: { title: string; hin
       <div style={{ display: "flex", alignItems: "flex-start", gap: 12, padding: "calc(env(safe-area-inset-top) + 18px) 18px 12px" }}>
         <div className="bq-grow">
           <div style={{ font: "800 22px/1.2 var(--font-body)" }}>{title}</div>
-          <div style={{ font: "400 13px/1.4 var(--font-mono)", color: "rgba(255,255,255,.7)", marginTop: 4 }}>{hint}</div>
+          <div style={{ font: "400 var(--fs-note)/1.4 var(--font-mono)", color: "rgba(255,255,255,.7)", marginTop: 4 }}>{hint}</div>
         </div>
         <button className="bq-hit"
           onClick={onClose}
@@ -174,7 +174,7 @@ export function QrScanner({ title, hint, onClose, onScan }: { title: string; hin
                   onClick={() => chooseLens(l)}
                   aria-pressed={lens === l}
                   aria-label={l === "0.5" ? "Wide lens 0.5×" : "Normal lens 1×"}
-                  style={{ minWidth: 44, height: 36, padding: "0 10px", borderRadius: 999, border: 0, cursor: "pointer", font: "700 13px var(--font-mono)", background: lens === l ? "#fff" : "transparent", color: lens === l ? "#000" : "#fff" }}
+                  style={{ minWidth: 44, height: 36, padding: "0 10px", borderRadius: 999, border: 0, cursor: "pointer", font: "700 var(--fs-note) var(--font-mono)", background: lens === l ? "#fff" : "transparent", color: lens === l ? "#000" : "#fff" }}
                 >
                   {l === "0.5" ? ".5×" : "1×"}
                 </button>
@@ -190,7 +190,7 @@ export function QrScanner({ title, hint, onClose, onScan }: { title: string; hin
       </div>
       {error && (
         <div style={{ margin: "0 16px calc(env(safe-area-inset-bottom) + 18px)", background: "var(--surface)", color: "var(--ink)", borderRadius: 20, padding: 16 }}>
-          <div style={{ font: "600 14px/1.5 var(--font-body)", marginBottom: 12 }}>{error}</div>
+          <div style={{ font: "600 var(--fs-body-sm)/1.5 var(--font-body)", marginBottom: 12 }}>{error}</div>
           <Button fullWidth onClick={() => { setError(null); setAttempt((n) => n + 1); }}>Try again</Button>
         </div>
       )}

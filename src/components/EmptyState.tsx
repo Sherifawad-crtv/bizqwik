@@ -39,8 +39,8 @@ export function EmptyState({
       <span style={{ width: 44, height: 44, borderRadius: "var(--r-md)", background: "var(--primary-tint)", color: "var(--primary-pressed)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 4 }}>
         <Icon name={icon} size={22} />
       </span>
-      <div style={{ font: "700 16px/1.3 var(--font-body)", color: "var(--ink)" }}>{title}</div>
-      {body && <div style={{ font: "500 13px/1.5 var(--font-body)", color: "var(--ink-muted)", maxWidth: 340 }}>{body}</div>}
+      <div style={{ font: "700 var(--fs-base)/1.3 var(--font-body)", color: "var(--ink)" }}>{title}</div>
+      {body && <div style={{ font: "500 var(--fs-note)/1.5 var(--font-body)", color: "var(--ink-muted)", maxWidth: 340 }}>{body}</div>}
       {action && (
         <Button variant="secondary" style={{ marginTop: 8 }} onClick={action.onClick}>
           {action.label}

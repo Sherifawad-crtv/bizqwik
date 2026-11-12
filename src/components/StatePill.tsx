@@ -19,7 +19,7 @@ export function StatePill({ state, label }: { state: State; label?: string }) {
         borderRadius: 999,
         background: s.bg,
         color: s.fg,
-        font: "700 11px var(--font-mono)",
+        font: "700 var(--fs-caption) var(--font-mono)",
         letterSpacing: ".08em",
         whiteSpace: "nowrap",
       }}

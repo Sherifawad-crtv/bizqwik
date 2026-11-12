@@ -6,7 +6,8 @@ import type { ClientWithPackage } from "../../lib/types";
 import { Icon } from "../../components/Icon";
 import { Spinner } from "../../components/Spinner";
 import { EmptyState } from "../../components/EmptyState";
-import { Card, PlanPill, SearchField, matchesClient, planSummary } from "./shared";
+import { Card, PlanPill, SearchField } from "./shared";
+import { matchesClient, planSummary } from "./deskStatus";
 import { useFrontDeskCatalog } from "./members/offers";
 
 type Result = { state: "busy" } | { state: "done"; note: string } | { state: "error"; text: string };
@@ -50,14 +51,14 @@ export function CheckInList() {
             <div key={c.id} data-testid="checkin-row" style={{ padding: "12px 16px", borderBottom: i === shown.length - 1 ? "none" : "1px solid var(--line)" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                 <div className="bq-grow">
-                  <div style={{ font: "700 16px var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.name}</div>
+                  <div style={{ font: "700 var(--fs-base) var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.name}</div>
                   <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 2 }}>
                     <PlanPill client={c} />
-                    <span style={{ font: "400 12px var(--font-mono)", color: "var(--ink-faint)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{plan.detail}</span>
+                    <span style={{ font: "400 var(--fs-small) var(--font-mono)", color: "var(--ink-faint)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{plan.detail}</span>
                   </div>
                 </div>
                 {r?.state === "done" ? (
-                  <span style={{ display: "inline-flex", alignItems: "center", gap: 6, color: "var(--paid-fg)", font: "800 14px var(--font-body)", flex: "none" }}>
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: 6, color: "var(--paid-fg)", font: "800 var(--fs-body-sm) var(--font-body)", flex: "none" }}>
                     <Icon name="check" size={18} /> Done
                   </span>
                 ) : (
@@ -65,15 +66,15 @@ export function CheckInList() {
                     className="bq-scale"
                     disabled={r?.state === "busy"}
                     onClick={() => checkIn(c)}
-                    style={{ flex: "none", height: 42, padding: "0 18px", border: 0, borderRadius: 999, background: "var(--primary)", color: "#fff", font: "700 14px var(--font-body)", cursor: "pointer", opacity: r?.state === "busy" ? 0.6 : 1 }}
+                    style={{ flex: "none", height: 42, padding: "0 18px", border: 0, borderRadius: 999, background: "var(--primary)", color: "#fff", font: "700 var(--fs-body-sm) var(--font-body)", cursor: "pointer", opacity: r?.state === "busy" ? 0.6 : 1 }}
                   >
                     {r?.state === "busy" ? "…" : "Check in"}
                   </button>
                 )}
               </div>
-              {r?.state === "done" && <div style={{ font: "400 12px var(--font-mono)", color: "var(--paid-fg)", marginTop: 6 }}>{r.note}</div>}
+              {r?.state === "done" && <div style={{ font: "400 var(--fs-small) var(--font-mono)", color: "var(--paid-fg)", marginTop: 6 }}>{r.note}</div>}
               {r?.state === "error" && (
-                <div role="alert" style={{ font: "600 12px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 10, padding: "8px 10px", marginTop: 8 }}>
+                <div role="alert" style={{ font: "600 var(--fs-small)/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 10, padding: "8px 10px", marginTop: 8 }}>
                   {r.text}
                 </div>
               )}

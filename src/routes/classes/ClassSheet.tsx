@@ -87,7 +87,7 @@ export function ClassSheet({
         {solo && editing && (
           <div style={{ background: "var(--sunken)", borderRadius: "var(--r-input)", padding: "12px 14px" }}>
             <div className="bq-label">COMING · {draft.coming?.length ?? 0}</div>
-            <div style={{ font: "600 14px/1.5 var(--font-body)", marginTop: 4 }}>{draft.coming?.length ? draft.coming.join(", ") : "No one has said they're coming yet."}</div>
+            <div style={{ font: "600 var(--fs-body-sm)/1.5 var(--font-body)", marginTop: 4 }}>{draft.coming?.length ? draft.coming.join(", ") : "No one has said they're coming yet."}</div>
           </div>
         )}
         <LocationField locations={locations} value={draft.locationId} onChange={(id) => setDraft({ ...draft, locationId: id })} />

@@ -46,9 +46,9 @@ export function DeleteOrgSheet({
 
   return (
     <Sheet open={open} onClose={close}>
-      <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--danger-fg)" }}>DELETE ORGANIZATION</div>
-      <div style={{ font: "800 26px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 10px" }}>Delete {org.name}?</div>
-      <div style={{ font: "500 14px/1.5 var(--font-body)", color: "var(--ink-muted)", marginBottom: 14 }}>
+      <div style={{ font: "700 var(--fs-caption) var(--font-mono)", letterSpacing: ".08em", color: "var(--danger-fg)" }}>DELETE ORGANIZATION</div>
+      <div style={{ font: "800 var(--fs-title)/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 10px" }}>Delete {org.name}?</div>
+      <div style={{ font: "500 var(--fs-body-sm)/1.5 var(--font-body)", color: "var(--ink-muted)", marginBottom: 14 }}>
         This permanently deletes {org.name}, its {usage.staffCount} staff and {usage.clientCount} members (and their app logins), every sale, session, wallet, points balance and its branding. It can't be undone.
       </div>
       <TextField

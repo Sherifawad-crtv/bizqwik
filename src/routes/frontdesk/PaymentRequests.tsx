@@ -29,17 +29,17 @@ export function PaymentRequestsCard() {
           <Icon name="cash" size={18} />
         </span>
         <span className="bq-grow">
-          <span style={{ display: "block", font: "700 15px var(--font-body)", color: "var(--logging-fg)" }}>
+          <span style={{ display: "block", font: "700 var(--fs-body) var(--font-body)", color: "var(--logging-fg)" }}>
             {list.length} payment{list.length === 1 ? "" : "s"} to approve
           </span>
-          <span style={{ display: "block", font: "400 12px var(--font-mono)", color: "var(--logging-fg)" }}>Check the receipt, then approve</span>
+          <span style={{ display: "block", font: "400 var(--fs-small) var(--font-mono)", color: "var(--logging-fg)" }}>Check the receipt, then approve</span>
         </span>
         <Icon name="chevron-right" size={16} />
       </button>
       <Sheet open={open} onClose={() => setOpen(false)}>
         <div className="bq-label">INSTAPAY</div>
-        <div style={{ font: "800 26px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 14px" }}>Payments to approve</div>
-        {list.length === 0 && <div style={{ font: "400 14px var(--font-body)", color: "var(--ink-muted)", padding: "12px 0 8px" }}>All caught up.</div>}
+        <div style={{ font: "800 var(--fs-title)/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 14px" }}>Payments to approve</div>
+        {list.length === 0 && <div style={{ font: "400 var(--fs-body-sm) var(--font-body)", color: "var(--ink-muted)", padding: "12px 0 8px" }}>All caught up.</div>}
         <div style={{ display: "flex", flexDirection: "column", gap: 12, maxHeight: "60vh", overflowY: "auto" }}>
           {list.map((r) => (
             <RequestRow key={r.id} r={r} onDone={() => reqs.refetch()} />
@@ -79,9 +79,9 @@ function RequestRow({ r, onDone }: { r: PaymentRequest; onDone: () => void }) {
         )}
         <div className="bq-grow">
           <div className="bq-h3">{r.clientName}</div>
-          <div style={{ font: "400 14px var(--font-body)", marginTop: 2 }}>{r.name}</div>
-          <div style={{ font: "800 20px var(--font-body)", marginTop: 4 }}>{egp(r.price)}</div>
-          <div style={{ font: "400 12px var(--font-mono)", color: "var(--ink-faint)", marginTop: 2 }}>{when(r.createdAt)}</div>
+          <div style={{ font: "400 var(--fs-body-sm) var(--font-body)", marginTop: 2 }}>{r.name}</div>
+          <div style={{ font: "800 var(--fs-title-sm) var(--font-body)", marginTop: 4 }}>{egp(r.price)}</div>
+          <div style={{ font: "400 var(--fs-small) var(--font-mono)", color: "var(--ink-faint)", marginTop: 2 }}>{when(r.createdAt)}</div>
         </div>
       </div>
       {rejecting ? (
@@ -98,7 +98,7 @@ function RequestRow({ r, onDone }: { r: PaymentRequest; onDone: () => void }) {
           <Button variant="quiet" disabled={busy} onClick={() => setRejecting(true)}>Reject</Button>
         </div>
       )}
-      {error && <div className="bq-rise" style={{ font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: "var(--r-md)", padding: "10px 14px", marginTop: 10 }}>{error}</div>}
+      {error && <div className="bq-rise" style={{ font: "600 var(--fs-note)/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: "var(--r-md)", padding: "10px 14px", marginTop: 10 }}>{error}</div>}
     </Card>
   );
 }

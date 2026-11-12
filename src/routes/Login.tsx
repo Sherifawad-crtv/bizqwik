@@ -47,8 +47,8 @@ export function Login() {
 
   const card = (
     <div style={{ width: isMobile ? "min(420px, 100%)" : "min(580px, 100%)", background: "var(--surface)", border: "1px solid var(--line)", borderRadius: isMobile ? "var(--r-card)" : 40, padding: isMobile ? 30 : 48 }}>
-        <div style={{ font: "800 30px/1.1 var(--font-body)", letterSpacing: "-.02em" }}>Sign in</div>
-        <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-muted)", marginTop: 6, marginBottom: 22 }}>
+        <div style={{ font: "800 var(--fs-display)/1.1 var(--font-body)", letterSpacing: "-.02em" }}>Sign in</div>
+        <div style={{ font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-muted)", marginTop: 6, marginBottom: 22 }}>
           ATTENDANCE &amp; PAYOUT PORTAL
         </div>
 
@@ -62,7 +62,7 @@ export function Login() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               onFocus={focusIntoView}
-              style={{ display: "block", width: "100%", border: 0, background: "none", outline: "none", font: "600 16px var(--font-body)", color: "var(--ink)", padding: "2px 0 0" }}
+              style={{ display: "block", width: "100%", border: 0, background: "none", outline: "none", font: "600 var(--fs-base) var(--font-body)", color: "var(--ink)", padding: "2px 0 0" }}
             />
           </label>
           <label style={{ display: "block", background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "10px 16px" }}>
@@ -74,12 +74,12 @@ export function Login() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               onFocus={focusIntoView}
-              style={{ display: "block", width: "100%", border: 0, background: "none", outline: "none", font: "600 16px var(--font-body)", color: "var(--ink)", padding: "2px 0 0" }}
+              style={{ display: "block", width: "100%", border: 0, background: "none", outline: "none", font: "600 var(--fs-base) var(--font-body)", color: "var(--ink)", padding: "2px 0 0" }}
             />
           </label>
           <Link
             to="/forgot-password"
-            style={{ textAlign: "right", font: "700 13px var(--font-body)", color: "var(--ink-muted)" }}
+            style={{ textAlign: "right", font: "700 var(--fs-note) var(--font-body)", color: "var(--ink-muted)" }}
           >
             Forgot password?
           </Link>
@@ -93,7 +93,7 @@ export function Login() {
           <Button type="submit" fullWidth size="lg" disabled={busy} style={{ marginTop: 4 }}>
             {busy ? "Signing in…" : "Sign in"}
           </Button>
-          <Link to="/signup" style={{ textAlign: "center", font: "700 13px var(--font-body)", color: "var(--ink-muted)" }}>
+          <Link to="/signup" style={{ textAlign: "center", font: "700 var(--fs-note) var(--font-body)", color: "var(--ink-muted)" }}>
             First time? <span style={{ color: "var(--primary)" }}>Create an account</span>
           </Link>
         </form>

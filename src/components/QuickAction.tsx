@@ -8,7 +8,7 @@ export function QuickAction({ icon, label, onClick }: { icon: IconName; label: s
       <span style={{ width: 56, height: 56, borderRadius: 999, background: "var(--primary)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 8px 20px rgba(90,65,255,.28)" }}>
         <Icon name={icon} size={24} />
       </span>
-      <span style={{ font: "600 13px/1.2 var(--font-body)", color: "var(--ink)", textAlign: "center" }}>{label}</span>
+      <span style={{ font: "600 var(--fs-note)/1.2 var(--font-body)", color: "var(--ink)", textAlign: "center" }}>{label}</span>
     </button>
   );
 }

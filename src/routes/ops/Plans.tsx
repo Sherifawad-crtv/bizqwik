@@ -10,7 +10,8 @@ import { Icon } from "../../components/Icon";
 import { Sheet } from "../../components/Sheet";
 import { TextField } from "../../components/FormField";
 import { ConfirmSheet } from "../../components/ConfirmSheet";
-import { Card, SectionTitle, ErrorBanner, limitLabel } from "./shared";
+import { Card, SectionTitle, ErrorBanner } from "./shared";
+import { limitLabel } from "./format";
 
 function PlanSheet({ open, onClose, plan, onDone }: { open: boolean; onClose: () => void; plan: PlanType | null; onDone: () => void }) {
   const [name, setName] = useState("");
@@ -98,7 +99,7 @@ export function Plans() {
   return (
     <div>
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
-        <div style={{ font: "800 30px/1.1 var(--font-body)", letterSpacing: "-.02em" }}>Plans</div>
+        <div style={{ font: "800 var(--fs-display)/1.1 var(--font-body)", letterSpacing: "-.02em" }}>Plans</div>
         <Button onClick={openNew} style={{ marginLeft: "auto" }}>
           <Icon name="plus" size={18} /> New plan
         </Button>
@@ -112,7 +113,7 @@ export function Plans() {
           <Card key={p.id} style={{ padding: "16px 18px", display: "flex", alignItems: "center", gap: 12 }}>
             <div className="bq-grow">
               <div style={{ font: "700 17px var(--font-body)" }}>{p.name}</div>
-              <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)", marginTop: 3 }}>
+              <div style={{ font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-faint)", marginTop: 3 }}>
                 {egp(p.price)}/mo · {limitLabel(p.teamSizeLimit)} staff · {limitLabel(p.clientSizeLimit)} clients
               </div>
             </div>

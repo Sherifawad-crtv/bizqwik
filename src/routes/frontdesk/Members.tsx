@@ -11,7 +11,8 @@ import { Sheet } from "../../components/Sheet";
 import { Spinner } from "../../components/Spinner";
 import { Icon } from "../../components/Icon";
 import { useSticky } from "../../lib/useSticky";
-import { Card, PlanPill, SearchField, SectionTitle, SheetHeading, endingSoon, matchesClient, planSummary } from "./shared";
+import { Card, PlanPill, SearchField, SectionTitle, SheetHeading } from "./shared";
+import { endingSoon, matchesClient, planSummary } from "./deskStatus";
 import { ConfirmCheckInSheet } from "./CheckIn";
 import { DropIn } from "./DropIn";
 import { useFrontDeskCatalog, useSellableCoaches } from "./members/offers";
@@ -69,7 +70,7 @@ export function Members() {
               key={f}
               className="bq-scale"
               onClick={() => setFilter(f)}
-              style={{ flex: "none", height: 36, padding: "0 14px", borderRadius: 999, border: on ? 0 : "1px solid var(--line)", background: on ? "var(--primary)" : "var(--surface)", color: on ? "var(--surface)" : "var(--ink)", font: "700 13px var(--font-body)", cursor: "pointer" }}
+              style={{ flex: "none", height: 36, padding: "0 14px", borderRadius: 999, border: on ? 0 : "1px solid var(--line)", background: on ? "var(--primary)" : "var(--surface)", color: on ? "var(--surface)" : "var(--ink)", font: "700 var(--fs-note) var(--font-body)", cursor: "pointer" }}
             >
               {{ all: "All", active: "Active", soon: "Ending soon", expired: "Expired", none: "No plan" }[f]} · {n}
             </button>
@@ -101,8 +102,8 @@ export function Members() {
               style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", minHeight: 64, padding: "12px 18px", border: 0, borderBottom: i === shown.length - 1 ? "none" : "1px solid var(--line)", background: "none", cursor: "pointer", textAlign: "left" }}
             >
               <div className="bq-grow">
-                <div style={{ font: "700 16px var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.name}</div>
-                <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                <div style={{ font: "700 var(--fs-base) var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.name}</div>
+                <div style={{ font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-faint)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                   {plan.title} · {plan.detail}
                   {soon && <span style={{ color: "var(--logging-fg)", fontWeight: 700 }}> · {soon.label}</span>}
                   {here && !c.homeLocationId && <span style={{ color: "var(--danger-fg)", fontWeight: 700 }}> · No location</span>}

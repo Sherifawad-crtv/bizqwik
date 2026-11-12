@@ -46,7 +46,7 @@ export function Welcome() {
           }}
         >
           <h1 style={{ margin: 0, font: "800 32px/1.1 var(--font-body)", letterSpacing: "-.03em", color: "var(--ink)" }}>Welcome to Bizqwik!</h1>
-          <p style={{ margin: "8px 0 22px", font: "400 16px/1.4 var(--font-body)", color: "var(--ink-muted)" }}>
+          <p style={{ margin: "8px 0 22px", font: "400 var(--fs-base)/1.4 var(--font-body)", color: "var(--ink-muted)" }}>
             Easily manage your coaching operations, bookings, revenue, reward your clients and more.
           </p>
           <button
@@ -59,7 +59,7 @@ export function Welcome() {
           <button
             className="bq-scale"
             onClick={() => go("/login")}
-            style={{ width: "100%", height: 60, marginTop: 10, border: 0, borderRadius: 999, background: "var(--primary-tint)", color: "var(--primary-pressed)", font: "700 20px var(--font-body)", cursor: "pointer" }}
+            style={{ width: "100%", height: 60, marginTop: 10, border: 0, borderRadius: 999, background: "var(--primary-tint)", color: "var(--primary-pressed)", font: "700 var(--fs-title-sm) var(--font-body)", cursor: "pointer" }}
           >
             Login
           </button>

@@ -63,12 +63,12 @@ export function Invitations({ embedded = false, onCreateClient }: { embedded?: b
         </span>
         <div>
           <div className="bq-h3">Guest invitations</div>
-          <div style={{ font: "400 13px/1.5 var(--font-mono)", color: "var(--ink-muted)" }}>Members on an active plan can bring guests, up to the guest passes their plan includes.</div>
+          <div style={{ font: "400 var(--fs-note)/1.5 var(--font-mono)", color: "var(--ink-muted)" }}>Members on an active plan can bring guests, up to the guest passes their plan includes.</div>
         </div>
       </Card>
 
       {done && (
-        <div style={{ marginBottom: 14, font: "600 13px/1.5 var(--font-body)", color: "var(--paid-fg)", background: "var(--paid-bg)", borderRadius: "var(--r-md)", padding: "10px 14px" }}>
+        <div style={{ marginBottom: 14, font: "600 var(--fs-note)/1.5 var(--font-body)", color: "var(--paid-fg)", background: "var(--paid-bg)", borderRadius: "var(--r-md)", padding: "10px 14px" }}>
           Invitation recorded — {done}
         </div>
       )}
@@ -95,7 +95,7 @@ export function Invitations({ embedded = false, onCreateClient }: { embedded?: b
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <div className="bq-grow">
                 <div className="bq-label">MEMBER</div>
-                <div style={{ font: "800 20px var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{member.name}</div>
+                <div style={{ font: "800 var(--fs-title-sm) var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{member.name}</div>
               </div>
               <Button
                 variant="quiet"
@@ -112,7 +112,7 @@ export function Invitations({ embedded = false, onCreateClient }: { embedded?: b
             </div>
             <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginTop: 10 }}>
               <span style={{ font: "800 34px/1 var(--font-body)", letterSpacing: "-.02em", color: left > 0 ? "var(--primary-pressed)" : "var(--ink-faint)" }}>{left}</span>
-              <span style={{ font: "400 13px var(--font-mono)", color: "var(--ink-muted)" }}>invitation{left === 1 ? "" : "s"} left</span>
+              <span style={{ font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-muted)" }}>invitation{left === 1 ? "" : "s"} left</span>
             </div>
           </Card>
 

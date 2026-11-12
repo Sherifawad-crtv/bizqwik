@@ -119,7 +119,7 @@ function PersonSheet({
         <div className="bq-stack">
           <div style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "12px 16px" }}>
             <div className="bq-label">ROLE</div>
-            <div style={{ font: "600 16px var(--font-body)" }}>{ROLE_LABELS[shown.role]}</div>
+            <div style={{ font: "600 var(--fs-base) var(--font-body)" }}>{ROLE_LABELS[shown.role]}</div>
           </div>
           {hasTier(shown.role) && (
             <SelectField
@@ -131,7 +131,7 @@ function PersonSheet({
             />
           )}
           {hasTier(shown.role) && tiers.length === 0 && (
-            <div style={{ font: "400 12px/1.5 var(--font-mono)", color: "var(--ink-faint)", padding: "0 2px" }}>
+            <div style={{ font: "400 var(--fs-small)/1.5 var(--font-mono)", color: "var(--ink-faint)", padding: "0 2px" }}>
               No pay tiers yet — create one in the Tiers tab to set this person's rate.
             </div>
           )}

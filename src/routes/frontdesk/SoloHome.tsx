@@ -14,7 +14,8 @@ import { Spinner } from "../../components/Spinner";
 import { RevenueChart } from "../overview/Charts";
 import { LocationSwitcher, atLocation, useCurrentLocation } from "../../lib/locations";
 import { PaymentRequestsCard } from "./PaymentRequests";
-import { Card, SectionLink, SectionTitle, endingSoon, planSummary } from "./shared";
+import { Card, SectionLink, SectionTitle } from "./shared";
+import { endingSoon, planSummary } from "./deskStatus";
 import { useNow } from "../../lib/useNow";
 
 const clockOf = (iso: string) => {
@@ -50,8 +51,8 @@ function Stat({ label, value, sub, icon, tone, onClick }: { label: string; value
         </span>
         <span className="bq-label">{label}</span>
       </div>
-      <div style={{ font: "800 30px/1.1 var(--font-body)", letterSpacing: "-.02em", marginTop: 10, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{value}</div>
-      <div style={{ font: "400 12px var(--font-mono)", color: "var(--ink-muted)", marginTop: 4 }}>{sub}</div>
+      <div style={{ font: "800 var(--fs-display)/1.1 var(--font-body)", letterSpacing: "-.02em", marginTop: 10, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{value}</div>
+      <div style={{ font: "400 var(--fs-small) var(--font-mono)", color: "var(--ink-muted)", marginTop: 4 }}>{sub}</div>
     </button>
   );
 }
@@ -126,7 +127,7 @@ export function SoloHome() {
       </div>
 
       <Card style={{ padding: "18px 18px 12px", marginTop: 10 }}>
-        <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", marginBottom: 10 }}>REVENUE BY MONTH · EGP</div>
+        <div style={{ font: "700 var(--fs-caption) var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", marginBottom: 10 }}>REVENUE BY MONTH · EGP</div>
         <RevenueChart months={trend} revenueOnly />
       </Card>
 
@@ -140,13 +141,13 @@ export function SoloHome() {
             onClick={() => navigate("/bookings")}
             style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", minHeight: 60, padding: "12px 18px", border: 0, borderBottom: i === nextUp.length - 1 ? "none" : "1px solid var(--line)", background: "none", cursor: "pointer", textAlign: "left" }}
           >
-            <span style={{ width: 84, flex: "none", font: "700 14px var(--font-mono)" }}>
+            <span style={{ width: 84, flex: "none", font: "700 var(--fs-body-sm) var(--font-mono)" }}>
               <span style={{ display: "block", whiteSpace: "nowrap" }}>{clockOf(c.startsAt)}</span>
-              <span style={{ display: "block", font: "400 11px var(--font-mono)", color: "var(--ink-faint)" }}>{dayOf(c.startsAt)}</span>
+              <span style={{ display: "block", font: "400 var(--fs-caption) var(--font-mono)", color: "var(--ink-faint)" }}>{dayOf(c.startsAt)}</span>
             </span>
             <span className="bq-grow">
-              <span style={{ display: "block", font: "700 15px var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.title}</span>
-              <span style={{ display: "block", font: "400 12px var(--font-mono)", color: (c.bookedCount ?? 0) > 0 ? "var(--primary-pressed)" : "var(--ink-faint)" }}>
+              <span style={{ display: "block", font: "700 var(--fs-body) var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.title}</span>
+              <span style={{ display: "block", font: "400 var(--fs-small) var(--font-mono)", color: (c.bookedCount ?? 0) > 0 ? "var(--primary-pressed)" : "var(--ink-faint)" }}>
                 {(c.bookedCount ?? 0) > 0 ? `${c.bookedCount} coming` : "No one yet"}
                 {c.id === nextUpId ? " · NEXT" : ""}
               </span>

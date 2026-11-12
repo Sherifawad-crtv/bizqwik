@@ -87,13 +87,13 @@ export function ClientDetailSheet({
               {client.conditions && (
                 <div style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "12px 16px", marginBottom: 10 }}>
                   <div className="bq-label">CONDITIONS</div>
-                  <div style={{ font: "600 15px/1.4 var(--font-body)" }}>{client.conditions}</div>
+                  <div style={{ font: "600 var(--fs-body)/1.4 var(--font-body)" }}>{client.conditions}</div>
                 </div>
               )}
 
               <div style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "12px 16px", marginBottom: 10 }}>
                 <div className="bq-label">COACH</div>
-                <div style={{ font: "600 16px var(--font-body)" }}>{coachName(client.assignedCoachId) ?? "Unassigned"}</div>
+                <div style={{ font: "600 var(--fs-base) var(--font-body)" }}>{coachName(client.assignedCoachId) ?? "Unassigned"}</div>
               </div>
 
               {role === "dept_head" && (
@@ -101,13 +101,13 @@ export function ClientDetailSheet({
                   <div className="bq-label">GROUP PLAN</div>
                   {client.groupPlan ? (
                     <>
-                      <div style={{ font: "600 16px var(--font-body)" }}>{client.groupPlan.name}</div>
-                      <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-muted)" }}>
+                      <div style={{ font: "600 var(--fs-base) var(--font-body)" }}>{client.groupPlan.name}</div>
+                      <div style={{ font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-muted)" }}>
                         {groupPlanLine(client.groupPlan)} · {egp(client.groupPlan.priceAtSale)}
                       </div>
                     </>
                   ) : (
-                    <div style={{ font: "600 15px var(--font-body)", color: "var(--ink-faint)" }}>No active plan</div>
+                    <div style={{ font: "600 var(--fs-body) var(--font-body)", color: "var(--ink-faint)" }}>No active plan</div>
                   )}
                 </div>
               )}
@@ -119,26 +119,26 @@ export function ClientDetailSheet({
                     <PackageStatusPill status={pkg.status} />
                   </div>
                   {pkg.status === "active" && (
-                    <div style={{ font: "600 15px var(--font-body)", marginBottom: 4 }}>
+                    <div style={{ font: "600 var(--fs-body) var(--font-body)", marginBottom: 4 }}>
                       {pkg.sessionsRemaining} of {pkg.sessionsIncluded} sessions left · {daysLeft(pkg.expiryDate)} days left
                     </div>
                   )}
-                  <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-muted)" }}>
+                  <div style={{ font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-muted)" }}>
                     {egp(pkg.priceAtSale)} paid · {egp(pkg.coachCutAtSale)} coach cut
                   </div>
                 </div>
               ) : (
-                <div style={{ font: "500 14px var(--font-body)", color: "var(--ink-faint)", marginBottom: 10 }}>No package sold yet.</div>
+                <div style={{ font: "500 var(--fs-body-sm) var(--font-body)", color: "var(--ink-faint)", marginBottom: 10 }}>No package sold yet.</div>
               )}
 
               {error && (
-                <div className="bq-rise" style={{ marginBottom: 10, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: "var(--r-md)", padding: "10px 14px" }}>
+                <div className="bq-rise" style={{ marginBottom: 10, font: "600 var(--fs-note)/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: "var(--r-md)", padding: "10px 14px" }}>
                   {error}
                 </div>
               )}
 
               {canDeliver && (
-                <div data-testid="pt-scan-hint" style={{ marginTop: 6, font: "500 13px/1.5 var(--font-body)", color: "var(--ink-muted)", background: "var(--primary-tint)", borderRadius: "var(--r-md)", padding: "10px 14px" }}>
+                <div data-testid="pt-scan-hint" style={{ marginTop: 6, font: "500 var(--fs-note)/1.5 var(--font-body)", color: "var(--ink-muted)", background: "var(--primary-tint)", borderRadius: "var(--r-md)", padding: "10px 14px" }}>
                   To log a session, scan the PT code in {client.name.split(" ")[0]}'s app (the + button, or Scan QR).
                 </div>
               )}
@@ -155,12 +155,12 @@ export function ClientDetailSheet({
 
           {mode === "compensate" && (
             <>
-              <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", marginBottom: 10 }}>GOODWILL WALLET CREDIT</div>
+              <div style={{ font: "700 var(--fs-caption) var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", marginBottom: 10 }}>GOODWILL WALLET CREDIT</div>
               <div className="bq-stack bq-rise">
                 <TextField label="AMOUNT (EGP)" value={compAmount} onChange={(e) => setCompAmount(e.target.value)} inputMode="numeric" placeholder="0" />
                 <TextField label="NOTE (OPTIONAL)" value={compNote} onChange={(e) => setCompNote(e.target.value)} placeholder="Why you're compensating them" />
               </div>
-              <div style={{ marginTop: 8, font: "400 12px/1.5 var(--font-mono)", color: "var(--ink-faint)" }}>
+              <div style={{ marginTop: 8, font: "400 var(--fs-small)/1.5 var(--font-mono)", color: "var(--ink-faint)" }}>
                 Adds store credit to {client.name}'s wallet. They can spend it on classes and desk purchases.
               </div>
               {error && (
@@ -202,7 +202,7 @@ export function ClientActionSheet({
     <Sheet open={open} onClose={onClose}>
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 18 }}>
         <Avatar name={client.name} size={38} />
-        <div style={{ font: "800 20px var(--font-body)", letterSpacing: "-.01em" }}>{client.name}</div>
+        <div style={{ font: "800 var(--fs-title-sm) var(--font-body)", letterSpacing: "-.01em" }}>{client.name}</div>
       </div>
       <Button fullWidth size="lg" onClick={onEdit}>
         Edit client

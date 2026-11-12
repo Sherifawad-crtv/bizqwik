@@ -13,7 +13,7 @@ export function MonthGrid({ cursor, today, on, wide, onDay, onOpen }: { cursor: 
     <div style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", overflow: "auto" }}>
       <div style={{ flex: "none", display: "grid", gridTemplateColumns: "repeat(7, minmax(0, 1fr))", borderBottom: "1px solid var(--line)" }}>
         {WEEKDAY_ORDER.map((w) => (
-          <div key={w} style={{ textAlign: "center", font: "700 11px var(--font-mono)", letterSpacing: ".06em", color: "var(--ink-muted)", padding: "8px 0" }}>
+          <div key={w} style={{ textAlign: "center", font: "700 var(--fs-caption) var(--font-mono)", letterSpacing: ".06em", color: "var(--ink-muted)", padding: "8px 0" }}>
             {WEEKDAY_SHORT[w].toUpperCase()}
           </div>
         ))}
@@ -44,7 +44,7 @@ export function MonthGrid({ cursor, today, on, wide, onDay, onOpen }: { cursor: 
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  font: "700 13px var(--font-body)",
+                  font: "700 var(--fs-note) var(--font-body)",
                   background: isToday ? "var(--primary)" : "transparent",
                   color: isToday ? "var(--surface)" : "var(--ink)",
                 }}
@@ -60,12 +60,12 @@ export function MonthGrid({ cursor, today, on, wide, onDay, onOpen }: { cursor: 
                     e.stopPropagation();
                     onOpen(c);
                   }}
-                  style={{ border: 0, textAlign: "left", cursor: "pointer", borderRadius: 6, background: "var(--primary-tint)", color: "var(--primary-pressed)", padding: "2px 5px", font: "700 11px var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", minWidth: 0 }}
+                  style={{ border: 0, textAlign: "left", cursor: "pointer", borderRadius: 6, background: "var(--primary-tint)", color: "var(--primary-pressed)", padding: "2px 5px", font: "700 var(--fs-caption) var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", minWidth: 0 }}
                 >
                   {wide ? `${clock(new Date(c.startsAt)).replace(" ", "").toLowerCase()} ${c.title}` : c.title}
                 </button>
               ))}
-              {items.length > shownChips && <span style={{ font: "700 11px var(--font-mono)", color: "var(--ink-muted)", paddingLeft: 4 }}>+{items.length - shownChips} more</span>}
+              {items.length > shownChips && <span style={{ font: "700 var(--fs-caption) var(--font-mono)", color: "var(--ink-muted)", paddingLeft: 4 }}>+{items.length - shownChips} more</span>}
             </div>
           );
         })}

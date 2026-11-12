@@ -27,7 +27,7 @@ export function Account() {
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4, padding: "24px 0 28px" }}>
         <Avatar name={profile.name} size={120} src={profile.avatarUrl} />
         <div style={{ font: "800 24px var(--font-body)", letterSpacing: "-.01em", marginTop: 12 }}>{profile.name}</div>
-        <div style={{ font: "600 14px var(--font-body)", color: "var(--ink-faint)" }}>{ROLE_LABELS[profile.role]}</div>
+        <div style={{ font: "600 var(--fs-body-sm) var(--font-body)", color: "var(--ink-faint)" }}>{ROLE_LABELS[profile.role]}</div>
       </div>
 
       <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: "6px 4px", marginBottom: 16 }}>
@@ -108,13 +108,13 @@ function NotificationsRow() {
   if (needsHomeScreenInstall || iosVersionTooOld) {
     return (
       <div style={{ borderBottom: "1px solid var(--line)", padding: "14px 16px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 12, font: "600 15px var(--font-body)", color: "var(--ink)" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, font: "600 var(--fs-body) var(--font-body)", color: "var(--ink)" }}>
           <span style={{ flex: "none", display: "flex", color: "var(--ink-muted)" }}>
             <Icon name="bell" size={19} />
           </span>
           Push Notifications
         </div>
-        <div style={{ marginTop: 6, marginLeft: 31, font: "500 13px/1.5 var(--font-body)", color: "var(--ink-muted)" }}>
+        <div style={{ marginTop: 6, marginLeft: 31, font: "500 var(--fs-note)/1.5 var(--font-body)", color: "var(--ink-muted)" }}>
           {iosVersionTooOld
             ? "Notifications need iOS/iPadOS 16.4 or later — update to enable this."
             : "On iPhone/iPad, add Bizqwik to your Home Screen first (Share → Add to Home Screen), then open it from there to turn this on."}
@@ -140,7 +140,7 @@ function NotificationsRow() {
           background: "none",
           cursor: "pointer",
           padding: "14px 16px",
-          font: "600 15px var(--font-body)",
+          font: "600 var(--fs-body) var(--font-body)",
           color: "var(--ink)",
           textAlign: "left",
         }}
@@ -152,7 +152,7 @@ function NotificationsRow() {
         <SwitchVisual checked={on} animate={ready} busy={busy} />
       </button>
       {error && (
-        <div style={{ margin: "0 16px 12px", font: "600 12px/1.4 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 10, padding: "8px 10px" }}>
+        <div style={{ margin: "0 16px 12px", font: "600 var(--fs-small)/1.4 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 10, padding: "8px 10px" }}>
           {error}
         </div>
       )}
@@ -173,7 +173,7 @@ function SettingsRow({ icon, label, onClick, last }: { icon: IconName; label: st
         background: "none",
         cursor: "pointer",
         padding: "14px 16px",
-        font: "600 15px var(--font-body)",
+        font: "600 var(--fs-body) var(--font-body)",
         color: "var(--ink)",
         textAlign: "left",
         borderBottom: last ? "none" : "1px solid var(--line)",

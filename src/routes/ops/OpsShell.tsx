@@ -25,7 +25,7 @@ function NavItem({ to, label, icon, end, onNavigate }: { to: string; label: stri
             cursor: "pointer",
             background: isActive ? "var(--primary-tint)" : "transparent",
             color: isActive ? "var(--primary-pressed)" : "var(--ink-muted)",
-            font: "600 16px var(--font-body)",
+            font: "600 var(--fs-base) var(--font-body)",
           }}
         >
           <Icon name={icon} size={19} solid={isActive} />
@@ -60,7 +60,7 @@ export function OpsShell() {
             <button
               onClick={logout}
               aria-label="Sign out"
-              style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 6, border: 0, background: "none", color: "var(--ink-faint)", cursor: "pointer", font: "700 13px var(--font-body)" }}
+              style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 6, border: 0, background: "none", color: "var(--ink-faint)", cursor: "pointer", font: "700 var(--fs-note) var(--font-body)" }}
             >
               <Icon name="logout" size={18} />
             </button>
@@ -72,7 +72,7 @@ export function OpsShell() {
                   <div
                     style={{
                       padding: "8px 6px 12px",
-                      font: "700 15px var(--font-body)",
+                      font: "700 var(--fs-body) var(--font-body)",
                       color: isActive ? "var(--primary-pressed)" : "var(--ink-faint)",
                       borderBottom: isActive ? "2px solid var(--primary)" : "2px solid transparent",
                     }}
@@ -108,7 +108,7 @@ export function OpsShell() {
         }}
       >
         <img src="/wordmark.png" alt="Bizqwik" style={{ height: 24, width: "auto", alignSelf: "flex-start", margin: "0 8px 12px", display: "block" }} />
-        <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", padding: "0 8px 20px" }}>OPS DASHBOARD</div>
+        <div style={{ font: "700 var(--fs-caption) var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", padding: "0 8px 20px" }}>OPS DASHBOARD</div>
         <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
           {NAV.map((n) => (
             <NavItem key={n.to} {...n} />
@@ -118,13 +118,13 @@ export function OpsShell() {
           <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "6px 8px" }}>
             <Avatar name={bizqwikTeam.name} size={34} />
             <div style={{ minWidth: 0 }}>
-              <div style={{ font: "600 15px var(--font-body)", lineHeight: 1.1, color: "var(--ink)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{bizqwikTeam.name}</div>
-              <div style={{ font: "400 12px var(--font-mono)", color: "var(--ink-faint)" }}>{BIZQWIK_ROLE_LABELS[bizqwikTeam.role]}</div>
+              <div style={{ font: "600 var(--fs-body) var(--font-body)", lineHeight: 1.1, color: "var(--ink)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{bizqwikTeam.name}</div>
+              <div style={{ font: "400 var(--fs-small) var(--font-mono)", color: "var(--ink-faint)" }}>{BIZQWIK_ROLE_LABELS[bizqwikTeam.role]}</div>
             </div>
           </div>
           <button
             onClick={logout}
-            style={{ display: "flex", alignItems: "center", gap: 8, width: "100%", marginTop: 6, padding: "10px 12px", border: 0, background: "none", color: "var(--ink-muted)", cursor: "pointer", font: "600 15px var(--font-body)", borderRadius: "var(--r-tile)" }}
+            style={{ display: "flex", alignItems: "center", gap: 8, width: "100%", marginTop: 6, padding: "10px 12px", border: 0, background: "none", color: "var(--ink-muted)", cursor: "pointer", font: "600 var(--fs-body) var(--font-body)", borderRadius: "var(--r-tile)" }}
           >
             <Icon name="logout" size={18} /> Sign out
           </button>

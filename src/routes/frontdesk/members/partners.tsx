@@ -7,25 +7,9 @@ import { atLocation, useCurrentLocation } from "../../../lib/locations";
 import { Button } from "../../../components/Button";
 import { TextField, SelectField } from "../../../components/FormField";
 import { useAuth } from "../../../lib/auth";
-import { ErrorBanner, SearchField, matchesClient } from "../shared";
+import { ErrorBanner, SearchField } from "../shared";
+import { matchesClient } from "../deskStatus";
 import { groupOfferOptions } from "./offers";
-
-// A shared sale's new partners have no app invite yet (they didn't exist a
-// moment ago); sending it is what lets them sign in with their email.
-export async function inviteNewPartners(sharedWith: { id: string; name: string }[] | undefined, partners: SalePartner[]) {
-  const failed: string[] = [];
-  for (let i = 0; i < partners.length; i++) {
-    const p = partners[i];
-    const made = sharedWith?.[i];
-    if (!("email" in p) || !made) continue;
-    try {
-      await api.inviteClient(made.id, p.email);
-    } catch {
-      failed.push(p.name);
-    }
-  }
-  if (failed.length) throw new Error(`Sold, but the app invite to ${failed.join(", ")} failed — re-invite from their client page.`);
-}
 
 // Who shares a shared bundle with the client being sold to: someone already on
 // file or a brand-new client. Each person gets an even share of the classes and
@@ -58,20 +42,20 @@ export function PartnerPicker({ type, buyerId, picked, onChange }: { type: Group
   };
   return (
     <div style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: 14, display: "flex", flexDirection: "column", gap: 10 }}>
-      <div style={{ font: "400 13px/1.5 var(--font-body)", color: "var(--ink-muted)" }}>
+      <div style={{ font: "400 var(--fs-note)/1.5 var(--font-body)", color: "var(--ink-muted)" }}>
         Shared by {seats}: {each} classes and {fmt(type.price / seats)} EGP each, {type.durationMonths} months from today. Each person gets their own plan.
       </div>
       {picked.map((p, i) => (
-        <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, font: "700 15px var(--font-body)" }}>
+        <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, font: "700 var(--fs-body) var(--font-body)" }}>
           <span style={{ flex: 1 }}>{labelOf(p)}</span>
-          <button className="bq-scale" onClick={() => onChange(picked.filter((_, j) => j !== i))} aria-label="Remove" style={{ border: 0, background: "none", color: "var(--ink-muted)", cursor: "pointer", font: "600 13px var(--font-body)" }}>Remove</button>
+          <button className="bq-scale" onClick={() => onChange(picked.filter((_, j) => j !== i))} aria-label="Remove" style={{ border: 0, background: "none", color: "var(--ink-muted)", cursor: "pointer", font: "600 var(--fs-note) var(--font-body)" }}>Remove</button>
         </div>
       ))}
       {picked.length < seats - 1 && !adding && (
         <>
           <SearchField value={q} onChange={setQ} placeholder="Search the other client" />
           {results.map((c) => (
-            <button key={c.id} className="bq-scale" onClick={() => { onChange([...picked, { clientId: c.id, label: c.name }]); setQ(""); }} style={{ textAlign: "left", minHeight: 44, border: 0, background: "none", cursor: "pointer", font: "600 15px var(--font-body)", color: "var(--ink)" }}>
+            <button key={c.id} className="bq-scale" onClick={() => { onChange([...picked, { clientId: c.id, label: c.name }]); setQ(""); }} style={{ textAlign: "left", minHeight: 44, border: 0, background: "none", cursor: "pointer", font: "600 var(--fs-body) var(--font-body)", color: "var(--ink)" }}>
               {c.name}
               {c.phone && <span className="bq-meta"> · {c.phone}</span>}
             </button>
@@ -120,7 +104,7 @@ export function GroupOfferSelect({ value, onChange, planTypes, series }: { value
             >
               <span className="bq-grow">
                 <span style={{ display: "block", font: "800 18px var(--font-body)", letterSpacing: "-.01em" }}>{name}</span>
-                <span style={{ display: "block", font: "400 12px var(--font-mono)", color: "var(--ink-muted)", marginTop: 2 }}>{rest.join(" · ")}</span>
+                <span style={{ display: "block", font: "400 var(--fs-small) var(--font-mono)", color: "var(--ink-muted)", marginTop: 2 }}>{rest.join(" · ")}</span>
               </span>
               <span style={{ font: "800 18px var(--font-mono)", color: on ? "var(--primary-pressed)" : "var(--ink)" }}>{price}</span>
             </button>

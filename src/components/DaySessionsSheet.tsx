@@ -76,8 +76,8 @@ export function DaySessionsSheet({ open, onClose, coachId, month, date, sessions
     <>
       <Sheet open={open} onClose={onClose}>
         <div className="bq-label">{editable ? "EDIT DAY" : "DAY"}</div>
-        <div style={{ font: "800 30px/1.1 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 4px" }}>{dateLabelFull(shown.date)}</div>
-        <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-muted)", marginBottom: 16 }}>
+        <div style={{ font: "800 var(--fs-display)/1.1 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 4px" }}>{dateLabelFull(shown.date)}</div>
+        <div style={{ font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-muted)", marginBottom: 16 }}>
           {shownSessions.length} {shownSessions.length === 1 ? "session" : "sessions"} · {egp(shownSessions.length * rate)}
         </div>
 
@@ -88,11 +88,11 @@ export function DaySessionsSheet({ open, onClose, coachId, month, date, sessions
                 <DateField value={s.date} min={min} max={max} onChange={(d) => move(s.id, d)} />
               ) : (
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <span style={{ font: "600 15px var(--font-body)", color: "var(--ink)" }}>Session {i + 1}</span>
+                  <span style={{ font: "600 var(--fs-body) var(--font-body)", color: "var(--ink)" }}>Session {i + 1}</span>
                   <span style={{ font: "700 10px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>{s.source === "qr" ? "QR" : "MANUAL"}</span>
                   {(() => {
                     const st = sessionStamp(s);
-                    return st ? <span data-testid="session-time" style={{ font: "600 13px var(--font-mono)", color: "var(--ink-muted)", whiteSpace: "nowrap" }}>{st.text}</span> : null;
+                    return st ? <span data-testid="session-time" style={{ font: "600 var(--fs-note) var(--font-mono)", color: "var(--ink-muted)", whiteSpace: "nowrap" }}>{st.text}</span> : null;
                   })()}
                   {editable && (
                     <>

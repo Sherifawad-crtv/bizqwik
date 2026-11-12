@@ -19,7 +19,7 @@ export function PackageStatusPill({ status }: { status: PackageStatus }) {
         borderRadius: 999,
         background: c.bg,
         color: c.fg,
-        font: "700 11px var(--font-mono)",
+        font: "700 var(--fs-caption) var(--font-mono)",
         letterSpacing: ".08em",
         whiteSpace: "nowrap",
       }}

@@ -10,7 +10,7 @@ export function TextField({ label, ...rest }: { label: string } & InputHTMLAttri
       <span className="bq-label">{label}</span>
       <input
         {...rest}
-        style={{ display: "block", width: "100%", border: 0, background: "none", outline: "none", font: "600 16px var(--font-body)", color: "var(--ink)", padding: "2px 0 0" }}
+        style={{ display: "block", width: "100%", border: 0, background: "none", outline: "none", font: "600 var(--fs-base) var(--font-body)", color: "var(--ink)", padding: "2px 0 0" }}
       />
     </label>
   );
@@ -58,7 +58,7 @@ export function SelectField({ label, value, options, onChange, placeholder, disa
       >
         <span className="bq-label">{label}</span>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{ font: "600 16px var(--font-body)", color: selected ? "var(--ink)" : "var(--ink-faint)" }}>
+          <span style={{ font: "600 var(--fs-base) var(--font-body)", color: selected ? "var(--ink)" : "var(--ink-faint)" }}>
             {selected?.label ?? (options.length === 0 ? (empty?.title ?? "Nothing to choose yet") : (placeholder ?? "Select…"))}
           </span>
           <span style={{ marginLeft: "auto", color: "var(--ink-faint)", display: "flex" }}>
@@ -100,7 +100,7 @@ export function SelectField({ label, value, options, onChange, placeholder, disa
                   borderRadius: "var(--r-input)",
                   padding: "14px 16px",
                   cursor: "pointer",
-                  font: "700 16px var(--font-body)",
+                  font: "700 var(--fs-base) var(--font-body)",
                   color: on ? "var(--primary-pressed)" : "var(--ink)",
                 }}
               >

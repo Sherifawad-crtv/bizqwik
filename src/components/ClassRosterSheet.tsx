@@ -66,13 +66,13 @@ export function ClassRosterSheet({
     <Sheet open={open} onClose={busyId ? () => {} : onClose}>
       <div className="bq-label">CLASS ROSTER</div>
       <div style={{ font: "800 24px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 4px" }}>{title}</div>
-      <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)", marginBottom: 16 }}>
+      <div style={{ font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-faint)", marginBottom: 16 }}>
         {live.length} booked{live.length > 0 ? ` · ${live.filter((b) => b.coverage === "plan").length} on a plan · ${live.filter((b) => b.attendance === "arrived").length} arrived` : ""}
       </div>
 
       {roster.loading && <InlineSpinner />}
       {error && (
-        <div className="bq-rise" style={{ marginBottom: 12, font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: "var(--r-md)", padding: "10px 14px" }}>{error}</div>
+        <div className="bq-rise" style={{ marginBottom: 12, font: "600 var(--fs-note)/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: "var(--r-md)", padding: "10px 14px" }}>{error}</div>
       )}
       {!roster.loading && live.length === 0 && (
         <EmptyState bare icon="clients" title="No one has booked this class yet" body="Members book from the app, or the front desk can add a drop-in from Drop-In → Class session." />
@@ -114,8 +114,8 @@ function RosterRow({
     <div style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "12px 14px", opacity: busy ? 0.6 : 1 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
         <div className="bq-grow">
-          <div style={{ font: "700 15px var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{b.clientName ?? "Member"}</div>
-          <div style={{ font: "500 12px var(--font-mono)", color: "var(--ink-faint)", marginTop: 2 }}>
+          <div style={{ font: "700 var(--fs-body) var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{b.clientName ?? "Member"}</div>
+          <div style={{ font: "500 var(--fs-small) var(--font-mono)", color: "var(--ink-faint)", marginTop: 2 }}>
             {onPlan ? "On their plan" : `Drop-in · ${b.price > 0 ? egp(b.price) : "Free"} · ${paid ? "Paid" : "Unpaid"}`}
           </div>
         </div>
@@ -162,7 +162,7 @@ function RowBtn({ children, onClick, disabled, active, primary }: { children: Re
         color: primary ? "var(--surface)" : active ? "var(--primary-pressed)" : "var(--ink-muted)",
         borderRadius: 10,
         padding: "8px 4px",
-        font: "700 13px var(--font-body)",
+        font: "700 var(--fs-note) var(--font-body)",
         cursor: disabled ? "default" : "pointer",
       }}
     >

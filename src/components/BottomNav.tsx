@@ -2,7 +2,7 @@ import { NavLink, useLocation } from "react-router-dom";
 import { Icon } from "./Icon";
 import { matchTabIndex, type NavItem } from "../lib/nav";
 import { useIsNarrowPhone } from "../lib/useIsMobile";
-import { noteTabTap } from "./RouteTransition";
+import { noteTabTap } from "../lib/tabTap";
 
 const BAR_BORDER = 1;
 

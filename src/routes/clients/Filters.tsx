@@ -51,7 +51,7 @@ function Chip({ on, onClick, children, testId }: { on: boolean; onClick: () => v
         border: `1px solid ${on ? "var(--primary)" : "var(--line)"}`,
         background: on ? "var(--primary-tint)" : "var(--surface)",
         color: on ? "var(--primary-pressed)" : "var(--ink)",
-        font: "700 14px var(--font-body)",
+        font: "700 var(--fs-body-sm) var(--font-body)",
         whiteSpace: "nowrap",
         cursor: "pointer",
         transition: "background .2s ease, color .2s ease, border-color .2s ease",
@@ -65,7 +65,7 @@ function Chip({ on, onClick, children, testId }: { on: boolean; onClick: () => v
 function FilterGroup({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div style={{ marginBottom: 18 }}>
-      <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", marginBottom: 8 }}>{label}</div>
+      <div style={{ font: "700 var(--fs-caption) var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", marginBottom: 8 }}>{label}</div>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>{children}</div>
     </div>
   );
@@ -106,17 +106,17 @@ export function ClientFilterBar({
             value={filters.q}
             onChange={(e) => set({ q: e.target.value })}
             placeholder="Search clients"
-            style={{ flex: 1, minWidth: 0, border: 0, background: "none", outline: "none", font: "600 16px var(--font-body)", color: "var(--ink)" }}
+            style={{ flex: 1, minWidth: 0, border: 0, background: "none", outline: "none", font: "600 var(--fs-base) var(--font-body)", color: "var(--ink)" }}
           />
         </label>
         <button
           type="button"
           onClick={() => setOpen(true)}
-          style={{ flex: "none", height: 48, padding: "0 16px", display: "flex", alignItems: "center", gap: 8, background: inSheet ? "var(--primary-tint)" : "var(--surface)", color: inSheet ? "var(--primary-pressed)" : "var(--ink)", border: `1px solid ${inSheet ? "var(--primary)" : "var(--line)"}`, borderRadius: "var(--r-input)", font: "700 15px var(--font-body)", cursor: "pointer" }}
+          style={{ flex: "none", height: 48, padding: "0 16px", display: "flex", alignItems: "center", gap: 8, background: inSheet ? "var(--primary-tint)" : "var(--surface)", color: inSheet ? "var(--primary-pressed)" : "var(--ink)", border: `1px solid ${inSheet ? "var(--primary)" : "var(--line)"}`, borderRadius: "var(--r-input)", font: "700 var(--fs-body) var(--font-body)", cursor: "pointer" }}
         >
           Filters
           {inSheet > 0 && (
-            <span data-testid="filter-badge" style={{ minWidth: 20, height: 20, padding: "0 6px", borderRadius: 999, background: "var(--primary)", color: "#fff", font: "700 12px/20px var(--font-body)", textAlign: "center" }}>
+            <span data-testid="filter-badge" style={{ minWidth: 20, height: 20, padding: "0 6px", borderRadius: 999, background: "var(--primary)", color: "#fff", font: "700 var(--fs-small)/20px var(--font-body)", textAlign: "center" }}>
               {inSheet}
             </span>
           )}
@@ -132,7 +132,7 @@ export function ClientFilterBar({
       </div>
 
       <Sheet open={open} onClose={() => setOpen(false)}>
-        <div style={{ font: "800 26px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "0 0 18px" }}>Filters</div>
+        <div style={{ font: "800 var(--fs-title)/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "0 0 18px" }}>Filters</div>
 
         <FilterGroup label="PLAN">
           <Chip on={filters.plan === ""} onClick={() => set({ plan: "" })}>All plans</Chip>
@@ -157,11 +157,11 @@ export function ClientFilterBar({
         {filters.expiry === "custom" && (
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, margin: "-6px 0 18px" }}>
             <div>
-              <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", margin: "0 0 4px 4px" }}>FROM</div>
+              <div style={{ font: "700 var(--fs-caption) var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", margin: "0 0 4px 4px" }}>FROM</div>
               <DateField value={filters.from || todayIso()} max={filters.to || undefined} onChange={(from) => set({ from })} />
             </div>
             <div>
-              <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", margin: "0 0 4px 4px" }}>TO</div>
+              <div style={{ font: "700 var(--fs-caption) var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", margin: "0 0 4px 4px" }}>TO</div>
               <DateField value={filters.to || plusDays(todayIso(), 30)} min={filters.from || undefined} onChange={(to) => set({ to })} />
             </div>
           </div>

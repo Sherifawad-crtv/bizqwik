@@ -6,6 +6,7 @@ import { matchTabIndex, headerMode, type NavItem, type OrgMode } from "../lib/na
 import { isStandalone } from "../lib/push";
 import type { Role } from "../lib/types";
 import { EASE, FADE_MS, PUSH_MS } from "../lib/motion";
+import { sinceTabTap } from "../lib/tabTap";
 import { ScreenActive, ScreenPath } from "../lib/screenActive";
 import { waitForFirstScreen } from "../lib/useAsync";
 import { reportScreenReady } from "../lib/vitals";
@@ -26,10 +27,6 @@ function pushDepth(pathname: string, tabs: NavItem[]): number {
 
 // Tapping a tab is a switch between peers, even when you were a level deep
 // (it must not play a "back" slide), so the bar says so just before navigating.
-let lastTabTap = 0;
-export function noteTabTap() {
-  lastTabTap = Date.now();
-}
 
 let layerIds = 0;
 
@@ -47,6 +44,7 @@ interface Layer {
 type Anim = { type: "none" } | { type: "push-in" | "push-out" } | { type: "tab-slide"; dir: 1 | -1 };
 
 const PUSH_EASE = EASE;
+
 // Switching tabs is the most frequent thing people do, so the content just
 // fades in under the bar's sliding pill — no travel to wait for.
 const TAB_MS = FADE_MS;
@@ -67,6 +65,7 @@ const TAB_MS = FADE_MS;
 // no toolbar, so the page ends just below the bar and you can't scroll into
 // blank space.
 const BOTTOM_CLEARANCE = isStandalone() ? 112 : 160;
+
 function layerStyle(pathname: string, role: Role, mode: OrgMode): CSSProperties {
   const top = headerMode(pathname, role, mode) === "home" ? 20 : 80;
   return {
@@ -131,7 +130,7 @@ export function RouteTransition({ tabs, role, orgMode = "team" }: { tabs: NavIte
     }
 
     const depth = pushDepth(path, tabs);
-    const viaTab = Date.now() - lastTabTap < 700;
+    const viaTab = sinceTabTap() < 700;
     let next: Layer;
     let nextKept: Layer[] = kept;
     let nextAnim: Anim;

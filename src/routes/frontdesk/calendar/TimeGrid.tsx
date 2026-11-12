@@ -49,7 +49,7 @@ export function TimeGrid({ days, today, now, on, narrow, onDay, onOpen }: { days
                 onClick={() => onDay(d)}
                 style={{ border: 0, background: "none", cursor: columns > 1 ? "pointer" : "default", padding: "8px 4px", textAlign: "center", borderLeft: "1px solid var(--line)" }}
               >
-                <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".06em", color: isToday ? "var(--primary-pressed)" : "var(--ink-muted)" }}>{WEEKDAY_SHORT[d.getDay()].toUpperCase()}</div>
+                <div style={{ font: "700 var(--fs-caption) var(--font-mono)", letterSpacing: ".06em", color: isToday ? "var(--primary-pressed)" : "var(--ink-muted)" }}>{WEEKDAY_SHORT[d.getDay()].toUpperCase()}</div>
                 <div
                   style={{
                     margin: "2px auto 0",
@@ -74,7 +74,7 @@ export function TimeGrid({ days, today, now, on, narrow, onDay, onOpen }: { days
         <div style={{ display: "grid", gridTemplateColumns: template, position: "relative" }}>
           <div style={{ position: "relative", height: 24 * HOUR_H }}>
             {Array.from({ length: 24 }, (_, h) => (
-              <div key={h} style={{ position: "absolute", top: h * HOUR_H - 7, right: 8, font: "500 11px var(--font-mono)", color: "var(--ink-faint)" }}>
+              <div key={h} style={{ position: "absolute", top: h * HOUR_H - 7, right: 8, font: "500 var(--fs-caption) var(--font-mono)", color: "var(--ink-faint)" }}>
                 {hourLabel(h)}
               </div>
             ))}
@@ -118,8 +118,8 @@ export function TimeGrid({ days, today, now, on, narrow, onDay, onOpen }: { days
                         minWidth: 0,
                       }}
                     >
-                      <div style={{ font: "700 13px/1.2 var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{e.c.title}</div>
-                      <div style={{ font: "500 11px var(--font-mono)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      <div style={{ font: "700 var(--fs-note)/1.2 var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{e.c.title}</div>
+                      <div style={{ font: "500 var(--fs-caption) var(--font-mono)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                         {clock(new Date(e.c.startsAt))} · {e.c.bookedCount ?? 0} booked
                       </div>
                     </button>
@@ -136,7 +136,7 @@ export function TimeGrid({ days, today, now, on, narrow, onDay, onOpen }: { days
         </div>
       </div>
       {empty && (
-        <div style={{ position: "sticky", bottom: 16, textAlign: "center", pointerEvents: "none", font: "600 14px var(--font-body)", color: "var(--ink-muted)" }}>
+        <div style={{ position: "sticky", bottom: 16, textAlign: "center", pointerEvents: "none", font: "600 var(--fs-body-sm) var(--font-body)", color: "var(--ink-muted)" }}>
           <span style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 999, padding: "8px 16px" }}>No classes this day</span>
         </div>
       )}

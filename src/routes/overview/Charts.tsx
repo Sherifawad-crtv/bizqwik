@@ -33,7 +33,7 @@ export function RevenueChart({ months, revenueOnly = false }: { months: RevenueR
           ["Revenue", REV_COLOR],
           ["Coach payouts", PAY_COLOR],
         ]).map(([label, color]) => (
-          <span key={label} style={{ display: "flex", alignItems: "center", gap: 6, font: "700 11px var(--font-mono)", letterSpacing: ".04em", color: "var(--ink-muted)" }}>
+          <span key={label} style={{ display: "flex", alignItems: "center", gap: 6, font: "700 var(--fs-caption) var(--font-mono)", letterSpacing: ".04em", color: "var(--ink-muted)" }}>
             <i style={{ width: 10, height: 10, borderRadius: 3, background: color, display: "block" }} />
             {label.toUpperCase()}
           </span>
@@ -51,7 +51,7 @@ export function RevenueChart({ months, revenueOnly = false }: { months: RevenueR
               {m.revenue > 0 && <path d={roundedTopBarPath(cx - barW - 1, y(m.revenue), barW, bottom, 4)} fill={REV_COLOR} />}
               {!revenueOnly && m.payouts > 0 && <path d={roundedTopBarPath(cx + 1, y(m.payouts), barW, bottom, 4)} fill={PAY_COLOR} />}
               {m.revenue > 0 && (
-                <text x={cx - barW / 2 - 1} y={y(m.revenue) - 8} textAnchor="middle" style={{ font: "800 11px var(--font-body)", fill: "var(--ink)" }}>
+                <text x={cx - barW / 2 - 1} y={y(m.revenue) - 8} textAnchor="middle" style={{ font: "800 var(--fs-caption) var(--font-body)", fill: "var(--ink)" }}>
                   {m.revenue >= 1000 ? `${Math.round(m.revenue / 100) / 10}k` : fmt(m.revenue)}
                 </text>
               )}
@@ -73,7 +73,7 @@ export function RevenueChart({ months, revenueOnly = false }: { months: RevenueR
             color: "var(--surface)",
             borderRadius: 12,
             padding: "8px 12px",
-            font: "600 12px/1.6 var(--font-mono)",
+            font: "600 var(--fs-small)/1.6 var(--font-mono)",
             pointerEvents: "none",
           }}
         >
@@ -98,9 +98,9 @@ export function ShareBars({ slices }: { slices: RevenueSlice[] }) {
         return (
           <div key={s.key}>
             <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 5 }}>
-              <span style={{ flex: 1, minWidth: 0, font: "600 14px var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s.label}</span>
-              <span className="tabular" style={{ font: "800 14px var(--font-body)" }}>{fmt(s.amount)}</span>
-              <span className="tabular" style={{ width: 40, textAlign: "right", font: "600 12px var(--font-mono)", color: "var(--ink-faint)" }}>{Math.round(pct)}%</span>
+              <span style={{ flex: 1, minWidth: 0, font: "600 var(--fs-body-sm) var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s.label}</span>
+              <span className="tabular" style={{ font: "800 var(--fs-body-sm) var(--font-body)" }}>{fmt(s.amount)}</span>
+              <span className="tabular" style={{ width: 40, textAlign: "right", font: "600 var(--fs-small) var(--font-mono)", color: "var(--ink-faint)" }}>{Math.round(pct)}%</span>
             </div>
             <div style={{ height: 8, background: "var(--sunken)", borderRadius: 4, overflow: "hidden" }}>
               <div style={{ width: `${pct}%`, height: "100%", background: "var(--primary)", borderRadius: "0 4px 4px 0" }} />

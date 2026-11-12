@@ -86,8 +86,8 @@ export function AddSessionSheet({ open, onClose, coachId, coachName, month: mont
       ) : (
         <>
           <div className="bq-label">NEW ENTRY</div>
-          <div style={{ font: "800 30px/1.1 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 4px" }}>Log a session</div>
-          <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-muted)", marginBottom: 16 }}>
+          <div style={{ font: "800 var(--fs-display)/1.1 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 4px" }}>Log a session</div>
+          <div style={{ font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-muted)", marginBottom: 16 }}>
             {coachName ? `Adds to ${coachName}'s ${monthLabel(month)} total.` : `Adds to your ${monthLabel(month)} total.`}
           </div>
 
@@ -95,8 +95,8 @@ export function AddSessionSheet({ open, onClose, coachId, coachName, month: mont
             {scan ? (
               <div data-testid="scan-date" style={{ display: "flex", alignItems: "center", gap: 10, background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "14px 16px" }}>
                 <Icon name="check" size={18} />
-                <span style={{ font: "700 15px var(--font-body)" }}>Today · {shortDay(scan.date)}</span>
-                <span style={{ marginLeft: "auto", font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>QR VERIFIED</span>
+                <span style={{ font: "700 var(--fs-body) var(--font-body)" }}>Today · {shortDay(scan.date)}</span>
+                <span style={{ marginLeft: "auto", font: "700 var(--fs-caption) var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>QR VERIFIED</span>
               </div>
             ) : (
               <DateField value={date} min={min} max={max} onChange={setDate} />
@@ -104,10 +104,10 @@ export function AddSessionSheet({ open, onClose, coachId, coachName, month: mont
             <Stepper value={qty} onChange={setQty} />
             <div style={{ display: "flex", alignItems: "baseline", gap: 10, padding: "6px 6px 0" }}>
               <span className="bq-label">ADDS</span>
-              <span className="tabular bq-rise" style={{ marginLeft: "auto", font: "800 30px var(--font-body)", letterSpacing: "-.02em", color: "var(--primary)" }}>
+              <span className="tabular bq-rise" style={{ marginLeft: "auto", font: "800 var(--fs-display) var(--font-body)", letterSpacing: "-.02em", color: "var(--primary)" }}>
                 +{qty * rate}
               </span>
-              <span style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--primary)" }}>EGP</span>
+              <span style={{ font: "700 var(--fs-caption) var(--font-mono)", letterSpacing: ".08em", color: "var(--primary)" }}>EGP</span>
             </div>
           </div>
 

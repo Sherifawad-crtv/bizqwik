@@ -42,7 +42,7 @@ export function PaymentCards({ value, onChange }: { value: PayMethod; onChange: 
             <Icon name={o.icon} size={40} solid={on} />
             <span>
               <span style={{ display: "block", font: "800 17px var(--font-body)", letterSpacing: "-.01em" }}>{o.label}</span>
-              <span style={{ display: "block", font: "400 12px var(--font-mono)", color: "var(--ink-muted)", marginTop: 2 }}>{o.note}</span>
+              <span style={{ display: "block", font: "400 var(--fs-small) var(--font-mono)", color: "var(--ink-muted)", marginTop: 2 }}>{o.note}</span>
             </span>
           </button>
         );

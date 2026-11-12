@@ -8,7 +8,7 @@ import { Icon } from "../../components/Icon";
 import { Sheet } from "../../components/Sheet";
 import { TextField } from "../../components/FormField";
 import { canvasToDataUrl } from "../../lib/image";
-import { iconBtn, useCatalogHere } from "./shared";
+import { iconBtn, useCatalogHere } from "./helpers";
 
 /** Resize a picked image to at most 700px and return it as a WebP data URL. */
 function readQr(file: File): Promise<string> {
@@ -152,7 +152,7 @@ export function SoloOffer() {
             <div className="bq-h3">InstaPay QR</div>
             <div className="bq-meta">{instapayQr ? "Shown when someone pays by InstaPay" : "Add it to show on drop-ins"}</div>
           </div>
-          <label style={{ flex: "none", display: "inline-flex", alignItems: "center", height: 40, padding: "0 16px", borderRadius: 999, background: "var(--primary-tint)", color: "var(--primary-pressed)", font: "700 14px var(--font-body)", cursor: "pointer" }}>
+          <label style={{ flex: "none", display: "inline-flex", alignItems: "center", height: 40, padding: "0 16px", borderRadius: 999, background: "var(--primary-tint)", color: "var(--primary-pressed)", font: "700 var(--fs-body-sm) var(--font-body)", cursor: "pointer" }}>
             {instapayQr ? "Replace" : "Add QR"}
             <input type="file" accept="image/*" hidden onChange={(e) => { void pickQr(e.target.files?.[0]); e.target.value = ""; }} />
           </label>
@@ -162,7 +162,7 @@ export function SoloOffer() {
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <div className="bq-grow">
             <div className="bq-h3">InstaPay address</div>
-            <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{instapayAddress ?? "Members copy this to pay you"}</div>
+            <div style={{ font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-faint)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{instapayAddress ?? "Members copy this to pay you"}</div>
           </div>
           {address === null && (
             <Button size="md" variant="secondary" style={{ height: 40, padding: "0 16px" }} onClick={() => { setAddress(instapayAddress ?? ""); setError(null); }}>
@@ -180,7 +180,7 @@ export function SoloOffer() {
           </div>
         )}
       </div>
-      {error && <div className="bq-rise" style={{ font: "600 13px/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: "var(--r-md)", padding: "10px 14px", marginBottom: 12 }}>{error}</div>}
+      {error && <div className="bq-rise" style={{ font: "600 var(--fs-note)/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: "var(--r-md)", padding: "10px 14px", marginBottom: 12 }}>{error}</div>}
     </div>
   );
 }
@@ -228,7 +228,7 @@ export function LocationsCard() {
         {list.map((l) => (
           <div key={l.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 0", borderTop: "1px solid var(--line)" }}>
             <Icon name="map-pin" size={16} />
-            <span style={{ flex: 1, minWidth: 0, font: "600 15px var(--font-body)" }}>{l.name}</span>
+            <span style={{ flex: 1, minWidth: 0, font: "600 var(--fs-body) var(--font-body)" }}>{l.name}</span>
             <button onClick={() => { setError(null); setEditing({ id: l.id, name: l.name }); }} aria-label={`Rename ${l.name}`} style={iconBtn()}>
               <Icon name="pencil" size={15} />
             </button>

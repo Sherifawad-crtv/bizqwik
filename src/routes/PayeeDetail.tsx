@@ -72,8 +72,8 @@ function RecordPaymentSheet({ open, onClose, row, month }: { open: boolean; onCl
       ) : (
         <>
           <div className="bq-label">RECORD PAYMENT</div>
-          <div style={{ font: "800 26px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 4px" }}>Pay {row.name}</div>
-          <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-muted)", marginBottom: 16 }}>
+          <div style={{ font: "800 var(--fs-title)/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 4px" }}>Pay {row.name}</div>
+          <div style={{ font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-muted)", marginBottom: 16 }}>
             {fmt(row.total)} EGP for {monthShort(month)} · {fmt(row.paidAmount)} paid · {fmt(row.remaining)} left
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
@@ -86,19 +86,19 @@ function RecordPaymentSheet({ open, onClose, row, month }: { open: boolean; onCl
               ]
                 .filter((q) => q.value > 0 && q.value <= row.remaining)
                 .map((q) => (
-                  <button key={q.label} type="button" className="bq-scale" onClick={() => setAmount(String(q.value))} style={{ border: "1px solid var(--line)", background: "var(--sunken)", borderRadius: 999, padding: "8px 14px", font: "600 13px var(--font-body)", color: "var(--ink)", cursor: "pointer" }}>
+                  <button key={q.label} type="button" className="bq-scale" onClick={() => setAmount(String(q.value))} style={{ border: "1px solid var(--line)", background: "var(--sunken)", borderRadius: 999, padding: "8px 14px", font: "600 var(--fs-note) var(--font-body)", color: "var(--ink)", cursor: "pointer" }}>
                     {q.label}
                   </button>
                 ))}
             </div>
             <TextField label="DATE PAID" type="date" value={date} max={todayIso()} onChange={(e) => setDate(e.target.value)} />
             <div>
-              <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", margin: "0 2px 6px" }}>METHOD</div>
+              <div style={{ font: "700 var(--fs-caption) var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", margin: "0 2px 6px" }}>METHOD</div>
               <Segmented value={method} onChange={(v) => setMethod(v as "cash" | "bank" | "instapay")} options={[{ value: "cash", label: "CASH" }, { value: "bank", label: "BANK" }, { value: "instapay", label: "INSTAPAY" }]} />
             </div>
             <TextField label="NOTE (OPTIONAL)" value={note} onChange={(e) => setNote(e.target.value)} placeholder="e.g. group sessions" />
           </div>
-          <div style={{ font: "400 12px/1.5 var(--font-mono)", color: "var(--ink-faint)", margin: "10px 2px 0" }}>
+          <div style={{ font: "400 var(--fs-small)/1.5 var(--font-mono)", color: "var(--ink-faint)", margin: "10px 2px 0" }}>
             {Number.isFinite(leftAfter) && leftAfter > 0 ? `${fmt(leftAfter)} EGP will still be left to pay.` : leftAfter === 0 ? "This pays the month in full." : ""} The coach is notified.
           </div>
           {error && <div  className="bq-error bq-error--spaced bq-rise">{error}</div>}
@@ -116,13 +116,13 @@ function PackageRow({ pkg }: { pkg: PackageWithNames }) {
   return (
     <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-tile)", padding: "14px 16px", marginBottom: 10 }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 6 }}>
-        <span style={{ font: "700 16px var(--font-body)", letterSpacing: "-.01em" }}>{pkg.clientName}</span>
+        <span style={{ font: "700 var(--fs-base) var(--font-body)", letterSpacing: "-.01em" }}>{pkg.clientName}</span>
         <PackageStatusPill status={pkg.status} />
       </div>
-      <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-muted)" }}>
+      <div style={{ font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-muted)" }}>
         {pkg.bundleName} · Sold {dateLabel(pkg.purchaseDate)}
       </div>
-      <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)", marginTop: 4 }}>
+      <div style={{ font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-faint)", marginTop: 4 }}>
         {egp(pkg.priceAtSale)} paid · {egp(pkg.coachCutAtSale)} coach cut
       </div>
     </div>
@@ -154,7 +154,7 @@ export function PayeeDetail() {
     <div>
       <button
         onClick={() => navigate(backTo.path)}
-        style={{ display: "flex", alignItems: "center", gap: 4, border: 0, background: "none", cursor: "pointer", color: "var(--ink-muted)", font: "600 13px var(--font-body)", padding: "0 0 14px" }}
+        style={{ display: "flex", alignItems: "center", gap: 4, border: 0, background: "none", cursor: "pointer", color: "var(--ink-muted)", font: "600 var(--fs-note) var(--font-body)", padding: "0 0 14px" }}
       >
         <Icon name="chevron-left" size={16} /> {backTo.label}
       </button>
@@ -180,14 +180,14 @@ export function PayeeDetail() {
       <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-tile)", padding: "16px 18px", marginBottom: 18 }}>
         <div className="bq-label">WHERE IT'S COMING FROM</div>
         <div style={{ marginTop: 12 }}>
-          <div style={{ font: "600 13px var(--font-mono)", color: "var(--ink-muted)" }}>GROUP SESSIONS</div>
-          <div className="tabular" style={{ font: "700 15px var(--font-body)", marginTop: 2 }}>
+          <div style={{ font: "600 var(--fs-note) var(--font-mono)", color: "var(--ink-muted)" }}>GROUP SESSIONS</div>
+          <div className="tabular" style={{ font: "700 var(--fs-body) var(--font-body)", marginTop: 2 }}>
             {row.count} × {fmt(row.rate)} EGP = {egp(row.groupTotal)}
           </div>
         </div>
         <div style={{ marginTop: 12 }}>
-          <div style={{ font: "600 13px var(--font-mono)", color: "var(--ink-muted)" }}>PRIVATE TRAINING</div>
-          <div className="tabular" style={{ font: "700 15px var(--font-body)", marginTop: 2 }}>
+          <div style={{ font: "600 var(--fs-note) var(--font-mono)", color: "var(--ink-muted)" }}>PRIVATE TRAINING</div>
+          <div className="tabular" style={{ font: "700 var(--fs-body) var(--font-body)", marginTop: 2 }}>
             {row.packageCount} {row.packageCount === 1 ? "package" : "packages"} = {egp(row.privateTotal)}
           </div>
         </div>
@@ -202,8 +202,8 @@ export function PayeeDetail() {
           ...(row.state === "settled" ? [["Still to pay", `${fmt(row.remaining)} EGP`]] : []),
         ].map(([k, v]) => (
           <div key={k} style={{ display: "flex", alignItems: "baseline", gap: 10, marginTop: 10 }}>
-            <span style={{ font: "600 13px var(--font-mono)", color: "var(--ink-muted)" }}>{k}</span>
-            <span className="tabular" style={{ marginLeft: "auto", font: "700 14px var(--font-body)", textAlign: "right" }}>{v}</span>
+            <span style={{ font: "600 var(--fs-note) var(--font-mono)", color: "var(--ink-muted)" }}>{k}</span>
+            <span className="tabular" style={{ marginLeft: "auto", font: "700 var(--fs-body-sm) var(--font-body)", textAlign: "right" }}>{v}</span>
           </div>
         ))}
         {payments.length > 0 && (
@@ -212,10 +212,10 @@ export function PayeeDetail() {
             {payments.map((p) => (
               <div key={p.id} style={{ display: "flex", alignItems: "baseline", gap: 10, marginTop: 10 }}>
                 <span style={{ minWidth: 0 }}>
-                  <span style={{ display: "block", font: "600 13px var(--font-mono)", color: "var(--ink-muted)" }}>{dateLabel(p.paidOn)} · {METHOD_LABELS[p.method] ?? p.method}</span>
-                  {p.note && <span style={{ display: "block", font: "400 12px var(--font-mono)", color: "var(--ink-faint)" }}>{p.note}</span>}
+                  <span style={{ display: "block", font: "600 var(--fs-note) var(--font-mono)", color: "var(--ink-muted)" }}>{dateLabel(p.paidOn)} · {METHOD_LABELS[p.method] ?? p.method}</span>
+                  {p.note && <span style={{ display: "block", font: "400 var(--fs-small) var(--font-mono)", color: "var(--ink-faint)" }}>{p.note}</span>}
                 </span>
-                <span className="tabular" style={{ marginLeft: "auto", font: "700 14px var(--font-body)", textAlign: "right" }}>{fmt(p.amount)} EGP</span>
+                <span className="tabular" style={{ marginLeft: "auto", font: "700 var(--fs-body-sm) var(--font-body)", textAlign: "right" }}>{fmt(p.amount)} EGP</span>
               </div>
             ))}
           </div>

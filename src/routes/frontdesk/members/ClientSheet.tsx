@@ -15,9 +15,11 @@ import { PaymentSelect } from "../../../components/PaymentSelect";
 import { Icon } from "../../../components/Icon";
 import type { PayMethod } from "../../../lib/types";
 import { useAuth } from "../../../lib/auth";
-import { ErrorBanner, PlanPill, SheetHeading, endingSoon, planSummary, renewalMessage, whatsappUrl } from "../shared";
+import { ErrorBanner, PlanPill, SheetHeading } from "../shared";
+import { endingSoon, planSummary, renewalMessage, whatsappUrl } from "../deskStatus";
 import { bundleOptions, coachOptions, offerOf } from "./offers";
-import { GroupOfferSelect, PartnerPicker, inviteNewPartners } from "./partners";
+import { GroupOfferSelect, PartnerPicker } from "./partners";
+import { inviteNewPartners } from "./invitePartners";
 
 type Mode = "view" | "sell-plan" | "renew-package" | "assign" | "invite" | "refund" | "pt-log" | "location";
 
@@ -184,23 +186,23 @@ export function ClientSheet({
         ) : mode === "view" ? (
           <>
             <SheetHeading kicker="CLIENT" title={shown.name} />
-            {shown.phone && <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-muted)", marginTop: -8, marginBottom: 14 }}>{shown.phone}</div>}
+            {shown.phone && <div style={{ font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-muted)", marginTop: -8, marginBottom: 14 }}>{shown.phone}</div>}
 
             <div style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "14px 16px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                 <div style={{ font: "800 18px var(--font-body)", flex: 1, minWidth: 0 }}>{summary.title}</div>
                 <PlanPill client={shown} />
               </div>
-              <div style={{ font: "400 14px var(--font-mono)", color: "var(--ink-muted)", marginTop: 4 }}>{summary.detail}</div>
-              {plan && plan.kind === "bundle" && <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)", marginTop: 2 }}>Until {dateLabel(plan.expiresAt.slice(0, 10))}</div>}
+              <div style={{ font: "400 var(--fs-body-sm) var(--font-mono)", color: "var(--ink-muted)", marginTop: 4 }}>{summary.detail}</div>
+              {plan && plan.kind === "bundle" && <div style={{ font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-faint)", marginTop: 2 }}>Until {dateLabel(plan.expiresAt.slice(0, 10))}</div>}
               {packageActive && plan && (
-                <div style={{ font: "600 13px var(--font-body)", color: "var(--ink)", marginTop: 8, paddingTop: 8, borderTop: "1px solid var(--line)" }}>
+                <div style={{ font: "600 var(--fs-note) var(--font-body)", color: "var(--ink)", marginTop: 8, paddingTop: 8, borderTop: "1px solid var(--line)" }}>
                   + {bType?.name ?? "Package"}: {pkg!.sessionsRemaining} of {pkg!.sessionsIncluded} sessions left
                 </div>
               )}
-              {coachName && !solo && <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)", marginTop: 6 }}>Coach: {coachName}</div>}
+              {coachName && !solo && <div style={{ font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-faint)", marginTop: 6 }}>Coach: {coachName}</div>}
               {sheetLocations.length > 0 && (
-                <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-faint)", marginTop: 6 }}>Location: {locationName(sheetLocations, shown.homeLocationId) ?? "Not set"}</div>
+                <div style={{ font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-faint)", marginTop: 6 }}>Location: {locationName(sheetLocations, shown.homeLocationId) ?? "Not set"}</div>
               )}
             </div>
             {solo && packageActive && pkg && me && pkg.coachId === me.id && (
@@ -265,7 +267,7 @@ export function ClientSheet({
               className="bq-scale"
               onClick={() => setShowMore((v) => !v)}
               aria-expanded={showMore}
-              style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 4, width: "100%", height: 48, marginTop: 6, border: 0, background: "none", color: "var(--primary-pressed)", font: "700 14px var(--font-body)", cursor: "pointer" }}
+              style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 4, width: "100%", height: 48, marginTop: 6, border: 0, background: "none", color: "var(--primary-pressed)", font: "700 var(--fs-body-sm) var(--font-body)", cursor: "pointer" }}
             >
               {showMore ? "Fewer options" : "More options"}
             </button>
@@ -285,7 +287,7 @@ export function ClientSheet({
                       key={x.label}
                       className="bq-scale"
                       onClick={x.go}
-                      style={{ display: "flex", alignItems: "center", width: "100%", minHeight: 52, padding: "0 16px", border: 0, borderBottom: i === arr.length - 1 ? "none" : "1px solid var(--line)", background: "none", cursor: "pointer", textAlign: "left", font: "600 15px var(--font-body)", color: x.danger ? "var(--danger-fg)" : "var(--ink)" }}
+                      style={{ display: "flex", alignItems: "center", width: "100%", minHeight: 52, padding: "0 16px", border: 0, borderBottom: i === arr.length - 1 ? "none" : "1px solid var(--line)", background: "none", cursor: "pointer", textAlign: "left", font: "600 var(--fs-body) var(--font-body)", color: x.danger ? "var(--danger-fg)" : "var(--ink)" }}
                     >
                       <span style={{ flex: 1 }}>{x.label}</span>
                       <Icon name="chevron-right" size={16} />
@@ -305,7 +307,7 @@ export function ClientSheet({
                 <>
                   <TextField label="AMOUNT (EGP)" value={refundAmount} onChange={(e) => setRefundAmount(e.target.value)} inputMode="decimal" placeholder="0" />
                   {refundable && (
-                    <div style={{ font: "400 12px/1.5 var(--font-mono)", color: "var(--ink-faint)" }}>
+                    <div style={{ font: "400 var(--fs-small)/1.5 var(--font-mono)", color: "var(--ink-faint)" }}>
                       Up to {fmt(refundable.refundable)} EGP · {fmt(refundable.paid)} paid, {fmt(refundable.refunded)} already refunded.
                     </div>
                   )}
@@ -317,7 +319,7 @@ export function ClientSheet({
                     ]}
                     onChange={(v) => setRefundDest(v as "wallet" | "desk")}
                   />
-                  <div style={{ font: "400 12px/1.5 var(--font-mono)", color: "var(--ink-faint)" }}>
+                  <div style={{ font: "400 var(--fs-small)/1.5 var(--font-mono)", color: "var(--ink-faint)" }}>
                     {refundDest === "wallet"
                       ? "Adds store credit to their wallet (expires per the org's policy)."
                       : solo ? "You send the money yourself on InstaPay — this just records it." : "You hand back cash/card outside Bizqwik — this just records the amount."}
@@ -328,7 +330,7 @@ export function ClientSheet({
               {mode === "invite" && (
                 <>
                   <TextField label="EMAIL" value={email} onChange={(e) => setEmail(e.target.value)} inputMode="email" placeholder="member@email.com" />
-                  <div style={{ font: "400 12px/1.5 var(--font-mono)", color: "var(--ink-faint)" }}>
+                  <div style={{ font: "400 var(--fs-small)/1.5 var(--font-mono)", color: "var(--ink-faint)" }}>
                     They'll use this email to sign in to the branded member app.
                   </div>
                 </>

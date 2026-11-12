@@ -29,7 +29,7 @@ function PnlChart({ trend }: { trend: PnlReport["trend"] }) {
     <div ref={ref} style={{ width: "100%", position: "relative" }}>
       <div style={{ display: "flex", gap: 16, marginBottom: 8 }}>
         {[["Net revenue", REV], ["Expenses", EXP]].map(([label, color]) => (
-          <span key={label} style={{ display: "flex", alignItems: "center", gap: 6, font: "700 11px var(--font-mono)", letterSpacing: ".04em", color: "var(--ink-muted)" }}>
+          <span key={label} style={{ display: "flex", alignItems: "center", gap: 6, font: "700 var(--fs-caption) var(--font-mono)", letterSpacing: ".04em", color: "var(--ink-muted)" }}>
             <i style={{ width: 10, height: 10, borderRadius: 3, background: color, display: "block" }} />
             {String(label).toUpperCase()}
           </span>
@@ -54,7 +54,7 @@ function PnlChart({ trend }: { trend: PnlReport["trend"] }) {
         })}
       </svg>
       {hover !== null && (
-        <div style={{ position: "absolute", top: 30, left: Math.min(Math.max((hover + 0.5) * slot - 80, 0), W - 160), width: 160, background: "var(--ink)", color: "var(--surface)", borderRadius: 12, padding: "8px 12px", font: "600 12px/1.6 var(--font-mono)", pointerEvents: "none" }}>
+        <div style={{ position: "absolute", top: 30, left: Math.min(Math.max((hover + 0.5) * slot - 80, 0), W - 160), width: 160, background: "var(--ink)", color: "var(--surface)", borderRadius: 12, padding: "8px 12px", font: "600 var(--fs-small)/1.6 var(--font-mono)", pointerEvents: "none" }}>
           <div style={{ fontWeight: 800 }}>{monthAbbr(trend[hover].month)}</div>
           <div>Net revenue {fmt(trend[hover].netRevenue)}</div>
           <div>Expenses {fmt(trend[hover].totalExpenses)}</div>
@@ -88,7 +88,7 @@ export function PnlPanel({ report, loading, onAddExpense, onCoachPayouts }: { re
           <span style={{ color: "var(--logging-fg)", display: "flex", flex: "none", marginTop: 1 }}>
             <Icon name="insights" size={18} />
           </span>
-          <span style={{ font: "500 13px/1.5 var(--font-body)", color: "var(--logging-fg)" }}>
+          <span style={{ font: "500 var(--fs-note)/1.5 var(--font-body)", color: "var(--logging-fg)" }}>
             {report.unsettledNote.count} coach session{report.unsettledNote.count === 1 ? "" : "s"} {report.unsettledNote.count === 1 ? "isn't" : "aren't"} settled yet, so payouts may be understated.
           </span>
         </div>
@@ -100,7 +100,7 @@ export function PnlPanel({ report, loading, onAddExpense, onCoachPayouts }: { re
           {prev && <span style={{ marginLeft: "auto" }}><Delta pct={pctChange(current.netRevenue, prev.netRevenue)} tone="good" /></span>}
         </div>
         <div className="tabular" style={{ font: "800 48px/1 var(--font-body)", letterSpacing: "-.03em", margin: "8px 0 0", overflowWrap: "anywhere" }}>{fmt(current.netRevenue)}</div>
-        <div style={{ font: "400 12px/1.4 var(--font-mono)", color: "var(--ink-faint)", marginTop: 8 }}>
+        <div style={{ font: "400 var(--fs-small)/1.4 var(--font-mono)", color: "var(--ink-faint)", marginTop: 8 }}>
           {current.refunds > 0 ? `${fmt(current.grossRevenue)} gross − ${fmt(current.refunds)} refunded` : "No refunds this month"}
         </div>
       </div>
@@ -132,14 +132,14 @@ export function PnlPanel({ report, loading, onAddExpense, onCoachPayouts }: { re
                 style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", border: 0, background: "none", padding: "6px 0", cursor: s.key === "coach_payouts" ? "pointer" : "default", textAlign: "left" }}
               >
                 <span className="bq-grow">
-                  <div style={{ font: "600 14px var(--font-body)" }}>{s.label}</div>
+                  <div style={{ font: "600 var(--fs-body-sm) var(--font-body)" }}>{s.label}</div>
                   {s.key === "coach_payouts" && (
-                    <div style={{ font: "400 11px var(--font-mono)", color: "var(--ink-faint)" }}>
+                    <div style={{ font: "400 var(--fs-caption) var(--font-mono)", color: "var(--ink-faint)" }}>
                       {s.paid !== undefined ? `${fmt(s.paid)} paid · ${fmt(Math.max(0, s.amount - s.paid))} still owed · ` : ""}Locked · settled only
                     </div>
                   )}
                 </span>
-                <span className="tabular" style={{ font: "800 14px var(--font-body)" }}>{fmt(s.amount)}</span>
+                <span className="tabular" style={{ font: "800 var(--fs-body-sm) var(--font-body)" }}>{fmt(s.amount)}</span>
                 {s.key === "coach_payouts" && <Icon name="chevron-right" size={14} style={{ color: "var(--ink-faint)" }} />}
               </button>
             ))}

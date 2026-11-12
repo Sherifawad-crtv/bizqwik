@@ -65,16 +65,16 @@ export function CreateOrgSheet({ open, onClose, plans, onCreated }: { open: bool
   if (created) {
     return (
       <Sheet open={open} onClose={close}>
-        <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--paid-fg)" }}>ORGANIZATION CREATED</div>
-        <div style={{ font: "800 26px/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 6px" }}>{created.name} is live</div>
-        <div style={{ font: "400 13px/1.7 var(--font-mono)", color: "var(--ink-muted)", marginBottom: 18 }}>
+        <div style={{ font: "700 var(--fs-caption) var(--font-mono)", letterSpacing: ".08em", color: "var(--paid-fg)" }}>ORGANIZATION CREATED</div>
+        <div style={{ font: "800 var(--fs-title)/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 6px" }}>{created.name} is live</div>
+        <div style={{ font: "400 var(--fs-note)/1.7 var(--font-mono)", color: "var(--ink-muted)", marginBottom: 18 }}>
           Its department head signs up with <b>{created.deptHeadEmail}</b>. Two starter pay tiers were created. Next: print
           the front-desk check-in QR so members can start checking in.
         </div>
         {created.domain && !created.domain.connected && (
           <div
             data-testid="domain-warning"
-            style={{ font: "500 13px/1.5 var(--font-body)", color: "var(--ink)", background: "var(--primary-tint)", borderRadius: 12, padding: "10px 12px", marginBottom: 18 }}
+            style={{ font: "500 var(--fs-note)/1.5 var(--font-body)", color: "var(--ink)", background: "var(--primary-tint)", borderRadius: 12, padding: "10px 12px", marginBottom: 18 }}
           >
             <b>{created.domain.name}</b> couldn't be connected automatically
             {created.domain.reason ? ` (${created.domain.reason})` : ""}, so its member app has no https yet and the camera
@@ -116,13 +116,13 @@ export function CreateOrgSheet({ open, onClose, plans, onCreated }: { open: bool
         />
         <SelectField label="PLAN" value={planId} options={planOptions} onChange={setPlanId} placeholder="No plan (assign later)" />
         {plans.length === 0 && (
-          <div style={{ font: "500 12px/1.5 var(--font-mono)", color: "var(--ink-faint)", padding: "0 2px" }}>
+          <div style={{ font: "500 var(--fs-small)/1.5 var(--font-mono)", color: "var(--ink-faint)", padding: "0 2px" }}>
             No SaaS plans yet — create them under Plans. You can assign one to this org later.
           </div>
         )}
         <TextField label="DEPARTMENT-HEAD NAME" value={headName} onChange={(e) => setHeadName(e.target.value)} placeholder="Optional" />
         <TextField label="DEPARTMENT-HEAD EMAIL" type="email" value={headEmail} onChange={(e) => setHeadEmail(e.target.value)} placeholder="head@gym.com" />
-        <div style={{ font: "500 12px/1.5 var(--font-mono)", color: "var(--ink-faint)", padding: "0 2px" }}>
+        <div style={{ font: "500 var(--fs-small)/1.5 var(--font-mono)", color: "var(--ink-faint)", padding: "0 2px" }}>
           They'll sign up with this email to claim the dept-head account. Two starter pay tiers are created automatically.
         </div>
         {error && <ErrorBanner text={error} />}

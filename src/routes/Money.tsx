@@ -81,7 +81,7 @@ export function Money() {
           <Card style={{ padding: "22px 22px 20px" }}>
             <div className="bq-label">REVENUE · EGP</div>
             <div style={{ font: "800 52px/1.05 var(--font-body)", letterSpacing: "-.03em", marginTop: 6 }}>{fmt(here ? data.pay.total : data.rev.totals.revenue)}</div>
-            <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-muted)", marginTop: 6 }}>
+            <div style={{ font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-muted)", marginTop: 6 }}>
               {here
                 ? `${data.pay.byMethod.reduce((a, m) => a + m.count, 0)} payment${data.pay.byMethod.reduce((a, m) => a + m.count, 0) === 1 ? "" : "s"} at ${current?.name ?? "this location"}`
                 : `${data.rev.activeSubscribers.total} active member${data.rev.activeSubscribers.total === 1 ? "" : "s"}`}
@@ -89,7 +89,7 @@ export function Money() {
             {data.pay.byMethod.length > 0 && (
               <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 14 }}>
                 {data.pay.byMethod.map((m) => (
-                  <span key={m.method} style={{ font: "700 12px var(--font-mono)", borderRadius: 999, padding: "6px 12px", color: m.method === "instapay" ? "var(--primary-pressed)" : "var(--ink-muted)", background: m.method === "instapay" ? "var(--primary-tint)" : "var(--sunken)" }}>
+                  <span key={m.method} style={{ font: "700 var(--fs-small) var(--font-mono)", borderRadius: 999, padding: "6px 12px", color: m.method === "instapay" ? "var(--primary-pressed)" : "var(--ink-muted)", background: m.method === "instapay" ? "var(--primary-tint)" : "var(--sunken)" }}>
                     {m.label} · {fmt(m.amount)}
                   </span>
                 ))}
@@ -102,13 +102,13 @@ export function Money() {
             {data.txns.slice(0, 100).map((t, i, arr) => (
               <button key={t.id} className="bq-scale" onClick={() => setOpen(t)} style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", border: 0, background: "none", cursor: "pointer", textAlign: "left", padding: "13px 18px", borderBottom: i === arr.length - 1 ? "none" : "1px solid var(--line)" }}>
                 <div className="bq-grow">
-                  <div style={{ font: "700 15px var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t.clientName ?? "Client"}</div>
-                  <div style={{ font: "400 12px var(--font-mono)", color: "var(--ink-faint)" }}>
+                  <div style={{ font: "700 var(--fs-body) var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t.clientName ?? "Client"}</div>
+                  <div style={{ font: "400 var(--fs-small) var(--font-mono)", color: "var(--ink-faint)" }}>
                     {t.what} · {formatDateTime(t.at)}
                   </div>
                 </div>
                 <span style={{ flex: "none", font: "700 10px var(--font-mono)", letterSpacing: ".06em", borderRadius: 8, padding: "3px 7px", color: t.method === "InstaPay" ? "var(--primary-pressed)" : "var(--ink-muted)", background: t.method === "InstaPay" ? "var(--primary-tint)" : "var(--sunken)" }}>{t.method.toUpperCase()}</span>
-                <div style={{ flex: "none", minWidth: 64, textAlign: "right", font: "800 15px var(--font-mono)", color: t.refund ? "var(--danger-fg)" : "var(--ink)" }}>{t.refund ? "−" : ""}{fmt(t.amount)}</div>
+                <div style={{ flex: "none", minWidth: 64, textAlign: "right", font: "800 var(--fs-body) var(--font-mono)", color: t.refund ? "var(--danger-fg)" : "var(--ink)" }}>{t.refund ? "−" : ""}{fmt(t.amount)}</div>
                 <Icon name="chevron-right" size={16} />
               </button>
             ))}
@@ -127,8 +127,8 @@ function Row({ k, v }: { k: string; v: string | null | undefined }) {
   if (!v) return null;
   return (
     <div style={{ display: "flex", gap: 12, padding: "12px 0", borderBottom: "1px solid var(--line)" }}>
-      <span style={{ width: 110, flex: "none", font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", paddingTop: 2 }}>{k}</span>
-      <span style={{ flex: 1, minWidth: 0, font: "600 15px/1.4 var(--font-body)", wordBreak: "break-word" }}>{v}</span>
+      <span style={{ width: 110, flex: "none", font: "700 var(--fs-caption) var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", paddingTop: 2 }}>{k}</span>
+      <span style={{ flex: 1, minWidth: 0, font: "600 var(--fs-body)/1.4 var(--font-body)", wordBreak: "break-word" }}>{v}</span>
     </div>
   );
 }
@@ -148,10 +148,10 @@ function TxnSheet({ txn, onClose }: { txn: Txn | null; onClose: () => void }) {
   return (
     <Sheet open={txn !== null} onClose={onClose}>
       <div className="bq-label">{t.refund ? "REFUND" : "PAYMENT"} · {t.method.toUpperCase()}</div>
-      <div style={{ font: "800 40px/1.1 var(--font-body)", letterSpacing: "-.02em", margin: "6px 0 2px", color: t.refund ? "var(--danger-fg)" : "var(--ink)" }}>{t.refund ? "−" : ""}{fmt(t.amount)} <span style={{ font: "700 16px var(--font-mono)", color: "var(--ink-faint)" }}>EGP</span></div>
-      <div style={{ font: "400 13px var(--font-mono)", color: "var(--ink-muted)", marginBottom: 12 }}>{t.what}</div>
+      <div style={{ font: "800 40px/1.1 var(--font-body)", letterSpacing: "-.02em", margin: "6px 0 2px", color: t.refund ? "var(--danger-fg)" : "var(--ink)" }}>{t.refund ? "−" : ""}{fmt(t.amount)} <span style={{ font: "700 var(--fs-base) var(--font-mono)", color: "var(--ink-faint)" }}>EGP</span></div>
+      <div style={{ font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-muted)", marginBottom: 12 }}>{t.what}</div>
 
-      <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", margin: "12px 0 0" }}>TRANSACTION</div>
+      <div style={{ font: "700 var(--fs-caption) var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", margin: "12px 0 0" }}>TRANSACTION</div>
       <Row k="WHAT" v={t.what} />
       <Row k="PAID VIA" v={t.method} />
       <Row k="DATE & TIME" v={formatDateTime(t.at)} />
@@ -159,7 +159,7 @@ function TxnSheet({ txn, onClose }: { txn: Txn | null; onClose: () => void }) {
       <Row k="NOTE" v={note} />
       <Row k="REFERENCE" v={t.id.slice(0, 8).toUpperCase()} />
 
-      <div style={{ font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", margin: "18px 0 0" }}>CLIENT</div>
+      <div style={{ font: "700 var(--fs-caption) var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", margin: "18px 0 0" }}>CLIENT</div>
       <Row k="NAME" v={t.clientName ?? "Unknown"} />
       <Row k="PHONE" v={client?.phone} />
       <Row k="EMAIL" v={client?.email} />

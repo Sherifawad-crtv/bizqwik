@@ -235,7 +235,7 @@ export function CreateClientSheet({
           {step === 2 && (
             <>
               <PaymentCards value={payMethod} onChange={setPayMethod} />
-              <div style={{ marginTop: 10, font: "400 12px/1.5 var(--font-mono)", color: "var(--ink-faint)" }}>A new client has no wallet yet, so it's cash or card.</div>
+              <div style={{ marginTop: 10, font: "400 var(--fs-small)/1.5 var(--font-mono)", color: "var(--ink-faint)" }}>A new client has no wallet yet, so it's cash or card.</div>
             </>
           )}
 
@@ -254,16 +254,16 @@ export function CreateClientSheet({
                   ] as [string, string][]
                 ).map(([k, v]) => (
                   <div key={k} style={{ display: "flex", gap: 12, padding: "12px 16px", borderBottom: "1px solid var(--line)" }}>
-                    <span style={{ flex: "none", width: 84, font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", paddingTop: 3 }}>{k}</span>
-                    <span style={{ minWidth: 0, flex: 1, font: "600 15px/1.4 var(--font-body)", overflowWrap: "anywhere" }}>{v}</span>
+                    <span style={{ flex: "none", width: 84, font: "700 var(--fs-caption) var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", paddingTop: 3 }}>{k}</span>
+                    <span style={{ minWidth: 0, flex: 1, font: "600 var(--fs-body)/1.4 var(--font-body)", overflowWrap: "anywhere" }}>{v}</span>
                   </div>
                 ))}
                 <div style={{ display: "flex", alignItems: "baseline", gap: 12, padding: "14px 16px", background: "var(--sunken)" }}>
-                  <span style={{ flex: 1, font: "700 11px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>TOTAL TO COLLECT</span>
+                  <span style={{ flex: 1, font: "700 var(--fs-caption) var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>TOTAL TO COLLECT</span>
                   <span className="tabular" style={{ font: "800 22px var(--font-body)", letterSpacing: "-.02em" }}>{chosen ? `${fmt(chosen.price)} EGP` : "—"}</span>
                 </div>
               </Card>
-              <div style={{ marginTop: 10, font: "400 12px/1.5 var(--font-mono)", color: "var(--ink-faint)" }}>Creating the client also sends the app invite to {mail}.</div>
+              <div style={{ marginTop: 10, font: "400 var(--fs-small)/1.5 var(--font-mono)", color: "var(--ink-faint)" }}>Creating the client also sends the app invite to {mail}.</div>
             </>
           )}
 
