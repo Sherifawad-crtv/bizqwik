@@ -34,6 +34,10 @@ export function YearMonthStrip({ months, value, onChange }: { months: string[]; 
         width: "fit-content",
         maxWidth: "100%",
         overflowX: "auto",
+        // Sideways only: with overflow-x set, CSS would otherwise let the bigger
+        // invisible tap areas make it scroll up and down a few pixels too.
+        overflowY: "hidden",
+        overscrollBehaviorX: "contain",
         marginBottom: 18,
       }}
     >

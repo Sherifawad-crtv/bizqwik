@@ -228,3 +228,18 @@ test("tapping quickly through screens never leaves two screens half-moved", asyn
   expect(Math.abs(shown[0].x)).toBeLessThan(1); // and it's at rest
   await expect(page.getByText("Coach Nour")).toBeVisible();
 });
+
+test("segmented controls and the month strip never scroll up and down", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await mockBackend(page, "dept_head", { tiers: { tiers: [] }, invites: { invites: [] }, people: { people: [] } });
+  await page.goto("/manage");
+  const bar = page.getByRole("button", { name: "TIERS" }).locator("xpath=..");
+  await bar.waitFor();
+  expect(await bar.evaluate((el) => getComputedStyle(el).overflowY)).toBe("hidden");
+  // Scroll over it the way a person does: it must not move up or down.
+  const box = (await bar.boundingBox())!;
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await page.mouse.wheel(0, 60);
+  await page.waitForTimeout(150);
+  expect(await bar.evaluate((el) => el.scrollTop)).toBe(0);
+});

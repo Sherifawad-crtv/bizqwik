@@ -27,8 +27,10 @@ export function Segmented<T extends string>({
     setShown(v);
     startTransition(() => onChange(v));
   };
+  // Sideways scrolling only (for long option lists): with overflow-x set, CSS
+  // would otherwise let the bigger invisible tap areas scroll it up and down.
   return (
-    <div ref={ref} style={{ position: "relative", isolation: "isolate", display: "flex", gap: 6, background: "var(--sunken)", borderRadius: 999, padding: 4, width: "fit-content", maxWidth: "100%", overflowX: "auto" }}>
+    <div ref={ref} style={{ position: "relative", isolation: "isolate", display: "flex", gap: 6, background: "var(--sunken)", borderRadius: 999, padding: 4, width: "fit-content", maxWidth: "100%", overflowX: "auto", overflowY: "hidden", overscrollBehaviorX: "contain" }}>
       {thumb}
       {options.map((o) => {
         const on = o.value === shown;
