@@ -142,6 +142,8 @@ function ShellInner() {
           </PullToRefresh>
         </main>
 
+        {/* A soft fade under the bar so content slips away behind it instead of being cut. */}
+        <div aria-hidden className="bq-bottom-fade" />
         <div
           style={{
             position: "fixed",
@@ -149,8 +151,8 @@ function ShellInner() {
             right: 0,
             bottom: 0,
             zIndex: 55,
-            // Flush to the bottom edge like a native tab bar (the home-indicator area is deliberately not reserved).
-            padding: `0 ${narrow ? 12 : 16}px 8px`,
+            // Sits just above the iOS home indicator, like a native tab bar.
+            padding: `0 ${narrow ? 12 : 16}px var(--bar-bottom)`,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",

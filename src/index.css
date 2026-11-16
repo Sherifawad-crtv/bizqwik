@@ -57,6 +57,8 @@
   --fs-title-sm: 20px;
   --fs-title: 26px;
   --fs-display: 30px;
+  /* Gap under the bottom bar: it sits just above the iOS home indicator. */
+  --bar-bottom: max(8px, calc(var(--safe-bottom) - 8px));
   --r-md: 14px; /* inputs, banners, small cards */
   --shadow-card: 0 24px 60px rgba(26, 23, 38, 0.1);
 
@@ -358,3 +360,15 @@ textarea {
   font: 600 var(--fs-note)/1.5 var(--font-body);
 }
 .bq-error--spaced { margin-top: 12px; }
+
+/* Fades the page out behind the bottom bar (and its floating actions). */
+.bq-bottom-fade {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: calc(var(--bar-bottom) + 64px + 36px);
+  z-index: 54;
+  pointer-events: none;
+  background: linear-gradient(to bottom, rgba(243, 242, 238, 0), var(--paper) 78%);
+}

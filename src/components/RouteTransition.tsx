@@ -71,7 +71,7 @@ function layerStyle(pathname: string, role: Role, mode: OrgMode): CSSProperties 
   return {
     position: "absolute",
     inset: 0,
-    padding: `calc(${top}px + var(--safe-top)) 16px ${BOTTOM_CLEARANCE}px`,
+    padding: `calc(${top}px + var(--safe-top)) 16px calc(${BOTTOM_CLEARANCE}px + var(--safe-bottom))`,
     overflowY: "auto",
     WebkitOverflowScrolling: "touch",
     background: "var(--paper)",
