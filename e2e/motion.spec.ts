@@ -162,3 +162,69 @@ test("the tab bar and a sub-page's actions hand over in one motion", async ({ pa
   expect(actions).toMatchObject({ on: "true", opacity: 1, vis: "visible" });
   await expect(page.getByRole("button", { name: "Settle month" })).toBeVisible();
 });
+
+test.describe("with Reduce Motion on", () => {
+  test.use({ reducedMotion: "reduce" });
+
+  test("going deeper is a crossfade, not a slide; sheets fade in place; presses don't shrink", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    const THIS = ym(0);
+    const row = { coachId: "c1", name: "Coach Nour", email: "c1@x.com", role: "coach", avatarUrl: null, tierId: "t", tierName: "Tier 1", rate: 250, count: 4, groupTotal: 1000, privateTotal: 0, packageCount: 0, total: 1000, state: "logging", settledAt: null, paidAt: null, paidAmount: 0, remaining: 1000 };
+    await mockBackend(page, "dept_head", { [`month/${THIS}`]: { rows: [row] }, [`sessions/c1/${THIS}`]: { sessions: [] }, [`packages/by-coach/c1/${THIS}`]: { packages: [] }, revenue: report() });
+    await page.goto("/coaches");
+    await page.getByText("Coach Nour").waitFor();
+    await page.waitForTimeout(300);
+    await page.getByText("Coach Nour").click();
+    // sample a few frames: no layer is ever pushed sideways
+    for (let i = 0; i < 8; i++) {
+      const xs = await page.evaluate(() => [...document.querySelectorAll("main [data-scroll]")].map((el) => { const t = getComputedStyle(el).transform; return t === "none" ? 0 : new DOMMatrixReadOnly(t).m41; }));
+      expect(xs.every((x) => Math.abs(x) < 1)).toBe(true);
+      await page.waitForTimeout(30);
+    }
+    await expect(page).toHaveURL(/\/coaches\/c1$/);
+    // press: no shrink
+    expect(await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--press-scale").trim())).toBe("1");
+    // sheet: opens without sliding
+    await page.goto("/oversight");
+    await page.getByRole("button", { name: "Create" }).click();
+    const panel = page.locator("[role=dialog] > div").nth(1);
+    await expect(panel).toBeVisible();
+    await page.waitForTimeout(60);
+    const y = await panel.evaluate((el) => { const t = getComputedStyle(el).transform; return t === "none" ? 0 : new DOMMatrixReadOnly(t).m42; });
+    expect(y).toBe(0);
+  });
+
+  test("charts and figures appear at their values without growing", async ({ page }) => {
+    await mockBackend(page, "dept_head", { revenue: () => ({ body: report() }) });
+    await page.goto("/oversight");
+    await page.locator("svg[role=img]").first().waitFor();
+    const first = await barHeights(page);
+    await page.waitForTimeout(400);
+    expect(await barHeights(page)).toEqual(first);
+  });
+});
+
+test("tapping quickly through screens never leaves two screens half-moved", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const THIS = ym(0);
+  const row = { coachId: "c1", name: "Coach Nour", email: "c1@x.com", role: "coach", avatarUrl: null, tierId: "t", tierName: "Tier 1", rate: 250, count: 4, groupTotal: 1000, privateTotal: 0, packageCount: 0, total: 1000, state: "logging", settledAt: null, paidAt: null, paidAmount: 0, remaining: 1000 };
+  await mockBackend(page, "dept_head", { [`month/${THIS}`]: { rows: [row] }, [`sessions/c1/${THIS}`]: { sessions: [] }, [`packages/by-coach/c1/${THIS}`]: { packages: [] }, revenue: report() });
+  await page.goto("/coaches");
+  await page.getByText("Coach Nour").waitFor();
+  await page.waitForTimeout(300);
+  // In, back out before the slide ends, in again, out again — faster than any slide.
+  await page.getByText("Coach Nour").click();
+  await page.waitForTimeout(80);
+  await page.getByRole("button", { name: "Back" }).click();
+  await page.waitForTimeout(80);
+  await page.getByText("Coach Nour").click();
+  await page.waitForTimeout(80);
+  await page.getByRole("button", { name: "Back" }).click();
+  await page.waitForTimeout(600);
+  await expect(page).toHaveURL(/\/coaches$/);
+  const layers = await page.evaluate(() => [...document.querySelectorAll("main [data-scroll]")].map((el) => { const cs = getComputedStyle(el); const t = cs.transform; return { x: t === "none" ? 0 : new DOMMatrixReadOnly(t).m41, vis: cs.visibility, op: +cs.opacity }; }));
+  const shown = layers.filter((l) => l.vis === "visible" && l.op > 0.5);
+  expect(shown.length).toBe(1); // exactly one screen on view
+  expect(Math.abs(shown[0].x)).toBeLessThan(1); // and it's at rest
+  await expect(page.getByText("Coach Nour")).toBeVisible();
+});

@@ -334,13 +334,16 @@ textarea {
   animation: bqRise var(--dur-standard) var(--ease-standard) both;
 }
 
+/* Reduce Motion (iPhone Settings → Accessibility → Motion): Apple's guidance is
+   to swap movement for fades, not to remove all animation. Things still fade,
+   controls still show their state; nothing slides, rises, shrinks or pulses.
+   (Screens and sheets switch to fades in code: RouteTransition, Sheet.) */
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
-  }
+  :root { --press-scale: 1; }
+  .bq-scale:active, .bq-qa:active { opacity: 0.7; }
+  .bq-rise, .bq-li[data-state="in"] { animation-name: bqFade; }
+  .bq-barlayer, .bq-barlayer[data-on="false"] { transform: none; }
+  .bq-skel { animation: none; }
 }
 
 /* QR scanner: the camera <video> fills the square. */

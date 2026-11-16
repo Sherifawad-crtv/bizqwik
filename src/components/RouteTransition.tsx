@@ -8,6 +8,7 @@ import type { Role } from "../lib/types";
 import { EASE, FADE_MS, PUSH_MS } from "../lib/motion";
 import { sinceTabTap } from "../lib/tabTap";
 import { ScreenActive, ScreenPath } from "../lib/screenActive";
+import { useReducedMotion } from "../lib/useReducedMotion";
 import { waitForFirstScreen } from "../lib/useAsync";
 import { reportScreenReady } from "../lib/vitals";
 
@@ -83,6 +84,7 @@ function layerStyle(pathname: string, role: Role, mode: OrgMode): CSSProperties 
 const KEEP = 2;
 
 export function RouteTransition({ tabs, role, orgMode = "team" }: { tabs: NavItem[]; role: Role; orgMode?: OrgMode }) {
+  const reduced = useReducedMotion();
   const location = useLocation();
   const rawOutlet = useOutlet();
   const outlet = <Suspense fallback={<Spinner />}>{rawOutlet}</Suspense>;
@@ -198,14 +200,15 @@ export function RouteTransition({ tabs, role, orgMode = "team" }: { tabs: NavIte
   // Every screen is one stable element (keyed by its id) whatever it is doing,
   // so nothing is torn down and rebuilt when a slide starts or ends.
   const moving = !!previous && anim.type !== "none";
-  const pushIn = moving && anim.type === "push-in";
-  const pushOut = moving && anim.type === "push-out";
-  const fading = moving && anim.type === "tab-slide";
+  // With Reduce Motion on, going deeper or back is a crossfade, never a slide.
+  const pushIn = moving && anim.type === "push-in" && !reduced;
+  const pushOut = moving && anim.type === "push-out" && !reduced;
+  const fading = moving && (anim.type === "tab-slide" || reduced);
 
   const styleFor = (l: Layer): CSSProperties => {
     const base = layerStyle(l.pathname, role, orgMode);
     if (l.id === current.id) {
-      if (fading) return { ...base, opacity: entered ? 1 : 0, transition: `opacity ${TAB_MS}ms ease-out`, willChange: "opacity" };
+      if (fading) return { ...base, opacity: entered ? 1 : 0, transition: `opacity ${TAB_MS}ms ${EASE}`, willChange: "opacity" };
       if (pushIn) {
         return {
           ...base,

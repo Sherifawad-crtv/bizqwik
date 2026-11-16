@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { useIsMobile } from "../lib/useIsMobile";
 import { Button } from "./Button";
 import { EASE, QUICK_MS, SHEET_IN_MS, SHEET_OUT_MS, SPRING, STANDARD_MS } from "../lib/motion";
+import { useReducedMotion } from "../lib/useReducedMotion";
 
 interface SheetProps {
   open: boolean;
@@ -25,6 +26,7 @@ const openStack: symbol[] = [];
  * through here. If something has been typed and not saved, it asks first
  * (the Cancel / Save buttons inside a sheet call onClose directly and never ask). */
 export function Sheet({ open, onClose, children, width = 460 }: SheetProps) {
+  const reduced = useReducedMotion();
   const isMobile = useIsMobile();
   const [visible, setVisible] = useState(open);
   const [phase, setPhase] = useState<Phase>(open ? "opening" : "closing");
@@ -137,7 +139,7 @@ export function Sheet({ open, onClose, children, width = 460 }: SheetProps) {
     const onEnd = (e: TransitionEvent) => {
       // Only the panel's own slide counts — a button inside it finishing its own
       // little press animation bubbles up here too.
-      if (e.target === el && e.propertyName === "transform") finish();
+      if (e.target === el && (e.propertyName === "transform" || e.propertyName === "opacity")) finish();
     };
     el?.addEventListener("transitionend", onEnd);
     const fallback = window.setTimeout(finish, SHEET_OUT_MS + 150);
@@ -240,8 +242,10 @@ export function Sheet({ open, onClose, children, width = 460 }: SheetProps) {
   );
 
   if (isMobile) {
-    const transform = dragging ? `translateY(${dragY}px)` : phase === "open" ? "translateY(0)" : "translateY(100%)";
-    const transition = dragging || phase === "opening" ? "none" : `transform ${phase === "closing" ? SHEET_OUT_MS : SHEET_IN_MS}ms ${EASE}`;
+    // With Reduce Motion on, the sheet fades in and out in place instead of sliding.
+    const transform = dragging ? `translateY(${dragY}px)` : phase === "open" || reduced ? "translateY(0)" : "translateY(100%)";
+    const transition = dragging || phase === "opening" ? "none" : `${reduced ? "opacity" : "transform"} ${phase === "closing" ? SHEET_OUT_MS : SHEET_IN_MS}ms ${EASE}`;
+    const panelOpacity = reduced && !dragging ? (phase === "open" ? 1 : 0) : 1;
     const h = panelRef.current?.offsetHeight ?? 400;
     // The dark layer follows the sheet: it fades in as the sheet rises, out as
     // it leaves, and lightens as you pull it down.
@@ -264,6 +268,7 @@ export function Sheet({ open, onClose, children, width = 460 }: SheetProps) {
             flexDirection: "column",
             transform,
             transition,
+            opacity: panelOpacity,
             touchAction: "none",
           }}
         >
@@ -332,7 +337,7 @@ export function Sheet({ open, onClose, children, width = 460 }: SheetProps) {
           background: "var(--surface)",
           borderRadius: "var(--r-card)",
           padding: 26,
-          animation: `bqPop ${STANDARD_MS}ms ${SPRING}`,
+          animation: reduced ? `bqFade ${STANDARD_MS}ms ${EASE}` : `bqPop ${STANDARD_MS}ms ${SPRING}`,
         }}
       >
         {children}
