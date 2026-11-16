@@ -7,7 +7,7 @@ import { Button } from "../../components/Button";
 import { Icon } from "../../components/Icon";
 import { Sheet } from "../../components/Sheet";
 import { TextField } from "../../components/FormField";
-import { Card } from "./shared";
+import { Card } from "../../components/Card";
 
 const when = (iso: string) => new Date(iso).toLocaleString(undefined, { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" });
 
@@ -68,7 +68,7 @@ function RequestRow({ r, onDone }: { r: PaymentRequest; onDone: () => void }) {
     }
   };
   return (
-    <Card style={{ padding: 14 }}>
+    <Card pad="none" style={{ padding: 14 }}>
       <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
         {r.proofUrl ? (
           <a href={r.proofUrl} target="_blank" rel="noreferrer" aria-label={`Open ${r.clientName}'s receipt`} style={{ flex: "none" }}>

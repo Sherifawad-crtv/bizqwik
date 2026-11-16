@@ -42,6 +42,15 @@
      button 24  buttons (a 48px button is a full pill)
      float  32  the floating actions container (button 24 + padding 8)
      999        pills, circles, avatars, switches, the tab bar (26 + 6 = 32) */
+  /* Spacing scale: every gap and padding comes from these steps. */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+
   --r-card: 28px;
   --r-sheet: 40px;
   --r-item: 20px;
@@ -428,3 +437,100 @@ textarea {
   visibility: hidden;
   transition: opacity var(--dur-standard) var(--ease-standard), transform var(--dur-standard) var(--ease-standard), visibility 0s linear var(--dur-standard);
 }
+
+/* ═══════════════════════════ Library components ═══════════════════════════
+   The CSS behind src/components (Card, ListRow, Tag, StatusBadge, IconButton,
+   Chip, Stat). See DESIGN_SYSTEM.md before styling anything by hand. */
+
+/* Tones: a status colour pair, set once and read by Tag / StatusBadge. */
+.bq-tone-neutral { --tone-fg: var(--ink-muted); --tone-bg: var(--sunken); }
+.bq-tone-primary { --tone-fg: var(--primary-pressed); --tone-bg: var(--primary-tint); }
+.bq-tone-logging { --tone-fg: var(--logging-fg); --tone-bg: var(--logging-bg); }
+.bq-tone-settled { --tone-fg: var(--settled-fg); --tone-bg: var(--settled-bg); }
+.bq-tone-paid { --tone-fg: var(--paid-fg); --tone-bg: var(--paid-bg); }
+.bq-tone-danger { --tone-fg: var(--danger-fg); --tone-bg: var(--danger-bg); }
+.bq-tone-frozen { --tone-fg: var(--frozen-fg); --tone-bg: var(--frozen-bg); }
+
+/* Card: every surface on a page. */
+.bq-card { background: var(--surface); border-radius: var(--r-card); }
+.bq-card--sm { padding: 14px var(--space-4); }
+.bq-card--md { padding: var(--space-5); }
+.bq-card--lg { padding: 30px; }
+.bq-card--clip { overflow: hidden; }
+
+/* ListRow: one row of a list that sits inside a Card (pad none). */
+.bq-listrow { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-4) var(--space-5); }
+.bq-listrow--compact { padding: var(--space-3) 18px; }
+.bq-listrow--divider { border-bottom: 1px solid var(--line); }
+
+/* Tag: a small square label (Kids, a location, OFF SALE). */
+.bq-tag {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  font: 700 10px var(--font-mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  border-radius: var(--r-chip);
+  padding: 3px 7px;
+  color: var(--tone-fg, var(--ink-muted));
+  background: var(--tone-bg, var(--sunken));
+}
+
+/* StatusBadge: a pill with a dot that says what state something is in. */
+.bq-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+  padding: var(--space-1) 10px;
+  border-radius: 999px;
+  font: 700 var(--fs-caption) var(--font-mono);
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+  color: var(--tone-fg);
+  background: var(--tone-bg);
+}
+.bq-badge::before { content: ""; width: 6px; height: 6px; border-radius: 999px; background: currentColor; flex: none; }
+
+/* IconButton: a round button with only an icon (edit, delete, remove). */
+.bq-iconbtn {
+  width: 36px;
+  height: 36px;
+  flex: none;
+  border: 0;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--primary-pressed);
+  background: var(--primary-tint);
+}
+.bq-iconbtn--danger { color: var(--danger-fg); background: var(--danger-bg); }
+.bq-iconbtn--neutral { color: var(--ink); background: var(--sunken); }
+.bq-iconbtn--plain { color: var(--ink-muted); background: transparent; }
+
+/* Chip: a selectable filter or choice. */
+.bq-chip {
+  flex: none;
+  height: 36px;
+  padding: 0 var(--space-3);
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  font: 700 var(--fs-body-sm) var(--font-body);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background var(--dur-quick) var(--ease-standard), color var(--dur-quick) var(--ease-standard), border-color var(--dur-quick) var(--ease-standard);
+}
+.bq-chip[aria-pressed="true"] { border-color: var(--primary); background: var(--primary-tint); color: var(--primary-pressed); }
+.bq-chip--sm { height: 32px; font-size: var(--fs-small); }
+
+/* Stat: big numbers. */
+.bq-stat-xl { font: 800 56px/1 var(--font-body); letter-spacing: -0.03em; }
+.bq-stat-lg { font: 800 var(--fs-display)/1.1 var(--font-body); letter-spacing: -0.02em; }
+.bq-stat-md { font: 800 24px/1.15 var(--font-body); letter-spacing: -0.02em; }
+.bq-stat-sm { font: 800 var(--fs-title-sm) var(--font-body); letter-spacing: -0.01em; }

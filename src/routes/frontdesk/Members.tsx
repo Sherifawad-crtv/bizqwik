@@ -11,7 +11,9 @@ import { Sheet } from "../../components/Sheet";
 import { Spinner } from "../../components/Spinner";
 import { Icon } from "../../components/Icon";
 import { useSticky } from "../../lib/useSticky";
-import { Card, PlanPill, SearchField, SectionTitle, SheetHeading } from "./shared";
+import { PlanPill, SearchField, SheetHeading } from "./shared";
+import { Card } from "../../components/Card";
+import { SectionHeader } from "../../components/SectionHeader";
 import { endingSoon, matchesClient, planSummary } from "./deskStatus";
 import { ConfirmCheckInSheet } from "./CheckIn";
 import { DropIn } from "./DropIn";
@@ -79,7 +81,7 @@ export function Members() {
       </div>
 
       <div style={{ marginTop: 14 }}>
-        <SectionTitle
+        <SectionHeader
           count={shown.length}
           right={
             <Button size="md" style={{ height: 36, padding: "0 14px" }} onClick={() => setCreating(true)}>
@@ -88,10 +90,10 @@ export function Members() {
           }
         >
           {{ all: "All clients", active: "Active", soon: "Ending soon", expired: "Expired", none: "No plan" }[filter]}
-        </SectionTitle>
+        </SectionHeader>
       </div>
 
-      <Card style={{ overflow: "hidden" }}>
+      <Card pad="none" style={{ overflow: "hidden" }}>
         {shown.map((c, i) => {
           const plan = planSummary(c, bundleTypes);
           const soon = endingSoon(c);

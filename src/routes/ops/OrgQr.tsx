@@ -6,7 +6,9 @@ import { useAsync } from "../../lib/useAsync";
 import { Spinner } from "../../components/Spinner";
 import { Icon } from "../../components/Icon";
 import { Button } from "../../components/Button";
-import { Card, SectionTitle, ErrorBanner } from "./shared";
+import { ErrorBanner } from "./shared";
+import { Card } from "../../components/Card";
+import { SectionHeader } from "../../components/SectionHeader";
 import { Segmented } from "../../components/Segmented";
 
 // The lifetime check-in QR. It encodes the org's check-in token — its slug,
@@ -112,8 +114,8 @@ export function OrgQr() {
       <div style={{ font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-faint)", marginTop: 6 }}>{copy.intro}</div>
 
       <div style={{ marginTop: 22, maxWidth: 520 }}>
-        <SectionTitle>Code</SectionTitle>
-        <Card style={{ padding: 24, display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
+        <SectionHeader>Code</SectionHeader>
+        <Card pad="none" style={{ padding: 24, display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
           {qrError && <ErrorBanner text={qrError} />}
           {!pngUrl && !qrError && <div style={{ padding: "40px 0", color: "var(--ink-faint)", font: "500 var(--fs-body-sm) var(--font-body)" }}>Rendering…</div>}
           {pngUrl && (

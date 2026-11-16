@@ -9,7 +9,9 @@ import { Icon } from "../../components/Icon";
 import { Avatar } from "../../components/Avatar";
 import { Sheet } from "../../components/Sheet";
 import { TextField, SelectField } from "../../components/FormField";
-import { Card, SectionTitle, ErrorBanner } from "./shared";
+import { ErrorBanner } from "./shared";
+import { Card } from "../../components/Card";
+import { SectionHeader } from "../../components/SectionHeader";
 
 const INVITE_ROLES: { value: BizqwikRole; label: string }[] = [
   { value: "ops_manager", label: BIZQWIK_ROLE_LABELS.ops_manager },
@@ -97,8 +99,8 @@ export function Team() {
 
       {error && <ErrorBanner text={error} />}
 
-      <SectionTitle count={members.length}>Members</SectionTitle>
-      <Card style={{ overflow: "hidden" }}>
+      <SectionHeader count={members.length}>Members</SectionHeader>
+      <Card pad="none" style={{ overflow: "hidden" }}>
         {members.map((m, i) => (
           <div key={m.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 18px", borderBottom: i === members.length - 1 ? "none" : "1px solid var(--line)" }}>
             <Avatar name={m.name} size={34} />
@@ -116,8 +118,8 @@ export function Team() {
 
       {invites.length > 0 && (
         <div style={{ marginTop: 26 }}>
-          <SectionTitle count={invites.length}>Pending invites</SectionTitle>
-          <Card style={{ overflow: "hidden" }}>
+          <SectionHeader count={invites.length}>Pending invites</SectionHeader>
+          <Card pad="none" style={{ overflow: "hidden" }}>
             {invites.map((inv, i) => (
               <div key={inv.email} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 18px", borderBottom: i === invites.length - 1 ? "none" : "1px solid var(--line)" }}>
                 <span style={{ color: "var(--ink-faint)", display: "flex" }}><Icon name="envelope" size={18} /></span>

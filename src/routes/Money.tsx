@@ -13,7 +13,9 @@ import type { ActivityEntry, ClientWithPackage } from "../lib/types";
 import { Sheet } from "../components/Sheet";
 import { Button } from "../components/Button";
 import { Icon } from "../components/Icon";
-import { Card, SectionTitle } from "./frontdesk/shared";
+import { Card } from "../components/Card";
+import { SectionHeader } from "../components/SectionHeader";
+import { Tag } from "../components/Tag";
 
 interface Txn { id: string; at: string; clientName: string | null; amount: number; what: string; method: string; refund: boolean; entry: ActivityEntry }
 
@@ -78,7 +80,7 @@ export function Money() {
         <Spinner />
       ) : (
         <>
-          <Card style={{ padding: "22px 22px 20px" }}>
+          <Card pad="none" style={{ padding: "22px 22px 20px" }}>
             <div className="bq-label">REVENUE · EGP</div>
             <div style={{ font: "800 52px/1.05 var(--font-body)", letterSpacing: "-.03em", marginTop: 6 }}>{fmt(here ? data.pay.total : data.rev.totals.revenue)}</div>
             <div style={{ font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-muted)", marginTop: 6 }}>
@@ -97,8 +99,8 @@ export function Money() {
             )}
           </Card>
 
-          <SectionTitle count={data.txns.length}>Transactions</SectionTitle>
-          <Card style={{ overflow: "hidden", marginBottom: 12 }}>
+          <SectionHeader count={data.txns.length}>Transactions</SectionHeader>
+          <Card pad="none" style={{ overflow: "hidden", marginBottom: 12 }}>
             {data.txns.slice(0, 100).map((t, i, arr) => (
               <button key={t.id} className="bq-scale" onClick={() => setOpen(t)} style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", border: 0, background: "none", cursor: "pointer", textAlign: "left", padding: "13px 18px", borderBottom: i === arr.length - 1 ? "none" : "1px solid var(--line)" }}>
                 <div className="bq-grow">
@@ -107,7 +109,7 @@ export function Money() {
                     {t.what} · {formatDateTime(t.at)}
                   </div>
                 </div>
-                <span style={{ flex: "none", font: "700 10px var(--font-mono)", letterSpacing: ".06em", borderRadius: "var(--r-chip)", padding: "3px 7px", color: t.method === "InstaPay" ? "var(--primary-pressed)" : "var(--ink-muted)", background: t.method === "InstaPay" ? "var(--primary-tint)" : "var(--sunken)" }}>{t.method.toUpperCase()}</span>
+                <Tag tone={t.method === "InstaPay" ? "primary" : "neutral"}>{t.method}</Tag>
                 <div style={{ flex: "none", minWidth: 64, textAlign: "right", font: "800 var(--fs-body) var(--font-mono)", color: t.refund ? "var(--danger-fg)" : "var(--ink)" }}>{t.refund ? "−" : ""}{fmt(t.amount)}</div>
                 <Icon name="chevron-right" size={16} />
               </button>

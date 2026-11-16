@@ -9,7 +9,9 @@ import { HomeAvatar } from "../../components/HomeAvatar";
 import { Icon, type IconName } from "../../components/Icon";
 import { Spinner } from "../../components/Spinner";
 import { Sheet } from "../../components/Sheet";
-import { Card, SectionLink, SectionTitle, SheetHeading, SearchField, PlanPill } from "./shared";
+import { SectionLink, SheetHeading, SearchField, PlanPill } from "./shared";
+import { Card } from "../../components/Card";
+import { SectionHeader } from "../../components/SectionHeader";
 import { planSummary, matchesClient, deskStatus } from "./deskStatus";
 import { useCurrentLocation } from "../../lib/locations";
 import { NewClientModal } from "./NewClientModal";
@@ -104,7 +106,7 @@ export function FrontDeskHome() {
 
       <SearchField value={query} onChange={setQuery} placeholder="Find a client by name or phone" />
       {query.trim() !== "" && (
-        <Card style={{ marginTop: 10, overflow: "hidden" }}>
+        <Card pad="none" style={{ marginTop: 10, overflow: "hidden" }}>
           {matches.map((c, i) => {
             const plan = planSummary(c, bundleTypes);
             const status = deskStatus(c);
@@ -193,8 +195,8 @@ export function FrontDeskHome() {
         ))}
       </div>
 
-      <SectionTitle right={<SectionLink onClick={() => navigate("/bookings")}>All bookings</SectionLink>}>Next up</SectionTitle>
-      <Card style={{ overflow: "hidden", marginBottom: 24 }}>
+      <SectionHeader right={<SectionLink onClick={() => navigate("/bookings")}>All bookings</SectionLink>}>Next up</SectionHeader>
+      <Card pad="none" style={{ overflow: "hidden", marginBottom: 24 }}>
         {nextDay && nextUp.length > 0 && (
           <div data-testid="next-day-label" style={{ padding: "12px 18px 0", font: "600 var(--fs-note) var(--font-body)", color: "var(--ink-muted)" }}>
             Nothing left today · {nextDay}
@@ -218,8 +220,8 @@ export function FrontDeskHome() {
         {nextUp.length === 0 && <EmptyState bare icon="calendar" title="No more classes today" body="Upcoming classes show up here." />}
       </Card>
 
-      <SectionTitle right={<SectionLink onClick={() => navigate("/activity")}>Full activity &amp; logs</SectionLink>}>Recent activity</SectionTitle>
-      <Card style={{ overflow: "hidden" }}>
+      <SectionHeader right={<SectionLink onClick={() => navigate("/activity")}>Full activity &amp; logs</SectionLink>}>Recent activity</SectionHeader>
+      <Card pad="none" style={{ overflow: "hidden" }}>
         {data.recent.slice(0, 5).map((r, i) => (
           <div key={r.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 18px", borderBottom: i === Math.min(data.recent.length, 5) - 1 ? "none" : "1px solid var(--line)" }}>
             <span

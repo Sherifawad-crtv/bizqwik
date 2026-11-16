@@ -18,7 +18,8 @@ import { Spinner } from "../../components/Spinner";
 import { EmptyState } from "../../components/EmptyState";
 import { Icon } from "../../components/Icon";
 import { ClassRosterSheet } from "../../components/ClassRosterSheet";
-import { Card, SectionLink } from "./shared";
+import { SectionLink } from "./shared";
+import { Card } from "../../components/Card";
 import { ClassCalendarScreen } from "./ClassCalendar";
 import { useNow } from "../../lib/useNow";
 
@@ -158,17 +159,17 @@ export function Bookings() {
 
       {ahead && (
         <div style={{ marginTop: 16 }} data-testid="next-day">
-          <Card>
+          <Card pad="none">
             <EmptyState bare icon="calendar" title="Nothing left today" body={`Here's what's next — ${dayHeading(ahead.day, today).toLowerCase() === "tomorrow" ? "tomorrow" : dayHeading(ahead.day, today)}.`} />
           </Card>
           <div style={{ font: "700 var(--fs-small) var(--font-mono)", letterSpacing: 1, color: "var(--ink-faint)", textTransform: "uppercase", margin: "20px 4px 8px" }}>{dayHeading(ahead.day, today)}</div>
-          <Card style={{ overflow: "hidden" }}>{ahead.items.map((c) => row(c))}</Card>
+          <Card pad="none" style={{ overflow: "hidden" }}>{ahead.items.map((c) => row(c))}</Card>
         </div>
       )}
 
       {groups.length === 0 && earlier.length === 0 && !ahead && (
         <div style={{ marginTop: 16 }}>
-          <Card>
+          <Card pad="none">
             <EmptyState bare icon="calendar" title={range === "today" ? (solo ? "No more classes today" : "Nothing booked for the rest of today") : "No classes in this range"} body={solo ? "Add a class and your members are reminded before it starts." : "Classes appear here as soon as they're scheduled."} />
           </Card>
         </div>
@@ -177,7 +178,7 @@ export function Bookings() {
       {groups.map((g) => (
         <div key={g.day.toISOString()} style={{ marginTop: 20 }}>
           <div style={{ font: "700 var(--fs-small) var(--font-mono)", letterSpacing: 1, color: "var(--ink-faint)", textTransform: "uppercase", margin: "0 4px 8px" }}>{dayHeading(g.day, today)}</div>
-          <Card style={{ overflow: "hidden" }}>{g.items.map((c) => row(c))}</Card>
+          <Card pad="none" style={{ overflow: "hidden" }}>{g.items.map((c) => row(c))}</Card>
         </div>
       ))}
 
@@ -189,7 +190,7 @@ export function Bookings() {
           >
             {showEarlier ? "Hide" : "Show"} earlier today ({earlier.length})
           </button>
-          {showEarlier && <Card style={{ overflow: "hidden", marginTop: 8 }}>{earlier.map((c) => row(c, true))}</Card>}
+          {showEarlier && <Card pad="none" style={{ overflow: "hidden", marginTop: 8 }}>{earlier.map((c) => row(c, true))}</Card>}
         </div>
       )}
 

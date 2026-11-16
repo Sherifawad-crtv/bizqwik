@@ -2,15 +2,6 @@ import { EmptyState } from "../../components/EmptyState";
 import type { ReactNode } from "react";
 import { Icon, type IconName } from "../../components/Icon";
 
-export function Card({ title, sub, children }: { title: string; sub?: string; children: ReactNode }) {
-  return (
-    <div style={{ background: "var(--surface)", borderRadius: "var(--r-card)", padding: "16px 18px", marginBottom: 14 }}>
-      <div className="bq-label">{title}</div>
-      {sub && <div style={{ font: "400 var(--fs-small) var(--font-mono)", color: "var(--ink-faint)", marginTop: 2 }}>{sub}</div>}
-      <div style={{ marginTop: 14 }}>{children}</div>
-    </div>
-  );
-}
 
 export function Empty({ text }: { text: string }) {
   return <EmptyState bare icon="insights" title={text} body="This fills in automatically as the front desk sells plans, packages and drop-ins." />;

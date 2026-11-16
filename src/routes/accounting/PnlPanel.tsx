@@ -4,7 +4,8 @@ import type { PnlReport } from "../../lib/types";
 import { Button } from "../../components/Button";
 import { Icon } from "../../components/Icon";
 import { Spinner } from "../../components/Spinner";
-import { Card, KpiTile, Delta } from "../overview/Cards";
+import { KpiTile, Delta } from "../overview/Cards";
+import { SectionCard } from "../../components/Card";
 import { pctChange, caption } from "../overview/helpers";
 import { BarChart } from "../overview/BarChart";
 import { ShareBars } from "../overview/Charts";
@@ -75,15 +76,15 @@ export function PnlPanel({ report, loading, onAddExpense, onCoachPayouts }: { re
         <KpiTile label="PROFIT" icon="insights" value={<Num value={current.profit} />} sub={margin !== null ? `${margin >= 0 ? "" : "−"}${Math.abs(Math.round(margin))}% margin` : "Margin needs revenue"} delta={prev && <Delta pct={pctChange(current.profit, prev.profit)} tone="good" />} />
       </div>
 
-      <Card title="NET REVENUE VS EXPENSES" sub={`${caption(report.trend.map((m) => m.month))} · BY MONTH · EGP`}>
+      <SectionCard title="NET REVENUE VS EXPENSES" sub={`${caption(report.trend.map((m) => m.month))} · BY MONTH · EGP`}>
         <PnlChart trend={report.trend} />
-      </Card>
+      </SectionCard>
 
-      <Card title="WHERE THE MONEY CAME FROM" sub={`${monthLabel(current.month).toUpperCase()} · EGP`}>
+      <SectionCard title="WHERE THE MONEY CAME FROM" sub={`${monthLabel(current.month).toUpperCase()} · EGP`}>
         <ShareBars slices={report.revenueBySource} />
-      </Card>
+      </SectionCard>
 
-      <Card title="WHERE THE MONEY WENT" sub={`${monthLabel(current.month).toUpperCase()} · EGP`}>
+      <SectionCard title="WHERE THE MONEY WENT" sub={`${monthLabel(current.month).toUpperCase()} · EGP`}>
         {report.expensesBySource.length === 0 ? (
           <EmptyState bare icon="insights" title="No expenses this month" body="Coach payouts and whatever you log show up here, largest first." />
         ) : (
@@ -110,7 +111,7 @@ export function PnlPanel({ report, loading, onAddExpense, onCoachPayouts }: { re
             ))}
           </div>
         )}
-      </Card>
+      </SectionCard>
 
       <Button fullWidth size="lg" style={{ marginTop: 4, marginBottom: 18 }} onClick={onAddExpense}>
         Add expense

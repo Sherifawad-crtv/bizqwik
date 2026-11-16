@@ -9,6 +9,7 @@ import { PAY_METHOD_LABELS, type ClassBooking, type PayMethod, type BookingAtten
 import { Sheet } from "./Sheet";
 import { Button } from "./Button";
 import { InlineSpinner } from "./Spinner";
+import { Tag, type Tone } from "./Tag";
 
 const ATT_LABEL: Record<BookingAttendance, string> = {
   booked: "Booked",
@@ -16,12 +17,7 @@ const ATT_LABEL: Record<BookingAttendance, string> = {
   no_show: "No-show",
   cancelled: "Cancelled",
 };
-const ATT_TONE: Record<BookingAttendance, { fg: string; bg: string }> = {
-  booked: { fg: "var(--ink-muted)", bg: "var(--sunken)" },
-  arrived: { fg: "var(--paid-fg)", bg: "var(--paid-bg)" },
-  no_show: { fg: "var(--danger-fg)", bg: "var(--danger-bg)" },
-  cancelled: { fg: "var(--ink-faint)", bg: "var(--sunken)" },
-};
+const ATT_TONE: Record<BookingAttendance, Tone> = { booked: "neutral", arrived: "paid", no_show: "danger", cancelled: "neutral" };
 
 /** Staff roster for one class: mark arrived / no-show and collect a pay-at-desk
  * booking (cash / card / wallet). Used by dept_head (class management) and the
@@ -119,9 +115,9 @@ function RosterRow({
             {onPlan ? "On their plan" : `Drop-in · ${b.price > 0 ? egp(b.price) : "Free"} · ${paid ? "Paid" : "Unpaid"}`}
           </div>
         </div>
-        <span style={{ flex: "none", font: "700 10px var(--font-mono)", letterSpacing: ".06em", color: tone.fg, background: tone.bg, borderRadius: "var(--r-chip)", padding: "5px 8px" }}>
+        <Tag tone={tone}>
           {ATT_LABEL[b.attendance].toUpperCase()}
-        </span>
+        </Tag>
       </div>
 
       <div style={{ display: "flex", gap: 8, marginTop: 10 }}>

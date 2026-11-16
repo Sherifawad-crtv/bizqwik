@@ -6,9 +6,11 @@ import { fmt, monthAbbr } from "../../lib/format";
 import type { Expense, ExpenseCategory } from "../../lib/types";
 import { Button } from "../../components/Button";
 import { Icon } from "../../components/Icon";
-import { Card as PlainCard, SectionTitle } from "../frontdesk/shared";
+import { Card } from "../../components/Card";
+import { SectionHeader } from "../../components/SectionHeader";
 import { CategoriesSheet, ExpenseSheet } from "./ExpenseSheet";
 import { MotionList } from "../../components/MotionList";
+import { Chip } from "../../components/Chip";
 
 function ReceiptIcon({ has }: { has: boolean }) {
   if (!has) return null;
@@ -71,17 +73,17 @@ export function ExpensesPanel({
         </label>
       </div>
       <div style={{ display: "flex", gap: 6, overflowX: "auto", marginBottom: 14, paddingBottom: 2 }}>
-        <CategoryChip on={categoryFilter === ""} onClick={() => setCategoryFilter("")}>All</CategoryChip>
+        <Chip size="sm" on={categoryFilter === ""} onClick={() => setCategoryFilter("")}>All</Chip>
         {categories.map((c) => (
-          <CategoryChip key={c.id} on={categoryFilter === c.id} onClick={() => setCategoryFilter(c.id)}>{c.name}</CategoryChip>
+          <Chip size="sm" key={c.id} on={categoryFilter === c.id} onClick={() => setCategoryFilter(c.id)}>{c.name}</Chip>
         ))}
       </div>
 
-      <SectionTitle count={fmt(total) + " EGP"} right={<button onClick={() => setManagingCats(true)} style={{ border: 0, background: "none", font: "700 var(--fs-note) var(--font-body)", color: "var(--primary-pressed)", cursor: "pointer" }}>Categories</button>}>
+      <SectionHeader count={fmt(total) + " EGP"} right={<button onClick={() => setManagingCats(true)} style={{ border: 0, background: "none", font: "700 var(--fs-note) var(--font-body)", color: "var(--primary-pressed)", cursor: "pointer" }}>Categories</button>}>
         Expenses
-      </SectionTitle>
+      </SectionHeader>
 
-      <PlainCard style={{ overflow: "hidden", marginBottom: 14 }}>
+      <Card pad="none" style={{ overflow: "hidden", marginBottom: 14 }}>
         {coachPayouts > 0 && !categoryFilter && !query && (
           <button className="bq-scale" onClick={onCoachPayouts} style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", border: 0, borderBottom: "1px solid var(--line)", background: "var(--sunken)", cursor: "pointer", textAlign: "left", padding: "13px 18px" }}>
             <div className="bq-grow">
@@ -112,7 +114,7 @@ export function ExpensesPanel({
         {expenses.length === 0 && coachPayouts === 0 && (
           <EmptyState bare icon="cash" title={data ? "No expenses this month" : "Loading…"} body="Rent, salaries, utilities — whatever the business spent on. Add the first one below." />
         )}
-      </PlainCard>
+      </Card>
 
       {!sheetMode && (
         <Button fullWidth size="lg" style={{ marginBottom: 18 }} onClick={() => setSheetMode("add")}>
@@ -134,15 +136,3 @@ export function ExpensesPanel({
   );
 }
 
-function CategoryChip({ on, onClick, children }: { on: boolean; onClick: () => void; children: string }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-pressed={on}
-      style={{ flex: "none", height: 32, padding: "0 12px", borderRadius: 999, border: `1px solid ${on ? "var(--primary)" : "var(--line)"}`, background: on ? "var(--primary-tint)" : "var(--surface)", color: on ? "var(--primary-pressed)" : "var(--ink)", font: "700 var(--fs-small) var(--font-body)", whiteSpace: "nowrap", cursor: "pointer" }}
-    >
-      {children}
-    </button>
-  );
-}

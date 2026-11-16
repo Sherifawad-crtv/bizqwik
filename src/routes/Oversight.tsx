@@ -12,7 +12,8 @@ import { Segmented } from "../components/Segmented";
 import { Spinner } from "../components/Spinner";
 import { caption, pctChange } from "./overview/helpers";
 import { RevenueChart, ShareBars } from "./overview/Charts";
-import { Card, Delta, KpiTile } from "./overview/Cards";
+import { Delta, KpiTile } from "./overview/Cards";
+import { SectionCard } from "../components/Card";
 import { Num } from "../components/Num";
 
 type Range = "1" | "3" | "6" | "12";
@@ -128,11 +129,11 @@ export function Oversight() {
             </>
           )}
 
-          <Card title="REVENUE VS COACH PAYOUTS" sub={`${caption(data.trend.map((m) => m.month))} · BY MONTH · EGP`}>
+          <SectionCard title="REVENUE VS COACH PAYOUTS" sub={`${caption(data.trend.map((m) => m.month))} · BY MONTH · EGP`}>
             <RevenueChart months={data.trend} />
-          </Card>
+          </SectionCard>
 
-          <Card title="WHERE THE MONEY CAME FROM" sub={`${caption(shown.map((m) => m.month))} · EGP`}>
+          <SectionCard title="WHERE THE MONEY CAME FROM" sub={`${caption(shown.map((m) => m.month))} · EGP`}>
             <div style={{ marginBottom: 14 }}>
               <Segmented
                 value={breakdown}
@@ -144,9 +145,9 @@ export function Oversight() {
               />
             </div>
             <ShareBars slices={breakdown === "service" ? report.byService : report.byType} />
-          </Card>
+          </SectionCard>
 
-          <Card title="BY COACH" sub="PRIVATE TRAINING SOLD · WHAT THEY EARNED">
+          <SectionCard title="BY COACH" sub="PRIVATE TRAINING SOLD · WHAT THEY EARNED">
             {report.byCoach.length === 0 ? (
               <EmptyState bare icon="coaches" title="No coach activity in this period" body="Coaches appear here once they sell PT or get paid for sessions in these months." />
             ) : (
@@ -165,7 +166,7 @@ export function Oversight() {
                 ))}
               </div>
             )}
-          </Card>
+          </SectionCard>
 
           {profile.role === "dept_head" && (
             <button

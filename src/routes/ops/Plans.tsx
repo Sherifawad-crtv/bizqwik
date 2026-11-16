@@ -10,7 +10,9 @@ import { Icon } from "../../components/Icon";
 import { Sheet } from "../../components/Sheet";
 import { TextField } from "../../components/FormField";
 import { ConfirmSheet } from "../../components/ConfirmSheet";
-import { Card, SectionTitle, ErrorBanner } from "./shared";
+import { ErrorBanner } from "./shared";
+import { Card } from "../../components/Card";
+import { SectionHeader } from "../../components/SectionHeader";
 import { limitLabel } from "./format";
 
 function PlanSheet({ open, onClose, plan, onDone }: { open: boolean; onClose: () => void; plan: PlanType | null; onDone: () => void }) {
@@ -107,10 +109,10 @@ export function Plans() {
 
       {plansRes.error && <ErrorBanner text={plansRes.error} />}
 
-      <SectionTitle count={plans.length}>SaaS plans</SectionTitle>
+      <SectionHeader count={plans.length}>SaaS plans</SectionHeader>
       <div className="bq-stack">
         {plans.map((p) => (
-          <Card key={p.id} style={{ padding: "16px 18px", display: "flex", alignItems: "center", gap: 12 }}>
+          <Card pad="none" key={p.id} style={{ padding: "16px 18px", display: "flex", alignItems: "center", gap: 12 }}>
             <div className="bq-grow">
               <div style={{ font: "700 17px var(--font-body)" }}>{p.name}</div>
               <div style={{ font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-faint)", marginTop: 3 }}>

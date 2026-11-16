@@ -11,7 +11,9 @@ import { Segmented } from "../../components/Segmented";
 import { SelectField } from "../../components/FormField";
 import { Button } from "../../components/Button";
 import { Avatar } from "../../components/Avatar";
-import { Card, SectionTitle, ErrorBanner } from "./shared";
+import { ErrorBanner } from "./shared";
+import { Card } from "../../components/Card";
+import { SectionHeader } from "../../components/SectionHeader";
 import { limitLabel } from "./format";
 import { DeleteOrgSheet } from "./orgdetail/DeleteOrgSheet";
 import { OrgAppConfig, UsageRow } from "./orgdetail/AppConfig";
@@ -98,11 +100,11 @@ export function OrgDetail() {
       {error && <ErrorBanner text={error} />}
 
       <div style={{ marginTop: 22, opacity: busy ? 0.6 : 1, pointerEvents: busy ? "none" : "auto" }}>
-        <SectionTitle>Status</SectionTitle>
+        <SectionHeader>Status</SectionHeader>
         <Segmented value={org.status} options={STATUS_OPTIONS} onChange={setStatus} />
 
         <div style={{ marginTop: 22 }}>
-          <SectionTitle>App type</SectionTitle>
+          <SectionHeader>App type</SectionHeader>
           <Segmented
             value={org.mode ?? "team"}
             options={[{ value: "team", label: "TEAM" }, { value: "solo", label: "SOLO" }]}
@@ -114,7 +116,7 @@ export function OrgDetail() {
         </div>
 
         <div style={{ marginTop: 22 }}>
-          <SectionTitle>Plan</SectionTitle>
+          <SectionHeader>Plan</SectionHeader>
           <SelectField label="SAAS PLAN" value={org.planId ?? ""} options={planOptions} onChange={setPlan} placeholder="No plan" />
           {activePlan && (
             <div style={{ font: "500 var(--fs-small)/1.6 var(--font-mono)", color: "var(--ink-faint)", padding: "8px 2px 0" }}>
@@ -127,8 +129,8 @@ export function OrgDetail() {
       <OrgAppConfig id={id} />
 
       <div style={{ marginTop: 26 }}>
-        <SectionTitle>QR codes</SectionTitle>
-        <Card style={{ padding: 18, display: "flex", alignItems: "center", gap: 14 }}>
+        <SectionHeader>QR codes</SectionHeader>
+        <Card pad="none" style={{ padding: 18, display: "flex", alignItems: "center", gap: 14 }}>
           <div className="bq-grow">
             <div style={{ font: "700 var(--fs-body) var(--font-body)" }}>Lifetime check-in code</div>
             <div style={{ font: "400 var(--fs-note)/1.5 var(--font-mono)", color: "var(--ink-faint)", marginTop: 2 }}>
@@ -139,7 +141,7 @@ export function OrgDetail() {
             Open
           </Button>
         </Card>
-        <Card style={{ padding: 18, display: "flex", alignItems: "center", gap: 14, marginTop: 10 }}>
+        <Card pad="none" style={{ padding: 18, display: "flex", alignItems: "center", gap: 14, marginTop: 10 }}>
           <div className="bq-grow">
             <div style={{ font: "700 var(--fs-body) var(--font-body)" }}>Coaches' attendance code</div>
             <div style={{ font: "400 var(--fs-note)/1.5 var(--font-mono)", color: "var(--ink-faint)", marginTop: 2 }}>
@@ -153,8 +155,8 @@ export function OrgDetail() {
       </div>
 
       <div style={{ marginTop: 26 }}>
-        <SectionTitle>Usage</SectionTitle>
-        <Card style={{ overflow: "hidden" }}>
+        <SectionHeader>Usage</SectionHeader>
+        <Card pad="none" style={{ overflow: "hidden" }}>
           <UsageRow label="GMV" value={egp(usage.gmv)} />
           <UsageRow label="Staff" value={String(usage.staffCount)} />
           <UsageRow label="Clients" value={String(usage.clientCount)} />
@@ -169,8 +171,8 @@ export function OrgDetail() {
       </div>
 
       <div style={{ marginTop: 26 }}>
-        <SectionTitle count={staff.length}>Staff</SectionTitle>
-        <Card style={{ overflow: "hidden" }}>
+        <SectionHeader count={staff.length}>Staff</SectionHeader>
+        <Card pad="none" style={{ overflow: "hidden" }}>
           {staff.map((p, i) => (
             <div key={p.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 18px", borderBottom: i === staff.length - 1 ? "none" : "1px solid var(--line)" }}>
               <Avatar name={p.name} size={34} src={p.avatarUrl} />
@@ -194,8 +196,8 @@ export function OrgDetail() {
 
       {pendingInvites.length > 0 && (
         <div style={{ marginTop: 26 }}>
-          <SectionTitle count={pendingInvites.length}>Pending invites</SectionTitle>
-          <Card style={{ overflow: "hidden" }}>
+          <SectionHeader count={pendingInvites.length}>Pending invites</SectionHeader>
+          <Card pad="none" style={{ overflow: "hidden" }}>
             {pendingInvites.map((inv, i) => (
               <div key={inv.email} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 18px", borderBottom: i === pendingInvites.length - 1 ? "none" : "1px solid var(--line)" }}>
                 <span style={{ color: "var(--ink-faint)", display: "flex" }}><Icon name="envelope" size={18} /></span>
@@ -208,8 +210,8 @@ export function OrgDetail() {
       )}
 
       <div style={{ marginTop: 26 }}>
-        <SectionTitle>Danger zone</SectionTitle>
-        <Card style={{ padding: 18, display: "flex", alignItems: "center", gap: 14 }}>
+        <SectionHeader>Danger zone</SectionHeader>
+        <Card pad="none" style={{ padding: 18, display: "flex", alignItems: "center", gap: 14 }}>
           <div className="bq-grow">
             <div style={{ font: "700 var(--fs-body) var(--font-body)" }}>Delete organization</div>
             <div style={{ font: "400 var(--fs-note)/1.5 var(--font-mono)", color: "var(--ink-faint)", marginTop: 2 }}>

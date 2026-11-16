@@ -13,7 +13,8 @@ import { TextField, SelectField } from "../../../components/FormField";
 import { PaymentCards } from "../../../components/PaymentCards";
 import type { PayMethod } from "../../../lib/types";
 import { useAuth } from "../../../lib/auth";
-import { Card, ErrorBanner, SheetHeading } from "../shared";
+import { ErrorBanner, SheetHeading } from "../shared";
+import { Card } from "../../../components/Card";
 import { type PlanKind, bundleOptions, coachOptions, offerOf } from "./offers";
 import { GroupOfferSelect, PartnerPicker } from "./partners";
 
@@ -241,7 +242,7 @@ export function CreateClientSheet({
 
           {step === 3 && (
             <>
-              <Card style={{ overflow: "hidden" }}>
+              <Card pad="none" style={{ overflow: "hidden" }}>
                 {(
                   [
                     ["CLIENT", name.trim()],

@@ -6,7 +6,8 @@ import type { ClientWithPackage } from "../../lib/types";
 import { Icon } from "../../components/Icon";
 import { Spinner } from "../../components/Spinner";
 import { EmptyState } from "../../components/EmptyState";
-import { Card, PlanPill, SearchField } from "./shared";
+import { PlanPill, SearchField } from "./shared";
+import { Card } from "../../components/Card";
 import { matchesClient, planSummary } from "./deskStatus";
 import { useFrontDeskCatalog } from "./members/offers";
 
@@ -43,7 +44,7 @@ export function CheckInList() {
   return (
     <div>
       <SearchField value={query} onChange={setQuery} placeholder="Search name or phone" />
-      <Card style={{ marginTop: 10, overflow: "hidden" }}>
+      <Card pad="none" style={{ marginTop: 10, overflow: "hidden" }}>
         {shown.map((c, i) => {
           const plan = planSummary(c, bundleTypes);
           const r = results[c.id];

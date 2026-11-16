@@ -4,7 +4,9 @@ import { useAsync } from "../../../lib/useAsync";
 import { type OrgConfig } from "../../../lib/types";
 import { TextField } from "../../../components/FormField";
 import { Button } from "../../../components/Button";
-import { Card, SectionTitle, ErrorBanner } from "../shared";
+import { ErrorBanner } from "../shared";
+import { Card } from "../../../components/Card";
+import { SectionHeader } from "../../../components/SectionHeader";
 import { ImageUploadField } from "./ImageUpload";
 
 // Blank earn rate = points off. Defaults: 10 pts/EGP earned, 500 pts = 1 EGP
@@ -37,8 +39,8 @@ export function OrgAppConfig({ id }: { id: string }) {
   const cfg = useAsync(() => api.ops.orgConfig(id), [id]);
   return (
     <div style={{ marginTop: 26 }}>
-      <SectionTitle>Member app</SectionTitle>
-      <Card style={{ padding: 18 }}>
+      <SectionHeader>Member app</SectionHeader>
+      <Card pad="none" style={{ padding: 18 }}>
         {cfg.loading && <div style={{ padding: "6px 0", color: "var(--ink-faint)", font: "500 var(--fs-body-sm) var(--font-body)" }}>Loading…</div>}
         {cfg.error && <ErrorBanner text={cfg.error} />}
         {cfg.data && <OrgAppConfigForm key={id} id={id} initial={cfg.data} onSaved={cfg.refetch} />}

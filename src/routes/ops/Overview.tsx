@@ -7,12 +7,14 @@ import { egp } from "../../lib/format";
 import { Spinner } from "../../components/Spinner";
 import { Button } from "../../components/Button";
 import { Icon } from "../../components/Icon";
-import { Card, SectionTitle, StatusPill } from "./shared";
+import { StatusPill } from "./shared";
+import { Card } from "../../components/Card";
+import { SectionHeader } from "../../components/SectionHeader";
 import { CreateOrgSheet } from "./CreateOrgSheet";
 
 function StatTile({ label, value }: { label: string; value: string }) {
   return (
-    <Card style={{ padding: "16px 18px" }}>
+    <Card pad="none" style={{ padding: "16px 18px" }}>
       <div className="bq-label">{label}</div>
       <div style={{ font: "800 var(--fs-title)/1.1 var(--font-body)", letterSpacing: "-.02em", marginTop: 6 }} className="tabular">{value}</div>
     </Card>
@@ -53,8 +55,8 @@ export function Overview() {
         </div>
       )}
 
-      <SectionTitle count={orgs.length}>Organizations</SectionTitle>
-      <Card style={{ overflow: "hidden" }}>
+      <SectionHeader count={orgs.length}>Organizations</SectionHeader>
+      <Card pad="none" style={{ overflow: "hidden" }}>
         {orgs.map((o, i) => (
           <button
             key={o.id}

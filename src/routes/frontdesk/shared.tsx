@@ -3,6 +3,8 @@ import { Icon } from "../../components/Icon";
 import { EmptyState } from "../../components/EmptyState";
 import type { BundleType, ClientWithPackage } from "../../lib/types";
 import { planSummary, deskStatus, matchesClient } from "./deskStatus";
+import { StatusBadge, type Tone } from "../../components/Tag";
+import { Card } from "../../components/Card";
 
 export type PlanTone = "active" | "expired" | "none";
 
@@ -16,39 +18,14 @@ export const DAY = 86400000;
 
 export type StatusTone = "good" | "warn" | "frozen" | "pt" | "bad" | "none";
 
-const TONE: Record<StatusTone, { fg: string; bg: string }> = {
-  good: { fg: "var(--paid-fg)", bg: "var(--paid-bg)" },
-  warn: { fg: "var(--logging-fg)", bg: "var(--logging-bg)" },
-  frozen: { fg: "var(--frozen-fg)", bg: "var(--frozen-bg)" },
-  pt: { fg: "var(--settled-fg)", bg: "var(--settled-bg)" },
-  bad: { fg: "var(--danger-fg)", bg: "var(--danger-bg)" },
-  none: { fg: "var(--ink-muted)", bg: "var(--sunken)" },
-};
+const TONE: Record<StatusTone, Tone> = { good: "paid", warn: "logging", frozen: "frozen", pt: "settled", bad: "danger", none: "neutral" };
 
 export function PlanPill({ client }: { client: ClientWithPackage }) {
   const s = deskStatus(client);
-  const c = TONE[s.tone];
   return (
-    <span
-      data-testid="status-pill"
-      data-tone={s.tone}
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 6,
-        padding: "4px 10px",
-        borderRadius: 999,
-        background: c.bg,
-        color: c.fg,
-        font: "700 var(--fs-caption) var(--font-mono)",
-        letterSpacing: ".06em",
-        whiteSpace: "nowrap",
-        flex: "none",
-      }}
-    >
-      <i style={{ width: 6, height: 6, borderRadius: 999, background: c.fg, display: "block" }} />
+    <StatusBadge tone={TONE[s.tone]} data-testid="status-pill" data-tone={s.tone}>
       {s.label}
-    </span>
+    </StatusBadge>
   );
 }
 
@@ -69,18 +46,9 @@ export function ErrorBanner({ text }: { text: string }) {
   );
 }
 
-export function SectionTitle({ children, count, right }: { children: ReactNode; count?: number | string; right?: ReactNode }) {
-  return (
-    <div style={{ display: "flex", alignItems: "center", gap: 10, margin: "4px 2px 12px" }}>
-      <span className="bq-h2">{children}</span>
-      {count !== undefined && <span className="bq-meta">{count}</span>}
-      {right && <div style={{ marginLeft: "auto" }}>{right}</div>}
-    </div>
-  );
-}
 
 /** The "see everything" link that belongs opposite a section's title (the
- * `right` of SectionTitle), never stranded under its list. */
+ * `right` of SectionHeader), never stranded under its list. */
 export function SectionLink({ children, onClick }: { children: ReactNode; onClick: () => void }) {
   return (
     <button
@@ -93,13 +61,6 @@ export function SectionLink({ children, onClick }: { children: ReactNode; onClic
   );
 }
 
-export function Card({ children, style }: { children: ReactNode; style?: React.CSSProperties }) {
-  return (
-    <div style={{ background: "var(--surface)", borderRadius: "var(--r-card)", ...style }}>
-      {children}
-    </div>
-  );
-}
 
 export function SearchField({ value, onChange, placeholder = "Search by name or phone" }: { value: string; onChange: (v: string) => void; placeholder?: string }) {
   return (
@@ -147,7 +108,7 @@ export function ClientPicker({
   return (
     <div>
       <SearchField value={query} onChange={setQuery} />
-      <Card style={{ marginTop: 10, overflow: "hidden" }}>
+      <Card pad="none" style={{ marginTop: 10, overflow: "hidden" }}>
         {shown.map((c, i) => {
           const plan = planSummary(c, bundleTypes);
           return (

@@ -13,7 +13,8 @@ import { ConfirmSheet } from "../../components/ConfirmSheet";
 import { TextField, SelectField } from "../../components/FormField";
 import { PaymentSelect } from "../../components/PaymentSelect";
 import { Icon } from "../../components/Icon";
-import { Card, ClientPicker, ErrorBanner } from "./shared";
+import { ClientPicker, ErrorBanner } from "./shared";
+import { Card } from "../../components/Card";
 import { useNewClient } from "./NewClientModal";
 import { useFrontDeskCatalog } from "./members/offers";
 import type { PayMethod } from "../../lib/types";
@@ -147,7 +148,7 @@ export function DropIn({ embedded = false, initialClient = null }: { embedded?: 
         />
       </div>
 
-      <Card style={{ padding: "16px 18px", display: "flex", gap: 12, alignItems: "flex-start", marginBottom: 16 }}>
+      <Card pad="none" style={{ padding: "16px 18px", display: "flex", gap: 12, alignItems: "flex-start", marginBottom: 16 }}>
         <span style={{ color: "var(--primary-pressed)", display: "flex", marginTop: 2 }}>
           <Icon name={mode === "class" ? "calendar" : "ticket"} size={22} />
         </span>

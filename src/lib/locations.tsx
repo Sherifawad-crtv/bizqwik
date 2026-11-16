@@ -4,6 +4,7 @@ import { useAsync } from "./useAsync";
 import type { Location } from "./types";
 import { SelectField } from "../components/FormField";
 import { Segmented } from "../components/Segmented";
+import { Tag } from "../components/Tag";
 
 // Where the owner is working right now (this phone). Remembered per device, so
 // switching location on Today applies to Schedule, check-in and new sessions.
@@ -70,11 +71,7 @@ export const locationName = (locations: Location[], id: string | null | undefine
 export function LocationPill({ locations, id }: { locations: Location[]; id: string | null | undefined }) {
   const name = locationName(locations, id);
   if (!name) return null;
-  return (
-    <span style={{ flex: "none", font: "700 10px var(--font-mono)", letterSpacing: ".06em", color: "var(--primary-pressed)", background: "var(--primary-tint)", borderRadius: "var(--r-chip)", padding: "3px 7px", textTransform: "uppercase", whiteSpace: "nowrap" }}>
-      {name}
-    </span>
-  );
+  return <Tag tone="primary">{name}</Tag>;
 }
 
 /** Pick a location in a form. Only shown when the business has locations. */

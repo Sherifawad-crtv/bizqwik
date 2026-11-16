@@ -17,9 +17,11 @@ import { TextField, SelectField } from "../../components/FormField";
 import { Spinner } from "../../components/Spinner";
 import { SheetSuccessIcon } from "../../components/SheetSuccessIcon";
 import { useAuth } from "../../lib/auth";
-import { EmptyRow, PanelHeader } from "./shared";
+import { EmptyRow } from "./shared";
+import { SectionHeader } from "../../components/SectionHeader";
 import { iconBtn, useCatalogHere } from "./helpers";
 import { MotionList } from "../../components/MotionList";
+import { Tag } from "../../components/Tag";
 
 export function PlansPanel({ solo }: { solo?: boolean }) {
   const { data } = useAsync(() => api.planTypes(), []);
@@ -36,15 +38,16 @@ export function PlansPanel({ solo }: { solo?: boolean }) {
     const rows = data.planTypes.filter((p) => p.kind === kind && p.active && atLocation(p.locationId, catalogHere));
     return (
       <div style={{ marginBottom: 28 }}>
-        <PanelHeader
-          title={title}
+        <SectionHeader
           count={rows.length}
-          action={
+          right={
             <Button size="md" style={{ height: 40, padding: "0 16px" }} onClick={() => setEditing({ kind, planType: null })}>
               + {kind === "membership" ? "Membership" : "Bundle"}
             </Button>
           }
-        />
+        >
+          {title}
+        </SectionHeader>
         <div className="bq-panel">
           <MotionList>
 {rows.map((p, i) => (
@@ -54,7 +57,7 @@ export function PlansPanel({ solo }: { solo?: boolean }) {
                   <span style={{ font: "700 var(--fs-base) var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.name}</span>
                   <CategoryPill name={p.name} />
                   <LocationPill locations={locations} id={p.locationId} />
-                  {!p.active && <span style={{ flex: "none", font: "700 10px var(--font-mono)", letterSpacing: ".06em", color: "var(--ink-muted)", background: "var(--sunken)", borderRadius: "var(--r-chip)", padding: "3px 7px" }}>OFF SALE</span>}
+                  {!p.active && <Tag>OFF SALE</Tag>}
                 </div>
                 <div className="bq-meta">
                   {fmt(p.price)} EGP · {p.kind === "bundle" ? `${p.credits} classes${p.sharedSeats ? ` shared by ${p.sharedSeats}` : ""} · ` : "all classes · "}

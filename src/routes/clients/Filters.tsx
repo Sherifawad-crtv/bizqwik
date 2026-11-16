@@ -8,7 +8,7 @@ import { DateField } from "../../components/DateField";
 import { NO_FILTERS, filterClients, planOptions, type ClientFilters, type ExpiryFilter, type SortKey, type StatusFilter } from "../../lib/clientFilters";
 import { plusDays } from "./helpers";
 import { useNow } from "../../lib/useNow";
-import { QUICK_MS, tr } from "../../lib/motion";
+import { Chip } from "../../components/Chip";
 
 const STATUS_CHIPS: { value: StatusFilter; label: string }[] = [
   { value: "all", label: "All" },
@@ -36,32 +36,6 @@ const SORT_OPTIONS: { value: SortKey; label: string }[] = [
   { value: "left_most", label: "Sessions left · most" },
 ];
 
-function Chip({ on, onClick, children, testId }: { on: boolean; onClick: () => void; children: ReactNode; testId?: string }) {
-  return (
-    <button
-      type="button"
-      data-testid={testId}
-      aria-pressed={on}
-      className="bq-still"
-      onClick={onClick}
-      style={{
-        flex: "none",
-        height: 36,
-        padding: "0 11px",
-        borderRadius: 999,
-        border: `1px solid ${on ? "var(--primary)" : "var(--line)"}`,
-        background: on ? "var(--primary-tint)" : "var(--surface)",
-        color: on ? "var(--primary-pressed)" : "var(--ink)",
-        font: "700 var(--fs-body-sm) var(--font-body)",
-        whiteSpace: "nowrap",
-        cursor: "pointer",
-        transition: tr(["background", "color", "border-color"], QUICK_MS),
-      }}
-    >
-      {children}
-    </button>
-  );
-}
 
 function FilterGroup({ label, children }: { label: string; children: ReactNode }) {
   return (

@@ -14,7 +14,9 @@ import { Spinner } from "../../components/Spinner";
 import { RevenueChart } from "../overview/Charts";
 import { LocationSwitcher, atLocation, useCurrentLocation } from "../../lib/locations";
 import { PaymentRequestsCard } from "./PaymentRequests";
-import { Card, SectionLink, SectionTitle } from "./shared";
+import { SectionLink } from "./shared";
+import { Card } from "../../components/Card";
+import { SectionHeader } from "../../components/SectionHeader";
 import { endingSoon, planSummary } from "./deskStatus";
 import { useNow } from "../../lib/useNow";
 
@@ -126,14 +128,14 @@ export function SoloHome() {
         <Stat label="ENDING SOON" icon="history" tone="warn" value={String(stats.soon)} sub="Next 7 days" onClick={() => goMembers("soon")} />
       </div>
 
-      <Card style={{ padding: "18px 18px 12px", marginTop: 10 }}>
+      <Card pad="none" style={{ padding: "18px 18px 12px", marginTop: 10 }}>
         <div style={{ font: "700 var(--fs-caption) var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", marginBottom: 10 }}>REVENUE BY MONTH · EGP</div>
         <RevenueChart months={trend} revenueOnly />
       </Card>
 
 
-      <SectionTitle right={<SectionLink onClick={() => navigate("/bookings")}>Schedule</SectionLink>}>Coming up</SectionTitle>
-      <Card style={{ overflow: "hidden", marginBottom: 24 }}>
+      <SectionHeader right={<SectionLink onClick={() => navigate("/bookings")}>Schedule</SectionLink>}>Coming up</SectionHeader>
+      <Card pad="none" style={{ overflow: "hidden", marginBottom: 24 }}>
         {nextUp.map((c, i) => (
           <button
             key={c.id}

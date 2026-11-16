@@ -18,7 +18,8 @@ import { TextField, SelectField } from "../../components/FormField";
 import { Spinner } from "../../components/Spinner";
 import { SheetSuccessIcon } from "../../components/SheetSuccessIcon";
 import { useAuth } from "../../lib/auth";
-import { EmptyRow, PanelHeader } from "./shared";
+import { EmptyRow } from "./shared";
+import { SectionHeader } from "../../components/SectionHeader";
 import { iconBtn, useCatalogHere } from "./helpers";
 import { MotionList } from "../../components/MotionList";
 
@@ -35,15 +36,16 @@ export function ClassesPanel({ solo }: { solo?: boolean }) {
 
   return (
     <div>
-      <PanelHeader
-        title="Group classes"
+      <SectionHeader
         count={active.length}
-        action={
+        right={
           <Button size="md" style={{ height: 40, padding: "0 16px" }} onClick={() => setEditing("new")}>
             + New class
           </Button>
         }
-      />
+      >
+        Group classes
+      </SectionHeader>
       <div className="bq-panel">
         <MotionList>
 {active.map((s, i) => (

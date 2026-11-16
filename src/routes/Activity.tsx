@@ -12,6 +12,7 @@ import { Icon } from "../components/Icon";
 import { Segmented } from "../components/Segmented";
 import { useBackAction } from "../lib/floatingActions";
 import { useIsMobile } from "../lib/useIsMobile";
+import { Tag, type Tone } from "../components/Tag";
 
 type Cat = "sale" | "refund" | "wallet" | "points" | "class" | "checkin" | "other";
 
@@ -26,14 +27,14 @@ function catOf(type: string): Cat {
   return "other";
 }
 
-const CAT_TONE: Record<Cat, { fg: string; bg: string; label: string }> = {
-  sale: { fg: "var(--paid-fg)", bg: "var(--paid-bg)", label: "SALE" },
-  refund: { fg: "var(--danger-fg)", bg: "var(--danger-bg)", label: "REFUND" },
-  wallet: { fg: "var(--primary-pressed)", bg: "var(--primary-tint)", label: "WALLET" },
-  points: { fg: "var(--settled-fg)", bg: "var(--settled-bg)", label: "POINTS" },
-  class: { fg: "var(--logging-fg)", bg: "var(--logging-bg)", label: "CLASS" },
-  checkin: { fg: "var(--ink-muted)", bg: "var(--sunken)", label: "CHECK-IN" },
-  other: { fg: "var(--ink-muted)", bg: "var(--sunken)", label: "EVENT" },
+const CAT_TONE: Record<Cat, { tone: Tone; label: string }> = {
+  sale: { tone: "paid", label: "SALE" },
+  refund: { tone: "danger", label: "REFUND" },
+  wallet: { tone: "primary", label: "WALLET" },
+  points: { tone: "settled", label: "POINTS" },
+  class: { tone: "logging", label: "CLASS" },
+  checkin: { tone: "neutral", label: "CHECK-IN" },
+  other: { tone: "neutral", label: "EVENT" },
 };
 
 function metaStr(m: Record<string, unknown> | null, key: string): string | null {
@@ -171,12 +172,12 @@ function Feed({ entries }: { entries: ActivityEntry[] }) {
         const amt = amountLabel(e);
         return (
           <div key={e.id} style={{ background: "var(--surface)", borderRadius: "var(--r-card)", padding: "12px 14px", display: "flex", alignItems: "center", gap: 12 }}>
-            <span style={{ flex: "none", font: "700 10px var(--font-mono)", letterSpacing: ".06em", color: tone.fg, background: tone.bg, borderRadius: "var(--r-chip)", padding: "5px 8px", minWidth: 74, textAlign: "center" }}>{tone.label}</span>
+            <Tag tone={tone.tone} style={{ minWidth: 74, justifyContent: "center" }}>{tone.label}</Tag>
             <span className="bq-grow">
               <span style={{ display: "block", font: "600 var(--fs-body-sm)/1.35 var(--font-body)" }}>{describe(e)}</span>
               <span style={{ display: "block", font: "400 var(--fs-small) var(--font-mono)", color: "var(--ink-faint)", marginTop: 2 }}>{timeLabel(e.at)}{e.actorName ? ` · by ${e.actorName}` : ""}</span>
             </span>
-            {amt && <span className="tabular" style={{ flex: "none", font: "800 var(--fs-body-sm) var(--font-body)", color: tone.fg }}>{amt}</span>}
+            {amt && <span className={`tabular bq-tone-${tone.tone}`} style={{ flex: "none", font: "800 var(--fs-body-sm) var(--font-body)", color: "var(--tone-fg)" }}>{amt}</span>}
           </div>
         );
       })}

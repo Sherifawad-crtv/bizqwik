@@ -7,7 +7,9 @@ import { Button } from "../../components/Button";
 import { TextField } from "../../components/FormField";
 import { Icon } from "../../components/Icon";
 import { Spinner } from "../../components/Spinner";
-import { Card, ClientPicker, ErrorBanner, SectionTitle } from "./shared";
+import { ClientPicker, ErrorBanner } from "./shared";
+import { Card } from "../../components/Card";
+import { SectionHeader } from "../../components/SectionHeader";
 import { useNewClient } from "./NewClientModal";
 import { useFrontDeskCatalog } from "./members/offers";
 
@@ -57,7 +59,7 @@ export function Invitations({ embedded = false, onCreateClient }: { embedded?: b
 
   return (
     <div>
-      <Card style={{ padding: "16px 18px", display: "flex", gap: 12, alignItems: "flex-start", marginBottom: 16 }}>
+      <Card pad="none" style={{ padding: "16px 18px", display: "flex", gap: 12, alignItems: "flex-start", marginBottom: 16 }}>
         <span style={{ color: "var(--primary-pressed)", display: "flex", marginTop: 2 }}>
           <Icon name="gift" size={22} />
         </span>
@@ -75,7 +77,7 @@ export function Invitations({ embedded = false, onCreateClient }: { embedded?: b
 
       {!member ? (
         <>
-          <SectionTitle>Choose the member</SectionTitle>
+          <SectionHeader>Choose the member</SectionHeader>
           <ClientPicker
             clients={data.clients}
             bundleTypes={bundleTypes}
@@ -91,7 +93,7 @@ export function Invitations({ embedded = false, onCreateClient }: { embedded?: b
         </>
       ) : (
         <>
-          <Card style={{ padding: "16px 18px", marginBottom: 14 }}>
+          <Card pad="none" style={{ padding: "16px 18px", marginBottom: 14 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <div className="bq-grow">
                 <div className="bq-label">MEMBER</div>

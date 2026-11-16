@@ -12,7 +12,8 @@ import { Sheet } from "../../components/Sheet";
 import { ConfirmSheet } from "../../components/ConfirmSheet";
 import { TextField, SelectField } from "../../components/FormField";
 import { SheetSuccessIcon } from "../../components/SheetSuccessIcon";
-import { Card as PlainCard, SectionTitle } from "../frontdesk/shared";
+import { Card } from "../../components/Card";
+import { SectionHeader } from "../../components/SectionHeader";
 import { CategoriesSheet } from "./ExpenseSheet";
 import { catOptions } from "./options";
 import { MotionList } from "../../components/MotionList";
@@ -40,10 +41,10 @@ export function RecurringPanel({ categories, onChanged, onCategoriesChanged }: {
 
   return (
     <div>
-      <SectionTitle count={recurring.length} right={<button onClick={() => setManagingCats(true)} style={{ border: 0, background: "none", font: "700 var(--fs-note) var(--font-body)", color: "var(--primary-pressed)", cursor: "pointer" }}>Categories</button>}>
+      <SectionHeader count={recurring.length} right={<button onClick={() => setManagingCats(true)} style={{ border: 0, background: "none", font: "700 var(--fs-note) var(--font-body)", color: "var(--primary-pressed)", cursor: "pointer" }}>Categories</button>}>
         Recurring expenses
-      </SectionTitle>
-      <PlainCard style={{ overflow: "hidden", marginBottom: 14 }}>
+      </SectionHeader>
+      <Card pad="none" style={{ overflow: "hidden", marginBottom: 14 }}>
         <MotionList>
 {recurring.map((r, i) => {
           const next = nextOccurrence(r);
@@ -64,7 +65,7 @@ export function RecurringPanel({ categories, onChanged, onCategoriesChanged }: {
         {recurring.length === 0 && (
           <EmptyState bare icon="cash" title={data ? "No repeating expenses" : "Loading…"} body="Rent, salaries and anything else that happens every month — set it up once." />
         )}
-      </PlainCard>
+      </Card>
       <Button fullWidth size="lg" style={{ marginBottom: 18 }} onClick={() => setEditing({ id: "", categoryId: categories.find((c) => !c.archived)?.id ?? "", categoryName: "", amount: 0, note: null, dayOfMonth: new Date().getDate() > 28 ? 28 : new Date().getDate(), startMonth: MOCK.CURRENT_MONTH, endMonth: null, active: true })}>
         Add a repeating expense
       </Button>
