@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { fmt } from "../../lib/format";
 import { useMeasuredWidth } from "./helpers";
+import { useTween } from "../../lib/useTween";
+import { EASE, QUICK_MS } from "../../lib/motion";
 
 export interface BarDatum {
   key: string;
@@ -44,6 +46,14 @@ export function BarChart({ data, aLabel, bLabel, ariaLabel }: { data: BarDatum[]
   const slot = plotW / data.length;
   const barW = Math.max(10, Math.min(36, slot * 0.62));
   const r = Math.min(barW / 2, 14);
+  // Bars grow up from the baseline when the chart appears, and glide to their
+  // new heights when the range changes (matched by month, so new months grow in).
+  const tweened = useTween(
+    data.flatMap((d) => [d.a, d.b ?? 0]),
+    data.flatMap((d) => [`${d.key}:a`, `${d.key}:b`]),
+  );
+  const shownA = (i: number) => tweened[i * 2] ?? 0;
+  const shownB = (i: number) => tweened[i * 2 + 1] ?? 0;
 
   // A bar with a round top and a square foot on the baseline.
   const bar = (x: number, v: number, fill: string, key: string) => {
@@ -66,21 +76,29 @@ export function BarChart({ data, aLabel, bLabel, ariaLabel }: { data: BarDatum[]
         ))}
         {data.map((d, i) => {
           const x = padL + i * slot + (slot - barW) / 2;
-          const bVal = d.b ?? 0;
+          const aVal = shownA(i);
+          const bVal = shownB(i);
           // The taller one goes behind, so the other always shows in front of it.
-          const aBehind = d.a >= bVal;
+          const aBehind = (d.a ?? 0) >= (d.b ?? 0);
           return (
-            <g key={d.key} onClick={() => setPick(pick === i ? null : i)} onMouseEnter={() => setPick(i)} onMouseLeave={() => setPick(null)} style={{ cursor: "pointer" }}>
+            <g
+              key={d.key}
+              // A mouse shows figures on hover; a finger taps a bar to show them and taps it again to hide.
+              onPointerEnter={(e) => e.pointerType === "mouse" && setPick(i)}
+              onPointerLeave={(e) => e.pointerType === "mouse" && setPick(null)}
+              onPointerUp={(e) => e.pointerType !== "mouse" && setPick(pick === i ? null : i)}
+              style={{ cursor: "pointer" }}
+            >
               <rect x={padL + i * slot} y={0} width={slot} height={H} fill="transparent" />
               {aBehind ? (
                 <>
-                  {d.a > 0 && bar(x, d.a, LIGHT, "a")}
-                  {bVal > 0 && bar(x, bVal, DEEP, "b")}
+                  {aVal > 0.5 && bar(x, aVal, LIGHT, "a")}
+                  {bVal > 0.5 && bar(x, bVal, DEEP, "b")}
                 </>
               ) : (
                 <>
-                  {bVal > 0 && bar(x, bVal, DEEP, "b")}
-                  {d.a > 0 && bar(x, d.a, LIGHT, "a")}
+                  {bVal > 0.5 && bar(x, bVal, DEEP, "b")}
+                  {aVal > 0.5 && bar(x, aVal, LIGHT, "a")}
                 </>
               )}
               <text x={padL + i * slot + slot / 2} y={H - 8} textAnchor="middle" style={{ font: "500 var(--fs-small) var(--font-body)", fill: "var(--ink-muted)" }}>
@@ -100,7 +118,9 @@ export function BarChart({ data, aLabel, bLabel, ariaLabel }: { data: BarDatum[]
       </div>
       {pick !== null && (
         <div
+          key={pick}
           style={{
+            animation: `bqFade ${QUICK_MS}ms ${EASE} both`,
             position: "absolute",
             top: 6,
             left: Math.min(Math.max(padL + (pick + 0.5) * slot - 80, 0), W - 160),
