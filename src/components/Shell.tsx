@@ -47,7 +47,7 @@ function TitlePill({ title }: { title: string }) {
         boxSizing: "border-box",
         padding: "8px 18px",
         borderRadius: 999,
-        background: "rgba(243,237,230,.82)",
+        background: "rgba(243,242,238,.82)",
         font: "800 17px var(--font-body)",
         letterSpacing: "-.01em",
         overflow: "hidden",
@@ -134,7 +134,7 @@ function ShellInner() {
                   onClick={goBack}
                   aria-label="Back"
                   className="bq-hit"
-                  style={{ display: "flex", alignItems: "center", gap: 2, border: 0, cursor: "pointer", color: "var(--ink)", background: "rgba(243,237,230,.82)", borderRadius: 999, padding: "8px 14px 8px 8px", font: "700 var(--fs-body-sm) var(--font-body)" }}
+                  style={{ display: "flex", alignItems: "center", gap: 2, border: 0, cursor: "pointer", color: "var(--ink)", background: "rgba(243,242,238,.82)", borderRadius: 999, padding: "8px 14px 8px 8px", font: "700 var(--fs-body-sm) var(--font-body)" }}
                 >
                   <Icon name="chevron-left" size={18} />
                   Back
@@ -203,7 +203,7 @@ function ShellInner() {
             position: "sticky",
             top: 0,
             zIndex: 20,
-            background: "rgba(243,237,230,.94)",
+            background: "rgba(243,242,238,.94)",
             borderBottom: "1px solid var(--line)",
             padding: "22px 30px 18px",
             display: "flex",

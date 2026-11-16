@@ -42,7 +42,7 @@ export function Welcome() {
         <div
           style={{
             padding: "90px 24px calc(20px + var(--safe-bottom))",
-            background: "linear-gradient(to bottom, rgba(243,237,230,0) 0%, rgba(243,237,230,.92) 38%, var(--paper) 62%)",
+            background: "linear-gradient(to bottom, rgba(243,242,238,0) 0%, rgba(243,242,238,.92) 38%, var(--paper) 62%)",
           }}
         >
           <h1 style={{ margin: 0, font: "800 32px/1.1 var(--font-body)", letterSpacing: "-.03em", color: "var(--ink)" }}>Welcome to Bizqwik!</h1>
