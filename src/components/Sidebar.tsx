@@ -5,6 +5,7 @@ import { Icon } from "./Icon";
 import { useAuth } from "../lib/auth";
 import { navFor, type NavItem } from "../lib/nav";
 import { ROLE_LABELS } from "../lib/types";
+import { QUICK_MS, tr } from "../lib/motion";
 
 function SidebarItem({ item }: { item: NavItem }) {
   const [hovered, setHovered] = useState(false);
@@ -22,7 +23,7 @@ function SidebarItem({ item }: { item: NavItem }) {
             background: isActive ? "var(--primary-tint)" : hovered ? "var(--sunken)" : "transparent",
             color: isActive ? "var(--primary-pressed)" : hovered ? "var(--ink)" : "var(--ink-muted)",
             font: "600 var(--fs-base) var(--font-body)",
-            transition: "background .15s ease, color .15s ease",
+            transition: tr(["background", "color"], QUICK_MS),
           }}
         >
           <Icon name={item.icon} size={19} solid={isActive} />

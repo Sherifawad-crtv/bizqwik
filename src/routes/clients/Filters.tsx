@@ -8,6 +8,7 @@ import { DateField } from "../../components/DateField";
 import { NO_FILTERS, filterClients, planOptions, type ClientFilters, type ExpiryFilter, type SortKey, type StatusFilter } from "../../lib/clientFilters";
 import { plusDays } from "./helpers";
 import { useNow } from "../../lib/useNow";
+import { QUICK_MS, tr } from "../../lib/motion";
 
 const STATUS_CHIPS: { value: StatusFilter; label: string }[] = [
   { value: "all", label: "All" },
@@ -54,7 +55,7 @@ function Chip({ on, onClick, children, testId }: { on: boolean; onClick: () => v
         font: "700 var(--fs-body-sm) var(--font-body)",
         whiteSpace: "nowrap",
         cursor: "pointer",
-        transition: "background .2s ease, color .2s ease, border-color .2s ease",
+        transition: tr(["background", "color", "border-color"], QUICK_MS),
       }}
     >
       {children}

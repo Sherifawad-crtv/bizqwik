@@ -1,3 +1,5 @@
+import { CONTROL_MS, EASE, QUICK_MS, SCREEN_MS, SPRING, STANDARD_MS, tr } from "../lib/motion";
+
 const CIRCLE_LEN = 176; // 2π × r(28), rounded
 const CHECK_LEN = 42; // length of the two-segment check path
 
@@ -21,7 +23,7 @@ export function SheetSuccessIcon({ label, iconIn }: { label: string; iconIn: boo
           justifyContent: "center",
           transform: iconIn ? "scale(1)" : "scale(0.7)",
           opacity: iconIn ? 1 : 0,
-          transition: "transform .35s cubic-bezier(.34,1.56,.64,1), opacity .2s ease",
+          transition: `${tr("transform", SCREEN_MS, SPRING)}, ${tr("opacity", QUICK_MS)}`,
         }}
       >
         <svg width={44} height={44} viewBox="0 0 64 64" fill="none">
@@ -35,7 +37,7 @@ export function SheetSuccessIcon({ label, iconIn }: { label: string; iconIn: boo
             style={{
               strokeDasharray: CIRCLE_LEN,
               strokeDashoffset: iconIn ? 0 : CIRCLE_LEN,
-              transition: "stroke-dashoffset .5s cubic-bezier(.65,0,.35,1)",
+              transition: tr("stroke-dashoffset", CONTROL_MS),
             }}
           />
           <path
@@ -47,7 +49,7 @@ export function SheetSuccessIcon({ label, iconIn }: { label: string; iconIn: boo
             style={{
               strokeDasharray: CHECK_LEN,
               strokeDashoffset: iconIn ? 0 : CHECK_LEN,
-              transition: "stroke-dashoffset .3s ease-out .35s",
+              transition: tr("stroke-dashoffset", STANDARD_MS, EASE, 100),
             }}
           />
         </svg>

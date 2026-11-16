@@ -8,6 +8,7 @@ import { Avatar } from "../../components/Avatar";
 import { PlanPill } from "../frontdesk/shared";
 import { PackageStatusPill } from "../../components/PackageStatusPill";
 import { countdownText, groupPlanLine, packageMetaText, rosterGrid } from "./helpers";
+import { QUICK_MS, tr } from "../../lib/motion";
 
 /** Small round icon button used for the roster's quick actions — stops the
  * click from bubbling to the row, which opens the detail sheet. */
@@ -194,7 +195,7 @@ function ClientDesktopRow({
         alignItems: "center",
         cursor: "pointer",
         background: hovered ? "var(--sunken)" : "transparent",
-        transition: "background .15s ease",
+        transition: tr("background", QUICK_MS),
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>

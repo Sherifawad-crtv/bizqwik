@@ -2,6 +2,7 @@ import { startTransition, useEffect, useRef, useState } from "react";
 import { useSlidingThumb } from "./useSlidingThumb";
 import { monthAbbr } from "../lib/format";
 import { MOCK } from "../lib/backend";
+import { QUICK_MS, tr } from "../lib/motion";
 
 export function YearMonthStrip({ months, value, onChange }: { months: string[]; value: string; onChange: (m: string) => void }) {
   const [shown, setShown] = useState(value);
@@ -61,7 +62,7 @@ export function YearMonthStrip({ months, value, onChange }: { months: string[]; 
               padding: "9px 14px",
               borderRadius: 999,
               background: "transparent",
-              transition: "color .2s ease",
+              transition: tr("color", QUICK_MS),
               color: future ? "var(--ink-faint)" : on ? "var(--ink)" : "var(--ink-muted)",
               opacity: future ? 0.45 : 1,
               font: "700 var(--fs-small) var(--font-mono)",

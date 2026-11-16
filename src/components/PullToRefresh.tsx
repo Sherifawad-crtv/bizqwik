@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { bump } from "../lib/bus";
 import { waitForLoadsToFinish } from "../lib/useAsync";
 import { Icon } from "./Icon";
+import { QUICK_MS, STANDARD_MS, tr } from "../lib/motion";
 
 const TRIGGER = 72; // how far (px) to pull before letting go refreshes
 const MAX = 110;
@@ -112,14 +113,14 @@ export function PullToRefresh({ children }: { children: ReactNode }) {
           color: ready || refreshing ? "var(--primary-pressed)" : "var(--ink-muted)",
           transform: `translateY(${shown ? pull : -60}px)`,
           opacity: shown ? Math.min(1, pull / 40 + (refreshing ? 1 : 0)) : 0,
-          transition: dragging ? "none" : "transform .25s ease, opacity .25s ease",
+          transition: dragging ? "none" : tr(["transform", "opacity"], STANDARD_MS),
           pointerEvents: "none",
         }}
       >
         {refreshing ? (
           <span className="bq-ptr-spin" style={{ width: 18, height: 18, borderRadius: 999, border: "2.5px solid var(--primary-tint)", borderTopColor: "var(--primary-pressed)" }} />
         ) : (
-          <span style={{ display: "flex", transform: `rotate(${ready ? 180 : 0}deg)`, transition: "transform .2s ease" }}>
+          <span style={{ display: "flex", transform: `rotate(${ready ? 180 : 0}deg)`, transition: tr("transform", QUICK_MS) }}>
             <Icon name="chevron-down" size={20} />
           </span>
         )}

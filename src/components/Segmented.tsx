@@ -1,5 +1,6 @@
 import { startTransition, useState } from "react";
 import { useSlidingThumb } from "./useSlidingThumb";
+import { QUICK_MS, tr } from "../lib/motion";
 
 
 export function Segmented<T extends string>({
@@ -47,7 +48,7 @@ export function Segmented<T extends string>({
               borderRadius: 999,
               background: "transparent",
               color: on ? "var(--ink)" : "var(--ink-muted)",
-              transition: "color .2s ease",
+              transition: tr("color", QUICK_MS),
               font: "700 var(--fs-small) var(--font-mono)",
               letterSpacing: ".06em",
               whiteSpace: "nowrap",

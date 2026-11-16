@@ -3,6 +3,7 @@ import { Icon } from "./Icon";
 import { matchTabIndex, type NavItem } from "../lib/nav";
 import { useIsNarrowPhone } from "../lib/useIsMobile";
 import { noteTabTap } from "../lib/tabTap";
+import { CONTROL_MS, QUICK_MS, tr } from "../lib/motion";
 
 const BAR_BORDER = 1;
 
@@ -62,7 +63,7 @@ export function BottomNav({ items }: { items: NavItem[] }) {
             borderRadius: 999,
             background: "var(--primary-tint-strong)",
             transform: `translateX(${activeIndex * (ITEM + GAP)}px)`,
-            transition: "transform .32s cubic-bezier(.22,1,.36,1)",
+            transition: tr("transform", CONTROL_MS),
           }}
         />
       )}
@@ -89,7 +90,7 @@ export function BottomNav({ items }: { items: NavItem[] }) {
                   alignItems: "center",
                   justifyContent: "center",
                   color: isActive ? "var(--primary-pressed)" : "var(--ink-muted)",
-                  transition: "color .2s ease",
+                  transition: tr("color", QUICK_MS),
                 }}
               >
                 <Icon name={t.icon} solid={isActive} />

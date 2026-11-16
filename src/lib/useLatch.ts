@@ -2,6 +2,7 @@
    rendering. Callers pass a fresh object on every render, so keeping it in state would re-render
    forever (this was tried: "Too many re-renders"). */
 import { useEffect, useRef, useState } from "react";
+import { SHEET_OUT_MS } from "./motion";
 
 // Keeps returning the last non-null value even after `value` itself goes
 // null — so a closing sheet's title/body (built from that value) don't go
@@ -23,7 +24,7 @@ export function useFrozen<T>(open: boolean, value: T): T {
 
 /** True while open and for the length of the exit animation after, so a sheet
  * component keeps rendering (and can slide out) instead of vanishing. */
-export function useMountedThroughExit(open: boolean, ms = 450): boolean {
+export function useMountedThroughExit(open: boolean, ms = SHEET_OUT_MS + 70): boolean {
   const [mounted, setMounted] = useState(open);
   if (open && !mounted) setMounted(true);
   useEffect(() => {

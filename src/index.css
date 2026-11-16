@@ -54,8 +54,12 @@
 
   /* Motion: the same values as src/lib/motion.ts. */
   --ease-standard: cubic-bezier(0.32, 0.72, 0, 1);
-  --dur-fade: 150ms;
-  --dur-press: 160ms;
+  /* Motion scale (see src/lib/motion.ts): nothing over 350ms. */
+  --dur-quick: 150ms;
+  --dur-standard: 250ms;
+  --dur-control: 300ms;
+  --dur-screen: 340ms;
+  --ease-spring: cubic-bezier(0.34, 1.36, 0.64, 1);
 
   --shadow-float: 0 14px 34px rgba(26, 23, 38, 0.18);
   /* Type scale: the sizes that carry nearly every screen. */
@@ -184,21 +188,25 @@ textarea {
 
 /* Every tappable thing dims the instant a finger lands and eases back on release. */
 :where(button, [role="button"], a[href]) {
-  transition: opacity 0.25s var(--ease-standard);
+  transition: opacity var(--dur-standard) var(--ease-standard);
 }
 :where(button:not(:disabled), [role="button"], a[href]):active {
   opacity: 0.7;
   transition-duration: 0s;
 }
 
-/* .bq-scale: tiles and big targets that shrink under the finger instead of dimming. */
+/* .bq-scale: tiles and big targets that shrink under the finger instead of
+   dimming, the iOS way: a small shrink (3%) the moment you touch, and a soft
+   spring back when you let go. */
+:root { --press-scale: 0.97; }
 .bq-scale {
-  transition: transform 0.12s ease;
+  transition: transform var(--dur-standard) var(--ease-spring);
 }
 .bq-scale:active {
-  transform: scale(0.92);
+  transform: scale(var(--press-scale));
   opacity: 1;
-  transition-duration: 0.12s;
+  transition-duration: var(--dur-quick);
+  transition-timing-function: var(--ease-standard);
 }
 
 /* .bq-still: options whose state is shown another way (the sliding pill), so they never dim. */
@@ -220,7 +228,7 @@ textarea {
 /* .bq-row: a tappable list row. */
 .bq-row {
   cursor: pointer;
-  transition: background 0.15s ease;
+  transition: background var(--dur-quick) var(--ease-standard);
 }
 .bq-row:active {
   background: var(--sunken);
@@ -244,7 +252,7 @@ textarea {
   border-radius: var(--r-button);
   font: 700 var(--fs-base) var(--font-body);
   cursor: pointer;
-  transition: opacity 0.25s var(--ease-standard), transform 0.15s ease, filter 0.15s ease;
+  transition: opacity var(--dur-standard) var(--ease-standard), transform var(--dur-quick) var(--ease-standard), filter var(--dur-quick) var(--ease-standard);
 }
 .bq-btn--lg { height: 56px; }
 .bq-btn--full { width: 100%; }
@@ -321,7 +329,7 @@ textarea {
 }
 
 .bq-rise {
-  animation: bqRise 0.24s var(--ease-standard) both;
+  animation: bqRise var(--dur-standard) var(--ease-standard) both;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -342,8 +350,8 @@ textarea {
   object-fit: cover;
 }
 
-.bq-qa { transition: transform .12s ease; }
-.bq-qa:active { transform: scale(.95); }
+.bq-qa { transition: transform var(--dur-standard) var(--ease-spring); }
+.bq-qa:active { transform: scale(var(--press-scale)); transition-duration: var(--dur-quick); transition-timing-function: var(--ease-standard); }
 
 /* pull-to-refresh spinner (same spin as every other loader) */
 .bq-ptr-spin { animation: bqSpin .7s linear infinite; }

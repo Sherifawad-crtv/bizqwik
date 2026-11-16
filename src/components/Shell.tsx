@@ -11,7 +11,7 @@ import { useAuth } from "../lib/auth";
 import { useHeader } from "../lib/header";
 import { useIsMobile, useIsNarrowPhone } from "../lib/useIsMobile";
 import { LocationsProvider } from "../lib/locations";
-import { FADE_MS } from "../lib/motion";
+import { EASE, FADE_MS, QUICK_MS, tr } from "../lib/motion";
 import { navFor, headerMode, accountBackTarget, isSoloOwner, isSubPage, homePathForRole } from "../lib/nav";
 
 // The Back button and the empty slot opposite it are the same width, so the title stays centred.
@@ -53,14 +53,14 @@ function TitlePill({ title }: { title: string }) {
         overflow: "hidden",
         display: "grid",
         justifyItems: "center",
-        transition: width !== null ? `width ${FADE_MS}ms ease` : undefined,
+        transition: width !== null ? tr("width", QUICK_MS) : undefined,
       }}
     >
       <span ref={sizer} aria-hidden style={{ position: "absolute", visibility: "hidden", whiteSpace: "nowrap", pointerEvents: "none" }}>{st.shown}</span>
       {st.leaving !== null && (
-        <span key={`out-${st.leaving}`} aria-hidden style={{ ...cell, animation: `bqFadeOut ${FADE_MS}ms ease forwards` }}>{st.leaving}</span>
+        <span key={`out-${st.leaving}`} aria-hidden style={{ ...cell, animation: `bqFadeOut ${QUICK_MS}ms ${EASE} forwards` }}>{st.leaving}</span>
       )}
-      <span key={st.shown} style={{ ...cell, animation: st.leaving !== null ? `bqFade ${FADE_MS}ms ease both` : undefined }}>{st.shown}</span>
+      <span key={st.shown} style={{ ...cell, animation: st.leaving !== null ? `bqFade ${QUICK_MS}ms ${EASE} both` : undefined }}>{st.shown}</span>
     </div>
   );
 }
@@ -116,7 +116,7 @@ function ShellInner() {
               opacity: barOn ? 1 : 0,
               pointerEvents: barOn ? "auto" : "none",
               // Gone at once on the home screen (which has no title bar); only fades IN elsewhere.
-              transition: barOn ? `opacity ${FADE_MS}ms ease` : "none",
+              transition: barOn ? tr("opacity", QUICK_MS) : "none",
               visibility: barOn ? "visible" : "hidden",
               position: "fixed",
               top: 0,

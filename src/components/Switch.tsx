@@ -1,4 +1,4 @@
-import { EASE } from "../lib/motion";
+import { CONTROL_MS, STANDARD_MS, tr } from "../lib/motion";
 
 /** The switch's look. The knob slides on the system curve and the track colour
  * fades, and it answers the moment you tap (callers flip it straight away and
@@ -17,7 +17,7 @@ export function SwitchVisual({ checked, animate = true, busy }: { checked: boole
         borderRadius: 999,
         background: checked ? "var(--primary)" : "var(--sunken)",
         boxShadow: checked ? "none" : "inset 0 0 0 1px var(--line)",
-        transition: animate ? "background .25s ease, box-shadow .25s ease" : "none",
+        transition: animate ? tr(["background", "box-shadow"], STANDARD_MS) : "none",
         opacity: busy ? 0.85 : 1,
       }}
     >
@@ -32,7 +32,7 @@ export function SwitchVisual({ checked, animate = true, busy }: { checked: boole
           background: "var(--surface)",
           boxShadow: "0 1px 3px rgba(0,0,0,.25)",
           transform: `translateX(${checked ? 19 : 0}px)`,
-          transition: animate ? `transform .3s ${EASE}` : "none",
+          transition: animate ? tr("transform", CONTROL_MS) : "none",
         }}
       />
     </span>

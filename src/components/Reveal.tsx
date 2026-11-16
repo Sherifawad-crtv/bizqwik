@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { EASE } from "../lib/motion";
+import { CONTROL_MS, QUICK_MS, tr } from "../lib/motion";
 
 /** Something that appears or goes away: it grows open and fades instead of
  * popping in and shoving everything below it. `gap` is the spacing the parent
@@ -14,7 +14,7 @@ export function Reveal({ show, children, gap = 0 }: { show: boolean; children: R
         gridTemplateRows: show ? "1fr" : "0fr",
         opacity: show ? 1 : 0,
         marginTop: show ? 0 : -gap,
-        transition: `grid-template-rows .3s ${EASE}, opacity .2s ease, margin-top .3s ${EASE}`,
+        transition: `${tr(["grid-template-rows", "margin-top"], CONTROL_MS)}, ${tr("opacity", QUICK_MS)}`,
         pointerEvents: show ? undefined : "none",
       }}
     >
@@ -24,7 +24,7 @@ export function Reveal({ show, children, gap = 0 }: { show: boolean; children: R
           overflow: "hidden",
           // Out of sight and out of reach once it has finished closing.
           visibility: show ? "visible" : "hidden",
-          transition: show ? "visibility 0s" : "visibility 0s linear .3s",
+          transition: show ? "visibility 0s" : `visibility 0s linear ${CONTROL_MS}ms`,
         }}
         inert={!show}
       >

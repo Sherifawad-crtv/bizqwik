@@ -1,10 +1,10 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { EASE } from "../lib/motion";
+import { CONTROL_MS, EASE } from "../lib/motion";
 
 /** The sliding highlight behind a row of pill options (the selected pill glides
  * to the new choice instead of jumping). Give the container `ref`, render
  * `thumb` as its first child, mark the selected option `data-thumb-on`. */
-export const THUMB_MS = 300;
+export const THUMB_MS = CONTROL_MS;
 
 export function useSlidingThumb(value: string) {
   const ref = useRef<HTMLDivElement>(null);
