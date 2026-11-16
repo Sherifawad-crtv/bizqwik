@@ -406,3 +406,22 @@ textarea {
   from { grid-template-rows: 0fr; opacity: 0; transform: translateY(6px); }
   to { grid-template-rows: 1fr; opacity: 1; transform: none; }
 }
+
+/* The bottom bar's two layers (tab bar / a sub-page's actions): one hands over
+   to the other in a single motion — the leaving one sinks and fades, the
+   arriving one rises in. Hidden layers can't be tapped. */
+.bq-barlayer {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity var(--dur-standard) var(--ease-standard), transform var(--dur-standard) var(--ease-standard), visibility 0s linear 0s;
+}
+.bq-barlayer[data-on="false"] {
+  opacity: 0;
+  transform: translateY(16px);
+  pointer-events: none;
+  visibility: hidden;
+  transition: opacity var(--dur-standard) var(--ease-standard), transform var(--dur-standard) var(--ease-standard), visibility 0s linear var(--dur-standard);
+}

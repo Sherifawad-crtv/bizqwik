@@ -17,6 +17,7 @@ import { navFor, headerMode, accountBackTarget, isSoloOwner, isSubPage, homePath
 // The Back button and the empty slot opposite it are the same width, so the title stays centred.
 const BACK_W = 84;
 import { usePublishedActions, usePublishedBack } from "../lib/floatingActions";
+import { useLatch } from "../lib/useLatch";
 
 /** The top pill with the screen's title. When the title changes, the old words
  * fade out as the new ones fade in (stacked), and the pill eases to the new
@@ -91,6 +92,9 @@ function ShellInner() {
   }
 
   const sub = isSubPage(pathname, navFor(profile?.role ?? "coach", orgMode));
+  // A sub-page's actions show in the bar; the last ones stay put while they fade out.
+  const showActions = sub && !!published && published.path === pathname;
+  const actionsNode = useLatch(showActions ? published!.node : null);
   if (!profile) return null;
   // Back: where the screen says it came from; for Account its parent; otherwise one step back.
   const goBack = () => {
@@ -156,34 +160,23 @@ function ShellInner() {
 
         {/* A soft fade under the bar so content slips away behind it instead of being cut. */}
         <div aria-hidden className="bq-bottom-fade" />
-        <div
-          style={{
-            position: "fixed",
-            left: 0,
-            right: 0,
-            bottom: 0,
-            zIndex: 55,
-            // Sits just above the iOS home indicator, like a native tab bar.
-            padding: `0 ${narrow ? 12 : 16}px var(--bar-bottom)`,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: narrow ? 8 : 12,
-          }}
-        >
-          {sub ? (
-            // A sub-page: no tab bar. Its main actions (if it has any) float here instead.
-            published && published.path === pathname ? (
-              <div key="actions" className="bq-grow" style={{ display: "flex", gap: 8, maxWidth: 520, padding: 8, background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-float)", boxShadow: "var(--shadow-float)", animation: `bqRise ${FADE_MS + 90}ms var(--ease-standard) both` }}>
-                {published.node}
-              </div>
-            ) : null
-          ) : (
-            <>
+        {/* The bottom bar: the tab bar on tab screens, a sub-page's own actions on
+            sub-pages. Both stay in one spot and hand over in one motion: the one
+            leaving sinks and fades while the one arriving rises in. */}
+        <div style={{ position: "fixed", left: 0, right: 0, bottom: 0, zIndex: 55, padding: `0 ${narrow ? 12 : 16}px var(--bar-bottom)` }}>
+          <div style={{ position: "relative", height: 64 }}>
+            <div className="bq-barlayer" data-on={!showActions} aria-hidden={showActions || undefined} inert={showActions} style={{ gap: narrow ? 8 : 12 }}>
               <BottomNav items={navFor(profile.role, orgMode)} />
               {showFab && <Fab />}
-            </>
-          )}
+            </div>
+            <div className="bq-barlayer" data-on={showActions} aria-hidden={!showActions || undefined} inert={!showActions}>
+              {actionsNode && (
+                <div className="bq-grow" style={{ display: "flex", gap: 8, maxWidth: 520, padding: 8, background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-float)", boxShadow: "var(--shadow-float)" }}>
+                  {actionsNode}
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     );

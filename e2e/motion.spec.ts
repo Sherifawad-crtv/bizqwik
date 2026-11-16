@@ -143,3 +143,22 @@ test("list rows grow in when added and fold away when removed; the rest slide to
   await expect.poll(() => stateOf("New row"), { intervals: [20], timeout: 2000 }).toBe("out");
   await expect(page.getByText("New row")).toHaveCount(0, { timeout: 1000 });
 });
+
+test("the tab bar and a sub-page's actions hand over in one motion", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const THIS = ym(0);
+  const row = { coachId: "c1", name: "Coach Nour", email: "c1@x.com", role: "coach", avatarUrl: null, tierId: "t", tierName: "Tier 1", rate: 250, count: 4, groupTotal: 1000, privateTotal: 0, packageCount: 0, total: 1000, state: "logging", settledAt: null, paidAt: null, paidAmount: 0, remaining: 1000 };
+  await mockBackend(page, "dept_head", { [`month/${THIS}`]: { rows: [row] }, [`sessions/c1/${THIS}`]: { sessions: [] }, [`packages/by-coach/c1/${THIS}`]: { packages: [] } });
+  await page.goto("/coaches");
+  await page.getByText("Coach Nour").waitFor();
+  await page.waitForTimeout(400);
+  const layers = () => page.evaluate(() => [...document.querySelectorAll(".bq-barlayer")].map((l) => ({ on: l.getAttribute("data-on"), opacity: +getComputedStyle(l).opacity, vis: getComputedStyle(l).visibility })));
+  await page.getByText("Coach Nour").click();
+  // mid-handover: both are partly visible at once (one fading out, the other in)
+  await expect.poll(async () => (await layers()).every((l) => l.opacity > 0.05 && l.opacity < 0.95), { intervals: [10], timeout: 1500 }).toBe(true);
+  await page.waitForTimeout(450);
+  const [nav, actions] = await layers();
+  expect(nav).toMatchObject({ on: "false", opacity: 0, vis: "hidden" });
+  expect(actions).toMatchObject({ on: "true", opacity: 1, vis: "visible" });
+  await expect(page.getByRole("button", { name: "Settle month" })).toBeVisible();
+});
