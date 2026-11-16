@@ -159,7 +159,7 @@ function ShellInner() {
           {sub ? (
             // A sub-page: no tab bar. Its main actions (if it has any) float here instead.
             published && published.path === pathname ? (
-              <div key="actions" className="bq-grow" style={{ display: "flex", gap: 10, maxWidth: 520, animation: `bqRise ${FADE_MS + 90}ms var(--ease-standard) both` }}>
+              <div key="actions" className="bq-grow" style={{ display: "flex", gap: 8, maxWidth: 520, padding: 8, background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 32, boxShadow: "var(--shadow-float)", animation: `bqRise ${FADE_MS + 90}ms var(--ease-standard) both` }}>
                 {published.node}
               </div>
             ) : null

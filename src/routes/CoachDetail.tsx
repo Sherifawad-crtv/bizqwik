@@ -60,17 +60,17 @@ export function CoachDetail() {
   const floating = isMobile && r ? (
     <>
       {r.state === "logging" && (
-        <Button size="lg" variant="secondary" className="bq-grow" style={{ boxShadow: "var(--shadow-float)" }} onClick={() => setAddOpen(true)}>
+        <Button size="lg" variant="secondary" className="bq-grow" onClick={() => setAddOpen(true)}>
           + Add on behalf
         </Button>
       )}
       {r.state === "logging" && r.count > 0 && (
-        <Button size="lg" className="bq-grow" style={{ boxShadow: "var(--shadow-float)" }} disabled={busyAction} onClick={() => runAction(() => api.settle(coachId, month))}>
+        <Button size="lg" className="bq-grow" disabled={busyAction} onClick={() => runAction(() => api.settle(coachId, month))}>
           Settle month
         </Button>
       )}
       {r.state === "settled" && (
-        <Button size="lg" variant="danger" className="bq-grow" style={{ boxShadow: "var(--shadow-float)" }} disabled={busyAction} onClick={() => runAction(() => api.reopen(coachId, month))}>
+        <Button size="lg" variant="danger" className="bq-grow" disabled={busyAction} onClick={() => runAction(() => api.reopen(coachId, month))}>
           Reopen
         </Button>
       )}
