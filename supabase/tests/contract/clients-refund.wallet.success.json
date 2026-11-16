@@ -1,0 +1,17 @@
+{
+  "_meta": {
+    "method": "POST",
+    "path": "clients/refund",
+    "status": 200,
+    "capturedFrom": "edge-source+types",
+    "requestBody": {
+      "clientId": "00000000-0000-4000-8000-000000000020",
+      "amount": 100,
+      "destination": "wallet",
+      "note": "Goodwill"
+    },
+    "notes": "destination wallet returns walletBalance. destination desk returns { ok: true } only."
+  },
+  "ok": true,
+  "walletBalance": 100
+}

@@ -1,0 +1,10 @@
+{
+  "_meta": {
+    "method": "GET",
+    "path": "me",
+    "status": 401,
+    "capturedFrom": "edge-source+types",
+    "notes": "Missing or invalid Bearer token."
+  },
+  "error": "Unauthorized"
+}

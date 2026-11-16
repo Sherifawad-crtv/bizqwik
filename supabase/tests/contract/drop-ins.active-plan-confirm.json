@@ -1,0 +1,34 @@
+{
+  "_meta": {
+    "method": "POST",
+    "path": "drop-ins",
+    "status": 409,
+    "capturedFrom": "edge-source+types",
+    "notes": "UI branches on code active_plan_confirm. activePlan is toGroupPlan. Do not rename code or keys."
+  },
+  "error": "Redacted Client still has Example Plan. Charge a drop-in anyway?",
+  "code": "active_plan_confirm",
+  "activePlan": {
+    "id": "00000000-0000-4000-8000-000000000050",
+    "clientId": "00000000-0000-4000-8000-000000000020",
+    "kind": "membership",
+    "planTypeId": "00000000-0000-4000-8000-000000000051",
+    "seriesId": null,
+    "name": "Example Plan",
+    "priceAtSale": 1500,
+    "payMethod": "cash",
+    "creditsTotal": null,
+    "creditsRemaining": null,
+    "invitationsRemaining": 2,
+    "startsAt": "2026-10-01T00:00:00.000Z",
+    "expiresAt": "2026-12-01T00:00:00.000Z",
+    "status": "active",
+    "createdAt": "2026-10-01T00:00:00.000Z",
+    "locationId": null,
+    "shareGroupId": null,
+    "freezeDays": 0,
+    "frozenUntil": null,
+    "canFreeze": false
+  },
+  "coveredByPlan": false
+}

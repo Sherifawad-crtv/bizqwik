@@ -14,3 +14,9 @@ Convention:
 Living design docs (the "why the system is shaped this way") live in
 `docs/architecture/` and are updated in place as decisions evolve; progress
 entries are point-in-time and never edited after their push.
+
+Backend track (Current vs Target, rules, phased Production-safe plan):
+
+- `docs/architecture/backend.md`
+- `docs/architecture/backend-guidelines.md`
+- `docs/architecture/backend-implementation-plan.md`

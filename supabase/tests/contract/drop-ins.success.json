@@ -1,0 +1,24 @@
+{
+  "_meta": {
+    "method": "POST",
+    "path": "drop-ins",
+    "status": 200,
+    "capturedFrom": "edge-source+types",
+    "requestBody": {
+      "clientId": "00000000-0000-4000-8000-000000000020",
+      "category": "Open gym",
+      "price": 200,
+      "payMethod": "cash"
+    },
+    "notes": "Generic walk-in drop-in (not class-linked). newClientId is null when using an existing client."
+  },
+  "dropIn": {
+    "id": "00000000-0000-4000-8000-000000000040",
+    "clientId": "00000000-0000-4000-8000-000000000020",
+    "classId": null,
+    "category": "Open gym",
+    "price": 200,
+    "createdAt": "2026-11-17T12:00:00.000Z"
+  },
+  "newClientId": null
+}

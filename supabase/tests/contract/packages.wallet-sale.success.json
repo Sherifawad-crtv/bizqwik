@@ -1,0 +1,30 @@
+{
+  "_meta": {
+    "method": "POST",
+    "path": "packages",
+    "status": 200,
+    "capturedFrom": "edge-source+types",
+    "requestBody": {
+      "clientId": "00000000-0000-4000-8000-000000000020",
+      "bundleTypeId": "00000000-0000-4000-8000-000000000060",
+      "coachId": "00000000-0000-4000-8000-000000000002",
+      "payMethod": "wallet"
+    },
+    "notes": "Wallet-paid PT package sale. Shape is toPackageInstance."
+  },
+  "package": {
+    "id": "00000000-0000-4000-8000-000000000070",
+    "clientId": "00000000-0000-4000-8000-000000000020",
+    "bundleTypeId": "00000000-0000-4000-8000-000000000060",
+    "coachId": "00000000-0000-4000-8000-000000000002",
+    "purchaseDate": "2026-11-17",
+    "expiryDate": "2027-01-17",
+    "sessionsIncluded": 10,
+    "sessionsRemaining": 10,
+    "priceAtSale": 3000,
+    "coachCutAtSale": 1500,
+    "status": "active",
+    "createdBy": "00000000-0000-4000-8000-000000000001",
+    "locationId": null
+  }
+}

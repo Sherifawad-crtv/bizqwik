@@ -1,0 +1,11 @@
+{
+  "_meta": {
+    "method": "POST",
+    "path": "packages",
+    "status": 400,
+    "capturedFrom": "edge-source+types",
+    "notes": "Money error code the UI may show. Do not rename code."
+  },
+  "error": "Wallet balance doesn't cover this package.",
+  "code": "insufficient_wallet"
+}
