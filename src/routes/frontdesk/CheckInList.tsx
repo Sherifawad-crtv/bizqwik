@@ -74,7 +74,7 @@ export function CheckInList() {
               </div>
               {r?.state === "done" && <div style={{ font: "400 var(--fs-small) var(--font-mono)", color: "var(--paid-fg)", marginTop: 6 }}>{r.note}</div>}
               {r?.state === "error" && (
-                <div role="alert" style={{ font: "600 var(--fs-small)/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 10, padding: "8px 10px", marginTop: 8 }}>
+                <div role="alert" style={{ font: "600 var(--fs-small)/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: "var(--r-item)", padding: "8px 10px", marginTop: 8 }}>
                   {r.text}
                 </div>
               )}

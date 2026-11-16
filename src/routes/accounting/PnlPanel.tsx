@@ -48,7 +48,7 @@ export function PnlPanel({ report, loading, onAddExpense, onCoachPayouts }: { re
   return (
     <>
       {report.unsettledNote && (
-        <div style={{ display: "flex", gap: 10, alignItems: "flex-start", background: "var(--logging-bg)", borderRadius: "var(--r-md)", padding: "12px 14px", marginBottom: 14 }}>
+        <div style={{ display: "flex", gap: 10, alignItems: "flex-start", background: "var(--logging-bg)", borderRadius: "var(--r-item)", padding: "12px 14px", marginBottom: 14 }}>
           <span style={{ color: "var(--logging-fg)", display: "flex", flex: "none", marginTop: 1 }}>
             <Icon name="insights" size={18} />
           </span>

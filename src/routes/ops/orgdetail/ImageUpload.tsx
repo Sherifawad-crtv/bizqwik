@@ -71,7 +71,7 @@ export function ImageUploadField({
             width: 56,
             height: 56,
             flex: "none",
-            borderRadius: "var(--r-input)",
+            borderRadius: "var(--r-item)",
             background: "var(--sunken)",
             border: "1px solid var(--line)",
             overflow: "hidden",
@@ -101,7 +101,7 @@ export function ImageUploadField({
       </div>
       {hint && <div style={{ font: "400 var(--fs-small)/1.5 var(--font-mono)", color: "var(--ink-faint)", margin: "6px 2px 0" }}>{hint}</div>}
       {error && (
-        <div className="bq-rise" style={{ marginTop: 8, font: "600 var(--fs-note)/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: "var(--r-md)", padding: "10px 14px" }}>
+        <div className="bq-rise" style={{ marginTop: 8, font: "600 var(--fs-note)/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: "var(--r-item)", padding: "10px 14px" }}>
           {error}
         </div>
       )}

@@ -104,7 +104,7 @@ export function Card({ children, style }: { children: ReactNode; style?: React.C
 export function SearchField({ value, onChange, placeholder = "Search by name or phone" }: { value: string; onChange: (v: string) => void; placeholder?: string }) {
   return (
     <label
-      style={{ display: "flex", alignItems: "center", gap: 10, background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "0 16px", height: 52 }}
+      style={{ display: "flex", alignItems: "center", gap: 10, background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-item)", padding: "0 16px", height: 52 }}
     >
       <span style={{ color: "var(--ink-faint)", display: "flex" }}>
         <Icon name="search" size={18} />

@@ -11,7 +11,7 @@ export function CategoryPill({ name }: { name: string }) {
   const c = categoryOf(name);
   if (!c) return null;
   return (
-    <span style={{ flex: "none", font: "700 10px var(--font-mono)", letterSpacing: ".06em", color: c === "Kids" ? "var(--logging-fg)" : "var(--ink-muted)", background: c === "Kids" ? "var(--logging-bg)" : "var(--sunken)", borderRadius: 8, padding: "3px 7px", textTransform: "uppercase" }}>
+    <span style={{ flex: "none", font: "700 10px var(--font-mono)", letterSpacing: ".06em", color: c === "Kids" ? "var(--logging-fg)" : "var(--ink-muted)", background: c === "Kids" ? "var(--logging-bg)" : "var(--sunken)", borderRadius: "var(--r-chip)", padding: "3px 7px", textTransform: "uppercase" }}>
       {c}
     </span>
   );

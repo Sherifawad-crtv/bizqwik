@@ -109,7 +109,7 @@ export function TimeGrid({ days, today, now, on, narrow, onDay, onOpen }: { days
                         textAlign: "left",
                         border: 0,
                         borderLeft: "3px solid var(--primary)",
-                        borderRadius: 8,
+                        borderRadius: "var(--r-chip)",
                         background: "var(--primary-tint)",
                         color: "var(--primary-pressed)",
                         padding: "4px 6px",

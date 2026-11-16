@@ -107,7 +107,7 @@ export function BarChart({ data, aLabel, bLabel, ariaLabel }: { data: BarDatum[]
             width: 160,
             background: "var(--ink)",
             color: "var(--surface)",
-            borderRadius: 12,
+            borderRadius: "var(--r-chip)",
             padding: "8px 12px",
             font: "600 var(--fs-small)/1.6 var(--font-mono)",
             pointerEvents: "none",

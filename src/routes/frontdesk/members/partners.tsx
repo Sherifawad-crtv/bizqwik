@@ -41,7 +41,7 @@ export function PartnerPicker({ type, buyerId, picked, onChange }: { type: Group
     setErr(null);
   };
   return (
-    <div style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: 14, display: "flex", flexDirection: "column", gap: 10 }}>
+    <div style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-item)", padding: 14, display: "flex", flexDirection: "column", gap: 10 }}>
       <div style={{ font: "400 var(--fs-note)/1.5 var(--font-body)", color: "var(--ink-muted)" }}>
         Shared by {seats}: {each} classes and {fmt(type.price / seats)} EGP each, {type.durationMonths} months from today. Each person gets their own plan.
       </div>

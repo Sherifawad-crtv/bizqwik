@@ -71,7 +71,7 @@ export function LocationPill({ locations, id }: { locations: Location[]; id: str
   const name = locationName(locations, id);
   if (!name) return null;
   return (
-    <span style={{ flex: "none", font: "700 10px var(--font-mono)", letterSpacing: ".06em", color: "var(--primary-pressed)", background: "var(--primary-tint)", borderRadius: 8, padding: "3px 7px", textTransform: "uppercase", whiteSpace: "nowrap" }}>
+    <span style={{ flex: "none", font: "700 10px var(--font-mono)", letterSpacing: ".06em", color: "var(--primary-pressed)", background: "var(--primary-tint)", borderRadius: "var(--r-chip)", padding: "3px 7px", textTransform: "uppercase", whiteSpace: "nowrap" }}>
       {name}
     </span>
   );

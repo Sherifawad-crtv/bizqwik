@@ -52,7 +52,7 @@ export function ClassesPanel({ solo }: { solo?: boolean }) {
 
       <button
         onClick={() => navigate(solo ? "/bookings" : "/classes")}
-        style={{ width: "100%", marginTop: 12, textAlign: "left", background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-tile)", padding: "14px 18px", cursor: "pointer", display: "flex", alignItems: "center", gap: 12 }}
+        style={{ width: "100%", marginTop: 12, textAlign: "left", background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: "14px 18px", cursor: "pointer", display: "flex", alignItems: "center", gap: 12 }}
       >
         <span style={{ color: "var(--primary-pressed)", display: "flex" }}>
           <Icon name="calendar" size={20} />
@@ -83,7 +83,7 @@ export function ClassesPanel({ solo }: { solo?: boolean }) {
 function SeriesRow({ s, last, onEdit, locations = [] }: { s: ClassSeries; last: boolean; onEdit?: () => void; locations?: Location[] }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "16px 20px", borderBottom: last ? "none" : "1px solid var(--line)" }}>
-      {s.imageUrl && <img src={s.imageUrl} alt="" style={{ width: 40, height: 50, flex: "none", borderRadius: 10, objectFit: "cover" }} />}
+      {s.imageUrl && <img src={s.imageUrl} alt="" style={{ width: 40, height: 50, flex: "none", borderRadius: "var(--r-chip)", objectFit: "cover" }} />}
       <div className="bq-grow">
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <span style={{ font: "700 var(--fs-base) var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s.title}</span>
@@ -121,7 +121,7 @@ function WeekdayPicker({ value, onChange }: { value: number[]; onChange: (v: num
               onClick={() => onChange(on ? value.filter((x) => x !== d) : [...value, d])}
               style={{
                 height: 44,
-                borderRadius: 12,
+                borderRadius: "var(--r-button)",
                 border: on ? "0" : "1px solid var(--line)",
                 background: on ? "var(--accent)" : "var(--sunken)",
                 color: on ? "var(--accent-ink)" : "var(--ink-muted)",

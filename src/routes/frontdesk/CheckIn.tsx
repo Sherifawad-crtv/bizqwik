@@ -139,7 +139,7 @@ export function ConfirmCheckInSheet({ client, onClose, onDropIn }: { client: Cli
         <>
           <div className="bq-label">CHECK-IN</div>
           <div className="bq-title">{shown.name}</div>
-          <div style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "12px 16px" }}>
+          <div style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-item)", padding: "12px 16px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <div style={{ font: "700 var(--fs-caption) var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", flex: 1 }}>CURRENT PLAN</div>
               <PlanPill client={current} />
@@ -149,12 +149,12 @@ export function ConfirmCheckInSheet({ client, onClose, onDropIn }: { client: Cli
           </div>
           {error && <ErrorBanner text={error} />}
           {bundle && eligible && (
-            <div style={{ marginTop: 12, font: "600 var(--fs-note)/1.5 var(--font-body)", color: "var(--ink)", background: "var(--primary-tint)", borderRadius: "var(--r-md)", padding: "10px 14px" }}>
+            <div style={{ marginTop: 12, font: "600 var(--fs-note)/1.5 var(--font-body)", color: "var(--ink)", background: "var(--primary-tint)", borderRadius: "var(--r-item)", padding: "10px 14px" }}>
               Checking in uses 1 session of {bundle.name} ({bundle.creditsRemaining} → {Math.max(0, (bundle.creditsRemaining ?? 0) - 1)} left). Every visit counts, even twice in a day.
             </div>
           )}
           {(empty || noSessions) && (
-            <div role="alert" data-testid="no-sessions" style={{ marginTop: 12, background: "var(--danger-bg)", color: "var(--danger-fg)", borderRadius: "var(--r-md)", padding: "12px 14px" }}>
+            <div role="alert" data-testid="no-sessions" style={{ marginTop: 12, background: "var(--danger-bg)", color: "var(--danger-fg)", borderRadius: "var(--r-item)", padding: "12px 14px" }}>
               <div style={{ font: "800 var(--fs-body) var(--font-body)" }}>No sessions left</div>
               <div style={{ font: "600 var(--fs-note)/1.5 var(--font-body)", marginTop: 2 }}>
                 {noSessions ?? `${shown.name} has used all ${bundle?.creditsTotal ?? ""} sessions of ${bundle?.name ?? "their bundle"}.`} Renew their plan below, or sell a drop-in for today.
@@ -167,7 +167,7 @@ export function ConfirmCheckInSheet({ client, onClose, onDropIn }: { client: Cli
             </Button>
           ) : (
             <>
-              <div style={{ marginTop: 12, font: "600 var(--fs-note)/1.5 var(--font-body)", color: "var(--logging-fg)", background: "var(--logging-bg)", borderRadius: "var(--r-md)", padding: "10px 14px" }}>
+              <div style={{ marginTop: 12, font: "600 var(--fs-note)/1.5 var(--font-body)", color: "var(--logging-fg)", background: "var(--logging-bg)", borderRadius: "var(--r-item)", padding: "10px 14px" }}>
                 {frozenUntil
                   ? `Their plan is frozen until ${dateLabel(frozenUntil.slice(0, 10))} and restarts by itself. Until then they can pay for a drop-in.`
                   : empty || noSessions ? "Nothing to check in on today." : "No active plan or package — they can renew a plan below, or pay for a drop-in."}

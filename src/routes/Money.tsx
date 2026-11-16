@@ -107,7 +107,7 @@ export function Money() {
                     {t.what} · {formatDateTime(t.at)}
                   </div>
                 </div>
-                <span style={{ flex: "none", font: "700 10px var(--font-mono)", letterSpacing: ".06em", borderRadius: 8, padding: "3px 7px", color: t.method === "InstaPay" ? "var(--primary-pressed)" : "var(--ink-muted)", background: t.method === "InstaPay" ? "var(--primary-tint)" : "var(--sunken)" }}>{t.method.toUpperCase()}</span>
+                <span style={{ flex: "none", font: "700 10px var(--font-mono)", letterSpacing: ".06em", borderRadius: "var(--r-chip)", padding: "3px 7px", color: t.method === "InstaPay" ? "var(--primary-pressed)" : "var(--ink-muted)", background: t.method === "InstaPay" ? "var(--primary-tint)" : "var(--sunken)" }}>{t.method.toUpperCase()}</span>
                 <div style={{ flex: "none", minWidth: 64, textAlign: "right", font: "800 var(--fs-body) var(--font-mono)", color: t.refund ? "var(--danger-fg)" : "var(--ink)" }}>{t.refund ? "−" : ""}{fmt(t.amount)}</div>
                 <Icon name="chevron-right" size={16} />
               </button>

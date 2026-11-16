@@ -50,7 +50,7 @@ export function DayList({
           style={{
             background: "var(--surface)",
             border: "1px solid var(--line)",
-            borderRadius: "var(--r-tile)",
+            borderRadius: "var(--r-card)",
             padding: "14px 16px",
             display: "flex",
             gap: 14,

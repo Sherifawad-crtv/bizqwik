@@ -74,7 +74,7 @@ export function CreateOrgSheet({ open, onClose, plans, onCreated }: { open: bool
         {created.domain && !created.domain.connected && (
           <div
             data-testid="domain-warning"
-            style={{ font: "500 var(--fs-note)/1.5 var(--font-body)", color: "var(--ink)", background: "var(--primary-tint)", borderRadius: 12, padding: "10px 12px", marginBottom: 18 }}
+            style={{ font: "500 var(--fs-note)/1.5 var(--font-body)", color: "var(--ink)", background: "var(--primary-tint)", borderRadius: "var(--r-item)", padding: "10px 12px", marginBottom: 18 }}
           >
             <b>{created.domain.name}</b> couldn't be connected automatically
             {created.domain.reason ? ` (${created.domain.reason})` : ""}, so its member app has no https yet and the camera

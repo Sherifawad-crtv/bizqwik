@@ -52,7 +52,7 @@ export function PlansPanel({ solo }: { solo?: boolean }) {
                   <span style={{ font: "700 var(--fs-base) var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.name}</span>
                   <CategoryPill name={p.name} />
                   <LocationPill locations={locations} id={p.locationId} />
-                  {!p.active && <span style={{ flex: "none", font: "700 10px var(--font-mono)", letterSpacing: ".06em", color: "var(--ink-muted)", background: "var(--sunken)", borderRadius: 8, padding: "3px 7px" }}>OFF SALE</span>}
+                  {!p.active && <span style={{ flex: "none", font: "700 10px var(--font-mono)", letterSpacing: ".06em", color: "var(--ink-muted)", background: "var(--sunken)", borderRadius: "var(--r-chip)", padding: "3px 7px" }}>OFF SALE</span>}
                 </div>
                 <div className="bq-meta">
                   {fmt(p.price)} EGP · {p.kind === "bundle" ? `${p.credits} classes${p.sharedSeats ? ` shared by ${p.sharedSeats}` : ""} · ` : "all classes · "}

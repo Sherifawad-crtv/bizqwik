@@ -160,11 +160,11 @@ export function QrScanner({ title, hint, onClose, onScan }: { title: string; hin
       </div>
       <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
         <div style={{ position: "relative", width: "100%", maxWidth: 420 }}>
-          <div id={REGION_ID} className="bq-qr-region" style={{ position: "relative", width: "100%", aspectRatio: "1 / 1", borderRadius: 28, overflow: "hidden", background: "#111" }}>
+          <div id={REGION_ID} className="bq-qr-region" style={{ position: "relative", width: "100%", aspectRatio: "1 / 1", borderRadius: "var(--r-card)", overflow: "hidden", background: "#111" }}>
             <video ref={videoRef} playsInline muted autoPlay />
           </div>
           {!error && !stalled && (
-            <div aria-hidden style={{ position: "absolute", inset: "14%", border: "3px solid var(--primary)", borderRadius: 24, pointerEvents: "none" }} />
+            <div aria-hidden style={{ position: "absolute", inset: "14%", border: "3px solid var(--primary)", borderRadius: "var(--r-item)", pointerEvents: "none" }} />
           )}
           {!error && !stalled && wide && (
             <div role="group" aria-label="Camera lens" style={{ position: "absolute", left: "50%", top: "calc(100% + 16px)", transform: "translateX(-50%)", display: "flex", gap: 6, padding: 4, borderRadius: 999, background: "rgba(255,255,255,.12)" }}>
@@ -189,7 +189,7 @@ export function QrScanner({ title, hint, onClose, onScan }: { title: string; hin
         </div>
       </div>
       {error && (
-        <div style={{ margin: "0 16px calc(env(safe-area-inset-bottom) + 18px)", background: "var(--surface)", color: "var(--ink)", borderRadius: 20, padding: 16 }}>
+        <div style={{ margin: "0 16px calc(env(safe-area-inset-bottom) + 18px)", background: "var(--surface)", color: "var(--ink)", borderRadius: "var(--r-item)", padding: 16 }}>
           <div style={{ font: "600 var(--fs-body-sm)/1.5 var(--font-body)", marginBottom: 12 }}>{error}</div>
           <Button fullWidth onClick={() => { setError(null); setAttempt((n) => n + 1); }}>Try again</Button>
         </div>

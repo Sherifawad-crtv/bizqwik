@@ -64,7 +64,7 @@ export function TiersPanel({ onOpenPeople, onOpenInvites }: { onOpenPeople: () =
           <div className="bq-label">DELETE TIER</div>
           <div style={{ font: "800 var(--fs-title)/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 4px" }}>{shownDeleting.name} is still in use</div>
           <div style={{ font: "400 var(--fs-note)/1.5 var(--font-mono)", color: "var(--ink-muted)", marginBottom: 14 }}>Move these to another tier first, then delete it.</div>
-          <div style={{ background: "var(--sunken)", borderRadius: "var(--r-input)", padding: "6px 16px", marginBottom: 16 }}>
+          <div style={{ background: "var(--sunken)", borderRadius: "var(--r-item)", padding: "6px 16px", marginBottom: 16 }}>
             {onTier(shownDeleting.id).map((p) => (
               <div key={p.id} style={{ display: "flex", alignItems: "baseline", gap: 10, padding: "10px 0" }}>
                 <span style={{ font: "700 var(--fs-body) var(--font-body)" }}>{p.name}</span>

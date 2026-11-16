@@ -69,7 +69,7 @@ export function Oversight() {
       <HomeAvatar name={profile.name} avatarUrl={profile.avatarUrl} greeting={`Hi, ${profile.name.split(" ")[0]}`} />
 
       {error && (
-        <div className="bq-rise" style={{ marginBottom: 14, font: "600 var(--fs-note)/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: "var(--r-md)", padding: "10px 14px" }}>{error}</div>
+        <div className="bq-rise" style={{ marginBottom: 14, font: "600 var(--fs-note)/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: "var(--r-item)", padding: "10px 14px" }}>{error}</div>
       )}
 
       <div style={{ display: "flex", alignItems: "center", gap: 10, margin: "0 0 12px" }}>
@@ -84,7 +84,7 @@ export function Oversight() {
       ) : (
         <>
           {short && (
-            <div style={{ display: "flex", gap: 10, alignItems: "flex-start", background: "var(--sunken)", borderRadius: "var(--r-md)", padding: "12px 14px", marginBottom: 14 }}>
+            <div style={{ display: "flex", gap: 10, alignItems: "flex-start", background: "var(--sunken)", borderRadius: "var(--r-item)", padding: "12px 14px", marginBottom: 14 }}>
               <span style={{ color: "var(--ink-muted)", display: "flex", flex: "none", marginTop: 1 }}>
                 <Icon name="insights" size={18} />
               </span>
@@ -158,7 +158,7 @@ export function Oversight() {
               onClick={() => navigate("/accounting")}
               style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: "16px 18px", marginBottom: 10, cursor: "pointer", textAlign: "left" }}
             >
-              <span style={{ width: 32, height: 32, flex: "none", borderRadius: 8, background: "var(--primary-tint)", color: "var(--primary-pressed)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <span style={{ width: 32, height: 32, flex: "none", borderRadius: "var(--r-chip)", background: "var(--primary-tint)", color: "var(--primary-pressed)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <Icon name="cash" size={16} />
               </span>
               <span style={{ flex: 1, font: "700 var(--fs-body) var(--font-body)" }}>Profit &amp; loss</span>

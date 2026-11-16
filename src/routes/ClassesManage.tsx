@@ -175,7 +175,7 @@ function ClassCard({ c, onEdit, onRoster }: { c: GymClass; onEdit?: () => void; 
         <button
           type="button"
           onClick={onRoster}
-          style={{ marginTop: 12, width: "100%", border: "1px solid var(--line)", background: "var(--paper)", color: "var(--ink-muted)", borderRadius: 10, padding: "8px 0", font: "700 var(--fs-note) var(--font-body)", cursor: "pointer" }}
+          style={{ marginTop: 12, width: "100%", border: "1px solid var(--line)", background: "var(--paper)", color: "var(--ink-muted)", borderRadius: "var(--r-button)", padding: "8px 0", font: "700 var(--fs-note) var(--font-body)", cursor: "pointer" }}
         >
           View roster
         </button>

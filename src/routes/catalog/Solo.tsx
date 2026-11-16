@@ -147,7 +147,7 @@ export function SoloOffer() {
 
       <div style={card}>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          {instapayQr && <img src={instapayQr} alt="Your InstaPay QR" style={{ width: 56, height: 56, objectFit: "contain", borderRadius: 8, background: "#fff", border: "1px solid var(--line)" }} />}
+          {instapayQr && <img src={instapayQr} alt="Your InstaPay QR" style={{ width: 56, height: 56, objectFit: "contain", borderRadius: "var(--r-chip)", background: "#fff", border: "1px solid var(--line)" }} />}
           <div className="bq-grow">
             <div className="bq-h3">InstaPay QR</div>
             <div className="bq-meta">{instapayQr ? "Shown when someone pays by InstaPay" : "Add it to show on drop-ins"}</div>
@@ -180,7 +180,7 @@ export function SoloOffer() {
           </div>
         )}
       </div>
-      {error && <div className="bq-rise" style={{ font: "600 var(--fs-note)/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: "var(--r-md)", padding: "10px 14px", marginBottom: 12 }}>{error}</div>}
+      {error && <div className="bq-rise" style={{ font: "600 var(--fs-note)/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: "var(--r-item)", padding: "10px 14px", marginBottom: 12 }}>{error}</div>}
     </div>
   );
 }

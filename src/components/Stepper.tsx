@@ -9,7 +9,7 @@ interface StepperProps {
 
 export function Stepper({ value, min = 1, max = 12, onChange }: StepperProps) {
   return (
-    <div style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "12px 16px" }}>
+    <div style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-item)", padding: "12px 16px" }}>
       <div className="bq-label">SESSIONS THAT DAY</div>
       <div style={{ display: "flex", alignItems: "center", gap: 16, marginTop: 8 }}>
         <button

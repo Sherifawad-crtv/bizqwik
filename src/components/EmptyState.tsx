@@ -27,7 +27,7 @@ export function EmptyState({
       style={{
         background: bare ? "transparent" : "var(--surface)",
         border: bare ? 0 : "1px solid var(--line)",
-        borderRadius: "var(--r-tile)",
+        borderRadius: "var(--r-card)",
         padding: bare ? "18px 8px" : "28px 20px",
         display: "flex",
         flexDirection: "column",
@@ -36,7 +36,7 @@ export function EmptyState({
         gap: 6,
       }}
     >
-      <span style={{ width: 44, height: 44, borderRadius: "var(--r-md)", background: "var(--primary-tint)", color: "var(--primary-pressed)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 4 }}>
+      <span style={{ width: 44, height: 44, borderRadius: "var(--r-chip)", background: "var(--primary-tint)", color: "var(--primary-pressed)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 4 }}>
         <Icon name={icon} size={22} />
       </span>
       <div style={{ font: "700 var(--fs-base)/1.3 var(--font-body)", color: "var(--ink)" }}>{title}</div>

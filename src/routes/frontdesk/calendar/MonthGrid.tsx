@@ -60,7 +60,7 @@ export function MonthGrid({ cursor, today, on, wide, onDay, onOpen }: { cursor: 
                     e.stopPropagation();
                     onOpen(c);
                   }}
-                  style={{ border: 0, textAlign: "left", cursor: "pointer", borderRadius: 6, background: "var(--primary-tint)", color: "var(--primary-pressed)", padding: "2px 5px", font: "700 var(--fs-caption) var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", minWidth: 0 }}
+                  style={{ border: 0, textAlign: "left", cursor: "pointer", borderRadius: "var(--r-chip)", background: "var(--primary-tint)", color: "var(--primary-pressed)", padding: "2px 5px", font: "700 var(--fs-caption) var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", minWidth: 0 }}
                 >
                   {wide ? `${clock(new Date(c.startsAt)).replace(" ", "").toLowerCase()} ${c.title}` : c.title}
                 </button>

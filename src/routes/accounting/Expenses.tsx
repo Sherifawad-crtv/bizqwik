@@ -58,7 +58,7 @@ export function ExpensesPanel({
   return (
     <div>
       <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
-        <label style={{ flex: 1, minWidth: 0, display: "flex", alignItems: "center", gap: 10, height: 48, padding: "0 14px", background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)" }}>
+        <label style={{ flex: 1, minWidth: 0, display: "flex", alignItems: "center", gap: 10, height: 48, padding: "0 14px", background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-item)" }}>
           <span style={{ color: "var(--ink-faint)", display: "flex" }}><Icon name="search" size={18} /></span>
           <input
             aria-label="Search expense notes"

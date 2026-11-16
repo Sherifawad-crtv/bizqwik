@@ -152,7 +152,7 @@ function NotificationsRow() {
         <SwitchVisual checked={on} animate={ready} busy={busy} />
       </button>
       {error && (
-        <div style={{ margin: "0 16px 12px", font: "600 var(--fs-small)/1.4 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 10, padding: "8px 10px" }}>
+        <div style={{ margin: "0 16px 12px", font: "600 var(--fs-small)/1.4 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: "var(--r-item)", padding: "8px 10px" }}>
           {error}
         </div>
       )}

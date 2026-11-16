@@ -165,7 +165,7 @@ function Feed({ entries }: { entries: ActivityEntry[] }) {
         const amt = amountLabel(e);
         return (
           <div key={e.id} style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: "12px 14px", display: "flex", alignItems: "center", gap: 12 }}>
-            <span style={{ flex: "none", font: "700 10px var(--font-mono)", letterSpacing: ".06em", color: tone.fg, background: tone.bg, borderRadius: 8, padding: "5px 8px", minWidth: 74, textAlign: "center" }}>{tone.label}</span>
+            <span style={{ flex: "none", font: "700 10px var(--font-mono)", letterSpacing: ".06em", color: tone.fg, background: tone.bg, borderRadius: "var(--r-chip)", padding: "5px 8px", minWidth: 74, textAlign: "center" }}>{tone.label}</span>
             <span className="bq-grow">
               <span style={{ display: "block", font: "600 var(--fs-body-sm)/1.35 var(--font-body)" }}>{describe(e)}</span>
               <span style={{ display: "block", font: "400 var(--fs-small) var(--font-mono)", color: "var(--ink-faint)", marginTop: 2 }}>{timeLabel(e.at)}{e.actorName ? ` · by ${e.actorName}` : ""}</span>

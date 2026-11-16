@@ -72,10 +72,10 @@ function RequestRow({ r, onDone }: { r: PaymentRequest; onDone: () => void }) {
       <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
         {r.proofUrl ? (
           <a href={r.proofUrl} target="_blank" rel="noreferrer" aria-label={`Open ${r.clientName}'s receipt`} style={{ flex: "none" }}>
-            <img src={r.proofUrl} alt={`${r.clientName}'s receipt`} style={{ width: 72, height: 96, objectFit: "cover", borderRadius: 10, border: "1px solid var(--line)", background: "var(--sunken)" }} />
+            <img src={r.proofUrl} alt={`${r.clientName}'s receipt`} style={{ width: 72, height: 96, objectFit: "cover", borderRadius: "var(--r-chip)", border: "1px solid var(--line)", background: "var(--sunken)" }} />
           </a>
         ) : (
-          <span style={{ width: 72, height: 96, flex: "none", borderRadius: 10, background: "var(--sunken)" }} />
+          <span style={{ width: 72, height: 96, flex: "none", borderRadius: "var(--r-chip)", background: "var(--sunken)" }} />
         )}
         <div className="bq-grow">
           <div className="bq-h3">{r.clientName}</div>
@@ -98,7 +98,7 @@ function RequestRow({ r, onDone }: { r: PaymentRequest; onDone: () => void }) {
           <Button variant="quiet" disabled={busy} onClick={() => setRejecting(true)}>Reject</Button>
         </div>
       )}
-      {error && <div className="bq-rise" style={{ font: "600 var(--fs-note)/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: "var(--r-md)", padding: "10px 14px", marginTop: 10 }}>{error}</div>}
+      {error && <div className="bq-rise" style={{ font: "600 var(--fs-note)/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: "var(--r-item)", padding: "10px 14px", marginTop: 10 }}>{error}</div>}
     </Card>
   );
 }

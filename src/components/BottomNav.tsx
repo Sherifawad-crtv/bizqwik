@@ -6,27 +6,28 @@ import { noteTabTap } from "../lib/tabTap";
 
 const BAR_BORDER = 1;
 
-// Original sizing — unchanged from before the narrow-phone fix, and kept
-// exactly as-is for Pro Max/Plus-class phones and up, where it already had
-// room to breathe.
-const REGULAR = { ITEM: 52, GAP: 6, PAD: 6, INDICATOR: 52 };
-// Compact sizing for phones too narrow to fit a 5-tab roster next to the FAB
-// without clipping (iPhone 12 Pro and similar — see useIsNarrowPhone). The
-// active-tab indicator stays at its original 52px regardless, centered on
-// the smaller icon box, so it stays as prominent as it always was.
-const COMPACT = { ITEM: 44, GAP: 5, PAD: 5, INDICATOR: 52 };
+// Sizes: the icon circle (ITEM), the gap around it (PAD) and between circles (GAP).
+// The bar is exactly ITEM + 2 × (PAD + border) tall, so it hugs its contents evenly.
+const REGULAR = { ITEM: 50, GAP: 6, PAD: 6 };
+// Phones too narrow for 5 tabs beside the + button (see useIsNarrowPhone) get
+// a slightly smaller circle and a gap of 7, which keeps the bar 64px tall.
+const COMPACT = { ITEM: 48, GAP: 4, PAD: 7 };
 
 export function BottomNav({ items }: { items: NavItem[] }) {
   const { pathname } = useLocation();
   const activeIndex = matchTabIndex(pathname, items);
   const narrow = useIsNarrowPhone();
-  const { ITEM, GAP, PAD, INDICATOR } = narrow ? COMPACT : REGULAR;
+  const { ITEM, GAP, PAD } = narrow ? COMPACT : REGULAR;
+  // The bar hugs its contents with the same gap on every side, and its corner is
+  // the active circle's radius plus that gap: outer = inner + padding (26 + 6 = 32).
+  const INDICATOR = ITEM;
+  const BAR_H = ITEM + 2 * (PAD + BAR_BORDER);
   // Real hit area extends past the visible ITEM box using space that already
   // exists but is otherwise unused: the bar's own vertical padding (64px bar
   // minus ITEM), and half the gap on each side horizontally (so two adjacent
   // items' hit zones meet exactly at the gap's midpoint — full coverage,
   // no overlap). Purely invisible; the icons themselves never change size.
-  const HIT_SLOP_Y = (64 - ITEM) / 2;
+  const HIT_SLOP_Y = (BAR_H - ITEM) / 2;
   const HIT_SLOP_X = GAP / 2;
 
   return (
@@ -35,8 +36,8 @@ export function BottomNav({ items }: { items: NavItem[] }) {
         position: "relative",
         flex: "0 1 auto",
         minWidth: 0,
-        height: 64,
-        borderRadius: 999,
+        height: BAR_H,
+        borderRadius: ITEM / 2 + PAD + BAR_BORDER,
         background: "rgba(251,250,247,.55)",
         backdropFilter: "blur(28px) saturate(180%)",
         WebkitBackdropFilter: "blur(28px) saturate(180%)",
@@ -54,12 +55,8 @@ export function BottomNav({ items }: { items: NavItem[] }) {
           aria-hidden
           style={{
             position: "absolute",
-            left: PAD + ITEM / 2 - INDICATOR / 2,
-            // On regular sizing INDICATOR===ITEM, so this is exactly the
-            // original, unmodified formula — the border-corrected version
-            // only kicks in for the compact/narrow-phone indicator, which is
-            // deliberately bigger than its icon box.
-            top: narrow ? (64 - BAR_BORDER * 2 - INDICATOR) / 2 : (64 - INDICATOR) / 2,
+            left: PAD,
+            top: PAD,
             width: INDICATOR,
             height: INDICATOR,
             borderRadius: 999,

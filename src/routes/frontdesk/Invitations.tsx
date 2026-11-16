@@ -68,7 +68,7 @@ export function Invitations({ embedded = false, onCreateClient }: { embedded?: b
       </Card>
 
       {done && (
-        <div style={{ marginBottom: 14, font: "600 var(--fs-note)/1.5 var(--font-body)", color: "var(--paid-fg)", background: "var(--paid-bg)", borderRadius: "var(--r-md)", padding: "10px 14px" }}>
+        <div style={{ marginBottom: 14, font: "600 var(--fs-note)/1.5 var(--font-body)", color: "var(--paid-fg)", background: "var(--paid-bg)", borderRadius: "var(--r-item)", padding: "10px 14px" }}>
           Invitation recorded — {done}
         </div>
       )}

@@ -13,7 +13,7 @@ export function DesktopAuth({ children }: { children: ReactNode }) {
           flex: "1 1 50%",
           minWidth: 0,
           minHeight: "calc(100vh - 40px)",
-          borderRadius: 32,
+          borderRadius: "var(--r-card)",
           overflow: "hidden",
           background: `var(--sunken) url(${hero}) center / cover no-repeat`,
         }}

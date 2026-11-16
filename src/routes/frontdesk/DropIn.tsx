@@ -162,13 +162,13 @@ export function DropIn({ embedded = false, initialClient = null }: { embedded?: 
       </Card>
 
       {done && (
-        <div style={{ marginBottom: 14, font: "600 var(--fs-note)/1.5 var(--font-body)", color: "var(--paid-fg)", background: "var(--paid-bg)", borderRadius: "var(--r-md)", padding: "10px 14px" }}>
+        <div style={{ marginBottom: 14, font: "600 var(--fs-note)/1.5 var(--font-body)", color: "var(--paid-fg)", background: "var(--paid-bg)", borderRadius: "var(--r-item)", padding: "10px 14px" }}>
           Drop-in recorded — {done}
         </div>
       )}
 
       <div className="bq-stack">
-        <div style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "10px 16px", display: "flex", alignItems: "center", gap: 10 }}>
+        <div style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-item)", padding: "10px 16px", display: "flex", alignItems: "center", gap: 10 }}>
           <div className="bq-grow">
             <div className="bq-label">MEMBER</div>
             <div style={{ font: "600 var(--fs-base) var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{client ? client.name : newMember ? "New member" : "Not linked"}</div>

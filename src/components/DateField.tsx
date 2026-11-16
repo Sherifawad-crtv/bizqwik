@@ -29,7 +29,7 @@ export function DateField({ value, min, max, onChange }: DateFieldProps) {
           textAlign: "left",
           background: "var(--sunken)",
           border: "1px solid var(--line)",
-          borderRadius: "var(--r-input)",
+          borderRadius: "var(--r-item)",
           padding: "12px 16px",
           cursor: "pointer",
         }}
@@ -66,7 +66,7 @@ export function DateField({ value, min, max, onChange }: DateFieldProps) {
                 style={{
                   aspectRatio: "1",
                   border: 0,
-                  borderRadius: "var(--r-input)",
+                  borderRadius: "var(--r-item)",
                   background: on ? "var(--primary)" : "var(--sunken)",
                   color: disabled ? "var(--ink-faint)" : on ? "#fff" : "var(--ink)",
                   opacity: disabled ? 0.4 : 1,

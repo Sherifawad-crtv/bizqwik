@@ -85,19 +85,19 @@ export function ClientDetailSheet({
           {mode === "view" && (
             <>
               {client.conditions && (
-                <div style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "12px 16px", marginBottom: 10 }}>
+                <div style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-item)", padding: "12px 16px", marginBottom: 10 }}>
                   <div className="bq-label">CONDITIONS</div>
                   <div style={{ font: "600 var(--fs-body)/1.4 var(--font-body)" }}>{client.conditions}</div>
                 </div>
               )}
 
-              <div style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "12px 16px", marginBottom: 10 }}>
+              <div style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-item)", padding: "12px 16px", marginBottom: 10 }}>
                 <div className="bq-label">COACH</div>
                 <div style={{ font: "600 var(--fs-base) var(--font-body)" }}>{coachName(client.assignedCoachId) ?? "Unassigned"}</div>
               </div>
 
               {role === "dept_head" && (
-                <div style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "12px 16px", marginBottom: 10 }}>
+                <div style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-item)", padding: "12px 16px", marginBottom: 10 }}>
                   <div className="bq-label">GROUP PLAN</div>
                   {client.groupPlan ? (
                     <>
@@ -113,7 +113,7 @@ export function ClientDetailSheet({
               )}
 
               {pkg ? (
-                <div style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "12px 16px", marginBottom: 10 }}>
+                <div style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-item)", padding: "12px 16px", marginBottom: 10 }}>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
                     <span className="bq-label">CURRENT PACKAGE</span>
                     <PackageStatusPill status={pkg.status} />
@@ -132,13 +132,13 @@ export function ClientDetailSheet({
               )}
 
               {error && (
-                <div className="bq-rise" style={{ marginBottom: 10, font: "600 var(--fs-note)/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: "var(--r-md)", padding: "10px 14px" }}>
+                <div className="bq-rise" style={{ marginBottom: 10, font: "600 var(--fs-note)/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: "var(--r-item)", padding: "10px 14px" }}>
                   {error}
                 </div>
               )}
 
               {canDeliver && (
-                <div data-testid="pt-scan-hint" style={{ marginTop: 6, font: "500 var(--fs-note)/1.5 var(--font-body)", color: "var(--ink-muted)", background: "var(--primary-tint)", borderRadius: "var(--r-md)", padding: "10px 14px" }}>
+                <div data-testid="pt-scan-hint" style={{ marginTop: 6, font: "500 var(--fs-note)/1.5 var(--font-body)", color: "var(--ink-muted)", background: "var(--primary-tint)", borderRadius: "var(--r-item)", padding: "10px 14px" }}>
                   To log a session, scan the PT code in {client.name.split(" ")[0]}'s app (the + button, or Scan QR).
                 </div>
               )}

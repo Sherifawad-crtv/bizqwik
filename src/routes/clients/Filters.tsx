@@ -96,7 +96,7 @@ export function ClientFilterBar({
     <div data-testid="client-filters" style={{ marginBottom: 14 }}>
       <div style={{ display: "flex", gap: 8 }}>
         <label
-          style={{ flex: 1, minWidth: 0, display: "flex", alignItems: "center", gap: 10, height: 48, padding: "0 14px", background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)" }}
+          style={{ flex: 1, minWidth: 0, display: "flex", alignItems: "center", gap: 10, height: 48, padding: "0 14px", background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-item)" }}
         >
           <span style={{ color: "var(--ink-faint)", display: "flex" }}>
             <Icon name="search" size={18} />
@@ -112,7 +112,7 @@ export function ClientFilterBar({
         <button
           type="button"
           onClick={() => setOpen(true)}
-          style={{ flex: "none", height: 48, padding: "0 16px", display: "flex", alignItems: "center", gap: 8, background: inSheet ? "var(--primary-tint)" : "var(--surface)", color: inSheet ? "var(--primary-pressed)" : "var(--ink)", border: `1px solid ${inSheet ? "var(--primary)" : "var(--line)"}`, borderRadius: "var(--r-input)", font: "700 var(--fs-body) var(--font-body)", cursor: "pointer" }}
+          style={{ flex: "none", height: 48, padding: "0 16px", display: "flex", alignItems: "center", gap: 8, background: inSheet ? "var(--primary-tint)" : "var(--surface)", color: inSheet ? "var(--primary-pressed)" : "var(--ink)", border: `1px solid ${inSheet ? "var(--primary)" : "var(--line)"}`, borderRadius: "var(--r-item)", font: "700 var(--fs-body) var(--font-body)", cursor: "pointer" }}
         >
           Filters
           {inSheet > 0 && (

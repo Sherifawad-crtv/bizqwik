@@ -21,7 +21,7 @@ function NavItem({ to, label, icon, end, onNavigate }: { to: string; label: stri
             alignItems: "center",
             gap: 12,
             padding: "11px 12px",
-            borderRadius: "var(--r-tile)",
+            borderRadius: "var(--r-item)",
             cursor: "pointer",
             background: isActive ? "var(--primary-tint)" : "transparent",
             color: isActive ? "var(--primary-pressed)" : "var(--ink-muted)",
@@ -124,7 +124,7 @@ export function OpsShell() {
           </div>
           <button
             onClick={logout}
-            style={{ display: "flex", alignItems: "center", gap: 8, width: "100%", marginTop: 6, padding: "10px 12px", border: 0, background: "none", color: "var(--ink-muted)", cursor: "pointer", font: "600 var(--fs-body) var(--font-body)", borderRadius: "var(--r-tile)" }}
+            style={{ display: "flex", alignItems: "center", gap: 8, width: "100%", marginTop: 6, padding: "10px 12px", border: 0, background: "none", color: "var(--ink-muted)", cursor: "pointer", font: "600 var(--fs-body) var(--font-body)", borderRadius: "var(--r-item)" }}
           >
             <Icon name="logout" size={18} /> Sign out
           </button>

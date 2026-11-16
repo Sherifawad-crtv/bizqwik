@@ -101,7 +101,7 @@ export function ClientRoster({
           <div
             key={c.id}
             onClick={() => onSelect(c)}
-            style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-tile)", padding: "14px 16px", display: "flex", gap: 14, alignItems: "center", cursor: "pointer" }}
+            style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: "14px 16px", display: "flex", gap: 14, alignItems: "center", cursor: "pointer" }}
           >
             <Avatar name={c.name} size={38} />
             <div className="bq-grow">

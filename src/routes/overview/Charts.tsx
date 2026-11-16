@@ -41,7 +41,7 @@ export function ShareBars({ slices }: { slices: RevenueSlice[] }) {
               <span className="tabular" style={{ font: "800 var(--fs-body-sm) var(--font-body)" }}>{fmt(s.amount)}</span>
               <span className="tabular" style={{ width: 40, textAlign: "right", font: "600 var(--fs-small) var(--font-mono)", color: "var(--ink-faint)" }}>{Math.round(pct)}%</span>
             </div>
-            <div style={{ height: 8, background: "var(--sunken)", borderRadius: 4, overflow: "hidden" }}>
+            <div style={{ height: 8, background: "var(--sunken)", borderRadius: 999, overflow: "hidden" }}>
               <div style={{ width: `${pct}%`, height: "100%", background: "var(--primary)", borderRadius: "0 4px 4px 0" }} />
             </div>
           </div>

@@ -72,7 +72,7 @@ export function ClassRosterSheet({
 
       {roster.loading && <InlineSpinner />}
       {error && (
-        <div className="bq-rise" style={{ marginBottom: 12, font: "600 var(--fs-note)/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: "var(--r-md)", padding: "10px 14px" }}>{error}</div>
+        <div className="bq-rise" style={{ marginBottom: 12, font: "600 var(--fs-note)/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: "var(--r-item)", padding: "10px 14px" }}>{error}</div>
       )}
       {!roster.loading && live.length === 0 && (
         <EmptyState bare icon="clients" title="No one has booked this class yet" body="Members book from the app, or the front desk can add a drop-in from Drop-In → Class session." />
@@ -111,7 +111,7 @@ function RosterRow({
   const paid = b.payStatus === "paid";
   const onPlan = b.coverage === "plan";
   return (
-    <div style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "12px 14px", opacity: busy ? 0.6 : 1 }}>
+    <div style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-item)", padding: "12px 14px", opacity: busy ? 0.6 : 1 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
         <div className="bq-grow">
           <div style={{ font: "700 var(--fs-body) var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{b.clientName ?? "Member"}</div>
@@ -119,7 +119,7 @@ function RosterRow({
             {onPlan ? "On their plan" : `Drop-in · ${b.price > 0 ? egp(b.price) : "Free"} · ${paid ? "Paid" : "Unpaid"}`}
           </div>
         </div>
-        <span style={{ flex: "none", font: "700 10px var(--font-mono)", letterSpacing: ".06em", color: tone.fg, background: tone.bg, borderRadius: 8, padding: "5px 8px" }}>
+        <span style={{ flex: "none", font: "700 10px var(--font-mono)", letterSpacing: ".06em", color: tone.fg, background: tone.bg, borderRadius: "var(--r-chip)", padding: "5px 8px" }}>
           {ATT_LABEL[b.attendance].toUpperCase()}
         </span>
       </div>
@@ -160,7 +160,7 @@ function RowBtn({ children, onClick, disabled, active, primary }: { children: Re
         border: active || primary ? 0 : "1px solid var(--line)",
         background: primary ? "var(--primary)" : active ? "var(--primary-tint-strong)" : "var(--surface)",
         color: primary ? "var(--surface)" : active ? "var(--primary-pressed)" : "var(--ink-muted)",
-        borderRadius: 10,
+        borderRadius: "var(--r-button)",
         padding: "8px 4px",
         font: "700 var(--fs-note) var(--font-body)",
         cursor: disabled ? "default" : "pointer",

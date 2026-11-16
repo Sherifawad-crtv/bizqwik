@@ -44,7 +44,7 @@ export function ClassPhotoField({ value, onChange, title }: { value: string | nu
         <div
           data-testid="class-photo-preview"
           style={{
-            position: "relative", width: 88, aspectRatio: "4 / 5", flex: "none", borderRadius: 16, overflow: "hidden",
+            position: "relative", width: 88, aspectRatio: "4 / 5", flex: "none", borderRadius: "var(--r-item)", overflow: "hidden",
             background: "var(--sunken)", border: value ? 0 : "1.5px dashed var(--line)", display: "flex", alignItems: "center", justifyContent: "center",
           }}
         >

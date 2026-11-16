@@ -117,7 +117,7 @@ function PersonSheet({
         </div>
 
         <div className="bq-stack">
-          <div style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "12px 16px" }}>
+          <div style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-item)", padding: "12px 16px" }}>
             <div className="bq-label">ROLE</div>
             <div style={{ font: "600 var(--fs-base) var(--font-body)" }}>{ROLE_LABELS[shown.role]}</div>
           </div>

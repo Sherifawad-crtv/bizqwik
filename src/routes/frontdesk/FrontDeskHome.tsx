@@ -149,7 +149,7 @@ export function FrontDeskHome() {
                 </div>
                 {q?.state === "done" && <div style={{ font: "400 var(--fs-small) var(--font-mono)", color: "var(--paid-fg)", marginTop: 4 }}>{q.note}</div>}
                 {q?.state === "error" && (
-                  <div role="alert" style={{ font: "600 var(--fs-small)/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: 10, padding: "8px 10px", marginTop: 6 }}>
+                  <div role="alert" style={{ font: "600 var(--fs-small)/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: "var(--r-item)", padding: "8px 10px", marginTop: 6 }}>
                     {q.text}
                   </div>
                 )}

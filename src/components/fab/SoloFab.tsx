@@ -47,9 +47,9 @@ export function SoloFab({ size }: { size: number }) {
             <button
               key={o.kind}
               onClick={() => pick(o.kind)}
-              style={{ textAlign: "left", background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "14px 16px", cursor: "pointer", display: "flex", alignItems: "center", gap: 14 }}
+              style={{ textAlign: "left", background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-item)", padding: "14px 16px", cursor: "pointer", display: "flex", alignItems: "center", gap: 14 }}
             >
-              <span style={{ width: 40, height: 40, flex: "none", borderRadius: 12, background: "var(--primary-tint)", color: "var(--primary-pressed)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <span style={{ width: 40, height: 40, flex: "none", borderRadius: "var(--r-chip)", background: "var(--primary-tint)", color: "var(--primary-pressed)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <Icon name={o.icon} size={20} />
               </span>
               <span className="bq-grow">

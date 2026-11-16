@@ -188,7 +188,7 @@ export function ClientSheet({
             <SheetHeading kicker="CLIENT" title={shown.name} />
             {shown.phone && <div style={{ font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-muted)", marginTop: -8, marginBottom: 14 }}>{shown.phone}</div>}
 
-            <div style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "14px 16px" }}>
+            <div style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-item)", padding: "14px 16px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                 <div style={{ font: "800 18px var(--font-body)", flex: 1, minWidth: 0 }}>{summary.title}</div>
                 <PlanPill client={shown} />
@@ -272,7 +272,7 @@ export function ClientSheet({
               {showMore ? "Fewer options" : "More options"}
             </button>
             <Reveal show={showMore}>
-              <div style={{ border: "1px solid var(--line)", borderRadius: "var(--r-input)", overflow: "hidden" }}>
+              <div style={{ border: "1px solid var(--line)", borderRadius: "var(--r-item)", overflow: "hidden" }}>
                 {[
                   !plan && summary.tone === "active" ? { label: "Sell a group plan", go: () => setMode("sell-plan") } : null,
                   !packageActive ? { label: pkg ? "Renew package" : "Sell a package", go: () => setMode("renew-package") } : null,

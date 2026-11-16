@@ -17,7 +17,7 @@ function SidebarItem({ item }: { item: NavItem }) {
             alignItems: "center",
             gap: 12,
             padding: "11px 12px",
-            borderRadius: "var(--r-tile)",
+            borderRadius: "var(--r-item)",
             cursor: "pointer",
             background: isActive ? "var(--primary-tint)" : hovered ? "var(--sunken)" : "transparent",
             color: isActive ? "var(--primary-pressed)" : hovered ? "var(--ink)" : "var(--ink-muted)",

@@ -33,10 +33,21 @@
   --frozen-fg: #1f6a85;
   --frozen-bg: #d8edf3;
 
-  --r-tile: 16px;
-  --r-input: 20px;
-  --r-button: 24px;
+/* ── Corner radii: one value per KIND of thing, and nested shapes follow
+     outer = inner + padding. ──
+     card   28  every surface on a page: cards, tiles, charts, hero, list rows
+     sheet  40  bottom sheets; padding 20 inside, so what sits in them is:
+     item   20  fields, notices, inner cards, thumbnails (40 − 20)
+     chip    8  small tags, icon boxes in cards, calendar blocks (28 − 20)
+     button 24  buttons (a 48px button is a full pill)
+     float  32  the floating actions container (button 24 + padding 8)
+     999        pills, circles, avatars, switches, the tab bar (26 + 6 = 32) */
   --r-card: 28px;
+  --r-sheet: 40px;
+  --r-item: 20px;
+  --r-chip: 8px;
+  --r-button: 24px;
+  --r-float: 32px;
 
   --font-body: "Urbanist", system-ui, sans-serif;
   --font-mono: "Space Mono", ui-monospace, monospace;
@@ -59,7 +70,6 @@
   --fs-display: 30px;
   /* Gap under the bottom bar: it sits just above the iOS home indicator. */
   --bar-bottom: max(8px, calc(var(--safe-bottom) - 8px));
-  --r-md: 14px; /* inputs, banners, small cards */
   --shadow-card: 0 24px 60px rgba(26, 23, 38, 0.1);
 
   --safe-top: env(safe-area-inset-top, 0px);
@@ -355,7 +365,7 @@ textarea {
 .bq-error {
   background: var(--danger-bg);
   color: var(--danger-fg);
-  border-radius: var(--r-md);
+  border-radius: var(--r-item);
   padding: 10px 14px;
   font: 600 var(--fs-note)/1.5 var(--font-body);
 }

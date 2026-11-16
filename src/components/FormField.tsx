@@ -6,7 +6,7 @@ import { EmptyState } from "./EmptyState";
 
 export function TextField({ label, ...rest }: { label: string } & InputHTMLAttributes<HTMLInputElement>) {
   return (
-    <label style={{ display: "block", background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "10px 16px" }}>
+    <label style={{ display: "block", background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-item)", padding: "10px 16px" }}>
       <span className="bq-label">{label}</span>
       <input
         {...rest}
@@ -50,7 +50,7 @@ export function SelectField({ label, value, options, onChange, placeholder, disa
           textAlign: "left",
           background: "var(--sunken)",
           border: "1px solid var(--line)",
-          borderRadius: "var(--r-input)",
+          borderRadius: "var(--r-item)",
           padding: "10px 16px",
           cursor: disabled ? "default" : "pointer",
           opacity: disabled ? 0.6 : 1,
@@ -97,7 +97,7 @@ export function SelectField({ label, value, options, onChange, placeholder, disa
                   textAlign: "left",
                   background: on ? "var(--primary-tint)" : "var(--sunken)",
                   border: "1px solid var(--line)",
-                  borderRadius: "var(--r-input)",
+                  borderRadius: "var(--r-item)",
                   padding: "14px 16px",
                   cursor: "pointer",
                   font: "700 var(--fs-base) var(--font-body)",

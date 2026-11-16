@@ -40,7 +40,7 @@ export function SoloDropIn({ onDone }: { onDone: () => void }) {
         <div style={{ font: "700 var(--fs-small) var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", textAlign: "center", marginBottom: 12 }}>WHO'S DROPPING IN{current ? ` · ${current.name.toUpperCase()}` : ""}</div>
         <div style={{ display: "grid", gridTemplateColumns: options.length > 2 ? "1fr" : "1fr 1fr", gap: 10 }}>
           {options.map((o) => (
-            <button key={o.label} className="bq-scale" onClick={() => setKind(o.label)} style={{ minHeight: 84, borderRadius: "var(--r-input)", border: "1px solid var(--line)", background: "var(--surface)", cursor: "pointer", padding: 12 }}>
+            <button key={o.label} className="bq-scale" onClick={() => setKind(o.label)} style={{ minHeight: 84, borderRadius: "var(--r-item)", border: "1px solid var(--line)", background: "var(--surface)", cursor: "pointer", padding: 12 }}>
               <div style={{ font: "800 18px var(--font-body)" }}>{o.label}</div>
               <div style={{ font: "700 var(--fs-body-sm) var(--font-mono)", color: "var(--primary-pressed)", marginTop: 2 }}>{fmt(o.price)} EGP</div>
             </button>
@@ -101,7 +101,7 @@ export function SoloDropIn({ onDone }: { onDone: () => void }) {
               key={m}
               className="bq-scale"
               onClick={() => setMethod(m)}
-              style={{ height: 64, borderRadius: "var(--r-input)", border: "1px solid var(--line)", background: "var(--surface)", font: "700 var(--fs-base) var(--font-body)", cursor: "pointer" }}
+              style={{ height: 64, borderRadius: "var(--r-item)", border: "1px solid var(--line)", background: "var(--surface)", font: "700 var(--fs-base) var(--font-body)", cursor: "pointer" }}
             >
               {m === "cash" ? "Cash" : "InstaPay"}
             </button>
@@ -112,9 +112,9 @@ export function SoloDropIn({ onDone }: { onDone: () => void }) {
       {method === "instapay" && (
         <div style={{ textAlign: "center" }}>
           {qr ? (
-            <img src={qr} alt="InstaPay QR code" style={{ width: "100%", maxWidth: 280, aspectRatio: "1", objectFit: "contain", background: "#fff", borderRadius: 16, border: "1px solid var(--line)" }} />
+            <img src={qr} alt="InstaPay QR code" style={{ width: "100%", maxWidth: 280, aspectRatio: "1", objectFit: "contain", background: "#fff", borderRadius: "var(--r-item)", border: "1px solid var(--line)" }} />
           ) : (
-            <div style={{ font: "400 var(--fs-note)/1.5 var(--font-mono)", color: "var(--ink-muted)", background: "var(--sunken)", borderRadius: "var(--r-md)", padding: "14px 16px" }}>
+            <div style={{ font: "400 var(--fs-note)/1.5 var(--font-mono)", color: "var(--ink-muted)", background: "var(--sunken)", borderRadius: "var(--r-item)", padding: "14px 16px" }}>
               Add your InstaPay QR on the Plans tab to show it here.
               <div><button onClick={() => navigate("/catalog")} style={{ border: 0, background: "none", color: "var(--primary-pressed)", font: "700 var(--fs-body-sm) var(--font-body)", cursor: "pointer", padding: "8px 0 0" }}>Add QR</button></div>
             </div>

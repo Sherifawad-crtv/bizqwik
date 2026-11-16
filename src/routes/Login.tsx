@@ -46,14 +46,14 @@ export function Login() {
   };
 
   const card = (
-    <div style={{ width: isMobile ? "min(420px, 100%)" : "min(580px, 100%)", background: "var(--surface)", border: "1px solid var(--line)", borderRadius: isMobile ? "var(--r-card)" : 40, padding: isMobile ? 30 : 48 }}>
+    <div style={{ width: isMobile ? "min(420px, 100%)" : "min(580px, 100%)", background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: isMobile ? 30 : 48 }}>
         <div style={{ font: "800 var(--fs-display)/1.1 var(--font-body)", letterSpacing: "-.02em" }}>Sign in</div>
         <div style={{ font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-muted)", marginTop: 6, marginBottom: 22 }}>
           ATTENDANCE &amp; PAYOUT PORTAL
         </div>
 
         <form onSubmit={submit} className="bq-stack">
-          <label style={{ display: "block", background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "10px 16px" }}>
+          <label style={{ display: "block", background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-item)", padding: "10px 16px" }}>
             <span className="bq-label">EMAIL</span>
             <input
               type="email"
@@ -65,7 +65,7 @@ export function Login() {
               style={{ display: "block", width: "100%", border: 0, background: "none", outline: "none", font: "600 var(--fs-base) var(--font-body)", color: "var(--ink)", padding: "2px 0 0" }}
             />
           </label>
-          <label style={{ display: "block", background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "10px 16px" }}>
+          <label style={{ display: "block", background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-item)", padding: "10px 16px" }}>
             <span className="bq-label">PASSWORD</span>
             <input
               type="password"

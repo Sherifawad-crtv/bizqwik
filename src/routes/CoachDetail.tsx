@@ -153,7 +153,7 @@ export function CoachDetail() {
       </div>
       )}
       {actionError && (
-        <div className="bq-rise" style={{ marginBottom: 14, font: "600 var(--fs-note)/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: "var(--r-md)", padding: "10px 14px" }}>
+        <div className="bq-rise" style={{ marginBottom: 14, font: "600 var(--fs-note)/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: "var(--r-item)", padding: "10px 14px" }}>
           {actionError}
         </div>
       )}

@@ -93,7 +93,7 @@ export function AddSessionSheet({ open, onClose, coachId, coachName, month: mont
 
           <div className="bq-stack">
             {scan ? (
-              <div data-testid="scan-date" style={{ display: "flex", alignItems: "center", gap: 10, background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-input)", padding: "14px 16px" }}>
+              <div data-testid="scan-date" style={{ display: "flex", alignItems: "center", gap: 10, background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-item)", padding: "14px 16px" }}>
                 <Icon name="check" size={18} />
                 <span style={{ font: "700 var(--fs-body) var(--font-body)" }}>Today · {shortDay(scan.date)}</span>
                 <span style={{ marginLeft: "auto", font: "700 var(--fs-caption) var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>QR VERIFIED</span>
