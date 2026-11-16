@@ -12,7 +12,8 @@ import { useHeader } from "../lib/header";
 import { useIsMobile, useIsNarrowPhone } from "../lib/useIsMobile";
 import { LocationsProvider } from "../lib/locations";
 import { FADE_MS } from "../lib/motion";
-import { navFor, headerMode, accountBackTarget, isSoloOwner } from "../lib/nav";
+import { navFor, headerMode, accountBackTarget, isSoloOwner, isSubPage } from "../lib/nav";
+import { usePublishedActions } from "../lib/floatingActions";
 
 /** The top pill with the screen's title. When the title changes, the old words
  * fade out as the new ones fade in (stacked), and the pill eases to the new
@@ -66,6 +67,7 @@ function ShellInner() {
   const isMobile = useIsMobile();
   const narrow = useIsNarrowPhone();
   const header = useHeader();
+  const published = usePublishedActions();
   const { pathname } = useLocation();
   const navigate = useNavigate();
 
@@ -83,6 +85,7 @@ function ShellInner() {
     setBarEpoch((e) => e + 1);
   }
 
+  const sub = isSubPage(pathname, navFor(profile?.role ?? "coach", orgMode));
   if (!profile) return null;
   // Everyone but accountant and front desk gets a FAB — what it does depends
   // on role (Fab.tsx branches: dept_head gets the "Create" menu for the
@@ -153,8 +156,19 @@ function ShellInner() {
             gap: narrow ? 8 : 12,
           }}
         >
-          <BottomNav items={navFor(profile.role, orgMode)} />
-          {showFab && <Fab />}
+          {sub ? (
+            // A sub-page: no tab bar. Its main actions (if it has any) float here instead.
+            published && published.path === pathname ? (
+              <div key="actions" className="bq-grow" style={{ display: "flex", gap: 10, maxWidth: 520, animation: `bqRise ${FADE_MS + 90}ms var(--ease-standard) both` }}>
+                {published.node}
+              </div>
+            ) : null
+          ) : (
+            <>
+              <BottomNav items={navFor(profile.role, orgMode)} />
+              {showFab && <Fab />}
+            </>
+          )}
         </div>
       </div>
     );

@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useSetHeader } from "../lib/header";
+import { useFloatingActions } from "../lib/floatingActions";
+import { useIsMobile } from "../lib/useIsMobile";
 import { useAsync } from "../lib/useAsync";
 import { api, MOCK } from "../lib/backend";
 import { fmt, monthShort } from "../lib/format";
@@ -39,12 +41,6 @@ export function CoachDetail() {
 
   useSetHeader({ kicker: monthShort(month), title: "Coach" }, [month]);
 
-  if (!data) return <Spinner />;
-  if (!data.row) return null;
-  const { row, sessions } = data;
-  const editable = row.state === "logging";
-  const dayGroup = dayDate ? sessions.filter((s) => s.date === dayDate) : [];
-
   const runAction = async (fn: () => Promise<void>) => {
     setBusyAction(true);
     setActionError(null);
@@ -56,6 +52,37 @@ export function CoachDetail() {
       setBusyAction(false);
     }
   };
+
+
+  // On a phone this page has no tab bar: its main actions float at the bottom instead.
+  const isMobile = useIsMobile();
+  const r = data?.row ?? null;
+  const floating = isMobile && r ? (
+    <>
+      {r.state === "logging" && (
+        <Button size="lg" variant="secondary" className="bq-grow" style={{ boxShadow: "var(--shadow-float)" }} onClick={() => setAddOpen(true)}>
+          + Add on behalf
+        </Button>
+      )}
+      {r.state === "logging" && r.count > 0 && (
+        <Button size="lg" className="bq-grow" style={{ boxShadow: "var(--shadow-float)" }} disabled={busyAction} onClick={() => runAction(() => api.settle(coachId, month))}>
+          Settle month
+        </Button>
+      )}
+      {r.state === "settled" && (
+        <Button size="lg" variant="danger" className="bq-grow" style={{ boxShadow: "var(--shadow-float)" }} disabled={busyAction} onClick={() => runAction(() => api.reopen(coachId, month))}>
+          Reopen
+        </Button>
+      )}
+    </>
+  ) : null;
+  useFloatingActions(floating);
+
+  if (!data) return <Spinner />;
+  if (!data.row) return null;
+  const { row, sessions } = data;
+  const editable = row.state === "logging";
+  const dayGroup = dayDate ? sessions.filter((s) => s.date === dayDate) : [];
 
   const handleOptimisticAdd = (addedDate: string, qty: number) => {
     mutate((prev) => {
@@ -106,6 +133,7 @@ export function CoachDetail() {
         ]}
       />
 
+      {!isMobile && (
       <div style={{ display: "flex", gap: 10, marginBottom: 18, flexWrap: "wrap" }}>
         {editable && (
           <Button variant="secondary" onClick={() => setAddOpen(true)}>
@@ -123,6 +151,7 @@ export function CoachDetail() {
           </Button>
         )}
       </div>
+      )}
       {actionError && (
         <div className="bq-rise" style={{ marginBottom: 14, font: "600 var(--fs-note)/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: "var(--r-md)", padding: "10px 14px" }}>
           {actionError}

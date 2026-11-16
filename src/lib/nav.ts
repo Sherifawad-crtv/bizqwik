@@ -39,6 +39,12 @@ export type HeaderMode = "home" | "account" | "plain";
  * "plain": centered screen name only — every other screen, including ones
  * drilled into from within a tab (e.g. a coach's detail page), which keep
  * their own existing in-body back link untouched. */
+/** A screen opened from a tab (a coach's page, a payee, Accounting, Account…)
+ * rather than one of the tabs themselves. Sub-pages have no tab bar. */
+export function isSubPage(pathname: string, tabs: NavItem[]): boolean {
+  return !(pathname === "/" || tabs.some((t) => t.path === pathname));
+}
+
 export function headerMode(pathname: string, role: Role, mode: OrgMode = "team"): HeaderMode {
   if (ACCOUNT_ROUTES.has(pathname)) return "account";
   if (pathname === homePathForRole(role, mode)) return "home";

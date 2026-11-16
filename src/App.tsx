@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./lib/auth";
 import { HeaderProvider } from "./lib/header";
 import { OwnMonthProvider } from "./lib/ownMonth";
+import { FloatingActionsProvider } from "./lib/floatingActions";
 import { RequireAuth, RequireRole, RequireBizqwikTeam, RequireDesk, RequireTeam } from "./lib/guards";
 import { Spinner } from "./components/Spinner";
 import { Shell } from "./components/Shell";
@@ -88,6 +89,7 @@ export default function App() {
       <AuthProvider>
         <HeaderProvider>
           <OwnMonthProvider>
+            <FloatingActionsProvider>
             <LaunchGate>
             <WarmScreens />
             <Suspense fallback={<Spinner />}>
@@ -181,6 +183,7 @@ export default function App() {
             </Routes>
             </Suspense>
             </LaunchGate>
+            </FloatingActionsProvider>
           </OwnMonthProvider>
         </HeaderProvider>
       </AuthProvider>

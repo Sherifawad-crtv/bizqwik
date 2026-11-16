@@ -95,15 +95,30 @@ test("settings go deeper in two steps, each sliding in", async ({ page }) => {
   await expect(page).toHaveURL(/\/account\/profile$/);
 });
 
-test("tapping a tab while a level deep fades, it does not play a back slide", async ({ page }) => {
-  await boot(page, "dept_head");
-  await page.goto("/oversight"); await page.waitForTimeout(1500);
-  await page.getByText("Profit & loss").click();
+test("a sub-page has no tab bar; on a coach's page the main actions float in its place", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await mockBackend(page, "dept_head", {
+    revenue: REVENUE,
+    [`month/${THIS}`]: { rows: [{ ...row("c1", "Coach Nour"), state: "logging" }] },
+    [`sessions/c1/${THIS}`]: { sessions: [] }, [`packages/by-coach/c1/${THIS}`]: { packages: [] },
+  });
+  await page.goto("/coaches"); await page.waitForTimeout(1200);
+  const tabs = page.getByRole("link", { name: "Catalog", exact: true });
+  await expect(tabs).toBeVisible(); // a tab screen has the bar
+  await page.getByText("Coach Nour").click();
+  await expect(page).toHaveURL(/\/coaches\/c1$/);
   await settle(page);
-  await expect(page).toHaveURL(/\/accounting$/);
-  await page.getByRole("link", { name: "Team" }).click();
-  expect(slides(await offsets(page))).toBe(false);
-  await expect(page).toHaveURL(/\/coaches$/);
+  await expect(tabs).toHaveCount(0); // the sub-page doesn't
+  await expect(page.getByRole("button", { name: /Add on behalf/ })).toBeVisible();
+  const settle_ = page.getByRole("button", { name: "Settle month" });
+  await expect(settle_).toBeVisible();
+  // They float at the bottom of the screen, not inside the scrolling page.
+  const box = await settle_.boundingBox();
+  expect(box!.y + box!.height).toBeGreaterThan(844 - 100);
+  await page.getByRole("button", { name: /Team/ }).first().click();
+  await settle(page);
+  await expect(tabs).toBeVisible();
+  await expect(page.getByRole("button", { name: "Settle month" })).toHaveCount(0);
 });
 
 test("the back button on a deeper screen slides it away to the right", async ({ page }) => {
