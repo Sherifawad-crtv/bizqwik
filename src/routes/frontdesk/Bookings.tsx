@@ -245,9 +245,9 @@ function AddClassPills({ floating, hidden, onOne, onRecurring }: { floating: boo
   if (!floating) return group;
   // Out of the way while a sheet is open.
   if (hidden) return null;
-  // Above the bottom bar (a 64px bar + its 12px margins).
+  // Above the bottom bar (a 64px bar + its 8px margin).
   return createPortal(
-    <div style={{ position: "fixed", left: 0, right: 0, bottom: "calc(92px + var(--safe-bottom))", zIndex: 54, display: "flex", justifyContent: "center", pointerEvents: "none" }}>
+    <div style={{ position: "fixed", left: 0, right: 0, bottom: 88, zIndex: 54, display: "flex", justifyContent: "center", pointerEvents: "none" }}>
       {group}
     </div>,
     document.body,

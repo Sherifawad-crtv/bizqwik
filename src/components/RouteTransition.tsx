@@ -64,14 +64,14 @@ const TAB_MS = FADE_MS;
 // That headroom is only needed in a browser tab. Installed as an app there is
 // no toolbar, so the page ends just below the bar and you can't scroll into
 // blank space.
-const BOTTOM_CLEARANCE = isStandalone() ? 112 : 160;
+const BOTTOM_CLEARANCE = isStandalone() ? 108 : 156;
 
 function layerStyle(pathname: string, role: Role, mode: OrgMode): CSSProperties {
   const top = headerMode(pathname, role, mode) === "home" ? 20 : 80;
   return {
     position: "absolute",
     inset: 0,
-    padding: `calc(${top}px + var(--safe-top)) 16px calc(${BOTTOM_CLEARANCE}px + var(--safe-bottom))`,
+    padding: `calc(${top}px + var(--safe-top)) 16px ${BOTTOM_CLEARANCE}px`,
     overflowY: "auto",
     WebkitOverflowScrolling: "touch",
     background: "var(--paper)",

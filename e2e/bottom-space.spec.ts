@@ -11,17 +11,17 @@ const pad = (page: import("@playwright/test").Page) =>
 
 test.use({ viewport: { width: 390, height: 844 } });
 
-test("installed as an app: only ~112px under the last item", async ({ page }) => {
+test("installed as an app: only ~108px under the last item", async ({ page }) => {
   await page.addInitScript(() => Object.defineProperty(navigator, "standalone", { value: true, configurable: true }));
   await mockBackend(page, "dept_head", { __orgMode: "solo", clients: { clients: [] }, classes: { classes: [] }, revenue: { months: [] } });
   await page.goto("/bookings");
   await page.waitForTimeout(800);
-  expect(await pad(page)).toBe(112);
+  expect(await pad(page)).toBe(108);
 });
 
 test("in a browser tab: a smaller buffer than before, never 230px", async ({ page }) => {
   await mockBackend(page, "dept_head", { __orgMode: "solo", clients: { clients: [] }, classes: { classes: [] }, revenue: { months: [] } });
   await page.goto("/bookings");
   await page.waitForTimeout(800);
-  expect(await pad(page)).toBe(160);
+  expect(await pad(page)).toBe(156);
 });
