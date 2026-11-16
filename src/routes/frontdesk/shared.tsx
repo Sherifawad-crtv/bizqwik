@@ -38,13 +38,6 @@ export function SheetHeading({ kicker, title }: { kicker: string; title: string 
   );
 }
 
-export function ErrorBanner({ text }: { text: string }) {
-  return (
-    <div  className="bq-error bq-error--spaced">
-      {text}
-    </div>
-  );
-}
 
 
 /** The "see everything" link that belongs opposite a section's title (the
@@ -115,7 +108,7 @@ export function ClientPicker({
             <button
               key={c.id}
               onClick={() => onPick(c)}
-              style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", minHeight: 64, padding: "12px 18px", border: 0, borderBottom: i === shown.length - 1 ? "none" : "1px solid var(--line)", background: "none", cursor: "pointer", textAlign: "left" }}
+              className={`bq-plain bq-listrow bq-listrow--compact ${!(i === shown.length - 1) ? "bq-listrow--divider" : ""}`} style={{ width: "100%", minHeight: 64, background: "none", cursor: "pointer", textAlign: "left" }}
             >
               <div className="bq-grow">
                 <div style={{ font: "700 var(--fs-base) var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.name}</div>

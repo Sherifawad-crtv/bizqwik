@@ -109,12 +109,12 @@ export function Oversight() {
             </div>
           ) : (
             <>
-            <div style={{ background: "var(--surface)", borderRadius: "var(--r-card)", padding: "20px 20px 18px", marginBottom: 10 }}>
+            <div className="bq-card" style={{ padding: "20px 20px 18px", marginBottom: 10 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <span className="bq-label">REVENUE · EGP</span>
                 <span style={{ marginLeft: "auto" }}>{compare && <Delta pct={pctChange(report.totals.revenue, compare.revenue)} tone="good" />}</span>
               </div>
-              <div className="tabular" style={{ font: "800 56px/1 var(--font-body)", letterSpacing: "-.03em", margin: "8px 0 0", overflowWrap: "anywhere" }}>{fmt(report.totals.revenue)}</div>
+              <div className="tabular bq-stat-xl" style={{ margin: "8px 0 0", overflowWrap: "anywhere" }}>{fmt(report.totals.revenue)}</div>
               <div style={{ font: "400 var(--fs-small)/1.4 var(--font-mono)", color: "var(--ink-faint)", marginTop: 8 }}>
                 {compare && compare.revenue > 0 ? `vs ${fmt(compare.revenue)} ${prevLabel}` : "New money in from cash and card sales"}
               </div>
@@ -170,9 +170,9 @@ export function Oversight() {
 
           {profile.role === "dept_head" && (
             <button
-              className="bq-scale"
+              className="bq-scale bq-card"
               onClick={() => navigate("/accounting")}
-              style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", background: "var(--surface)", borderRadius: "var(--r-card)", padding: "16px 18px", marginBottom: 10, cursor: "pointer", textAlign: "left" }}
+              style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", padding: "16px 18px", marginBottom: 10, cursor: "pointer", textAlign: "left" }}
             >
               <span style={{ width: 32, height: 32, flex: "none", borderRadius: "var(--r-chip)", background: "var(--primary-tint)", color: "var(--primary-pressed)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <Icon name="cash" size={16} />

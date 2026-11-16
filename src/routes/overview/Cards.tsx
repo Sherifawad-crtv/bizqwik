@@ -24,7 +24,7 @@ export function Delta({ pct, tone }: { pct: number | null; tone: "good" | "neutr
 
 export function KpiTile({ label, value, sub, icon, delta }: { label: string; value: ReactNode; sub?: string; icon: IconName; delta?: ReactNode }) {
   return (
-    <div style={{ background: "var(--surface)", borderRadius: "var(--r-card)", padding: "14px 16px", minWidth: 0 }}>
+    <div className="bq-card bq-card--sm" style={{ minWidth: 0 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
         <span style={{ width: 28, height: 28, flex: "none", borderRadius: "var(--r-chip)", background: "var(--primary-tint)", color: "var(--primary-pressed)", display: "flex", alignItems: "center", justifyContent: "center" }}>
           <Icon name={icon} size={16} />
@@ -32,7 +32,7 @@ export function KpiTile({ label, value, sub, icon, delta }: { label: string; val
         <span style={{ marginLeft: "auto" }}>{delta}</span>
       </div>
       <div style={{ font: "700 var(--fs-caption) var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", marginTop: 10 }}>{label}</div>
-      <div className="tabular" style={{ font: "800 24px/1.15 var(--font-body)", letterSpacing: "-.02em", marginTop: 2, overflowWrap: "anywhere" }}>{value}</div>
+      <div className="tabular bq-stat-md" style={{ marginTop: 2, overflowWrap: "anywhere" }}>{value}</div>
       {sub && <div style={{ font: "400 var(--fs-small)/1.4 var(--font-mono)", color: "var(--ink-faint)", marginTop: 4 }}>{sub}</div>}
     </div>
   );

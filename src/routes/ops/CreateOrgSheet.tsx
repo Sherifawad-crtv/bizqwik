@@ -5,7 +5,7 @@ import { Button } from "../../components/Button";
 import { TextField, SelectField } from "../../components/FormField";
 import { api } from "../../lib/backend";
 import type { PlanType } from "../../lib/types";
-import { ErrorBanner } from "./shared";
+import { ErrorBanner } from "../../components/ErrorBanner";
 
 function slugify(s: string): string {
   return s.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");

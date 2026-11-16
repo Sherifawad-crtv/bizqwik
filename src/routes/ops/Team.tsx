@@ -9,7 +9,7 @@ import { Icon } from "../../components/Icon";
 import { Avatar } from "../../components/Avatar";
 import { Sheet } from "../../components/Sheet";
 import { TextField, SelectField } from "../../components/FormField";
-import { ErrorBanner } from "./shared";
+import { ErrorBanner } from "../../components/ErrorBanner";
 import { Card } from "../../components/Card";
 import { SectionHeader } from "../../components/SectionHeader";
 
@@ -91,7 +91,7 @@ export function Team() {
   return (
     <div>
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
-        <div style={{ font: "800 var(--fs-display)/1.1 var(--font-body)", letterSpacing: "-.02em" }}>Team</div>
+        <div className="bq-stat-lg">Team</div>
         <Button onClick={() => setSheetOpen(true)} style={{ marginLeft: "auto" }}>
           <Icon name="user-plus" size={18} /> Invite
         </Button>
@@ -102,7 +102,7 @@ export function Team() {
       <SectionHeader count={members.length}>Members</SectionHeader>
       <Card pad="none" style={{ overflow: "hidden" }}>
         {members.map((m, i) => (
-          <div key={m.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 18px", borderBottom: i === members.length - 1 ? "none" : "1px solid var(--line)" }}>
+          <div key={m.id} className={`bq-listrow bq-listrow--compact ${!(i === members.length - 1) ? "bq-listrow--divider" : ""}`}>
             <Avatar name={m.name} size={34} />
             <div className="bq-grow">
               <div style={{ font: "700 var(--fs-body) var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{m.name}</div>
@@ -121,7 +121,7 @@ export function Team() {
           <SectionHeader count={invites.length}>Pending invites</SectionHeader>
           <Card pad="none" style={{ overflow: "hidden" }}>
             {invites.map((inv, i) => (
-              <div key={inv.email} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 18px", borderBottom: i === invites.length - 1 ? "none" : "1px solid var(--line)" }}>
+              <div key={inv.email} className={`bq-listrow bq-listrow--compact ${!(i === invites.length - 1) ? "bq-listrow--divider" : ""}`}>
                 <span style={{ color: "var(--ink-faint)", display: "flex" }}><Icon name="envelope" size={18} /></span>
                 <div className="bq-grow">
                   <div style={{ font: "600 var(--fs-body) var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{inv.email}</div>

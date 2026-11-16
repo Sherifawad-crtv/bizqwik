@@ -46,7 +46,7 @@ export function AccountPassword() {
 
   return (
     <div>
-      <div style={{ background: "var(--surface)", borderRadius: "var(--r-card)", padding: 20 }}>
+      <div className="bq-card bq-card--md">
         <div className="bq-stack">
           <TextField
             label="CURRENT PASSWORD"

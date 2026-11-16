@@ -39,7 +39,7 @@ export function Overview() {
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
         <div>
           <div className="bq-label">BIZQWIK OPS</div>
-          <div style={{ font: "800 var(--fs-display)/1.1 var(--font-body)", letterSpacing: "-.02em", marginTop: 4 }}>Overview</div>
+          <div className="bq-stat-lg" style={{ marginTop: 4 }}>Overview</div>
         </div>
         <Button onClick={() => setSheetOpen(true)} style={{ marginLeft: "auto" }}>
           <Icon name="plus" size={18} /> New org
@@ -61,18 +61,7 @@ export function Overview() {
           <button
             key={o.id}
             onClick={() => navigate(`/bizqwik/orgs/${o.id}`)}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 12,
-              width: "100%",
-              padding: "16px 18px",
-              border: 0,
-              borderBottom: i === orgs.length - 1 ? "none" : "1px solid var(--line)",
-              background: "none",
-              cursor: "pointer",
-              textAlign: "left",
-            }}
+            className={`bq-plain bq-listrow ${!(i === orgs.length - 1) ? "bq-listrow--divider" : ""}`} style={{ width: "100%", background: "none", cursor: "pointer", textAlign: "left" }}
           >
             <div className="bq-grow">
               <div style={{ font: "700 var(--fs-base) var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{o.name}</div>

@@ -7,7 +7,8 @@ import { atLocation, useCurrentLocation } from "../../../lib/locations";
 import { Button } from "../../../components/Button";
 import { TextField, SelectField } from "../../../components/FormField";
 import { useAuth } from "../../../lib/auth";
-import { ErrorBanner, SearchField } from "../shared";
+import { SearchField } from "../shared";
+import { ErrorBanner } from "../../../components/ErrorBanner";
 import { matchesClient } from "../deskStatus";
 import { groupOfferOptions } from "./offers";
 

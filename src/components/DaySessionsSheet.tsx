@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { Sheet } from "./Sheet";
 import { Button } from "./Button";
-import { Icon } from "./Icon";
 import { DateField } from "./DateField";
 import { ConfirmSheet } from "./ConfirmSheet";
 import { useLatch } from "../lib/useLatch";
 import { api } from "../lib/backend";
 import type { Session } from "../lib/types";
 import { dateLabelFull, daysInMonth, egp, isoDate, sessionStamp } from "../lib/format";
+import { IconButton } from "./IconButton";
 
 interface DaySessionsSheetProps {
   open: boolean;
@@ -76,7 +76,7 @@ export function DaySessionsSheet({ open, onClose, coachId, month, date, sessions
     <>
       <Sheet open={open} onClose={onClose}>
         <div className="bq-label">{editable ? "EDIT DAY" : "DAY"}</div>
-        <div style={{ font: "800 var(--fs-display)/1.1 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 4px" }}>{dateLabelFull(shown.date)}</div>
+        <div className="bq-stat-lg" style={{ margin: "4px 0 4px" }}>{dateLabelFull(shown.date)}</div>
         <div style={{ font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-muted)", marginBottom: 16 }}>
           {shownSessions.length} {shownSessions.length === 1 ? "session" : "sessions"} · {egp(shownSessions.length * rate)}
         </div>
@@ -97,23 +97,9 @@ export function DaySessionsSheet({ open, onClose, coachId, month, date, sessions
                   {editable && (
                     <>
                       {!scanOnly && (
-                      <button className="bq-hit"
-                        aria-label="Change date"
-                        onClick={() => setMovingId(s.id)}
-                        disabled={busyId === s.id}
-                        style={{ marginLeft: "auto", width: 34, height: 34, borderRadius: 999, border: 0, background: "var(--primary-tint)", color: "var(--primary-pressed)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
-                      >
-                        <Icon name="pencil" size={15} />
-                      </button>
+                      <IconButton icon="pencil" label="Change date" disabled={busyId === s.id} style={{ marginLeft: "auto" }} onClick={() => setMovingId(s.id)} />
                       )}
-                      <button className="bq-hit"
-                        aria-label="Remove session"
-                        onClick={() => setRemovingId(s.id)}
-                        disabled={busyId === s.id}
-                        style={{ marginLeft: scanOnly ? "auto" : undefined, width: 34, height: 34, borderRadius: 999, border: 0, background: "var(--danger-bg)", color: "var(--danger-fg)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
-                      >
-                        <Icon name="trash" size={15} />
-                      </button>
+                      <IconButton icon="trash" label="Remove session" tone="danger" disabled={busyId === s.id} style={{ marginLeft: scanOnly ? "auto" : undefined }} onClick={() => setRemovingId(s.id)} />
                     </>
                   )}
                 </div>

@@ -102,7 +102,7 @@ export function ClientRoster({
           <div
             key={c.id}
             onClick={() => onSelect(c)}
-            style={{ background: "var(--surface)", borderRadius: "var(--r-card)", padding: "14px 16px", display: "flex", gap: 14, alignItems: "center", cursor: "pointer" }}
+            className="bq-card bq-card--sm" style={{ display: "flex", gap: 14, alignItems: "center", cursor: "pointer" }}
           >
             <Avatar name={c.name} size={38} />
             <div className="bq-grow">
@@ -115,7 +115,7 @@ export function ClientRoster({
             </div>
             {c.currentPackage && (
               <div style={{ textAlign: "right", flex: "none" }}>
-                <div className="tabular" style={{ font: "800 var(--fs-title-sm) var(--font-body)", letterSpacing: "-.01em" }}>{valueFor(c).split(" ")[0]}</div>
+                <div className="tabular bq-stat-sm" >{valueFor(c).split(" ")[0]}</div>
                 <div className="bq-label">EGP</div>
               </div>
             )}
@@ -207,7 +207,7 @@ function ClientDesktopRow({
       </div>
       <div style={{ font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-muted)", minWidth: 0, overflow: "hidden", textOverflow: "ellipsis" }}>{meta}</div>
       <div>{pill}</div>
-      <div className="tabular" style={{ textAlign: "right", font: "800 var(--fs-title-sm) var(--font-body)", letterSpacing: "-.01em" }}>{value}</div>
+      <div className="tabular bq-stat-sm" style={{ textAlign: "right" }}>{value}</div>
       <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 6, color: "var(--ink-faint)" }}>
         {canManage && (
           <>

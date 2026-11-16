@@ -7,7 +7,6 @@ import { api } from "../../lib/backend";
 import type { Tier } from "../../lib/types";
 import { ROLE_LABELS } from "../../lib/types";
 import { Button } from "../../components/Button";
-import { Icon } from "../../components/Icon";
 import { Sheet } from "../../components/Sheet";
 import { ConfirmSheet } from "../../components/ConfirmSheet";
 import { TextField } from "../../components/FormField";
@@ -15,6 +14,7 @@ import { Spinner } from "../../components/Spinner";
 import { SheetSuccessIcon } from "../../components/SheetSuccessIcon";
 import { useSheetSuccess } from "../../lib/useSheetSuccess";
 import { MotionList } from "../../components/MotionList";
+import { IconButton } from "../../components/IconButton";
 
 export function TiersPanel({ onOpenPeople, onOpenInvites }: { onOpenPeople: () => void; onOpenInvites: () => void }) {
   const { data } = useAsync(() => api.tiers(), []);
@@ -42,17 +42,13 @@ export function TiersPanel({ onOpenPeople, onOpenInvites }: { onOpenPeople: () =
       <div className="bq-panel">
         <MotionList>
 {data.tiers.map((t, i) => (
-          <div key={t.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "16px 20px", borderBottom: i === data.tiers.length - 1 ? "none" : "1px solid var(--line)" }}>
+          <div key={t.id} className={`bq-listrow ${!(i === data.tiers.length - 1) ? "bq-listrow--divider" : ""}`}>
             <div className="bq-grow">
               <div className="bq-h3">{t.name}</div>
               <div className="bq-meta">{t.rate} EGP / session · {t.privateCutPct}% private cut</div>
             </div>
-            <button className="bq-hit" onClick={() => setEditing(t)} aria-label="Edit tier" style={{ width: 36, height: 36, borderRadius: 999, border: 0, background: "var(--primary-tint)", color: "var(--primary-pressed)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <Icon name="pencil" size={15} />
-            </button>
-            <button className="bq-hit" onClick={() => setDeleting(t)} aria-label="Delete tier" style={{ width: 36, height: 36, borderRadius: 999, border: 0, background: "var(--danger-bg)", color: "var(--danger-fg)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <Icon name="trash" size={15} />
-            </button>
+            <IconButton icon="pencil" label="Edit tier" onClick={() => setEditing(t)} />
+            <IconButton icon="trash" label="Delete tier" tone="danger" onClick={() => setDeleting(t)} />
           </div>
         ))}
 </MotionList>

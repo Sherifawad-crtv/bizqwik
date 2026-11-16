@@ -49,15 +49,7 @@ export function DayList({
         <div
           key={g.date}
           onClick={() => onOpenDay(g)}
-          style={{
-            background: "var(--surface)",
-            borderRadius: "var(--r-card)",
-            padding: "14px 16px",
-            display: "flex",
-            gap: 14,
-            alignItems: "center",
-            cursor: "pointer",
-          }}
+          className="bq-card bq-card--sm" style={{ display: "flex", gap: 14, alignItems: "center", cursor: "pointer" }}
         >
           <div className="bq-grow">
             <div style={{ font: "700 var(--fs-base) var(--font-body)", letterSpacing: "-.01em" }}>{dateLabel(g.date)}</div>
@@ -84,7 +76,7 @@ export function DayList({
             </div>
           </div>
           <div style={{ textAlign: "right", flex: "none" }}>
-            <div className="tabular" style={{ font: "800 var(--fs-title-sm) var(--font-body)", letterSpacing: "-.01em" }}>{egp(g.sessions.length * rate).split(" ")[0]}</div>
+            <div className="tabular bq-stat-sm" >{egp(g.sessions.length * rate).split(" ")[0]}</div>
             <div className="bq-label">EGP</div>
           </div>
         </div>

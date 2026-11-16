@@ -173,9 +173,9 @@ export function FrontDeskHome() {
         {ACTIONS.map((a) => (
           <button
             key={a.key}
-            className="bq-scale"
+            className="bq-scale bq-card"
             onClick={() => setModal(a.key)}
-            style={{ minHeight: 76, borderRadius: "var(--r-card)", background: "var(--surface)", color: "var(--ink)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 6, padding: 8, cursor: "pointer", font: "700 var(--fs-note)/1.2 var(--font-body)", textAlign: "center" }}
+            style={{ minHeight: 76, color: "var(--ink)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 6, padding: 8, cursor: "pointer", font: "700 var(--fs-note)/1.2 var(--font-body)", textAlign: "center" }}
           >
             <Icon name={a.icon} size={22} />
             {a.label}
@@ -205,9 +205,9 @@ export function FrontDeskHome() {
         {nextUp.map((c, i) => (
           <button
             key={c.id}
-            className="bq-scale"
+            className={`bq-plain bq-scale bq-listrow bq-listrow--compact ${!(i === nextUp.length - 1) ? "bq-listrow--divider" : ""}`}
             onClick={() => setRoster(c)}
-            style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", minHeight: 60, padding: "12px 18px", border: 0, borderBottom: i === nextUp.length - 1 ? "none" : "1px solid var(--line)", background: "none", cursor: "pointer", textAlign: "left" }}
+            style={{ width: "100%", minHeight: 60, background: "none", cursor: "pointer", textAlign: "left" }}
           >
             <span style={{ width: 84, flex: "none", whiteSpace: "nowrap", font: "700 var(--fs-body-sm) var(--font-mono)" }}>{clockOf(c.startsAt)}</span>
             <span className="bq-grow">

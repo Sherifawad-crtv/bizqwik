@@ -60,7 +60,7 @@ export function PnlPanel({ report, loading, onAddExpense, onCoachPayouts }: { re
         </div>
       )}
 
-      <div style={{ background: "var(--surface)", borderRadius: "var(--r-card)", padding: "20px 20px 18px", marginBottom: 10 }}>
+      <div className="bq-card" style={{ padding: "20px 20px 18px", marginBottom: 10 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <span className="bq-label">REVENUE · EGP</span>
           {prev && <span style={{ marginLeft: "auto" }}><Delta pct={pctChange(current.netRevenue, prev.netRevenue)} tone="good" /></span>}

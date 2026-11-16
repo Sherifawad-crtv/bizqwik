@@ -49,7 +49,7 @@ export function RecurringPanel({ categories, onChanged, onCategoriesChanged }: {
 {recurring.map((r, i) => {
           const next = nextOccurrence(r);
           return (
-            <button key={r.id} className="bq-scale" onClick={() => setEditing(r)} style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", border: 0, background: "none", cursor: "pointer", textAlign: "left", padding: "13px 18px", borderBottom: i === recurring.length - 1 ? "none" : "1px solid var(--line)", opacity: r.active ? 1 : 0.5 }}>
+            <button key={r.id} className={`bq-plain bq-scale bq-listrow bq-listrow--compact ${!(i === recurring.length - 1) ? "bq-listrow--divider" : ""}`} onClick={() => setEditing(r)} style={{ width: "100%", background: "none", cursor: "pointer", textAlign: "left", opacity: r.active ? 1 : 0.5 }}>
               <div className="bq-grow">
                 <div style={{ font: "700 var(--fs-body) var(--font-body)" }}>{r.categoryName}{r.note ? ` · ${r.note}` : ""}</div>
                 <div style={{ font: "400 var(--fs-small) var(--font-mono)", color: "var(--ink-faint)" }}>

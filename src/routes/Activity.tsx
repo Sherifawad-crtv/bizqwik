@@ -171,7 +171,7 @@ function Feed({ entries }: { entries: ActivityEntry[] }) {
         const tone = CAT_TONE[catOf(e.type)];
         const amt = amountLabel(e);
         return (
-          <div key={e.id} style={{ background: "var(--surface)", borderRadius: "var(--r-card)", padding: "12px 14px", display: "flex", alignItems: "center", gap: 12 }}>
+          <div key={e.id} className="bq-card" style={{ padding: "12px 14px", display: "flex", alignItems: "center", gap: 12 }}>
             <Tag tone={tone.tone} style={{ minWidth: 74, justifyContent: "center" }}>{tone.label}</Tag>
             <span className="bq-grow">
               <span style={{ display: "block", font: "600 var(--fs-body-sm)/1.35 var(--font-body)" }}>{describe(e)}</span>
@@ -232,7 +232,7 @@ export function Transactions() {
             ["WALLET CHANGES", sum("wallet"), "Credits, rewards, expiries"],
           ] as const
         ).map(([label, value, hint]) => (
-          <div key={label} style={{ background: "var(--surface)", borderRadius: "var(--r-card)", padding: "14px 16px" }}>
+          <div key={label} className="bq-card bq-card--sm">
             <div className="bq-label">{label}</div>
             <div className="tabular" style={{ font: "800 22px/1.15 var(--font-body)", letterSpacing: "-.02em", marginTop: 4 }}>{egp(value)}</div>
             <div style={{ font: "400 var(--fs-small) var(--font-mono)", color: "var(--ink-faint)", marginTop: 4 }}>{hint}</div>

@@ -102,14 +102,14 @@ export function Money() {
           <SectionHeader count={data.txns.length}>Transactions</SectionHeader>
           <Card pad="none" style={{ overflow: "hidden", marginBottom: 12 }}>
             {data.txns.slice(0, 100).map((t, i, arr) => (
-              <button key={t.id} className="bq-scale" onClick={() => setOpen(t)} style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", border: 0, background: "none", cursor: "pointer", textAlign: "left", padding: "13px 18px", borderBottom: i === arr.length - 1 ? "none" : "1px solid var(--line)" }}>
+              <button key={t.id} className={`bq-plain bq-scale bq-listrow bq-listrow--compact ${!(i === arr.length - 1) ? "bq-listrow--divider" : ""}`} onClick={() => setOpen(t)} style={{ width: "100%", background: "none", cursor: "pointer", textAlign: "left" }}>
                 <div className="bq-grow">
                   <div style={{ font: "700 var(--fs-body) var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t.clientName ?? "Client"}</div>
                   <div style={{ font: "400 var(--fs-small) var(--font-mono)", color: "var(--ink-faint)" }}>
                     {t.what} · {formatDateTime(t.at)}
                   </div>
                 </div>
-                <Tag tone={t.method === "InstaPay" ? "primary" : "neutral"}>{t.method}</Tag>
+                <Tag tone={t.method === "InstaPay" ? "primary" : "neutral"}>{t.method.toUpperCase()}</Tag>
                 <div style={{ flex: "none", minWidth: 64, textAlign: "right", font: "800 var(--fs-body) var(--font-mono)", color: t.refund ? "var(--danger-fg)" : "var(--ink)" }}>{t.refund ? "−" : ""}{fmt(t.amount)}</div>
                 <Icon name="chevron-right" size={16} />
               </button>

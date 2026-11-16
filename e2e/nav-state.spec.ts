@@ -77,6 +77,6 @@ test("dept head: the revenue vs payouts chart shows every month, whatever the ra
     },
   });
   await page.goto("/oversight"); // range defaults to 1 month
-  const card = page.getByText("REVENUE VS COACH PAYOUTS").locator("xpath=ancestor::*[contains(@style,'border')][1]");
+  const card = page.getByText("REVENUE VS COACH PAYOUTS").locator("xpath=ancestor::*[contains(@class,'bq-card')][1]");
   for (const m of months) await expect(card.getByText(abbr(m), { exact: true }).first()).toBeVisible();
 });

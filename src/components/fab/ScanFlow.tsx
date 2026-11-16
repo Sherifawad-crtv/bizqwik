@@ -110,7 +110,7 @@ function PtDeliverSheet({ scan, onClose }: { scan: { token: string; preview: PtS
       ) : p ? (
         <>
           <div className="bq-label">PRIVATE TRAINING</div>
-          <div style={{ font: "800 var(--fs-display)/1.1 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 4px" }}>{p.clientName}</div>
+          <div className="bq-stat-lg" style={{ margin: "4px 0 4px" }}>{p.clientName}</div>
           <div style={{ font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-muted)", marginBottom: 16 }}>
             {p.bundleName} · expires {p.expiryDate}
           </div>

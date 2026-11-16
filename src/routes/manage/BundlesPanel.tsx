@@ -9,7 +9,6 @@ import { api } from "../../lib/backend";
 import type { BundleType } from "../../lib/types";
 import { Segmented } from "../../components/Segmented";
 import { Button } from "../../components/Button";
-import { Icon } from "../../components/Icon";
 import { Sheet } from "../../components/Sheet";
 import { ConfirmSheet } from "../../components/ConfirmSheet";
 import { TextField } from "../../components/FormField";
@@ -18,6 +17,7 @@ import { SheetSuccessIcon } from "../../components/SheetSuccessIcon";
 import { useSheetSuccess } from "../../lib/useSheetSuccess";
 import { useAuth } from "../../lib/auth";
 import { MotionList } from "../../components/MotionList";
+import { IconButton } from "../../components/IconButton";
 
 export function BundlesPanel() {
   const { data: raw } = useAsync(() => api.bundleTypes(), []);
@@ -46,7 +46,7 @@ export function BundlesPanel() {
       <div className="bq-panel">
         <MotionList>
 {rows.map((b, i) => (
-          <div key={b.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "16px 20px", borderBottom: i === rows.length - 1 ? "none" : "1px solid var(--line)" }}>
+          <div key={b.id} className={`bq-listrow ${!(i === rows.length - 1) ? "bq-listrow--divider" : ""}`}>
             <div className="bq-grow">
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <span className="bq-h3">{b.name}</span>
@@ -57,12 +57,8 @@ export function BundlesPanel() {
                 {b.price} EGP · {b.sessionsIncluded} sessions · {b.expiryDays >= NO_EXPIRY_DAYS ? "no expiry" : `${b.expiryDays} days`}
               </div>
             </div>
-            <button className="bq-hit" onClick={() => setEditing(b)} aria-label="Edit bundle" style={{ width: 36, height: 36, borderRadius: 999, border: 0, background: "var(--primary-tint)", color: "var(--primary-pressed)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <Icon name="pencil" size={15} />
-            </button>
-            <button className="bq-hit" onClick={() => setDeleting(b)} aria-label="Delete bundle" style={{ width: 36, height: 36, borderRadius: 999, border: 0, background: "var(--danger-bg)", color: "var(--danger-fg)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <Icon name="trash" size={15} />
-            </button>
+            <IconButton icon="pencil" label="Edit bundle" onClick={() => setEditing(b)} />
+            <IconButton icon="trash" label="Delete bundle" tone="danger" onClick={() => setDeleting(b)} />
           </div>
         ))}
 </MotionList>

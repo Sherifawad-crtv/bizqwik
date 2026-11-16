@@ -45,7 +45,7 @@ export function Spinner() {
     <div ref={ref} role="status" aria-label="Loading" aria-busy="true" data-testid="skeleton" style={{ padding: "8px 16px 24px", display: "flex", flexDirection: "column", gap: 12 }}>
       {block("42%", 22, 999)}
       {[0, 1, 2, 3, 4].map((i) => (
-        <div key={i} style={{ display: "flex", alignItems: "center", gap: 14, padding: 16, borderRadius: "var(--r-card)", background: "var(--surface)" }}>
+        <div key={i} className="bq-card" style={{ display: "flex", alignItems: "center", gap: 14, padding: 16 }}>
           {block(44, 44, 999)}
           <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 8 }}>
             {block(i % 2 ? "55%" : "70%", 14, 999)}

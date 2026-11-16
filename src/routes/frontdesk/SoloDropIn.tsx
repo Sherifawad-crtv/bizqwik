@@ -7,7 +7,7 @@ import { fmt } from "../../lib/format";
 import { Button } from "../../components/Button";
 import { Icon } from "../../components/Icon";
 import { Spinner } from "../../components/Spinner";
-import { ErrorBanner } from "./shared";
+import { ErrorBanner } from "../../components/ErrorBanner";
 
 type Method = "cash" | "instapay";
 

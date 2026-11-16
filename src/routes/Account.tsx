@@ -30,7 +30,7 @@ export function Account() {
         <div style={{ font: "600 var(--fs-body-sm) var(--font-body)", color: "var(--ink-faint)" }}>{ROLE_LABELS[profile.role]}</div>
       </div>
 
-      <div style={{ background: "var(--surface)", borderRadius: "var(--r-card)", padding: "6px 4px", marginBottom: 16 }}>
+      <div className="bq-card" style={{ padding: "6px 4px", marginBottom: 16 }}>
         <NotificationsRow />
         <SettingsRow icon="account" label="Account Settings" onClick={() => navigate("/account/profile")} />
         <SettingsRow icon="lock" label="Password Settings" onClick={() => navigate("/account/password")} last />
@@ -164,20 +164,7 @@ function SettingsRow({ icon, label, onClick, last }: { icon: IconName; label: st
   return (
     <button
       onClick={onClick}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 12,
-        width: "100%",
-        border: 0,
-        background: "none",
-        cursor: "pointer",
-        padding: "14px 16px",
-        font: "600 var(--fs-body) var(--font-body)",
-        color: "var(--ink)",
-        textAlign: "left",
-        borderBottom: last ? "none" : "1px solid var(--line)",
-      }}
+      className={`bq-plain bq-listrow bq-listrow--compact ${!(last) ? "bq-listrow--divider" : ""}`} style={{ width: "100%", background: "none", cursor: "pointer", font: "600 var(--fs-body) var(--font-body)", color: "var(--ink)", textAlign: "left" }}
     >
       <span style={{ flex: "none", display: "flex", color: "var(--ink-muted)" }}>
         <Icon name={icon} size={19} />

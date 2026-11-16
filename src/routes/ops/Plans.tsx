@@ -10,7 +10,7 @@ import { Icon } from "../../components/Icon";
 import { Sheet } from "../../components/Sheet";
 import { TextField } from "../../components/FormField";
 import { ConfirmSheet } from "../../components/ConfirmSheet";
-import { ErrorBanner } from "./shared";
+import { ErrorBanner } from "../../components/ErrorBanner";
 import { Card } from "../../components/Card";
 import { SectionHeader } from "../../components/SectionHeader";
 import { limitLabel } from "./format";
@@ -101,7 +101,7 @@ export function Plans() {
   return (
     <div>
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
-        <div style={{ font: "800 var(--fs-display)/1.1 var(--font-body)", letterSpacing: "-.02em" }}>Plans</div>
+        <div className="bq-stat-lg">Plans</div>
         <Button onClick={openNew} style={{ marginLeft: "auto" }}>
           <Icon name="plus" size={18} /> New plan
         </Button>

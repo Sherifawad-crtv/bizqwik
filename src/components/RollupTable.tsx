@@ -44,7 +44,7 @@ function DesktopRow({ r }: { r: ListRow }) {
       </div>
       <div style={{ font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-muted)", minWidth: 0, overflow: "hidden", textOverflow: "ellipsis" }}>{r.meta}</div>
       <div>{r.state && <StatePill state={r.state} />}</div>
-      <div className="tabular" style={{ textAlign: "right", font: "800 var(--fs-title-sm) var(--font-body)", letterSpacing: "-.01em" }}>{egp(r.amount)}</div>
+      <div className="tabular bq-stat-sm" style={{ textAlign: "right" }}>{egp(r.amount)}</div>
       <div style={{ display: "flex", justifyContent: "flex-end", color: "var(--ink-faint)" }}>
         {r.onClick && <Icon name="chevron-right" size={16} />}
       </div>
@@ -77,7 +77,7 @@ export function RollupTable({
           <div
             key={r.id}
             onClick={r.onClick}
-            style={{ background: "var(--surface)", borderRadius: "var(--r-card)", padding: "14px 16px", display: "flex", gap: 14, alignItems: "center", cursor: r.onClick ? "pointer" : "default" }}
+            className="bq-card bq-card--sm" style={{ display: "flex", gap: 14, alignItems: "center", cursor: r.onClick ? "pointer" : "default" }}
           >
             <Avatar name={r.name} size={38} src={r.avatarUrl} />
             <div className="bq-grow">
@@ -89,7 +89,7 @@ export function RollupTable({
               </div>
             </div>
             <div style={{ textAlign: "right", flex: "none" }}>
-              <div className="tabular" style={{ font: "800 var(--fs-title-sm) var(--font-body)", letterSpacing: "-.01em" }}>{egp(r.amount).split(" ")[0]}</div>
+              <div className="tabular bq-stat-sm" >{egp(r.amount).split(" ")[0]}</div>
               <div className="bq-label">EGP</div>
             </div>
             {r.onClick && (

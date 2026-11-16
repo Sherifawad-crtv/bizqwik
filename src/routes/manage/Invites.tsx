@@ -7,7 +7,6 @@ import { api } from "../../lib/backend";
 import type { Invite, Role, Tier } from "../../lib/types";
 import { ROLE_LABELS, hasTier } from "../../lib/types";
 import { Button } from "../../components/Button";
-import { Icon } from "../../components/Icon";
 import { Sheet } from "../../components/Sheet";
 import { ConfirmSheet } from "../../components/ConfirmSheet";
 import { TextField, SelectField } from "../../components/FormField";
@@ -15,6 +14,7 @@ import { Spinner } from "../../components/Spinner";
 import { SheetSuccessIcon } from "../../components/SheetSuccessIcon";
 import { useSheetSuccess } from "../../lib/useSheetSuccess";
 import { MotionList } from "../../components/MotionList";
+import { IconButton } from "../../components/IconButton";
 
 const INVITABLE_ROLES: Role[] = ["coach", "head_coach", "dept_head", "accountant", "front_desk"];
 
@@ -41,7 +41,7 @@ export function InvitesPanel() {
       <div className="bq-panel">
         <MotionList>
 {data.invites.map((inv, i) => (
-          <div key={inv.email} style={{ display: "flex", alignItems: "center", gap: 12, padding: "16px 20px", borderBottom: i === data.invites.length - 1 ? "none" : "1px solid var(--line)" }}>
+          <div key={inv.email} className={`bq-listrow ${!(i === data.invites.length - 1) ? "bq-listrow--divider" : ""}`}>
             <div className="bq-grow">
               <div style={{ font: "700 var(--fs-base) var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{inv.email}</div>
               <div className="bq-meta">
@@ -49,9 +49,7 @@ export function InvitesPanel() {
                 {inv.tierId ? ` · ${tiers.find((t) => t.id === inv.tierId)?.name ?? ""}` : ""}
               </div>
             </div>
-            <button className="bq-hit" onClick={() => setDeleting(inv)} aria-label="Cancel invite" style={{ width: 36, height: 36, borderRadius: 999, border: 0, background: "var(--danger-bg)", color: "var(--danger-fg)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <Icon name="trash" size={15} />
-            </button>
+            <IconButton icon="trash" label="Cancel invite" tone="danger" onClick={() => setDeleting(inv)} />
           </div>
         ))}
 </MotionList>

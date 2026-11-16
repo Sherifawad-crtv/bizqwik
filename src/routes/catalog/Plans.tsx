@@ -10,7 +10,6 @@ import { CategoryPill } from "../../lib/category";
 import { LocationField, LocationPill, atLocation, useCurrentLocation, useLocations } from "../../lib/locations";
 import { Segmented } from "../../components/Segmented";
 import { Button } from "../../components/Button";
-import { Icon } from "../../components/Icon";
 import { Sheet } from "../../components/Sheet";
 import { ConfirmSheet } from "../../components/ConfirmSheet";
 import { TextField, SelectField } from "../../components/FormField";
@@ -19,9 +18,10 @@ import { SheetSuccessIcon } from "../../components/SheetSuccessIcon";
 import { useAuth } from "../../lib/auth";
 import { EmptyRow } from "./shared";
 import { SectionHeader } from "../../components/SectionHeader";
-import { iconBtn, useCatalogHere } from "./helpers";
+import { useCatalogHere } from "./helpers";
 import { MotionList } from "../../components/MotionList";
 import { Tag } from "../../components/Tag";
+import { IconButton } from "../../components/IconButton";
 
 export function PlansPanel({ solo }: { solo?: boolean }) {
   const { data } = useAsync(() => api.planTypes(), []);
@@ -51,7 +51,7 @@ export function PlansPanel({ solo }: { solo?: boolean }) {
         <div className="bq-panel">
           <MotionList>
 {rows.map((p, i) => (
-            <div key={p.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "16px 20px", borderBottom: i === rows.length - 1 ? "none" : "1px solid var(--line)", opacity: p.active ? 1 : 0.6 }}>
+            <div key={p.id} className={`bq-listrow ${!(i === rows.length - 1) ? "bq-listrow--divider" : ""}`} style={{ opacity: p.active ? 1 : 0.6 }}>
               <div className="bq-grow">
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                   <span style={{ font: "700 var(--fs-base) var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.name}</span>
@@ -65,12 +65,8 @@ export function PlansPanel({ solo }: { solo?: boolean }) {
                   {p.invitationsAllowance > 0 ? ` · ${p.invitationsAllowance} guest pass${p.invitationsAllowance === 1 ? "" : "es"}` : ""}
                 </div>
               </div>
-              <button className="bq-hit" onClick={() => setEditing({ kind, planType: p })} aria-label={`Edit ${p.name}`} style={iconBtn()}>
-                <Icon name="pencil" size={15} />
-              </button>
-              <button className="bq-hit" onClick={() => setDeleting(p)} aria-label={`Delete ${p.name}`} style={iconBtn(true)}>
-                <Icon name="trash" size={15} />
-              </button>
+              <IconButton icon="pencil" label={`Edit ${p.name}`} onClick={() => setEditing({ kind, planType: p })} />
+              <IconButton icon="trash" label={`Delete ${p.name}`} tone="danger" onClick={() => setDeleting(p)} />
             </div>
           ))}
 </MotionList>

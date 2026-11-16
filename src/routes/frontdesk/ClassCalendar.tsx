@@ -66,7 +66,7 @@ export function ClassCalendarScreen({ onClose }: { onClose: () => void }) {
         <Button variant="quiet" aria-label="Close calendar" style={{ width: 44, height: 44, padding: 0 }} onClick={onClose}>
           <Icon name="close" size={18} />
         </Button>
-        {!isMobile && <span style={{ font: "800 var(--fs-title-sm) var(--font-body)", letterSpacing: "-.01em", marginRight: 8 }}>Classes</span>}
+        {!isMobile && <span className="bq-stat-sm" style={{ marginRight: 8 }}>Classes</span>}
         <Button variant="secondary" style={{ height: 44, padding: "0 14px", font: "700 var(--fs-small) var(--font-mono)", letterSpacing: ".06em" }} onClick={() => setCursor(today)}>
           TODAY
         </Button>

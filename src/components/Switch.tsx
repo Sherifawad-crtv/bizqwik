@@ -38,21 +38,3 @@ export function SwitchVisual({ checked, animate = true, busy }: { checked: boole
     </span>
   );
 }
-
-/** A standalone switch (a button with the right semantics). */
-export function Switch({ checked, onChange, label, disabled }: { checked: boolean; onChange: (next: boolean) => void; label: string; disabled?: boolean }) {
-  return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={checked}
-      aria-label={label}
-      disabled={disabled}
-      className="bq-hit"
-      onClick={() => onChange(!checked)}
-      style={{ border: 0, background: "none", padding: 0, cursor: disabled ? "default" : "pointer", display: "flex" }}
-    >
-      <SwitchVisual checked={checked} />
-    </button>
-  );
-}

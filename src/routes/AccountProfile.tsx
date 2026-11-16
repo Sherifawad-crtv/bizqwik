@@ -98,7 +98,7 @@ export function AccountProfile() {
 
   return (
     <div>
-      <div style={{ background: "var(--surface)", borderRadius: "var(--r-card)", padding: 20, marginBottom: 16, display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
+      <div className="bq-card bq-card--md" style={{ marginBottom: 16, display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
         {PHOTO_EDIT_ENABLED ? (
           <>
             <input ref={fileInput} type="file" accept="image/*" onChange={onPhotoSelected} style={{ display: "none" }} />
@@ -155,7 +155,7 @@ export function AccountProfile() {
         )}
       </div>
 
-      <div style={{ background: "var(--surface)", borderRadius: "var(--r-card)", padding: 20, marginBottom: 16 }}>
+      <div className="bq-card bq-card--md" style={{ marginBottom: 16 }}>
         <TextField
           label="NAME"
           value={name}
@@ -179,7 +179,7 @@ export function AccountProfile() {
         </Button>
       </div>
 
-      <div style={{ background: "var(--surface)", borderRadius: "var(--r-card)", padding: "6px 4px", marginBottom: 12 }}>
+      <div className="bq-card" style={{ padding: "6px 4px", marginBottom: 12 }}>
         <Row k="EMAIL" v={profile.email} />
         <Row k="ROLE" v={ROLE_LABELS[profile.role]} last={!hasTier(profile.role)} />
         {hasTier(profile.role) && (
@@ -195,7 +195,7 @@ export function AccountProfile() {
 
 function Row({ k, v, last }: { k: string; v: string; last?: boolean }) {
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 16px", borderBottom: last ? "none" : "1px solid var(--line)" }}>
+    <div className={`bq-listrow bq-listrow--compact ${!(last) ? "bq-listrow--divider" : ""}`}>
       <span style={{ font: "700 var(--fs-caption) var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", width: 90, flex: "none" }}>{k}</span>
       <span style={{ font: "600 var(--fs-body) var(--font-body)", color: "var(--ink)", flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{v}</span>
     </div>

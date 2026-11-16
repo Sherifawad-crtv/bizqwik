@@ -11,7 +11,7 @@ import { Segmented } from "../../components/Segmented";
 import { SelectField } from "../../components/FormField";
 import { Button } from "../../components/Button";
 import { Avatar } from "../../components/Avatar";
-import { ErrorBanner } from "./shared";
+import { ErrorBanner } from "../../components/ErrorBanner";
 import { Card } from "../../components/Card";
 import { SectionHeader } from "../../components/SectionHeader";
 import { limitLabel } from "./format";
@@ -92,7 +92,7 @@ export function OrgDetail() {
         <Icon name="chevron-left" size={16} /> Overview
       </button>
 
-      <div style={{ font: "800 var(--fs-display)/1.1 var(--font-body)", letterSpacing: "-.02em" }}>{org.name}</div>
+      <div className="bq-stat-lg">{org.name}</div>
       <div style={{ font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-faint)", marginTop: 6 }}>
         /{org.slug} · Created {formatDateTime(org.createdAt)}
       </div>
@@ -174,7 +174,7 @@ export function OrgDetail() {
         <SectionHeader count={staff.length}>Staff</SectionHeader>
         <Card pad="none" style={{ overflow: "hidden" }}>
           {staff.map((p, i) => (
-            <div key={p.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 18px", borderBottom: i === staff.length - 1 ? "none" : "1px solid var(--line)" }}>
+            <div key={p.id} className={`bq-listrow bq-listrow--compact ${!(i === staff.length - 1) ? "bq-listrow--divider" : ""}`}>
               <Avatar name={p.name} size={34} src={p.avatarUrl} />
               <div className="bq-grow">
                 <div style={{ font: "700 var(--fs-body) var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.name}</div>
@@ -199,7 +199,7 @@ export function OrgDetail() {
           <SectionHeader count={pendingInvites.length}>Pending invites</SectionHeader>
           <Card pad="none" style={{ overflow: "hidden" }}>
             {pendingInvites.map((inv, i) => (
-              <div key={inv.email} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 18px", borderBottom: i === pendingInvites.length - 1 ? "none" : "1px solid var(--line)" }}>
+              <div key={inv.email} className={`bq-listrow bq-listrow--compact ${!(i === pendingInvites.length - 1) ? "bq-listrow--divider" : ""}`}>
                 <span style={{ color: "var(--ink-faint)", display: "flex" }}><Icon name="envelope" size={18} /></span>
                 <div style={{ font: "600 var(--fs-body) var(--font-body)", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{inv.email}</div>
                 <span style={{ font: "700 var(--fs-caption) var(--font-mono)", letterSpacing: ".06em", color: "var(--ink-muted)" }}>{ROLE_LABELS[inv.role].toUpperCase()}</span>

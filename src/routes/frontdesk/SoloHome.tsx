@@ -43,9 +43,9 @@ const TONES: Record<"primary" | "good" | "warn" | "neutral", Tone> = {
 function Stat({ label, value, sub, icon, tone, onClick }: { label: string; value: string; sub: string; icon: IconName; tone: keyof typeof TONES; onClick?: () => void }) {
   return (
     <button
-      className="bq-scale"
+      className="bq-scale bq-card"
       onClick={onClick}
-      style={{ textAlign: "left", background: "var(--surface)", borderRadius: "var(--r-card)", padding: "16px 18px", cursor: onClick ? "pointer" : "default", minWidth: 0 }}
+      style={{ textAlign: "left", padding: "16px 18px", cursor: onClick ? "pointer" : "default", minWidth: 0 }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
         <span style={{ width: 32, height: 32, borderRadius: 999, flex: "none", display: "flex", alignItems: "center", justifyContent: "center", background: TONES[tone].bg, color: TONES[tone].fg }}>
@@ -53,7 +53,7 @@ function Stat({ label, value, sub, icon, tone, onClick }: { label: string; value
         </span>
         <span className="bq-label">{label}</span>
       </div>
-      <div style={{ font: "800 var(--fs-display)/1.1 var(--font-body)", letterSpacing: "-.02em", marginTop: 10, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{value}</div>
+      <div className="bq-stat-lg" style={{ marginTop: 10, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{value}</div>
       <div style={{ font: "400 var(--fs-small) var(--font-mono)", color: "var(--ink-muted)", marginTop: 4 }}>{sub}</div>
     </button>
   );
@@ -139,9 +139,9 @@ export function SoloHome() {
         {nextUp.map((c, i) => (
           <button
             key={c.id}
-            className="bq-scale"
+            className={`bq-plain bq-scale bq-listrow bq-listrow--compact ${!(i === nextUp.length - 1) ? "bq-listrow--divider" : ""}`}
             onClick={() => navigate("/bookings")}
-            style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", minHeight: 60, padding: "12px 18px", border: 0, borderBottom: i === nextUp.length - 1 ? "none" : "1px solid var(--line)", background: "none", cursor: "pointer", textAlign: "left" }}
+            style={{ width: "100%", minHeight: 60, background: "none", cursor: "pointer", textAlign: "left" }}
           >
             <span style={{ width: 84, flex: "none", font: "700 var(--fs-body-sm) var(--font-mono)" }}>
               <span style={{ display: "block", whiteSpace: "nowrap" }}>{clockOf(c.startsAt)}</span>

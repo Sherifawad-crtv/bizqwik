@@ -349,7 +349,7 @@ textarea {
    (Screens and sheets switch to fades in code: RouteTransition, Sheet.) */
 @media (prefers-reduced-motion: reduce) {
   :root { --press-scale: 1; }
-  .bq-scale:active, .bq-qa:active { opacity: 0.7; }
+  .bq-scale:active { opacity: 0.7; }
   .bq-rise, .bq-li[data-state="in"] { animation-name: bqFade; }
   .bq-barlayer, .bq-barlayer[data-on="false"] { transform: none; }
   .bq-skel { animation: none; }
@@ -364,8 +364,6 @@ textarea {
   object-fit: cover;
 }
 
-.bq-qa { transition: transform var(--dur-standard) var(--ease-spring); }
-.bq-qa:active { transform: scale(var(--press-scale)); transition-duration: var(--dur-quick); transition-timing-function: var(--ease-standard); }
 
 /* pull-to-refresh spinner (same spin as every other loader) */
 .bq-ptr-spin { animation: bqSpin .7s linear infinite; }
@@ -457,6 +455,10 @@ textarea {
 .bq-card--md { padding: var(--space-5); }
 .bq-card--lg { padding: 30px; }
 .bq-card--clip { overflow: hidden; }
+
+/* A bare element (a button acting as a row): no border or background of its own.
+   Defined before .bq-listrow--divider so a row's divider still shows. */
+.bq-plain { border: 0; background: none; }
 
 /* ListRow: one row of a list that sits inside a Card (pad none). */
 .bq-listrow { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-4) var(--space-5); }

@@ -4,7 +4,7 @@ import { useAsync } from "../../../lib/useAsync";
 import { type OrgConfig } from "../../../lib/types";
 import { TextField } from "../../../components/FormField";
 import { Button } from "../../../components/Button";
-import { ErrorBanner } from "../shared";
+import { ErrorBanner } from "../../../components/ErrorBanner";
 import { Card } from "../../../components/Card";
 import { SectionHeader } from "../../../components/SectionHeader";
 import { ImageUploadField } from "./ImageUpload";
@@ -24,7 +24,7 @@ function pointsPreview(earn: number, redeem: number, checkin: number, min: numbe
 
 export function UsageRow({ label, value }: { label: string; value: string }) {
   return (
-    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 18px", borderBottom: "1px solid var(--line)" }}>
+    <div className="bq-listrow bq-listrow--compact bq-listrow--divider" style={{ justifyContent: "space-between" }}>
       <span style={{ font: "600 var(--fs-body) var(--font-body)", color: "var(--ink-muted)" }}>{label}</span>
       <span style={{ font: "700 var(--fs-body) var(--font-body)" }} className="tabular">{value}</span>
     </div>

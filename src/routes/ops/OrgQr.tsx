@@ -6,7 +6,7 @@ import { useAsync } from "../../lib/useAsync";
 import { Spinner } from "../../components/Spinner";
 import { Icon } from "../../components/Icon";
 import { Button } from "../../components/Button";
-import { ErrorBanner } from "./shared";
+import { ErrorBanner } from "../../components/ErrorBanner";
 import { Card } from "../../components/Card";
 import { SectionHeader } from "../../components/SectionHeader";
 import { Segmented } from "../../components/Segmented";
@@ -110,7 +110,7 @@ export function OrgQr() {
           onChange={(v) => setParams(v === "coaches" ? { for: "coaches" } : {}, { replace: true })}
         />
       </div>
-      <div style={{ font: "800 var(--fs-display)/1.1 var(--font-body)", letterSpacing: "-.02em" }}>{copy.title}</div>
+      <div className="bq-stat-lg">{copy.title}</div>
       <div style={{ font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-faint)", marginTop: 6 }}>{copy.intro}</div>
 
       <div style={{ marginTop: 22, maxWidth: 520 }}>

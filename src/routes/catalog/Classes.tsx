@@ -20,8 +20,9 @@ import { SheetSuccessIcon } from "../../components/SheetSuccessIcon";
 import { useAuth } from "../../lib/auth";
 import { EmptyRow } from "./shared";
 import { SectionHeader } from "../../components/SectionHeader";
-import { iconBtn, useCatalogHere } from "./helpers";
+import { useCatalogHere } from "./helpers";
 import { MotionList } from "../../components/MotionList";
+import { IconButton } from "../../components/IconButton";
 
 export function ClassesPanel({ solo }: { solo?: boolean }) {
   const navigate = useNavigate();
@@ -57,7 +58,7 @@ export function ClassesPanel({ solo }: { solo?: boolean }) {
 
       <button
         onClick={() => navigate(solo ? "/bookings" : "/classes")}
-        style={{ width: "100%", marginTop: 12, textAlign: "left", background: "var(--surface)", borderRadius: "var(--r-card)", padding: "14px 18px", cursor: "pointer", display: "flex", alignItems: "center", gap: 12 }}
+        className="bq-card" style={{ width: "100%", marginTop: 12, textAlign: "left", padding: "14px 18px", cursor: "pointer", display: "flex", alignItems: "center", gap: 12 }}
       >
         <span style={{ color: "var(--primary-pressed)", display: "flex" }}>
           <Icon name="calendar" size={20} />
@@ -72,7 +73,7 @@ export function ClassesPanel({ solo }: { solo?: boolean }) {
       {ended.length > 0 && (
         <>
           <div style={{ font: "700 var(--fs-caption) var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", margin: "24px 2px 10px" }}>ENDED · {ended.length}</div>
-          <div style={{ background: "var(--surface)", borderRadius: "var(--r-card)", overflow: "hidden", opacity: 0.6 }}>
+          <div className="bq-card bq-card--clip" style={{ opacity: 0.6 }}>
             {ended.map((s, i) => (
               <SeriesRow key={s.id} s={s} last={i === ended.length - 1} />
             ))}
@@ -87,7 +88,7 @@ export function ClassesPanel({ solo }: { solo?: boolean }) {
 
 function SeriesRow({ s, last, onEdit, locations = [] }: { s: ClassSeries; last: boolean; onEdit?: () => void; locations?: Location[] }) {
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "16px 20px", borderBottom: last ? "none" : "1px solid var(--line)" }}>
+    <div className={`bq-listrow ${!(last) ? "bq-listrow--divider" : ""}`}>
       {s.imageUrl && <img src={s.imageUrl} alt="" style={{ width: 40, height: 50, flex: "none", borderRadius: "var(--r-chip)", objectFit: "cover" }} />}
       <div className="bq-grow">
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -103,9 +104,7 @@ function SeriesRow({ s, last, onEdit, locations = [] }: { s: ClassSeries; last: 
         </div>
       </div>
       {onEdit && (
-        <button className="bq-hit" onClick={onEdit} aria-label={`Edit ${s.title}`} style={iconBtn()}>
-          <Icon name="pencil" size={15} />
-        </button>
+        <IconButton icon="pencil" label={`Edit ${s.title}`} onClick={onEdit} />
       )}
     </div>
   );

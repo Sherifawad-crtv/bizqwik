@@ -86,7 +86,7 @@ export function AddSessionSheet({ open, onClose, coachId, coachName, month: mont
       ) : (
         <>
           <div className="bq-label">NEW ENTRY</div>
-          <div style={{ font: "800 var(--fs-display)/1.1 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 4px" }}>Log a session</div>
+          <div className="bq-stat-lg" style={{ margin: "4px 0 4px" }}>Log a session</div>
           <div style={{ font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-muted)", marginBottom: 16 }}>
             {coachName ? `Adds to ${coachName}'s ${monthLabel(month)} total.` : `Adds to your ${monthLabel(month)} total.`}
           </div>

@@ -35,7 +35,7 @@ export function PeoplePanel() {
           <button
             key={p.id}
             onClick={() => setEditing(p)}
-            style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 20px", border: 0, borderBottom: i === data.profiles.length - 1 ? "none" : "1px solid var(--line)", width: "100%", background: "none", cursor: "pointer", textAlign: "left" }}
+            className={`bq-plain bq-listrow ${!(i === data.profiles.length - 1) ? "bq-listrow--divider" : ""}`} style={{ width: "100%", background: "none", cursor: "pointer", textAlign: "left" }}
         >
             <Avatar name={p.name} size={36} src={p.avatarUrl} />
             <div className="bq-grow">

@@ -8,7 +8,8 @@ import { Icon } from "../../components/Icon";
 import { Sheet } from "../../components/Sheet";
 import { TextField } from "../../components/FormField";
 import { canvasToDataUrl } from "../../lib/image";
-import { iconBtn, useCatalogHere } from "./helpers";
+import { useCatalogHere } from "./helpers";
+import { IconButton } from "../../components/IconButton";
 
 /** Resize a picked image to at most 700px and return it as a WebP data URL. */
 function readQr(file: File): Promise<string> {
@@ -124,7 +125,7 @@ export function SoloOffer() {
               <div key={i} style={{ display: "grid", gridTemplateColumns: "1fr 1fr auto", gap: 8, alignItems: "end" }}>
                 <TextField label="NAME" value={r.label} onChange={(e) => setRows(rows.map((x, j) => (j === i ? { ...x, label: e.target.value } : x)))} placeholder="Kids" />
                 <TextField label="PRICE · EGP" type="number" min={0} inputMode="decimal" value={r.price} onChange={(e) => setRows(rows.map((x, j) => (j === i ? { ...x, price: e.target.value } : x)))} />
-                <button className="bq-hit" aria-label="Remove" onClick={() => setRows(rows.filter((_, j) => j !== i))} style={{ ...iconBtn(true), marginBottom: 6 }}><Icon name="trash" size={15} /></button>
+                <IconButton icon="trash" label="Remove" tone="danger" style={{ marginBottom: 6 }} onClick={() => setRows(rows.filter((_, j) => j !== i))} />
               </div>
             ))}
             {rows.length < 6 && <Button variant="quiet" onClick={() => setRows([...rows, { label: "", price: "" }])}>+ Another drop-in</Button>}
@@ -213,7 +214,7 @@ export function LocationsCard() {
 
   return (
     <div style={{ marginBottom: 12 }}>
-      <div style={{ background: "var(--surface)", borderRadius: "var(--r-card)", padding: "16px 20px" }}>
+      <div className="bq-card" style={{ padding: "16px 20px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: list.length ? 8 : 0 }}>
           <div className="bq-grow">
             <div className="bq-h3">Locations</div>
@@ -229,9 +230,7 @@ export function LocationsCard() {
           <div key={l.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 0", borderTop: "1px solid var(--line)" }}>
             <Icon name="map-pin" size={16} />
             <span style={{ flex: 1, minWidth: 0, font: "600 var(--fs-body) var(--font-body)" }}>{l.name}</span>
-            <button onClick={() => { setError(null); setEditing({ id: l.id, name: l.name }); }} aria-label={`Rename ${l.name}`} style={iconBtn()}>
-              <Icon name="pencil" size={15} />
-            </button>
+            <IconButton icon="pencil" label={`Rename ${l.name}`} onClick={() => { setError(null); setEditing({ id: l.id, name: l.name }); }} />
           </div>
         ))}
       </div>

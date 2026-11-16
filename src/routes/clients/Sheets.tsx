@@ -202,7 +202,7 @@ export function ClientActionSheet({
     <Sheet open={open} onClose={onClose}>
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 18 }}>
         <Avatar name={client.name} size={38} />
-        <div style={{ font: "800 var(--fs-title-sm) var(--font-body)", letterSpacing: "-.01em" }}>{client.name}</div>
+        <div className="bq-stat-sm">{client.name}</div>
       </div>
       <Button fullWidth size="lg" onClick={onEdit}>
         Edit client

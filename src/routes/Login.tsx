@@ -46,8 +46,8 @@ export function Login() {
   };
 
   const card = (
-    <div style={{ width: isMobile ? "min(420px, 100%)" : "min(580px, 100%)", background: "var(--surface)", borderRadius: "var(--r-card)", padding: isMobile ? 30 : 48 }}>
-        <div style={{ font: "800 var(--fs-display)/1.1 var(--font-body)", letterSpacing: "-.02em" }}>Sign in</div>
+    <div className="bq-card" style={{ width: isMobile ? "min(420px, 100%)" : "min(580px, 100%)", padding: isMobile ? 30 : 48 }}>
+        <div className="bq-stat-lg">Sign in</div>
         <div style={{ font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-muted)", marginTop: 6, marginBottom: 22 }}>
           ATTENDANCE &amp; PAYOUT PORTAL
         </div>

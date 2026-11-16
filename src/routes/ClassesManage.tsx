@@ -148,12 +148,7 @@ function ClassCard({ c, onEdit, onRoster }: { c: GymClass; onEdit?: () => void; 
   const cancelled = c.status === "cancelled";
   return (
     <div
-      style={{
-        background: "var(--surface)",
-        borderRadius: "var(--r-card)",
-        padding: "14px 16px",
-        opacity: cancelled ? 0.55 : 1,
-      }}
+      className="bq-card bq-card--sm" style={{ opacity: cancelled ? 0.55 : 1 }}
     >
       <div onClick={onEdit} style={{ display: "flex", alignItems: "center", gap: 12, cursor: onEdit ? "pointer" : "default" }}>
         <div className="bq-grow">

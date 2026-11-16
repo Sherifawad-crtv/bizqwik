@@ -3,7 +3,7 @@ import { api } from "../../../lib/backend";
 import { TextField } from "../../../components/FormField";
 import { Button } from "../../../components/Button";
 import { Sheet } from "../../../components/Sheet";
-import { ErrorBanner } from "../shared";
+import { ErrorBanner } from "../../../components/ErrorBanner";
 
 // Type-the-slug confirmation, GitHub style: the delete button only unlocks
 // once the org's slug is typed exactly.
