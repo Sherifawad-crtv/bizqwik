@@ -20,6 +20,7 @@ import { SheetSuccessIcon } from "../../components/SheetSuccessIcon";
 import { useAuth } from "../../lib/auth";
 import { EmptyRow, PanelHeader } from "./shared";
 import { iconBtn, useCatalogHere } from "./helpers";
+import { MotionList } from "../../components/MotionList";
 
 export function ClassesPanel({ solo }: { solo?: boolean }) {
   const navigate = useNavigate();
@@ -44,9 +45,11 @@ export function ClassesPanel({ solo }: { solo?: boolean }) {
         }
       />
       <div className="bq-panel">
-        {active.map((s, i) => (
+        <MotionList>
+{active.map((s, i) => (
           <SeriesRow key={s.id} s={s} last={i === active.length - 1} onEdit={() => setEditing(s)} locations={locations} />
         ))}
+</MotionList>
         {active.length === 0 && <EmptyRow text="No classes yet. Create one and it repeats every week until you change it. Members can then drop in or buy a monthly." action={{ label: "+ New class", onClick: () => setEditing("new") }} />}
       </div>
 

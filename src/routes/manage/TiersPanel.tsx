@@ -14,6 +14,7 @@ import { TextField } from "../../components/FormField";
 import { Spinner } from "../../components/Spinner";
 import { SheetSuccessIcon } from "../../components/SheetSuccessIcon";
 import { useSheetSuccess } from "../../lib/useSheetSuccess";
+import { MotionList } from "../../components/MotionList";
 
 export function TiersPanel({ onOpenPeople, onOpenInvites }: { onOpenPeople: () => void; onOpenInvites: () => void }) {
   const { data } = useAsync(() => api.tiers(), []);
@@ -39,7 +40,8 @@ export function TiersPanel({ onOpenPeople, onOpenInvites }: { onOpenPeople: () =
       </div>
 
       <div className="bq-panel">
-        {data.tiers.map((t, i) => (
+        <MotionList>
+{data.tiers.map((t, i) => (
           <div key={t.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "16px 20px", borderBottom: i === data.tiers.length - 1 ? "none" : "1px solid var(--line)" }}>
             <div className="bq-grow">
               <div className="bq-h3">{t.name}</div>
@@ -53,6 +55,7 @@ export function TiersPanel({ onOpenPeople, onOpenInvites }: { onOpenPeople: () =
             </button>
           </div>
         ))}
+</MotionList>
         {data.tiers.length === 0 && (
           <EmptyState bare icon="tag" title="No pay tiers yet" body="A tier sets what a coach earns per group session and their cut of PT sales. Create one, then assign it to coaches in People." action={{ label: "+ New tier", onClick: () => setEditing("new") }} />
         )}

@@ -111,3 +111,35 @@ test("big money figures glide to their new value instead of jumping", async ({ p
   expect(after).not.toBe(before);
   expect([...seen].some((v) => v !== after && v !== before)).toBe(true); // passed through values in between
 });
+
+test("list rows grow in when added and fold away when removed; the rest slide to make room", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const THIS = ym(0);
+  const ex = (id: string, note: string) => ({ id, categoryId: "c1", categoryName: "Rent", amount: 1000, date: `${THIS}-02`, note, hasReceipt: false, receiptUrl: null, recurringId: null, createdBy: "me", editedAfterMonthEnd: false });
+  let list = [ex("e1", "First row"), ex("e2", "Second row")];
+  await mockBackend(page, "accountant", {
+    "accounting/categories": { categories: [{ id: "c1", name: "Rent", sortOrder: 1, isDefault: true, archived: false }] },
+    "accounting/expenses": () => ({ body: { expenses: list } }),
+    "accounting/recurring": { recurring: [] },
+    "accounting/pnl": { month: THIS, current: { month: THIS, grossRevenue: 0, refunds: 0, netRevenue: 0, coachPayouts: 0, otherExpenses: 0, totalExpenses: 0, profit: 0 }, trend: [], revenueBySource: [], expensesBySource: [], hasPastExpenses: true, unsettledNote: null },
+    [`month/${THIS}`]: { rows: [] },
+  });
+  await page.goto("/accounting");
+  await page.getByRole("button", { name: "EXPENSES" }).click();
+  await expect(page.getByText("Second row")).toBeVisible();
+  const stateOf = (text: string) => page.getByText(text).locator("xpath=ancestor::div[contains(@class,'bq-li')][1]").getAttribute("data-state");
+  expect(await stateOf("First row")).toBe("idle"); // rows already there when the list appeared don't animate
+
+  // Added on another phone; the app refreshes.
+  list = [ex("e1", "First row"), ex("e3", "New row"), ex("e2", "Second row")];
+  await page.evaluate(() => document.dispatchEvent(new Event("visibilitychange")));
+  await expect(page.getByText("New row")).toBeVisible();
+  expect(await stateOf("New row")).toBe("in");
+  expect(await page.getByText("New row").locator("xpath=ancestor::div[contains(@class,'bq-li')][1]").evaluate((el) => getComputedStyle(el).animationName)).toBe("bqListIn");
+
+  // Removed: it folds away, then it's gone.
+  list = [ex("e1", "First row"), ex("e2", "Second row")];
+  await page.evaluate(() => document.dispatchEvent(new Event("visibilitychange")));
+  await expect.poll(() => stateOf("New row"), { intervals: [20], timeout: 2000 }).toBe("out");
+  await expect(page.getByText("New row")).toHaveCount(0, { timeout: 1000 });
+});

@@ -15,6 +15,7 @@ import { SheetSuccessIcon } from "../../components/SheetSuccessIcon";
 import { Card as PlainCard, SectionTitle } from "../frontdesk/shared";
 import { CategoriesSheet } from "./ExpenseSheet";
 import { catOptions } from "./options";
+import { MotionList } from "../../components/MotionList";
 
 function nextOccurrence(r: RecurringExpense): string | null {
   if (!r.active) return null;
@@ -43,7 +44,8 @@ export function RecurringPanel({ categories, onChanged, onCategoriesChanged }: {
         Recurring expenses
       </SectionTitle>
       <PlainCard style={{ overflow: "hidden", marginBottom: 14 }}>
-        {recurring.map((r, i) => {
+        <MotionList>
+{recurring.map((r, i) => {
           const next = nextOccurrence(r);
           return (
             <button key={r.id} className="bq-scale" onClick={() => setEditing(r)} style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", border: 0, background: "none", cursor: "pointer", textAlign: "left", padding: "13px 18px", borderBottom: i === recurring.length - 1 ? "none" : "1px solid var(--line)", opacity: r.active ? 1 : 0.5 }}>
@@ -58,6 +60,7 @@ export function RecurringPanel({ categories, onChanged, onCategoriesChanged }: {
             </button>
           );
         })}
+</MotionList>
         {recurring.length === 0 && (
           <EmptyState bare icon="cash" title={data ? "No repeating expenses" : "Loading…"} body="Rent, salaries and anything else that happens every month — set it up once." />
         )}

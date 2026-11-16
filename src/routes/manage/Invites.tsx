@@ -14,6 +14,7 @@ import { TextField, SelectField } from "../../components/FormField";
 import { Spinner } from "../../components/Spinner";
 import { SheetSuccessIcon } from "../../components/SheetSuccessIcon";
 import { useSheetSuccess } from "../../lib/useSheetSuccess";
+import { MotionList } from "../../components/MotionList";
 
 const INVITABLE_ROLES: Role[] = ["coach", "head_coach", "dept_head", "accountant", "front_desk"];
 
@@ -38,7 +39,8 @@ export function InvitesPanel() {
       </div>
 
       <div className="bq-panel">
-        {data.invites.map((inv, i) => (
+        <MotionList>
+{data.invites.map((inv, i) => (
           <div key={inv.email} style={{ display: "flex", alignItems: "center", gap: 12, padding: "16px 20px", borderBottom: i === data.invites.length - 1 ? "none" : "1px solid var(--line)" }}>
             <div className="bq-grow">
               <div style={{ font: "700 var(--fs-base) var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{inv.email}</div>
@@ -52,6 +54,7 @@ export function InvitesPanel() {
             </button>
           </div>
         ))}
+</MotionList>
         {data.invites.length === 0 && (
           <EmptyState bare icon="envelope" title="No pending invites" body="Invite coaches, head coaches, the front desk or an accountant by email. They sign up with that email and appear in People." action={{ label: "+ Invite someone", onClick: () => setOpen(true) }} />
         )}

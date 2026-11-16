@@ -392,3 +392,17 @@ textarea {
   pointer-events: none;
   background: linear-gradient(to bottom, rgba(243, 242, 238, 0), var(--paper) 78%);
 }
+
+/* MotionList rows: arrive by growing in and fading up, leave by fading and
+   folding away; the rows around them slide to make or close the gap. */
+.bq-li {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows var(--dur-standard) var(--ease-standard), opacity var(--dur-standard) var(--ease-standard);
+}
+.bq-li[data-state="in"] { animation: bqListIn var(--dur-standard) var(--ease-standard) both; }
+.bq-li[data-state="out"] { grid-template-rows: 0fr; opacity: 0; pointer-events: none; }
+@keyframes bqListIn {
+  from { grid-template-rows: 0fr; opacity: 0; transform: translateY(6px); }
+  to { grid-template-rows: 1fr; opacity: 1; transform: none; }
+}

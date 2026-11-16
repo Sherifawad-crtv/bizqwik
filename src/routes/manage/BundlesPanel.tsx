@@ -17,6 +17,7 @@ import { Spinner } from "../../components/Spinner";
 import { SheetSuccessIcon } from "../../components/SheetSuccessIcon";
 import { useSheetSuccess } from "../../lib/useSheetSuccess";
 import { useAuth } from "../../lib/auth";
+import { MotionList } from "../../components/MotionList";
 
 export function BundlesPanel() {
   const { data: raw } = useAsync(() => api.bundleTypes(), []);
@@ -43,7 +44,8 @@ export function BundlesPanel() {
       </div>
 
       <div className="bq-panel">
-        {rows.map((b, i) => (
+        <MotionList>
+{rows.map((b, i) => (
           <div key={b.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "16px 20px", borderBottom: i === rows.length - 1 ? "none" : "1px solid var(--line)" }}>
             <div className="bq-grow">
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -63,6 +65,7 @@ export function BundlesPanel() {
             </button>
           </div>
         ))}
+</MotionList>
         {rows.length === 0 && (
           <EmptyState bare icon="coaches" title="No PT bundles yet" body="A PT bundle is a pack of private sessions with one coach (e.g. 8 sessions, valid 30 days). The front desk sells them once they exist." action={{ label: "+ New PT bundle", onClick: () => setEditing("new") }} />
         )}

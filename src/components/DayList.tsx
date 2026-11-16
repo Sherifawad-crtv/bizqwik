@@ -3,6 +3,7 @@ import { StatePill } from "./StatePill";
 import { EmptyState } from "./EmptyState";
 import { dateLabel, egp, sessionStamp } from "../lib/format";
 import type { State } from "../lib/types";
+import { MotionList } from "./MotionList";
 
 interface DayGroup {
   date: string;
@@ -43,7 +44,8 @@ export function DayList({
 
   return (
     <div className="bq-stack">
-      {groups.map((g) => (
+      <MotionList gap={10}>
+{groups.map((g) => (
         <div
           key={g.date}
           onClick={() => onOpenDay(g)}
@@ -87,6 +89,7 @@ export function DayList({
           </div>
         </div>
       ))}
+</MotionList>
     </div>
   );
 }

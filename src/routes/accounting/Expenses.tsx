@@ -8,6 +8,7 @@ import { Button } from "../../components/Button";
 import { Icon } from "../../components/Icon";
 import { Card as PlainCard, SectionTitle } from "../frontdesk/shared";
 import { CategoriesSheet, ExpenseSheet } from "./ExpenseSheet";
+import { MotionList } from "../../components/MotionList";
 
 function ReceiptIcon({ has }: { has: boolean }) {
   if (!has) return null;
@@ -91,7 +92,8 @@ export function ExpensesPanel({
             <Icon name="chevron-right" size={16} />
           </button>
         )}
-        {expenses.map((e, i) => (
+        <MotionList>
+{expenses.map((e, i) => (
           <button key={e.id} className="bq-scale" onClick={() => setSheetMode(e)} style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", border: 0, background: "none", cursor: "pointer", textAlign: "left", padding: "13px 18px", borderBottom: i === expenses.length - 1 ? "none" : "1px solid var(--line)" }}>
             <div className="bq-grow">
               <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
@@ -106,6 +108,7 @@ export function ExpensesPanel({
             <Icon name="chevron-right" size={16} />
           </button>
         ))}
+</MotionList>
         {expenses.length === 0 && coachPayouts === 0 && (
           <EmptyState bare icon="cash" title={data ? "No expenses this month" : "Loading…"} body="Rent, salaries, utilities — whatever the business spent on. Add the first one below." />
         )}

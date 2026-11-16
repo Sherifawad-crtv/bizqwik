@@ -19,6 +19,7 @@ import { SheetSuccessIcon } from "../../components/SheetSuccessIcon";
 import { useAuth } from "../../lib/auth";
 import { EmptyRow, PanelHeader } from "./shared";
 import { iconBtn, useCatalogHere } from "./helpers";
+import { MotionList } from "../../components/MotionList";
 
 export function PlansPanel({ solo }: { solo?: boolean }) {
   const { data } = useAsync(() => api.planTypes(), []);
@@ -45,7 +46,8 @@ export function PlansPanel({ solo }: { solo?: boolean }) {
           }
         />
         <div className="bq-panel">
-          {rows.map((p, i) => (
+          <MotionList>
+{rows.map((p, i) => (
             <div key={p.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "16px 20px", borderBottom: i === rows.length - 1 ? "none" : "1px solid var(--line)", opacity: p.active ? 1 : 0.6 }}>
               <div className="bq-grow">
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -68,6 +70,7 @@ export function PlansPanel({ solo }: { solo?: boolean }) {
               </button>
             </div>
           ))}
+</MotionList>
           {rows.length === 0 && <EmptyRow text={empty} action={{ label: kind === "bundle" ? "+ New class bundle" : "+ New membership", onClick: () => setEditing({ kind, planType: null }) }} />}
         </div>
 
