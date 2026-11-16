@@ -100,10 +100,10 @@ export function Oversight() {
           {founder ? (
             // The founder's overview: four equal tiles, no big revenue card.
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(150px,1fr))", gap: 10, marginBottom: 14 }}>
-              <KpiTile label="PROFIT" icon="insights" value={fmt(report.totals.profit)} sub="Revenue − coach payouts" delta={compare && <Delta pct={pctChange(report.totals.profit, compare.profit)} tone="good" />} />
-              <KpiTile label="REVENUE" icon="wallet" value={fmt(report.totals.revenue)} sub={compare && compare.revenue > 0 ? `vs ${fmt(compare.revenue)} ${prevLabel}` : "Cash and card sales"} delta={compare && <Delta pct={pctChange(report.totals.revenue, compare.revenue)} tone="good" />} />
-              <KpiTile label="ACTIVE SUBSCRIBERS" icon="coaches" value={String(subs?.total ?? 0)} sub={`${subs?.groupPlans ?? 0} group plan · ${subs?.ptPackages ?? 0} PT`} />
-              <KpiTile label="COACH PAYOUTS" icon="topay" value={fmt(report.totals.payouts)} sub="Owed to coaches" delta={compare && <Delta pct={pctChange(report.totals.payouts, compare.payouts)} tone="neutral" />} />
+              <KpiTile label="PROFIT" icon="insights" value={fmt(report.totals.profit)} delta={compare && <Delta pct={pctChange(report.totals.profit, compare.profit)} tone="good" />} />
+              <KpiTile label="REVENUE" icon="wallet" value={fmt(report.totals.revenue)} delta={compare && <Delta pct={pctChange(report.totals.revenue, compare.revenue)} tone="good" />} />
+              <KpiTile label="ACTIVE SUBSCRIBERS" icon="coaches" value={String(subs?.total ?? 0)} />
+              <KpiTile label="COACH PAYOUTS" icon="topay" value={fmt(report.totals.payouts)} delta={compare && <Delta pct={pctChange(report.totals.payouts, compare.payouts)} tone="neutral" />} />
             </div>
           ) : (
             <>
