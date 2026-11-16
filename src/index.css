@@ -1,6 +1,6 @@
 :root {
   /* ===== Bizqwik Foundation tokens ===== */
-  --paper: #f3f2ee;
+  --paper: #f3ede6;
   --surface: #fbfaf7;
   --sunken: #ecebe5;
   --line: #e3e1da;
@@ -380,5 +380,5 @@ textarea {
   height: calc(var(--bar-bottom) + 64px + 36px);
   z-index: 54;
   pointer-events: none;
-  background: linear-gradient(to bottom, rgba(243, 242, 238, 0), var(--paper) 78%);
+  background: linear-gradient(to bottom, rgba(243, 237, 230, 0), var(--paper) 78%);
 }
