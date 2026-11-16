@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { useSetHeader } from "../lib/header";
 import { useAsync } from "../lib/useAsync";
 import { api, MOCK } from "../lib/backend";
-import { fmt } from "../lib/format";
 import { MoneyHero } from "../components/MoneyHero";
 import { RollupTable, type ListRow } from "../components/RollupTable";
 import { Spinner } from "../components/Spinner";
@@ -11,6 +10,7 @@ import { canLog } from "../lib/types";
 import { useAuth } from "../lib/auth";
 import { Icon } from "../components/Icon";
 import { InviteFlow } from "./manage/Invites";
+import { Num } from "../components/Num";
 
 export function CoachesOverview() {
   const month = MOCK.CURRENT_MONTH;
@@ -41,7 +41,7 @@ export function CoachesOverview() {
     <div>
       <MoneyHero
         label="MONTH TOTAL · EGP"
-        value={fmt(rows.reduce((s, r) => s + r.total, 0))}
+        value={<Num value={rows.reduce((s, r) => s + r.total, 0)} />}
         stats={[
           { k: "COACHES", v: String(rows.length) },
           { k: "SESSIONS", v: String(rows.reduce((s, r) => s + r.count, 0)) },

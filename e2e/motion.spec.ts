@@ -77,3 +77,37 @@ test("charts glide, they don't jump: bars travel to new heights when the numbers
   // At least one bar was seen between its old and new height.
   expect(mid.some((h, i) => h !== after[i])).toBe(true);
 });
+
+test("content fades in where its loading placeholder was (no pop)", async ({ page }) => {
+  await mockBackend(page, "dept_head", { revenue: () => ({ body: report() }) });
+  // Hold the numbers back a moment so the placeholder is on screen first.
+  await page.route(/\/revenue\?/, async (route) => { await new Promise((r) => setTimeout(r, 600)); await route.fallback(); });
+  await page.goto("/oversight");
+  await expect(page.getByTestId("skeleton").first()).toBeVisible();
+  await page.getByText("REVENUE VS COACH PAYOUTS").waitFor();
+  const anim = await page.evaluate(() => {
+    const host = document.querySelector("[data-reveal]");
+    const kids = host ? [...host.children].map((c) => getComputedStyle(c).animationName) : [];
+    return kids;
+  });
+  expect(anim).toContain("bqFade");
+});
+
+test("big money figures glide to their new value instead of jumping", async ({ page }) => {
+  let bump = 0;
+  await mockBackend(page, "dept_head", { revenue: () => ({ body: report(months.map((m) => ({ ...m, revenue: m.revenue + bump }))) }) });
+  await page.goto("/oversight");
+  const revenueTile = page.getByText("REVENUE", { exact: true }).locator("xpath=following-sibling::div[1]");
+  await expect(revenueTile).toHaveText(/\d/);
+  await page.waitForTimeout(400);
+  const before = (await revenueTile.innerText()).trim();
+  bump = 9000;
+  await page.evaluate(() => document.dispatchEvent(new Event("visibilitychange")));
+  await page.waitForFunction((b) => { const el = [...document.querySelectorAll("div")].find((d) => d.textContent === "REVENUE")?.nextElementSibling; return !!el && el.textContent!.trim() !== b; }, before);
+  const seen = new Set<string>();
+  for (let i = 0; i < 12; i++) { seen.add((await revenueTile.innerText()).trim()); await page.waitForTimeout(25); }
+  await page.waitForTimeout(400);
+  const after = (await revenueTile.innerText()).trim();
+  expect(after).not.toBe(before);
+  expect([...seen].some((v) => v !== after && v !== before)).toBe(true); // passed through values in between
+});

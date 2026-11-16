@@ -17,6 +17,7 @@ import { Avatar } from "../components/Avatar";
 import { Button } from "../components/Button";
 import { Icon } from "../components/Icon";
 import { Spinner } from "../components/Spinner";
+import { Num } from "../components/Num";
 
 export function CoachDetail() {
   const { id } = useParams<{ id: string }>();
@@ -127,7 +128,7 @@ export function CoachDetail() {
 
       <MoneyHero
         label="MONTH TOTAL · EGP"
-        value={fmt(row.total)}
+        value={<Num value={row.total} />}
         stats={[
           { k: "SESSIONS", v: `${row.count} ${row.count === 1 ? "session" : "sessions"}` },
           { k: "GROUP", v: `${fmt(row.groupTotal)} EGP` },

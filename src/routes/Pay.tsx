@@ -11,6 +11,7 @@ import { RollupTable, type ListRow } from "../components/RollupTable";
 import { Spinner } from "../components/Spinner";
 import { StatePill } from "../components/StatePill";
 import type { Rollup } from "../lib/types";
+import { Num } from "../components/Num";
 
 /** Where this month stands: paid out, still to pay, and still being logged. */
 function MonthStatus({ rows }: { rows: Rollup[] }) {
@@ -73,7 +74,7 @@ export function Pay() {
 
       <MoneyHero
         label="DUE NOW · EGP"
-        value={fmt(sumRemaining(dueRows))}
+        value={<Num value={sumRemaining(dueRows)} />}
         stats={[
           { k: "PAYEES", v: String(dueRows.length) },
           { k: "SESSIONS", v: String(dueRows.reduce((s, r) => s + r.count, 0)) },

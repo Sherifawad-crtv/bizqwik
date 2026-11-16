@@ -15,6 +15,7 @@ import { AddSessionSheet } from "../components/AddSessionSheet";
 import { Button } from "../components/Button";
 import { ScanFlow } from "../components/fab/ScanFlow";
 import { Spinner } from "../components/Spinner";
+import { Num } from "../components/Num";
 
 export function CoachWallet() {
   const { profile } = useAuth();
@@ -77,7 +78,7 @@ export function CoachWallet() {
 
       <MoneyHero
         label="RUNNING TOTAL · EGP"
-        value={fmt(row.total)}
+        value={<Num value={row.total} />}
         stats={[
           { k: "SESSIONS", v: `${row.count} ${row.count === 1 ? "session" : "sessions"}` },
           { k: "GROUP", v: `${fmt(row.groupTotal)} EGP` },

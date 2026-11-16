@@ -21,6 +21,7 @@ import { PackageStatusPill } from "../components/PackageStatusPill";
 import type { PackageWithNames, Rollup, SettlementPayment } from "../lib/types";
 import { useBackAction } from "../lib/floatingActions";
 import { useIsMobile } from "../lib/useIsMobile";
+import { Num } from "../components/Num";
 
 const METHOD_LABELS: Record<string, string> = { cash: "Cash", bank: "Bank", instapay: "InstaPay", other: "Recorded earlier" };
 
@@ -175,7 +176,7 @@ export function PayeeDetail() {
 
       <MoneyHero
         label="MONTH TOTAL · EGP"
-        value={fmt(row.total)}
+        value={<Num value={row.total} />}
         stats={[
           { k: "GROUP", v: `${fmt(row.groupTotal)} EGP` },
           { k: "PRIVATE", v: `${fmt(row.privateTotal)} EGP` },

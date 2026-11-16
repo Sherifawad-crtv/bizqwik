@@ -18,6 +18,7 @@ import { Segmented } from "../components/Segmented";
 import { ActivityPanel } from "./Activity";
 import { canLog, isHead } from "../lib/types";
 import type { Rollup, Session } from "../lib/types";
+import { Num } from "../components/Num";
 
 interface PersonalData {
   kind: "personal";
@@ -44,7 +45,7 @@ function PersonalHistory({ row, sessions }: { row: Rollup | null; sessions: Sess
       <LockedBanner state={row.state} />
       <MoneyHero
         label="TOTAL · EGP"
-        value={fmt(row.total)}
+        value={<Num value={row.total} />}
         stats={[
           { k: "SESSIONS", v: `${row.count} ${row.count === 1 ? "session" : "sessions"}` },
           { k: row.tierName ? row.tierName.toUpperCase() : "RATE", v: `${row.rate} / session` },
@@ -88,7 +89,7 @@ function RosterHistory({ rows, month, paidOnly, ytdPaid, onOpenCoach }: { rows: 
     <>
       <MoneyHero
         label={`${paidOnly ? "PAID" : "MONTH TOTAL"} · EGP`}
-        value={fmt(rows.reduce((s, r) => s + r.total, 0))}
+        value={<Num value={rows.reduce((s, r) => s + r.total, 0)} />}
         stats={
           paidOnly
             ? [

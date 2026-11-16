@@ -31,7 +31,7 @@ export function Delta({ pct, tone }: { pct: number | null; tone: "good" | "neutr
   );
 }
 
-export function KpiTile({ label, value, sub, icon, delta }: { label: string; value: string; sub?: string; icon: IconName; delta?: ReactNode }) {
+export function KpiTile({ label, value, sub, icon, delta }: { label: string; value: ReactNode; sub?: string; icon: IconName; delta?: ReactNode }) {
   return (
     <div style={{ background: "var(--surface)", borderRadius: "var(--r-card)", padding: "14px 16px", minWidth: 0 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>

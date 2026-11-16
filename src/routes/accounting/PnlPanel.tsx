@@ -8,6 +8,7 @@ import { Card, KpiTile, Delta } from "../overview/Cards";
 import { pctChange, caption } from "../overview/helpers";
 import { BarChart } from "../overview/BarChart";
 import { ShareBars } from "../overview/Charts";
+import { Num } from "../../components/Num";
 
 function PnlChart({ trend }: { trend: PnlReport["trend"] }) {
   if (trend.every((m) => m.netRevenue === 0 && m.totalExpenses === 0)) {
@@ -70,8 +71,8 @@ export function PnlPanel({ report, loading, onAddExpense, onCoachPayouts }: { re
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(150px,1fr))", gap: 10, marginBottom: 14 }}>
-        <KpiTile label="EXPENSES" icon="topay" value={fmt(current.totalExpenses)} sub={`${fmt(current.coachPayouts)} coach payouts`} delta={prev && <Delta pct={pctChange(current.totalExpenses, prev.totalExpenses)} tone="neutral" />} />
-        <KpiTile label="PROFIT" icon="insights" value={fmt(current.profit)} sub={margin !== null ? `${margin >= 0 ? "" : "−"}${Math.abs(Math.round(margin))}% margin` : "Margin needs revenue"} delta={prev && <Delta pct={pctChange(current.profit, prev.profit)} tone="good" />} />
+        <KpiTile label="EXPENSES" icon="topay" value={<Num value={current.totalExpenses} />} sub={`${fmt(current.coachPayouts)} coach payouts`} delta={prev && <Delta pct={pctChange(current.totalExpenses, prev.totalExpenses)} tone="neutral" />} />
+        <KpiTile label="PROFIT" icon="insights" value={<Num value={current.profit} />} sub={margin !== null ? `${margin >= 0 ? "" : "−"}${Math.abs(Math.round(margin))}% margin` : "Margin needs revenue"} delta={prev && <Delta pct={pctChange(current.profit, prev.profit)} tone="good" />} />
       </div>
 
       <Card title="NET REVENUE VS EXPENSES" sub={`${caption(report.trend.map((m) => m.month))} · BY MONTH · EGP`}>

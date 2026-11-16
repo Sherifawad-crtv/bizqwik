@@ -317,6 +317,8 @@ textarea {
   50% { opacity: 0.45; }
 }
 .bq-skel { animation: bqSkel 1.3s ease-in-out infinite; }
+/* Real content arriving where a loading placeholder was: a soft fade, not a pop. */
+[data-reveal] > :not([data-testid="skeleton"]) { animation: bqFade var(--dur-standard) var(--ease-standard) both; }
 @keyframes bqRise {
   from {
     opacity: 0;

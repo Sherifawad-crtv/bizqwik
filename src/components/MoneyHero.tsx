@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { useIsMobile } from "../lib/useIsMobile";
 
 interface Stat {
@@ -5,7 +6,7 @@ interface Stat {
   v: string;
 }
 
-export function MoneyHero({ label, value, stats }: { label: string; value: string; stats: Stat[] }) {
+export function MoneyHero({ label, value, stats }: { label: string; value: ReactNode; stats: Stat[] }) {
   const isMobile = useIsMobile();
 
   if (isMobile) {
