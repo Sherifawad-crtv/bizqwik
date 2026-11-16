@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useSetHeader } from "../lib/header";
-import { useFloatingActions } from "../lib/floatingActions";
+import { useFloatingActions, useBackAction } from "../lib/floatingActions";
 import { useIsMobile } from "../lib/useIsMobile";
 import { useAsync } from "../lib/useAsync";
 import { api, MOCK } from "../lib/backend";
@@ -40,6 +40,7 @@ export function CoachDetail() {
   }, [coachId, month]);
 
   useSetHeader({ kicker: monthShort(month), title: "Coach" }, [month]);
+  useBackAction(goBack);
 
   const runAction = async (fn: () => Promise<void>) => {
     setBusyAction(true);
@@ -105,12 +106,14 @@ export function CoachDetail() {
 
   return (
     <div>
+      {!isMobile && (
       <button
         onClick={goBack}
         style={{ display: "flex", alignItems: "center", gap: 4, border: 0, background: "none", cursor: "pointer", color: "var(--ink-muted)", font: "600 var(--fs-note) var(--font-body)", padding: "0 0 14px" }}
       >
         <Icon name="chevron-left" size={16} /> {from === "history" ? "History" : "Team"}
       </button>
+      )}
 
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 18 }}>
         <Avatar name={row.name} size={44} src={row.avatarUrl} />

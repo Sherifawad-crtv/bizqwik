@@ -41,3 +41,36 @@ export function useFloatingActions(node: ReactNode) {
   });
   useLayoutEffect(() => () => set(null), [set]);
 }
+
+/** What "Back" does on a sub-page: a screen that came from somewhere specific
+ * (History, To Pay…) says where. Without it the bar just goes back. */
+interface PublishedBack {
+  path: string | null;
+  fn: () => void;
+}
+const BackValueCtx = createContext<PublishedBack | null>(null);
+const BackSetCtx = createContext<(b: PublishedBack | null) => void>(() => {});
+
+export function BackActionProvider({ children }: { children: ReactNode }) {
+  const [back, setBack] = useState<PublishedBack | null>(null);
+  const set = useMemo(() => setBack, []);
+  return (
+    <BackSetCtx.Provider value={set}>
+      <BackValueCtx.Provider value={back}>{children}</BackValueCtx.Provider>
+    </BackSetCtx.Provider>
+  );
+}
+
+export function usePublishedBack(): PublishedBack | null {
+  return useContext(BackValueCtx);
+}
+
+export function useBackAction(fn: () => void) {
+  const set = useContext(BackSetCtx);
+  const active = useScreenActive();
+  const path = useScreenPath();
+  useLayoutEffect(() => {
+    if (active) set({ path, fn });
+  });
+  useLayoutEffect(() => () => set(null), [set]);
+}

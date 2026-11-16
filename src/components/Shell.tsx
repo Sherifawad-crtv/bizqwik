@@ -12,8 +12,11 @@ import { useHeader } from "../lib/header";
 import { useIsMobile, useIsNarrowPhone } from "../lib/useIsMobile";
 import { LocationsProvider } from "../lib/locations";
 import { FADE_MS } from "../lib/motion";
-import { navFor, headerMode, accountBackTarget, isSoloOwner, isSubPage } from "../lib/nav";
-import { usePublishedActions } from "../lib/floatingActions";
+import { navFor, headerMode, accountBackTarget, isSoloOwner, isSubPage, homePathForRole } from "../lib/nav";
+
+// The Back button and the empty slot opposite it are the same width, so the title stays centred.
+const BACK_W = 84;
+import { usePublishedActions, usePublishedBack } from "../lib/floatingActions";
 
 /** The top pill with the screen's title. When the title changes, the old words
  * fade out as the new ones fade in (stacked), and the pill eases to the new
@@ -68,6 +71,8 @@ function ShellInner() {
   const narrow = useIsNarrowPhone();
   const header = useHeader();
   const published = usePublishedActions();
+  const publishedBack = usePublishedBack();
+  const location = useLocation();
   const { pathname } = useLocation();
   const navigate = useNavigate();
 
@@ -87,6 +92,13 @@ function ShellInner() {
 
   const sub = isSubPage(pathname, navFor(profile?.role ?? "coach", orgMode));
   if (!profile) return null;
+  // Back: where the screen says it came from; for Account its parent; otherwise one step back.
+  const goBack = () => {
+    if (publishedBack && publishedBack.path === pathname) return publishedBack.fn();
+    if (headerMode(pathname, profile.role, orgMode) === "account") return navigate(accountBackTarget(pathname, profile.role, orgMode));
+    if (location.key !== "default") return navigate(-1);
+    navigate(homePathForRole(profile.role, orgMode));
+  };
   // Everyone but accountant and front desk gets a FAB — what it does depends
   // on role (Fab.tsx branches: dept_head gets the "Create" menu for the
   // catalog, coach/head_coach get "log a session"). Front desk's actions live on its
@@ -95,7 +107,6 @@ function ShellInner() {
   const showFab = profile.role !== "accountant" && profile.role !== "front_desk";
 
   if (isMobile) {
-    const mode = headerMode(pathname, profile.role, orgMode);
     return (
       <div style={{ minHeight: "100svh", background: "var(--paper)", position: "relative", overflow: "hidden" }}>
         {(
@@ -117,22 +128,23 @@ function ShellInner() {
               alignItems: "center",
             }}
           >
-            <div style={{ width: 30, flex: "none", display: "flex" }}>
-              {mode === "account" && (
+            <div style={{ width: BACK_W, flex: "none", display: "flex" }}>
+              {sub && (
                 <button
-                  onClick={() => navigate(accountBackTarget(pathname, profile.role, orgMode))}
+                  onClick={goBack}
                   aria-label="Back"
                   className="bq-hit"
-                  style={{ border: 0, background: "none", padding: 7, margin: -7, cursor: "pointer", color: "var(--ink)", display: "flex" }}
+                  style={{ display: "flex", alignItems: "center", gap: 2, border: 0, cursor: "pointer", color: "var(--ink)", background: "rgba(243,242,238,.82)", borderRadius: 999, padding: "8px 14px 8px 8px", font: "700 var(--fs-body-sm) var(--font-body)" }}
                 >
-                  <Icon name="chevron-left" size={22} />
+                  <Icon name="chevron-left" size={18} />
+                  Back
                 </button>
               )}
             </div>
             <div style={{ flex: 1, minWidth: 0, display: "flex", justifyContent: "center" }}>
               <TitlePill key={barEpoch} title={header.title} />
             </div>
-            <div style={{ width: 30, flex: "none" }} />
+            <div style={{ width: BACK_W, flex: "none" }} />
           </div>
         )}
 

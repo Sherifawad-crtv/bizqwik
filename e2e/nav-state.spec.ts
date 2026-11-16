@@ -37,8 +37,8 @@ test("dept head: History keeps the chosen month when you open a coach and come b
 
   await page.getByText("Coach Nour").first().click();
   await expect(page).toHaveURL(/\/coaches\/c1$/);
-  await expect(page.getByRole("button", { name: "History" })).toBeVisible();
-  await page.getByRole("button", { name: "History" }).click();
+  await expect(page.getByRole("button", { name: "Back" })).toBeVisible();
+  await page.getByRole("button", { name: "Back" }).click();
 
   await expect(page).toHaveURL(/\/history/);
   await expect(page).toHaveURL(new RegExp(`month=${LAST}`));
@@ -52,7 +52,7 @@ test("dept head: Back from a coach opened on Team returns to Team", async ({ pag
   await expect(page).toHaveURL(/\/coaches\/[^/]+$/);
   // Let the slide finish so only the coach screen is on top, then tap its Back.
   await page.waitForTimeout(700);
-  await page.getByRole("button", { name: "Team" }).last().click();
+  await page.getByRole("button", { name: "Back" }).click();
   await expect(page).toHaveURL(/\/coaches$/);
 });
 

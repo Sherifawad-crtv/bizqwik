@@ -19,6 +19,8 @@ import { SheetSuccessIcon } from "../components/SheetSuccessIcon";
 import { isPartPaid, stateLabel } from "../lib/payables";
 import { PackageStatusPill } from "../components/PackageStatusPill";
 import type { PackageWithNames, Rollup, SettlementPayment } from "../lib/types";
+import { useBackAction } from "../lib/floatingActions";
+import { useIsMobile } from "../lib/useIsMobile";
 
 const METHOD_LABELS: Record<string, string> = { cash: "Cash", bank: "Bank", instapay: "InstaPay", other: "Recorded earlier" };
 
@@ -136,6 +138,8 @@ export function PayeeDetail() {
   const nav = (location.state as { month?: string; from?: "pay" | "history" } | null) ?? {};
   const month = nav.month ?? MOCK.CURRENT_MONTH;
   const backTo = nav.from === "history" ? { path: "/history", label: "History" } : { path: "/pay", label: "To Pay" };
+  useBackAction(() => navigate(backTo.path));
+  const isMobile = useIsMobile();
   const [paying, setPaying] = useState(false);
   const id = coachId ?? "";
 
@@ -152,12 +156,14 @@ export function PayeeDetail() {
 
   return (
     <div>
+      {!isMobile && (
       <button
         onClick={() => navigate(backTo.path)}
         style={{ display: "flex", alignItems: "center", gap: 4, border: 0, background: "none", cursor: "pointer", color: "var(--ink-muted)", font: "600 var(--fs-note) var(--font-body)", padding: "0 0 14px" }}
       >
         <Icon name="chevron-left" size={16} /> {backTo.label}
       </button>
+      )}
 
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 18 }}>
         <Avatar name={row.name} size={44} src={row.avatarUrl} />

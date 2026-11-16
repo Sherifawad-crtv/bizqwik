@@ -16,6 +16,8 @@ import { SeriesSheet } from "./catalog/Classes";
 import { useNow } from "../lib/useNow";
 import { type FormState, emptyForm, formOf } from "./classes/classForm";
 import { ClassSheet } from "./classes/ClassSheet";
+import { useBackAction } from "../lib/floatingActions";
+import { useIsMobile } from "../lib/useIsMobile";
 
 export function ClassesManage() {
   const navigate = useNavigate();
@@ -25,6 +27,8 @@ export function ClassesManage() {
   const [confirmCancel, setConfirmCancel] = useState<GymClass | null>(null);
   const [roster, setRoster] = useState<GymClass | null>(null);
   useSetHeader({ kicker: "CATALOG", title: "Sessions" }, []);
+  useBackAction(() => navigate("/catalog"));
+  const isMobile = useIsMobile();
   const now = useNow();
 
   // Sessions come from the recurring classes (Catalog → Classes). This screen
@@ -37,12 +41,14 @@ export function ClassesManage() {
 
   return (
     <div>
+      {!isMobile && (
       <button
         onClick={() => navigate("/catalog")}
         style={{ display: "inline-flex", alignItems: "center", gap: 4, border: 0, background: "none", color: "var(--ink-muted)", cursor: "pointer", font: "700 var(--fs-body-sm) var(--font-body)", marginBottom: 14, padding: 0 }}
       >
         <Icon name="chevron-left" size={16} /> Catalog
       </button>
+      )}
 
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
         <div className="bq-grow">

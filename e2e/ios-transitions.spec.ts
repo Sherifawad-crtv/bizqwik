@@ -62,7 +62,7 @@ test("going deeper slides in; going back slides away", async ({ page }) => {
   expect(slides(await offsets(page))).toBe(true);
   await expect(page).toHaveURL(/\/coaches\/c1$/);
   await settle(page);
-  await page.getByRole("button", { name: /Team/ }).first().click();
+  await page.getByRole("button", { name: "Back" }).click();
   expect(slides(await offsets(page))).toBe(true);
   await expect(page).toHaveURL(/\/coaches$/);
 });
@@ -115,7 +115,7 @@ test("a sub-page has no tab bar; on a coach's page the main actions float in its
   // They float at the bottom of the screen, not inside the scrolling page.
   const box = await settle_.boundingBox();
   expect(box!.y + box!.height).toBeGreaterThan(844 - 100);
-  await page.getByRole("button", { name: /Team/ }).first().click();
+  await page.getByRole("button", { name: "Back" }).click();
   await settle(page);
   await expect(tabs).toBeVisible();
   await expect(page.getByRole("button", { name: "Settle month" })).toHaveCount(0);
@@ -126,9 +126,9 @@ test("the back button on a deeper screen slides it away to the right", async ({ 
   await page.goto("/pay"); await page.waitForTimeout(1200);
   await page.getByText("Coach Nour").first().click();
   await expect(page).toHaveURL(/\/pay\/c1$/);
-  await expect(page.getByRole("button", { name: /To Pay/ })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Back" })).toBeVisible();
   await settle(page);
-  await page.getByRole("button", { name: /To Pay/ }).click();
+  await page.getByRole("button", { name: "Back" }).click();
   expect(slides(await offsets(page))).toBe(true);
   await expect(page).toHaveURL(/\/pay$/);
 });
@@ -147,7 +147,7 @@ test("screens are never rebuilt: the new one survives its slide, and going back 
     return { detailSurvived: ls.some((l) => l.__mark === "detail" && getComputedStyle(l).visibility === "visible"), teamKeptHidden: ls.some((l) => l.__mark === "team" && getComputedStyle(l).visibility === "hidden") };
   });
   expect(kept).toEqual({ detailSurvived: true, teamKeptHidden: true });
-  await page.getByRole("button", { name: /Team/ }).first().click();
+  await page.getByRole("button", { name: "Back" }).click();
   await settle(page);
   const back = await page.evaluate(() => { const l = ([...document.querySelectorAll("main [data-scroll]")] as (HTMLElement & { __mark?: string })[]).find((x) => x.__mark === "team"); return { same: !!l, visible: l ? getComputedStyle(l).visibility : null }; });
   expect(back).toEqual({ same: true, visible: "visible" });
@@ -167,7 +167,7 @@ test("a screen kept underneath does not re-request data when the app refreshes",
   // Only the open screen asks (Coach detail: one month call); Team underneath stays quiet.
   expect(monthCalls).toBe(1);
   // Going back shows Team, which catches up once.
-  await page.getByRole("button", { name: /Team/ }).first().click();
+  await page.getByRole("button", { name: "Back" }).click();
   await settle(page);
   expect(monthCalls).toBe(2);
 });
@@ -198,7 +198,7 @@ test("the title follows the screen you're on: it fades between screens and comes
   await settle(page);
   const detail = (await pill.innerText()).trim();
   expect(detail).not.toBe(team);
-  await page.getByRole("button", { name: /Team/ }).first().click();
+  await page.getByRole("button", { name: "Back" }).click();
   await settle(page);
   expect((await pill.innerText()).trim()).toBe(team);
 });
@@ -237,4 +237,25 @@ test("the title bar never shows another screen's title: not when leaving home, n
     await page.waitForTimeout(wait);
   }
   expect(await page.evaluate(() => (window as unknown as { __bad: string[] }).__bad)).toEqual([]);
+});
+
+test("on a sub-page, Back sits on the title's line, says Back, and stays put while the page scrolls", async ({ page }) => {
+  await boot(page, "dept_head");
+  await page.goto("/coaches"); await page.waitForTimeout(1200);
+  await page.getByText("Coach Nour").click();
+  await expect(page).toHaveURL(/\/coaches\/c1$/);
+  await settle(page);
+  const back = page.getByRole("button", { name: "Back" });
+  await expect(back).toHaveText(/^\s*Back\s*$/);
+  await expect(page.getByRole("button", { name: /^Team$/ })).toHaveCount(0); // the old in-page "‹ Team" link is gone on phones
+  const pill = page.locator("div[style*='position: fixed'][style*='top: 0'] div[style*='border-radius: 999px']");
+  const b1 = (await back.boundingBox())!;
+  const p1 = (await pill.boundingBox())!;
+  expect(Math.abs((b1.y + b1.height / 2) - (p1.y + p1.height / 2))).toBeLessThan(2); // same line
+  await page.evaluate(() => { const ls = [...document.querySelectorAll("main [data-scroll]")] as HTMLElement[]; ls[ls.length - 1].scrollTop = 400; });
+  await page.waitForTimeout(150);
+  const b2 = (await back.boundingBox())!;
+  expect(b2.y).toBe(b1.y); // sticky
+  await back.click();
+  await expect(page).toHaveURL(/\/coaches$/);
 });

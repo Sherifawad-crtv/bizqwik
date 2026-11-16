@@ -10,6 +10,8 @@ import type { ActivityEntry } from "../lib/types";
 import { InlineSpinner } from "../components/Spinner";
 import { Icon } from "../components/Icon";
 import { Segmented } from "../components/Segmented";
+import { useBackAction } from "../lib/floatingActions";
+import { useIsMobile } from "../lib/useIsMobile";
 
 type Cat = "sale" | "refund" | "wallet" | "points" | "class" | "checkin" | "other";
 
@@ -105,15 +107,19 @@ export function Activity() {
   const fromHome = profile?.role === "front_desk" || (profile?.role === "dept_head" && orgMode === "solo");
   const back = fromHome ? "/" : "/history";
   const backLabel = profile?.role === "front_desk" ? "Front Desk" : fromHome ? "Today" : "History";
+  useBackAction(() => navigate(back));
+  const isMobile = useIsMobile();
 
   return (
     <div>
+      {!isMobile && (
       <button
         onClick={() => navigate(back)}
         style={{ display: "inline-flex", alignItems: "center", gap: 4, border: 0, background: "none", color: "var(--ink-muted)", cursor: "pointer", font: "700 var(--fs-body-sm) var(--font-body)", marginBottom: 14, padding: 0 }}
       >
         <Icon name="chevron-left" size={16} /> {backLabel}
       </button>
+      )}
       <div style={{ font: "800 var(--fs-title)/1.1 var(--font-body)", letterSpacing: "-.02em", marginBottom: 12 }}>Activity</div>
       <ActivityPanel />
     </div>

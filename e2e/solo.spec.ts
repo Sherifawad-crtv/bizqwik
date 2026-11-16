@@ -150,7 +150,7 @@ test("solo owner never lands on team screens: Activity goes back home, and team 
   });
   await page.goto("/");
   await page.goto("/activity");
-  await page.getByRole("button", { name: "Today" }).first().click();
+  await page.getByRole("button", { name: "Back" }).click();
   await expect(page).toHaveURL(/localhost:\d+\/$/);
   for (const path of ["/history", "/coaches", "/oversight", "/manage", "/clients"]) {
     await page.goto(path);
