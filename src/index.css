@@ -360,7 +360,7 @@ textarea {
 
 /* ───────────────────────────── Layout helpers ───────────────────────────── */
 .bq-stack { display: flex; flex-direction: column; gap: 10px; }
-.bq-panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-card); overflow: hidden; }
+.bq-panel { background: var(--surface); border-radius: var(--r-card); overflow: hidden; }
 /* A form or action error under its field. */
 .bq-error {
   background: var(--danger-bg);

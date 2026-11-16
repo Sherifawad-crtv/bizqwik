@@ -150,7 +150,6 @@ function ClassCard({ c, onEdit, onRoster }: { c: GymClass; onEdit?: () => void; 
     <div
       style={{
         background: "var(--surface)",
-        border: "1px solid var(--line)",
         borderRadius: "var(--r-card)",
         padding: "14px 16px",
         opacity: cancelled ? 0.55 : 1,

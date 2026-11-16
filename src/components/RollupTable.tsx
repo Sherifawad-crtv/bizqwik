@@ -77,7 +77,7 @@ export function RollupTable({
           <div
             key={r.id}
             onClick={r.onClick}
-            style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: "14px 16px", display: "flex", gap: 14, alignItems: "center", cursor: r.onClick ? "pointer" : "default" }}
+            style={{ background: "var(--surface)", borderRadius: "var(--r-card)", padding: "14px 16px", display: "flex", gap: 14, alignItems: "center", cursor: r.onClick ? "pointer" : "default" }}
           >
             <Avatar name={r.name} size={38} src={r.avatarUrl} />
             <div className="bq-grow">

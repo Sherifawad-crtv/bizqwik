@@ -49,7 +49,6 @@ export function DayList({
           onClick={() => onOpenDay(g)}
           style={{
             background: "var(--surface)",
-            border: "1px solid var(--line)",
             borderRadius: "var(--r-card)",
             padding: "14px 16px",
             display: "flex",

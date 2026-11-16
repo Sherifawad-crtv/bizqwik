@@ -14,7 +14,8 @@ test("every main card, tile and chart on Overview has the same 28px corner", asy
   const radii = await page.evaluate(() => {
     const cards = [...document.querySelectorAll("main div")].filter((d) => {
       const cs = getComputedStyle(d);
-      return cs.borderTopWidth === "1px" && cs.backgroundColor !== "rgba(0, 0, 0, 0)" && d.getBoundingClientRect().height > 100 && parseFloat(cs.borderTopLeftRadius) > 0;
+      // cards: the surface colour, rounded, a real size (they have no stroke now)
+      return cs.backgroundColor === "rgb(251, 250, 247)" && d.getBoundingClientRect().height > 100 && parseFloat(cs.borderTopLeftRadius) > 0;
     });
     return cards.map((d) => parseFloat(getComputedStyle(d).borderTopLeftRadius));
   });
@@ -80,4 +81,18 @@ test("floating actions: container 32 = button 24 + 8 padding", async ({ page }) 
   });
   expect(r.button).toBe(24);
   expect(r.box).toBe(r.button + r.pad);
+});
+
+test("cards have no stroke", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 1400 });
+  await mockBackend(page, "dept_head", { revenue: { months: [{ month: "2026-11", revenue: 12000, payouts: 4000, profit: 8000 }], totals: { revenue: 12000, payouts: 4000, profit: 8000 }, byService: [], byType: [], byCoach: [], activeSubscribers: { total: 0, groupPlans: 0, ptPackages: 0, byPlanKind: {} }, walletLiability: 0 } });
+  await page.goto("/oversight");
+  await expect(page.getByText("REVENUE VS COACH PAYOUTS")).toBeVisible();
+  const stroked = await page.evaluate(() =>
+    [...document.querySelectorAll("main div")].filter((d) => {
+      const cs = getComputedStyle(d);
+      return cs.backgroundColor === "rgb(251, 250, 247)" && parseFloat(cs.borderTopLeftRadius) === 28 && parseFloat(cs.borderTopWidth) > 0;
+    }).length,
+  );
+  expect(stroked).toBe(0);
 });

@@ -26,7 +26,7 @@ export function EmptyState({
       data-testid={testId ?? "empty-state"}
       style={{
         background: bare ? "transparent" : "var(--surface)",
-        border: bare ? 0 : "1px solid var(--line)",
+        border: 0,
         borderRadius: "var(--r-card)",
         padding: bare ? "18px 8px" : "28px 20px",
         display: "flex",

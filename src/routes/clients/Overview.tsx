@@ -19,7 +19,7 @@ export function OverviewCards({ clients, showGroupPlans, onPick }: { clients: Cl
         <button
           key={s.k}
           onClick={() => onPick({ ...NO_FILTERS, ...s.patch })}
-          style={{ textAlign: "left", background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: "16px 18px", cursor: "pointer" }}
+          style={{ textAlign: "left", background: "var(--surface)", borderRadius: "var(--r-card)", padding: "16px 18px", cursor: "pointer" }}
         >
           <div className="bq-label">{s.k}</div>
           <div className="tabular" style={{ font: "800 var(--fs-display) var(--font-body)", letterSpacing: "-.02em", marginTop: 6, color: "var(--ink)" }}>{s.v}</div>

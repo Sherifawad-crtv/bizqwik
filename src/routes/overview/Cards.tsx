@@ -4,7 +4,7 @@ import { Icon, type IconName } from "../../components/Icon";
 
 export function Card({ title, sub, children }: { title: string; sub?: string; children: ReactNode }) {
   return (
-    <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: "16px 18px", marginBottom: 14 }}>
+    <div style={{ background: "var(--surface)", borderRadius: "var(--r-card)", padding: "16px 18px", marginBottom: 14 }}>
       <div className="bq-label">{title}</div>
       {sub && <div style={{ font: "400 var(--fs-small) var(--font-mono)", color: "var(--ink-faint)", marginTop: 2 }}>{sub}</div>}
       <div style={{ marginTop: 14 }}>{children}</div>
@@ -33,7 +33,7 @@ export function Delta({ pct, tone }: { pct: number | null; tone: "good" | "neutr
 
 export function KpiTile({ label, value, sub, icon, delta }: { label: string; value: string; sub?: string; icon: IconName; delta?: ReactNode }) {
   return (
-    <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: "14px 16px", minWidth: 0 }}>
+    <div style={{ background: "var(--surface)", borderRadius: "var(--r-card)", padding: "14px 16px", minWidth: 0 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
         <span style={{ width: 28, height: 28, flex: "none", borderRadius: "var(--r-chip)", background: "var(--primary-tint)", color: "var(--primary-pressed)", display: "flex", alignItems: "center", justifyContent: "center" }}>
           <Icon name={icon} size={16} />

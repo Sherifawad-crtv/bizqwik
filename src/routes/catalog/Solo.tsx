@@ -213,7 +213,7 @@ export function LocationsCard() {
 
   return (
     <div style={{ marginBottom: 12 }}>
-      <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: "16px 20px" }}>
+      <div style={{ background: "var(--surface)", borderRadius: "var(--r-card)", padding: "16px 20px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: list.length ? 8 : 0 }}>
           <div className="bq-grow">
             <div className="bq-h3">Locations</div>

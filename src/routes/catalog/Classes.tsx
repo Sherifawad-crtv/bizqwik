@@ -52,7 +52,7 @@ export function ClassesPanel({ solo }: { solo?: boolean }) {
 
       <button
         onClick={() => navigate(solo ? "/bookings" : "/classes")}
-        style={{ width: "100%", marginTop: 12, textAlign: "left", background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: "14px 18px", cursor: "pointer", display: "flex", alignItems: "center", gap: 12 }}
+        style={{ width: "100%", marginTop: 12, textAlign: "left", background: "var(--surface)", borderRadius: "var(--r-card)", padding: "14px 18px", cursor: "pointer", display: "flex", alignItems: "center", gap: 12 }}
       >
         <span style={{ color: "var(--primary-pressed)", display: "flex" }}>
           <Icon name="calendar" size={20} />
@@ -67,7 +67,7 @@ export function ClassesPanel({ solo }: { solo?: boolean }) {
       {ended.length > 0 && (
         <>
           <div style={{ font: "700 var(--fs-caption) var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", margin: "24px 2px 10px" }}>ENDED · {ended.length}</div>
-          <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", overflow: "hidden", opacity: 0.6 }}>
+          <div style={{ background: "var(--surface)", borderRadius: "var(--r-card)", overflow: "hidden", opacity: 0.6 }}>
             {ended.map((s, i) => (
               <SeriesRow key={s.id} s={s} last={i === ended.length - 1} />
             ))}

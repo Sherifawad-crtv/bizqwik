@@ -43,7 +43,7 @@ function Stat({ label, value, sub, icon, tone, onClick }: { label: string; value
     <button
       className="bq-scale"
       onClick={onClick}
-      style={{ textAlign: "left", background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: "16px 18px", cursor: onClick ? "pointer" : "default", minWidth: 0 }}
+      style={{ textAlign: "left", background: "var(--surface)", borderRadius: "var(--r-card)", padding: "16px 18px", cursor: onClick ? "pointer" : "default", minWidth: 0 }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
         <span style={{ width: 32, height: 32, borderRadius: 999, flex: "none", display: "flex", alignItems: "center", justifyContent: "center", background: TONES[tone].bg, color: TONES[tone].fg }}>

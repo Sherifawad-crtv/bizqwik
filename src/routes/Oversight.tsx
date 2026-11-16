@@ -107,7 +107,7 @@ export function Oversight() {
             </div>
           ) : (
             <>
-            <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: "20px 20px 18px", marginBottom: 10 }}>
+            <div style={{ background: "var(--surface)", borderRadius: "var(--r-card)", padding: "20px 20px 18px", marginBottom: 10 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <span className="bq-label">REVENUE · EGP</span>
                 <span style={{ marginLeft: "auto" }}>{compare && <Delta pct={pctChange(report.totals.revenue, compare.revenue)} tone="good" />}</span>
@@ -170,7 +170,7 @@ export function Oversight() {
             <button
               className="bq-scale"
               onClick={() => navigate("/accounting")}
-              style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: "16px 18px", marginBottom: 10, cursor: "pointer", textAlign: "left" }}
+              style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", background: "var(--surface)", borderRadius: "var(--r-card)", padding: "16px 18px", marginBottom: 10, cursor: "pointer", textAlign: "left" }}
             >
               <span style={{ width: 32, height: 32, flex: "none", borderRadius: "var(--r-chip)", background: "var(--primary-tint)", color: "var(--primary-pressed)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <Icon name="cash" size={16} />

@@ -23,7 +23,7 @@ export function PaymentRequestsCard() {
       <button
         className="bq-scale"
         onClick={() => setOpen(true)}
-        style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", marginBottom: 10, textAlign: "left", cursor: "pointer", background: "var(--logging-bg)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: "14px 18px" }}
+        style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", marginBottom: 10, textAlign: "left", cursor: "pointer", background: "var(--logging-bg)", borderRadius: "var(--r-card)", padding: "14px 18px" }}
       >
         <span style={{ width: 34, height: 34, borderRadius: 999, flex: "none", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--surface)", color: "var(--logging-fg)" }}>
           <Icon name="cash" size={18} />

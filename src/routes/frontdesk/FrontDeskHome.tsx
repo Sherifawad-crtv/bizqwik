@@ -173,7 +173,7 @@ export function FrontDeskHome() {
             key={a.key}
             className="bq-scale"
             onClick={() => setModal(a.key)}
-            style={{ minHeight: 76, borderRadius: "var(--r-card)", border: "1px solid var(--line)", background: "var(--surface)", color: "var(--ink)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 6, padding: 8, cursor: "pointer", font: "700 var(--fs-note)/1.2 var(--font-body)", textAlign: "center" }}
+            style={{ minHeight: 76, borderRadius: "var(--r-card)", background: "var(--surface)", color: "var(--ink)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 6, padding: 8, cursor: "pointer", font: "700 var(--fs-note)/1.2 var(--font-body)", textAlign: "center" }}
           >
             <Icon name={a.icon} size={22} />
             {a.label}
