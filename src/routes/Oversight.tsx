@@ -10,9 +10,9 @@ import { HomeAvatar } from "../components/HomeAvatar";
 import { Icon } from "../components/Icon";
 import { Segmented } from "../components/Segmented";
 import { Spinner } from "../components/Spinner";
-import { caption, pctChange } from "./overview/helpers";
-import { RevenueChart, ShareBars } from "./overview/Charts";
-import { Delta, KpiTile } from "./overview/Cards";
+import { caption, pctChange } from "../lib/chartHelpers";
+import { RevenueChart, ShareBars } from "../components/MoneyCharts";
+import { Delta, KpiTile } from "../components/KpiTile";
 import { SectionCard } from "../components/Card";
 import { Num } from "../components/Num";
 

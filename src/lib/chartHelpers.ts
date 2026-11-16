@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { monthAbbr } from "../../lib/format";
+import { monthAbbr } from "./format";
 
 export function useMeasuredWidth(fallback: number) {
   const ref = useRef<HTMLDivElement>(null);

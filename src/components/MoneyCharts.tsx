@@ -1,8 +1,8 @@
-import { EmptyState } from "../../components/EmptyState";
-import { fmt, monthAbbr } from "../../lib/format";
-import type { RevenueReport, RevenueSlice } from "../../lib/types";
+import { EmptyState } from "./EmptyState";
+import { fmt, monthAbbr } from "../lib/format";
+import type { RevenueReport, RevenueSlice } from "../lib/types";
 import { BarChart } from "./BarChart";
-import { Empty } from "./Cards";
+import { Empty } from "./KpiTile";
 
 /** Revenue vs coach payouts per month, as one soft bar chart (see BarChart). */
 export function RevenueChart({ months, revenueOnly = false }: { months: RevenueReport["months"]; revenueOnly?: boolean }) {

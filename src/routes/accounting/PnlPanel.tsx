@@ -4,11 +4,11 @@ import type { PnlReport } from "../../lib/types";
 import { Button } from "../../components/Button";
 import { Icon } from "../../components/Icon";
 import { Spinner } from "../../components/Spinner";
-import { KpiTile, Delta } from "../overview/Cards";
+import { KpiTile, Delta } from "../../components/KpiTile";
 import { SectionCard } from "../../components/Card";
-import { pctChange, caption } from "../overview/helpers";
-import { BarChart } from "../overview/BarChart";
-import { ShareBars } from "../overview/Charts";
+import { pctChange, caption } from "../../lib/chartHelpers";
+import { BarChart } from "../../components/BarChart";
+import { ShareBars } from "../../components/MoneyCharts";
 import { Num } from "../../components/Num";
 
 function PnlChart({ trend }: { trend: PnlReport["trend"] }) {

@@ -1,6 +1,6 @@
-import { EmptyState } from "../../components/EmptyState";
+import { EmptyState } from "./EmptyState";
 import type { ReactNode } from "react";
-import { Icon, type IconName } from "../../components/Icon";
+import { Icon, type IconName } from "./Icon";
 
 
 export function Empty({ text }: { text: string }) {

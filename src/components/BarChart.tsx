@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { fmt } from "../../lib/format";
-import { useMeasuredWidth } from "./helpers";
-import { useTween } from "../../lib/useTween";
-import { EASE, QUICK_MS } from "../../lib/motion";
+import { fmt } from "../lib/format";
+import { useMeasuredWidth } from "../lib/chartHelpers";
+import { useTween } from "../lib/useTween";
+import { EASE, QUICK_MS } from "../lib/motion";
 
 export interface BarDatum {
   key: string;
