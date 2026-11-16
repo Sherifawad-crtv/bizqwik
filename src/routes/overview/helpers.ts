@@ -14,12 +14,6 @@ export function useMeasuredWidth(fallback: number) {
   return [ref, w] as const;
 }
 
-/** A bar's outline: rounded top corners (the "data end"), square at the baseline. */
-export function roundedTopBarPath(x: number, yTop: number, w: number, yBottom: number, r: number): string {
-  const rr = Math.max(0, Math.min(r, w / 2, yBottom - yTop));
-  return [`M${x},${yBottom}`, `L${x},${yTop + rr}`, `Q${x},${yTop} ${x + rr},${yTop}`, `L${x + w - rr},${yTop}`, `Q${x + w},${yTop} ${x + w},${yTop + rr}`, `L${x + w},${yBottom}`, "Z"].join(" ");
-}
-
 export function pctChange(cur: number, prev: number): number | null {
   return prev > 0 ? ((cur - prev) / prev) * 100 : null;
 }

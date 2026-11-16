@@ -1,67 +1,31 @@
 import { EmptyState } from "../../components/EmptyState";
-import { useState } from "react";
 import { fmt, monthAbbr, monthLabel } from "../../lib/format";
 import type { PnlReport } from "../../lib/types";
 import { Button } from "../../components/Button";
 import { Icon } from "../../components/Icon";
 import { Spinner } from "../../components/Spinner";
 import { Card, KpiTile, Delta } from "../overview/Cards";
-import { pctChange, caption, useMeasuredWidth, roundedTopBarPath } from "../overview/helpers";
+import { pctChange, caption } from "../overview/helpers";
+import { BarChart } from "../overview/BarChart";
 import { ShareBars } from "../overview/Charts";
 
 function PnlChart({ trend }: { trend: PnlReport["trend"] }) {
-  const [ref, W] = useMeasuredWidth(320);
-  const H = 210;
-  const top = 26;
-  const bottom = 172;
-  const max = Math.max(...trend.map((m) => Math.max(m.netRevenue, m.totalExpenses)), 1) * 1.15;
-  const y = (v: number) => bottom - (v / max) * (bottom - top);
-  const slot = W / trend.length;
-  const barW = Math.max(6, Math.min(18, slot / 3));
-  const [hover, setHover] = useState<number | null>(null);
-  const REV = "var(--primary)";
-  const EXP = "var(--accent)";
-
   if (trend.every((m) => m.netRevenue === 0 && m.totalExpenses === 0)) {
     return <EmptyState bare icon="insights" title="No activity yet" body="Once there's revenue or an expense logged, this fills in month by month." />;
   }
   return (
-    <div ref={ref} style={{ width: "100%", position: "relative" }}>
-      <div style={{ display: "flex", gap: 16, marginBottom: 8 }}>
-        {[["Net revenue", REV], ["Expenses", EXP]].map(([label, color]) => (
-          <span key={label} style={{ display: "flex", alignItems: "center", gap: 6, font: "700 var(--fs-caption) var(--font-mono)", letterSpacing: ".04em", color: "var(--ink-muted)" }}>
-            <i style={{ width: 10, height: 10, borderRadius: 3, background: color, display: "block" }} />
-            {String(label).toUpperCase()}
-          </span>
-        ))}
-      </div>
-      <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={{ display: "block", overflow: "visible" }} role="img" aria-label="Net revenue and expenses by month">
-        {[top, (top + bottom) / 2, bottom].map((gy, i) => (
-          <line key={i} x1={0} y1={gy} x2={W} y2={gy} stroke="var(--line)" strokeWidth={1} />
-        ))}
-        {trend.map((m, i) => {
-          const cx = (i + 0.5) * slot;
-          return (
-            <g key={m.month} onMouseEnter={() => setHover(i)} onMouseLeave={() => setHover(null)}>
-              <rect x={i * slot} y={0} width={slot} height={H} fill="transparent" />
-              {m.netRevenue > 0 && <path d={roundedTopBarPath(cx - barW - 1, y(m.netRevenue), barW, bottom, 4)} fill={REV} />}
-              {m.totalExpenses > 0 && <path d={roundedTopBarPath(cx + 1, y(m.totalExpenses), barW, bottom, 4)} fill={EXP} />}
-              <text x={cx} y={H - 4} textAnchor="middle" style={{ font: "700 10px var(--font-mono)", letterSpacing: ".06em", fill: "var(--ink-faint)" }}>
-                {monthAbbr(m.month).toUpperCase()}
-              </text>
-            </g>
-          );
-        })}
-      </svg>
-      {hover !== null && (
-        <div style={{ position: "absolute", top: 30, left: Math.min(Math.max((hover + 0.5) * slot - 80, 0), W - 160), width: 160, background: "var(--ink)", color: "var(--surface)", borderRadius: 12, padding: "8px 12px", font: "600 var(--fs-small)/1.6 var(--font-mono)", pointerEvents: "none" }}>
-          <div style={{ fontWeight: 800 }}>{monthAbbr(trend[hover].month)}</div>
-          <div>Net revenue {fmt(trend[hover].netRevenue)}</div>
-          <div>Expenses {fmt(trend[hover].totalExpenses)}</div>
-          <div>Profit {fmt(trend[hover].profit)}</div>
-        </div>
-      )}
-    </div>
+    <BarChart
+      ariaLabel="Net revenue and expenses by month"
+      aLabel="Net revenue"
+      bLabel="Expenses"
+      data={trend.map((m) => ({
+        key: m.month,
+        label: monthAbbr(m.month),
+        a: m.netRevenue,
+        b: m.totalExpenses,
+        tip: { title: monthAbbr(m.month), lines: [`Net revenue ${fmt(m.netRevenue)}`, `Expenses ${fmt(m.totalExpenses)}`, `Profit ${fmt(m.profit)}`] },
+      }))}
+    />
   );
 }
 

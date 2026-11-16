@@ -1,0 +1,124 @@
+import { useState } from "react";
+import { fmt } from "../../lib/format";
+import { useMeasuredWidth } from "./helpers";
+
+export interface BarDatum {
+  key: string;
+  label: string;
+  /** The larger, lighter bar behind (e.g. revenue). */
+  a: number;
+  /** The darker bar in front (e.g. payouts). Optional. */
+  b?: number;
+  tip: { title: string; lines: string[] };
+}
+
+const LIGHT = "var(--primary-light)";
+const DEEP = "var(--primary)";
+
+function niceStep(max: number): number {
+  const raw = max / 4;
+  const pow = Math.pow(10, Math.floor(Math.log10(raw || 1)));
+  const n = raw / pow;
+  return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 2.5 ? 2.5 : n <= 5 ? 5 : 10) * pow;
+}
+
+const short = (v: number) => (v >= 1000 ? `${Math.round(v / 100) / 10}k` : fmt(v));
+
+/** One chart for the app's money pictures: soft rounded bars (one tone laid over
+ * the other, like a stacked silhouette), faint gridlines with the scale on the
+ * left, plain labels underneath and a round-dot legend. Tap or hover a bar for
+ * the exact figures. */
+export function BarChart({ data, aLabel, bLabel, ariaLabel }: { data: BarDatum[]; aLabel: string; bLabel?: string; ariaLabel: string }) {
+  const [ref, W] = useMeasuredWidth(320);
+  const [pick, setPick] = useState<number | null>(null);
+  const H = 220;
+  const padL = 34;
+  const top = 10;
+  const bottom = 190;
+  const rawMax = Math.max(...data.map((d) => Math.max(d.a, d.b ?? 0)), 1);
+  const step = niceStep(rawMax);
+  const max = Math.ceil(rawMax / step) * step;
+  const ticks = Array.from({ length: Math.round(max / step) + 1 }, (_, i) => i * step);
+  const y = (v: number) => bottom - (v / max) * (bottom - top);
+  const plotW = Math.max(1, W - padL);
+  const slot = plotW / data.length;
+  const barW = Math.max(10, Math.min(36, slot * 0.62));
+  const r = Math.min(barW / 2, 14);
+
+  // A bar with a round top and a square foot on the baseline.
+  const bar = (x: number, v: number, fill: string, key: string) => {
+    const yt = y(v);
+    const rr = Math.min(r, Math.max(0, bottom - yt));
+    const d = `M${x},${bottom} L${x},${yt + rr} Q${x},${yt} ${x + rr},${yt} L${x + barW - rr},${yt} Q${x + barW},${yt} ${x + barW},${yt + rr} L${x + barW},${bottom} Z`;
+    return <path key={key} d={d} fill={fill} />;
+  };
+
+  return (
+    <div ref={ref} style={{ width: "100%", position: "relative" }}>
+      <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={{ display: "block", overflow: "visible" }} role="img" aria-label={ariaLabel}>
+        {ticks.map((t) => (
+          <g key={t}>
+            <line x1={padL} y1={y(t)} x2={W} y2={y(t)} stroke="var(--line)" strokeWidth={1} />
+            <text x={0} y={y(t) + 4} style={{ font: "500 var(--fs-caption) var(--font-body)", fill: "var(--ink-faint)" }}>
+              {short(t)}
+            </text>
+          </g>
+        ))}
+        {data.map((d, i) => {
+          const x = padL + i * slot + (slot - barW) / 2;
+          const bVal = d.b ?? 0;
+          // The taller one goes behind, so the other always shows in front of it.
+          const aBehind = d.a >= bVal;
+          return (
+            <g key={d.key} onClick={() => setPick(pick === i ? null : i)} onMouseEnter={() => setPick(i)} onMouseLeave={() => setPick(null)} style={{ cursor: "pointer" }}>
+              <rect x={padL + i * slot} y={0} width={slot} height={H} fill="transparent" />
+              {aBehind ? (
+                <>
+                  {d.a > 0 && bar(x, d.a, LIGHT, "a")}
+                  {bVal > 0 && bar(x, bVal, DEEP, "b")}
+                </>
+              ) : (
+                <>
+                  {bVal > 0 && bar(x, bVal, DEEP, "b")}
+                  {d.a > 0 && bar(x, d.a, LIGHT, "a")}
+                </>
+              )}
+              <text x={padL + i * slot + slot / 2} y={H - 8} textAnchor="middle" style={{ font: "500 var(--fs-small) var(--font-body)", fill: "var(--ink-muted)" }}>
+                {d.label}
+              </text>
+            </g>
+          );
+        })}
+      </svg>
+      <div style={{ display: "flex", gap: 18, marginTop: 4 }}>
+        {[[aLabel, LIGHT], ...(bLabel ? [[bLabel, DEEP]] : [])].map(([label, color]) => (
+          <span key={label} style={{ display: "flex", alignItems: "center", gap: 7, font: "500 var(--fs-small) var(--font-body)", color: "var(--ink-muted)" }}>
+            <i style={{ width: 10, height: 10, borderRadius: 999, background: color, display: "block" }} />
+            {label}
+          </span>
+        ))}
+      </div>
+      {pick !== null && (
+        <div
+          style={{
+            position: "absolute",
+            top: 6,
+            left: Math.min(Math.max(padL + (pick + 0.5) * slot - 80, 0), W - 160),
+            width: 160,
+            background: "var(--ink)",
+            color: "var(--surface)",
+            borderRadius: 12,
+            padding: "8px 12px",
+            font: "600 var(--fs-small)/1.6 var(--font-mono)",
+            pointerEvents: "none",
+          }}
+        >
+          <div style={{ fontWeight: 800 }}>{data[pick].tip.title}</div>
+          {data[pick].tip.lines.map((l) => (
+            <div key={l}>{l}</div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
