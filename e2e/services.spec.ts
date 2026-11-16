@@ -40,16 +40,30 @@ const PLAN_TYPES = [
 ];
 
 test("dept_head: overview shows the money view; nav has Catalog", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 1400 });
   await mockBackend(page, "dept_head", { revenue: REVENUE });
   await page.goto("/oversight");
-  await expect(page.getByText("REVENUE · EGP")).toBeVisible();
+  // Four equal tiles, in this order; no big revenue card and no wallet credit.
+  await expect(page.getByText("REVENUE · EGP")).toHaveCount(0);
+  await expect(page.getByText("ACTIVE SUBSCRIBERS")).toBeVisible();
+  const tiles = await page.locator("body").evaluate((el) =>
+    ["PROFIT", "REVENUE", "ACTIVE SUBSCRIBERS", "COACH PAYOUTS"].map((label) => {
+      const node = [...el.querySelectorAll("*")].find((n) => n.childElementCount === 0 && n.textContent?.trim() === label) as HTMLElement | undefined;
+      const r = node?.getBoundingClientRect();
+      return r ? { label, x: Math.round(r.x), y: Math.round(r.y) } : { label, x: -1, y: -1 };
+    }),
+  );
+  const [profit, revenue, subs, payouts] = tiles;
+  expect(profit.x).toBeLessThan(revenue.x); expect(profit.y).toBe(revenue.y); // top row: Profit | Revenue
+  expect(subs.x).toBeLessThan(payouts.x); expect(subs.y).toBe(payouts.y); // bottom row: Subscribers | Coach payouts
+  expect(subs.y).toBeGreaterThan(profit.y);
   await expect(page.getByText("18,250").first()).toBeVisible();
   await expect(page.getByText("▲ 17.7%")).toBeVisible(); // revenue vs the period before
   await expect(page.getByText("You have")).toHaveCount(0); // enough history, no disclaimer
   await expect(page.getByText("REVENUE VS COACH PAYOUTS")).toBeVisible();
   await expect(page.getByText("Group training")).toBeVisible();
   await expect(page.getByText("Coach Nour")).toBeVisible();
-  await expect(page.getByText("WALLET CREDIT", { exact: true })).toBeVisible();
+  await expect(page.getByText("WALLET CREDIT", { exact: true })).toHaveCount(0);
   // The Activity tile no longer lives on the home screen.
   await expect(page.getByText("Member feed and the full transaction log")).toHaveCount(0);
   await expect(page.getByRole("link", { name: /Catalog/ }).or(page.getByText("Catalog", { exact: true })).first()).toBeVisible();

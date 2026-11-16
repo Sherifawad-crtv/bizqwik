@@ -31,6 +31,8 @@ const RANGE_OPTIONS: { value: Range; label: string }[] = [
  * is counted when a sale happens (any tender except wallet). */
 export function Oversight() {
   const { profile } = useAuth();
+  // The founder (department head) gets the four-tile overview; the accountant's Revenue screen keeps the big card.
+  const founder = profile?.role === "dept_head";
   const navigate = useNavigate();
   const [range, setRange] = useSticky<Range>("range", "1", { valid: (v) => ["1","3","6","12"].includes(v) });
   const [breakdown, setBreakdown] = useSticky<Breakdown>("breakdown", "service", { valid: (v) => v === "service" || v === "type" });
@@ -95,23 +97,35 @@ export function Oversight() {
             </div>
           )}
 
-          <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: "20px 20px 18px", marginBottom: 10 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <span className="bq-label">REVENUE · EGP</span>
-              <span style={{ marginLeft: "auto" }}>{compare && <Delta pct={pctChange(report.totals.revenue, compare.revenue)} tone="good" />}</span>
+          {founder ? (
+            // The founder's overview: four equal tiles, no big revenue card.
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(150px,1fr))", gap: 10, marginBottom: 14 }}>
+              <KpiTile label="PROFIT" icon="insights" value={fmt(report.totals.profit)} sub="Revenue − coach payouts" delta={compare && <Delta pct={pctChange(report.totals.profit, compare.profit)} tone="good" />} />
+              <KpiTile label="REVENUE" icon="wallet" value={fmt(report.totals.revenue)} sub={compare && compare.revenue > 0 ? `vs ${fmt(compare.revenue)} ${prevLabel}` : "Cash and card sales"} delta={compare && <Delta pct={pctChange(report.totals.revenue, compare.revenue)} tone="good" />} />
+              <KpiTile label="ACTIVE SUBSCRIBERS" icon="coaches" value={String(subs?.total ?? 0)} sub={`${subs?.groupPlans ?? 0} group plan · ${subs?.ptPackages ?? 0} PT`} />
+              <KpiTile label="COACH PAYOUTS" icon="topay" value={fmt(report.totals.payouts)} sub="Owed to coaches" delta={compare && <Delta pct={pctChange(report.totals.payouts, compare.payouts)} tone="neutral" />} />
             </div>
-            <div className="tabular" style={{ font: "800 56px/1 var(--font-body)", letterSpacing: "-.03em", margin: "8px 0 0", overflowWrap: "anywhere" }}>{fmt(report.totals.revenue)}</div>
-            <div style={{ font: "400 var(--fs-small)/1.4 var(--font-mono)", color: "var(--ink-faint)", marginTop: 8 }}>
-              {compare && compare.revenue > 0 ? `vs ${fmt(compare.revenue)} ${prevLabel}` : "New money in from cash and card sales"}
+          ) : (
+            <>
+            <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: "20px 20px 18px", marginBottom: 10 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <span className="bq-label">REVENUE · EGP</span>
+                <span style={{ marginLeft: "auto" }}>{compare && <Delta pct={pctChange(report.totals.revenue, compare.revenue)} tone="good" />}</span>
+              </div>
+              <div className="tabular" style={{ font: "800 56px/1 var(--font-body)", letterSpacing: "-.03em", margin: "8px 0 0", overflowWrap: "anywhere" }}>{fmt(report.totals.revenue)}</div>
+              <div style={{ font: "400 var(--fs-small)/1.4 var(--font-mono)", color: "var(--ink-faint)", marginTop: 8 }}>
+                {compare && compare.revenue > 0 ? `vs ${fmt(compare.revenue)} ${prevLabel}` : "New money in from cash and card sales"}
+              </div>
             </div>
-          </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(150px,1fr))", gap: 10, marginBottom: 14 }}>
-            <KpiTile label="PROFIT" icon="insights" value={fmt(report.totals.profit)} sub="Revenue − coach payouts" delta={compare && <Delta pct={pctChange(report.totals.profit, compare.profit)} tone="good" />} />
-            <KpiTile label="COACH PAYOUTS" icon="topay" value={fmt(report.totals.payouts)} sub="Owed to coaches" delta={compare && <Delta pct={pctChange(report.totals.payouts, compare.payouts)} tone="neutral" />} />
-            <KpiTile label="ACTIVE SUBSCRIBERS" icon="coaches" value={String(subs?.total ?? 0)} sub={`${subs?.groupPlans ?? 0} group plan · ${subs?.ptPackages ?? 0} PT`} />
-            <KpiTile label="WALLET CREDIT" icon="wallet" value={fmt(report.walletLiability)} sub="Unspent, owed to members" />
-          </div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(150px,1fr))", gap: 10, marginBottom: 14 }}>
+              <KpiTile label="PROFIT" icon="insights" value={fmt(report.totals.profit)} sub="Revenue − coach payouts" delta={compare && <Delta pct={pctChange(report.totals.profit, compare.profit)} tone="good" />} />
+              <KpiTile label="COACH PAYOUTS" icon="topay" value={fmt(report.totals.payouts)} sub="Owed to coaches" delta={compare && <Delta pct={pctChange(report.totals.payouts, compare.payouts)} tone="neutral" />} />
+              <KpiTile label="ACTIVE SUBSCRIBERS" icon="coaches" value={String(subs?.total ?? 0)} sub={`${subs?.groupPlans ?? 0} group plan · ${subs?.ptPackages ?? 0} PT`} />
+              <KpiTile label="WALLET CREDIT" icon="wallet" value={fmt(report.walletLiability)} sub="Unspent, owed to members" />
+            </div>
+            </>
+          )}
 
           <Card title="REVENUE VS COACH PAYOUTS" sub={`${caption(data.trend.map((m) => m.month))} · BY MONTH · EGP`}>
             <RevenueChart months={data.trend} />
