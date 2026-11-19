@@ -1,27 +1,12 @@
 import { Hono } from "npm:hono";
 import { cors } from "npm:hono/cors";
-import { createClient } from "npm:@supabase/supabase-js@2";
+import { adminClient } from "../_shared/db.ts";
+import { requireUser } from "../_shared/auth.ts";
 
 // Solo owner's small desk helpers, kept apart from the main backend:
 // the one-off drop-in price, her InstaPay QR, and the member-less drop-in.
-const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {
-  auth: { autoRefreshToken: false, persistSession: false },
-});
+const admin = adminClient;
 const P = "/solo-desk";
-
-async function requireUser(c: any): Promise<{ id: string } | null> {
-  const token = (c.req.header("Authorization") || "").replace("Bearer ", "");
-  if (!token) return null;
-  try {
-    const { data, error } = await admin.auth.getClaims(token);
-    if (!error && data?.claims) {
-      const { sub, role } = data.claims as { sub?: string; role?: string };
-      return sub && role === "authenticated" ? { id: sub } : null;
-    }
-  } catch { /* fall through */ }
-  const { data, error } = await admin.auth.getUser(token);
-  return error || !data?.user ? null : { id: data.user.id };
-}
 
 // Only the owner of a solo organization.
 async function soloOwner(c: any) {

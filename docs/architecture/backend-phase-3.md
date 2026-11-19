@@ -442,4 +442,4 @@ You are ready to dedupe `solo-desk` / `clients-list` when:
 2. `_shared/` contains the real db/auth/mapper modules the main function uses.  
 3. Smoke + money tests still green on the thin `index.ts`.
 
-Next: [backend-implementation-plan.md](./backend-implementation-plan.md) → **Phase 4 — Deduplicate solo-desk / clients-list**.
+Next: [backend-phase-4.md](./backend-phase-4.md) → **Phase 4 — Deduplicate solo-desk / clients-list** (milestones M0–M6).

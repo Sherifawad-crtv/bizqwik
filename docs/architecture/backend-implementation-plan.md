@@ -134,13 +134,9 @@ Target folder layout (`routes/` + `services/` + `_shared/`); **identical** route
 
 ## Phase 4 — Deduplicate `solo-desk` / `clients-list` (local)
 
-### Work
+**Detailed playbook:** [backend-phase-4.md](./backend-phase-4.md) (milestones M0–M6 with tasks + acceptance criteria).
 
-Import `_shared` only; delete copied helpers. Smoke both slugs locally + any UI that uses them.
-
-### Production
-
-**No deploy.**
+Make `_shared` real (no facades into main context); point `solo-desk` / `clients-list` at shared db/auth/mappers; delete copied helpers. Same slugs/JSON. **No Production deploy.**
 
 ---
 
@@ -271,7 +267,7 @@ Then: run the phase’s tests + click the screens that use the routes you touche
 | 1 Local + baseline + seed | Done | yes | yes (login + smoke) | 2026-11-19 |
 | 2 Money RPCs | Done (RPC default on; tests/money green) | yes | yes (compensate + smoke) | 2026-11-19 |
 | 3 Split Edge source | Done (routes + thin index; context helpers) | yes | yes (smoke + compensate) | 2026-11-19 |
-| 4 Dedupe functions | Not started | | | |
+| 4 Dedupe functions | Done (_shared auth/mappers; solo-desk + clients-list wired) | yes | yes (smoke + clients-list + solo-desk) | 2026-11-19 |
 | 5 Validation + org helper | Not started | | | |
 | 6 Automation / CI config | Not started | | | |
 | GATE full local acceptance | Not started | | | |
@@ -295,4 +291,5 @@ Then: run the phase’s tests + click the screens that use the routes you touche
 - [backend-phase-0-1.md](./backend-phase-0-1.md) — detailed Phase 0 & 1 playbook  
 - [backend-phase-2.md](./backend-phase-2.md) — detailed Phase 2 money RPC milestones  
 - [backend-phase-3.md](./backend-phase-3.md) — detailed Phase 3 Edge split milestones  
+- [backend-phase-4.md](./backend-phase-4.md) — detailed Phase 4 dedupe milestones  
 - `docs/audit/frontend-issues.md` — separate front-end track  

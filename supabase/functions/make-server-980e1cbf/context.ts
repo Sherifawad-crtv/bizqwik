@@ -21,6 +21,12 @@ import {
   currentMonth,
   webpush,
 } from "../_shared/db.ts";
+import { requireUser } from "../_shared/auth.ts";
+import {
+  toClient,
+  toMembershipInstance,
+  toPackageInstance,
+} from "../_shared/mappers.ts";
 export {
   fetchRetryingClockSkew,
   SUPABASE_URL,
@@ -37,6 +43,8 @@ export {
   currentMonth,
   webpush,
 };
+export { requireUser };
+export { toClient, toMembershipInstance, toPackageInstance };
 
 export const isFutureMonth = (m: string) => m > currentMonth();
 
@@ -57,24 +65,6 @@ export function addDays(dateIso: string, days: number): string {
 // Who's calling. The token's signature is checked here against the project's
 // published signing keys (fetched once, then cached), so there's no round
 // trip to the auth server on every request. The anon key is not a user.
-export async function requireUser(c: any): Promise<{ id: string } | null> {
-  const auth = c.req.header("Authorization") || "";
-  const token = auth.replace("Bearer ", "");
-  if (!token) return null;
-  try {
-    const { data, error } = await admin().auth.getClaims(token);
-    if (!error && data?.claims) {
-      const { sub, role } = data.claims as { sub?: string; role?: string };
-      return sub && role === "authenticated" ? { id: sub } : null;
-    }
-  } catch {
-    // fall through to the auth server
-  }
-  const { data, error } = await admin().auth.getUser(token);
-  if (error || !data?.user) return null;
-  return { id: data.user.id };
-}
-
 export async function profileOf(userId: string) {
   const { data, error } = await admin().from("profiles").select("*").eq("id", userId).maybeSingle();
   if (error) throw error;
@@ -745,48 +735,6 @@ export function toTier(row: any) {
 }
 export function toBundleType(row: any) {
   return { id: row.id, name: row.name, price: Number(row.price), sessionsIncluded: row.sessions_included, expiryDays: row.expiry_days, locationId: row.location_id ?? null, active: row.active !== false };
-}
-export function toClient(row: any, conditions: string | null, currentPackage: any, currentMembership: any = null) {
-  return {
-    id: row.id,
-    name: row.name,
-    age: row.age,
-    phone: row.phone ?? null,
-    email: row.email ?? null,
-    conditions,
-    assignedCoachId: row.assigned_coach_id,
-    currentPackage,
-    currentMembership,
-    homeLocationId: row.home_location_id ?? null,
-  };
-}
-export function toMembershipInstance(row: any) {
-  return {
-    id: row.id,
-    clientId: row.client_id,
-    membershipTypeId: row.membership_type_id,
-    startDate: String(row.starts_at).slice(0, 10),
-    expiryDate: String(row.expires_at).slice(0, 10),
-    status: row.status,
-    invitationsRemaining: row.invitations_remaining,
-  };
-}
-export function toPackageInstance(row: any) {
-  return {
-    id: row.id,
-    clientId: row.client_id,
-    bundleTypeId: row.bundle_type_id,
-    coachId: row.coach_id,
-    purchaseDate: String(row.purchased_at).slice(0, 10),
-    expiryDate: String(row.expires_at).slice(0, 10),
-    sessionsIncluded: row.sessions_included,
-    sessionsRemaining: row.sessions_remaining,
-    priceAtSale: Number(row.price_at_sale),
-    coachCutAtSale: Number(row.coach_cut_at_sale),
-    status: row.status,
-    createdBy: row.created_by,
-    locationId: row.location_id ?? null,
-  };
 }
 export function toSession(row: any) {
   return { id: row.id, coachId: row.coach_id, month: row.month, date: row.date, createdBy: row.created_by, source: row.source ?? "manual", createdAt: row.created_at ?? null };
