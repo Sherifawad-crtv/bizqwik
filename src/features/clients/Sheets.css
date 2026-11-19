@@ -1,0 +1,74 @@
+/* Styles for Sheets.tsx. Tokens only; see DESIGN_SYSTEM.md. */
+
+.bq-clients-sheets-client-detail-sheet-title {
+  font: 800 22px var(--font-family-body);
+  letter-spacing: -.01em;
+}
+
+.bq-clients-sheets-client-detail-sheet-box {
+  background: var(--color-bg-surface-secondary-default);
+  border: 1px solid var(--color-border-primary-default);
+  border-radius: var(--radius-item);
+  padding: 12px 16px;
+  margin-bottom: 10px;
+}
+
+.bq-clients-sheets-client-detail-sheet-text {
+  font: 600 var(--text-body-size)/1.4 var(--font-family-body);
+}
+
+.bq-clients-sheets-client-detail-sheet-text-2 {
+  font: 600 var(--text-callout-size) var(--font-family-body);
+}
+
+.bq-clients-sheets-client-detail-sheet-meta {
+  font: 400 var(--text-footnote-size) var(--font-family-mono);
+  color: var(--color-text-secondary-default);
+}
+
+.bq-clients-sheets-client-detail-sheet-text-3 {
+  font: 600 var(--text-body-size) var(--font-family-body);
+  color: var(--color-text-tertiary-default);
+}
+
+.bq-clients-sheets-client-detail-sheet-text-4 {
+  font: 600 var(--text-body-size) var(--font-family-body);
+  margin-bottom: 4px;
+}
+
+.bq-clients-sheets-client-detail-sheet-text-5 {
+  font: 500 var(--text-subheadline-size) var(--font-family-body);
+  color: var(--color-text-tertiary-default);
+  margin-bottom: 10px;
+}
+
+.bq-clients-sheets-client-detail-sheet-text-6 {
+  margin-bottom: 10px;
+  font: 600 var(--text-footnote-size)/1.5 var(--font-family-body);
+  color: var(--color-text-status-danger-default);
+  background: var(--color-bg-fill-status-danger-default);
+  border-radius: var(--radius-item);
+  padding: 10px 14px;
+}
+
+.bq-clients-sheets-client-detail-sheet-text-7 {
+  margin-top: 6px;
+  font: 500 var(--text-footnote-size)/1.5 var(--font-family-body);
+  color: var(--color-text-secondary-default);
+  background: var(--color-bg-fill-accent-default);
+  border-radius: var(--radius-item);
+  padding: 10px 14px;
+}
+
+.bq-clients-sheets-client-detail-sheet-label {
+  font: 700 var(--text-caption-2-size) var(--font-family-mono);
+  letter-spacing: .08em;
+  color: var(--color-text-tertiary-default);
+  margin-bottom: 10px;
+}
+
+.bq-clients-sheets-client-detail-sheet-meta-2 {
+  margin-top: 8px;
+  font: 400 var(--text-caption-1-size)/1.5 var(--font-family-mono);
+  color: var(--color-text-tertiary-default);
+}

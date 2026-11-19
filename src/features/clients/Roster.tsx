@@ -9,6 +9,7 @@ import { PlanPill } from "../../shared/components/PlanPill";
 import { PackageStatusPill } from "../../shared/components/PackageStatusPill";
 import { countdownText, groupPlanLine, packageMetaText, rosterGrid } from "./helpers";
 import { QUICK_MS, tr } from "../../design-system/motion/motion";
+import "./Roster.css";
 
 /** Small round icon button used for the roster's quick actions — stops the
  * click from bubbling to the row, which opens the detail sheet. */
@@ -24,25 +25,13 @@ function RowActionButton({
   onClick: () => void;
 }) {
   return (
-    <button
+    <button className="bq-clients-roster-row-action-button-btn"
       onClick={(e) => {
         e.stopPropagation();
         onClick();
       }}
       aria-label={label}
-      style={{
-        width: 32,
-        height: 32,
-        flex: "none",
-        borderRadius: 999,
-        border: 0,
-        background: danger ? "var(--color-bg-fill-status-danger-default)" : "var(--color-bg-fill-accent-default)",
-        color: danger ? "var(--color-text-status-danger-default)" : "var(--color-bg-fill-primary-active)",
-        cursor: "pointer",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
+      style={{ background: danger ? "var(--color-bg-fill-status-danger-default)" : "var(--color-bg-fill-accent-default)", color: danger ? "var(--color-text-status-danger-default)" : "var(--color-bg-fill-primary-active)" }}
     >
       <Icon name={icon} size={14} />
     </button>
@@ -102,19 +91,19 @@ export function ClientRoster({
           <div
             key={c.id}
             onClick={() => onSelect(c)}
-            className="bq-card bq-card--sm" style={{ display: "flex", gap: 14, alignItems: "center", cursor: "pointer" }}
+            className="bq-card bq-card--sm bq-flex bq-gap-14px bq-items-center bq-pointer"
           >
             <Avatar name={c.name} size={38} />
             <div className="bq-grow">
-              <div style={{ font: "700 var(--text-callout-size) var(--font-family-body)", letterSpacing: "-.01em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{c.name}</div>
-              <div style={{ font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-secondary-default)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{metaFor(c)}</div>
-              <div style={{ marginTop: 8, display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+              <div className="bq-clients-roster-client-roster-title">{c.name}</div>
+              <div className="bq-clients-roster-client-roster-meta">{metaFor(c)}</div>
+              <div className="bq-mt-2 bq-flex bq-gap-2 bq-items-center bq-wrap">
                 {pillFor(c)}
                 {subFor(c) && <span className="bq-meta">{subFor(c)}</span>}
               </div>
             </div>
             {c.currentPackage && (
-              <div style={{ textAlign: "right", flex: "none" }}>
+              <div className="bq-text-right bq-flex-none">
                 <div className="tabular bq-stat-sm" >{valueFor(c).split(" ")[0]}</div>
                 <div className="bq-label">EGP</div>
               </div>
@@ -134,11 +123,11 @@ export function ClientRoster({
 
   return (
     <div className="bq-panel">
-      <div style={{ display: "grid", gridTemplateColumns: rosterGrid(canManage), gap: 12, padding: "10px 20px", background: "var(--color-bg-surface-secondary-default)", font: "700 var(--text-caption-2-size) var(--font-family-mono)", letterSpacing: ".08em", color: "var(--color-text-secondary-default)" }}>
+      <div className="bq-clients-roster-client-roster-label" style={{ gridTemplateColumns: rosterGrid(canManage) }}>
         <span>CLIENT</span>
         <span>{showAssignedCoach ? "COACH" : "PACKAGE"}</span>
         <span>STATUS</span>
-        <span style={{ textAlign: "right" }}>VALUE</span>
+        <span className="bq-text-right">VALUE</span>
         <span />
       </div>
       {clients.map((c) => (
@@ -182,33 +171,23 @@ function ClientDesktopRow({
 }) {
   const [hovered, setHovered] = useState(false);
   return (
-    <div
+    <div className="bq-clients-roster-client-desktop-row-grid"
       onClick={onClick}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      style={{
-        display: "grid",
-        gridTemplateColumns: rosterGrid(canManage),
-        gap: 12,
-        padding: "14px 20px",
-        borderBottom: "1px solid var(--color-border-primary-default)",
-        alignItems: "center",
-        cursor: "pointer",
-        background: hovered ? "var(--color-bg-surface-secondary-default)" : "transparent",
-        transition: tr("background", QUICK_MS),
-      }}
+      style={{ gridTemplateColumns: rosterGrid(canManage), background: hovered ? "var(--color-bg-surface-secondary-default)" : "transparent", transition: tr("background", QUICK_MS) }}
     >
-      <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
+      <div className="bq-flex bq-items-center bq-gap-3 bq-min-w-0">
         <Avatar name={client.name} size={32} />
-        <div style={{ minWidth: 0 }}>
-          <div style={{ font: "600 var(--text-callout-size) var(--font-family-body)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{client.name}</div>
+        <div className="bq-min-w-0">
+          <div className="bq-clients-roster-client-desktop-row-text">{client.name}</div>
           {sub && <div className="bq-meta">{sub}</div>}
         </div>
       </div>
-      <div style={{ font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-secondary-default)", minWidth: 0, overflow: "hidden", textOverflow: "ellipsis" }}>{meta}</div>
+      <div className="bq-clients-roster-client-desktop-row-meta">{meta}</div>
       <div>{pill}</div>
-      <div className="tabular bq-stat-sm" style={{ textAlign: "right" }}>{value}</div>
-      <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 6, color: "var(--color-text-tertiary-default)" }}>
+      <div className="tabular bq-stat-sm bq-text-right">{value}</div>
+      <div className="bq-flex bq-justify-end bq-items-center bq-gap-6px bq-fg-tertiary">
         {canManage && (
           <>
             <RowActionButton icon="pencil" label="Edit client" onClick={onEdit} />

@@ -2,6 +2,7 @@ import type { ClientWithPackage } from "../../shared/types";
 import { NO_FILTERS, planFacts, type ClientFilters } from "./clientFilters";
 import { EXPIRING_SOON_DAYS } from "./helpers";
 import { useNow } from "../../shared/useNow";
+import "./Overview.css";
 
 export function OverviewCards({ clients, showGroupPlans, onPick }: { clients: ClientWithPackage[]; showGroupPlans: boolean; onPick: (patch: Partial<ClientFilters>) => void }) {
   const now = useNow();
@@ -14,15 +15,15 @@ export function OverviewCards({ clients, showGroupPlans, onPick }: { clients: Cl
     { k: "EXPIRING SOON", v: facts.filter((f) => f.state === "active" && f.daysLeft !== null && f.daysLeft <= EXPIRING_SOON_DAYS).length, patch: { status: "active", expiry: "7" } },
   ];
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(140px,1fr))", gap: 10, marginBottom: 18 }}>
+    <div className="bq-clients-overview-overview-cards-grid">
       {stats.map((s) => (
         <button
           key={s.k}
           onClick={() => onPick({ ...NO_FILTERS, ...s.patch })}
-          className="bq-card" style={{ textAlign: "left", padding: "16px 18px", cursor: "pointer" }}
+          className="bq-card bq-clients-overview-overview-cards-btn"
         >
           <div className="bq-label">{s.k}</div>
-          <div className="tabular" style={{ font: "800 var(--text-large-title-size) var(--font-family-body)", letterSpacing: "-.02em", marginTop: 6, color: "var(--color-text-primary-default)" }}>{s.v}</div>
+          <div className="tabular bq-clients-overview-overview-cards-title">{s.v}</div>
         </button>
       ))}
     </div>

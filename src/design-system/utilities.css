@@ -48,3 +48,10 @@
 .bq-mb-28px { margin-bottom: 28px; }
 .bq-mt-2px { margin-top: 2px; }
 .bq-mt-3px { margin-top: 3px; }
+.bq-gap-14px { gap: 14px; }
+.bq-items-baseline { align-items: baseline; }
+.bq-justify-between { justify-content: space-between; }
+.bq-justify-end { justify-content: flex-end; }
+.bq-mb-1 { margin-bottom: var(--space-1); }
+.bq-mb-2 { margin-bottom: var(--space-2); }
+.bq-wrap { flex-wrap: wrap; }

@@ -9,6 +9,7 @@ import { NO_FILTERS, filterClients, planOptions, type ClientFilters, type Expiry
 import { plusDays } from "./helpers";
 import { useNow } from "../../shared/useNow";
 import { Chip } from "../../design-system/components/Chip";
+import "./Filters.css";
 
 const STATUS_CHIPS: { value: StatusFilter; label: string }[] = [
   { value: "all", label: "All" },
@@ -39,9 +40,9 @@ const SORT_OPTIONS: { value: SortKey; label: string }[] = [
 
 function FilterGroup({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <div style={{ marginBottom: 18 }}>
-      <div style={{ font: "700 var(--text-caption-2-size) var(--font-family-mono)", letterSpacing: ".08em", color: "var(--color-text-tertiary-default)", marginBottom: 8 }}>{label}</div>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>{children}</div>
+    <div className="bq-mb-18px">
+      <div className="bq-clients-filters-filter-group-label">{label}</div>
+      <div className="bq-flex bq-wrap bq-gap-2">{children}</div>
     </div>
   );
 }
@@ -68,20 +69,18 @@ export function ClientFilterBar({
   const matching = filterClients(clients, filters, now).length;
 
   return (
-    <div data-testid="client-filters" style={{ marginBottom: 14 }}>
-      <div style={{ display: "flex", gap: 8 }}>
-        <label
-          style={{ flex: 1, minWidth: 0, display: "flex", alignItems: "center", gap: 10, height: 48, padding: "0 14px", background: "var(--color-bg-surface-secondary-default)", border: "1px solid var(--color-border-primary-default)", borderRadius: "var(--radius-item)" }}
+    <div className="bq-mb-14px" data-testid="client-filters">
+      <div className="bq-flex bq-gap-2">
+        <label className="bq-clients-filters-client-filter-bar-label"
         >
-          <span style={{ color: "var(--color-text-tertiary-default)", display: "flex" }}>
+          <span className="bq-fg-tertiary bq-flex">
             <Icon name="search" size={18} />
           </span>
-          <input
+          <input className="bq-clients-filters-client-filter-bar-input"
             aria-label="Search clients"
             value={filters.q}
             onChange={(e) => set({ q: e.target.value })}
             placeholder="Search clients"
-            style={{ flex: 1, minWidth: 0, border: 0, background: "none", outline: "none", font: "600 var(--text-callout-size) var(--font-family-body)", color: "var(--color-text-primary-default)" }}
           />
         </label>
         <button
@@ -91,29 +90,29 @@ export function ClientFilterBar({
         >
           Filters
           {inSheet > 0 && (
-            <span data-testid="filter-badge" style={{ minWidth: 20, height: 20, padding: "0 6px", borderRadius: 999, background: "var(--color-bg-fill-primary-default)", color: "var(--color-text-on-fill-default)", font: "700 var(--text-caption-1-size)/20px var(--font-family-body)", textAlign: "center" }}>
+            <span className="bq-clients-filters-client-filter-bar-title" data-testid="filter-badge">
               {inSheet}
             </span>
           )}
         </button>
       </div>
 
-      <div style={{ display: "flex", gap: 6, overflowX: "auto", margin: "10px -2px 0", padding: "2px", scrollbarWidth: "none" }}>
+      <div className="bq-clients-filters-client-filter-bar-row">
         {STATUS_CHIPS.map((o) => (
           <Chip key={o.value} on={filters.status === o.value} onClick={() => set({ status: o.value })} testId={`status-${o.value}`}>
-            {o.label} <span className="tabular" style={{ opacity: 0.6, marginLeft: 2 }}>{count(o.value)}</span>
+            {o.label} <span className="tabular bq-clients-filters-client-filter-bar-part">{count(o.value)}</span>
           </Chip>
         ))}
       </div>
 
       <Sheet open={open} onClose={() => setOpen(false)}>
-        <div style={{ font: "800 var(--text-title-1-size)/1.2 var(--font-family-body)", letterSpacing: "-.02em", margin: "0 0 18px" }}>Filters</div>
+        <div className="bq-clients-filters-client-filter-bar-title-2">Filters</div>
 
         <FilterGroup label="PLAN">
           <Chip on={filters.plan === ""} onClick={() => set({ plan: "" })}>All plans</Chip>
           {plans.map((p) => (
             <Chip key={p.name} on={filters.plan === p.name} onClick={() => set({ plan: p.name })}>
-              {p.name} <span className="tabular" style={{ opacity: 0.6 }}>{p.count}</span>
+              {p.name} <span className="tabular bq-clients-filters-client-filter-bar-part-2">{p.count}</span>
             </Chip>
           ))}
         </FilterGroup>
@@ -130,13 +129,13 @@ export function ClientFilterBar({
           ))}
         </FilterGroup>
         {filters.expiry === "custom" && (
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, margin: "-6px 0 18px" }}>
+          <div className="bq-clients-filters-client-filter-bar-grid">
             <div>
-              <div style={{ font: "700 var(--text-caption-2-size) var(--font-family-mono)", letterSpacing: ".08em", color: "var(--color-text-tertiary-default)", margin: "0 0 4px 4px" }}>FROM</div>
+              <div className="bq-clients-filters-client-filter-bar-label-2">FROM</div>
               <DateField value={filters.from || todayIso()} max={filters.to || undefined} onChange={(from) => set({ from })} />
             </div>
             <div>
-              <div style={{ font: "700 var(--text-caption-2-size) var(--font-family-mono)", letterSpacing: ".08em", color: "var(--color-text-tertiary-default)", margin: "0 0 4px 4px" }}>TO</div>
+              <div className="bq-clients-filters-client-filter-bar-label-2">TO</div>
               <DateField value={filters.to || plusDays(todayIso(), 30)} min={filters.from || undefined} onChange={(to) => set({ to })} />
             </div>
           </div>
@@ -165,7 +164,7 @@ export function ClientFilterBar({
         <Button fullWidth size="lg" onClick={() => setOpen(false)}>
           Show {matching} {matching === 1 ? "client" : "clients"}
         </Button>
-        <Button variant="quiet" fullWidth style={{ marginTop: 8 }} onClick={() => onChange({ ...NO_FILTERS })}>
+        <Button className="bq-mt-2" variant="quiet" fullWidth onClick={() => onChange({ ...NO_FILTERS })}>
           Reset all
         </Button>
       </Sheet>

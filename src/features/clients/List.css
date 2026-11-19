@@ -1,0 +1,24 @@
+/* Styles for List.tsx. Tokens only; see DESIGN_SYSTEM.md. */
+
+.bq-clients-list-client-list-meta {
+  font: 400 var(--text-caption-1-size)/1.5 var(--font-family-mono);
+  color: var(--color-text-tertiary-default);
+  margin: -6px 2px 14px;
+}
+
+.bq-clients-list-client-list-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 2px 2px 8px;
+}
+
+.bq-clients-list-client-list-btn {
+  margin-left: auto;
+  border: 0;
+  background: none;
+  font: 700 var(--text-footnote-size) var(--font-family-body);
+  color: var(--color-bg-fill-primary-active);
+  cursor: pointer;
+  padding: 4px;
+}

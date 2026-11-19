@@ -1,0 +1,63 @@
+/* Styles for Roster.tsx. Tokens only; see DESIGN_SYSTEM.md. */
+
+.bq-clients-roster-row-action-button-btn {
+  width: 32px;
+  height: 32px;
+  flex: none;
+  border-radius: 999px;
+  border: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bq-clients-roster-client-roster-title {
+  font: 700 var(--text-callout-size) var(--font-family-body);
+  letter-spacing: -.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bq-clients-roster-client-roster-meta {
+  font: 400 var(--text-footnote-size) var(--font-family-mono);
+  color: var(--color-text-secondary-default);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bq-clients-roster-client-roster-label {
+  display: grid;
+  gap: 12px;
+  padding: 10px 20px;
+  background: var(--color-bg-surface-secondary-default);
+  font: 700 var(--text-caption-2-size) var(--font-family-mono);
+  letter-spacing: .08em;
+  color: var(--color-text-secondary-default);
+}
+
+.bq-clients-roster-client-desktop-row-grid {
+  display: grid;
+  gap: 12px;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--color-border-primary-default);
+  align-items: center;
+  cursor: pointer;
+}
+
+.bq-clients-roster-client-desktop-row-text {
+  font: 600 var(--text-callout-size) var(--font-family-body);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bq-clients-roster-client-desktop-row-meta {
+  font: 400 var(--text-footnote-size) var(--font-family-mono);
+  color: var(--color-text-secondary-default);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

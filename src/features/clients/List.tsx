@@ -9,6 +9,7 @@ import { OverviewCards } from "./Overview";
 import { ClientFilterBar } from "./Filters";
 import { ClientRoster } from "./Roster";
 import { ClientActionSheet, ClientDetailSheet, ClientEditSheet } from "./Sheets";
+import "./List.css";
 
 export function ClientList({
   clients,
@@ -49,20 +50,19 @@ export function ClientList({
       {clients.length > 0 && <ClientFilterBar clients={clients} filters={filters} onChange={setFilters} coaches={coachChoices} />}
       {!isMobile && <OverviewCards clients={clients} showGroupPlans={canManage} onPick={(patch) => setFilters({ ...patch, sort: filters.sort } as ClientFilters)} />}
       {canManage && !isMobile && (
-        <div style={{ font: "400 var(--text-caption-1-size)/1.5 var(--font-family-mono)", color: "var(--color-text-tertiary-default)", margin: "-6px 2px 14px" }}>
+        <div className="bq-clients-list-client-list-meta">
           New clients, plans and packages are handled at the front desk.
         </div>
       )}
 
-      <div style={{ display: "flex", alignItems: "baseline", gap: 10, padding: "2px 2px 8px" }}>
+      <div className="bq-clients-list-client-list-row">
         <span className="bq-h2">Roster</span>
         <span data-testid="roster-count" className="bq-meta">
           {filtering ? `${shown.length} of ${clients.length} clients` : `${clients.length} clients`}
         </span>
         {filtering && (
-          <button
+          <button className="bq-clients-list-client-list-btn"
             onClick={() => setFilters({ ...NO_FILTERS, sort: filters.sort })}
-            style={{ marginLeft: "auto", border: 0, background: "none", font: "700 var(--text-footnote-size) var(--font-family-body)", color: "var(--color-bg-fill-primary-active)", cursor: "pointer", padding: 4 }}
           >
             Clear filters
           </button>
