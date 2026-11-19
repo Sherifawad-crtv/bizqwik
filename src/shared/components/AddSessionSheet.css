@@ -1,0 +1,52 @@
+/* Styles for AddSessionSheet.tsx. Tokens only; see DESIGN_SYSTEM.md. */
+
+.bq-add-session-sheet-spacing {
+  margin: 4px 0 4px;
+}
+
+.bq-add-session-sheet-meta {
+  font: 400 var(--text-footnote-size) var(--font-family-mono);
+  color: var(--color-text-secondary-default);
+  margin-bottom: 16px;
+}
+
+.bq-add-session-sheet-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--color-bg-surface-secondary-default);
+  border: 1px solid var(--color-border-primary-default);
+  border-radius: var(--radius-item);
+  padding: 14px 16px;
+}
+
+.bq-add-session-sheet-title {
+  font: 700 var(--text-body-size) var(--font-family-body);
+}
+
+.bq-add-session-sheet-label {
+  margin-left: auto;
+  font: 700 var(--text-caption-2-size) var(--font-family-mono);
+  letter-spacing: .08em;
+  color: var(--color-text-tertiary-default);
+}
+
+.bq-add-session-sheet-row-2 {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 6px 6px 0;
+}
+
+.bq-add-session-sheet-title-2 {
+  margin-left: auto;
+  font: 800 var(--text-large-title-size) var(--font-family-body);
+  letter-spacing: -.02em;
+  color: var(--color-bg-fill-primary-default);
+}
+
+.bq-add-session-sheet-label-2 {
+  font: 700 var(--text-caption-2-size) var(--font-family-mono);
+  letter-spacing: .08em;
+  color: var(--color-bg-fill-primary-default);
+}

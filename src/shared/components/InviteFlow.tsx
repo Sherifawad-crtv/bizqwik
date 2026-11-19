@@ -9,6 +9,7 @@ import { Sheet } from "../../design-system/components/Sheet";
 import { TextField, SelectField } from "../../design-system/components/FormField";
 import { SheetSuccessIcon } from "../../design-system/components/SheetSuccessIcon";
 import { useSheetSuccess } from "../../design-system/components/useSheetSuccess";
+import "./InviteFlow.css";
 
 /** The invite overlay on its own, for opening from any screen: it loads the
  * pay tiers it needs to offer, then behaves exactly like the Invites tab's. */
@@ -82,7 +83,7 @@ export function InviteSheet({ open, tiers: tiersProp, onClose }: { open: boolean
               />
             )}
             {hasTier(role) && tiers.length === 0 && (
-              <div style={{ font: "400 var(--text-caption-1-size)/1.5 var(--font-family-mono)", color: "var(--color-text-tertiary-default)", padding: "0 2px" }}>
+              <div className="bq-invite-flow-invite-sheet-meta">
                 No pay tiers yet — create one in the Tiers tab, then assign it here or later from People.
               </div>
             )}
@@ -92,10 +93,10 @@ export function InviteSheet({ open, tiers: tiersProp, onClose }: { open: boolean
               {error}
             </div>
           )}
-          <Button fullWidth size="lg" style={{ marginTop: 16 }} disabled={busy} onClick={save}>
+          <Button className="bq-mt-4" fullWidth size="lg" disabled={busy} onClick={save}>
             {busy ? "Sending…" : "Send invite"}
           </Button>
-          <Button variant="secondary" fullWidth style={{ marginTop: 8 }} onClick={onClose} disabled={busy}>
+          <Button className="bq-mt-2" variant="secondary" fullWidth onClick={onClose} disabled={busy}>
             Cancel
           </Button>
         </>

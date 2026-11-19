@@ -10,6 +10,7 @@ import { Sheet } from "../../design-system/components/Sheet";
 import { Button } from "../../design-system/components/Button";
 import { InlineSpinner } from "../../design-system/components/Spinner";
 import { Tag, type Tone } from "../../design-system/components/Tag";
+import "./ClassRosterSheet.css";
 
 const ATT_LABEL: Record<BookingAttendance, string> = {
   booked: "Booked",
@@ -61,14 +62,14 @@ export function ClassRosterSheet({
   return (
     <Sheet open={open} onClose={busyId ? () => {} : onClose}>
       <div className="bq-label">CLASS ROSTER</div>
-      <div style={{ font: "800 24px/1.2 var(--font-family-body)", letterSpacing: "-.02em", margin: "4px 0 4px" }}>{title}</div>
-      <div style={{ font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)", marginBottom: 16 }}>
+      <div className="bq-class-roster-sheet-title">{title}</div>
+      <div className="bq-class-roster-sheet-meta">
         {live.length} booked{live.length > 0 ? ` · ${live.filter((b) => b.coverage === "plan").length} on a plan · ${live.filter((b) => b.attendance === "arrived").length} arrived` : ""}
       </div>
 
       {roster.loading && <InlineSpinner />}
       {error && (
-        <div className="bq-rise" style={{ marginBottom: 12, font: "600 var(--text-footnote-size)/1.5 var(--font-family-body)", color: "var(--color-text-status-danger-default)", background: "var(--color-bg-fill-status-danger-default)", borderRadius: "var(--radius-item)", padding: "10px 14px" }}>{error}</div>
+        <div className="bq-rise bq-class-roster-sheet-text">{error}</div>
       )}
       {!roster.loading && live.length === 0 && (
         <EmptyState bare icon="clients" title="No one has booked this class yet" body="Members book from the app, or the front desk can add a drop-in from Drop-In → Class session." />
@@ -80,7 +81,7 @@ export function ClassRosterSheet({
         ))}
       </div>
 
-      <Button variant="quiet" fullWidth style={{ marginTop: 16 }} disabled={!!busyId} onClick={onClose}>
+      <Button className="bq-mt-4" variant="quiet" fullWidth disabled={!!busyId} onClick={onClose}>
         Close
       </Button>
     </Sheet>
@@ -107,11 +108,11 @@ function RosterRow({
   const paid = b.payStatus === "paid";
   const onPlan = b.coverage === "plan";
   return (
-    <div style={{ background: "var(--color-bg-surface-secondary-default)", border: "1px solid var(--color-border-primary-default)", borderRadius: "var(--radius-item)", padding: "12px 14px", opacity: busy ? 0.6 : 1 }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+    <div className="bq-class-roster-sheet-roster-row-box" style={{ opacity: busy ? 0.6 : 1 }}>
+      <div className="bq-flex bq-items-center bq-gap-10px">
         <div className="bq-grow">
-          <div style={{ font: "700 var(--text-body-size) var(--font-family-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{b.clientName ?? "Member"}</div>
-          <div style={{ font: "500 var(--text-caption-1-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)", marginTop: 2 }}>
+          <div className="bq-class-roster-sheet-roster-row-title">{b.clientName ?? "Member"}</div>
+          <div className="bq-class-roster-sheet-roster-row-meta">
             {onPlan ? "On their plan" : `Drop-in · ${b.price > 0 ? egp(b.price) : "Free"} · ${paid ? "Paid" : "Unpaid"}`}
           </div>
         </div>
@@ -120,7 +121,7 @@ function RosterRow({
         </Tag>
       </div>
 
-      <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+      <div className="bq-flex bq-gap-2 bq-mt-10px">
         <RowBtn active={b.attendance === "arrived"} disabled={busy} onClick={() => run(() => api.markAttendance(b.id, "arrived"), b.id)}>Arrived</RowBtn>
         <RowBtn active={b.attendance === "no_show"} disabled={busy} onClick={() => run(() => api.markAttendance(b.id, "no_show"), b.id)}>No-show</RowBtn>
         {!paid && !collecting && (
@@ -129,9 +130,9 @@ function RosterRow({
       </div>
 
       {!paid && collecting && (
-        <div style={{ marginTop: 10 }}>
-          <div style={{ font: "700 10px var(--font-family-mono)", letterSpacing: ".06em", color: "var(--color-text-tertiary-default)", marginBottom: 6 }}>COLLECT PAYMENT</div>
-          <div style={{ display: "flex", gap: 8 }}>
+        <div className="bq-mt-10px">
+          <div className="bq-class-roster-sheet-roster-row-label">COLLECT PAYMENT</div>
+          <div className="bq-flex bq-gap-2">
             {((solo ? ["cash", "instapay"] : ["cash", "card", "instapay", "wallet"]) as PayMethod[]).map((pm) => (
               <RowBtn key={pm} disabled={busy} onClick={() => run(() => api.collectBooking(b.id, pm), b.id)}>
                 {PAY_METHOD_LABELS[pm]}

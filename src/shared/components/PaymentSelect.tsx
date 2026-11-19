@@ -2,6 +2,7 @@ import { Segmented } from "../../design-system/components/Segmented";
 import { useAuth } from "../auth";
 import { isSoloOwner } from "../screen/nav";
 import type { PayMethod } from "../types";
+import "./PaymentSelect.css";
 
 /** Cash / card / InstaPay / wallet picker for a desk sale. `wallet` is only offered when a
  * paying member is in context (a brand-new client has no balance yet); when it's
@@ -31,7 +32,7 @@ export function PaymentSelect({
       ];
   return (
     <div>
-      <div style={{ font: "700 var(--text-caption-2-size) var(--font-family-mono)", letterSpacing: ".08em", color: "var(--color-text-tertiary-default)", margin: "0 2px 6px" }}>PAYMENT</div>
+      <div className="bq-payment-select-label">PAYMENT</div>
       <Segmented value={value} options={options} onChange={(v) => onChange(v as PayMethod)} />
     </div>
   );

@@ -1,0 +1,71 @@
+/* Styles for ActivityPanel.tsx. Tokens only; see DESIGN_SYSTEM.md. */
+
+.bq-activity-panel-feed-row {
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.bq-activity-panel-feed-part {
+  min-width: 74px;
+  justify-content: center;
+}
+
+.bq-activity-panel-feed-text {
+  display: block;
+  font: 600 var(--text-subheadline-size)/1.35 var(--font-family-body);
+}
+
+.bq-activity-panel-feed-meta {
+  display: block;
+  font: 400 var(--text-caption-1-size) var(--font-family-mono);
+  color: var(--color-text-tertiary-default);
+  margin-top: 2px;
+}
+
+.bq-activity-panel-feed-title {
+  flex: none;
+  font: 800 var(--text-subheadline-size) var(--font-family-body);
+  color: var(--tone-fg);
+}
+
+.bq-activity-panel-logs-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 10px 14px;
+}
+
+.bq-activity-panel-logs-meta {
+  flex: none;
+  width: 96px;
+  font: 400 var(--text-caption-2-size) var(--font-family-mono);
+  color: var(--color-text-tertiary-default);
+}
+
+.bq-activity-panel-logs-label {
+  flex: none;
+  width: 128px;
+  font: 700 var(--text-caption-2-size) var(--font-family-mono);
+  letter-spacing: .04em;
+  color: var(--color-text-secondary-default);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bq-activity-panel-logs-text {
+  flex: 1;
+  min-width: 0;
+  font: 500 var(--text-footnote-size) var(--font-family-body);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bq-activity-panel-logs-meta-2 {
+  flex: none;
+  font: 700 var(--text-caption-1-size) var(--font-family-mono);
+  color: var(--color-text-secondary-default);
+}

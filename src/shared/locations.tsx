@@ -5,6 +5,7 @@ import type { Location } from "./types";
 import { SelectField } from "../design-system/components/FormField";
 import { Segmented } from "../design-system/components/Segmented";
 import { Tag } from "../design-system/components/Tag";
+import "./locations.css";
 
 // Where the owner is working right now (this phone). Remembered per device, so
 // switching location on Today applies to Schedule, check-in and new sessions.
@@ -87,11 +88,11 @@ export function LocationField({ locations, value, onChange }: { locations: Locat
 export function LocationSwitcher({ all, onAll, isAll = false }: { all?: boolean; onAll?: (on: boolean) => void; isAll?: boolean }) {
   const { locations, current, setCurrent, ready } = useCurrentLocation();
   // Hold the switcher's place while locations load so nothing jumps when it appears.
-  if (!ready) return <div aria-hidden style={{ height: 44, marginBottom: 16 }} />;
+  if (!ready) return <div className="bq-locations-location-switcher-size" aria-hidden />;
   if (locations.length < 2 || !current) return null;
   const options = [...locations.map((l) => ({ value: l.id, label: l.name })), ...(all ? [{ value: "__all", label: "All" }] : [])];
   return (
-    <div role="group" aria-label="Working at" style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}>
+    <div className="bq-flex bq-justify-center bq-mb-4" role="group" aria-label="Working at">
       <Segmented
         value={isAll ? "__all" : current.id}
         options={options}

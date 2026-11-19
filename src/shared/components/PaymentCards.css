@@ -1,0 +1,14 @@
+/* Styles for PaymentCards.tsx. Tokens only; see DESIGN_SYSTEM.md. */
+
+.bq-payment-cards-title {
+  display: block;
+  font: 800 17px var(--font-family-body);
+  letter-spacing: -.01em;
+}
+
+.bq-payment-cards-meta {
+  display: block;
+  font: 400 var(--text-caption-1-size) var(--font-family-mono);
+  color: var(--color-text-secondary-default);
+  margin-top: 2px;
+}

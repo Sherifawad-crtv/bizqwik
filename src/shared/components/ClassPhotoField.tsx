@@ -4,6 +4,7 @@ import { classCardCrop, extOf } from "../image";
 import { useAuth } from "../auth";
 import { Icon } from "../../design-system/components/Icon";
 import { Button } from "../../design-system/components/Button";
+import "./ClassPhotoField.css";
 
 const BUCKET = "class-images";
 
@@ -39,8 +40,8 @@ export function ClassPhotoField({ value, onChange, title }: { value: string | nu
 
   return (
     <div>
-      <div style={{ font: "700 var(--text-caption-2-size) var(--font-family-mono)", letterSpacing: ".08em", color: "var(--color-text-tertiary-default)", margin: "0 2px 6px" }}>PHOTO</div>
-      <div style={{ display: "flex", gap: 14, alignItems: "center" }}>
+      <div className="bq-class-photo-field-label">PHOTO</div>
+      <div className="bq-flex bq-gap-14px bq-items-center">
         <div
           data-testid="class-photo-preview"
           style={{
@@ -50,30 +51,30 @@ export function ClassPhotoField({ value, onChange, title }: { value: string | nu
         >
           {value ? (
             <>
-              <img src={value} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
-              <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, var(--color-bg-overlay-photo), transparent 60%)" }} />
-              <div style={{ position: "absolute", left: 8, right: 8, bottom: 8, color: "var(--color-text-on-media-default)", font: "800 var(--text-caption-2-size)/1.15 var(--font-family-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{title || "Class"}</div>
+              <img className="bq-class-photo-field-img" src={value} alt="" />
+              <div className="bq-class-photo-field-layer" />
+              <div className="bq-class-photo-field-title">{title || "Class"}</div>
             </>
           ) : (
             <Icon name="plus" size={20} style={{ color: "var(--color-text-tertiary-default)" }} />
           )}
         </div>
         <div className="bq-grow">
-          <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
-            <input ref={input} type="file" accept="image/*" onChange={onPick} style={{ display: "none" }} data-testid="class-photo-input" />
+          <div className="bq-flex bq-gap-10px bq-items-center bq-wrap">
+            <input className="bq-class-photo-field-input" ref={input} type="file" accept="image/*" onChange={onPick} data-testid="class-photo-input" />
             <Button variant="secondary" size="md" disabled={busy} onClick={() => input.current?.click()}>
               {busy ? "Uploading…" : value ? "Replace" : "Add photo"}
             </Button>
             {value && !busy && (
-              <button onClick={() => onChange(null)} style={{ border: 0, background: "none", padding: 0, cursor: "pointer", font: "600 var(--text-footnote-size) var(--font-family-body)", color: "var(--color-text-tertiary-default)" }}>
+              <button className="bq-class-photo-field-btn" onClick={() => onChange(null)}>
                 Remove
               </button>
             )}
           </div>
-          <div style={{ marginTop: 6, font: "400 var(--text-caption-1-size)/1.45 var(--font-family-mono)", color: "var(--color-text-tertiary-default)" }}>
+          <div className="bq-class-photo-field-meta">
             {value ? "Cropped to fit the class card in the members' app." : "Members see a Bizqwik photo until you add one. Any photo works; it's cropped to fit."}
           </div>
-          {error && <div style={{ marginTop: 6, font: "600 var(--text-caption-1-size)/1.4 var(--font-family-body)", color: "var(--color-text-status-danger-default)" }}>{error}</div>}
+          {error && <div className="bq-class-photo-field-text">{error}</div>}
         </div>
       </div>
     </div>

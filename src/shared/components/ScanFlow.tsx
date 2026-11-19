@@ -9,6 +9,7 @@ import { QrScanner } from "../../design-system/components/QrScanner";
 import { SheetSuccessIcon } from "../../design-system/components/SheetSuccessIcon";
 import { useSheetSuccess } from "../../design-system/components/useSheetSuccess";
 import type { PtScanPreview } from "../types";
+import "./ScanFlow.css";
 
 // The coach's FAB is a scanner. What was scanned decides what happens next:
 // the coaches'-room QR -> the session stepper (locked to today); a member's
@@ -56,14 +57,14 @@ export function ScanFlow({ trigger, hint }: { trigger: (open: () => void, busy: 
       )}
       <Sheet open={!!problem} onClose={() => setProblem(null)}>
         <div className="bq-label">SCAN</div>
-        <div style={{ font: "800 var(--text-title-1-size)/1.2 var(--font-family-body)", letterSpacing: "-.02em", margin: "4px 0 12px" }}>That didn't work</div>
-        <div role="alert" style={{ font: "600 var(--text-subheadline-size)/1.5 var(--font-family-body)", color: "var(--color-text-status-danger-default)", background: "var(--color-bg-fill-status-danger-default)", borderRadius: "var(--radius-item)", padding: "12px 14px" }}>
+        <div className="bq-scan-flow-title">That didn't work</div>
+        <div className="bq-scan-flow-text" role="alert">
           {problem}
         </div>
-        <Button fullWidth size="lg" style={{ marginTop: 16 }} onClick={() => { setProblem(null); setScanning(true); }}>
+        <Button className="bq-mt-4" fullWidth size="lg" onClick={() => { setProblem(null); setScanning(true); }}>
           Scan again
         </Button>
-        <Button fullWidth variant="secondary" style={{ marginTop: 8 }} onClick={() => setProblem(null)}>
+        <Button className="bq-mt-2" fullWidth variant="secondary" onClick={() => setProblem(null)}>
           Close
         </Button>
       </Sheet>
@@ -110,13 +111,13 @@ function PtDeliverSheet({ scan, onClose }: { scan: { token: string; preview: PtS
       ) : p ? (
         <>
           <div className="bq-label">PRIVATE TRAINING</div>
-          <div className="bq-stat-lg" style={{ margin: "4px 0 4px" }}>{p.clientName}</div>
-          <div style={{ font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-secondary-default)", marginBottom: 16 }}>
+          <div className="bq-stat-lg bq-scan-flow-pt-deliver-sheet-spacing">{p.clientName}</div>
+          <div className="bq-scan-flow-pt-deliver-sheet-meta">
             {p.bundleName} · expires {p.expiryDate}
           </div>
-          <div style={{ display: "flex", alignItems: "baseline", gap: 10, background: "var(--color-bg-surface-secondary-default)", border: "1px solid var(--color-border-primary-default)", borderRadius: "var(--radius-item)", padding: "14px 16px" }}>
+          <div className="bq-scan-flow-pt-deliver-sheet-row">
             <span className="bq-label">SESSIONS LEFT</span>
-            <span className="tabular" style={{ marginLeft: "auto", font: "800 var(--text-title-1-size) var(--font-family-body)" }}>
+            <span className="tabular bq-scan-flow-pt-deliver-sheet-title">
               {p.sessionsRemaining} → {p.sessionsRemaining - 1}
             </span>
             <span className="bq-meta">of {p.sessionsIncluded}</span>
@@ -126,10 +127,10 @@ function PtDeliverSheet({ scan, onClose }: { scan: { token: string; preview: PtS
               {error}
             </div>
           )}
-          <Button fullWidth size="lg" style={{ marginTop: 16 }} disabled={busy} onClick={confirm}>
+          <Button className="bq-mt-4" fullWidth size="lg" disabled={busy} onClick={confirm}>
             {busy ? "Logging…" : "Deduct 1 session"}
           </Button>
-          <Button fullWidth variant="secondary" style={{ marginTop: 8 }} disabled={busy} onClick={onClose}>
+          <Button className="bq-mt-2" fullWidth variant="secondary" disabled={busy} onClick={onClose}>
             Cancel
           </Button>
         </>

@@ -1,3 +1,4 @@
+import { cx } from "../../design-system/cx";
 import { EmptyState } from "../../design-system/components/EmptyState";
 import { useSticky } from "../../design-system/hooks/useSticky";
 import { api } from "../api/backend";
@@ -7,6 +8,7 @@ import type { ActivityEntry } from "../types";
 import { InlineSpinner } from "../../design-system/components/Spinner";
 import { Segmented } from "../../design-system/components/Segmented";
 import { Tag, type Tone } from "../../design-system/components/Tag";
+import "./ActivityPanel.css";
 
 export type Cat = "sale" | "refund" | "wallet" | "points" | "class" | "checkin" | "other";
 
@@ -103,7 +105,7 @@ export function ActivityPanel() {
 
   return (
     <div>
-      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+      <div className="bq-flex bq-items-center bq-gap-3 bq-mb-4">
         <Segmented
           value={tab}
           options={[
@@ -133,18 +135,18 @@ export function ActivityPanel() {
 export function Feed({ entries }: { entries: ActivityEntry[] }) {
   if (entries.length === 0) return null;
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+    <div className="bq-flex bq-col bq-gap-2">
       {entries.map((e) => {
         const tone = CAT_TONE[catOf(e.type)];
         const amt = amountLabel(e);
         return (
-          <div key={e.id} className="bq-card" style={{ padding: "12px 14px", display: "flex", alignItems: "center", gap: 12 }}>
-            <Tag tone={tone.tone} style={{ minWidth: 74, justifyContent: "center" }}>{tone.label}</Tag>
+          <div key={e.id} className="bq-card bq-activity-panel-feed-row">
+            <Tag className="bq-activity-panel-feed-part" tone={tone.tone}>{tone.label}</Tag>
             <span className="bq-grow">
-              <span style={{ display: "block", font: "600 var(--text-subheadline-size)/1.35 var(--font-family-body)" }}>{describe(e)}</span>
-              <span style={{ display: "block", font: "400 var(--text-caption-1-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)", marginTop: 2 }}>{timeLabel(e.at)}{e.actorName ? ` · by ${e.actorName}` : ""}</span>
+              <span className="bq-activity-panel-feed-text">{describe(e)}</span>
+              <span className="bq-activity-panel-feed-meta">{timeLabel(e.at)}{e.actorName ? ` · by ${e.actorName}` : ""}</span>
             </span>
-            {amt && <span className={`tabular bq-tone-${tone.tone}`} style={{ flex: "none", font: "800 var(--text-subheadline-size) var(--font-family-body)", color: "var(--tone-fg)" }}>{amt}</span>}
+            {amt && <span className={cx(`tabular bq-tone-${tone.tone}`, "bq-activity-panel-feed-title")}>{amt}</span>}
           </div>
         );
       })}
@@ -159,11 +161,11 @@ function Logs({ entries }: { entries: ActivityEntry[] }) {
       {entries.map((e, i) => {
         const amt = amountLabel(e);
         return (
-          <div key={e.id} style={{ display: "flex", alignItems: "baseline", gap: 10, padding: "10px 14px", borderBottom: i === entries.length - 1 ? "none" : "1px solid var(--color-border-primary-default)" }}>
-            <span style={{ flex: "none", width: 96, font: "400 var(--text-caption-2-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)" }}>{timeLabel(e.at)}</span>
-            <span style={{ flex: "none", width: 128, font: "700 var(--text-caption-2-size) var(--font-family-mono)", letterSpacing: ".04em", color: "var(--color-text-secondary-default)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{e.type}</span>
-            <span style={{ flex: 1, minWidth: 0, font: "500 var(--text-footnote-size) var(--font-family-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{e.clientName ?? "—"}{e.actorName ? ` · by ${e.actorName}` : ""}</span>
-            <span className="tabular" style={{ flex: "none", font: "700 var(--text-caption-1-size) var(--font-family-mono)", color: "var(--color-text-secondary-default)" }}>{amt ?? ""}</span>
+          <div className="bq-activity-panel-logs-row" key={e.id} style={{ borderBottom: i === entries.length - 1 ? "none" : "1px solid var(--color-border-primary-default)" }}>
+            <span className="bq-activity-panel-logs-meta">{timeLabel(e.at)}</span>
+            <span className="bq-activity-panel-logs-label">{e.type}</span>
+            <span className="bq-activity-panel-logs-text">{e.clientName ?? "—"}{e.actorName ? ` · by ${e.actorName}` : ""}</span>
+            <span className="tabular bq-activity-panel-logs-meta-2">{amt ?? ""}</span>
           </div>
         );
       })}

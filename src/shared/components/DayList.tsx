@@ -4,6 +4,7 @@ import { EmptyState } from "../../design-system/components/EmptyState";
 import { dateLabel, egp, sessionStamp } from "../format";
 import type { State } from "../types";
 import { MotionList } from "../../design-system/components/MotionList";
+import "./DayList.css";
 
 interface DayGroup {
   date: string;
@@ -49,33 +50,33 @@ export function DayList({
         <div
           key={g.date}
           onClick={() => onOpenDay(g)}
-          className="bq-card bq-card--sm" style={{ display: "flex", gap: 14, alignItems: "center", cursor: "pointer" }}
+          className="bq-card bq-card--sm bq-flex bq-gap-14px bq-items-center bq-pointer"
         >
           <div className="bq-grow">
-            <div style={{ font: "700 var(--text-callout-size) var(--font-family-body)", letterSpacing: "-.01em" }}>{dateLabel(g.date)}</div>
-            <div style={{ font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-secondary-default)" }}>
+            <div className="bq-day-list-title">{dateLabel(g.date)}</div>
+            <div className="bq-day-list-meta">
               {g.sessions.length} {g.sessions.length === 1 ? "session" : "sessions"}
             </div>
             {/* When each session was scanned in, so a late scan is easy to spot. */}
-            <div data-testid="session-times" style={{ marginTop: 4, display: "flex", flexDirection: "column", gap: 1 }}>
+            <div className="bq-mt-1 bq-flex bq-col bq-gap-1px" data-testid="session-times">
               {[...g.sessions]
                 .sort((a, b) => String(a.createdAt ?? "").localeCompare(String(b.createdAt ?? "")))
                 .map((s) => {
                   const st = sessionStamp(s);
                   return st ? (
-                    <div key={s.id} style={{ display: "flex", gap: 8, alignItems: "baseline", font: "600 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-primary-default)" }}>
-                      <span style={{ font: "700 10px var(--font-family-mono)", letterSpacing: ".08em", color: "var(--color-text-tertiary-default)", minWidth: 52 }}>{s.source === "qr" ? "QR" : "MANUAL"}</span>
+                    <div className="bq-day-list-meta-2" key={s.id}>
+                      <span className="bq-day-list-label">{s.source === "qr" ? "QR" : "MANUAL"}</span>
                       {st.text}
                     </div>
                   ) : null;
                 })}
             </div>
-            <div style={{ marginTop: 8 }}>
+            <div className="bq-mt-2">
               {/* A day that's on the books is "Logged"; the coach's month status (Logging / Settled / Paid) lives on their header. */}
               {state === "logging" ? <StatePill state="paid" label="Logged" /> : <StatePill state={state} />}
             </div>
           </div>
-          <div style={{ textAlign: "right", flex: "none" }}>
+          <div className="bq-text-right bq-flex-none">
             <div className="tabular bq-stat-sm" >{egp(g.sessions.length * rate).split(" ")[0]}</div>
             <div className="bq-label">EGP</div>
           </div>

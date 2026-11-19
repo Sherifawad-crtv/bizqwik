@@ -13,12 +13,13 @@ import { ConfirmSheet } from "../../design-system/components/ConfirmSheet";
 import { TextField, SelectField } from "../../design-system/components/FormField";
 import { SheetSuccessIcon } from "../../design-system/components/SheetSuccessIcon";
 import { useAuth } from "../auth";
+import "./SeriesSheet.css";
 
 function WeekdayPicker({ value, onChange }: { value: number[]; onChange: (v: number[]) => void }) {
   return (
     <div>
-      <div style={{ font: "700 var(--text-caption-2-size) var(--font-family-mono)", letterSpacing: ".08em", color: "var(--color-text-tertiary-default)", marginBottom: 8 }}>DAYS</div>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 6 }}>
+      <div className="bq-series-sheet-weekday-picker-label">DAYS</div>
+      <div className="bq-series-sheet-weekday-picker-grid">
         {WEEKDAY_ORDER.map((d) => {
           const on = value.includes(d);
           return (
@@ -127,24 +128,24 @@ export function SeriesSheet({ open, series: seriesProp, onClose }: { open: boole
           <>
             <div className="bq-label">{series ? "EDIT CLASS" : "NEW GROUP CLASS"}</div>
             <div className="bq-title">{series ? series.title : "New class"}</div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            <div className="bq-flex bq-col bq-gap-3">
               <TextField label="NAME" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Sunrise HIIT" />
               <TextField label="DESCRIPTION" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Optional — shown to members" />
               <ClassPhotoField value={imageUrl} onChange={setImageUrl} title={title} />
               <LocationField locations={locations} value={locationId} onChange={setLocationId} />
               <WeekdayPicker value={weekdays} onChange={setWeekdays} />
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+              <div className="bq-series-sheet-grid">
                 <TimeWheelField label="STARTS AT" value={startTime} onChange={setStartTime} />
                 <SelectField label="LENGTH" value={duration} options={DURATION_OPTIONS} onChange={setDuration} />
               </div>
               {!seriesSolo && (
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                <div className="bq-series-sheet-grid">
                   <TextField label="DROP-IN · EGP" type="number" min={0} inputMode="decimal" value={dropIn} onChange={(e) => setDropIn(e.target.value)} placeholder="Per class" />
                   <TextField label="MONTHLY · EGP" type="number" min={0} inputMode="decimal" value={monthly} onChange={(e) => setMonthly(e.target.value)} placeholder="1 month" />
                 </div>
               )}
             </div>
-            <div style={{ marginTop: 10, font: "400 var(--text-caption-1-size)/1.5 var(--font-family-mono)", color: "var(--color-text-tertiary-default)" }}>
+            <div className="bq-series-sheet-meta">
               {series
                 ? (seriesSolo ? "Changes apply to all upcoming sessions of this class." : "Changes apply to upcoming sessions nobody has booked yet. Booked sessions keep their time and price.")
                 : seriesSolo
@@ -154,15 +155,15 @@ export function SeriesSheet({ open, series: seriesProp, onClose }: { open: boole
             {error && (
               <div  className="bq-error bq-error--spaced bq-rise">{error}</div>
             )}
-            <Button fullWidth size="lg" style={{ marginTop: 16 }} disabled={busy} onClick={save}>
+            <Button className="bq-mt-4" fullWidth size="lg" disabled={busy} onClick={save}>
               {busy ? "Saving…" : series ? "Save changes" : "Create class"}
             </Button>
             {series && (
-              <Button variant="danger" fullWidth style={{ marginTop: 8 }} disabled={busy} onClick={() => setConfirmEnd(true)}>
+              <Button className="bq-mt-2" variant="danger" fullWidth disabled={busy} onClick={() => setConfirmEnd(true)}>
                 End this class
               </Button>
             )}
-            <Button variant="secondary" fullWidth style={{ marginTop: 8 }} onClick={onClose} disabled={busy}>
+            <Button className="bq-mt-2" variant="secondary" fullWidth onClick={onClose} disabled={busy}>
               Cancel
             </Button>
           </>

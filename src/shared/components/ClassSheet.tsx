@@ -10,6 +10,7 @@ import { TimeWheelField } from "../../design-system/components/TimeWheelField";
 import { ClassPhotoField } from "./ClassPhotoField";
 import { LocationField, useLocations } from "../locations";
 import { type FormState, emptyForm } from "../classForm";
+import "./ClassSheet.css";
 
 export function ClassSheet({
   form,
@@ -80,14 +81,14 @@ export function ClassSheet({
       <div className="bq-label">{editing ? "THIS SESSION ONLY" : "ONE-OFF SESSION"}</div>
       <div className="bq-title">{editing ? "Edit session" : solo ? "New session" : "One-off session"}</div>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+      <div className="bq-flex bq-col bq-gap-3">
         <TextField label="TITLE" value={draft.title} onChange={(e) => setDraft({ ...draft, title: e.target.value })} placeholder="e.g. Sunrise HIIT" />
         {!solo && <TextField label="DESCRIPTION" value={draft.description} onChange={(e) => setDraft({ ...draft, description: e.target.value })} placeholder="Optional — shown to members" />}
         {!solo && !draft.seriesId && <ClassPhotoField value={draft.imageUrl} onChange={(url) => setDraft({ ...draft, imageUrl: url })} title={draft.title} />}
         {solo && editing && (
-          <div style={{ background: "var(--color-bg-surface-secondary-default)", borderRadius: "var(--radius-item)", padding: "12px 14px" }}>
+          <div className="bq-class-sheet-box">
             <div className="bq-label">COMING · {draft.coming?.length ?? 0}</div>
-            <div style={{ font: "600 var(--text-subheadline-size)/1.5 var(--font-family-body)", marginTop: 4 }}>{draft.coming?.length ? draft.coming.join(", ") : "No one has said they're coming yet."}</div>
+            <div className="bq-class-sheet-text">{draft.coming?.length ? draft.coming.join(", ") : "No one has said they're coming yet."}</div>
           </div>
         )}
         <LocationField locations={locations} value={draft.locationId} onChange={(id) => setDraft({ ...draft, locationId: id })} />
@@ -100,21 +101,20 @@ export function ClassSheet({
         <div  className="bq-error bq-error--spaced bq-rise">{error}</div>
       )}
 
-      <Button fullWidth size="lg" style={{ marginTop: 16 }} disabled={busy} onClick={save}>
+      <Button className="bq-mt-4" fullWidth size="lg" disabled={busy} onClick={save}>
         {busy ? "Saving…" : editing ? "Save changes" : "Create session"}
       </Button>
       {editing && draft.id && (
-        <Button
+        <Button className="bq-mt-2"
           variant="danger"
           fullWidth
-          style={{ marginTop: 8 }}
           disabled={busy}
           onClick={() => onRequestCancel({ id: draft.id!, title: draft.title, description: draft.description || null, startsAt: new Date(`${draft.date}T${draft.time}:00`).toISOString(), price: Number(draft.price) || 0, status: "active" })}
         >
           Cancel this session
         </Button>
       )}
-      <Button variant="quiet" fullWidth style={{ marginTop: 8 }} disabled={busy} onClick={onClose}>
+      <Button className="bq-mt-2" variant="quiet" fullWidth disabled={busy} onClick={onClose}>
         Close
       </Button>
     </Sheet>

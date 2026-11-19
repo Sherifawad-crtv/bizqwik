@@ -1,6 +1,7 @@
 import { NavLink } from "react-router-dom";
 import { Avatar } from "../../design-system/components/Avatar";
 import { useIsMobile } from "../../design-system/hooks/useIsMobile";
+import "./HomeAvatar.css";
 
 /** The one place the avatar (and its greeting) lives — mobile only, blended
  * into each role's home screen instead of a persistent header bar, tapping
@@ -13,11 +14,11 @@ export function HomeAvatar({ name, avatarUrl, greeting }: { name: string; avatar
   if (!isMobile) return null;
 
   return (
-    <div style={{ display: "flex", alignItems: "center", justifyContent: greeting ? "space-between" : "flex-end", gap: 12, marginBottom: 28 }}>
+    <div className="bq-flex bq-items-center bq-gap-3 bq-mb-28px" style={{ justifyContent: greeting ? "space-between" : "flex-end" }}>
       {greeting && (
-        <div style={{ flex: 1, minWidth: 0, font: "800 28px/1.15 var(--font-family-body)", letterSpacing: "-.02em" }}>{greeting}</div>
+        <div className="bq-home-avatar-title">{greeting}</div>
       )}
-      <NavLink to="/account" aria-label="Account" style={{ flex: "none" }}>
+      <NavLink className="bq-flex-none" to="/account" aria-label="Account">
         <Avatar name={name} size={64} src={avatarUrl} />
       </NavLink>
     </div>

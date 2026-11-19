@@ -1,0 +1,35 @@
+/* Styles for DaySessionsSheet.tsx. Tokens only; see DESIGN_SYSTEM.md. */
+
+.bq-day-sessions-sheet-spacing {
+  margin: 4px 0 4px;
+}
+
+.bq-day-sessions-sheet-meta {
+  font: 400 var(--text-footnote-size) var(--font-family-mono);
+  color: var(--color-text-secondary-default);
+  margin-bottom: 16px;
+}
+
+.bq-day-sessions-sheet-box {
+  background: var(--color-bg-surface-secondary-default);
+  border: 1px solid var(--color-border-primary-default);
+  border-radius: var(--radius-item);
+  padding: 10px 14px;
+}
+
+.bq-day-sessions-sheet-text {
+  font: 600 var(--text-body-size) var(--font-family-body);
+  color: var(--color-text-primary-default);
+}
+
+.bq-day-sessions-sheet-label {
+  font: 700 10px var(--font-family-mono);
+  letter-spacing: .08em;
+  color: var(--color-text-tertiary-default);
+}
+
+.bq-day-sessions-sheet-meta-2 {
+  font: 600 var(--text-footnote-size) var(--font-family-mono);
+  color: var(--color-text-secondary-default);
+  white-space: nowrap;
+}

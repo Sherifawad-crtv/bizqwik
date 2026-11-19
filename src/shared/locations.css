@@ -1,0 +1,6 @@
+/* Styles for locations.tsx. Tokens only; see DESIGN_SYSTEM.md. */
+
+.bq-locations-location-switcher-size {
+  height: 44px;
+  margin-bottom: 16px;
+}

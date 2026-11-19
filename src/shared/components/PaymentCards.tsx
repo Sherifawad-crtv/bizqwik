@@ -2,6 +2,7 @@ import { Icon } from "../../design-system/components/Icon";
 import { useAuth } from "../auth";
 import { isSoloOwner } from "../screen/nav";
 import type { PayMethod } from "../types";
+import "./PaymentCards.css";
 
 const OPTIONS: { value: PayMethod; label: string; icon: "cash" | "card" | "wallet"; note: string }[] = [
   { value: "cash", label: "Cash", icon: "cash", note: "Paid in cash" },
@@ -15,7 +16,7 @@ export function PaymentCards({ value, onChange }: { value: PayMethod; onChange: 
   // A solo business has no card machine: cash or InstaPay only.
   const options = profile && isSoloOwner(profile.role, orgMode) ? OPTIONS.filter((o) => o.value !== "card") : OPTIONS;
   return (
-    <div role="radiogroup" aria-label="Payment" style={{ display: "grid", gridTemplateColumns: `repeat(${options.length}, 1fr)`, gap: 8 }}>
+    <div className="bq-grid bq-gap-2" role="radiogroup" aria-label="Payment" style={{ gridTemplateColumns: `repeat(${options.length}, 1fr)` }}>
       {options.map((o) => {
         const on = value === o.value;
         return (
@@ -41,8 +42,8 @@ export function PaymentCards({ value, onChange }: { value: PayMethod; onChange: 
           >
             <Icon name={o.icon} size={40} solid={on} />
             <span>
-              <span style={{ display: "block", font: "800 17px var(--font-family-body)", letterSpacing: "-.01em" }}>{o.label}</span>
-              <span style={{ display: "block", font: "400 var(--text-caption-1-size) var(--font-family-mono)", color: "var(--color-text-secondary-default)", marginTop: 2 }}>{o.note}</span>
+              <span className="bq-payment-cards-title">{o.label}</span>
+              <span className="bq-payment-cards-meta">{o.note}</span>
             </span>
           </button>
         );

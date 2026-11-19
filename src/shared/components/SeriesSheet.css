@@ -1,0 +1,26 @@
+/* Styles for SeriesSheet.tsx. Tokens only; see DESIGN_SYSTEM.md. */
+
+.bq-series-sheet-weekday-picker-label {
+  font: 700 var(--text-caption-2-size) var(--font-family-mono);
+  letter-spacing: .08em;
+  color: var(--color-text-tertiary-default);
+  margin-bottom: 8px;
+}
+
+.bq-series-sheet-weekday-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
+
+.bq-series-sheet-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.bq-series-sheet-meta {
+  margin-top: 10px;
+  font: 400 var(--text-caption-1-size)/1.5 var(--font-family-mono);
+  color: var(--color-text-tertiary-default);
+}

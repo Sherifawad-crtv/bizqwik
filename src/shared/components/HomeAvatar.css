@@ -1,0 +1,8 @@
+/* Styles for HomeAvatar.tsx. Tokens only; see DESIGN_SYSTEM.md. */
+
+.bq-home-avatar-title {
+  flex: 1;
+  min-width: 0;
+  font: 800 28px/1.15 var(--font-family-body);
+  letter-spacing: -.02em;
+}

@@ -8,6 +8,7 @@ import { api } from "../api/backend";
 import type { Session } from "../types";
 import { dateLabelFull, daysInMonth, egp, isoDate, sessionStamp } from "../format";
 import { IconButton } from "../../design-system/components/IconButton";
+import "./DaySessionsSheet.css";
 
 interface DaySessionsSheetProps {
   open: boolean;
@@ -76,28 +77,28 @@ export function DaySessionsSheet({ open, onClose, coachId, month, date, sessions
     <>
       <Sheet open={open} onClose={onClose}>
         <div className="bq-label">{editable ? "EDIT DAY" : "DAY"}</div>
-        <div className="bq-stat-lg" style={{ margin: "4px 0 4px" }}>{dateLabelFull(shown.date)}</div>
-        <div style={{ font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-secondary-default)", marginBottom: 16 }}>
+        <div className="bq-stat-lg bq-day-sessions-sheet-spacing">{dateLabelFull(shown.date)}</div>
+        <div className="bq-day-sessions-sheet-meta">
           {shownSessions.length} {shownSessions.length === 1 ? "session" : "sessions"} · {egp(shownSessions.length * rate)}
         </div>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        <div className="bq-flex bq-col bq-gap-2">
           {shownSessions.map((s, i) => (
-            <div key={s.id} style={{ background: "var(--color-bg-surface-secondary-default)", border: "1px solid var(--color-border-primary-default)", borderRadius: "var(--radius-item)", padding: "10px 14px" }}>
+            <div className="bq-day-sessions-sheet-box" key={s.id}>
               {movingId === s.id ? (
                 <DateField value={s.date} min={min} max={max} onChange={(d) => move(s.id, d)} />
               ) : (
-                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <span style={{ font: "600 var(--text-body-size) var(--font-family-body)", color: "var(--color-text-primary-default)" }}>Session {i + 1}</span>
-                  <span style={{ font: "700 10px var(--font-family-mono)", letterSpacing: ".08em", color: "var(--color-text-tertiary-default)" }}>{s.source === "qr" ? "QR" : "MANUAL"}</span>
+                <div className="bq-flex bq-items-center bq-gap-10px">
+                  <span className="bq-day-sessions-sheet-text">Session {i + 1}</span>
+                  <span className="bq-day-sessions-sheet-label">{s.source === "qr" ? "QR" : "MANUAL"}</span>
                   {(() => {
                     const st = sessionStamp(s);
-                    return st ? <span data-testid="session-time" style={{ font: "600 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-secondary-default)", whiteSpace: "nowrap" }}>{st.text}</span> : null;
+                    return st ? <span className="bq-day-sessions-sheet-meta-2" data-testid="session-time">{st.text}</span> : null;
                   })()}
                   {editable && (
                     <>
                       {!scanOnly && (
-                      <IconButton icon="pencil" label="Change date" disabled={busyId === s.id} style={{ marginLeft: "auto" }} onClick={() => setMovingId(s.id)} />
+                      <IconButton className="bq-ml-auto" icon="pencil" label="Change date" disabled={busyId === s.id} onClick={() => setMovingId(s.id)} />
                       )}
                       <IconButton icon="trash" label="Remove session" tone="danger" disabled={busyId === s.id} style={{ marginLeft: scanOnly ? "auto" : undefined }} onClick={() => setRemovingId(s.id)} />
                     </>
@@ -115,11 +116,11 @@ export function DaySessionsSheet({ open, onClose, coachId, month, date, sessions
         )}
 
         {editable && !scanOnly && (
-          <Button variant="secondary" fullWidth style={{ marginTop: 14 }} onClick={addAnother}>
+          <Button className="bq-mt-14px" variant="secondary" fullWidth onClick={addAnother}>
             + Add another session this date
           </Button>
         )}
-        <Button variant="quiet" fullWidth style={{ marginTop: 8 }} onClick={onClose}>
+        <Button className="bq-mt-2" variant="quiet" fullWidth onClick={onClose}>
           Close
         </Button>
       </Sheet>

@@ -1,0 +1,40 @@
+/* Styles for ScanFlow.tsx. Tokens only; see DESIGN_SYSTEM.md. */
+
+.bq-scan-flow-title {
+  font: 800 var(--text-title-1-size)/1.2 var(--font-family-body);
+  letter-spacing: -.02em;
+  margin: 4px 0 12px;
+}
+
+.bq-scan-flow-text {
+  font: 600 var(--text-subheadline-size)/1.5 var(--font-family-body);
+  color: var(--color-text-status-danger-default);
+  background: var(--color-bg-fill-status-danger-default);
+  border-radius: var(--radius-item);
+  padding: 12px 14px;
+}
+
+.bq-scan-flow-pt-deliver-sheet-spacing {
+  margin: 4px 0 4px;
+}
+
+.bq-scan-flow-pt-deliver-sheet-meta {
+  font: 400 var(--text-footnote-size) var(--font-family-mono);
+  color: var(--color-text-secondary-default);
+  margin-bottom: 16px;
+}
+
+.bq-scan-flow-pt-deliver-sheet-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  background: var(--color-bg-surface-secondary-default);
+  border: 1px solid var(--color-border-primary-default);
+  border-radius: var(--radius-item);
+  padding: 14px 16px;
+}
+
+.bq-scan-flow-pt-deliver-sheet-title {
+  margin-left: auto;
+  font: 800 var(--text-title-1-size) var(--font-family-body);
+}

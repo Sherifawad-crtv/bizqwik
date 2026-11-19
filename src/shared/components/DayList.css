@@ -1,0 +1,26 @@
+/* Styles for DayList.tsx. Tokens only; see DESIGN_SYSTEM.md. */
+
+.bq-day-list-title {
+  font: 700 var(--text-callout-size) var(--font-family-body);
+  letter-spacing: -.01em;
+}
+
+.bq-day-list-meta {
+  font: 400 var(--text-footnote-size) var(--font-family-mono);
+  color: var(--color-text-secondary-default);
+}
+
+.bq-day-list-meta-2 {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  font: 600 var(--text-footnote-size) var(--font-family-mono);
+  color: var(--color-text-primary-default);
+}
+
+.bq-day-list-label {
+  font: 700 10px var(--font-family-mono);
+  letter-spacing: .08em;
+  color: var(--color-text-tertiary-default);
+  min-width: 52px;
+}
