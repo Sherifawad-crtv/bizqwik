@@ -11,6 +11,7 @@ import { Spinner } from "../../design-system/components/Spinner";
 import { MotionList } from "../../design-system/components/MotionList";
 import { IconButton } from "../../design-system/components/IconButton";
 import { InviteSheet } from "../../shared/components/InviteFlow";
+import "./Invites.css";
 
 
 export function InvitesPanel() {
@@ -25,10 +26,10 @@ export function InvitesPanel() {
 
   return (
     <div>
-      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
+      <div className="bq-flex bq-items-center bq-gap-10px bq-mb-14px">
         <span className="bq-h2">Pending invites</span>
         <span className="bq-meta">{data.invites.length}</span>
-        <Button size="md" style={{ marginLeft: "auto", height: 40, padding: "0 16px" }} onClick={() => setOpen(true)}>
+        <Button className="bq-manage-invites-invites-panel-btn" size="md" onClick={() => setOpen(true)}>
           + Invite
         </Button>
       </div>
@@ -38,7 +39,7 @@ export function InvitesPanel() {
 {data.invites.map((inv, i) => (
           <div key={inv.email} className={`bq-listrow ${!(i === data.invites.length - 1) ? "bq-listrow--divider" : ""}`}>
             <div className="bq-grow">
-              <div style={{ font: "700 var(--text-callout-size) var(--font-family-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{inv.email}</div>
+              <div className="bq-manage-invites-invites-panel-title">{inv.email}</div>
               <div className="bq-meta">
                 {ROLE_LABELS[inv.role].toUpperCase()}
                 {inv.tierId ? ` · ${tiers.find((t) => t.id === inv.tierId)?.name ?? ""}` : ""}

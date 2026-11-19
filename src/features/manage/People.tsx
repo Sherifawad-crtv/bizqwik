@@ -1,3 +1,4 @@
+import { cx } from "../../design-system/cx";
 import { EmptyState } from "../../design-system/components/EmptyState";
 import { useEffect, useState } from "react";
 import { useAsync } from "../../shared/api/useAsync";
@@ -13,6 +14,7 @@ import { SelectField } from "../../design-system/components/FormField";
 import { Avatar } from "../../design-system/components/Avatar";
 import { Spinner } from "../../design-system/components/Spinner";
 import { useAuth } from "../../shared/auth";
+import "./People.css";
 
 export function PeoplePanel() {
   const { profile: me } = useAuth();
@@ -25,7 +27,7 @@ export function PeoplePanel() {
 
   return (
     <div>
-      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
+      <div className="bq-flex bq-items-center bq-gap-10px bq-mb-14px">
         <span className="bq-h2">People</span>
         <span className="bq-meta">{data.profiles.length}</span>
       </div>
@@ -35,7 +37,7 @@ export function PeoplePanel() {
           <button
             key={p.id}
             onClick={() => setEditing(p)}
-            className={`bq-plain bq-listrow ${!(i === data.profiles.length - 1) ? "bq-listrow--divider" : ""}`} style={{ width: "100%", background: "none", cursor: "pointer", textAlign: "left" }}
+            className={cx(`bq-plain bq-listrow ${!(i === data.profiles.length - 1) ? "bq-listrow--divider" : ""}`, "bq-manage-people-people-panel-btn")}
         >
             <Avatar name={p.name} size={36} src={p.avatarUrl} />
             <div className="bq-grow">
@@ -108,18 +110,18 @@ function PersonSheet({
   return (
     <>
       <Sheet open={open} onClose={onClose}>
-        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 18 }}>
+        <div className="bq-flex bq-items-center bq-gap-3 bq-mb-18px">
           <Avatar name={shown.name} size={44} src={shown.avatarUrl} />
           <div>
-            <div style={{ font: "800 22px var(--font-family-body)", letterSpacing: "-.01em" }}>{shown.name}</div>
+            <div className="bq-manage-people-person-sheet-title">{shown.name}</div>
             <div className="bq-meta">{shown.email}</div>
           </div>
         </div>
 
         <div className="bq-stack">
-          <div style={{ background: "var(--color-bg-surface-secondary-default)", border: "1px solid var(--color-border-primary-default)", borderRadius: "var(--radius-item)", padding: "12px 16px" }}>
+          <div className="bq-manage-people-person-sheet-box">
             <div className="bq-label">ROLE</div>
-            <div style={{ font: "600 var(--text-callout-size) var(--font-family-body)" }}>{ROLE_LABELS[shown.role]}</div>
+            <div className="bq-manage-people-person-sheet-text">{ROLE_LABELS[shown.role]}</div>
           </div>
           {hasTier(shown.role) && (
             <SelectField
@@ -131,7 +133,7 @@ function PersonSheet({
             />
           )}
           {hasTier(shown.role) && tiers.length === 0 && (
-            <div style={{ font: "400 var(--text-caption-1-size)/1.5 var(--font-family-mono)", color: "var(--color-text-tertiary-default)", padding: "0 2px" }}>
+            <div className="bq-manage-people-person-sheet-meta">
               No pay tiers yet — create one in the Tiers tab to set this person's rate.
             </div>
           )}
@@ -144,11 +146,11 @@ function PersonSheet({
         )}
 
         {!isSelf && (
-          <Button variant="danger" fullWidth style={{ marginTop: 18 }} onClick={() => setConfirmRemove(true)}>
+          <Button className="bq-mt-18px" variant="danger" fullWidth onClick={() => setConfirmRemove(true)}>
             Remove profile
           </Button>
         )}
-        <Button variant="quiet" fullWidth style={{ marginTop: 8 }} onClick={onClose}>
+        <Button className="bq-mt-2" variant="quiet" fullWidth onClick={onClose}>
           Close
         </Button>
       </Sheet>

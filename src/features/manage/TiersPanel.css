@@ -1,0 +1,49 @@
+/* Styles for TiersPanel.tsx. Tokens only; see DESIGN_SYSTEM.md. */
+
+.bq-manage-tiers-panel-btn {
+  margin-left: auto;
+  height: 40px;
+  padding: 0 16px;
+}
+
+.bq-manage-tiers-panel-title {
+  font: 800 var(--text-title-1-size)/1.2 var(--font-family-body);
+  letter-spacing: -.02em;
+  margin: 4px 0 4px;
+}
+
+.bq-manage-tiers-panel-meta {
+  font: 400 var(--text-footnote-size)/1.5 var(--font-family-mono);
+  color: var(--color-text-secondary-default);
+  margin-bottom: 14px;
+}
+
+.bq-manage-tiers-panel-box {
+  background: var(--color-bg-surface-secondary-default);
+  border-radius: var(--radius-item);
+  padding: 6px 16px;
+  margin-bottom: 16px;
+}
+
+.bq-manage-tiers-panel-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 10px 0;
+}
+
+.bq-manage-tiers-panel-title-2 {
+  font: 700 var(--text-body-size) var(--font-family-body);
+}
+
+.bq-manage-tiers-panel-meta-2 {
+  margin-left: auto;
+  font: 400 var(--text-caption-1-size) var(--font-family-mono);
+  color: var(--color-text-tertiary-default);
+}
+
+.bq-manage-tiers-panel-title-3 {
+  font: 700 var(--text-body-size) var(--font-family-body);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

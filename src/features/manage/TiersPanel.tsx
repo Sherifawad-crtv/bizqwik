@@ -15,6 +15,7 @@ import { SheetSuccessIcon } from "../../design-system/components/SheetSuccessIco
 import { useSheetSuccess } from "../../design-system/components/useSheetSuccess";
 import { MotionList } from "../../design-system/components/MotionList";
 import { IconButton } from "../../design-system/components/IconButton";
+import "./TiersPanel.css";
 
 export function TiersPanel({ onOpenPeople, onOpenInvites }: { onOpenPeople: () => void; onOpenInvites: () => void }) {
   const { data } = useAsync(() => api.tiers(), []);
@@ -31,10 +32,10 @@ export function TiersPanel({ onOpenPeople, onOpenInvites }: { onOpenPeople: () =
 
   return (
     <div>
-      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
+      <div className="bq-flex bq-items-center bq-gap-10px bq-mb-14px">
         <span className="bq-h2">Tiers</span>
         <span className="bq-meta">{data.tiers.length}</span>
-        <Button size="md" style={{ marginLeft: "auto", height: 40, padding: "0 16px" }} onClick={() => setEditing("new")}>
+        <Button className="bq-manage-tiers-panel-btn" size="md" onClick={() => setEditing("new")}>
           + New tier
         </Button>
       </div>
@@ -61,19 +62,19 @@ export function TiersPanel({ onOpenPeople, onOpenInvites }: { onOpenPeople: () =
       {shownDeleting && (onTier(shownDeleting.id).length > 0 || invitedTo(shownDeleting.id).length > 0) ? (
         <Sheet open={!!deleting} onClose={() => setDeleting(null)}>
           <div className="bq-label">DELETE TIER</div>
-          <div style={{ font: "800 var(--text-title-1-size)/1.2 var(--font-family-body)", letterSpacing: "-.02em", margin: "4px 0 4px" }}>{shownDeleting.name} is still in use</div>
-          <div style={{ font: "400 var(--text-footnote-size)/1.5 var(--font-family-mono)", color: "var(--color-text-secondary-default)", marginBottom: 14 }}>Move these to another tier first, then delete it.</div>
-          <div style={{ background: "var(--color-bg-surface-secondary-default)", borderRadius: "var(--radius-item)", padding: "6px 16px", marginBottom: 16 }}>
+          <div className="bq-manage-tiers-panel-title">{shownDeleting.name} is still in use</div>
+          <div className="bq-manage-tiers-panel-meta">Move these to another tier first, then delete it.</div>
+          <div className="bq-manage-tiers-panel-box">
             {onTier(shownDeleting.id).map((p) => (
-              <div key={p.id} style={{ display: "flex", alignItems: "baseline", gap: 10, padding: "10px 0" }}>
-                <span style={{ font: "700 var(--text-body-size) var(--font-family-body)" }}>{p.name}</span>
-                <span style={{ marginLeft: "auto", font: "400 var(--text-caption-1-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)" }}>{ROLE_LABELS[p.role]}</span>
+              <div className="bq-manage-tiers-panel-row" key={p.id}>
+                <span className="bq-manage-tiers-panel-title-2">{p.name}</span>
+                <span className="bq-manage-tiers-panel-meta-2">{ROLE_LABELS[p.role]}</span>
               </div>
             ))}
             {invitedTo(shownDeleting.id).map((i) => (
-              <div key={i.email} style={{ display: "flex", alignItems: "baseline", gap: 10, padding: "10px 0" }}>
-                <span style={{ font: "700 var(--text-body-size) var(--font-family-body)", overflow: "hidden", textOverflow: "ellipsis" }}>{i.email}</span>
-                <span style={{ marginLeft: "auto", font: "400 var(--text-caption-1-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)" }}>Pending invite</span>
+              <div className="bq-manage-tiers-panel-row" key={i.email}>
+                <span className="bq-manage-tiers-panel-title-3">{i.email}</span>
+                <span className="bq-manage-tiers-panel-meta-2">Pending invite</span>
               </div>
             ))}
           </div>
@@ -89,7 +90,7 @@ export function TiersPanel({ onOpenPeople, onOpenInvites }: { onOpenPeople: () =
           >
             {onTier(shownDeleting.id).length > 0 ? "Change their tier in People" : "Go to pending invites"}
           </Button>
-          <Button variant="quiet" fullWidth style={{ marginTop: 8 }} onClick={() => setDeleting(null)}>
+          <Button className="bq-mt-2" variant="quiet" fullWidth onClick={() => setDeleting(null)}>
             Cancel
           </Button>
         </Sheet>
@@ -176,10 +177,10 @@ export function TierSheet({ open, tier: tierProp, onClose }: { open: boolean; ti
               {error}
             </div>
           )}
-          <Button fullWidth size="lg" style={{ marginTop: 16 }} disabled={busy} onClick={save}>
+          <Button className="bq-mt-4" fullWidth size="lg" disabled={busy} onClick={save}>
             {busy ? "Saving…" : tier ? "Save changes" : "Create tier"}
           </Button>
-          <Button variant="secondary" fullWidth style={{ marginTop: 8 }} onClick={onClose} disabled={busy}>
+          <Button className="bq-mt-2" variant="secondary" fullWidth onClick={onClose} disabled={busy}>
             Cancel
           </Button>
         </>
