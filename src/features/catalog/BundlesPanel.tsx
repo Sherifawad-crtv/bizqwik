@@ -18,6 +18,7 @@ import { useSheetSuccess } from "../../design-system/components/useSheetSuccess"
 import { useAuth } from "../../shared/auth";
 import { MotionList } from "../../design-system/components/MotionList";
 import { IconButton } from "../../design-system/components/IconButton";
+import "./BundlesPanel.css";
 
 export function BundlesPanel() {
   const { data: raw } = useAsync(() => api.bundleTypes(), []);
@@ -35,10 +36,10 @@ export function BundlesPanel() {
 
   return (
     <div>
-      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
+      <div className="bq-flex bq-items-center bq-gap-10px bq-mb-14px">
         <span className="bq-h2">Private training bundles</span>
         <span className="bq-meta">{rows.length}</span>
-        <Button size="md" style={{ marginLeft: "auto", height: 40, padding: "0 16px" }} onClick={() => setEditing("new")}>
+        <Button className="bq-catalog-bundles-panel-btn" size="md" onClick={() => setEditing("new")}>
           + New bundle
         </Button>
       </div>
@@ -48,7 +49,7 @@ export function BundlesPanel() {
 {rows.map((b, i) => (
           <div key={b.id} className={`bq-listrow ${!(i === rows.length - 1) ? "bq-listrow--divider" : ""}`}>
             <div className="bq-grow">
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <div className="bq-flex bq-items-center bq-gap-2">
                 <span className="bq-h3">{b.name}</span>
                 <CategoryPill name={b.name} />
                 <LocationPill locations={locations} id={b.locationId} />
@@ -173,10 +174,10 @@ export function BundleSheet({ open, bundleType: bundleTypeProp, onClose }: { ope
               {error}
             </div>
           )}
-          <Button fullWidth size="lg" style={{ marginTop: 16 }} disabled={busy} onClick={save}>
+          <Button className="bq-mt-4" fullWidth size="lg" disabled={busy} onClick={save}>
             {busy ? "Saving…" : bundleType ? "Save changes" : "Create bundle"}
           </Button>
-          <Button variant="secondary" fullWidth style={{ marginTop: 8 }} onClick={onClose} disabled={busy}>
+          <Button className="bq-mt-2" variant="secondary" fullWidth onClick={onClose} disabled={busy}>
             Cancel
           </Button>
         </>

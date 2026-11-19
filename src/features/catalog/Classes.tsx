@@ -15,6 +15,7 @@ import { useCatalogHere } from "./helpers";
 import { MotionList } from "../../design-system/components/MotionList";
 import { IconButton } from "../../design-system/components/IconButton";
 import { SeriesSheet } from "../../shared/components/SeriesSheet";
+import "./Classes.css";
 
 export function ClassesPanel({ solo }: { solo?: boolean }) {
   const navigate = useNavigate();
@@ -32,7 +33,7 @@ export function ClassesPanel({ solo }: { solo?: boolean }) {
       <SectionHeader
         count={active.length}
         right={
-          <Button size="md" style={{ height: 40, padding: "0 16px" }} onClick={() => setEditing("new")}>
+          <Button className="bq-catalog-classes-classes-panel-btn" size="md" onClick={() => setEditing("new")}>
             + New class
           </Button>
         }
@@ -50,22 +51,22 @@ export function ClassesPanel({ solo }: { solo?: boolean }) {
 
       <button
         onClick={() => navigate(solo ? "/bookings" : "/classes")}
-        className="bq-card" style={{ width: "100%", marginTop: 12, textAlign: "left", padding: "14px 18px", cursor: "pointer", display: "flex", alignItems: "center", gap: 12 }}
+        className="bq-card bq-catalog-classes-classes-panel-btn-2"
       >
-        <span style={{ color: "var(--color-bg-fill-primary-active)", display: "flex" }}>
+        <span className="bq-catalog-classes-classes-panel-row">
           <Icon name="calendar" size={20} />
         </span>
         <span className="bq-grow">
-          <span style={{ display: "block", font: "700 var(--text-body-size) var(--font-family-body)" }}>Upcoming sessions & rosters</span>
-          <span style={{ display: "block", font: "400 var(--text-caption-1-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)", marginTop: 2 }}>Who's booked, attendance, one-off changes</span>
+          <span className="bq-catalog-classes-classes-panel-title">Upcoming sessions & rosters</span>
+          <span className="bq-catalog-classes-classes-panel-meta">Who's booked, attendance, one-off changes</span>
         </span>
         <Icon name="chevron-right" size={18} />
       </button>
 
       {ended.length > 0 && (
         <>
-          <div style={{ font: "700 var(--text-caption-2-size) var(--font-family-mono)", letterSpacing: ".08em", color: "var(--color-text-tertiary-default)", margin: "24px 2px 10px" }}>ENDED · {ended.length}</div>
-          <div className="bq-card bq-card--clip" style={{ opacity: 0.6 }}>
+          <div className="bq-catalog-classes-classes-panel-label">ENDED · {ended.length}</div>
+          <div className="bq-card bq-card--clip bq-catalog-classes-classes-panel-part">
             {ended.map((s, i) => (
               <SeriesRow key={s.id} s={s} last={i === ended.length - 1} />
             ))}
@@ -81,16 +82,16 @@ export function ClassesPanel({ solo }: { solo?: boolean }) {
 function SeriesRow({ s, last, onEdit, locations = [] }: { s: ClassSeries; last: boolean; onEdit?: () => void; locations?: Location[] }) {
   return (
     <div className={`bq-listrow ${!(last) ? "bq-listrow--divider" : ""}`}>
-      {s.imageUrl && <img src={s.imageUrl} alt="" style={{ width: 40, height: 50, flex: "none", borderRadius: "var(--radius-chip)", objectFit: "cover" }} />}
+      {s.imageUrl && <img className="bq-catalog-classes-series-row-img" src={s.imageUrl} alt="" />}
       <div className="bq-grow">
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{ font: "700 var(--text-callout-size) var(--font-family-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s.title}</span>
+        <div className="bq-flex bq-items-center bq-gap-2">
+          <span className="bq-catalog-classes-series-row-title">{s.title}</span>
           <LocationPill locations={locations} id={s.locationId} />
         </div>
         <div className="bq-meta">
           {weekdaysLabel(s.weekdays)} · {timeLabel(s.startTime)} · {s.durationMin} min
         </div>
-        <div style={{ font: "500 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-secondary-default)", marginTop: 2 }}>
+        <div className="bq-catalog-classes-series-row-meta">
           {s.dropInPrice === 0 && s.monthlyPrice === 0 ? "" : <>Drop-in {egp(s.dropInPrice)} · Monthly {egp(s.monthlyPrice)}</>}
           {s.activeMonthlySubscribers ? ` · ${s.activeMonthlySubscribers} monthly` : ""}
         </div>

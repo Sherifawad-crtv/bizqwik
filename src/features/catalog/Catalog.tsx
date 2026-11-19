@@ -25,7 +25,7 @@ export function Catalog() {
   return (
     <div>
       {solo && <LocationSwitcher />}
-      <div style={{ display: "flex", justifyContent: "center", marginBottom: 18 }}>
+      <div className="bq-flex bq-justify-center bq-mb-18px">
         <Segmented
           value={tab}
           onChange={setTab}

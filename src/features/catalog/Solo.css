@@ -1,0 +1,70 @@
+/* Styles for Solo.tsx. Tokens only; see DESIGN_SYSTEM.md. */
+
+.bq-catalog-solo-solo-offer-btn {
+  height: 40px;
+  padding: 0 16px;
+}
+
+.bq-catalog-solo-solo-offer-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 8px;
+  align-items: end;
+}
+
+.bq-catalog-solo-solo-offer-img {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+  border-radius: var(--radius-chip);
+  background: var(--color-bg-qr-default);
+  border: 1px solid var(--color-border-primary-default);
+}
+
+.bq-catalog-solo-solo-offer-label {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  height: 40px;
+  padding: 0 16px;
+  border-radius: 999px;
+  background: var(--color-bg-fill-accent-default);
+  color: var(--color-bg-fill-primary-active);
+  font: 700 var(--text-subheadline-size) var(--font-family-body);
+  cursor: pointer;
+}
+
+.bq-catalog-solo-solo-offer-meta {
+  font: 400 var(--text-footnote-size) var(--font-family-mono);
+  color: var(--color-text-tertiary-default);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bq-catalog-solo-solo-offer-text {
+  font: 600 var(--text-footnote-size)/1.5 var(--font-family-body);
+  color: var(--color-text-status-danger-default);
+  background: var(--color-bg-fill-status-danger-default);
+  border-radius: var(--radius-item);
+  padding: 10px 14px;
+  margin-bottom: 12px;
+}
+
+.bq-catalog-solo-locations-card-spacing {
+  padding: 16px 20px;
+}
+
+.bq-catalog-solo-locations-card-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-top: 1px solid var(--color-border-primary-default);
+}
+
+.bq-catalog-solo-locations-card-text {
+  flex: 1;
+  min-width: 0;
+  font: 600 var(--text-body-size) var(--font-family-body);
+}

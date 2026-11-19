@@ -1,0 +1,31 @@
+/* Styles for Plans.tsx. Tokens only; see DESIGN_SYSTEM.md. */
+
+.bq-catalog-plans-section-btn {
+  height: 40px;
+  padding: 0 16px;
+}
+
+.bq-catalog-plans-section-title {
+  font: 700 var(--text-callout-size) var(--font-family-body);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bq-catalog-plans-plans-panel-meta {
+  font: 400 var(--text-caption-1-size)/1.5 var(--font-family-mono);
+  color: var(--color-text-tertiary-default);
+  margin: -12px 2px 0;
+}
+
+.bq-catalog-plans-plan-type-sheet-meta {
+  font: 400 var(--text-caption-1-size)/1.5 var(--font-family-mono);
+  color: var(--color-text-tertiary-default);
+  margin-top: -4px;
+}
+
+.bq-catalog-plans-plan-type-sheet-meta-2 {
+  margin-top: 10px;
+  font: 400 var(--text-caption-1-size)/1.5 var(--font-family-mono);
+  color: var(--color-text-tertiary-default);
+}

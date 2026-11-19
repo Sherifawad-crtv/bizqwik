@@ -1,0 +1,7 @@
+/* Styles for BundlesPanel.tsx. Tokens only; see DESIGN_SYSTEM.md. */
+
+.bq-catalog-bundles-panel-btn {
+  margin-left: auto;
+  height: 40px;
+  padding: 0 16px;
+}

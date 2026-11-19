@@ -10,6 +10,7 @@ import { TextField } from "../../design-system/components/FormField";
 import { canvasToDataUrl } from "../../shared/image";
 import { useCatalogHere } from "./helpers";
 import { IconButton } from "../../design-system/components/IconButton";
+import "./Solo.css";
 
 /** Resize a picked image to at most 700px and return it as a WebP data URL. */
 function readQr(file: File): Promise<string> {
@@ -101,16 +102,16 @@ export function SoloOffer() {
 
   const card: React.CSSProperties = { background: "var(--color-bg-surface-primary-default)", border: "1px solid var(--color-border-primary-default)", borderRadius: "var(--radius-card)", padding: "16px 20px", marginBottom: 12 };
   return (
-    <div style={{ marginBottom: 12 }}>
+    <div className="bq-mb-3">
       <div style={card}>
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        <div className="bq-flex bq-items-center bq-gap-3">
           <div className="bq-grow">
             <div className="bq-h3">Drop-in{catalogCurrent && catalogHere ? ` · ${catalogCurrent.name}` : ""}</div>
             <div className="bq-meta">
               {catalogHere ? (dropInList.length === 0 ? "Not set" : dropInList.map((o) => `${o.label} ${fmt(o.price)}`).join(" · ") + " EGP") : dropInPrice === null ? "Not set" : `${fmt(dropInPrice)} EGP · one visit`}
             </div>
           </div>
-          <Button size="md" variant="secondary" style={{ height: 40, padding: "0 16px" }} onClick={() => {
+          <Button className="bq-catalog-solo-solo-offer-btn" size="md" variant="secondary" onClick={() => {
             if (catalogHere) setRows(dropInList.length ? dropInList.map((o) => ({ label: o.label, price: String(o.price) })) : [{ label: "Kids", price: "" }, { label: "Adults", price: "" }]);
             else setPrice(dropInPrice === null ? "" : String(dropInPrice));
             setError(null);
@@ -120,26 +121,26 @@ export function SoloOffer() {
           </Button>
         </div>
         {editing && catalogHere && (
-          <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 10 }}>
+          <div className="bq-mt-3 bq-flex bq-col bq-gap-10px">
             {rows.map((r, i) => (
-              <div key={i} style={{ display: "grid", gridTemplateColumns: "1fr 1fr auto", gap: 8, alignItems: "end" }}>
+              <div className="bq-catalog-solo-solo-offer-grid" key={i}>
                 <TextField label="NAME" value={r.label} onChange={(e) => setRows(rows.map((x, j) => (j === i ? { ...x, label: e.target.value } : x)))} placeholder="Kids" />
                 <TextField label="PRICE · EGP" type="number" min={0} inputMode="decimal" value={r.price} onChange={(e) => setRows(rows.map((x, j) => (j === i ? { ...x, price: e.target.value } : x)))} />
-                <IconButton icon="trash" label="Remove" tone="danger" style={{ marginBottom: 6 }} onClick={() => setRows(rows.filter((_, j) => j !== i))} />
+                <IconButton className="bq-mb-6px" icon="trash" label="Remove" tone="danger" onClick={() => setRows(rows.filter((_, j) => j !== i))} />
               </div>
             ))}
             {rows.length < 6 && <Button variant="quiet" onClick={() => setRows([...rows, { label: "", price: "" }])}>+ Another drop-in</Button>}
-            <div style={{ display: "flex", gap: 8 }}>
-              <Button style={{ flex: 1 }} disabled={busy} onClick={saveList}>{busy ? "Saving…" : "Save"}</Button>
+            <div className="bq-flex bq-gap-2">
+              <Button className="bq-flex-1" disabled={busy} onClick={saveList}>{busy ? "Saving…" : "Save"}</Button>
               <Button variant="quiet" disabled={busy} onClick={() => setEditing(false)}>Cancel</Button>
             </div>
           </div>
         )}
         {editing && !catalogHere && (
-          <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 10 }}>
+          <div className="bq-mt-3 bq-flex bq-col bq-gap-10px">
             <TextField label="DROP-IN PRICE · EGP" type="number" min={0} inputMode="decimal" value={price} onChange={(e) => setPrice(e.target.value)} />
-            <div style={{ display: "flex", gap: 8 }}>
-              <Button style={{ flex: 1 }} disabled={busy} onClick={savePrice}>{busy ? "Saving…" : "Save"}</Button>
+            <div className="bq-flex bq-gap-2">
+              <Button className="bq-flex-1" disabled={busy} onClick={savePrice}>{busy ? "Saving…" : "Save"}</Button>
               <Button variant="quiet" disabled={busy} onClick={() => setEditing(false)}>Cancel</Button>
             </div>
           </div>
@@ -147,41 +148,41 @@ export function SoloOffer() {
       </div>
 
       <div style={card}>
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          {instapayQr && <img src={instapayQr} alt="Your InstaPay QR" style={{ width: 56, height: 56, objectFit: "contain", borderRadius: "var(--radius-chip)", background: "var(--color-bg-qr-default)", border: "1px solid var(--color-border-primary-default)" }} />}
+        <div className="bq-flex bq-items-center bq-gap-3">
+          {instapayQr && <img className="bq-catalog-solo-solo-offer-img" src={instapayQr} alt="Your InstaPay QR" />}
           <div className="bq-grow">
             <div className="bq-h3">InstaPay QR</div>
             <div className="bq-meta">{instapayQr ? "Shown when someone pays by InstaPay" : "Add it to show on drop-ins"}</div>
           </div>
-          <label style={{ flex: "none", display: "inline-flex", alignItems: "center", height: 40, padding: "0 16px", borderRadius: 999, background: "var(--color-bg-fill-accent-default)", color: "var(--color-bg-fill-primary-active)", font: "700 var(--text-subheadline-size) var(--font-family-body)", cursor: "pointer" }}>
+          <label className="bq-catalog-solo-solo-offer-label">
             {instapayQr ? "Replace" : "Add QR"}
             <input type="file" accept="image/*" hidden onChange={(e) => { void pickQr(e.target.files?.[0]); e.target.value = ""; }} />
           </label>
         </div>
       </div>
       <div style={card}>
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        <div className="bq-flex bq-items-center bq-gap-3">
           <div className="bq-grow">
             <div className="bq-h3">InstaPay address</div>
-            <div style={{ font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{instapayAddress ?? "Members copy this to pay you"}</div>
+            <div className="bq-catalog-solo-solo-offer-meta">{instapayAddress ?? "Members copy this to pay you"}</div>
           </div>
           {address === null && (
-            <Button size="md" variant="secondary" style={{ height: 40, padding: "0 16px" }} onClick={() => { setAddress(instapayAddress ?? ""); setError(null); }}>
+            <Button className="bq-catalog-solo-solo-offer-btn" size="md" variant="secondary" onClick={() => { setAddress(instapayAddress ?? ""); setError(null); }}>
               {instapayAddress ? "Edit" : "Add"}
             </Button>
           )}
         </div>
         {address !== null && (
-          <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 10 }}>
+          <div className="bq-mt-3 bq-flex bq-col bq-gap-10px">
             <TextField label="INSTAPAY ADDRESS" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="name@instapay" autoCapitalize="none" autoCorrect="off" />
-            <div style={{ display: "flex", gap: 8 }}>
-              <Button style={{ flex: 1 }} disabled={busy} onClick={saveAddress}>{busy ? "Saving…" : "Save"}</Button>
+            <div className="bq-flex bq-gap-2">
+              <Button className="bq-flex-1" disabled={busy} onClick={saveAddress}>{busy ? "Saving…" : "Save"}</Button>
               <Button variant="quiet" disabled={busy} onClick={() => setAddress(null)}>Cancel</Button>
             </div>
           </div>
         )}
       </div>
-      {error && <div className="bq-rise" style={{ font: "600 var(--text-footnote-size)/1.5 var(--font-family-body)", color: "var(--color-text-status-danger-default)", background: "var(--color-bg-fill-status-danger-default)", borderRadius: "var(--radius-item)", padding: "10px 14px", marginBottom: 12 }}>{error}</div>}
+      {error && <div className="bq-rise bq-catalog-solo-solo-offer-text">{error}</div>}
     </div>
   );
 }
@@ -213,23 +214,23 @@ export function LocationsCard() {
   };
 
   return (
-    <div style={{ marginBottom: 12 }}>
-      <div className="bq-card" style={{ padding: "16px 20px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: list.length ? 8 : 0 }}>
+    <div className="bq-mb-3">
+      <div className="bq-card bq-catalog-solo-locations-card-spacing">
+        <div className="bq-flex bq-items-center bq-gap-3" style={{ marginBottom: list.length ? 8 : 0 }}>
           <div className="bq-grow">
             <div className="bq-h3">Locations</div>
             <div className="bq-meta">{list.length === 0 ? "Working in more than one place? Add them." : "Each plan, PT bundle and session belongs to one."}</div>
           </div>
           {list.length < 10 && (
-            <Button size="md" variant="secondary" style={{ height: 40, padding: "0 16px" }} onClick={() => { setError(null); setEditing({ id: null, name: "" }); }}>
+            <Button className="bq-catalog-solo-solo-offer-btn" size="md" variant="secondary" onClick={() => { setError(null); setEditing({ id: null, name: "" }); }}>
               + Location
             </Button>
           )}
         </div>
         {list.map((l) => (
-          <div key={l.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 0", borderTop: "1px solid var(--color-border-primary-default)" }}>
+          <div className="bq-catalog-solo-locations-card-row" key={l.id}>
             <Icon name="map-pin" size={16} />
-            <span style={{ flex: 1, minWidth: 0, font: "600 var(--text-body-size) var(--font-family-body)" }}>{l.name}</span>
+            <span className="bq-catalog-solo-locations-card-text">{l.name}</span>
             <IconButton icon="pencil" label={`Rename ${l.name}`} onClick={() => { setError(null); setEditing({ id: l.id, name: l.name }); }} />
           </div>
         ))}
@@ -239,8 +240,8 @@ export function LocationsCard() {
         <div className="bq-title bq-rise">{editing?.id ? "Rename" : "Add a location"}</div>
         <TextField label="NAME" value={editing?.name ?? ""} onChange={(e) => setEditing((x) => (x ? { ...x, name: e.target.value } : x))} placeholder="e.g. Zamalek studio" />
         {error && <div  className="bq-error bq-error--spaced">{error}</div>}
-        <Button fullWidth size="lg" style={{ marginTop: 16 }} disabled={busy} onClick={save}>{busy ? "Saving…" : "Save"}</Button>
-        <Button variant="secondary" fullWidth style={{ marginTop: 8 }} disabled={busy} onClick={() => setEditing(null)}>Cancel</Button>
+        <Button className="bq-mt-4" fullWidth size="lg" disabled={busy} onClick={save}>{busy ? "Saving…" : "Save"}</Button>
+        <Button className="bq-mt-2" variant="secondary" fullWidth disabled={busy} onClick={() => setEditing(null)}>Cancel</Button>
       </Sheet>
     </div>
   );

@@ -22,6 +22,7 @@ import { useCatalogHere } from "./helpers";
 import { MotionList } from "../../design-system/components/MotionList";
 import { Tag } from "../../design-system/components/Tag";
 import { IconButton } from "../../design-system/components/IconButton";
+import "./Plans.css";
 
 export function PlansPanel({ solo }: { solo?: boolean }) {
   const { data } = useAsync(() => api.planTypes(), []);
@@ -37,11 +38,11 @@ export function PlansPanel({ solo }: { solo?: boolean }) {
     // Plans taken off sale are gone from the list; people who hold one keep it.
     const rows = data.planTypes.filter((p) => p.kind === kind && p.active && atLocation(p.locationId, catalogHere));
     return (
-      <div style={{ marginBottom: 28 }}>
+      <div className="bq-mb-28px">
         <SectionHeader
           count={rows.length}
           right={
-            <Button size="md" style={{ height: 40, padding: "0 16px" }} onClick={() => setEditing({ kind, planType: null })}>
+            <Button className="bq-catalog-plans-section-btn" size="md" onClick={() => setEditing({ kind, planType: null })}>
               + {kind === "membership" ? "Membership" : "Bundle"}
             </Button>
           }
@@ -53,8 +54,8 @@ export function PlansPanel({ solo }: { solo?: boolean }) {
 {rows.map((p, i) => (
             <div key={p.id} className={`bq-listrow ${!(i === rows.length - 1) ? "bq-listrow--divider" : ""}`} style={{ opacity: p.active ? 1 : 0.6 }}>
               <div className="bq-grow">
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <span style={{ font: "700 var(--text-callout-size) var(--font-family-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.name}</span>
+                <div className="bq-flex bq-items-center bq-gap-2">
+                  <span className="bq-catalog-plans-section-title">{p.name}</span>
                   <CategoryPill name={p.name} />
                   <LocationPill locations={locations} id={p.locationId} />
                   {!p.active && <Tag>OFF SALE</Tag>}
@@ -81,7 +82,7 @@ export function PlansPanel({ solo }: { solo?: boolean }) {
     <div>
       {!solo && section("membership", "Memberships", solo ? "No memberships yet. A membership covers every class at its location for the months you choose." : "No memberships yet. A membership covers every class for the months you choose.")}
       {section("bundle", solo ? "Packages" : "Class bundles", solo ? "No packages yet. A package is a number of classes valid for 1 or 3 months; one class is used each day the member checks in." : "No bundles yet. A bundle is a pack of sessions: one is used each day the member checks in.")}
-      {!solo && <div style={{ font: "400 var(--text-caption-1-size)/1.5 var(--font-family-mono)", color: "var(--color-text-tertiary-default)", margin: "-12px 2px 0" }}>
+      {!solo && <div className="bq-catalog-plans-plans-panel-meta">
         Each class's monthly is set on the class itself. A member holds one group plan at a time, and a new one can only be bought once the current one is finished.
       </div>}
 
@@ -185,7 +186,7 @@ export function PlanTypeSheet({ open, kind: kindProp, planType: planTypeProp, on
         <>
           <div className="bq-label">{planType ? `EDIT ${noun.toUpperCase()}` : isBundle ? "NEW CLASS BUNDLE" : "NEW MEMBERSHIP"}</div>
           <div className="bq-title">{planType ? planType.name : isBundle ? "New bundle" : "New membership"}</div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <div className="bq-flex bq-col bq-gap-3">
             <TextField label="NAME" value={name} onChange={(e) => setName(e.target.value)} placeholder={isBundle ? "10-Class Pack" : "All-Access · 3 Months"} />
             <TextField label="PRICE · EGP" type="number" min={0} inputMode="decimal" value={price} onChange={(e) => setPrice(e.target.value)} />
             <LocationField locations={locations} value={locationId} onChange={setLocationId} />
@@ -194,7 +195,7 @@ export function PlanTypeSheet({ open, kind: kindProp, planType: planTypeProp, on
               <SelectField label="SHARED BY" value={shared} onChange={setShared} options={[{ value: "1", label: "One person" }, { value: "2", label: "2 people" }, { value: "3", label: "3 people" }, { value: "4", label: "4 people" }]} />
             )}
             {isBundle && Number(shared) > 1 && (
-              <div style={{ font: "400 var(--text-caption-1-size)/1.5 var(--font-family-mono)", color: "var(--color-text-tertiary-default)", marginTop: -4 }}>
+              <div className="bq-catalog-plans-plan-type-sheet-meta">
                 {Number(credits) > 0 && Number(credits) % Number(shared) === 0 ? `Each person gets ${Number(credits) / Number(shared)} classes and ${fmt(Number(price) / Number(shared))} EGP of the price, valid for the months below.` : "Classes and price are split evenly. Classes must divide evenly."} Sold at the desk to everyone at once.
               </div>
             )}
@@ -211,17 +212,17 @@ export function PlanTypeSheet({ open, kind: kindProp, planType: planTypeProp, on
               />
             )}
           </div>
-          <div style={{ marginTop: 10, font: "400 var(--text-caption-1-size)/1.5 var(--font-family-mono)", color: "var(--color-text-tertiary-default)" }}>
+          <div className="bq-catalog-plans-plan-type-sheet-meta-2">
             {isBundle ? "One session is used each day the member checks in (booking a class only reserves the spot). " : "Covers every class. "}
             Runs from the day it's bought. Changes apply to future sales only.
           </div>
           {error && (
             <div  className="bq-error bq-error--spaced bq-rise">{error}</div>
           )}
-          <Button fullWidth size="lg" style={{ marginTop: 16 }} disabled={busy} onClick={save}>
+          <Button className="bq-mt-4" fullWidth size="lg" disabled={busy} onClick={save}>
             {busy ? "Saving…" : planType ? "Save changes" : `Create ${noun}`}
           </Button>
-          <Button variant="secondary" fullWidth style={{ marginTop: 8 }} onClick={onClose} disabled={busy}>
+          <Button className="bq-mt-2" variant="secondary" fullWidth onClick={onClose} disabled={busy}>
             Cancel
           </Button>
         </>
