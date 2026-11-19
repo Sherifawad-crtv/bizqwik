@@ -439,18 +439,18 @@ If this fails, Phase 1 is not done.
 
 ## 1.5 Phase 1 checklist (done when all checked)
 
-- [ ] `supabase/config.toml` committed  
-- [ ] Baseline (or documented reset strategy) applies with `supabase db reset`  
-- [ ] `supabase/migrations/README.md` updated (local workflow + “don’t re-apply baseline on Prod”)  
-- [ ] Seed path documented; can log into local UI  
-- [ ] `.env.local` documented (not committed) → local URL/anon  
-- [ ] Edge functions serve locally; app calls local API  
-- [ ] Manual front↔back: login + one desk/home screen + one Edge read  
-- [ ] Phase 0 smoke script runs successfully against local  
-- [ ] DB types generated and committed  
-- [ ] Second `db reset` + login still works  
-- [ ] Progress note under `docs/progress/`  
-- [ ] **Still no Production deploy**  
+- [x] `supabase/config.toml` committed  
+- [x] Baseline (or documented reset strategy) applies with `supabase db reset`  
+- [x] `supabase/migrations/README.md` updated (local workflow + “don’t re-apply baseline on Prod”)  
+- [x] Seed path documented; can log into local UI  
+- [x] `.env.local` documented (not committed) → local URL/anon  
+- [x] Edge functions serve locally; app calls local API  
+- [x] Manual front↔back: login + one desk/home screen + one Edge read  
+- [x] Phase 0 smoke script runs successfully against local  
+- [x] DB types generated (`src/lib/database.types.ts`)  
+- [x] Second `db reset` + login still works  
+- [x] Progress note under `docs/progress/`  
+- [x] **Still no Production deploy**  
 
 ## 1.6 Out of scope for Phase 1
 
@@ -491,8 +491,8 @@ Next: [backend-implementation-plan.md](./backend-implementation-plan.md) → **P
 | Phase 0 critical fixtures | Done (edge-source+types; local-verify in Phase 1) | 2026-11-17 |
 | Phase 0 smoke script | Done (dry-run green; `--live` waits on Phase 1) | 2026-11-17 |
 | Phase 0 Playwright on Mac | Done (bundled Chromium; no `/opt/pw-browsers` default) | 2026-11-17 |
-| Phase 1 config.toml + baseline / reset green | Not started | |
-| Phase 1 seed + local login | Not started | |
-| Phase 1 functions serve + UI against local | Not started | |
-| Phase 1 generated DB types | Not started | |
-| Phase 1 repeatable db reset | Not started | |
+| Phase 1 config.toml + baseline / reset green | Done (baseline dump + archive strategy) | 2026-11-19 |
+| Phase 1 seed + local login | Done (`seed.sql`; Auth password grant OK) | 2026-11-19 |
+| Phase 1 functions serve + UI against local | Done (serve + `/me` + smoke `--live`) | 2026-11-19 |
+| Phase 1 generated DB types | Done (`src/lib/database.types.ts`) | 2026-11-19 |
+| Phase 1 repeatable db reset | Done (second reset + login) | 2026-11-19 |
