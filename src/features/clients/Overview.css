@@ -1,19 +1,19 @@
 /* Styles for Overview.tsx. Tokens only; see DESIGN_SYSTEM.md. */
 
-.bq-clients-overview-overview-cards-grid {
+.bq-clients-overview-cards-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit,minmax(140px,1fr));
   gap: 10px;
   margin-bottom: 18px;
 }
 
-.bq-clients-overview-overview-cards-btn {
+.bq-clients-overview-cards-btn {
   text-align: left;
   padding: 16px 18px;
   cursor: pointer;
 }
 
-.bq-clients-overview-overview-cards-title {
+.bq-clients-overview-cards-title {
   font: 800 var(--text-large-title-size) var(--font-family-body);
   letter-spacing: -.02em;
   margin-top: 6px;

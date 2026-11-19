@@ -26,13 +26,13 @@ export function Account() {
 
   return (
     <div>
-      <div className="bq-account-account-stack">
+      <div className="bq-account-stack">
         <Avatar name={profile.name} size={120} src={profile.avatarUrl} />
-        <div className="bq-account-account-title">{profile.name}</div>
-        <div className="bq-account-account-text">{ROLE_LABELS[profile.role]}</div>
+        <div className="bq-account-title">{profile.name}</div>
+        <div className="bq-account-text">{ROLE_LABELS[profile.role]}</div>
       </div>
 
-      <div className="bq-card bq-account-account-spacing">
+      <div className="bq-card bq-account-spacing">
         <NotificationsRow />
         <SettingsRow icon="account" label="Account Settings" onClick={() => navigate("/account/profile")} />
         <SettingsRow icon="lock" label="Password Settings" onClick={() => navigate("/account/password")} last />
@@ -109,14 +109,14 @@ function NotificationsRow() {
 
   if (needsHomeScreenInstall || iosVersionTooOld) {
     return (
-      <div className="bq-account-account-notifications-row-part">
-        <div className="bq-account-account-notifications-row-text">
+      <div className="bq-account-notifications-row-part">
+        <div className="bq-account-notifications-row-text">
           <span className="bq-flex-none bq-flex bq-fg-secondary">
             <Icon name="bell" size={19} />
           </span>
           Push Notifications
         </div>
-        <div className="bq-account-account-notifications-row-text-2">
+        <div className="bq-account-notifications-row-text-2">
           {iosVersionTooOld
             ? "Notifications need iOS/iPadOS 16.4 or later — update to enable this."
             : "On iPhone/iPad, add Bizqwik to your Home Screen first (Share → Add to Home Screen), then open it from there to turn this on."}
@@ -128,8 +128,8 @@ function NotificationsRow() {
   if (!supported) return null;
 
   return (
-    <div className="bq-account-account-notifications-row-part-2">
-      <button className="bq-account-account-notifications-row-btn"
+    <div className="bq-account-notifications-row-part-2">
+      <button className="bq-account-notifications-row-btn"
         onClick={toggle}
         role="switch"
         aria-checked={on}
@@ -141,7 +141,7 @@ function NotificationsRow() {
         <SwitchVisual checked={on} animate={ready} busy={busy} />
       </button>
       {error && (
-        <div className="bq-account-account-notifications-row-text-3">
+        <div className="bq-account-notifications-row-text-3">
           {error}
         </div>
       )}
@@ -153,7 +153,7 @@ function SettingsRow({ icon, label, onClick, last }: { icon: IconName; label: st
   return (
     <button
       onClick={onClick}
-      className={cx(`bq-plain bq-listrow bq-listrow--compact ${!(last) ? "bq-listrow--divider" : ""}`, "bq-account-account-settings-row-btn")}
+      className={cx(`bq-plain bq-listrow bq-listrow--compact ${!(last) ? "bq-listrow--divider" : ""}`, "bq-account-settings-row-btn")}
     >
       <span className="bq-flex-none bq-flex bq-fg-secondary">
         <Icon name={icon} size={19} />

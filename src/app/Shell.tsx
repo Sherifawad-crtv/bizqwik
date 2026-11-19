@@ -18,6 +18,7 @@ import { navFor, headerMode, accountBackTarget, isSoloOwner, isSubPage, homePath
 const BACK_W = 84;
 import { usePublishedActions, usePublishedBack } from "../shared/screen/floatingActions";
 import { useLatch } from "../shared/useLatch";
+import "./Shell.css";
 
 /** The top pill with the screen's title. When the title changes, the old words
  * fade out as the new ones fade in (stacked), and the pill eases to the new
@@ -40,24 +41,10 @@ function TitlePill({ title }: { title: string }) {
 
   const cell = { gridArea: "1 / 1", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } as const;
   return (
-    <div
-      style={{
-        position: "relative",
-        maxWidth: "100%",
-        width: width ?? undefined,
-        boxSizing: "border-box",
-        padding: "8px 18px",
-        borderRadius: 999,
-        background: "var(--color-bg-canvas-translucent)",
-        font: "800 17px var(--font-family-body)",
-        letterSpacing: "-.01em",
-        overflow: "hidden",
-        display: "grid",
-        justifyItems: "center",
-        transition: width !== null ? tr("width", QUICK_MS) : undefined,
-      }}
+    <div className="bq-shell-title-pill" data-testid="title-pill"
+      style={{ width: width ?? undefined, transition: width !== null ? tr("width", QUICK_MS) : undefined }}
     >
-      <span ref={sizer} aria-hidden style={{ position: "absolute", visibility: "hidden", whiteSpace: "nowrap", pointerEvents: "none" }}>{st.shown}</span>
+      <span className="bq-shell-title-pill-layer" ref={sizer} aria-hidden>{st.shown}</span>
       {st.leaving !== null && (
         <span key={`out-${st.leaving}`} aria-hidden style={{ ...cell, animation: `bqFadeOut ${QUICK_MS}ms ${EASE} forwards` }}>{st.leaving}</span>
       )}
@@ -112,47 +99,32 @@ function ShellInner() {
 
   if (isMobile) {
     return (
-      <div style={{ minHeight: "100svh", background: "var(--color-bg-canvas-default)", position: "relative", overflow: "hidden" }}>
+      <div className="bq-shell-inner-box">
         {(
-          <div
+          <div className="bq-shell-titlebar" data-testid="title-bar"
             aria-hidden={!barOn}
-            style={{
-              opacity: barOn ? 1 : 0,
-              pointerEvents: barOn ? "auto" : "none",
-              // Gone at once on the home screen (which has no title bar); only fades IN elsewhere.
-              transition: barOn ? tr("opacity", QUICK_MS) : "none",
-              visibility: barOn ? "visible" : "hidden",
-              position: "fixed",
-              top: 0,
-              left: 0,
-              right: 0,
-              zIndex: 50,
-              padding: "calc(14px + var(--safe-top)) 16px 10px",
-              display: "flex",
-              alignItems: "center",
-            }}
+            style={{ opacity: barOn ? 1 : 0, pointerEvents: barOn ? "auto" : "none", transition: barOn ? tr("opacity", QUICK_MS) : "none", visibility: barOn ? "visible" : "hidden" }}
           >
-            <div style={{ width: BACK_W, flex: "none", display: "flex" }}>
+            <div className="bq-flex-none bq-flex" style={{ width: BACK_W }}>
               {sub && (
                 <button
                   onClick={goBack}
                   aria-label="Back"
-                  className="bq-hit"
-                  style={{ display: "flex", alignItems: "center", gap: 2, border: 0, cursor: "pointer", color: "var(--color-text-primary-default)", background: "var(--color-bg-canvas-translucent)", borderRadius: 999, padding: "8px 14px 8px 8px", font: "700 var(--text-subheadline-size) var(--font-family-body)" }}
+                  className="bq-hit bq-shell-inner-btn"
                 >
                   <Icon name="chevron-left" size={18} />
                   Back
                 </button>
               )}
             </div>
-            <div style={{ flex: 1, minWidth: 0, display: "flex", justifyContent: "center" }}>
+            <div className="bq-flex-1 bq-min-w-0 bq-flex bq-justify-center">
               <TitlePill key={barEpoch} title={header.title} />
             </div>
-            <div style={{ width: BACK_W, flex: "none" }} />
+            <div className="bq-flex-none" style={{ width: BACK_W }} />
           </div>
         )}
 
-        <main style={{ position: "relative", height: "100svh", overflow: "hidden" }}>
+        <main className="bq-shell-inner-size">
           <PullToRefresh>
             <RouteTransition tabs={navFor(profile.role, orgMode)} role={profile.role} orgMode={orgMode} />
           </PullToRefresh>
@@ -163,15 +135,15 @@ function ShellInner() {
         {/* The bottom bar: the tab bar on tab screens, a sub-page's own actions on
             sub-pages. Both stay in one spot and hand over in one motion: the one
             leaving sinks and fades while the one arriving rises in. */}
-        <div style={{ position: "fixed", left: 0, right: 0, bottom: 0, zIndex: 55, padding: `0 ${narrow ? 12 : 16}px var(--bar-bottom)` }}>
-          <div style={{ position: "relative", height: 64 }}>
+        <div className="bq-shell-inner-layer" style={{ padding: `0 ${narrow ? 12 : 16}px var(--bar-bottom)` }}>
+          <div className="bq-shell-inner-size-2">
             <div className="bq-barlayer" data-on={!showActions} aria-hidden={showActions || undefined} inert={showActions} style={{ gap: narrow ? 8 : 12 }}>
               <BottomNav items={navFor(profile.role, orgMode)} />
               {showFab && <Fab />}
             </div>
             <div className="bq-barlayer" data-on={showActions} aria-hidden={!showActions || undefined} inert={!showActions}>
               {actionsNode && (
-                <div className="bq-grow" style={{ display: "flex", gap: 8, maxWidth: 520, padding: 8, background: "var(--color-bg-surface-primary-default)", border: "1px solid var(--color-border-primary-default)", borderRadius: "var(--radius-float)", boxShadow: "var(--shadow-float)" }}>
+                <div className="bq-grow bq-shell-inner-row-2">
                   {actionsNode}
                 </div>
               )}
@@ -183,35 +155,23 @@ function ShellInner() {
   }
 
   return (
-    <div style={{ minHeight: "100svh", background: "var(--color-bg-canvas-default)", display: "flex" }}>
+    <div className="bq-shell-inner-row-3">
       <Sidebar />
       {solo && (
-        <div style={{ position: "fixed", right: 32, bottom: 32, zIndex: 40 }}>
+        <div className="bq-shell-inner-layer-2">
           <Fab />
         </div>
       )}
       <div className="bq-grow">
-        <div
-          style={{
-            position: "sticky",
-            top: 0,
-            zIndex: 20,
-            background: "var(--color-bg-canvas-translucent-strong)",
-            borderBottom: "1px solid var(--color-border-primary-default)",
-            padding: "22px 30px 18px",
-            display: "flex",
-            alignItems: "flex-end",
-            gap: 14,
-            flexWrap: "wrap",
-          }}
+        <div className="bq-shell-inner-row-4"
         >
           <div>
             <div className="bq-label">{header.kicker}</div>
             <div className="bq-stat-lg">{header.title}</div>
           </div>
-          {header.right && <div style={{ marginLeft: "auto" }}>{header.right}</div>}
+          {header.right && <div className="bq-ml-auto">{header.right}</div>}
         </div>
-        <div style={{ padding: "24px 30px 60px" }}>
+        <div className="bq-shell-inner-spacing">
           <Suspense fallback={<Spinner />}><Outlet /></Suspense>
         </div>
       </div>

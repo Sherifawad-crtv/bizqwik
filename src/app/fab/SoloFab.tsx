@@ -8,6 +8,7 @@ import { CheckInList } from "../../features/frontdesk/CheckInList";
 import { SheetHeading } from "../../features/frontdesk/shared";
 import { FabButton } from "./FabButton";
 import { ScanFlow } from "../../shared/components/ScanFlow";
+import "./SoloFab.css";
 
 type SoloAction = "new" | "dropin" | "checkin" | "scan";
 
@@ -44,23 +45,22 @@ export function SoloFab({ size }: { size: number }) {
         <div className="bq-title">What do you need?</div>
         <div role="group" aria-label="Quick actions" className="bq-stack">
           {SOLO_OPTIONS.map((o) => (
-            <button
+            <button className="bq-solo-fab-btn"
               key={o.kind}
               onClick={() => pick(o.kind)}
-              style={{ textAlign: "left", background: "var(--color-bg-surface-secondary-default)", border: "1px solid var(--color-border-primary-default)", borderRadius: "var(--radius-item)", padding: "14px 16px", cursor: "pointer", display: "flex", alignItems: "center", gap: 14 }}
             >
-              <span style={{ width: 40, height: 40, flex: "none", borderRadius: "var(--radius-chip)", background: "var(--color-bg-fill-accent-default)", color: "var(--color-bg-fill-primary-active)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <span className="bq-solo-fab-row">
                 <Icon name={o.icon} size={20} />
               </span>
               <span className="bq-grow">
-                <span style={{ display: "block", font: "700 var(--text-callout-size) var(--font-family-body)" }}>{o.title}</span>
-                <span style={{ display: "block", font: "400 var(--text-caption-1-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)", marginTop: 2 }}>{o.sub}</span>
+                <span className="bq-solo-fab-title">{o.title}</span>
+                <span className="bq-solo-fab-meta">{o.sub}</span>
               </span>
               <Icon name="chevron-right" size={18} />
             </button>
           ))}
         </div>
-        <Button variant="quiet" fullWidth style={{ marginTop: 12 }} onClick={() => setMenuOpen(false)}>
+        <Button className="bq-mt-3" variant="quiet" fullWidth onClick={() => setMenuOpen(false)}>
           Cancel
         </Button>
       </Sheet>

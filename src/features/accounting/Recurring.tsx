@@ -43,7 +43,7 @@ export function RecurringPanel({ categories, onChanged, onCategoriesChanged }: {
 
   return (
     <div>
-      <SectionHeader count={recurring.length} right={<button className="bq-accounting-recurring-recurring-panel-btn" onClick={() => setManagingCats(true)}>Categories</button>}>
+      <SectionHeader count={recurring.length} right={<button className="bq-accounting-recurring-panel-btn" onClick={() => setManagingCats(true)}>Categories</button>}>
         Recurring expenses
       </SectionHeader>
       <Card className="bq-overflow-hidden bq-mb-14px" pad="none">
@@ -51,14 +51,14 @@ export function RecurringPanel({ categories, onChanged, onCategoriesChanged }: {
 {recurring.map((r, i) => {
           const next = nextOccurrence(r);
           return (
-            <button key={r.id} className={cx(`bq-plain bq-scale bq-listrow bq-listrow--compact ${!(i === recurring.length - 1) ? "bq-listrow--divider" : ""}`, "bq-accounting-recurring-recurring-panel-btn-2")} onClick={() => setEditing(r)} style={{ opacity: r.active ? 1 : 0.5 }}>
+            <button key={r.id} className={cx(`bq-plain bq-scale bq-listrow bq-listrow--compact ${!(i === recurring.length - 1) ? "bq-listrow--divider" : ""}`, "bq-accounting-recurring-panel-btn-2")} onClick={() => setEditing(r)} style={{ opacity: r.active ? 1 : 0.5 }}>
               <div className="bq-grow">
-                <div className="bq-accounting-recurring-recurring-panel-title">{r.categoryName}{r.note ? ` · ${r.note}` : ""}</div>
-                <div className="bq-accounting-recurring-recurring-panel-meta">
+                <div className="bq-accounting-recurring-panel-title">{r.categoryName}{r.note ? ` · ${r.note}` : ""}</div>
+                <div className="bq-accounting-recurring-panel-meta">
                   Day {r.dayOfMonth} · {r.active ? (next ? `Next ${next.slice(8, 10)} ${monthAbbr(next.slice(0, 7))}` : "Ended") : "Paused"}
                 </div>
               </div>
-              <div className="tabular bq-accounting-recurring-recurring-panel-meta-2">{fmt(r.amount)}</div>
+              <div className="tabular bq-accounting-recurring-panel-meta-2">{fmt(r.amount)}</div>
               <Icon name="chevron-right" size={16} />
             </button>
           );
@@ -161,7 +161,7 @@ function RecurringSheet({ template, categories, onClose, onSaved }: { template: 
             <TextField label="NOTE (OPTIONAL)" value={note} onChange={(e) => setNote(e.target.value)} placeholder="What it's for" />
             <TextField label="ENDS (OPTIONAL, YYYY-MM)" value={endMonth} onChange={(e) => setEndMonth(e.target.value)} placeholder="Leave blank to repeat forever" />
           </div>
-          <div className="bq-accounting-recurring-recurring-sheet-meta">
+          <div className="bq-accounting-recurring-sheet-meta">
             {isNew ? "Changing this later only affects future months — rows already made stay as they are." : "Editing changes future months only. Rows already made for past months are untouched."}
           </div>
           {error && <div  className="bq-error bq-error--spaced bq-rise">{error}</div>}

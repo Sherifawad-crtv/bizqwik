@@ -1,0 +1,30 @@
+/* Styles for BottomNav.tsx. Tokens only; see DESIGN_SYSTEM.md. */
+
+.bq-bottom-nav-layer {
+  position: absolute;
+  border-radius: 999px;
+  background: var(--color-bg-fill-accent-selected);
+}
+
+.bq-bottom-nav-row {
+  position: relative;
+  z-index: 1;
+  flex: none;
+  background: none;
+  border: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bq-bottom-nav-layer-2 {
+  position: absolute;
+}
+
+.bq-bottom-nav-row-2 {
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

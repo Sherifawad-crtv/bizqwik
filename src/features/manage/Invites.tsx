@@ -29,7 +29,7 @@ export function InvitesPanel() {
       <div className="bq-flex bq-items-center bq-gap-10px bq-mb-14px">
         <span className="bq-h2">Pending invites</span>
         <span className="bq-meta">{data.invites.length}</span>
-        <Button className="bq-manage-invites-invites-panel-btn" size="md" onClick={() => setOpen(true)}>
+        <Button className="bq-manage-invites-panel-btn" size="md" onClick={() => setOpen(true)}>
           + Invite
         </Button>
       </div>
@@ -39,7 +39,7 @@ export function InvitesPanel() {
 {data.invites.map((inv, i) => (
           <div key={inv.email} className={`bq-listrow ${!(i === data.invites.length - 1) ? "bq-listrow--divider" : ""}`}>
             <div className="bq-grow">
-              <div className="bq-manage-invites-invites-panel-title">{inv.email}</div>
+              <div className="bq-manage-invites-panel-title">{inv.email}</div>
               <div className="bq-meta">
                 {ROLE_LABELS[inv.role].toUpperCase()}
                 {inv.tierId ? ` · ${tiers.find((t) => t.id === inv.tierId)?.name ?? ""}` : ""}

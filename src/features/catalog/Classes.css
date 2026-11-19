@@ -1,11 +1,11 @@
 /* Styles for Classes.tsx. Tokens only; see DESIGN_SYSTEM.md. */
 
-.bq-catalog-classes-classes-panel-btn {
+.bq-catalog-classes-panel-btn {
   height: 40px;
   padding: 0 16px;
 }
 
-.bq-catalog-classes-classes-panel-btn-2 {
+.bq-catalog-classes-panel-btn-2 {
   width: 100%;
   margin-top: 12px;
   text-align: left;
@@ -16,31 +16,31 @@
   gap: 12px;
 }
 
-.bq-catalog-classes-classes-panel-row {
+.bq-catalog-classes-panel-row {
   color: var(--color-bg-fill-primary-active);
   display: flex;
 }
 
-.bq-catalog-classes-classes-panel-title {
+.bq-catalog-classes-panel-title {
   display: block;
   font: 700 var(--text-body-size) var(--font-family-body);
 }
 
-.bq-catalog-classes-classes-panel-meta {
+.bq-catalog-classes-panel-meta {
   display: block;
   font: 400 var(--text-caption-1-size) var(--font-family-mono);
   color: var(--color-text-tertiary-default);
   margin-top: 2px;
 }
 
-.bq-catalog-classes-classes-panel-label {
+.bq-catalog-classes-panel-label {
   font: 700 var(--text-caption-2-size) var(--font-family-mono);
   letter-spacing: .08em;
   color: var(--color-text-tertiary-default);
   margin: 24px 2px 10px;
 }
 
-.bq-catalog-classes-classes-panel-part {
+.bq-catalog-classes-panel-part {
   opacity: 0.6;
 }
 

@@ -2,20 +2,20 @@ import { useEffect, useState, type ReactNode } from "react";
 import { useAuth } from "../shared/auth";
 import { waitForFirstScreen } from "../shared/api/useAsync";
 import { track } from "../shared/analytics";
+import "./Splash.css";
 
 /** The launch screen: the full Bizqwik logo with a small spinner under it.
  * index.html paints the same thing before the app has loaded, so launching
  * never flashes blank or jumps. */
 export function Splash() {
   return (
-    <div
+    <div className="bq-splash-stack"
       data-testid="splash"
       role="status"
       aria-label="Loading Bizqwik"
-      style={{ minHeight: "100svh", background: "var(--color-bg-canvas-default)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 22 }}
     >
-      <img src="/wordmark.png" alt="Bizqwik" style={{ height: 44, width: "auto", display: "block" }} />
-      <div style={{ width: 24, height: 24, borderRadius: 999, border: "3px solid var(--color-bg-fill-accent-default)", borderTopColor: "var(--color-bg-fill-primary-default)", animation: "bqSpin .7s linear infinite" }} />
+      <img className="bq-splash-img" src="/wordmark.png" alt="Bizqwik" />
+      <div className="bq-splash-box" />
     </div>
   );
 }
@@ -52,7 +52,7 @@ export function LaunchGate({ children }: { children: ReactNode }) {
     <>
       {children}
       {covered && (
-        <div style={{ position: "fixed", inset: 0, zIndex: 1000 }}>
+        <div className="bq-splash-launch-gate-layer">
           <Splash />
         </div>
       )}

@@ -15,7 +15,7 @@
 .bq-chip[aria-pressed="true"] { border-color: var(--color-bg-fill-primary-default); background: var(--color-bg-fill-accent-default); color: var(--color-bg-fill-primary-active); }
 .bq-chip--sm { height: 32px; font-size: var(--text-caption-1-size); }
 
-.bq-chip-chip-group-row {
+.bq-chip-group-row {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);

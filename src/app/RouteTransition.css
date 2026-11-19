@@ -1,0 +1,14 @@
+/* Styles for RouteTransition.tsx. Tokens only; see DESIGN_SYSTEM.md. */
+
+.bq-route-transition-layer {
+  position: absolute;
+  inset: 0;
+  background: var(--color-bg-overlay-dim);
+  pointer-events: none;
+}
+
+.bq-route-transition-size {
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+}

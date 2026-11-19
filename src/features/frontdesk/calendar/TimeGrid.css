@@ -7,7 +7,7 @@
   position: relative;
 }
 
-.bq-frontdesk-time-grid-grid {
+.bq-frontdesk-time-grid {
   position: sticky;
   top: 0;
   z-index: 3;

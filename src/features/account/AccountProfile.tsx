@@ -102,21 +102,21 @@ export function AccountProfile() {
       <div className="bq-card bq-card--md bq-mb-4 bq-flex bq-col bq-items-center bq-gap-10px">
         {PHOTO_EDIT_ENABLED ? (
           <>
-            <input className="bq-account-account-profile-input" ref={fileInput} type="file" accept="image/*" onChange={onPhotoSelected} />
-            <button className="bq-account-account-profile-btn"
+            <input className="bq-account-profile-input" ref={fileInput} type="file" accept="image/*" onChange={onPhotoSelected} />
+            <button className="bq-account-profile-btn"
               onClick={pickPhoto}
               disabled={photoBusy}
               aria-label="Change photo"
               style={{ cursor: photoBusy ? "default" : "pointer" }}
             >
               <Avatar name={profile.name} size={84} src={profile.avatarUrl} />
-              <span className="bq-account-account-profile-row"
+              <span className="bq-account-profile-row"
                 aria-hidden
               >
                 <Icon name="pencil" size={14} />
               </span>
             </button>
-            <button className="bq-account-account-profile-btn-2"
+            <button className="bq-account-profile-btn-2"
               onClick={pickPhoto}
               disabled={photoBusy}
               style={{ cursor: photoBusy ? "default" : "pointer" }}
@@ -124,14 +124,14 @@ export function AccountProfile() {
               {photoBusy ? "Uploading…" : "Change photo"}
             </button>
             {profile.avatarUrl && !photoBusy && (
-              <button className="bq-account-account-profile-btn-3"
+              <button className="bq-account-profile-btn-3"
                 onClick={removePhoto}
               >
                 Remove photo
               </button>
             )}
             {photoError && (
-              <div className="bq-rise bq-account-account-profile-text">
+              <div className="bq-rise bq-account-profile-text">
                 {photoError}
               </div>
             )}
@@ -156,7 +156,7 @@ export function AccountProfile() {
           </div>
         )}
         {saved && !error && (
-          <div className="bq-account-account-profile-text-2">
+          <div className="bq-account-profile-text-2">
             Saved.
           </div>
         )}
@@ -165,14 +165,14 @@ export function AccountProfile() {
         </Button>
       </div>
 
-      <div className="bq-card bq-account-account-profile-spacing">
+      <div className="bq-card bq-account-profile-spacing">
         <Row k="EMAIL" v={profile.email} />
         <Row k="ROLE" v={ROLE_LABELS[profile.role]} last={!hasTier(profile.role)} />
         {hasTier(profile.role) && (
           <Row k="TIER" v={tier ? `${tier.name} · ${tier.rate} EGP / session` : "Not assigned"} last />
         )}
       </div>
-      <div className="bq-account-account-profile-meta">
+      <div className="bq-account-profile-meta">
         Email, role, and tier are managed by a department head.
       </div>
     </div>
@@ -182,8 +182,8 @@ export function AccountProfile() {
 function Row({ k, v, last }: { k: string; v: string; last?: boolean }) {
   return (
     <div className={`bq-listrow bq-listrow--compact ${!(last) ? "bq-listrow--divider" : ""}`}>
-      <span className="bq-account-account-profile-row-label">{k}</span>
-      <span className="bq-account-account-profile-row-text">{v}</span>
+      <span className="bq-account-profile-row-label">{k}</span>
+      <span className="bq-account-profile-row-text">{v}</span>
     </div>
   );
 }

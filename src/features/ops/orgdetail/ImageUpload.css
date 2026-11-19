@@ -1,13 +1,13 @@
 /* Styles for ImageUpload.tsx. Tokens only; see DESIGN_SYSTEM.md. */
 
-.bq-ops-image-upload-image-upload-field-label {
+.bq-ops-image-upload-field-label {
   font: 700 var(--text-caption-2-size) var(--font-family-mono);
   letter-spacing: .08em;
   color: var(--color-text-tertiary-default);
   margin: 0 2px 6px;
 }
 
-.bq-ops-image-upload-image-upload-field-row {
+.bq-ops-image-upload-field-row {
   width: 56px;
   height: 56px;
   flex: none;
@@ -20,17 +20,17 @@
   justify-content: center;
 }
 
-.bq-ops-image-upload-image-upload-field-img {
+.bq-ops-image-upload-field-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.bq-ops-image-upload-image-upload-field-input {
+.bq-ops-image-upload-field-input {
   display: none;
 }
 
-.bq-ops-image-upload-image-upload-field-btn {
+.bq-ops-image-upload-field-btn {
   border: 0;
   background: none;
   padding: 0;
@@ -39,13 +39,13 @@
   color: var(--color-text-tertiary-default);
 }
 
-.bq-ops-image-upload-image-upload-field-meta {
+.bq-ops-image-upload-field-meta {
   font: 400 var(--text-caption-1-size)/1.5 var(--font-family-mono);
   color: var(--color-text-tertiary-default);
   margin: 6px 2px 0;
 }
 
-.bq-ops-image-upload-image-upload-field-text {
+.bq-ops-image-upload-field-text {
   margin-top: 8px;
   font: 600 var(--text-footnote-size)/1.5 var(--font-family-body);
   color: var(--color-text-status-danger-default);

@@ -15,15 +15,15 @@ export function OverviewCards({ clients, showGroupPlans, onPick }: { clients: Cl
     { k: "EXPIRING SOON", v: facts.filter((f) => f.state === "active" && f.daysLeft !== null && f.daysLeft <= EXPIRING_SOON_DAYS).length, patch: { status: "active", expiry: "7" } },
   ];
   return (
-    <div className="bq-clients-overview-overview-cards-grid">
+    <div className="bq-clients-overview-cards-grid">
       {stats.map((s) => (
         <button
           key={s.k}
           onClick={() => onPick({ ...NO_FILTERS, ...s.patch })}
-          className="bq-card bq-clients-overview-overview-cards-btn"
+          className="bq-card bq-clients-overview-cards-btn"
         >
           <div className="bq-label">{s.k}</div>
-          <div className="tabular bq-clients-overview-overview-cards-title">{s.v}</div>
+          <div className="tabular bq-clients-overview-cards-title">{s.v}</div>
         </button>
       ))}
     </div>

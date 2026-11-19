@@ -38,7 +38,7 @@ export function TimeGrid({ days, today, now, on, narrow, onDay, onOpen }: { days
     <div className="bq-frontdesk-time-grid-size" ref={scroller} data-testid="time-grid">
       <div style={{ minWidth: GUTTER + columns * colMin }}>
         {/* Day headers stay in view while the hours scroll. */}
-        <div className="bq-frontdesk-time-grid-grid" style={{ gridTemplateColumns: template }}>
+        <div className="bq-frontdesk-time-grid" style={{ gridTemplateColumns: template }}>
           <div />
           {days.map((d) => {
             const isToday = dayKey(d) === dayKey(today);

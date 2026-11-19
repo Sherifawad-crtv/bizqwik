@@ -1,6 +1,6 @@
 /* Styles for ClassesManage.tsx. Tokens only; see DESIGN_SYSTEM.md. */
 
-.bq-classes-classes-manage-btn {
+.bq-classes-manage-btn {
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -13,44 +13,44 @@
   padding: 0;
 }
 
-.bq-classes-classes-manage-title {
+.bq-classes-manage-title {
   font: 800 var(--text-title-1-size)/1.1 var(--font-family-body);
   letter-spacing: -.02em;
 }
 
-.bq-classes-classes-manage-meta {
+.bq-classes-manage-meta {
   font: 400 var(--text-footnote-size) var(--font-family-mono);
   color: var(--color-text-tertiary-default);
   margin-top: 4px;
 }
 
-.bq-classes-classes-manage-label {
+.bq-classes-manage-label {
   font: 700 var(--text-caption-2-size) var(--font-family-mono);
   letter-spacing: .08em;
   color: var(--color-text-tertiary-default);
   margin: 24px 2px 10px;
 }
 
-.bq-classes-classes-manage-class-card-title {
+.bq-classes-manage-class-card-title {
   font: 700 var(--text-callout-size) var(--font-family-body);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.bq-classes-classes-manage-class-card-meta {
+.bq-classes-manage-class-card-meta {
   font: 500 var(--text-footnote-size) var(--font-family-mono);
   color: var(--color-text-secondary-default);
   margin-top: 3px;
 }
 
-.bq-classes-classes-manage-class-card-meta-2 {
+.bq-classes-manage-class-card-meta-2 {
   font: 500 var(--text-caption-1-size) var(--font-family-mono);
   color: var(--color-text-tertiary-default);
   margin-top: 3px;
 }
 
-.bq-classes-classes-manage-class-card-text {
+.bq-classes-manage-class-card-text {
   font: 400 var(--text-footnote-size)/1.4 var(--font-family-body);
   color: var(--color-text-tertiary-default);
   margin-top: 6px;
@@ -61,24 +61,24 @@
   -webkit-box-orient: vertical;
 }
 
-.bq-classes-classes-manage-class-card-title-2 {
+.bq-classes-manage-class-card-title-2 {
   font: 800 var(--text-callout-size) var(--font-family-body);
 }
 
-.bq-classes-classes-manage-class-card-label {
+.bq-classes-manage-class-card-label {
   font: 600 10px var(--font-family-mono);
   letter-spacing: .06em;
   color: var(--color-text-tertiary-default);
 }
 
-.bq-classes-classes-manage-class-card-label-2 {
+.bq-classes-manage-class-card-label-2 {
   font: 700 var(--text-caption-2-size) var(--font-family-mono);
   letter-spacing: .06em;
   color: var(--color-text-tertiary-default);
   margin-top: 4px;
 }
 
-.bq-classes-classes-manage-class-card-btn {
+.bq-classes-manage-class-card-btn {
   margin-top: 12px;
   width: 100%;
   border: 1px solid var(--color-border-primary-default);

@@ -1,6 +1,6 @@
 /* Styles for Switch.tsx. Tokens only; see DESIGN_SYSTEM.md. */
 
-.bq-switch-switch-visual-box {
+.bq-switch-visual-box {
   flex: none;
   display: block;
   position: relative;
@@ -9,7 +9,7 @@
   border-radius: 999px;
 }
 
-.bq-switch-switch-visual-layer {
+.bq-switch-visual-layer {
   position: absolute;
   top: 2px;
   left: 2px;

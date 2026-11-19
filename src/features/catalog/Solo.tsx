@@ -111,7 +111,7 @@ export function SoloOffer() {
               {catalogHere ? (dropInList.length === 0 ? "Not set" : dropInList.map((o) => `${o.label} ${fmt(o.price)}`).join(" · ") + " EGP") : dropInPrice === null ? "Not set" : `${fmt(dropInPrice)} EGP · one visit`}
             </div>
           </div>
-          <Button className="bq-catalog-solo-solo-offer-btn" size="md" variant="secondary" onClick={() => {
+          <Button className="bq-catalog-solo-offer-btn" size="md" variant="secondary" onClick={() => {
             if (catalogHere) setRows(dropInList.length ? dropInList.map((o) => ({ label: o.label, price: String(o.price) })) : [{ label: "Kids", price: "" }, { label: "Adults", price: "" }]);
             else setPrice(dropInPrice === null ? "" : String(dropInPrice));
             setError(null);
@@ -123,7 +123,7 @@ export function SoloOffer() {
         {editing && catalogHere && (
           <div className="bq-mt-3 bq-flex bq-col bq-gap-10px">
             {rows.map((r, i) => (
-              <div className="bq-catalog-solo-solo-offer-grid" key={i}>
+              <div className="bq-catalog-solo-offer-grid" key={i}>
                 <TextField label="NAME" value={r.label} onChange={(e) => setRows(rows.map((x, j) => (j === i ? { ...x, label: e.target.value } : x)))} placeholder="Kids" />
                 <TextField label="PRICE · EGP" type="number" min={0} inputMode="decimal" value={r.price} onChange={(e) => setRows(rows.map((x, j) => (j === i ? { ...x, price: e.target.value } : x)))} />
                 <IconButton className="bq-mb-6px" icon="trash" label="Remove" tone="danger" onClick={() => setRows(rows.filter((_, j) => j !== i))} />
@@ -149,12 +149,12 @@ export function SoloOffer() {
 
       <div style={card}>
         <div className="bq-flex bq-items-center bq-gap-3">
-          {instapayQr && <img className="bq-catalog-solo-solo-offer-img" src={instapayQr} alt="Your InstaPay QR" />}
+          {instapayQr && <img className="bq-catalog-solo-offer-img" src={instapayQr} alt="Your InstaPay QR" />}
           <div className="bq-grow">
             <div className="bq-h3">InstaPay QR</div>
             <div className="bq-meta">{instapayQr ? "Shown when someone pays by InstaPay" : "Add it to show on drop-ins"}</div>
           </div>
-          <label className="bq-catalog-solo-solo-offer-label">
+          <label className="bq-catalog-solo-offer-label">
             {instapayQr ? "Replace" : "Add QR"}
             <input type="file" accept="image/*" hidden onChange={(e) => { void pickQr(e.target.files?.[0]); e.target.value = ""; }} />
           </label>
@@ -164,10 +164,10 @@ export function SoloOffer() {
         <div className="bq-flex bq-items-center bq-gap-3">
           <div className="bq-grow">
             <div className="bq-h3">InstaPay address</div>
-            <div className="bq-catalog-solo-solo-offer-meta">{instapayAddress ?? "Members copy this to pay you"}</div>
+            <div className="bq-catalog-solo-offer-meta">{instapayAddress ?? "Members copy this to pay you"}</div>
           </div>
           {address === null && (
-            <Button className="bq-catalog-solo-solo-offer-btn" size="md" variant="secondary" onClick={() => { setAddress(instapayAddress ?? ""); setError(null); }}>
+            <Button className="bq-catalog-solo-offer-btn" size="md" variant="secondary" onClick={() => { setAddress(instapayAddress ?? ""); setError(null); }}>
               {instapayAddress ? "Edit" : "Add"}
             </Button>
           )}
@@ -182,7 +182,7 @@ export function SoloOffer() {
           </div>
         )}
       </div>
-      {error && <div className="bq-rise bq-catalog-solo-solo-offer-text">{error}</div>}
+      {error && <div className="bq-rise bq-catalog-solo-offer-text">{error}</div>}
     </div>
   );
 }
@@ -222,7 +222,7 @@ export function LocationsCard() {
             <div className="bq-meta">{list.length === 0 ? "Working in more than one place? Add them." : "Each plan, PT bundle and session belongs to one."}</div>
           </div>
           {list.length < 10 && (
-            <Button className="bq-catalog-solo-solo-offer-btn" size="md" variant="secondary" onClick={() => { setError(null); setEditing({ id: null, name: "" }); }}>
+            <Button className="bq-catalog-solo-offer-btn" size="md" variant="secondary" onClick={() => { setError(null); setEditing({ id: null, name: "" }); }}>
               + Location
             </Button>
           )}

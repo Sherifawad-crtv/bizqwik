@@ -63,9 +63,9 @@ export function ExpensesPanel({
   return (
     <div>
       <div className="bq-flex bq-gap-2 bq-mb-3">
-        <label className="bq-accounting-expenses-expenses-panel-label">
+        <label className="bq-accounting-expenses-panel-label">
           <span className="bq-fg-tertiary bq-flex"><Icon name="search" size={18} /></span>
-          <input className="bq-accounting-expenses-expenses-panel-input"
+          <input className="bq-accounting-expenses-panel-input"
             aria-label="Search expense notes"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
@@ -73,41 +73,41 @@ export function ExpensesPanel({
           />
         </label>
       </div>
-      <div className="bq-accounting-expenses-expenses-panel-row">
+      <div className="bq-accounting-expenses-panel-row">
         <Chip size="sm" on={categoryFilter === ""} onClick={() => setCategoryFilter("")}>All</Chip>
         {categories.map((c) => (
           <Chip size="sm" key={c.id} on={categoryFilter === c.id} onClick={() => setCategoryFilter(c.id)}>{c.name}</Chip>
         ))}
       </div>
 
-      <SectionHeader count={fmt(total) + " EGP"} right={<button className="bq-accounting-expenses-expenses-panel-btn" onClick={() => setManagingCats(true)}>Categories</button>}>
+      <SectionHeader count={fmt(total) + " EGP"} right={<button className="bq-accounting-expenses-panel-btn" onClick={() => setManagingCats(true)}>Categories</button>}>
         Expenses
       </SectionHeader>
 
       <Card className="bq-overflow-hidden bq-mb-14px" pad="none">
         {coachPayouts > 0 && !categoryFilter && !query && (
-          <button className="bq-plain bq-scale bq-listrow bq-listrow--compact bq-listrow--divider bq-accounting-expenses-expenses-panel-btn-2" onClick={onCoachPayouts}>
+          <button className="bq-plain bq-scale bq-listrow bq-listrow--compact bq-listrow--divider bq-accounting-expenses-panel-btn-2" onClick={onCoachPayouts}>
             <div className="bq-grow">
-              <div className="bq-accounting-expenses-expenses-panel-title">Coach payouts</div>
-              <div className="bq-accounting-expenses-expenses-panel-meta">Settled this month · locked</div>
+              <div className="bq-accounting-expenses-panel-title">Coach payouts</div>
+              <div className="bq-accounting-expenses-panel-meta">Settled this month · locked</div>
             </div>
-            <div className="tabular bq-accounting-expenses-expenses-panel-meta-2">{fmt(coachPayouts)}</div>
+            <div className="tabular bq-accounting-expenses-panel-meta-2">{fmt(coachPayouts)}</div>
             <Icon name="chevron-right" size={16} />
           </button>
         )}
         <MotionList>
 {expenses.map((e, i) => (
-          <button key={e.id} className={cx(`bq-plain bq-scale bq-listrow bq-listrow--compact ${!(i === expenses.length - 1) ? "bq-listrow--divider" : ""}`, "bq-accounting-expenses-expenses-panel-btn-3")} onClick={() => setSheetMode(e)}>
+          <button key={e.id} className={cx(`bq-plain bq-scale bq-listrow bq-listrow--compact ${!(i === expenses.length - 1) ? "bq-listrow--divider" : ""}`, "bq-accounting-expenses-panel-btn-3")} onClick={() => setSheetMode(e)}>
             <div className="bq-grow">
               <div className="bq-flex bq-items-center bq-gap-6px">
-                <span className="bq-accounting-expenses-expenses-panel-title-2">{e.categoryName}</span>
+                <span className="bq-accounting-expenses-panel-title-2">{e.categoryName}</span>
                 <ReceiptIcon has={e.hasReceipt} />
               </div>
-              <div className="bq-accounting-expenses-expenses-panel-meta-3">
+              <div className="bq-accounting-expenses-panel-meta-3">
                 {e.date.slice(8, 10)} {monthAbbr(e.date.slice(0, 7))}{e.note ? ` · ${e.note}` : ""}{e.editedAfterMonthEnd ? " · edited after month end" : ""}
               </div>
             </div>
-            <div className="tabular bq-accounting-expenses-expenses-panel-meta-2">{fmt(e.amount)}</div>
+            <div className="tabular bq-accounting-expenses-panel-meta-2">{fmt(e.amount)}</div>
             <Icon name="chevron-right" size={16} />
           </button>
         ))}

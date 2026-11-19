@@ -11,6 +11,7 @@ import { ScreenActive, ScreenPath } from "../shared/screen/screenActive";
 import { useReducedMotion } from "../design-system/motion/useReducedMotion";
 import { waitForFirstScreen } from "../shared/api/useAsync";
 import { reportScreenReady } from "../shared/vitals";
+import "./RouteTransition.css";
 
 /** How the app moves between screens, the way iOS does it:
  *  - the sections in the tab bar are peers: switching between them is a quick
@@ -268,18 +269,10 @@ export function RouteTransition({ tabs, role, orgMode = "team" }: { tabs: NavIte
   for (const l of order) {
     if (l.id === topId) {
       children.push(
-        <div
+        <div className="bq-route-transition-layer"
           key="dim"
           aria-hidden
-          style={{
-            position: "absolute",
-            inset: 0,
-            background: "var(--color-bg-overlay-dim)",
-            // dims the screen underneath as the new one covers it (and lifts as it leaves)
-            opacity: pushIn ? (entered ? 1 : 0) : entered ? 0 : 1,
-            transition: `opacity ${PUSH_MS}ms ${PUSH_EASE}`,
-            pointerEvents: "none",
-          }}
+          style={{ opacity: pushIn ? (entered ? 1 : 0) : entered ? 0 : 1, transition: `opacity ${PUSH_MS}ms ${PUSH_EASE}` }}
         />,
       );
     }
@@ -293,5 +286,5 @@ export function RouteTransition({ tabs, role, orgMode = "team" }: { tabs: NavIte
     );
   }
 
-  return <div style={{ position: "relative", height: "100%", overflow: "hidden" }}>{children}</div>;
+  return <div className="bq-route-transition-size">{children}</div>;
 }

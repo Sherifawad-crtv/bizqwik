@@ -59,24 +59,24 @@ export function ClassCalendarScreen({ onClose }: { onClose: () => void }) {
     setCursor((c) => (view === "day" ? addDays(c, dir) : view === "week" ? addDays(c, 7 * dir) : new Date(c.getFullYear(), c.getMonth() + dir, 1)));
 
   return createPortal(
-    <div className="bq-frontdesk-class-calendar-class-calendar-screen-stack"
+    <div className="bq-frontdesk-class-calendar-screen-stack"
       data-testid="class-calendar"
     >
-      <div className="bq-frontdesk-class-calendar-class-calendar-screen-row" style={{ padding: isMobile ? "10px 12px" : "12px 20px" }}>
-        <Button className="bq-frontdesk-class-calendar-class-calendar-screen-btn" variant="quiet" aria-label="Close calendar" onClick={onClose}>
+      <div className="bq-frontdesk-class-calendar-screen-row" style={{ padding: isMobile ? "10px 12px" : "12px 20px" }}>
+        <Button className="bq-frontdesk-class-calendar-screen-btn" variant="quiet" aria-label="Close calendar" onClick={onClose}>
           <Icon name="close" size={18} />
         </Button>
-        {!isMobile && <span className="bq-stat-sm bq-frontdesk-class-calendar-class-calendar-screen-spacing">Classes</span>}
-        <Button className="bq-frontdesk-class-calendar-class-calendar-screen-btn-2" variant="secondary" onClick={() => setCursor(today)}>
+        {!isMobile && <span className="bq-stat-sm bq-frontdesk-class-calendar-screen-spacing">Classes</span>}
+        <Button className="bq-frontdesk-class-calendar-screen-btn-2" variant="secondary" onClick={() => setCursor(today)}>
           TODAY
         </Button>
-        <Button className="bq-frontdesk-class-calendar-class-calendar-screen-btn" variant="quiet" aria-label="Previous" onClick={() => step(-1)}>
+        <Button className="bq-frontdesk-class-calendar-screen-btn" variant="quiet" aria-label="Previous" onClick={() => step(-1)}>
           <Icon name="chevron-left" size={18} />
         </Button>
-        <Button className="bq-frontdesk-class-calendar-class-calendar-screen-btn" variant="quiet" aria-label="Next" onClick={() => step(1)}>
+        <Button className="bq-frontdesk-class-calendar-screen-btn" variant="quiet" aria-label="Next" onClick={() => step(1)}>
           <Icon name="chevron-right" size={18} />
         </Button>
-        <div className="bq-frontdesk-class-calendar-class-calendar-screen-title" data-testid="calendar-label">
+        <div className="bq-frontdesk-class-calendar-screen-title" data-testid="calendar-label">
           {title(view, cursor)}
         </div>
         <Segmented
@@ -91,10 +91,10 @@ export function ClassCalendarScreen({ onClose }: { onClose: () => void }) {
       </div>
 
       {classes.error && (
-        <div className="bq-frontdesk-class-calendar-class-calendar-screen-text">{classes.error}</div>
+        <div className="bq-frontdesk-class-calendar-screen-text">{classes.error}</div>
       )}
 
-      <div className="bq-frontdesk-class-calendar-class-calendar-screen-stack-2">
+      <div className="bq-frontdesk-class-calendar-screen-stack-2">
         {classes.loading && !classes.data ? (
           <InlineSpinner />
         ) : view === "month" ? (

@@ -1,6 +1,6 @@
 /* Styles for Expenses.tsx. Tokens only; see DESIGN_SYSTEM.md. */
 
-.bq-accounting-expenses-expenses-panel-label {
+.bq-accounting-expenses-panel-label {
   flex: 1;
   min-width: 0;
   display: flex;
@@ -13,7 +13,7 @@
   border-radius: var(--radius-item);
 }
 
-.bq-accounting-expenses-expenses-panel-input {
+.bq-accounting-expenses-panel-input {
   flex: 1;
   min-width: 0;
   border: 0;
@@ -23,7 +23,7 @@
   color: var(--color-text-primary-default);
 }
 
-.bq-accounting-expenses-expenses-panel-row {
+.bq-accounting-expenses-panel-row {
   display: flex;
   gap: 6px;
   overflow-x: auto;
@@ -31,7 +31,7 @@
   padding-bottom: 2px;
 }
 
-.bq-accounting-expenses-expenses-panel-btn {
+.bq-accounting-expenses-panel-btn {
   border: 0;
   background: none;
   font: 700 var(--text-footnote-size) var(--font-family-body);
@@ -39,42 +39,42 @@
   cursor: pointer;
 }
 
-.bq-accounting-expenses-expenses-panel-btn-2 {
+.bq-accounting-expenses-panel-btn-2 {
   width: 100%;
   background: var(--color-bg-surface-secondary-default);
   cursor: pointer;
   text-align: left;
 }
 
-.bq-accounting-expenses-expenses-panel-title {
+.bq-accounting-expenses-panel-title {
   font: 700 var(--text-body-size) var(--font-family-body);
 }
 
-.bq-accounting-expenses-expenses-panel-meta {
+.bq-accounting-expenses-panel-meta {
   font: 400 var(--text-caption-1-size) var(--font-family-mono);
   color: var(--color-text-tertiary-default);
 }
 
-.bq-accounting-expenses-expenses-panel-meta-2 {
+.bq-accounting-expenses-panel-meta-2 {
   flex: none;
   font: 800 var(--text-body-size) var(--font-family-mono);
 }
 
-.bq-accounting-expenses-expenses-panel-btn-3 {
+.bq-accounting-expenses-panel-btn-3 {
   width: 100%;
   background: none;
   cursor: pointer;
   text-align: left;
 }
 
-.bq-accounting-expenses-expenses-panel-title-2 {
+.bq-accounting-expenses-panel-title-2 {
   font: 700 var(--text-body-size) var(--font-family-body);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.bq-accounting-expenses-expenses-panel-meta-3 {
+.bq-accounting-expenses-panel-meta-3 {
   font: 400 var(--text-caption-1-size) var(--font-family-mono);
   color: var(--color-text-tertiary-default);
   overflow: hidden;

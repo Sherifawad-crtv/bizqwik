@@ -1,6 +1,6 @@
 /* Styles for Recurring.tsx. Tokens only; see DESIGN_SYSTEM.md. */
 
-.bq-accounting-recurring-recurring-panel-btn {
+.bq-accounting-recurring-panel-btn {
   border: 0;
   background: none;
   font: 700 var(--text-footnote-size) var(--font-family-body);
@@ -8,28 +8,28 @@
   cursor: pointer;
 }
 
-.bq-accounting-recurring-recurring-panel-btn-2 {
+.bq-accounting-recurring-panel-btn-2 {
   width: 100%;
   background: none;
   cursor: pointer;
   text-align: left;
 }
 
-.bq-accounting-recurring-recurring-panel-title {
+.bq-accounting-recurring-panel-title {
   font: 700 var(--text-body-size) var(--font-family-body);
 }
 
-.bq-accounting-recurring-recurring-panel-meta {
+.bq-accounting-recurring-panel-meta {
   font: 400 var(--text-caption-1-size) var(--font-family-mono);
   color: var(--color-text-tertiary-default);
 }
 
-.bq-accounting-recurring-recurring-panel-meta-2 {
+.bq-accounting-recurring-panel-meta-2 {
   flex: none;
   font: 800 var(--text-body-size) var(--font-family-mono);
 }
 
-.bq-accounting-recurring-recurring-sheet-meta {
+.bq-accounting-recurring-sheet-meta {
   margin-top: 8px;
   font: 400 var(--text-caption-1-size)/1.5 var(--font-family-mono);
   color: var(--color-text-tertiary-default);

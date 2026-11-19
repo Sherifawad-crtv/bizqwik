@@ -103,7 +103,7 @@ export function Bookings() {
     const happening = start <= nowMs && nowMs < start + 60 * 60000;
     const booked = c.bookedCount ?? 0;
     return (
-      <div className="bq-frontdesk-bookings-row-row" key={c.id} style={{ opacity: muted ? 0.65 : 1 }}>
+      <div className="bq-frontdesk-bookings-row" key={c.id} style={{ opacity: muted ? 0.65 : 1 }}>
       <button className="bq-frontdesk-bookings-row-btn"
         onClick={() => (solo ? setForm(formOf(c)) : setOpen(c))}
       >

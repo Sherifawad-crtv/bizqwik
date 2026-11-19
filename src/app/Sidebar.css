@@ -1,0 +1,70 @@
+/* Styles for Sidebar.tsx. Tokens only; see DESIGN_SYSTEM.md. */
+
+.bq-sidebar-item-part {
+  text-decoration: none;
+}
+
+.bq-sidebar-item-text {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 12px;
+  border-radius: var(--radius-item);
+  cursor: pointer;
+  font: 600 var(--text-callout-size) var(--font-family-body);
+}
+
+.bq-sidebar-stack {
+  width: 250px;
+  flex: none;
+  background: var(--color-bg-surface-primary-default);
+  border-right: 1px solid var(--color-border-primary-default);
+  display: flex;
+  flex-direction: column;
+  padding: 22px 16px;
+  position: sticky;
+  top: 0;
+  height: 100svh;
+}
+
+.bq-sidebar-img {
+  height: 24px;
+  width: auto;
+  align-self: flex-start;
+  margin: 0 8px 12px;
+  display: block;
+}
+
+.bq-sidebar-label {
+  font: 700 var(--text-caption-2-size) var(--font-family-mono);
+  letter-spacing: .08em;
+  color: var(--color-text-tertiary-default);
+  padding: 0 8px 20px;
+}
+
+.bq-sidebar-part {
+  margin-top: auto;
+  text-decoration: none;
+}
+
+.bq-sidebar-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 8px 0;
+  border-top: 1px solid var(--color-border-primary-default);
+}
+
+.bq-sidebar-text {
+  font: 600 var(--text-callout-size) var(--font-family-body);
+  line-height: 1.1;
+  color: var(--color-text-primary-default);
+}
+
+.bq-sidebar-meta {
+  font: 400 var(--text-footnote-size) var(--font-family-mono);
+  color: var(--color-text-tertiary-default);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}

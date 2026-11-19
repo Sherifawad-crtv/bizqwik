@@ -1,6 +1,6 @@
 /* Styles for Bookings.tsx. Tokens only; see DESIGN_SYSTEM.md. */
 
-.bq-frontdesk-bookings-row-row {
+.bq-frontdesk-bookings-row {
   display: flex;
   align-items: center;
   border-bottom: 1px solid var(--color-border-primary-default);

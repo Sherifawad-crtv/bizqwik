@@ -12,14 +12,14 @@ export function MonthGrid({ cursor, today, on, wide, onDay, onOpen }: { cursor: 
   const shownChips = wide ? 3 : 2;
   return (
     <div className="bq-frontdesk-month-grid-stack">
-      <div className="bq-frontdesk-month-grid-grid">
+      <div className="bq-frontdesk-month-grid">
         {WEEKDAY_ORDER.map((w) => (
           <div className="bq-frontdesk-month-grid-label" key={w}>
             {WEEKDAY_SHORT[w].toUpperCase()}
           </div>
         ))}
       </div>
-      <div className="bq-frontdesk-month-grid-grid-2" style={{ gridTemplateRows: `repeat(${weeks}, minmax(${wide ? 104 : 84}px, 1fr))` }}>
+      <div className="bq-frontdesk-month-grid-2" style={{ gridTemplateRows: `repeat(${weeks}, minmax(${wide ? 104 : 84}px, 1fr))` }}>
         {cells.map((d) => {
           const items = on(d);
           const inMonth = d.getMonth() === cursor.getMonth();

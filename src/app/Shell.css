@@ -34,3 +34,115 @@
 @media (prefers-reduced-motion: reduce) {
   .bq-barlayer, .bq-barlayer[data-on="false"] { transform: none; }
 }
+
+.bq-shell-title-pill {
+  position: relative;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: 8px 18px;
+  border-radius: 999px;
+  background: var(--color-bg-canvas-translucent);
+  font: 800 17px var(--font-family-body);
+  letter-spacing: -.01em;
+  overflow: hidden;
+  display: grid;
+  justify-items: center;
+}
+
+.bq-shell-title-pill-layer {
+  position: absolute;
+  visibility: hidden;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.bq-shell-inner-box {
+  min-height: 100svh;
+  background: var(--color-bg-canvas-default);
+  position: relative;
+  overflow: hidden;
+}
+
+.bq-shell-titlebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  padding: calc(14px + var(--safe-top)) 16px 10px;
+  display: flex;
+  align-items: center;
+}
+
+.bq-shell-inner-btn {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  border: 0;
+  cursor: pointer;
+  color: var(--color-text-primary-default);
+  background: var(--color-bg-canvas-translucent);
+  border-radius: 999px;
+  padding: 8px 14px 8px 8px;
+  font: 700 var(--text-subheadline-size) var(--font-family-body);
+}
+
+.bq-shell-inner-size {
+  position: relative;
+  height: 100svh;
+  overflow: hidden;
+}
+
+.bq-shell-inner-layer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 55;
+}
+
+.bq-shell-inner-size-2 {
+  position: relative;
+  height: 64px;
+}
+
+.bq-shell-inner-row-2 {
+  display: flex;
+  gap: 8px;
+  max-width: 520px;
+  padding: 8px;
+  background: var(--color-bg-surface-primary-default);
+  border: 1px solid var(--color-border-primary-default);
+  border-radius: var(--radius-float);
+  box-shadow: var(--shadow-float);
+}
+
+.bq-shell-inner-row-3 {
+  min-height: 100svh;
+  background: var(--color-bg-canvas-default);
+  display: flex;
+}
+
+.bq-shell-inner-layer-2 {
+  position: fixed;
+  right: 32px;
+  bottom: 32px;
+  z-index: 40;
+}
+
+.bq-shell-inner-row-4 {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--color-bg-canvas-translucent-strong);
+  border-bottom: 1px solid var(--color-border-primary-default);
+  padding: 22px 30px 18px;
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.bq-shell-inner-spacing {
+  padding: 24px 30px 60px;
+}

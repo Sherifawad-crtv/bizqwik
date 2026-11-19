@@ -37,7 +37,7 @@ export function PeoplePanel() {
           <button
             key={p.id}
             onClick={() => setEditing(p)}
-            className={cx(`bq-plain bq-listrow ${!(i === data.profiles.length - 1) ? "bq-listrow--divider" : ""}`, "bq-manage-people-people-panel-btn")}
+            className={cx(`bq-plain bq-listrow ${!(i === data.profiles.length - 1) ? "bq-listrow--divider" : ""}`, "bq-manage-people-panel-btn")}
         >
             <Avatar name={p.name} size={36} src={p.avatarUrl} />
             <div className="bq-grow">

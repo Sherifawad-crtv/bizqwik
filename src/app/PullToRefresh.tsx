@@ -3,6 +3,7 @@ import { bump } from "../shared/api/bus";
 import { waitForLoadsToFinish } from "../shared/api/useAsync";
 import { Icon } from "../design-system/components/Icon";
 import { QUICK_MS, STANDARD_MS, tr } from "../design-system/motion/motion";
+import "./PullToRefresh.css";
 
 const TRIGGER = 72; // how far (px) to pull before letting go refreshes
 const MAX = 110;
@@ -91,36 +92,16 @@ export function PullToRefresh({ children }: { children: ReactNode }) {
   const shown = pull > 0 || refreshing;
   const ready = pull >= TRIGGER;
   return (
-    <div ref={ref} style={{ position: "relative", height: "100%" }}>
-      <div
+    <div className="bq-pull-to-refresh-size" ref={ref}>
+      <div className="bq-pull-to-refresh-row"
         aria-hidden={!shown}
         data-testid="ptr"
-        style={{
-          position: "absolute",
-          left: "50%",
-          top: "calc(var(--safe-top) + 6px)",
-          zIndex: 60,
-          width: 40,
-          height: 40,
-          marginLeft: -20,
-          borderRadius: 999,
-          background: "var(--color-bg-surface-primary-default)",
-          border: "1px solid var(--color-border-primary-default)",
-          boxShadow: "var(--shadow-raised)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          color: ready || refreshing ? "var(--color-bg-fill-primary-active)" : "var(--color-text-secondary-default)",
-          transform: `translateY(${shown ? pull : -60}px)`,
-          opacity: shown ? Math.min(1, pull / 40 + (refreshing ? 1 : 0)) : 0,
-          transition: dragging ? "none" : tr(["transform", "opacity"], STANDARD_MS),
-          pointerEvents: "none",
-        }}
+        style={{ color: ready || refreshing ? "var(--color-bg-fill-primary-active)" : "var(--color-text-secondary-default)", transform: `translateY(${shown ? pull : -60}px)`, opacity: shown ? Math.min(1, pull / 40 + (refreshing ? 1 : 0)) : 0, transition: dragging ? "none" : tr(["transform", "opacity"], STANDARD_MS) }}
       >
         {refreshing ? (
-          <span className="bq-ptr-spin" style={{ width: 18, height: 18, borderRadius: 999, border: "2.5px solid var(--color-bg-fill-accent-default)", borderTopColor: "var(--color-bg-fill-primary-active)" }} />
+          <span className="bq-ptr-spin bq-pull-to-refresh-box" />
         ) : (
-          <span style={{ display: "flex", transform: `rotate(${ready ? 180 : 0}deg)`, transition: tr("transform", QUICK_MS) }}>
+          <span className="bq-flex" style={{ transform: `rotate(${ready ? 180 : 0}deg)`, transition: tr("transform", QUICK_MS) }}>
             <Icon name="chevron-down" size={20} />
           </span>
         )}

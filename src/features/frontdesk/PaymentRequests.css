@@ -1,6 +1,6 @@
 /* Styles for PaymentRequests.tsx. Tokens only; see DESIGN_SYSTEM.md. */
 
-.bq-frontdesk-payment-requests-payment-requests-card-btn {
+.bq-frontdesk-payment-requests-card-btn {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -13,7 +13,7 @@
   padding: 14px 18px;
 }
 
-.bq-frontdesk-payment-requests-payment-requests-card-row {
+.bq-frontdesk-payment-requests-card-row {
   width: 34px;
   height: 34px;
   border-radius: 999px;
@@ -25,31 +25,31 @@
   color: var(--color-text-status-logging-default);
 }
 
-.bq-frontdesk-payment-requests-payment-requests-card-title {
+.bq-frontdesk-payment-requests-card-title {
   display: block;
   font: 700 var(--text-body-size) var(--font-family-body);
   color: var(--color-text-status-logging-default);
 }
 
-.bq-frontdesk-payment-requests-payment-requests-card-meta {
+.bq-frontdesk-payment-requests-card-meta {
   display: block;
   font: 400 var(--text-caption-1-size) var(--font-family-mono);
   color: var(--color-text-status-logging-default);
 }
 
-.bq-frontdesk-payment-requests-payment-requests-card-title-2 {
+.bq-frontdesk-payment-requests-card-title-2 {
   font: 800 var(--text-title-1-size)/1.2 var(--font-family-body);
   letter-spacing: -.02em;
   margin: 4px 0 14px;
 }
 
-.bq-frontdesk-payment-requests-payment-requests-card-text {
+.bq-frontdesk-payment-requests-card-text {
   font: 400 var(--text-subheadline-size) var(--font-family-body);
   color: var(--color-text-secondary-default);
   padding: 12px 0 8px;
 }
 
-.bq-frontdesk-payment-requests-payment-requests-card-stack {
+.bq-frontdesk-payment-requests-card-stack {
   display: flex;
   flex-direction: column;
   gap: 12px;

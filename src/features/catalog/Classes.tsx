@@ -33,7 +33,7 @@ export function ClassesPanel({ solo }: { solo?: boolean }) {
       <SectionHeader
         count={active.length}
         right={
-          <Button className="bq-catalog-classes-classes-panel-btn" size="md" onClick={() => setEditing("new")}>
+          <Button className="bq-catalog-classes-panel-btn" size="md" onClick={() => setEditing("new")}>
             + New class
           </Button>
         }
@@ -51,22 +51,22 @@ export function ClassesPanel({ solo }: { solo?: boolean }) {
 
       <button
         onClick={() => navigate(solo ? "/bookings" : "/classes")}
-        className="bq-card bq-catalog-classes-classes-panel-btn-2"
+        className="bq-card bq-catalog-classes-panel-btn-2"
       >
-        <span className="bq-catalog-classes-classes-panel-row">
+        <span className="bq-catalog-classes-panel-row">
           <Icon name="calendar" size={20} />
         </span>
         <span className="bq-grow">
-          <span className="bq-catalog-classes-classes-panel-title">Upcoming sessions & rosters</span>
-          <span className="bq-catalog-classes-classes-panel-meta">Who's booked, attendance, one-off changes</span>
+          <span className="bq-catalog-classes-panel-title">Upcoming sessions & rosters</span>
+          <span className="bq-catalog-classes-panel-meta">Who's booked, attendance, one-off changes</span>
         </span>
         <Icon name="chevron-right" size={18} />
       </button>
 
       {ended.length > 0 && (
         <>
-          <div className="bq-catalog-classes-classes-panel-label">ENDED · {ended.length}</div>
-          <div className="bq-card bq-card--clip bq-catalog-classes-classes-panel-part">
+          <div className="bq-catalog-classes-panel-label">ENDED · {ended.length}</div>
+          <div className="bq-card bq-card--clip bq-catalog-classes-panel-part">
             {ended.map((s, i) => (
               <SeriesRow key={s.id} s={s} last={i === ended.length - 1} />
             ))}

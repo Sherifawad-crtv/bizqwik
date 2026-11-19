@@ -1,18 +1,18 @@
 /* Styles for Solo.tsx. Tokens only; see DESIGN_SYSTEM.md. */
 
-.bq-catalog-solo-solo-offer-btn {
+.bq-catalog-solo-offer-btn {
   height: 40px;
   padding: 0 16px;
 }
 
-.bq-catalog-solo-solo-offer-grid {
+.bq-catalog-solo-offer-grid {
   display: grid;
   grid-template-columns: 1fr 1fr auto;
   gap: 8px;
   align-items: end;
 }
 
-.bq-catalog-solo-solo-offer-img {
+.bq-catalog-solo-offer-img {
   width: 56px;
   height: 56px;
   object-fit: contain;
@@ -21,7 +21,7 @@
   border: 1px solid var(--color-border-primary-default);
 }
 
-.bq-catalog-solo-solo-offer-label {
+.bq-catalog-solo-offer-label {
   flex: none;
   display: inline-flex;
   align-items: center;
@@ -34,7 +34,7 @@
   cursor: pointer;
 }
 
-.bq-catalog-solo-solo-offer-meta {
+.bq-catalog-solo-offer-meta {
   font: 400 var(--text-footnote-size) var(--font-family-mono);
   color: var(--color-text-tertiary-default);
   overflow: hidden;
@@ -42,7 +42,7 @@
   white-space: nowrap;
 }
 
-.bq-catalog-solo-solo-offer-text {
+.bq-catalog-solo-offer-text {
   font: 600 var(--text-footnote-size)/1.5 var(--font-family-body);
   color: var(--color-text-status-danger-default);
   background: var(--color-bg-fill-status-danger-default);

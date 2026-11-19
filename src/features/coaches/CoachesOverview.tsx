@@ -52,19 +52,19 @@ export function CoachesOverview() {
       {profile?.role === "dept_head" && (
         <button
           onClick={() => navigate("/manage")}
-          className="bq-card bq-coaches-coaches-overview-btn"
+          className="bq-card bq-coaches-overview-btn"
         >
-          <span className="bq-coaches-coaches-overview-row">
+          <span className="bq-coaches-overview-row">
             <Icon name="settings" size={20} />
           </span>
           <span className="bq-grow">
-            <span className="bq-coaches-coaches-overview-title">Team & tiers</span>
-            <span className="bq-coaches-coaches-overview-meta">Pay tiers, staff invites and people</span>
+            <span className="bq-coaches-overview-title">Team & tiers</span>
+            <span className="bq-coaches-overview-meta">Pay tiers, staff invites and people</span>
           </span>
           <Icon name="chevron-right" size={18} />
         </button>
       )}
-      <div className="bq-coaches-coaches-overview-row-2">
+      <div className="bq-coaches-overview-row-2">
         <span className="bq-h2">Roster</span>
         <span className="bq-meta">{rows.length} coaches</span>
       </div>
@@ -78,7 +78,7 @@ export function CoachesOverview() {
             : { title: "No coaches on the team yet", body: "The department head invites coaches. They show up here once they sign up." }
         }
       />
-      <div className="bq-coaches-coaches-overview-meta-2">
+      <div className="bq-coaches-overview-meta-2">
         {rows.length > 0 ? "Tap a coach to review their sessions and settle the month." : null}
       </div>
       <InviteFlow open={inviting} onClose={() => setInviting(false)} />

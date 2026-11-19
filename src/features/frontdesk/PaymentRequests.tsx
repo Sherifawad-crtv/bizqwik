@@ -22,25 +22,25 @@ export function PaymentRequestsCard() {
   return (
     <>
       <button
-        className="bq-scale bq-frontdesk-payment-requests-payment-requests-card-btn"
+        className="bq-scale bq-frontdesk-payment-requests-card-btn"
         onClick={() => setOpen(true)}
       >
-        <span className="bq-frontdesk-payment-requests-payment-requests-card-row">
+        <span className="bq-frontdesk-payment-requests-card-row">
           <Icon name="cash" size={18} />
         </span>
         <span className="bq-grow">
-          <span className="bq-frontdesk-payment-requests-payment-requests-card-title">
+          <span className="bq-frontdesk-payment-requests-card-title">
             {list.length} payment{list.length === 1 ? "" : "s"} to approve
           </span>
-          <span className="bq-frontdesk-payment-requests-payment-requests-card-meta">Check the receipt, then approve</span>
+          <span className="bq-frontdesk-payment-requests-card-meta">Check the receipt, then approve</span>
         </span>
         <Icon name="chevron-right" size={16} />
       </button>
       <Sheet open={open} onClose={() => setOpen(false)}>
         <div className="bq-label">INSTAPAY</div>
-        <div className="bq-frontdesk-payment-requests-payment-requests-card-title-2">Payments to approve</div>
-        {list.length === 0 && <div className="bq-frontdesk-payment-requests-payment-requests-card-text">All caught up.</div>}
-        <div className="bq-frontdesk-payment-requests-payment-requests-card-stack">
+        <div className="bq-frontdesk-payment-requests-card-title-2">Payments to approve</div>
+        {list.length === 0 && <div className="bq-frontdesk-payment-requests-card-text">All caught up.</div>}
+        <div className="bq-frontdesk-payment-requests-card-stack">
           {list.map((r) => (
             <RequestRow key={r.id} r={r} onDone={() => reqs.refetch()} />
           ))}

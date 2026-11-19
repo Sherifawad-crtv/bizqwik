@@ -1,61 +1,61 @@
 /* Styles for Money.tsx. Tokens only; see DESIGN_SYSTEM.md. */
 
-.bq-money-money-card {
+.bq-money-card {
   padding: 22px 22px 20px;
 }
 
-.bq-money-money-title {
+.bq-money-title {
   font: 800 52px/1.05 var(--font-family-body);
   letter-spacing: -.03em;
   margin-top: 6px;
 }
 
-.bq-money-money-meta {
+.bq-money-meta {
   font: 400 var(--text-footnote-size) var(--font-family-mono);
   color: var(--color-text-secondary-default);
   margin-top: 6px;
 }
 
-.bq-money-money-meta-2 {
+.bq-money-meta-2 {
   font: 700 var(--text-caption-1-size) var(--font-family-mono);
   border-radius: 999px;
   padding: 6px 12px;
 }
 
-.bq-money-money-btn {
+.bq-money-btn {
   width: 100%;
   background: none;
   cursor: pointer;
   text-align: left;
 }
 
-.bq-money-money-title-2 {
+.bq-money-title-2 {
   font: 700 var(--text-body-size) var(--font-family-body);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.bq-money-money-meta-3 {
+.bq-money-meta-3 {
   font: 400 var(--text-caption-1-size) var(--font-family-mono);
   color: var(--color-text-tertiary-default);
 }
 
-.bq-money-money-meta-4 {
+.bq-money-meta-4 {
   flex: none;
   min-width: 64px;
   text-align: right;
   font: 800 var(--text-body-size) var(--font-family-mono);
 }
 
-.bq-money-money-row-row {
+.bq-money-row-row {
   display: flex;
   gap: 12px;
   padding: 12px 0;
   border-bottom: 1px solid var(--color-border-primary-default);
 }
 
-.bq-money-money-row-label {
+.bq-money-row-label {
   width: 110px;
   flex: none;
   font: 700 var(--text-caption-2-size) var(--font-family-mono);
@@ -64,38 +64,38 @@
   padding-top: 2px;
 }
 
-.bq-money-money-row-text {
+.bq-money-row-text {
   flex: 1;
   min-width: 0;
   font: 600 var(--text-body-size)/1.4 var(--font-family-body);
   word-break: break-word;
 }
 
-.bq-money-money-txn-sheet-title {
+.bq-money-txn-sheet-title {
   font: 800 40px/1.1 var(--font-family-body);
   letter-spacing: -.02em;
   margin: 6px 0 2px;
 }
 
-.bq-money-money-txn-sheet-meta {
+.bq-money-txn-sheet-meta {
   font: 700 var(--text-callout-size) var(--font-family-mono);
   color: var(--color-text-tertiary-default);
 }
 
-.bq-money-money-txn-sheet-meta-2 {
+.bq-money-txn-sheet-meta-2 {
   font: 400 var(--text-footnote-size) var(--font-family-mono);
   color: var(--color-text-secondary-default);
   margin-bottom: 12px;
 }
 
-.bq-money-money-txn-sheet-label {
+.bq-money-txn-sheet-label {
   font: 700 var(--text-caption-2-size) var(--font-family-mono);
   letter-spacing: .08em;
   color: var(--color-text-tertiary-default);
   margin: 12px 0 0;
 }
 
-.bq-money-money-txn-sheet-label-2 {
+.bq-money-txn-sheet-label-2 {
   font: 700 var(--text-caption-2-size) var(--font-family-mono);
   letter-spacing: .08em;
   color: var(--color-text-tertiary-default);

@@ -4,6 +4,7 @@ import { matchTabIndex, type NavItem } from "../shared/screen/nav";
 import { useIsNarrowPhone } from "../design-system/hooks/useIsMobile";
 import { noteTabTap } from "../shared/screen/tabTap";
 import { CONTROL_MS, QUICK_MS, tr } from "../design-system/motion/motion";
+import "./BottomNav.css";
 
 const BAR_BORDER = 1;
 
@@ -52,19 +53,9 @@ export function BottomNav({ items }: { items: NavItem[] }) {
       }}
     >
       {activeIndex >= 0 && (
-        <div
+        <div className="bq-bottom-nav-layer"
           aria-hidden
-          style={{
-            position: "absolute",
-            left: PAD,
-            top: PAD,
-            width: INDICATOR,
-            height: INDICATOR,
-            borderRadius: 999,
-            background: "var(--color-bg-fill-accent-selected)",
-            transform: `translateX(${activeIndex * (ITEM + GAP)}px)`,
-            transition: tr("transform", CONTROL_MS),
-          }}
+          style={{ left: PAD, top: PAD, width: INDICATOR, height: INDICATOR, transform: `translateX(${activeIndex * (ITEM + GAP)}px)`, transition: tr("transform", CONTROL_MS) }}
         />
       )}
       {items.map((t) => (
@@ -74,24 +65,15 @@ export function BottomNav({ items }: { items: NavItem[] }) {
           end={t.path === "/"}
           title={t.label}
           aria-label={t.label}
-          className="bq-scale"
+          className="bq-scale bq-bottom-nav-row"
           onClick={noteTabTap}
-          style={{ position: "relative", zIndex: 1, flex: "none", width: ITEM, height: ITEM, background: "none", border: 0, padding: 0, display: "flex", alignItems: "center", justifyContent: "center" }}
+          style={{ width: ITEM, height: ITEM }}
         >
           {({ isActive }) => (
             <>
-              <span aria-hidden style={{ position: "absolute", inset: `${-HIT_SLOP_Y}px ${-HIT_SLOP_X}px` }} />
-              <span
-                style={{
-                  width: ITEM,
-                  height: ITEM,
-                  borderRadius: 999,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: isActive ? "var(--color-bg-fill-primary-active)" : "var(--color-text-secondary-default)",
-                  transition: tr("color", QUICK_MS),
-                }}
+              <span className="bq-bottom-nav-layer-2" aria-hidden style={{ inset: `${-HIT_SLOP_Y}px ${-HIT_SLOP_X}px` }} />
+              <span className="bq-bottom-nav-row-2"
+                style={{ width: ITEM, height: ITEM, color: isActive ? "var(--color-bg-fill-primary-active)" : "var(--color-text-secondary-default)", transition: tr("color", QUICK_MS) }}
               >
                 <Icon name={t.icon} solid={isActive} />
               </span>

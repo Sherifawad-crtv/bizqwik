@@ -1,0 +1,14 @@
+/* Styles for FabButton.tsx. Tokens only; see DESIGN_SYSTEM.md. */
+
+.bq-fab-button-btn {
+  flex: none;
+  border-radius: 999px;
+  border: 0;
+  background: var(--color-bg-fill-primary-default);
+  color: var(--color-bg-surface-primary-default);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-fab);
+}

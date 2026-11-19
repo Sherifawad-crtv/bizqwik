@@ -1,0 +1,37 @@
+/* Styles for CreateFab.tsx. Tokens only; see DESIGN_SYSTEM.md. */
+
+.bq-create-fab-btn {
+  text-align: left;
+  background: var(--color-bg-surface-secondary-default);
+  border: 1px solid var(--color-border-primary-default);
+  border-radius: var(--radius-item);
+  padding: 14px 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.bq-create-fab-row {
+  width: 40px;
+  height: 40px;
+  flex: none;
+  border-radius: var(--radius-chip);
+  background: var(--color-bg-fill-accent-default);
+  color: var(--color-bg-fill-primary-active);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bq-create-fab-title {
+  display: block;
+  font: 700 var(--text-callout-size) var(--font-family-body);
+}
+
+.bq-create-fab-meta {
+  display: block;
+  font: 400 var(--text-caption-1-size) var(--font-family-mono);
+  color: var(--color-text-tertiary-default);
+  margin-top: 2px;
+}

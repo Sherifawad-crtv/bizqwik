@@ -82,10 +82,10 @@ export function Money() {
         <Spinner />
       ) : (
         <>
-          <Card className="bq-money-money-card" pad="none">
+          <Card className="bq-money-card" pad="none">
             <div className="bq-label">REVENUE · EGP</div>
-            <div className="bq-money-money-title">{fmt(here ? data.pay.total : data.rev.totals.revenue)}</div>
-            <div className="bq-money-money-meta">
+            <div className="bq-money-title">{fmt(here ? data.pay.total : data.rev.totals.revenue)}</div>
+            <div className="bq-money-meta">
               {here
                 ? `${data.pay.byMethod.reduce((a, m) => a + m.count, 0)} payment${data.pay.byMethod.reduce((a, m) => a + m.count, 0) === 1 ? "" : "s"} at ${current?.name ?? "this location"}`
                 : `${data.rev.activeSubscribers.total} active member${data.rev.activeSubscribers.total === 1 ? "" : "s"}`}
@@ -93,7 +93,7 @@ export function Money() {
             {data.pay.byMethod.length > 0 && (
               <div className="bq-flex bq-wrap bq-gap-2 bq-mt-14px">
                 {data.pay.byMethod.map((m) => (
-                  <span className="bq-money-money-meta-2" key={m.method} style={{ color: m.method === "instapay" ? "var(--color-bg-fill-primary-active)" : "var(--color-text-secondary-default)", background: m.method === "instapay" ? "var(--color-bg-fill-accent-default)" : "var(--color-bg-surface-secondary-default)" }}>
+                  <span className="bq-money-meta-2" key={m.method} style={{ color: m.method === "instapay" ? "var(--color-bg-fill-primary-active)" : "var(--color-text-secondary-default)", background: m.method === "instapay" ? "var(--color-bg-fill-accent-default)" : "var(--color-bg-surface-secondary-default)" }}>
                     {m.label} · {fmt(m.amount)}
                   </span>
                 ))}
@@ -104,15 +104,15 @@ export function Money() {
           <SectionHeader count={data.txns.length}>Transactions</SectionHeader>
           <Card className="bq-overflow-hidden bq-mb-3" pad="none">
             {data.txns.slice(0, 100).map((t, i, arr) => (
-              <button key={t.id} className={cx(`bq-plain bq-scale bq-listrow bq-listrow--compact ${!(i === arr.length - 1) ? "bq-listrow--divider" : ""}`, "bq-money-money-btn")} onClick={() => setOpen(t)}>
+              <button key={t.id} className={cx(`bq-plain bq-scale bq-listrow bq-listrow--compact ${!(i === arr.length - 1) ? "bq-listrow--divider" : ""}`, "bq-money-btn")} onClick={() => setOpen(t)}>
                 <div className="bq-grow">
-                  <div className="bq-money-money-title-2">{t.clientName ?? "Client"}</div>
-                  <div className="bq-money-money-meta-3">
+                  <div className="bq-money-title-2">{t.clientName ?? "Client"}</div>
+                  <div className="bq-money-meta-3">
                     {t.what} · {formatDateTime(t.at)}
                   </div>
                 </div>
                 <Tag tone={t.method === "InstaPay" ? "primary" : "neutral"}>{t.method.toUpperCase()}</Tag>
-                <div className="bq-money-money-meta-4" style={{ color: t.refund ? "var(--color-text-status-danger-default)" : "var(--color-text-primary-default)" }}>{t.refund ? "−" : ""}{fmt(t.amount)}</div>
+                <div className="bq-money-meta-4" style={{ color: t.refund ? "var(--color-text-status-danger-default)" : "var(--color-text-primary-default)" }}>{t.refund ? "−" : ""}{fmt(t.amount)}</div>
                 <Icon name="chevron-right" size={16} />
               </button>
             ))}
@@ -130,9 +130,9 @@ export function Money() {
 function Row({ k, v }: { k: string; v: string | null | undefined }) {
   if (!v) return null;
   return (
-    <div className="bq-money-money-row-row">
-      <span className="bq-money-money-row-label">{k}</span>
-      <span className="bq-money-money-row-text">{v}</span>
+    <div className="bq-money-row-row">
+      <span className="bq-money-row-label">{k}</span>
+      <span className="bq-money-row-text">{v}</span>
     </div>
   );
 }
@@ -152,10 +152,10 @@ function TxnSheet({ txn, onClose }: { txn: Txn | null; onClose: () => void }) {
   return (
     <Sheet open={txn !== null} onClose={onClose}>
       <div className="bq-label">{t.refund ? "REFUND" : "PAYMENT"} · {t.method.toUpperCase()}</div>
-      <div className="bq-money-money-txn-sheet-title" style={{ color: t.refund ? "var(--color-text-status-danger-default)" : "var(--color-text-primary-default)" }}>{t.refund ? "−" : ""}{fmt(t.amount)} <span className="bq-money-money-txn-sheet-meta">EGP</span></div>
-      <div className="bq-money-money-txn-sheet-meta-2">{t.what}</div>
+      <div className="bq-money-txn-sheet-title" style={{ color: t.refund ? "var(--color-text-status-danger-default)" : "var(--color-text-primary-default)" }}>{t.refund ? "−" : ""}{fmt(t.amount)} <span className="bq-money-txn-sheet-meta">EGP</span></div>
+      <div className="bq-money-txn-sheet-meta-2">{t.what}</div>
 
-      <div className="bq-money-money-txn-sheet-label">TRANSACTION</div>
+      <div className="bq-money-txn-sheet-label">TRANSACTION</div>
       <Row k="WHAT" v={t.what} />
       <Row k="PAID VIA" v={t.method} />
       <Row k="DATE & TIME" v={formatDateTime(t.at)} />
@@ -163,7 +163,7 @@ function TxnSheet({ txn, onClose }: { txn: Txn | null; onClose: () => void }) {
       <Row k="NOTE" v={note} />
       <Row k="REFERENCE" v={t.id.slice(0, 8).toUpperCase()} />
 
-      <div className="bq-money-money-txn-sheet-label-2">CLIENT</div>
+      <div className="bq-money-txn-sheet-label-2">CLIENT</div>
       <Row k="NAME" v={t.clientName ?? "Unknown"} />
       <Row k="PHONE" v={client?.phone} />
       <Row k="EMAIL" v={client?.email} />

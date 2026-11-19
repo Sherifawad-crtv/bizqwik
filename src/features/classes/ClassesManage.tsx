@@ -43,7 +43,7 @@ export function ClassesManage() {
   return (
     <div>
       {!isMobile && (
-      <button className="bq-classes-classes-manage-btn"
+      <button className="bq-classes-manage-btn"
         onClick={() => navigate("/catalog")}
       >
         <Icon name="chevron-left" size={16} /> Catalog
@@ -52,8 +52,8 @@ export function ClassesManage() {
 
       <div className="bq-flex bq-items-center bq-gap-3 bq-mb-4">
         <div className="bq-grow">
-          <div className="bq-classes-classes-manage-title">Sessions</div>
-          <div className="bq-classes-classes-manage-meta">
+          <div className="bq-classes-manage-title">Sessions</div>
+          <div className="bq-classes-manage-meta">
             Upcoming sessions from your classes. Tap one to edit just that session.
           </div>
         </div>
@@ -81,7 +81,7 @@ export function ClassesManage() {
 
       {past.length > 0 && (
         <>
-          <div className="bq-classes-classes-manage-label">
+          <div className="bq-classes-manage-label">
             LAST 2 WEEKS · {past.length}
           </div>
           <div className="bq-stack">
@@ -94,7 +94,7 @@ export function ClassesManage() {
 
       {cancelled.length > 0 && (
         <>
-          <div className="bq-classes-classes-manage-label">
+          <div className="bq-classes-manage-label">
             CANCELLED · {cancelled.length}
           </div>
           <div className="bq-stack">
@@ -152,27 +152,27 @@ function ClassCard({ c, onEdit, onRoster }: { c: GymClass; onEdit?: () => void; 
     >
       <div className="bq-flex bq-items-center bq-gap-3" onClick={onEdit} style={{ cursor: onEdit ? "pointer" : "default" }}>
         <div className="bq-grow">
-          <div className="bq-classes-classes-manage-class-card-title" style={{ textDecoration: cancelled ? "line-through" : "none" }}>{c.title}</div>
-          <div className="bq-classes-classes-manage-class-card-meta">{whenLabel(c.startsAt)}</div>
+          <div className="bq-classes-manage-class-card-title" style={{ textDecoration: cancelled ? "line-through" : "none" }}>{c.title}</div>
+          <div className="bq-classes-manage-class-card-meta">{whenLabel(c.startsAt)}</div>
           {!cancelled && (c.bookedCount ?? 0) > 0 && (
-            <div className="bq-classes-classes-manage-class-card-meta-2">
+            <div className="bq-classes-manage-class-card-meta-2">
               {c.bookedCount} booked · {c.planSeats ?? 0} on a plan · {c.dropInSeats ?? 0} drop-in
             </div>
           )}
           {c.description && (
-            <div className="bq-classes-classes-manage-class-card-text">
+            <div className="bq-classes-manage-class-card-text">
               {c.description}
             </div>
           )}
         </div>
         <div className="bq-flex-none bq-text-right">
-          <div className="tabular bq-classes-classes-manage-class-card-title-2">{c.price > 0 ? egp(c.price) : "Free"}</div>
-          <div className="bq-classes-classes-manage-class-card-label">DROP-IN</div>
-          {onEdit && <div className="bq-classes-classes-manage-class-card-label-2">EDIT</div>}
+          <div className="tabular bq-classes-manage-class-card-title-2">{c.price > 0 ? egp(c.price) : "Free"}</div>
+          <div className="bq-classes-manage-class-card-label">DROP-IN</div>
+          {onEdit && <div className="bq-classes-manage-class-card-label-2">EDIT</div>}
         </div>
       </div>
       {onRoster && (
-        <button className="bq-classes-classes-manage-class-card-btn"
+        <button className="bq-classes-manage-class-card-btn"
           type="button"
           onClick={onRoster}
         >

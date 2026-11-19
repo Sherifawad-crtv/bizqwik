@@ -6,11 +6,11 @@ import { CONTROL_MS, STANDARD_MS, tr } from "../motion/motion";
  * only correcting itself, so it doesn't visibly slide on arrival. */
 export function SwitchVisual({ checked, animate = true, busy }: { checked: boolean; animate?: boolean; busy?: boolean }) {
   return (
-    <span className="bq-switch-switch-visual-box"
+    <span className="bq-switch-visual-box"
       aria-hidden
       style={{ background: checked ? "var(--color-bg-fill-primary-default)" : "var(--color-bg-surface-secondary-default)", boxShadow: checked ? "none" : "inset 0 0 0 1px var(--color-border-primary-default)", transition: animate ? tr(["background", "box-shadow"], STANDARD_MS) : "none", opacity: busy ? 0.85 : 1 }}
     >
-      <span className="bq-switch-switch-visual-layer"
+      <span className="bq-switch-visual-layer"
         style={{ transform: `translateX(${checked ? 19 : 0}px)`, transition: animate ? tr("transform", CONTROL_MS) : "none" }}
       />
     </span>

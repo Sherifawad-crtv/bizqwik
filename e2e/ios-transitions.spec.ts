@@ -190,7 +190,7 @@ test("how long each screen takes, and how the phone feels, are measured (numbers
 test("the title follows the screen you're on: it fades between screens and comes back right after going back", async ({ page }) => {
   await boot(page, "dept_head");
   await page.goto("/coaches"); await page.waitForTimeout(1200);
-  const pill = page.locator("div[style*='position: fixed'][style*='top: 0'] div[style*='border-radius: 999px']");
+  const pill = page.getByTestId("title-pill");
   const team = (await pill.innerText()).trim();
   await page.getByText("Coach Nour").click();
   // mid-change both titles are present (old fading out, new fading in)
@@ -206,7 +206,7 @@ test("the title follows the screen you're on: it fades between screens and comes
 test("the title bar vanishes at once on the home screen (no stale title fading out)", async ({ page }) => {
   await boot(page, "dept_head");
   await page.goto("/coaches"); await page.waitForTimeout(1200);
-  const bar = page.locator("div[style*='position: fixed'][style*='top: 0']").first();
+  const bar = page.getByTestId("title-bar").first();
   await expect(bar).toHaveCSS("visibility", "visible");
   // Overview is the founder's home: the bar must be gone in the very first frames, not fading with the old title.
   await page.getByRole("link", { name: "Overview", exact: true }).click();
@@ -222,7 +222,7 @@ test("the title bar never shows another screen's title: not when leaving home, n
     const w = window as unknown as { __bad: string[] };
     w.__bad = [];
     const tick = () => {
-      const bar = document.querySelector("div[style*='position: fixed'][style*='top: 0']") as HTMLElement | null;
+      const bar = document.querySelector("[data-testid='title-bar']") as HTMLElement | null;
       if (bar) {
         const cs = getComputedStyle(bar);
         const text = (bar.innerText || "").trim();
@@ -248,7 +248,7 @@ test("on a sub-page, Back sits on the title's line, says Back, and stays put whi
   const back = page.getByRole("button", { name: "Back" });
   await expect(back).toHaveText(/^\s*Back\s*$/);
   await expect(page.getByRole("button", { name: /^Team$/ })).toHaveCount(0); // the old in-page "‹ Team" link is gone on phones
-  const pill = page.locator("div[style*='position: fixed'][style*='top: 0'] div[style*='border-radius: 999px']");
+  const pill = page.getByTestId("title-pill");
   const b1 = (await back.boundingBox())!;
   const p1 = (await pill.boundingBox())!;
   expect(Math.abs((b1.y + b1.height / 2) - (p1.y + p1.height / 2))).toBeLessThan(2); // same line

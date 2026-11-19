@@ -1,6 +1,6 @@
 /* Styles for ClassCalendar.tsx. Tokens only; see DESIGN_SYSTEM.md. */
 
-.bq-frontdesk-class-calendar-class-calendar-screen-stack {
+.bq-frontdesk-class-calendar-screen-stack {
   position: fixed;
   inset: 0;
   z-index: 150;
@@ -10,7 +10,7 @@
   padding-top: var(--safe-top);
 }
 
-.bq-frontdesk-class-calendar-class-calendar-screen-row {
+.bq-frontdesk-class-calendar-screen-row {
   flex: none;
   display: flex;
   flex-wrap: wrap;
@@ -19,31 +19,31 @@
   border-bottom: 1px solid var(--color-border-primary-default);
 }
 
-.bq-frontdesk-class-calendar-class-calendar-screen-btn {
+.bq-frontdesk-class-calendar-screen-btn {
   width: 44px;
   height: 44px;
   padding: 0;
 }
 
-.bq-frontdesk-class-calendar-class-calendar-screen-spacing {
+.bq-frontdesk-class-calendar-screen-spacing {
   margin-right: 8px;
 }
 
-.bq-frontdesk-class-calendar-class-calendar-screen-btn-2 {
+.bq-frontdesk-class-calendar-screen-btn-2 {
   height: 44px;
   padding: 0 14px;
   font: 700 var(--text-caption-1-size) var(--font-family-mono);
   letter-spacing: .06em;
 }
 
-.bq-frontdesk-class-calendar-class-calendar-screen-title {
+.bq-frontdesk-class-calendar-screen-title {
   flex: 1;
   min-width: 140px;
   font: 800 18px var(--font-family-body);
   letter-spacing: -.01em;
 }
 
-.bq-frontdesk-class-calendar-class-calendar-screen-text {
+.bq-frontdesk-class-calendar-screen-text {
   flex: none;
   font: 600 var(--text-footnote-size)/1.5 var(--font-family-body);
   color: var(--color-text-status-danger-default);
@@ -51,7 +51,7 @@
   padding: 10px 20px;
 }
 
-.bq-frontdesk-class-calendar-class-calendar-screen-stack-2 {
+.bq-frontdesk-class-calendar-screen-stack-2 {
   flex: 1;
   min-height: 0;
   display: flex;

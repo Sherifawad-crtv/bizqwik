@@ -82,7 +82,7 @@ export function PlansPanel({ solo }: { solo?: boolean }) {
     <div>
       {!solo && section("membership", "Memberships", solo ? "No memberships yet. A membership covers every class at its location for the months you choose." : "No memberships yet. A membership covers every class for the months you choose.")}
       {section("bundle", solo ? "Packages" : "Class bundles", solo ? "No packages yet. A package is a number of classes valid for 1 or 3 months; one class is used each day the member checks in." : "No bundles yet. A bundle is a pack of sessions: one is used each day the member checks in.")}
-      {!solo && <div className="bq-catalog-plans-plans-panel-meta">
+      {!solo && <div className="bq-catalog-plans-panel-meta">
         Each class's monthly is set on the class itself. A member holds one group plan at a time, and a new one can only be bought once the current one is finished.
       </div>}
 

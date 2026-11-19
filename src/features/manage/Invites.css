@@ -1,12 +1,12 @@
 /* Styles for Invites.tsx. Tokens only; see DESIGN_SYSTEM.md. */
 
-.bq-manage-invites-invites-panel-btn {
+.bq-manage-invites-panel-btn {
   margin-left: auto;
   height: 40px;
   padding: 0 16px;
 }
 
-.bq-manage-invites-invites-panel-title {
+.bq-manage-invites-panel-title {
   font: 700 var(--text-callout-size) var(--font-family-body);
   overflow: hidden;
   text-overflow: ellipsis;
