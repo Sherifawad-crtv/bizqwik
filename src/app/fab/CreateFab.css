@@ -5,11 +5,11 @@
   background: var(--color-bg-surface-secondary-default);
   border: var(--border-outline);
   border-radius: var(--radius-item);
-  padding: 14px 16px;
+  padding: var(--space-4) var(--space-4);
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: var(--space-4);
 }
 
 .bq-create-fab-row {
@@ -33,5 +33,5 @@
   display: block;
   font: 400 var(--text-caption-1-size) var(--font-family-mono);
   color: var(--color-text-tertiary-default);
-  margin-top: 2px;
+  margin-top: var(--space-0-5);
 }

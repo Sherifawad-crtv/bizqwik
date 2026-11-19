@@ -4,10 +4,10 @@
   background: var(--color-bg-surface-secondary-default);
   border: var(--border-outline);
   border-radius: var(--radius-item);
-  padding: 14px;
+  padding: var(--space-4);
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: var(--space-2);
 }
 
 .bq-frontdesk-partners-partner-picker-text {
@@ -18,7 +18,7 @@
 .bq-frontdesk-partners-partner-picker-title {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
   font: 700 var(--text-body-size) var(--font-family-body);
 }
 
@@ -42,7 +42,7 @@
 
 .bq-frontdesk-partners-group-offer-select-title {
   display: block;
-  font: 800 18px var(--font-family-body);
+  font: 800 var(--text-title-3-size) var(--font-family-body);
   letter-spacing: -.01em;
 }
 
@@ -50,9 +50,9 @@
   display: block;
   font: 400 var(--text-caption-1-size) var(--font-family-mono);
   color: var(--color-text-secondary-default);
-  margin-top: 2px;
+  margin-top: var(--space-0-5);
 }
 
 .bq-frontdesk-partners-group-offer-select-meta-2 {
-  font: 800 18px var(--font-family-mono);
+  font: 800 var(--text-title-3-size) var(--font-family-mono);
 }

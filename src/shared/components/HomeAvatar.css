@@ -3,6 +3,6 @@
 .bq-home-avatar-title {
   flex: 1;
   min-width: 0;
-  font: 800 28px/1.15 var(--font-family-body);
+  font: 800 var(--text-title-1-size)/1.15 var(--font-family-body);
   letter-spacing: -.02em;
 }

@@ -20,7 +20,7 @@ export function SectionCard({ title, sub, children, style }: { title: string; su
     <div className={cardClass("md")} style={{ marginBottom: 14, ...style }}>
       <div className="bq-label">{title}</div>
       {sub && <div className="bq-card-section-card-meta">{sub}</div>}
-      <div className="bq-mt-14px">{children}</div>
+      <div className="bq-mt-4">{children}</div>
     </div>
   );
 }

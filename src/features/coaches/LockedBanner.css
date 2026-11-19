@@ -2,11 +2,11 @@
 
 .bq-coaches-locked-banner-row {
   display: flex;
-  gap: 12px;
+  gap: var(--space-3);
   align-items: flex-start;
   border-radius: var(--radius-item);
-  padding: 14px 16px;
-  margin-bottom: 14px;
+  padding: var(--space-4) var(--space-4);
+  margin-bottom: var(--space-4);
 }
 
 .bq-coaches-locked-banner-box {
@@ -14,7 +14,7 @@
   height: 8px;
   border-radius: var(--radius-full);
   flex: none;
-  margin-top: 6px;
+  margin-top: var(--space-1-5);
   display: block;
 }
 

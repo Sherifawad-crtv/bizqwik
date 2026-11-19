@@ -3,14 +3,14 @@
 .bq-frontdesk-check-in-meta {
   font: 400 var(--text-footnote-size)/1.5 var(--font-family-mono);
   color: var(--color-text-secondary-default);
-  margin: 0 2px 14px;
+  margin: 0 var(--space-0-5) var(--space-4);
 }
 
 .bq-frontdesk-check-in-confirm-check-in-sheet-box {
   background: var(--color-bg-surface-secondary-default);
   border: var(--border-outline);
   border-radius: var(--radius-item);
-  padding: 12px 16px;
+  padding: var(--space-3) var(--space-4);
 }
 
 .bq-frontdesk-check-in-confirm-check-in-sheet-label {
@@ -22,7 +22,7 @@
 
 .bq-frontdesk-check-in-confirm-check-in-sheet-title {
   font: 700 var(--text-callout-size) var(--font-family-body);
-  margin-top: 4px;
+  margin-top: var(--space-1);
 }
 
 .bq-frontdesk-check-in-confirm-check-in-sheet-meta {
@@ -31,20 +31,20 @@
 }
 
 .bq-frontdesk-check-in-confirm-check-in-sheet-text {
-  margin-top: 12px;
+  margin-top: var(--space-3);
   font: 600 var(--text-footnote-size)/1.5 var(--font-family-body);
   color: var(--color-text-primary-default);
   background: var(--color-bg-fill-accent-default);
   border-radius: var(--radius-item);
-  padding: 10px 14px;
+  padding: var(--space-2) var(--space-4);
 }
 
 .bq-frontdesk-check-in-confirm-check-in-sheet-box-2 {
-  margin-top: 12px;
+  margin-top: var(--space-3);
   background: var(--color-bg-fill-status-danger-default);
   color: var(--color-text-status-danger-default);
   border-radius: var(--radius-item);
-  padding: 12px 14px;
+  padding: var(--space-3) var(--space-4);
 }
 
 .bq-frontdesk-check-in-confirm-check-in-sheet-title-2 {
@@ -53,14 +53,14 @@
 
 .bq-frontdesk-check-in-confirm-check-in-sheet-text-2 {
   font: 600 var(--text-footnote-size)/1.5 var(--font-family-body);
-  margin-top: 2px;
+  margin-top: var(--space-0-5);
 }
 
 .bq-frontdesk-check-in-confirm-check-in-sheet-text-3 {
-  margin-top: 12px;
+  margin-top: var(--space-3);
   font: 600 var(--text-footnote-size)/1.5 var(--font-family-body);
   color: var(--color-text-status-logging-default);
   background: var(--color-bg-fill-status-logging-default);
   border-radius: var(--radius-item);
-  padding: 10px 14px;
+  padding: var(--space-2) var(--space-4);
 }

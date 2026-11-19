@@ -205,7 +205,7 @@ export function CreateClientSheet({
           {step === 1 && (
             <>
               {!(profile?.role === "dept_head" && orgMode === "solo" && bundleTypes.length === 0) && (
-              <div className="bq-flex bq-justify-center bq-mb-14px">
+              <div className="bq-flex bq-justify-center bq-mb-4">
                 <Segmented
                   value={kind}
                   onChange={(v) => {

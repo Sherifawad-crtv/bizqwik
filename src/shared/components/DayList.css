@@ -12,14 +12,14 @@
 
 .bq-day-list-meta-2 {
   display: flex;
-  gap: 8px;
+  gap: var(--space-2);
   align-items: baseline;
   font: 600 var(--text-footnote-size) var(--font-family-mono);
   color: var(--color-text-primary-default);
 }
 
 .bq-day-list-label {
-  font: 700 10px var(--font-family-mono);
+  font: 700 var(--text-label-size) var(--font-family-mono);
   letter-spacing: .08em;
   color: var(--color-text-tertiary-default);
   min-width: 52px;

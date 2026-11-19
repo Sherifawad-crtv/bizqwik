@@ -116,7 +116,7 @@ export function CoachDetail() {
       </button>
       )}
 
-      <div className="bq-flex bq-items-center bq-gap-3 bq-mb-18px">
+      <div className="bq-flex bq-items-center bq-gap-3 bq-mb-4">
         <Avatar name={row.name} size={44} src={row.avatarUrl} />
         <div>
           <div className="bq-coaches-coach-detail-title">{row.name}</div>
@@ -138,7 +138,7 @@ export function CoachDetail() {
       />
 
       {!isMobile && (
-      <div className="bq-flex bq-gap-10px bq-mb-18px bq-wrap">
+      <div className="bq-flex bq-gap-2 bq-mb-4 bq-wrap">
         {editable && (
           <Button variant="secondary" onClick={() => setAddOpen(true)}>
             + Add session on their behalf

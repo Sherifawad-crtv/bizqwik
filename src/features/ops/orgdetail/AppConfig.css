@@ -10,11 +10,11 @@
 }
 
 .bq-ops-app-config-org-app-config-card {
-  padding: 18px;
+  padding: var(--space-4);
 }
 
 .bq-ops-app-config-org-app-config-text {
-  padding: 6px 0;
+  padding: var(--space-1-5) 0;
   color: var(--color-text-tertiary-default);
   font: 500 var(--text-subheadline-size) var(--font-family-body);
 }
@@ -23,20 +23,20 @@
   font: 700 var(--text-caption-2-size) var(--font-family-mono);
   letter-spacing: .08em;
   color: var(--color-text-tertiary-default);
-  margin: 2px 2px 0;
+  margin: var(--space-0-5) var(--space-0-5) 0;
 }
 
 .bq-ops-app-config-org-app-config-form-label-2 {
   font: 700 var(--text-caption-2-size) var(--font-family-mono);
   letter-spacing: .08em;
   color: var(--color-text-tertiary-default);
-  margin: 10px 2px 0;
+  margin: var(--space-2) var(--space-0-5) 0;
 }
 
 .bq-ops-app-config-org-app-config-form-meta {
   font: 500 var(--text-caption-1-size)/1.5 var(--font-family-mono);
   color: var(--color-text-secondary-default);
-  padding: 0 2px;
+  padding: 0 var(--space-0-5);
 }
 
 .bq-ops-app-config-org-app-config-form-text {

@@ -110,7 +110,7 @@ function RosterRow({
   const onPlan = b.coverage === "plan";
   return (
     <div className="bq-class-roster-sheet-roster-row-box" style={{ opacity: busy ? 0.6 : 1 }}>
-      <div className="bq-flex bq-items-center bq-gap-10px">
+      <div className="bq-flex bq-items-center bq-gap-2">
         <div className="bq-grow">
           <div className="bq-class-roster-sheet-roster-row-title">{b.clientName ?? "Member"}</div>
           <div className="bq-class-roster-sheet-roster-row-meta">
@@ -122,7 +122,7 @@ function RosterRow({
         </Tag>
       </div>
 
-      <div className="bq-flex bq-gap-2 bq-mt-10px">
+      <div className="bq-flex bq-gap-2 bq-mt-2">
         <RowBtn active={b.attendance === "arrived"} disabled={busy} onClick={() => run(() => api.markAttendance(b.id, "arrived"), b.id)}>Arrived</RowBtn>
         <RowBtn active={b.attendance === "no_show"} disabled={busy} onClick={() => run(() => api.markAttendance(b.id, "no_show"), b.id)}>No-show</RowBtn>
         {!paid && !collecting && (
@@ -131,7 +131,7 @@ function RosterRow({
       </div>
 
       {!paid && collecting && (
-        <div className="bq-mt-10px">
+        <div className="bq-mt-2">
           <div className="bq-class-roster-sheet-roster-row-label">COLLECT PAYMENT</div>
           <div className="bq-flex bq-gap-2">
             {((solo ? ["cash", "instapay"] : ["cash", "card", "instapay", "wallet"]) as PayMethod[]).map((pm) => (

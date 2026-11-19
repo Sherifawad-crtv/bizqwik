@@ -3,8 +3,8 @@
 .bq-coaches-history-personal-history-row {
   display: flex;
   align-items: baseline;
-  gap: 10px;
-  padding: 2px 2px 8px;
+  gap: var(--space-2);
+  padding: var(--space-0-5) var(--space-0-5) var(--space-2);
 }
 
 .bq-coaches-history-personal-history-meta {

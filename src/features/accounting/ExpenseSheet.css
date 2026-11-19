@@ -5,7 +5,7 @@
   background: var(--color-bg-surface-secondary-default);
   border: var(--border-outline);
   border-radius: var(--radius-item);
-  padding: 10px 16px;
+  padding: var(--space-2) var(--space-4);
 }
 
 .bq-accounting-expense-sheet-input {
@@ -14,9 +14,9 @@
   border: 0;
   background: none;
   outline: none;
-  font: 800 28px var(--font-family-body);
+  font: 800 var(--text-title-1-size) var(--font-family-body);
   color: var(--color-text-primary-default);
-  padding: 2px 0 0;
+  padding: var(--space-0-5) 0 0;
 }
 
 .bq-accounting-expense-sheet-input-2 {
@@ -26,13 +26,13 @@
 .bq-accounting-expense-sheet-btn {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--space-2);
   width: 100%;
   text-align: left;
   background: var(--color-bg-surface-secondary-default);
   border: var(--border-outline);
   border-radius: var(--radius-item);
-  padding: 12px 16px;
+  padding: var(--space-3) var(--space-4);
   cursor: pointer;
 }
 
@@ -43,13 +43,13 @@
 .bq-accounting-expense-sheet-btn-2 {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--space-2);
   width: 100%;
   text-align: left;
   background: var(--color-bg-surface-secondary-default);
   border: var(--border-outline);
   border-radius: var(--radius-item);
-  padding: 12px 16px;
+  padding: var(--space-3) var(--space-4);
   cursor: pointer;
   color: var(--color-text-primary-default);
 }
@@ -62,17 +62,17 @@
 .bq-accounting-expense-sheet-categories-sheet-title {
   font: 800 var(--text-title-1-size)/1.2 var(--font-family-body);
   letter-spacing: -.02em;
-  margin: 0 0 16px;
+  margin: 0 0 var(--space-4);
 }
 
 .bq-accounting-expense-sheet-categories-sheet-row {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--space-2);
   background: var(--color-bg-surface-secondary-default);
   border: var(--border-outline);
   border-radius: var(--radius-item);
-  padding: 10px 14px;
+  padding: var(--space-2) var(--space-4);
 }
 
 .bq-accounting-expense-sheet-categories-sheet-text {
@@ -89,7 +89,7 @@
 }
 
 .bq-accounting-expense-sheet-categories-sheet-text-2 {
-  margin-top: 8px;
+  margin-top: var(--space-2);
   font: 600 var(--text-footnote-size) var(--font-family-body);
   color: var(--color-text-status-danger-default);
 }

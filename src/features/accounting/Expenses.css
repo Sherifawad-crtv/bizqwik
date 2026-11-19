@@ -5,9 +5,9 @@
   min-width: 0;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--space-2);
   height: 48px;
-  padding: 0 14px;
+  padding: 0 var(--space-4);
   background: var(--color-bg-surface-secondary-default);
   border: var(--border-outline);
   border-radius: var(--radius-item);
@@ -25,10 +25,10 @@
 
 .bq-accounting-expenses-panel-row {
   display: flex;
-  gap: 6px;
+  gap: var(--space-1-5);
   overflow-x: auto;
-  margin-bottom: 14px;
-  padding-bottom: 2px;
+  margin-bottom: var(--space-4);
+  padding-bottom: var(--space-0-5);
 }
 
 .bq-accounting-expenses-panel-btn {

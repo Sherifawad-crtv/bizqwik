@@ -109,7 +109,8 @@ Screens pick a role, never a pixel size. Each role has `--text-<role>-size` and
 |---|---|---|---|
 | Large Title | 30 / 800 | `bq-text-large-title` | the biggest heading |
 | Title 1 | 26 / 800 | `bq-text-title-1`, `bq-title` (page title with spacing) | page titles |
-| Title 2 | 20 / 700 | `bq-text-title-2`, `bq-h2` | section titles |
+| Title 2 | 20 / 700 | `bq-text-title-2`, `bq-h2` | section titles, names on sheets |
+| Title 3 | 18 / 700 | `--text-title-3-*` | small titles (title pill, payment cards, plan names) |
 | Headline | 16 / 700 | `bq-text-headline`, `bq-h3` | row titles |
 | Callout | 16 / 500 | `bq-text-callout` | larger body text |
 | Body | 15 / 500 | `bq-text-body` | body text |
@@ -118,7 +119,7 @@ Screens pick a role, never a pixel size. Each role has `--text-<role>-size` and
 | Caption 1 / 2 | 12 / 11, 500 | `bq-text-caption-1` / `-2` | captions |
 | Label | 11 / 700 mono, uppercase | `bq-label` | MONTH TOTAL · EGP |
 | Meta | 13 / 400 mono | `bq-meta` | secondary mono text |
-| Stat XL / LG / MD / SM | 56 / 30 / 24 / 20, 800 | `bq-stat-xl / lg / md / sm` | big numbers |
+| Stat XL / Hero / LG / MD / SM | 56 / 48 / 30 / 24 / 20, 800 | `bq-stat-xl / lg / md / sm`, `--text-stat-hero-*` | big numbers (Hero: a screen's main money figure) |
 
 Fonts: `--font-family-body` (Urbanist) for words, `--font-family-mono` (Space
 Mono) for labels, meta and figures. `tabular` for figures that must not change
@@ -126,8 +127,16 @@ width.
 
 ### Spacing
 
-`--space-1` 4 · `--space-2` 8 · `--space-3` 12 · `--space-4` 16 · `--space-5` 20 ·
-`--space-6` 24 · `--space-8` 32. Page side gutter is 16; cards pad 20 (`md`) or
+A 4px grid. Every gap, padding and margin uses one of these:
+
+| Step | px | For |
+|---|---|---|
+| `--space-px` | 1 | hairline: a 1px gap that shows a grid line |
+| `--space-0-5` / `--space-1-5` | 2 / 6 | half-steps for tight gaps inside small parts (pills, labels) |
+| `--space-1` · `-2` · `-3` · `-4` · `-5` · `-6` · `-8` | 4 · 8 · 12 · 16 · 20 · 24 · 32 | everyday spacing |
+| `--space-10` · `-12` · `-16` · `-24` | 40 · 48 · 64 · 96 | page-level layout (desktop margins, big hero padding) |
+
+A value between two steps goes to the nearest one; a tie goes to the multiple of 8. Page side gutter is 16; cards pad 20 (`md`) or
 14×16 (`sm`).
 
 ### Corner radius: one value per kind; nested shapes follow outer = inner + padding
@@ -287,7 +296,7 @@ of writing a new class for a flex row with a gap.
 |---|---|
 | Layout | `bq-flex`, `bq-inline-flex`, `bq-grid`, `bq-block`, `bq-col`, `bq-wrap`, `bq-flex-1`, `bq-flex-none`, `bq-min-w-0`, `bq-relative`, `bq-w-full` |
 | Alignment | `bq-items-center / baseline / start / end`, `bq-justify-center / between / end`, `bq-ml-auto` |
-| Spacing | `bq-gap-N`, `bq-mt-N`, `bq-mb-N` where N is the token step (`bq-gap-2` = `--space-2` = 8px). Off-scale values are marked in px (`bq-mt-6px`) and will be snapped. |
+| Spacing | `bq-gap-N`, `bq-mt-N`, `bq-mb-N` where N is the token step (`bq-gap-2` = `--space-2` = 8px; `bq-gap-px`, `bq-mt-0-5`, `bq-gap-1-5` for the small steps) |
 | Text | `bq-fg-primary / secondary / tertiary` (text colour), `bq-text-left / center / right`, `bq-nowrap`, `bq-ellipsis`, `bq-overflow-hidden`, `bq-pointer` |
 
 ### Feature and component CSS

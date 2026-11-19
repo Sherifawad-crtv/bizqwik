@@ -1,20 +1,20 @@
 /* Styles for Overview.tsx. Tokens only; see DESIGN_SYSTEM.md. */
 
 .bq-ops-overview-stat-tile-card {
-  padding: 16px 18px;
+  padding: var(--space-4) var(--space-4);
 }
 
 .bq-ops-overview-stat-tile-title {
   font: 800 var(--text-title-1-size)/1.1 var(--font-family-body);
   letter-spacing: -.02em;
-  margin-top: 6px;
+  margin-top: var(--space-1-5);
 }
 
 .bq-ops-overview-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 10px;
-  margin-bottom: 26px;
+  gap: var(--space-2);
+  margin-bottom: var(--space-6);
 }
 
 .bq-ops-overview-btn {

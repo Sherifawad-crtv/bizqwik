@@ -3,29 +3,29 @@
 .bq-ops-org-qr-btn {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-1);
   border: 0;
   background: none;
   color: var(--color-text-secondary-default);
   cursor: pointer;
   font: 700 var(--text-subheadline-size) var(--font-family-body);
-  margin-bottom: 12px;
+  margin-bottom: var(--space-3);
   padding: 0;
 }
 
 .bq-ops-org-qr-meta {
   font: 400 var(--text-footnote-size) var(--font-family-mono);
   color: var(--color-text-tertiary-default);
-  margin-top: 6px;
+  margin-top: var(--space-1-5);
 }
 
 .bq-ops-org-qr-size {
-  margin-top: 22px;
+  margin-top: var(--space-6);
   max-width: 520px;
 }
 
 .bq-ops-org-qr-card {
-  padding: 24px;
+  padding: var(--space-6);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -33,7 +33,7 @@
 }
 
 .bq-ops-org-qr-text {
-  padding: 40px 0;
+  padding: var(--space-10) 0;
   color: var(--color-text-tertiary-default);
   font: 500 var(--text-subheadline-size) var(--font-family-body);
 }
@@ -45,12 +45,12 @@
 }
 
 .bq-ops-org-qr-title {
-  font: 700 18px var(--font-family-body);
-  margin-top: 14px;
+  font: 700 var(--text-title-3-size) var(--font-family-body);
+  margin-top: var(--space-4);
 }
 
 .bq-ops-org-qr-meta-2 {
   font: 400 var(--text-footnote-size)/1.6 var(--font-family-mono);
   color: var(--color-text-tertiary-default);
-  margin-top: 4px;
+  margin-top: var(--space-1);
 }

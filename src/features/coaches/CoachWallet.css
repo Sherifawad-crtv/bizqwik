@@ -1,19 +1,19 @@
 /* Styles for CoachWallet.tsx. Tokens only; see DESIGN_SYSTEM.md. */
 
 .bq-coaches-coach-wallet-text {
-  margin-bottom: 14px;
+  margin-bottom: var(--space-4);
   font: 600 var(--text-footnote-size)/1.5 var(--font-family-body);
   color: var(--color-text-status-danger-default);
   background: var(--color-bg-fill-status-danger-default);
   border-radius: var(--radius-item);
-  padding: 10px 14px;
+  padding: var(--space-2) var(--space-4);
 }
 
 .bq-coaches-coach-wallet-row {
   display: flex;
   align-items: baseline;
-  gap: 10px;
-  padding: 2px 2px 8px;
+  gap: var(--space-2);
+  padding: var(--space-0-5) var(--space-0-5) var(--space-2);
 }
 
 .bq-coaches-coach-wallet-meta {
@@ -23,7 +23,7 @@
 }
 
 .bq-coaches-coach-wallet-meta-2 {
-  padding: 22px 2px 0;
+  padding: var(--space-6) var(--space-0-5) 0;
   font: 400 var(--text-footnote-size) var(--font-family-mono);
   color: var(--color-text-tertiary-default);
 }

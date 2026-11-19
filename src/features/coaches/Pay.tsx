@@ -24,9 +24,9 @@ function MonthStatus({ rows }: { rows: Rollup[] }) {
   return (
     <div className="bq-card bq-coaches-pay-month-status-spacing">
       <div className="bq-label">THIS MONTH · {monthLabel(MOCK.CURRENT_MONTH).toUpperCase()}</div>
-      <div className="bq-mt-3 bq-flex bq-col bq-gap-10px">
+      <div className="bq-mt-3 bq-flex bq-col bq-gap-2">
         {parts.map((p) => (
-          <div className="bq-flex bq-items-center bq-gap-10px" key={p.state}>
+          <div className="bq-flex bq-items-center bq-gap-2" key={p.state}>
             <StatePill state={p.state} label={p.label} />
             <span className="bq-meta">{p.n} {p.n === 1 ? "coach" : "coaches"}</span>
             <span className="tabular bq-coaches-pay-month-status-title">{fmt(p.total)} EGP</span>
@@ -94,7 +94,7 @@ export function Pay() {
         <RollupTable colA="PAYEE" colB="METHOD" rows={[]} empty={{ icon: "topay", title: "Nothing to pay right now", body: "A coach appears here once a head settles their month. Paid months move to History." }} />
       ) : (
         due.map((m) => (
-          <div className="bq-mb-18px" key={m.month}>
+          <div className="bq-mb-4" key={m.month}>
             <div className="bq-coaches-pay-row-2">
               <span className="bq-label">{monthLabel(m.month).toUpperCase()}</span>
               <span className="tabular bq-coaches-pay-meta">{fmt(sumRemaining(m.rows))} EGP</span>

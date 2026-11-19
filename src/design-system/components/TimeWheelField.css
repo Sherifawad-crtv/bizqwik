@@ -29,7 +29,7 @@
   background: var(--color-bg-surface-secondary-default);
   border: var(--border-outline);
   border-radius: var(--radius-item);
-  padding: 10px 16px;
+  padding: var(--space-2) var(--space-4);
   cursor: pointer;
 }
 
@@ -41,7 +41,7 @@
 .bq-time-wheel-field-title {
   font: 800 var(--text-title-1-size)/1.2 var(--font-family-body);
   letter-spacing: -.02em;
-  margin: 4px 0 12px;
+  margin: var(--space-1) 0 var(--space-3);
 }
 
 .bq-time-wheel-field-layer {

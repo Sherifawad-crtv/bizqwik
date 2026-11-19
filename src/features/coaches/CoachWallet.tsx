@@ -89,7 +89,7 @@ export function CoachWallet() {
       />
 
       {((editable && !isMobile) || isHead(profile.role)) && (
-        <div className="bq-flex bq-gap-10px bq-mb-18px bq-wrap">
+        <div className="bq-flex bq-gap-2 bq-mb-4 bq-wrap">
           {isHead(profile.role) && row.state === "logging" && row.count > 0 && (
             <Button variant="secondary" disabled={busyAction} onClick={() => runAction(() => api.settle(profile.id, month))}>
               Settle my month

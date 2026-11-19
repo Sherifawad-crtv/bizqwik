@@ -1,10 +1,10 @@
 /* Styles for ActivityPanel.tsx. Tokens only; see DESIGN_SYSTEM.md. */
 
 .bq-activity-panel-feed-row {
-  padding: 12px 14px;
+  padding: var(--space-3) var(--space-4);
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .bq-activity-panel-feed-part {
@@ -21,7 +21,7 @@
   display: block;
   font: 400 var(--text-caption-1-size) var(--font-family-mono);
   color: var(--color-text-tertiary-default);
-  margin-top: 2px;
+  margin-top: var(--space-0-5);
 }
 
 .bq-activity-panel-feed-title {
@@ -33,8 +33,8 @@
 .bq-activity-panel-logs-row {
   display: flex;
   align-items: baseline;
-  gap: 10px;
-  padding: 10px 14px;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
 }
 
 .bq-activity-panel-logs-meta {

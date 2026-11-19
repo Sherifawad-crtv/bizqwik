@@ -50,25 +50,25 @@
   color: var(--color-text-status-danger-default);
   background: var(--color-bg-fill-status-danger-default);
   border-radius: var(--radius-item);
-  padding: 10px 14px;
+  padding: var(--space-2) var(--space-4);
 }
 
 .bq-account-profile-text-2 {
-  margin-top: 12px;
+  margin-top: var(--space-3);
   font: 600 var(--text-footnote-size)/1.5 var(--font-family-body);
   color: var(--color-bg-fill-primary-active);
   background: var(--color-bg-fill-accent-default);
   border-radius: var(--radius-item);
-  padding: 10px 14px;
+  padding: var(--space-2) var(--space-4);
 }
 
 .bq-account-profile-spacing {
-  padding: 6px 4px;
-  margin-bottom: 12px;
+  padding: var(--space-1-5) var(--space-1);
+  margin-bottom: var(--space-3);
 }
 
 .bq-account-profile-meta {
-  padding: 0 4px;
+  padding: 0 var(--space-1);
   font: 400 var(--text-footnote-size)/1.5 var(--font-family-mono);
   color: var(--color-text-tertiary-default);
 }

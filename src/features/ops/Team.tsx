@@ -118,7 +118,7 @@ export function Team() {
       </Card>
 
       {invites.length > 0 && (
-        <div className="bq-mt-26px">
+        <div className="bq-mt-6">
           <SectionHeader count={invites.length}>Pending invites</SectionHeader>
           <Card className="bq-overflow-hidden" pad="none">
             {invites.map((inv, i) => (

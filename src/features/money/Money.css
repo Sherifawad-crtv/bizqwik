@@ -1,25 +1,25 @@
 /* Styles for Money.tsx. Tokens only; see DESIGN_SYSTEM.md. */
 
 .bq-money-card {
-  padding: 22px 22px 20px;
+  padding: var(--space-6) var(--space-6) var(--space-5);
 }
 
 .bq-money-title {
-  font: 800 52px/1.05 var(--font-family-body);
+  font: 800 var(--text-stat-hero-size)/1.05 var(--font-family-body);
   letter-spacing: -.03em;
-  margin-top: 6px;
+  margin-top: var(--space-1-5);
 }
 
 .bq-money-meta {
   font: 400 var(--text-footnote-size) var(--font-family-mono);
   color: var(--color-text-secondary-default);
-  margin-top: 6px;
+  margin-top: var(--space-1-5);
 }
 
 .bq-money-meta-2 {
   font: 700 var(--text-caption-1-size) var(--font-family-mono);
   border-radius: var(--radius-full);
-  padding: 6px 12px;
+  padding: var(--space-1-5) var(--space-3);
 }
 
 .bq-money-btn {
@@ -50,8 +50,8 @@
 
 .bq-money-row-row {
   display: flex;
-  gap: 12px;
-  padding: 12px 0;
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
   border-bottom: var(--border-divider);
 }
 
@@ -61,7 +61,7 @@
   font: 700 var(--text-caption-2-size) var(--font-family-mono);
   letter-spacing: .08em;
   color: var(--color-text-tertiary-default);
-  padding-top: 2px;
+  padding-top: var(--space-0-5);
 }
 
 .bq-money-row-text {
@@ -72,9 +72,9 @@
 }
 
 .bq-money-txn-sheet-title {
-  font: 800 40px/1.1 var(--font-family-body);
+  font: 800 var(--text-stat-hero-size)/1.1 var(--font-family-body);
   letter-spacing: -.02em;
-  margin: 6px 0 2px;
+  margin: var(--space-1-5) 0 var(--space-0-5);
 }
 
 .bq-money-txn-sheet-meta {
@@ -85,19 +85,19 @@
 .bq-money-txn-sheet-meta-2 {
   font: 400 var(--text-footnote-size) var(--font-family-mono);
   color: var(--color-text-secondary-default);
-  margin-bottom: 12px;
+  margin-bottom: var(--space-3);
 }
 
 .bq-money-txn-sheet-label {
   font: 700 var(--text-caption-2-size) var(--font-family-mono);
   letter-spacing: .08em;
   color: var(--color-text-tertiary-default);
-  margin: 12px 0 0;
+  margin: var(--space-3) 0 0;
 }
 
 .bq-money-txn-sheet-label-2 {
   font: 700 var(--text-caption-2-size) var(--font-family-mono);
   letter-spacing: .08em;
   color: var(--color-text-tertiary-default);
-  margin: 18px 0 0;
+  margin: var(--space-4) 0 0;
 }

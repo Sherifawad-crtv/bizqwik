@@ -9,11 +9,11 @@
 .bq-ops-delete-org-sheet-title {
   font: 800 var(--text-title-1-size)/1.2 var(--font-family-body);
   letter-spacing: -.02em;
-  margin: 4px 0 10px;
+  margin: var(--space-1) 0 var(--space-2);
 }
 
 .bq-ops-delete-org-sheet-text {
   font: 500 var(--text-subheadline-size)/1.5 var(--font-family-body);
   color: var(--color-text-secondary-default);
-  margin-bottom: 14px;
+  margin-bottom: var(--space-4);
 }

@@ -50,7 +50,7 @@ export function DayList({
         <div
           key={g.date}
           onClick={() => onOpenDay(g)}
-          className="bq-card bq-card--sm bq-flex bq-gap-14px bq-items-center bq-pointer"
+          className="bq-card bq-card--sm bq-flex bq-gap-4 bq-items-center bq-pointer"
         >
           <div className="bq-grow">
             <div className="bq-day-list-title">{dateLabel(g.date)}</div>
@@ -58,7 +58,7 @@ export function DayList({
               {g.sessions.length} {g.sessions.length === 1 ? "session" : "sessions"}
             </div>
             {/* When each session was scanned in, so a late scan is easy to spot. */}
-            <div className="bq-mt-1 bq-flex bq-col bq-gap-1px" data-testid="session-times">
+            <div className="bq-mt-1 bq-flex bq-col bq-gap-px" data-testid="session-times">
               {[...g.sessions]
                 .sort((a, b) => String(a.createdAt ?? "").localeCompare(String(b.createdAt ?? "")))
                 .map((s) => {

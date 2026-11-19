@@ -128,7 +128,7 @@ export function History() {
   if (profile?.role === "dept_head") {
     return (
       <div>
-        <div className="bq-flex bq-justify-center bq-mb-18px">
+        <div className="bq-flex bq-justify-center bq-mb-4">
           <Segmented
             value={view}
             onChange={setView}

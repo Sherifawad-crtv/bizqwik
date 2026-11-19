@@ -1,31 +1,31 @@
 /* Styles for ClassRosterSheet.tsx. Tokens only; see DESIGN_SYSTEM.md. */
 
 .bq-class-roster-sheet-title {
-  font: 800 24px/1.2 var(--font-family-body);
+  font: 800 var(--text-stat-md-size)/1.2 var(--font-family-body);
   letter-spacing: -.02em;
-  margin: 4px 0 4px;
+  margin: var(--space-1) 0 var(--space-1);
 }
 
 .bq-class-roster-sheet-meta {
   font: 400 var(--text-footnote-size) var(--font-family-mono);
   color: var(--color-text-tertiary-default);
-  margin-bottom: 16px;
+  margin-bottom: var(--space-4);
 }
 
 .bq-class-roster-sheet-text {
-  margin-bottom: 12px;
+  margin-bottom: var(--space-3);
   font: 600 var(--text-footnote-size)/1.5 var(--font-family-body);
   color: var(--color-text-status-danger-default);
   background: var(--color-bg-fill-status-danger-default);
   border-radius: var(--radius-item);
-  padding: 10px 14px;
+  padding: var(--space-2) var(--space-4);
 }
 
 .bq-class-roster-sheet-roster-row-box {
   background: var(--color-bg-surface-secondary-default);
   border: var(--border-outline);
   border-radius: var(--radius-item);
-  padding: 12px 14px;
+  padding: var(--space-3) var(--space-4);
 }
 
 .bq-class-roster-sheet-roster-row-title {
@@ -38,14 +38,14 @@
 .bq-class-roster-sheet-roster-row-meta {
   font: 500 var(--text-caption-1-size) var(--font-family-mono);
   color: var(--color-text-tertiary-default);
-  margin-top: 2px;
+  margin-top: var(--space-0-5);
 }
 
 .bq-class-roster-sheet-roster-row-label {
-  font: 700 10px var(--font-family-mono);
+  font: 700 var(--text-label-size) var(--font-family-mono);
   letter-spacing: .06em;
   color: var(--color-text-tertiary-default);
-  margin-bottom: 6px;
+  margin-bottom: var(--space-1-5);
 }
 
 /* RowBtn: a choice in the roster's collect-payment row. Neutral, chosen

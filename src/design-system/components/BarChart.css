@@ -18,7 +18,7 @@
 .bq-bar-chart-text-3 {
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: var(--space-2);
   font: 500 var(--text-caption-1-size) var(--font-family-body);
   color: var(--color-text-secondary-default);
 }
@@ -37,7 +37,7 @@
   background: var(--color-text-primary-default);
   color: var(--color-bg-surface-primary-default);
   border-radius: var(--radius-chip);
-  padding: 8px 12px;
+  padding: var(--space-2) var(--space-3);
   font: 600 var(--text-caption-1-size)/1.6 var(--font-family-mono);
   pointer-events: none;
 }

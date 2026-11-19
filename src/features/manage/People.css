@@ -8,7 +8,7 @@
 }
 
 .bq-manage-people-person-sheet-title {
-  font: 800 22px var(--font-family-body);
+  font: 800 var(--text-title-2-size) var(--font-family-body);
   letter-spacing: -.01em;
 }
 
@@ -16,7 +16,7 @@
   background: var(--color-bg-surface-secondary-default);
   border: var(--border-outline);
   border-radius: var(--radius-item);
-  padding: 12px 16px;
+  padding: var(--space-3) var(--space-4);
 }
 
 .bq-manage-people-person-sheet-text {
@@ -26,5 +26,5 @@
 .bq-manage-people-person-sheet-meta {
   font: 400 var(--text-caption-1-size)/1.5 var(--font-family-mono);
   color: var(--color-text-tertiary-default);
-  padding: 0 2px;
+  padding: 0 var(--space-0-5);
 }

@@ -192,7 +192,7 @@ export function ClientSheet({
             {shown.phone && <div className="bq-frontdesk-client-sheet-meta">{shown.phone}</div>}
 
             <div className="bq-frontdesk-client-sheet-box">
-              <div className="bq-flex bq-items-center bq-gap-10px">
+              <div className="bq-flex bq-items-center bq-gap-2">
                 <div className="bq-frontdesk-client-sheet-title">{summary.title}</div>
                 <PlanPill client={shown} />
               </div>

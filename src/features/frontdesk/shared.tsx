@@ -76,7 +76,7 @@ export function ClientPicker({
   return (
     <div>
       <SearchField value={query} onChange={setQuery} />
-      <Card className="bq-mt-10px bq-overflow-hidden" pad="none">
+      <Card className="bq-mt-2 bq-overflow-hidden" pad="none">
         {shown.map((c, i) => {
           const plan = planSummary(c, bundleTypes);
           return (

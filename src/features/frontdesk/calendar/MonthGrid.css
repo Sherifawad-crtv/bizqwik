@@ -20,7 +20,7 @@
   font: 700 var(--text-caption-2-size) var(--font-family-mono);
   letter-spacing: .06em;
   color: var(--color-text-secondary-default);
-  padding: 8px 0;
+  padding: var(--space-2) 0;
 }
 
 .bq-frontdesk-month-grid-2 {
@@ -31,13 +31,13 @@
 
 .bq-frontdesk-month-grid-stack-2 {
   min-width: 0;
-  padding: 4px;
+  padding: var(--space-1);
   cursor: pointer;
   border-right: var(--border-divider);
   border-bottom: var(--border-divider);
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--space-0-5);
   overflow: hidden;
 }
 
@@ -45,7 +45,7 @@
   align-self: center;
   min-width: 26px;
   height: 26px;
-  padding: 0 4px;
+  padding: 0 var(--space-1);
   border-radius: var(--radius-full);
   display: flex;
   align-items: center;
@@ -60,7 +60,7 @@
   border-radius: var(--radius-chip);
   background: var(--color-bg-fill-accent-default);
   color: var(--color-bg-fill-primary-active);
-  padding: 2px 5px;
+  padding: var(--space-0-5) var(--space-1);
   font: 700 var(--text-caption-2-size) var(--font-family-body);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -71,5 +71,5 @@
 .bq-frontdesk-month-grid-meta {
   font: 700 var(--text-caption-2-size) var(--font-family-mono);
   color: var(--color-text-secondary-default);
-  padding-left: 4px;
+  padding-left: var(--space-1);
 }

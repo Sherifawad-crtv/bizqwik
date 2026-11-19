@@ -39,7 +39,7 @@ export function SoloDropIn({ onDone }: { onDone: () => void }) {
     return (
       <div>
         <div className="bq-frontdesk-solo-drop-in-label">WHO'S DROPPING IN{current ? ` · ${current.name.toUpperCase()}` : ""}</div>
-        <div className="bq-grid bq-gap-10px" style={{ gridTemplateColumns: options.length > 2 ? "1fr" : "1fr 1fr" }}>
+        <div className="bq-grid bq-gap-2" style={{ gridTemplateColumns: options.length > 2 ? "1fr" : "1fr 1fr" }}>
           {options.map((o) => (
             <button key={o.label} className="bq-scale bq-frontdesk-solo-drop-in-btn" onClick={() => setKind(o.label)}>
               <div className="bq-frontdesk-solo-drop-in-title">{o.label}</div>

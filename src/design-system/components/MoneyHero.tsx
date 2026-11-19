@@ -30,7 +30,7 @@ export function MoneyHero({ label, value, stats }: { label: string; value: React
     <div className="bq-money-hero-grid">
       <div className="bq-card bq-card--md">
         <div className="bq-label">{label}</div>
-        <div className="tabular bq-stat-xl bq-mt-6px">{value}</div>
+        <div className="tabular bq-stat-xl bq-mt-1-5">{value}</div>
       </div>
       {stats.map((s) => (
         <div key={s.k} className="bq-card bq-card--md">

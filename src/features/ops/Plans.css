@@ -1,20 +1,20 @@
 /* Styles for Plans.tsx. Tokens only; see DESIGN_SYSTEM.md. */
 
 .bq-ops-plans-card {
-  padding: 16px 18px;
+  padding: var(--space-4) var(--space-4);
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .bq-ops-plans-title {
-  font: 700 17px var(--font-family-body);
+  font: 700 var(--text-title-3-size) var(--font-family-body);
 }
 
 .bq-ops-plans-meta {
   font: 400 var(--text-footnote-size) var(--font-family-mono);
   color: var(--color-text-tertiary-default);
-  margin-top: 3px;
+  margin-top: var(--space-1);
 }
 
 .bq-ops-plans-btn {

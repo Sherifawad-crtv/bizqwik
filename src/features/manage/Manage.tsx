@@ -16,7 +16,7 @@ export function Manage() {
 
   return (
     <div>
-      <div className="bq-flex bq-justify-center bq-mb-18px">
+      <div className="bq-flex bq-justify-center bq-mb-4">
         <Segmented
           value={tab}
           onChange={setTab}

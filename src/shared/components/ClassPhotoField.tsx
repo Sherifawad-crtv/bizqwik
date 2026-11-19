@@ -41,7 +41,7 @@ export function ClassPhotoField({ value, onChange, title }: { value: string | nu
   return (
     <div>
       <div className="bq-class-photo-field-label">PHOTO</div>
-      <div className="bq-flex bq-gap-14px bq-items-center">
+      <div className="bq-flex bq-gap-4 bq-items-center">
         <div
           data-testid="class-photo-preview"
           style={{
@@ -60,7 +60,7 @@ export function ClassPhotoField({ value, onChange, title }: { value: string | nu
           )}
         </div>
         <div className="bq-grow">
-          <div className="bq-flex bq-gap-10px bq-items-center bq-wrap">
+          <div className="bq-flex bq-gap-2 bq-items-center bq-wrap">
             <input className="bq-class-photo-field-input" ref={input} type="file" accept="image/*" onChange={onPick} data-testid="class-photo-input" />
             <Button variant="secondary" size="md" disabled={busy} onClick={() => input.current?.click()}>
               {busy ? "Uploading…" : value ? "Replace" : "Add photo"}

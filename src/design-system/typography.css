@@ -2,7 +2,7 @@
    The text styles screens repeat most, once. */
 .bq-label { font: var(--text-label-weight) var(--text-label-size) var(--font-family-mono); letter-spacing: 0.08em; color: var(--color-text-tertiary-default); }
 .bq-meta { font: var(--text-meta-weight) var(--text-meta-size) var(--font-family-mono); color: var(--color-text-tertiary-default); }
-.bq-title { font: var(--text-title-1-weight) var(--text-title-1-size)/1.2 var(--font-family-body); letter-spacing: -0.02em; margin: 4px 0 16px; }
+.bq-title { font: var(--text-title-1-weight) var(--text-title-1-size)/1.2 var(--font-family-body); letter-spacing: -0.02em; margin: var(--space-1) 0 var(--space-4); }
 .bq-h2 { font: var(--text-title-2-weight) var(--text-title-2-size) var(--font-family-body); letter-spacing: -0.01em; }
 .bq-h3 { font: var(--text-headline-weight) var(--text-headline-size) var(--font-family-body); }
 

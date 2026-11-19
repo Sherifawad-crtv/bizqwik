@@ -15,7 +15,7 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
   border-bottom: var(--border-divider);
 }
 
@@ -26,12 +26,12 @@
 }
 
 .bq-frontdesk-class-calendar-screen-spacing {
-  margin-right: 8px;
+  margin-right: var(--space-2);
 }
 
 .bq-frontdesk-class-calendar-screen-btn-2 {
   height: 44px;
-  padding: 0 14px;
+  padding: 0 var(--space-4);
   font: 700 var(--text-caption-1-size) var(--font-family-mono);
   letter-spacing: .06em;
 }
@@ -39,7 +39,7 @@
 .bq-frontdesk-class-calendar-screen-title {
   flex: 1;
   min-width: 140px;
-  font: 800 18px var(--font-family-body);
+  font: 800 var(--text-title-3-size) var(--font-family-body);
   letter-spacing: -.01em;
 }
 
@@ -48,7 +48,7 @@
   font: 600 var(--text-footnote-size)/1.5 var(--font-family-body);
   color: var(--color-text-status-danger-default);
   background: var(--color-bg-fill-status-danger-default);
-  padding: 10px 20px;
+  padding: var(--space-2) var(--space-5);
 }
 
 .bq-frontdesk-class-calendar-screen-stack-2 {

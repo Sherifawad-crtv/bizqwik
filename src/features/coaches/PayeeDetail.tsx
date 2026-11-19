@@ -118,8 +118,8 @@ function RecordPaymentSheet({ open, onClose, row, month }: { open: boolean; onCl
 
 function PackageRow({ pkg }: { pkg: PackageWithNames }) {
   return (
-    <div className="bq-card bq-card--sm bq-mb-10px">
-      <div className="bq-flex bq-items-center bq-justify-between bq-gap-10px bq-mb-6px">
+    <div className="bq-card bq-card--sm bq-mb-2">
+      <div className="bq-flex bq-items-center bq-justify-between bq-gap-2 bq-mb-1-5">
         <span className="bq-coaches-payee-detail-package-row-title">{pkg.clientName}</span>
         <PackageStatusPill status={pkg.status} />
       </div>
@@ -166,7 +166,7 @@ export function PayeeDetail() {
       </button>
       )}
 
-      <div className="bq-flex bq-items-center bq-gap-3 bq-mb-18px">
+      <div className="bq-flex bq-items-center bq-gap-3 bq-mb-4">
         <Avatar name={row.name} size={44} src={row.avatarUrl} />
         <div>
           <div className="bq-coaches-payee-detail-title">{row.name}</div>
@@ -208,7 +208,7 @@ export function PayeeDetail() {
           ["Paid", row.state === "paid" ? `${fmt(row.total)} EGP${row.paidAt ? ` · ${formatDateTime(row.paidAt)}` : ""}` : row.paidAmount > 0 ? `${fmt(row.paidAmount)} of ${fmt(row.total)} EGP` : "Not paid yet"],
           ...(row.state === "settled" ? [["Still to pay", `${fmt(row.remaining)} EGP`]] : []),
         ].map(([k, v]) => (
-          <div className="bq-flex bq-items-baseline bq-gap-10px bq-mt-10px" key={k}>
+          <div className="bq-flex bq-items-baseline bq-gap-2 bq-mt-2" key={k}>
             <span className="bq-coaches-payee-detail-meta">{k}</span>
             <span className="tabular bq-coaches-payee-detail-title-3">{v}</span>
           </div>
@@ -217,7 +217,7 @@ export function PayeeDetail() {
           <div className="bq-coaches-payee-detail-part">
             <div className="bq-label">PAYMENTS</div>
             {payments.map((p) => (
-              <div className="bq-flex bq-items-baseline bq-gap-10px bq-mt-10px" key={p.id}>
+              <div className="bq-flex bq-items-baseline bq-gap-2 bq-mt-2" key={p.id}>
                 <span className="bq-min-w-0">
                   <span className="bq-coaches-payee-detail-meta-2">{dateLabel(p.paidOn)} · {METHOD_LABELS[p.method] ?? p.method}</span>
                   {p.note && <span className="bq-coaches-payee-detail-meta-3">{p.note}</span>}
@@ -230,7 +230,7 @@ export function PayeeDetail() {
       </div>
 
       {row.state === "settled" && (
-        <Button className="bq-mb-18px" fullWidth size="lg" onClick={() => setPaying(true)}>
+        <Button className="bq-mb-4" fullWidth size="lg" onClick={() => setPaying(true)}>
           {isPartPaid(row) ? "Record another payment" : "Record payment"}
         </Button>
       )}

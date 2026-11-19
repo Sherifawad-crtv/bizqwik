@@ -20,18 +20,18 @@
 .bq-qr-scanner-row {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
-  padding: calc(env(safe-area-inset-top) + 18px) 18px 12px;
+  gap: var(--space-3);
+  padding: calc(env(safe-area-inset-top) + var(--space-4)) var(--space-4) var(--space-3);
 }
 
 .bq-qr-scanner-title {
-  font: 800 22px/1.2 var(--font-family-body);
+  font: 800 var(--text-title-2-size)/1.2 var(--font-family-body);
 }
 
 .bq-qr-scanner-meta {
   font: 400 var(--text-footnote-size)/1.4 var(--font-family-mono);
   color: var(--color-text-on-media-secondary);
-  margin-top: 4px;
+  margin-top: var(--space-1);
 }
 
 .bq-qr-scanner-btn {
@@ -53,7 +53,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 16px;
+  padding: var(--space-4);
 }
 
 .bq-qr-scanner-size {
@@ -85,8 +85,8 @@
   top: calc(100% + 16px);
   transform: translateX(-50%);
   display: flex;
-  gap: 6px;
-  padding: 4px;
+  gap: var(--space-1-5);
+  padding: var(--space-1);
   border-radius: var(--radius-full);
   background: var(--color-bg-fill-on-media-secondary);
 }
@@ -94,7 +94,7 @@
 .bq-qr-scanner-btn-2 {
   min-width: 44px;
   height: 36px;
-  padding: 0 10px;
+  padding: 0 var(--space-2);
   border-radius: var(--radius-full);
   border: 0;
   cursor: pointer;
@@ -107,18 +107,18 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 24px;
+  padding: var(--space-6);
 }
 
 .bq-qr-scanner-box-2 {
-  margin: 0 16px calc(env(safe-area-inset-bottom) + 18px);
+  margin: 0 var(--space-4) calc(env(safe-area-inset-bottom) + var(--space-4));
   background: var(--color-bg-surface-primary-default);
   color: var(--color-text-primary-default);
   border-radius: var(--radius-item);
-  padding: 16px;
+  padding: var(--space-4);
 }
 
 .bq-qr-scanner-text {
   font: 600 var(--text-subheadline-size)/1.5 var(--font-family-body);
-  margin-bottom: 12px;
+  margin-bottom: var(--space-3);
 }

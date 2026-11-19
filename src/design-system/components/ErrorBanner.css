@@ -3,7 +3,7 @@
   background: var(--color-bg-fill-status-danger-default);
   color: var(--color-text-status-danger-default);
   border-radius: var(--radius-item);
-  padding: 10px 14px;
+  padding: var(--space-2) var(--space-4);
   font: 600 var(--text-footnote-size)/1.5 var(--font-family-body);
 }
-.bq-error--spaced { margin-top: 12px; }
+.bq-error--spaced { margin-top: var(--space-3); }

@@ -39,7 +39,7 @@ export function UsageRow({ label, value }: { label: string; value: string }) {
 export function OrgAppConfig({ id }: { id: string }) {
   const cfg = useAsync(() => api.ops.orgConfig(id), [id]);
   return (
-    <div className="bq-mt-26px">
+    <div className="bq-mt-6">
       <SectionHeader>Member app</SectionHeader>
       <Card className="bq-ops-app-config-org-app-config-card" pad="none">
         {cfg.loading && <div className="bq-ops-app-config-org-app-config-text">Loading…</div>}

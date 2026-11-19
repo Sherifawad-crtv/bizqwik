@@ -3,7 +3,7 @@
 .bq-manage-invites-panel-btn {
   margin-left: auto;
   height: 40px;
-  padding: 0 16px;
+  padding: 0 var(--space-4);
 }
 
 .bq-manage-invites-panel-title {

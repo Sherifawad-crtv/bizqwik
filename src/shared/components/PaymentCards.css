@@ -2,7 +2,7 @@
 
 .bq-payment-cards-title {
   display: block;
-  font: 800 17px var(--font-family-body);
+  font: 800 var(--text-title-3-size) var(--font-family-body);
   letter-spacing: -.01em;
 }
 
@@ -10,5 +10,5 @@
   display: block;
   font: 400 var(--text-caption-1-size) var(--font-family-mono);
   color: var(--color-text-secondary-default);
-  margin-top: 2px;
+  margin-top: var(--space-0-5);
 }

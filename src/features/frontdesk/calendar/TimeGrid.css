@@ -19,7 +19,7 @@
 .bq-frontdesk-time-grid-btn {
   border: 0;
   background: none;
-  padding: 8px 4px;
+  padding: var(--space-2) var(--space-1);
   text-align: center;
   border-left: var(--border-divider);
 }
@@ -30,14 +30,14 @@
 }
 
 .bq-frontdesk-time-grid-title {
-  margin: 2px auto 0;
+  margin: var(--space-0-5) auto 0;
   width: 36px;
   height: 36px;
   border-radius: var(--radius-full);
   display: flex;
   align-items: center;
   justify-content: center;
-  font: 800 18px var(--font-family-body);
+  font: 800 var(--text-title-3-size) var(--font-family-body);
 }
 
 .bq-frontdesk-time-grid-meta {
@@ -61,7 +61,7 @@
   border-radius: var(--radius-chip);
   background: var(--color-bg-fill-accent-default);
   color: var(--color-bg-fill-primary-active);
-  padding: 4px 6px;
+  padding: var(--space-1) var(--space-1-5);
   cursor: pointer;
   overflow: hidden;
   min-width: 0;
@@ -114,5 +114,5 @@
   background: var(--color-bg-surface-primary-default);
   border: var(--border-outline);
   border-radius: var(--radius-full);
-  padding: 8px 16px;
+  padding: var(--space-2) var(--space-4);
 }

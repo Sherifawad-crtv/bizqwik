@@ -4,23 +4,23 @@
   font: 700 var(--text-caption-2-size) var(--font-family-mono);
   letter-spacing: .08em;
   color: var(--color-text-tertiary-default);
-  margin-bottom: 8px;
+  margin-bottom: var(--space-2);
 }
 
 .bq-series-sheet-weekday-picker-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 6px;
+  gap: var(--space-1-5);
 }
 
 .bq-series-sheet-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  gap: var(--space-2);
 }
 
 .bq-series-sheet-meta {
-  margin-top: 10px;
+  margin-top: var(--space-2);
   font: 400 var(--text-caption-1-size)/1.5 var(--font-family-mono);
   color: var(--color-text-tertiary-default);
 }

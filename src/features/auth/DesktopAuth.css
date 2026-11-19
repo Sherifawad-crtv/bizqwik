@@ -3,8 +3,8 @@
 .bq-auth-desktop-auth-row {
   min-height: 100vh;
   display: flex;
-  gap: 20px;
-  padding: 20px;
+  gap: var(--space-5);
+  padding: var(--space-5);
   background: var(--color-bg-canvas-default);
 }
 
@@ -23,8 +23,8 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 40px;
-  padding: 24px clamp(24px, 4vw, 72px);
+  gap: var(--space-10);
+  padding: var(--space-6) clamp(var(--space-6), 4vw, var(--space-16));
 }
 
 .bq-auth-desktop-auth-img {

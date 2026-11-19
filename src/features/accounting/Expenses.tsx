@@ -84,7 +84,7 @@ export function ExpensesPanel({
         Expenses
       </SectionHeader>
 
-      <Card className="bq-overflow-hidden bq-mb-14px" pad="none">
+      <Card className="bq-overflow-hidden bq-mb-4" pad="none">
         {coachPayouts > 0 && !categoryFilter && !query && (
           <button className="bq-plain bq-scale bq-listrow bq-listrow--compact bq-listrow--divider bq-accounting-expenses-panel-btn-2" onClick={onCoachPayouts}>
             <div className="bq-grow">
@@ -99,7 +99,7 @@ export function ExpensesPanel({
 {expenses.map((e, i) => (
           <button key={e.id} className={cx(`bq-plain bq-scale bq-listrow bq-listrow--compact ${!(i === expenses.length - 1) ? "bq-listrow--divider" : ""}`, "bq-accounting-expenses-panel-btn-3")} onClick={() => setSheetMode(e)}>
             <div className="bq-grow">
-              <div className="bq-flex bq-items-center bq-gap-6px">
+              <div className="bq-flex bq-items-center bq-gap-1-5">
                 <span className="bq-accounting-expenses-panel-title-2">{e.categoryName}</span>
                 <ReceiptIcon has={e.hasReceipt} />
               </div>
@@ -118,7 +118,7 @@ export function ExpensesPanel({
       </Card>
 
       {!sheetMode && (
-        <Button className="bq-mb-18px" fullWidth size="lg" onClick={() => setSheetMode("add")}>
+        <Button className="bq-mb-4" fullWidth size="lg" onClick={() => setSheetMode("add")}>
           Add expense
         </Button>
       )}

@@ -88,7 +88,7 @@ export function DaySessionsSheet({ open, onClose, coachId, month, date, sessions
               {movingId === s.id ? (
                 <DateField value={s.date} min={min} max={max} onChange={(d) => move(s.id, d)} />
               ) : (
-                <div className="bq-flex bq-items-center bq-gap-10px">
+                <div className="bq-flex bq-items-center bq-gap-2">
                   <span className="bq-day-sessions-sheet-text">Session {i + 1}</span>
                   <span className="bq-day-sessions-sheet-label">{s.source === "qr" ? "QR" : "MANUAL"}</span>
                   {(() => {
@@ -116,7 +116,7 @@ export function DaySessionsSheet({ open, onClose, coachId, month, date, sessions
         )}
 
         {editable && !scanOnly && (
-          <Button className="bq-mt-14px" variant="secondary" fullWidth onClick={addAnother}>
+          <Button className="bq-mt-4" variant="secondary" fullWidth onClick={addAnother}>
             + Add another session this date
           </Button>
         )}

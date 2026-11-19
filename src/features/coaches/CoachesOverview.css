@@ -2,13 +2,13 @@
 
 .bq-coaches-overview-btn {
   width: 100%;
-  margin-bottom: 14px;
+  margin-bottom: var(--space-4);
   text-align: left;
-  padding: 14px 18px;
+  padding: var(--space-4) var(--space-4);
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .bq-coaches-overview-row {
@@ -25,18 +25,18 @@
   display: block;
   font: 400 var(--text-caption-1-size) var(--font-family-mono);
   color: var(--color-text-tertiary-default);
-  margin-top: 2px;
+  margin-top: var(--space-0-5);
 }
 
 .bq-coaches-overview-row-2 {
   display: flex;
   align-items: baseline;
-  gap: 10px;
-  padding: 2px 2px 8px;
+  gap: var(--space-2);
+  padding: var(--space-0-5) var(--space-0-5) var(--space-2);
 }
 
 .bq-coaches-overview-meta-2 {
-  padding: 18px 4px 0;
+  padding: var(--space-4) var(--space-1) 0;
   font: 400 var(--text-footnote-size) var(--font-family-mono);
   color: var(--color-text-tertiary-default);
 }

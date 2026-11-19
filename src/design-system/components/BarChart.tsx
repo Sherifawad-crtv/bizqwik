@@ -107,7 +107,7 @@ export function BarChart({ data, aLabel, bLabel, ariaLabel }: { data: BarDatum[]
           );
         })}
       </svg>
-      <div className="bq-flex bq-gap-18px bq-mt-1">
+      <div className="bq-flex bq-gap-4 bq-mt-1">
         {[[aLabel, LIGHT], ...(bLabel ? [[bLabel, DEEP]] : [])].map(([label, color]) => (
           <span className="bq-bar-chart-text-3" key={label}>
             <i className="bq-bar-chart-box" style={{ background: color }} />

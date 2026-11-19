@@ -153,7 +153,7 @@ export function Bookings() {
       />
       </div>
 
-      <div className="bq-flex bq-justify-end bq-mt-6px">
+      <div className="bq-flex bq-justify-end bq-mt-1-5">
         <SectionLink onClick={() => setMonth(true)}>Open full calendar</SectionLink>
       </div>
 

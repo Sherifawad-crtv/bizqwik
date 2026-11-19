@@ -75,7 +75,7 @@ export function Transactions() {
           </div>
         ))}
       </div>
-      <div className="bq-flex bq-justify-center bq-mb-14px">
+      <div className="bq-flex bq-justify-center bq-mb-4">
         <Segmented
           value={kind}
           onChange={setKind}

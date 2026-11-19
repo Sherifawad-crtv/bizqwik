@@ -55,7 +55,7 @@ function Stat({ label, value, sub, icon, tone, onClick }: { label: string; value
         </span>
         <span className="bq-label">{label}</span>
       </div>
-      <div className="bq-stat-lg bq-mt-10px bq-overflow-hidden bq-ellipsis bq-nowrap">{value}</div>
+      <div className="bq-stat-lg bq-mt-2 bq-overflow-hidden bq-ellipsis bq-nowrap">{value}</div>
       <div className="bq-frontdesk-solo-home-stat-meta">{sub}</div>
     </button>
   );

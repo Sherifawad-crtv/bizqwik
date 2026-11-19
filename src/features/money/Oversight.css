@@ -1,19 +1,19 @@
 /* Styles for Oversight.tsx. Tokens only; see DESIGN_SYSTEM.md. */
 
 .bq-money-oversight-text {
-  margin-bottom: 14px;
+  margin-bottom: var(--space-4);
   font: 600 var(--text-footnote-size)/1.5 var(--font-family-body);
   color: var(--color-text-status-danger-default);
   background: var(--color-bg-fill-status-danger-default);
   border-radius: var(--radius-item);
-  padding: 10px 14px;
+  padding: var(--space-2) var(--space-4);
 }
 
 .bq-money-oversight-row {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin: 0 0 12px;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-3);
 }
 
 .bq-money-oversight-label {
@@ -26,12 +26,12 @@
 
 .bq-money-oversight-row-2 {
   display: flex;
-  gap: 10px;
+  gap: var(--space-2);
   align-items: flex-start;
   background: var(--color-bg-surface-secondary-default);
   border-radius: var(--radius-item);
-  padding: 12px 14px;
-  margin-bottom: 14px;
+  padding: var(--space-3) var(--space-4);
+  margin-bottom: var(--space-4);
 }
 
 .bq-money-oversight-text-2 {
@@ -42,41 +42,41 @@
 .bq-money-oversight-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit,minmax(150px,1fr));
-  gap: 10px;
-  margin-bottom: 14px;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
 }
 
 .bq-money-oversight-spacing {
-  padding: 20px 20px 18px;
-  margin-bottom: 10px;
+  padding: var(--space-5) var(--space-5) var(--space-4);
+  margin-bottom: var(--space-2);
 }
 
 .bq-money-oversight-part {
-  margin: 8px 0 0;
+  margin: var(--space-2) 0 0;
   overflow-wrap: anywhere;
 }
 
 .bq-money-oversight-meta {
   font: 400 var(--text-caption-1-size)/1.4 var(--font-family-mono);
   color: var(--color-text-tertiary-default);
-  margin-top: 8px;
+  margin-top: var(--space-2);
 }
 
 .bq-money-oversight-label-2 {
   display: grid;
   grid-template-columns: 1fr 90px 90px;
-  gap: 8px;
-  font: 700 10px var(--font-family-mono);
+  gap: var(--space-2);
+  font: 700 var(--text-label-size) var(--font-family-mono);
   letter-spacing: .06em;
   color: var(--color-text-tertiary-default);
-  padding-bottom: 8px;
+  padding-bottom: var(--space-2);
 }
 
 .bq-money-oversight-grid-2 {
   display: grid;
   grid-template-columns: 1fr 90px 90px;
-  gap: 8px;
-  padding: 10px 0;
+  gap: var(--space-2);
+  padding: var(--space-2) 0;
   border-top: var(--border-divider);
   align-items: baseline;
 }
@@ -102,10 +102,10 @@
 .bq-money-oversight-btn {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--space-2);
   width: 100%;
-  padding: 16px 18px;
-  margin-bottom: 10px;
+  padding: var(--space-4) var(--space-4);
+  margin-bottom: var(--space-2);
   cursor: pointer;
   text-align: left;
 }
@@ -131,5 +131,5 @@
   text-align: center;
   font: 400 var(--text-caption-1-size)/1.5 var(--font-family-mono);
   color: var(--color-text-tertiary-default);
-  margin: 8px 0 18px;
+  margin: var(--space-2) 0 var(--space-4);
 }

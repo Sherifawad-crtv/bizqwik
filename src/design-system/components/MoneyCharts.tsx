@@ -36,7 +36,7 @@ export function ShareBars({ slices }: { slices: RevenueSlice[] }) {
         const pct = (s.amount / total) * 100;
         return (
           <div key={s.key}>
-            <div className="bq-flex bq-items-baseline bq-gap-2 bq-mb-5px">
+            <div className="bq-flex bq-items-baseline bq-gap-2 bq-mb-1">
               <span className="bq-money-charts-share-bars-text">{s.label}</span>
               <span className="tabular bq-money-charts-share-bars-title">{fmt(s.amount)}</span>
               <span className="tabular bq-money-charts-share-bars-meta">{Math.round(pct)}%</span>

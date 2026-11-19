@@ -3,7 +3,7 @@
 .bq-ops-team-invite-sheet-meta {
   font: 500 var(--text-caption-1-size)/1.5 var(--font-family-mono);
   color: var(--color-text-tertiary-default);
-  padding: 0 2px;
+  padding: 0 var(--space-0-5);
 }
 
 .bq-ops-team-title {
@@ -47,5 +47,5 @@
   cursor: pointer;
   display: flex;
   flex: none;
-  padding: 4px;
+  padding: var(--space-1);
 }

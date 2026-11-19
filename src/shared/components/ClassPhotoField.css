@@ -4,7 +4,7 @@
   font: 700 var(--text-caption-2-size) var(--font-family-mono);
   letter-spacing: .08em;
   color: var(--color-text-tertiary-default);
-  margin: 0 2px 6px;
+  margin: 0 var(--space-0-5) var(--space-1-5);
 }
 
 .bq-class-photo-field-img {
@@ -47,13 +47,13 @@
 }
 
 .bq-class-photo-field-meta {
-  margin-top: 6px;
+  margin-top: var(--space-1-5);
   font: 400 var(--text-caption-1-size)/1.45 var(--font-family-mono);
   color: var(--color-text-tertiary-default);
 }
 
 .bq-class-photo-field-text {
-  margin-top: 6px;
+  margin-top: var(--space-1-5);
   font: 600 var(--text-caption-1-size)/1.4 var(--font-family-body);
   color: var(--color-text-status-danger-default);
 }

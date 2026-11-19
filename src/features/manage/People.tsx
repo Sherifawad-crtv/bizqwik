@@ -27,7 +27,7 @@ export function PeoplePanel() {
 
   return (
     <div>
-      <div className="bq-flex bq-items-center bq-gap-10px bq-mb-14px">
+      <div className="bq-flex bq-items-center bq-gap-2 bq-mb-4">
         <span className="bq-h2">People</span>
         <span className="bq-meta">{data.profiles.length}</span>
       </div>
@@ -110,7 +110,7 @@ function PersonSheet({
   return (
     <>
       <Sheet open={open} onClose={onClose}>
-        <div className="bq-flex bq-items-center bq-gap-3 bq-mb-18px">
+        <div className="bq-flex bq-items-center bq-gap-3 bq-mb-4">
           <Avatar name={shown.name} size={44} src={shown.avatarUrl} />
           <div>
             <div className="bq-manage-people-person-sheet-title">{shown.name}</div>
@@ -146,7 +146,7 @@ function PersonSheet({
         )}
 
         {!isSelf && (
-          <Button className="bq-mt-18px" variant="danger" fullWidth onClick={() => setConfirmRemove(true)}>
+          <Button className="bq-mt-4" variant="danger" fullWidth onClick={() => setConfirmRemove(true)}>
             Remove profile
           </Button>
         )}

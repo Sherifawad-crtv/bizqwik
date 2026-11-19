@@ -1,7 +1,7 @@
 /* Styles for CheckInList.tsx. Tokens only; see DESIGN_SYSTEM.md. */
 
 .bq-frontdesk-check-in-list-spacing {
-  padding: 12px 16px;
+  padding: var(--space-3) var(--space-4);
 }
 
 .bq-frontdesk-check-in-list-title {
@@ -22,7 +22,7 @@
 .bq-frontdesk-check-in-list-title-2 {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-1-5);
   color: var(--color-text-status-paid-default);
   font: 800 var(--text-subheadline-size) var(--font-family-body);
   flex: none;
@@ -31,7 +31,7 @@
 .bq-frontdesk-check-in-list-btn {
   flex: none;
   height: 42px;
-  padding: 0 18px;
+  padding: 0 var(--space-4);
   border: 0;
   border-radius: var(--radius-full);
   background: var(--color-bg-fill-primary-default);
@@ -43,7 +43,7 @@
 .bq-frontdesk-check-in-list-meta-2 {
   font: 400 var(--text-caption-1-size) var(--font-family-mono);
   color: var(--color-text-status-paid-default);
-  margin-top: 6px;
+  margin-top: var(--space-1-5);
 }
 
 .bq-frontdesk-check-in-list-text {
@@ -51,6 +51,6 @@
   color: var(--color-text-status-danger-default);
   background: var(--color-bg-fill-status-danger-default);
   border-radius: var(--radius-item);
-  padding: 8px 10px;
-  margin-top: 8px;
+  padding: var(--space-2) var(--space-2);
+  margin-top: var(--space-2);
 }

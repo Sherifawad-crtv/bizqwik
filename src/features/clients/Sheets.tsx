@@ -75,7 +75,7 @@ export function ClientDetailSheet({
         <SheetSuccessIcon label={successLabel} iconIn={iconIn} />
       ) : (
         <>
-          <div className="bq-flex bq-items-center bq-gap-3 bq-mb-18px">
+          <div className="bq-flex bq-items-center bq-gap-3 bq-mb-4">
             <Avatar name={client.name} size={44} />
             <div>
               <div className="bq-clients-sheets-client-detail-sheet-title">{client.name}</div>
@@ -115,7 +115,7 @@ export function ClientDetailSheet({
 
               {pkg ? (
                 <div className="bq-clients-sheets-client-detail-sheet-box">
-                  <div className="bq-flex bq-items-center bq-justify-between bq-mb-6px">
+                  <div className="bq-flex bq-items-center bq-justify-between bq-mb-1-5">
                     <span className="bq-label">CURRENT PACKAGE</span>
                     <PackageStatusPill status={pkg.status} />
                   </div>
@@ -201,7 +201,7 @@ export function ClientActionSheet({
 }) {
   return (
     <Sheet open={open} onClose={onClose}>
-      <div className="bq-flex bq-items-center bq-gap-3 bq-mb-18px">
+      <div className="bq-flex bq-items-center bq-gap-3 bq-mb-4">
         <Avatar name={client.name} size={38} />
         <div className="bq-stat-sm">{client.name}</div>
       </div>

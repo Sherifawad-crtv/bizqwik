@@ -37,7 +37,7 @@ export function OpsShell() {
       <div className="bq-ops-shell-stack">
         <div className="bq-ops-shell-box"
         >
-          <div className="bq-flex bq-items-center bq-gap-10px">
+          <div className="bq-flex bq-items-center bq-gap-2">
             <img className="bq-ops-shell-img" src="/wordmark.png" alt="Bizqwik" />
             <span className="bq-label">OPS</span>
             <button className="bq-ops-shell-btn"

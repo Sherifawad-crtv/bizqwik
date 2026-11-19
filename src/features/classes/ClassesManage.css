@@ -3,13 +3,13 @@
 .bq-classes-manage-btn {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-1);
   border: 0;
   background: none;
   color: var(--color-text-secondary-default);
   cursor: pointer;
   font: 700 var(--text-subheadline-size) var(--font-family-body);
-  margin-bottom: 14px;
+  margin-bottom: var(--space-4);
   padding: 0;
 }
 
@@ -21,14 +21,14 @@
 .bq-classes-manage-meta {
   font: 400 var(--text-footnote-size) var(--font-family-mono);
   color: var(--color-text-tertiary-default);
-  margin-top: 4px;
+  margin-top: var(--space-1);
 }
 
 .bq-classes-manage-label {
   font: 700 var(--text-caption-2-size) var(--font-family-mono);
   letter-spacing: .08em;
   color: var(--color-text-tertiary-default);
-  margin: 24px 2px 10px;
+  margin: var(--space-6) var(--space-0-5) var(--space-2);
 }
 
 .bq-classes-manage-class-card-title {
@@ -41,19 +41,19 @@
 .bq-classes-manage-class-card-meta {
   font: 500 var(--text-footnote-size) var(--font-family-mono);
   color: var(--color-text-secondary-default);
-  margin-top: 3px;
+  margin-top: var(--space-1);
 }
 
 .bq-classes-manage-class-card-meta-2 {
   font: 500 var(--text-caption-1-size) var(--font-family-mono);
   color: var(--color-text-tertiary-default);
-  margin-top: 3px;
+  margin-top: var(--space-1);
 }
 
 .bq-classes-manage-class-card-text {
   font: 400 var(--text-footnote-size)/1.4 var(--font-family-body);
   color: var(--color-text-tertiary-default);
-  margin-top: 6px;
+  margin-top: var(--space-1-5);
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
@@ -66,7 +66,7 @@
 }
 
 .bq-classes-manage-class-card-label {
-  font: 600 10px var(--font-family-mono);
+  font: 600 var(--text-label-size) var(--font-family-mono);
   letter-spacing: .06em;
   color: var(--color-text-tertiary-default);
 }
@@ -75,17 +75,17 @@
   font: 700 var(--text-caption-2-size) var(--font-family-mono);
   letter-spacing: .06em;
   color: var(--color-text-tertiary-default);
-  margin-top: 4px;
+  margin-top: var(--space-1);
 }
 
 .bq-classes-manage-class-card-btn {
-  margin-top: 12px;
+  margin-top: var(--space-3);
   width: 100%;
   border: var(--border-outline);
   background: var(--color-bg-canvas-default);
   color: var(--color-text-secondary-default);
   border-radius: var(--radius-button);
-  padding: 8px 0;
+  padding: var(--space-2) 0;
   font: 700 var(--text-footnote-size) var(--font-family-body);
   cursor: pointer;
 }

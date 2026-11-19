@@ -30,8 +30,8 @@
 
 .bq-clients-roster-client-roster-label {
   display: grid;
-  gap: 12px;
-  padding: 10px 20px;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-5);
   background: var(--color-bg-surface-secondary-default);
   font: 700 var(--text-caption-2-size) var(--font-family-mono);
   letter-spacing: .08em;
@@ -40,8 +40,8 @@
 
 .bq-clients-roster-client-desktop-row-grid {
   display: grid;
-  gap: 12px;
-  padding: 14px 20px;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
   border-bottom: var(--border-divider);
   align-items: center;
   cursor: pointer;

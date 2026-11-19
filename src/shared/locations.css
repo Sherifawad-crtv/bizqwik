@@ -2,5 +2,5 @@
 
 .bq-locations-location-switcher-size {
   height: 44px;
-  margin-bottom: 16px;
+  margin-bottom: var(--space-4);
 }

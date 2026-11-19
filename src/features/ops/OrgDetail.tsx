@@ -99,11 +99,11 @@ export function OrgDetail() {
 
       {error && <ErrorBanner text={error} />}
 
-      <div className="bq-mt-22px" style={{ opacity: busy ? 0.6 : 1, pointerEvents: busy ? "none" : "auto" }}>
+      <div className="bq-mt-6" style={{ opacity: busy ? 0.6 : 1, pointerEvents: busy ? "none" : "auto" }}>
         <SectionHeader>Status</SectionHeader>
         <Segmented value={org.status} options={STATUS_OPTIONS} onChange={setStatus} />
 
-        <div className="bq-mt-22px">
+        <div className="bq-mt-6">
           <SectionHeader>App type</SectionHeader>
           <Segmented
             value={org.mode ?? "team"}
@@ -115,7 +115,7 @@ export function OrgDetail() {
           </div>
         </div>
 
-        <div className="bq-mt-22px">
+        <div className="bq-mt-6">
           <SectionHeader>Plan</SectionHeader>
           <SelectField label="SAAS PLAN" value={org.planId ?? ""} options={planOptions} onChange={setPlan} placeholder="No plan" />
           {activePlan && (
@@ -128,7 +128,7 @@ export function OrgDetail() {
 
       <OrgAppConfig id={id} />
 
-      <div className="bq-mt-26px">
+      <div className="bq-mt-6">
         <SectionHeader>QR codes</SectionHeader>
         <Card className="bq-ops-org-detail-card" pad="none">
           <div className="bq-grow">
@@ -154,7 +154,7 @@ export function OrgDetail() {
         </Card>
       </div>
 
-      <div className="bq-mt-26px">
+      <div className="bq-mt-6">
         <SectionHeader>Usage</SectionHeader>
         <Card className="bq-overflow-hidden" pad="none">
           <UsageRow label="GMV" value={egp(usage.gmv)} />
@@ -170,7 +170,7 @@ export function OrgDetail() {
         </Card>
       </div>
 
-      <div className="bq-mt-26px">
+      <div className="bq-mt-6">
         <SectionHeader count={staff.length}>Staff</SectionHeader>
         <Card className="bq-overflow-hidden" pad="none">
           {staff.map((p, i) => (
@@ -195,7 +195,7 @@ export function OrgDetail() {
       </div>
 
       {pendingInvites.length > 0 && (
-        <div className="bq-mt-26px">
+        <div className="bq-mt-6">
           <SectionHeader count={pendingInvites.length}>Pending invites</SectionHeader>
           <Card className="bq-overflow-hidden" pad="none">
             {pendingInvites.map((inv, i) => (
@@ -209,7 +209,7 @@ export function OrgDetail() {
         </div>
       )}
 
-      <div className="bq-mt-26px">
+      <div className="bq-mt-6">
         <SectionHeader>Danger zone</SectionHeader>
         <Card className="bq-ops-org-detail-card" pad="none">
           <div className="bq-grow">

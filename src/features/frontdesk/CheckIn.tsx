@@ -143,7 +143,7 @@ export function ConfirmCheckInSheet({ client, onClose, onDropIn }: { client: Cli
           <div className="bq-label">CHECK-IN</div>
           <div className="bq-title">{shown.name}</div>
           <div className="bq-frontdesk-check-in-confirm-check-in-sheet-box">
-            <div className="bq-flex bq-items-center bq-gap-10px">
+            <div className="bq-flex bq-items-center bq-gap-2">
               <div className="bq-frontdesk-check-in-confirm-check-in-sheet-label">CURRENT PLAN</div>
               <PlanPill client={current} />
             </div>

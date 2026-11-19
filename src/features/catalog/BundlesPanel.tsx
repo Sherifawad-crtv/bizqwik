@@ -36,7 +36,7 @@ export function BundlesPanel() {
 
   return (
     <div>
-      <div className="bq-flex bq-items-center bq-gap-10px bq-mb-14px">
+      <div className="bq-flex bq-items-center bq-gap-2 bq-mb-4">
         <span className="bq-h2">Private training bundles</span>
         <span className="bq-meta">{rows.length}</span>
         <Button className="bq-catalog-bundles-panel-btn" size="md" onClick={() => setEditing("new")}>

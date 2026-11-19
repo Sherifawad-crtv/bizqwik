@@ -40,7 +40,7 @@ const SORT_OPTIONS: { value: SortKey; label: string }[] = [
 
 function FilterGroup({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <div className="bq-mb-18px">
+    <div className="bq-mb-4">
       <div className="bq-clients-filters-filter-group-label">{label}</div>
       <div className="bq-flex bq-wrap bq-gap-2">{children}</div>
     </div>
@@ -69,7 +69,7 @@ export function ClientFilterBar({
   const matching = filterClients(clients, filters, now).length;
 
   return (
-    <div className="bq-mb-14px" data-testid="client-filters">
+    <div className="bq-mb-4" data-testid="client-filters">
       <div className="bq-flex bq-gap-2">
         <label className="bq-clients-filters-client-filter-bar-label"
         >

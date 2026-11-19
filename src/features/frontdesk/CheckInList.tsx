@@ -46,7 +46,7 @@ export function CheckInList() {
   return (
     <div>
       <SearchField value={query} onChange={setQuery} placeholder="Search name or phone" />
-      <Card className="bq-mt-10px bq-overflow-hidden" pad="none">
+      <Card className="bq-mt-2 bq-overflow-hidden" pad="none">
         {shown.map((c, i) => {
           const plan = planSummary(c, bundleTypes);
           const r = results[c.id];
@@ -55,7 +55,7 @@ export function CheckInList() {
               <div className="bq-flex bq-items-center bq-gap-3">
                 <div className="bq-grow">
                   <div className="bq-frontdesk-check-in-list-title">{c.name}</div>
-                  <div className="bq-flex bq-items-center bq-gap-2 bq-mt-2px">
+                  <div className="bq-flex bq-items-center bq-gap-2 bq-mt-0-5">
                     <PlanPill client={c} />
                     <span className="bq-frontdesk-check-in-list-meta">{plan.detail}</span>
                   </div>

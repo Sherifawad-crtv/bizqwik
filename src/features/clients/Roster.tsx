@@ -91,7 +91,7 @@ export function ClientRoster({
           <div
             key={c.id}
             onClick={() => onSelect(c)}
-            className="bq-card bq-card--sm bq-flex bq-gap-14px bq-items-center bq-pointer"
+            className="bq-card bq-card--sm bq-flex bq-gap-4 bq-items-center bq-pointer"
           >
             <Avatar name={c.name} size={38} />
             <div className="bq-grow">
@@ -187,7 +187,7 @@ function ClientDesktopRow({
       <div className="bq-clients-roster-client-desktop-row-meta">{meta}</div>
       <div>{pill}</div>
       <div className="tabular bq-stat-sm bq-text-right">{value}</div>
-      <div className="bq-flex bq-justify-end bq-items-center bq-gap-6px bq-fg-tertiary">
+      <div className="bq-flex bq-justify-end bq-items-center bq-gap-1-5 bq-fg-tertiary">
         {canManage && (
           <>
             <RowActionButton icon="pencil" label="Edit client" onClick={onEdit} />

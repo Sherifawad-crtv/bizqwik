@@ -38,7 +38,7 @@ export function PlansPanel({ solo }: { solo?: boolean }) {
     // Plans taken off sale are gone from the list; people who hold one keep it.
     const rows = data.planTypes.filter((p) => p.kind === kind && p.active && atLocation(p.locationId, catalogHere));
     return (
-      <div className="bq-mb-28px">
+      <div className="bq-mb-6">
         <SectionHeader
           count={rows.length}
           right={

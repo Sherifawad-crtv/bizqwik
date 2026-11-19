@@ -61,7 +61,7 @@ export function DeleteOrgSheet({
         autoCorrect="off"
         spellCheck={false}
       />
-      {error && <div className="bq-mt-10px"><ErrorBanner text={error} /></div>}
+      {error && <div className="bq-mt-2"><ErrorBanner text={error} /></div>}
       <Button className="bq-mt-4" variant="danger" fullWidth size="lg" disabled={!matches || busy} onClick={confirm}>
         {busy ? "Deleting…" : "Delete permanently"}
       </Button>

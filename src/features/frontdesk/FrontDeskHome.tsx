@@ -109,7 +109,7 @@ export function FrontDeskHome() {
 
       <SearchField value={query} onChange={setQuery} placeholder="Find a client by name or phone" />
       {query.trim() !== "" && (
-        <Card className="bq-mt-10px bq-overflow-hidden" pad="none">
+        <Card className="bq-mt-2 bq-overflow-hidden" pad="none">
           {matches.map((c, i) => {
             const plan = planSummary(c, bundleTypes);
             const status = deskStatus(c);
@@ -182,7 +182,7 @@ export function FrontDeskHome() {
         ))}
       </div>
 
-      <div className="bq-flex bq-gap-2 bq-mt-14px bq-wrap">
+      <div className="bq-flex bq-gap-2 bq-mt-4 bq-wrap">
         {[
           { k: "Checked in today", v: data.todayCheckIns },
           { k: "Drop-ins", v: data.todayDropIns },

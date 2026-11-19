@@ -21,15 +21,15 @@
 }
 
 .bq-spinner-stack {
-  padding: 8px 16px 24px;
+  padding: var(--space-2) var(--space-4) var(--space-6);
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .bq-spinner-row {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 16px;
+  gap: var(--space-4);
+  padding: var(--space-4);
 }

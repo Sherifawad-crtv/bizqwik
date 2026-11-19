@@ -75,7 +75,7 @@ export function Money() {
   return (
     <div>
       <LocationSwitcher all isAll={allLocations} onAll={setAllLocations} />
-      <div className="bq-flex bq-justify-center bq-mb-18px">
+      <div className="bq-flex bq-justify-center bq-mb-4">
         <Segmented value={range} onChange={setRange} options={RANGES} />
       </div>
       {!data ? (
@@ -91,7 +91,7 @@ export function Money() {
                 : `${data.rev.activeSubscribers.total} active member${data.rev.activeSubscribers.total === 1 ? "" : "s"}`}
             </div>
             {data.pay.byMethod.length > 0 && (
-              <div className="bq-flex bq-wrap bq-gap-2 bq-mt-14px">
+              <div className="bq-flex bq-wrap bq-gap-2 bq-mt-4">
                 {data.pay.byMethod.map((m) => (
                   <span className="bq-money-meta-2" key={m.method} style={{ color: m.method === "instapay" ? "var(--color-bg-fill-primary-active)" : "var(--color-text-secondary-default)", background: m.method === "instapay" ? "var(--color-bg-fill-accent-default)" : "var(--color-bg-surface-secondary-default)" }}>
                     {m.label} · {fmt(m.amount)}

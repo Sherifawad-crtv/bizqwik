@@ -247,7 +247,7 @@ export function CategoriesSheet({ open, categories, onClose, onChanged }: { open
         <div className="bq-mt-3">
           <TextField label="NEW CATEGORY" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Insurance" />
           {error && <div className="bq-accounting-expense-sheet-categories-sheet-text-2">{error}</div>}
-          <Button className="bq-mt-10px" fullWidth disabled={busy} onClick={add}>{busy ? "Adding…" : "Add category"}</Button>
+          <Button className="bq-mt-2" fullWidth disabled={busy} onClick={add}>{busy ? "Adding…" : "Add category"}</Button>
         </div>
       ) : (
         <Button className="bq-mt-3" variant="secondary" fullWidth onClick={() => setAdding(true)}>+ New category</Button>

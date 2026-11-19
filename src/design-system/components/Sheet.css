@@ -17,7 +17,7 @@
 .bq-sheet-meta {
   font: 400 var(--text-footnote-size) var(--font-family-mono);
   color: var(--color-text-secondary-default);
-  margin: 4px 0 16px;
+  margin: var(--space-1) 0 var(--space-4);
 }
 
 .bq-sheet-layer {
@@ -53,11 +53,11 @@
   border-radius: var(--radius-sheet);
   border: var(--border-outline);
   box-shadow: var(--shadow-float);
-  padding: 10px 20px 20px;
+  padding: var(--space-2) var(--space-5) var(--space-5);
 }
 
 .bq-sheet-part {
-  padding: 8px 0 14px;
+  padding: var(--space-2) 0 var(--space-4);
   cursor: grab;
   touch-action: none;
   flex: none;
@@ -90,5 +90,5 @@
 .bq-sheet-part-3 {
   max-height: 88vh;
   overflow-y: auto;
-  padding: 26px;
+  padding: var(--space-6);
 }

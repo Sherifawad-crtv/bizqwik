@@ -46,7 +46,7 @@ export function RecurringPanel({ categories, onChanged, onCategoriesChanged }: {
       <SectionHeader count={recurring.length} right={<button className="bq-accounting-recurring-panel-btn" onClick={() => setManagingCats(true)}>Categories</button>}>
         Recurring expenses
       </SectionHeader>
-      <Card className="bq-overflow-hidden bq-mb-14px" pad="none">
+      <Card className="bq-overflow-hidden bq-mb-4" pad="none">
         <MotionList>
 {recurring.map((r, i) => {
           const next = nextOccurrence(r);
@@ -68,7 +68,7 @@ export function RecurringPanel({ categories, onChanged, onCategoriesChanged }: {
           <EmptyState bare icon="cash" title={data ? "No repeating expenses" : "Loading…"} body="Rent, salaries and anything else that happens every month — set it up once." />
         )}
       </Card>
-      <Button className="bq-mb-18px" fullWidth size="lg" onClick={() => setEditing({ id: "", categoryId: categories.find((c) => !c.archived)?.id ?? "", categoryName: "", amount: 0, note: null, dayOfMonth: new Date().getDate() > 28 ? 28 : new Date().getDate(), startMonth: MOCK.CURRENT_MONTH, endMonth: null, active: true })}>
+      <Button className="bq-mb-4" fullWidth size="lg" onClick={() => setEditing({ id: "", categoryId: categories.find((c) => !c.archived)?.id ?? "", categoryName: "", amount: 0, note: null, dayOfMonth: new Date().getDate() > 28 ? 28 : new Date().getDate(), startMonth: MOCK.CURRENT_MONTH, endMonth: null, active: true })}>
         Add a repeating expense
       </Button>
       <RecurringSheet

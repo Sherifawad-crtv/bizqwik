@@ -2,19 +2,19 @@
 
 .bq-accounting-pnl-panel-row {
   display: flex;
-  gap: 10px;
+  gap: var(--space-2);
   align-items: flex-start;
   background: var(--color-bg-fill-status-logging-default);
   border-radius: var(--radius-item);
-  padding: 12px 14px;
-  margin-bottom: 14px;
+  padding: var(--space-3) var(--space-4);
+  margin-bottom: var(--space-4);
 }
 
 .bq-accounting-pnl-panel-row-2 {
   color: var(--color-text-status-logging-default);
   display: flex;
   flex: none;
-  margin-top: 1px;
+  margin-top: 0;
 }
 
 .bq-accounting-pnl-panel-text {
@@ -23,38 +23,38 @@
 }
 
 .bq-accounting-pnl-panel-spacing {
-  padding: 20px 20px 18px;
-  margin-bottom: 10px;
+  padding: var(--space-5) var(--space-5) var(--space-4);
+  margin-bottom: var(--space-2);
 }
 
 .bq-accounting-pnl-panel-title {
-  font: 800 48px/1 var(--font-family-body);
+  font: 800 var(--text-stat-hero-size)/1 var(--font-family-body);
   letter-spacing: -.03em;
-  margin: 8px 0 0;
+  margin: var(--space-2) 0 0;
   overflow-wrap: anywhere;
 }
 
 .bq-accounting-pnl-panel-meta {
   font: 400 var(--text-caption-1-size)/1.4 var(--font-family-mono);
   color: var(--color-text-tertiary-default);
-  margin-top: 8px;
+  margin-top: var(--space-2);
 }
 
 .bq-accounting-pnl-panel-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit,minmax(150px,1fr));
-  gap: 10px;
-  margin-bottom: 14px;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
 }
 
 .bq-accounting-pnl-panel-btn {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--space-2);
   width: 100%;
   border: 0;
   background: none;
-  padding: 6px 0;
+  padding: var(--space-1-5) 0;
   text-align: left;
 }
 

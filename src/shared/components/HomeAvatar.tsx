@@ -14,7 +14,7 @@ export function HomeAvatar({ name, avatarUrl, greeting }: { name: string; avatar
   if (!isMobile) return null;
 
   return (
-    <div className="bq-flex bq-items-center bq-gap-3 bq-mb-28px" style={{ justifyContent: greeting ? "space-between" : "flex-end" }}>
+    <div className="bq-flex bq-items-center bq-gap-3 bq-mb-6" style={{ justifyContent: greeting ? "space-between" : "flex-end" }}>
       {greeting && (
         <div className="bq-home-avatar-title">{greeting}</div>
       )}

@@ -96,7 +96,7 @@ export function Invitations({ embedded = false, onCreateClient }: { embedded?: b
       ) : (
         <>
           <Card className="bq-frontdesk-invitations-card-2" pad="none">
-            <div className="bq-flex bq-items-center bq-gap-10px">
+            <div className="bq-flex bq-items-center bq-gap-2">
               <div className="bq-grow">
                 <div className="bq-label">MEMBER</div>
                 <div className="bq-frontdesk-invitations-title">{member.name}</div>
@@ -113,7 +113,7 @@ export function Invitations({ embedded = false, onCreateClient }: { embedded?: b
                 Change
               </Button>
             </div>
-            <div className="bq-flex bq-items-baseline bq-gap-2 bq-mt-10px">
+            <div className="bq-flex bq-items-baseline bq-gap-2 bq-mt-2">
               <span className="bq-frontdesk-invitations-title-2" style={{ color: left > 0 ? "var(--color-bg-fill-primary-active)" : "var(--color-text-tertiary-default)" }}>{left}</span>
               <span className="bq-frontdesk-invitations-meta-2">invitation{left === 1 ? "" : "s"} left</span>
             </div>

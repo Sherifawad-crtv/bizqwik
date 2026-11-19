@@ -121,12 +121,12 @@ export function SoloOffer() {
           </Button>
         </div>
         {editing && catalogHere && (
-          <div className="bq-mt-3 bq-flex bq-col bq-gap-10px">
+          <div className="bq-mt-3 bq-flex bq-col bq-gap-2">
             {rows.map((r, i) => (
               <div className="bq-catalog-solo-offer-grid" key={i}>
                 <TextField label="NAME" value={r.label} onChange={(e) => setRows(rows.map((x, j) => (j === i ? { ...x, label: e.target.value } : x)))} placeholder="Kids" />
                 <TextField label="PRICE · EGP" type="number" min={0} inputMode="decimal" value={r.price} onChange={(e) => setRows(rows.map((x, j) => (j === i ? { ...x, price: e.target.value } : x)))} />
-                <IconButton className="bq-mb-6px" icon="trash" label="Remove" tone="danger" onClick={() => setRows(rows.filter((_, j) => j !== i))} />
+                <IconButton className="bq-mb-1-5" icon="trash" label="Remove" tone="danger" onClick={() => setRows(rows.filter((_, j) => j !== i))} />
               </div>
             ))}
             {rows.length < 6 && <Button variant="quiet" onClick={() => setRows([...rows, { label: "", price: "" }])}>+ Another drop-in</Button>}
@@ -137,7 +137,7 @@ export function SoloOffer() {
           </div>
         )}
         {editing && !catalogHere && (
-          <div className="bq-mt-3 bq-flex bq-col bq-gap-10px">
+          <div className="bq-mt-3 bq-flex bq-col bq-gap-2">
             <TextField label="DROP-IN PRICE · EGP" type="number" min={0} inputMode="decimal" value={price} onChange={(e) => setPrice(e.target.value)} />
             <div className="bq-flex bq-gap-2">
               <Button className="bq-flex-1" disabled={busy} onClick={savePrice}>{busy ? "Saving…" : "Save"}</Button>
@@ -173,7 +173,7 @@ export function SoloOffer() {
           )}
         </div>
         {address !== null && (
-          <div className="bq-mt-3 bq-flex bq-col bq-gap-10px">
+          <div className="bq-mt-3 bq-flex bq-col bq-gap-2">
             <TextField label="INSTAPAY ADDRESS" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="name@instapay" autoCapitalize="none" autoCorrect="off" />
             <div className="bq-flex bq-gap-2">
               <Button className="bq-flex-1" disabled={busy} onClick={saveAddress}>{busy ? "Saving…" : "Save"}</Button>

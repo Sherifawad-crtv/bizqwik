@@ -26,7 +26,7 @@ export function InvitesPanel() {
 
   return (
     <div>
-      <div className="bq-flex bq-items-center bq-gap-10px bq-mb-14px">
+      <div className="bq-flex bq-items-center bq-gap-2 bq-mb-4">
         <span className="bq-h2">Pending invites</span>
         <span className="bq-meta">{data.invites.length}</span>
         <Button className="bq-manage-invites-panel-btn" size="md" onClick={() => setOpen(true)}>

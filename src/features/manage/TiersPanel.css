@@ -3,33 +3,33 @@
 .bq-manage-tiers-panel-btn {
   margin-left: auto;
   height: 40px;
-  padding: 0 16px;
+  padding: 0 var(--space-4);
 }
 
 .bq-manage-tiers-panel-title {
   font: 800 var(--text-title-1-size)/1.2 var(--font-family-body);
   letter-spacing: -.02em;
-  margin: 4px 0 4px;
+  margin: var(--space-1) 0 var(--space-1);
 }
 
 .bq-manage-tiers-panel-meta {
   font: 400 var(--text-footnote-size)/1.5 var(--font-family-mono);
   color: var(--color-text-secondary-default);
-  margin-bottom: 14px;
+  margin-bottom: var(--space-4);
 }
 
 .bq-manage-tiers-panel-box {
   background: var(--color-bg-surface-secondary-default);
   border-radius: var(--radius-item);
-  padding: 6px 16px;
-  margin-bottom: 16px;
+  padding: var(--space-1-5) var(--space-4);
+  margin-bottom: var(--space-4);
 }
 
 .bq-manage-tiers-panel-row {
   display: flex;
   align-items: baseline;
-  gap: 10px;
-  padding: 10px 0;
+  gap: var(--space-2);
+  padding: var(--space-2) 0;
 }
 
 .bq-manage-tiers-panel-title-2 {

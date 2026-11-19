@@ -32,7 +32,7 @@ export function TiersPanel({ onOpenPeople, onOpenInvites }: { onOpenPeople: () =
 
   return (
     <div>
-      <div className="bq-flex bq-items-center bq-gap-10px bq-mb-14px">
+      <div className="bq-flex bq-items-center bq-gap-2 bq-mb-4">
         <span className="bq-h2">Tiers</span>
         <span className="bq-meta">{data.tiers.length}</span>
         <Button className="bq-manage-tiers-panel-btn" size="md" onClick={() => setEditing("new")}>

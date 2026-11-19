@@ -90,7 +90,7 @@ export function Oversight() {
         <>
           {short && (
             <div className="bq-money-oversight-row-2">
-              <span className="bq-fg-secondary bq-flex bq-flex-none bq-mt-1px">
+              <span className="bq-fg-secondary bq-flex bq-flex-none bq-mt-px">
                 <Icon name="insights" size={18} />
               </span>
               <span className="bq-money-oversight-text-2">
@@ -135,7 +135,7 @@ export function Oversight() {
           </SectionCard>
 
           <SectionCard title="WHERE THE MONEY CAME FROM" sub={`${caption(shown.map((m) => m.month))} · EGP`}>
-            <div className="bq-mb-14px">
+            <div className="bq-mb-4">
               <Segmented
                 value={breakdown}
                 onChange={setBreakdown}

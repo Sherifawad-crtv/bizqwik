@@ -1,12 +1,12 @@
 /* Card: every surface on a page. */
 .bq-card { background: var(--color-bg-surface-primary-default); border-radius: var(--radius-card); }
-.bq-card--sm { padding: 14px var(--space-4); }
+.bq-card--sm { padding: var(--space-4) var(--space-4); }
 .bq-card--md { padding: var(--space-5); }
-.bq-card--lg { padding: 30px; }
+.bq-card--lg { padding: var(--space-8); }
 .bq-card--clip { overflow: hidden; }
 
 .bq-card-section-card-meta {
   font: 400 var(--text-caption-1-size) var(--font-family-mono);
   color: var(--color-text-tertiary-default);
-  margin-top: 2px;
+  margin-top: var(--space-0-5);
 }

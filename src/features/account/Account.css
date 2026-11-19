@@ -4,14 +4,14 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  padding: 24px 0 28px;
+  gap: var(--space-1);
+  padding: var(--space-6) 0 var(--space-6);
 }
 
 .bq-account-title {
-  font: 800 24px var(--font-family-body);
+  font: 800 var(--text-stat-md-size) var(--font-family-body);
   letter-spacing: -.01em;
-  margin-top: 12px;
+  margin-top: var(--space-3);
 }
 
 .bq-account-text {
@@ -20,26 +20,26 @@
 }
 
 .bq-account-spacing {
-  padding: 6px 4px;
-  margin-bottom: 16px;
+  padding: var(--space-1-5) var(--space-1);
+  margin-bottom: var(--space-4);
 }
 
 .bq-account-notifications-row-part {
   border-bottom: var(--border-divider);
-  padding: 14px 16px;
+  padding: var(--space-4) var(--space-4);
 }
 
 .bq-account-notifications-row-text {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-3);
   font: 600 var(--text-body-size) var(--font-family-body);
   color: var(--color-text-primary-default);
 }
 
 .bq-account-notifications-row-text-2 {
-  margin-top: 6px;
-  margin-left: 31px;
+  margin-top: var(--space-1-5);
+  margin-left: var(--space-8);
   font: 500 var(--text-footnote-size)/1.5 var(--font-family-body);
   color: var(--color-text-secondary-default);
 }
@@ -51,24 +51,24 @@
 .bq-account-notifications-row-btn {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-3);
   width: 100%;
   border: 0;
   background: none;
   cursor: pointer;
-  padding: 14px 16px;
+  padding: var(--space-4) var(--space-4);
   font: 600 var(--text-body-size) var(--font-family-body);
   color: var(--color-text-primary-default);
   text-align: left;
 }
 
 .bq-account-notifications-row-text-3 {
-  margin: 0 16px 12px;
+  margin: 0 var(--space-4) var(--space-3);
   font: 600 var(--text-caption-1-size)/1.4 var(--font-family-body);
   color: var(--color-text-status-danger-default);
   background: var(--color-bg-fill-status-danger-default);
   border-radius: var(--radius-item);
-  padding: 8px 10px;
+  padding: var(--space-2) var(--space-2);
 }
 
 .bq-account-settings-row-btn {

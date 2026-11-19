@@ -99,7 +99,7 @@ export function AccountProfile() {
 
   return (
     <div>
-      <div className="bq-card bq-card--md bq-mb-4 bq-flex bq-col bq-items-center bq-gap-10px">
+      <div className="bq-card bq-card--md bq-mb-4 bq-flex bq-col bq-items-center bq-gap-2">
         {PHOTO_EDIT_ENABLED ? (
           <>
             <input className="bq-account-profile-input" ref={fileInput} type="file" accept="image/*" onChange={onPhotoSelected} />
@@ -160,7 +160,7 @@ export function AccountProfile() {
             Saved.
           </div>
         )}
-        <Button className="bq-mt-14px" fullWidth size="lg" disabled={busy || !dirty} onClick={save}>
+        <Button className="bq-mt-4" fullWidth size="lg" disabled={busy || !dirty} onClick={save}>
           {busy ? "Saving…" : "Save name"}
         </Button>
       </div>

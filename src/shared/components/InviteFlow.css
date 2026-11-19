@@ -3,5 +3,5 @@
 .bq-invite-flow-invite-sheet-meta {
   font: 400 var(--text-caption-1-size)/1.5 var(--font-family-mono);
   color: var(--color-text-tertiary-default);
-  padding: 0 2px;
+  padding: 0 var(--space-0-5);
 }

@@ -3,14 +3,14 @@
 .bq-clients-list-client-list-meta {
   font: 400 var(--text-caption-1-size)/1.5 var(--font-family-mono);
   color: var(--color-text-tertiary-default);
-  margin: -6px 2px 14px;
+  margin: calc(-1 * var(--space-1-5)) var(--space-0-5) var(--space-4);
 }
 
 .bq-clients-list-client-list-row {
   display: flex;
   align-items: baseline;
-  gap: 10px;
-  padding: 2px 2px 8px;
+  gap: var(--space-2);
+  padding: var(--space-0-5) var(--space-0-5) var(--space-2);
 }
 
 .bq-clients-list-client-list-btn {
@@ -20,5 +20,5 @@
   font: 700 var(--text-footnote-size) var(--font-family-body);
   color: var(--color-bg-fill-primary-active);
   cursor: pointer;
-  padding: 4px;
+  padding: var(--space-1);
 }

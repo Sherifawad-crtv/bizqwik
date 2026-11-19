@@ -38,7 +38,7 @@ export function Account() {
         <SettingsRow icon="lock" label="Password Settings" onClick={() => navigate("/account/password")} last />
       </div>
 
-      <Button className="bq-gap-10px" variant="danger" fullWidth size="lg" onClick={doLogout}>
+      <Button className="bq-gap-2" variant="danger" fullWidth size="lg" onClick={doLogout}>
         <Icon name="logout" size={18} /> Sign out
       </Button>
     </div>

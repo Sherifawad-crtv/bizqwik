@@ -102,7 +102,7 @@ input,
 select,
 textarea {
   font-family: inherit;
-  font-size: 16px; /* prevents iOS focus auto-zoom */
+  font-size: var(--text-callout-size); /* prevents iOS focus auto-zoom */
 }
 
 [data-scroll] {

@@ -83,7 +83,7 @@ export function Members() {
         })}
       </div>
 
-      <div className="bq-mt-14px">
+      <div className="bq-mt-4">
         <SectionHeader
           count={shown.length}
           right={

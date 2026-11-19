@@ -9,10 +9,10 @@
 .bq-frontdesk-bookings-row-btn {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-3);
   flex: 1;
   min-width: 0;
-  padding: 14px 18px;
+  padding: var(--space-4) var(--space-4);
   border: 0;
   background: none;
   cursor: pointer;
@@ -49,7 +49,7 @@
   font: 700 var(--text-caption-2-size) var(--font-family-mono);
   color: var(--color-text-status-paid-default);
   background: var(--color-bg-fill-status-paid-default);
-  padding: 3px 8px;
+  padding: var(--space-1) var(--space-2);
   border-radius: var(--radius-full);
 }
 
@@ -57,7 +57,7 @@
   font: 700 var(--text-caption-2-size) var(--font-family-mono);
   color: var(--color-bg-fill-primary-active);
   background: var(--color-bg-fill-accent-default);
-  padding: 3px 8px;
+  padding: var(--space-1) var(--space-2);
   border-radius: var(--radius-full);
 }
 
@@ -66,7 +66,7 @@
   letter-spacing: 1px;
   color: var(--color-text-tertiary-default);
   text-transform: uppercase;
-  margin: 20px 4px 8px;
+  margin: var(--space-5) var(--space-1) var(--space-2);
 }
 
 .bq-frontdesk-bookings-label-2 {
@@ -74,7 +74,7 @@
   letter-spacing: 1px;
   color: var(--color-text-tertiary-default);
   text-transform: uppercase;
-  margin: 0 4px 8px;
+  margin: 0 var(--space-1) var(--space-2);
 }
 
 .bq-frontdesk-bookings-btn {
@@ -83,7 +83,7 @@
   cursor: pointer;
   font: 700 var(--text-subheadline-size) var(--font-family-body);
   color: var(--color-bg-fill-primary-active);
-  padding: 4px 0;
+  padding: var(--space-1) 0;
 }
 
 .bq-frontdesk-bookings-size {

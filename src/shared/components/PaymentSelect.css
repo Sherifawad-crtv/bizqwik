@@ -4,5 +4,5 @@
   font: 700 var(--text-caption-2-size) var(--font-family-mono);
   letter-spacing: .08em;
   color: var(--color-text-tertiary-default);
-  margin: 0 2px 6px;
+  margin: 0 var(--space-0-5) var(--space-1-5);
 }

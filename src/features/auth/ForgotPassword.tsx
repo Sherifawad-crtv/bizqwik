@@ -59,7 +59,7 @@ export function ForgotPassword() {
             <div className="bq-auth-forgot-password-text">
               If an account exists for <strong>{email}</strong>, a password reset link is on its way.
             </div>
-            <Link className="bq-block bq-mt-22px" to="/login">
+            <Link className="bq-block bq-mt-6" to="/login">
               <Button fullWidth size="lg">
                 Back to sign in
               </Button>

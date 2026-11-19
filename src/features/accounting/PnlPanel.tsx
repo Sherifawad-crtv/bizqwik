@@ -114,7 +114,7 @@ export function PnlPanel({ report, loading, onAddExpense, onCoachPayouts }: { re
         )}
       </SectionCard>
 
-      <Button className="bq-mt-1 bq-mb-18px" fullWidth size="lg" onClick={onAddExpense}>
+      <Button className="bq-mt-1 bq-mb-4" fullWidth size="lg" onClick={onAddExpense}>
         Add expense
       </Button>
     </>

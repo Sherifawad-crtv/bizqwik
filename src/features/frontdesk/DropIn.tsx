@@ -285,7 +285,7 @@ function PickClientSheet({ open, onClose, onPick }: { open: boolean; onClose: ()
       <div className="bq-label">DROP-IN</div>
       <div className="bq-title">Link a member</div>
       <ClientPicker clients={data?.clients ?? []} bundleTypes={bundleTypes} onPick={onPick} onCreate={newClient.open} />
-      <Button className="bq-mt-10px" variant="quiet" fullWidth onClick={onClose}>
+      <Button className="bq-mt-2" variant="quiet" fullWidth onClick={onClose}>
         Cancel
       </Button>
       {newClient.modal}

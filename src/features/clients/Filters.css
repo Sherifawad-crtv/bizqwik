@@ -4,7 +4,7 @@
   font: 700 var(--text-caption-2-size) var(--font-family-mono);
   letter-spacing: .08em;
   color: var(--color-text-tertiary-default);
-  margin-bottom: 8px;
+  margin-bottom: var(--space-2);
 }
 
 .bq-clients-filters-client-filter-bar-label {
@@ -12,9 +12,9 @@
   min-width: 0;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--space-2);
   height: 48px;
-  padding: 0 14px;
+  padding: 0 var(--space-4);
   background: var(--color-bg-surface-secondary-default);
   border: var(--border-outline);
   border-radius: var(--radius-item);
@@ -33,32 +33,32 @@
 .bq-clients-filters-client-filter-bar-title {
   min-width: 20px;
   height: 20px;
-  padding: 0 6px;
+  padding: 0 var(--space-1-5);
   border-radius: var(--radius-full);
   background: var(--color-bg-fill-primary-default);
   color: var(--color-text-on-fill-default);
-  font: 700 var(--text-caption-1-size)/20px var(--font-family-body);
+  font: 700 var(--text-caption-1-size)/var(--text-title-2-size) var(--font-family-body);
   text-align: center;
 }
 
 .bq-clients-filters-client-filter-bar-row {
   display: flex;
-  gap: 6px;
+  gap: var(--space-1-5);
   overflow-x: auto;
-  margin: 10px -2px 0;
-  padding: 2px;
+  margin: var(--space-2) calc(-1 * var(--space-0-5)) 0;
+  padding: var(--space-0-5);
   scrollbar-width: none;
 }
 
 .bq-clients-filters-client-filter-bar-part {
   opacity: 0.6;
-  margin-left: 2px;
+  margin-left: var(--space-0-5);
 }
 
 .bq-clients-filters-client-filter-bar-title-2 {
   font: 800 var(--text-title-1-size)/1.2 var(--font-family-body);
   letter-spacing: -.02em;
-  margin: 0 0 18px;
+  margin: 0 0 var(--space-4);
 }
 
 .bq-clients-filters-client-filter-bar-part-2 {
@@ -68,13 +68,13 @@
 .bq-clients-filters-client-filter-bar-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  margin: -6px 0 18px;
+  gap: var(--space-2);
+  margin: calc(-1 * var(--space-1-5)) 0 var(--space-4);
 }
 
 .bq-clients-filters-client-filter-bar-label-2 {
   font: 700 var(--text-caption-2-size) var(--font-family-mono);
   letter-spacing: .08em;
   color: var(--color-text-tertiary-default);
-  margin: 0 0 4px 4px;
+  margin: 0 0 var(--space-1) var(--space-1);
 }

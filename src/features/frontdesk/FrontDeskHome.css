@@ -1,7 +1,7 @@
 /* Styles for FrontDeskHome.tsx. Tokens only; see DESIGN_SYSTEM.md. */
 
 .bq-frontdesk-front-desk-home-spacing {
-  padding: 10px 12px 10px 18px;
+  padding: var(--space-2) var(--space-3) var(--space-2) var(--space-4);
 }
 
 .bq-frontdesk-front-desk-home-btn {
@@ -10,7 +10,7 @@
   display: block;
   border: 0;
   background: none;
-  padding: 4px 0;
+  padding: var(--space-1) 0;
   cursor: pointer;
   text-align: left;
   color: var(--color-text-primary-default);
@@ -36,7 +36,7 @@
 .bq-frontdesk-front-desk-home-title-2 {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-1-5);
   color: var(--color-text-status-paid-default);
   font: 800 var(--text-subheadline-size) var(--font-family-body);
   flex: none;
@@ -45,7 +45,7 @@
 .bq-frontdesk-front-desk-home-btn-2 {
   flex: none;
   height: 42px;
-  padding: 0 18px;
+  padding: 0 var(--space-4);
   border: 0;
   border-radius: var(--radius-full);
   background: var(--color-bg-fill-primary-default);
@@ -57,7 +57,7 @@
 .bq-frontdesk-front-desk-home-btn-3 {
   flex: none;
   height: 42px;
-  padding: 0 16px;
+  padding: 0 var(--space-4);
   border: var(--border-outline);
   border-radius: var(--radius-full);
   background: var(--color-bg-surface-primary-default);
@@ -69,7 +69,7 @@
 .bq-frontdesk-front-desk-home-meta-2 {
   font: 400 var(--text-caption-1-size) var(--font-family-mono);
   color: var(--color-text-status-paid-default);
-  margin-top: 4px;
+  margin-top: var(--space-1);
 }
 
 .bq-frontdesk-front-desk-home-text {
@@ -77,23 +77,23 @@
   color: var(--color-text-status-danger-default);
   background: var(--color-bg-fill-status-danger-default);
   border-radius: var(--radius-item);
-  padding: 8px 10px;
-  margin-top: 6px;
+  padding: var(--space-2) var(--space-2);
+  margin-top: var(--space-1-5);
 }
 
 .bq-frontdesk-front-desk-home-btn-4 {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: var(--space-2);
   width: 100%;
   height: 64px;
-  margin-top: 14px;
+  margin-top: var(--space-4);
   border: 0;
   border-radius: var(--radius-card);
   background: var(--color-bg-fill-primary-default);
   color: var(--color-bg-surface-primary-default);
-  font: 800 18px var(--font-family-body);
+  font: 800 var(--text-title-3-size) var(--font-family-body);
   cursor: pointer;
   box-shadow: var(--shadow-cta);
 }
@@ -101,8 +101,8 @@
 .bq-frontdesk-front-desk-home-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  margin-top: 10px;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
 }
 
 .bq-frontdesk-front-desk-home-btn-5 {
@@ -112,8 +112,8 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  padding: 8px;
+  gap: var(--space-1-5);
+  padding: var(--space-2);
   cursor: pointer;
   font: 700 var(--text-footnote-size)/1.2 var(--font-family-body);
   text-align: center;
@@ -124,7 +124,7 @@
   color: var(--color-text-secondary-default);
   background: var(--color-bg-surface-secondary-default);
   border-radius: var(--radius-full);
-  padding: 6px 12px;
+  padding: var(--space-1-5) var(--space-3);
 }
 
 .bq-frontdesk-front-desk-home-meta-3 {
@@ -133,7 +133,7 @@
 }
 
 .bq-frontdesk-front-desk-home-text-3 {
-  padding: 12px 18px 0;
+  padding: var(--space-3) var(--space-4) 0;
   font: 600 var(--text-footnote-size) var(--font-family-body);
   color: var(--color-text-secondary-default);
 }
@@ -170,8 +170,8 @@
 .bq-frontdesk-front-desk-home-row {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 14px 18px;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-4);
 }
 
 .bq-frontdesk-front-desk-home-row-2 {

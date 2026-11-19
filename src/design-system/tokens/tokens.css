@@ -55,6 +55,13 @@
   --space-5: 20px;
   --space-6: 24px;
   --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-24: 96px;
+  --space-px: 1px; /** hairline: a 1px gap that shows a grid line */
+  --space-0-5: 2px;
+  --space-1-5: 6px;
   --radius-card: 28px; /** every surface on a page: cards, tiles, charts, hero, list cards */
   --radius-sheet: 40px; /** bottom sheets (20 padding inside) */
   --radius-item: 20px; /** fields, notices, thumbnails inside a sheet (40 - 20) */
@@ -71,14 +78,17 @@
   --font-size-14: 14px;
   --font-size-15: 15px;
   --font-size-16: 16px;
+  --font-size-18: 18px;
   --font-size-20: 20px;
   --font-size-24: 24px;
   --font-size-26: 26px;
   --font-size-30: 30px;
+  --font-size-48: 48px;
   --font-size-56: 56px;
   --text-large-title-weight: 800;
   --text-title-1-weight: 800;
   --text-title-2-weight: 700;
+  --text-title-3-weight: 700;
   --text-headline-weight: 700;
   --text-callout-weight: 500;
   --text-body-weight: 500;
@@ -89,6 +99,7 @@
   --text-label-weight: 700;
   --text-meta-weight: 400;
   --text-stat-xl-weight: 800;
+  --text-stat-hero-weight: 800;
   --text-stat-lg-weight: 800;
   --text-stat-md-weight: 800;
   --text-stat-sm-weight: 800;
@@ -150,6 +161,7 @@
   --text-large-title-size: var(--font-size-30);
   --text-title-1-size: var(--font-size-26);
   --text-title-2-size: var(--font-size-20);
+  --text-title-3-size: var(--font-size-18);
   --text-headline-size: var(--font-size-16);
   --text-callout-size: var(--font-size-16);
   --text-body-size: var(--font-size-15);
@@ -160,6 +172,7 @@
   --text-label-size: var(--font-size-11);
   --text-meta-size: var(--font-size-13);
   --text-stat-xl-size: var(--font-size-56);
+  --text-stat-hero-size: var(--font-size-48);
   --text-stat-lg-size: var(--font-size-30);
   --text-stat-md-size: var(--font-size-24);
   --text-stat-sm-size: var(--font-size-20);

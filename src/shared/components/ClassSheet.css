@@ -3,10 +3,10 @@
 .bq-class-sheet-box {
   background: var(--color-bg-surface-secondary-default);
   border-radius: var(--radius-item);
-  padding: 12px 14px;
+  padding: var(--space-3) var(--space-4);
 }
 
 .bq-class-sheet-text {
   font: 600 var(--text-subheadline-size)/1.5 var(--font-family-body);
-  margin-top: 4px;
+  margin-top: var(--space-1);
 }

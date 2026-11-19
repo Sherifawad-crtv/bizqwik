@@ -4,7 +4,7 @@
   font: 700 var(--text-caption-2-size) var(--font-family-mono);
   letter-spacing: .08em;
   color: var(--color-text-tertiary-default);
-  margin: 0 2px 6px;
+  margin: 0 var(--space-0-5) var(--space-1-5);
 }
 
 .bq-ops-image-upload-field-row {
@@ -42,14 +42,14 @@
 .bq-ops-image-upload-field-meta {
   font: 400 var(--text-caption-1-size)/1.5 var(--font-family-mono);
   color: var(--color-text-tertiary-default);
-  margin: 6px 2px 0;
+  margin: var(--space-1-5) var(--space-0-5) 0;
 }
 
 .bq-ops-image-upload-field-text {
-  margin-top: 8px;
+  margin-top: var(--space-2);
   font: 600 var(--text-footnote-size)/1.5 var(--font-family-body);
   color: var(--color-text-status-danger-default);
   background: var(--color-bg-fill-status-danger-default);
   border-radius: var(--radius-item);
-  padding: 10px 14px;
+  padding: var(--space-2) var(--space-4);
 }

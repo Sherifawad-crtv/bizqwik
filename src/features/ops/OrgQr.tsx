@@ -131,7 +131,7 @@ export function OrgQr() {
           )}
         </Card>
 
-        <div className="bq-flex bq-gap-10px bq-mt-4">
+        <div className="bq-flex bq-gap-2 bq-mt-4">
           <Button className="bq-flex-1" onClick={printQr} disabled={!pngUrl}>
             Print / Save PDF
           </Button>
