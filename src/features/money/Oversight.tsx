@@ -15,6 +15,7 @@ import { RevenueChart, ShareBars } from "../../design-system/components/MoneyCha
 import { Delta, KpiTile } from "../../design-system/components/KpiTile";
 import { SectionCard } from "../../design-system/components/Card";
 import { Num } from "../../design-system/components/Num";
+import "./Oversight.css";
 
 type Range = "1" | "3" | "6" | "12";
 
@@ -73,13 +74,13 @@ export function Oversight() {
       <HomeAvatar name={profile.name} avatarUrl={profile.avatarUrl} greeting={`Hi, ${profile.name.split(" ")[0]}`} />
 
       {error && (
-        <div className="bq-rise" style={{ marginBottom: 14, font: "600 var(--text-footnote-size)/1.5 var(--font-family-body)", color: "var(--color-text-status-danger-default)", background: "var(--color-bg-fill-status-danger-default)", borderRadius: "var(--radius-item)", padding: "10px 14px" }}>{error}</div>
+        <div className="bq-rise bq-money-oversight-text">{error}</div>
       )}
 
-      <div style={{ display: "flex", alignItems: "center", gap: 10, margin: "0 0 12px" }}>
+      <div className="bq-money-oversight-row">
         <Segmented value={range} onChange={setRange} options={RANGE_OPTIONS} />
         {data && shown.length > 0 && (
-          <span style={{ marginLeft: "auto", font: "700 var(--text-caption-2-size) var(--font-family-mono)", letterSpacing: ".06em", color: "var(--color-text-tertiary-default)", textAlign: "right" }}>{caption(shown.map((m) => m.month))}</span>
+          <span className="bq-money-oversight-label">{caption(shown.map((m) => m.month))}</span>
         )}
       </div>
 
@@ -88,12 +89,12 @@ export function Oversight() {
       ) : (
         <>
           {short && (
-            <div style={{ display: "flex", gap: 10, alignItems: "flex-start", background: "var(--color-bg-surface-secondary-default)", borderRadius: "var(--radius-item)", padding: "12px 14px", marginBottom: 14 }}>
-              <span style={{ color: "var(--color-text-secondary-default)", display: "flex", flex: "none", marginTop: 1 }}>
+            <div className="bq-money-oversight-row-2">
+              <span className="bq-fg-secondary bq-flex bq-flex-none bq-mt-1px">
                 <Icon name="insights" size={18} />
               </span>
-              <span style={{ font: "500 var(--text-footnote-size)/1.5 var(--font-family-body)", color: "var(--color-text-secondary-default)" }}>
-                <b style={{ color: "var(--color-text-primary-default)" }}>{depth === 1 ? "You have 1 month of data." : `You have ${depth} months of data.`}</b>{" "}
+              <span className="bq-money-oversight-text-2">
+                <b className="bq-fg-primary">{depth === 1 ? "You have 1 month of data." : `You have ${depth} months of data.`}</b>{" "}
                 {`That's all this ${n}-month view can show. Trends and comparisons with earlier periods appear as you keep selling and logging sessions.`}
               </span>
             </div>
@@ -101,7 +102,7 @@ export function Oversight() {
 
           {founder ? (
             // The founder's overview: four equal tiles, no big revenue card.
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(150px,1fr))", gap: 10, marginBottom: 14 }}>
+            <div className="bq-money-oversight-grid">
               <KpiTile label="PROFIT" icon="insights" value={<Num value={report.totals.profit} />} delta={compare && <Delta pct={pctChange(report.totals.profit, compare.profit)} tone="good" />} />
               <KpiTile label="REVENUE" icon="wallet" value={<Num value={report.totals.revenue} />} delta={compare && <Delta pct={pctChange(report.totals.revenue, compare.revenue)} tone="good" />} />
               <KpiTile label="ACTIVE SUBSCRIBERS" icon="coaches" value={<Num value={subs?.total ?? 0} />} />
@@ -109,18 +110,18 @@ export function Oversight() {
             </div>
           ) : (
             <>
-            <div className="bq-card" style={{ padding: "20px 20px 18px", marginBottom: 10 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <div className="bq-card bq-money-oversight-spacing">
+              <div className="bq-flex bq-items-center bq-gap-2">
                 <span className="bq-label">REVENUE · EGP</span>
-                <span style={{ marginLeft: "auto" }}>{compare && <Delta pct={pctChange(report.totals.revenue, compare.revenue)} tone="good" />}</span>
+                <span className="bq-ml-auto">{compare && <Delta pct={pctChange(report.totals.revenue, compare.revenue)} tone="good" />}</span>
               </div>
-              <div className="tabular bq-stat-xl" style={{ margin: "8px 0 0", overflowWrap: "anywhere" }}>{fmt(report.totals.revenue)}</div>
-              <div style={{ font: "400 var(--text-caption-1-size)/1.4 var(--font-family-mono)", color: "var(--color-text-tertiary-default)", marginTop: 8 }}>
+              <div className="tabular bq-stat-xl bq-money-oversight-part">{fmt(report.totals.revenue)}</div>
+              <div className="bq-money-oversight-meta">
                 {compare && compare.revenue > 0 ? `vs ${fmt(compare.revenue)} ${prevLabel}` : "New money in from cash and card sales"}
               </div>
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(150px,1fr))", gap: 10, marginBottom: 14 }}>
+            <div className="bq-money-oversight-grid">
               <KpiTile label="PROFIT" icon="insights" value={<Num value={report.totals.profit} />} sub="Revenue − coach payouts" delta={compare && <Delta pct={pctChange(report.totals.profit, compare.profit)} tone="good" />} />
               <KpiTile label="COACH PAYOUTS" icon="topay" value={<Num value={report.totals.payouts} />} sub="Owed to coaches" delta={compare && <Delta pct={pctChange(report.totals.payouts, compare.payouts)} tone="neutral" />} />
               <KpiTile label="ACTIVE SUBSCRIBERS" icon="coaches" value={<Num value={subs?.total ?? 0} />} sub={`${subs?.groupPlans ?? 0} group plan · ${subs?.ptPackages ?? 0} PT`} />
@@ -134,7 +135,7 @@ export function Oversight() {
           </SectionCard>
 
           <SectionCard title="WHERE THE MONEY CAME FROM" sub={`${caption(shown.map((m) => m.month))} · EGP`}>
-            <div style={{ marginBottom: 14 }}>
+            <div className="bq-mb-14px">
               <Segmented
                 value={breakdown}
                 onChange={setBreakdown}
@@ -151,17 +152,17 @@ export function Oversight() {
             {report.byCoach.length === 0 ? (
               <EmptyState bare icon="coaches" title="No coach activity in this period" body="Coaches appear here once they sell PT or get paid for sessions in these months." />
             ) : (
-              <div style={{ display: "flex", flexDirection: "column" }}>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 90px 90px", gap: 8, font: "700 10px var(--font-family-mono)", letterSpacing: ".06em", color: "var(--color-text-tertiary-default)", paddingBottom: 8 }}>
+              <div className="bq-flex bq-col">
+                <div className="bq-money-oversight-label-2">
                   <span>COACH</span>
-                  <span style={{ textAlign: "right" }}>PT SOLD</span>
-                  <span style={{ textAlign: "right" }}>PAID OUT</span>
+                  <span className="bq-text-right">PT SOLD</span>
+                  <span className="bq-text-right">PAID OUT</span>
                 </div>
                 {report.byCoach.map((c) => (
-                  <div key={c.coachId} style={{ display: "grid", gridTemplateColumns: "1fr 90px 90px", gap: 8, padding: "10px 0", borderTop: "1px solid var(--color-border-primary-default)", alignItems: "baseline" }}>
-                    <span style={{ font: "600 var(--text-subheadline-size) var(--font-family-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.name}</span>
-                    <span className="tabular" style={{ textAlign: "right", font: "800 var(--text-subheadline-size) var(--font-family-body)" }}>{fmt(c.revenue)}</span>
-                    <span className="tabular" style={{ textAlign: "right", font: "600 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-secondary-default)" }}>{fmt(c.payouts)}</span>
+                  <div className="bq-money-oversight-grid-2" key={c.coachId}>
+                    <span className="bq-money-oversight-text-3">{c.name}</span>
+                    <span className="tabular bq-money-oversight-title">{fmt(c.revenue)}</span>
+                    <span className="tabular bq-money-oversight-meta-2">{fmt(c.payouts)}</span>
                   </div>
                 ))}
               </div>
@@ -170,21 +171,20 @@ export function Oversight() {
 
           {profile.role === "dept_head" && (
             <button
-              className="bq-scale bq-card"
+              className="bq-scale bq-card bq-money-oversight-btn"
               onClick={() => navigate("/accounting")}
-              style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", padding: "16px 18px", marginBottom: 10, cursor: "pointer", textAlign: "left" }}
             >
-              <span style={{ width: 32, height: 32, flex: "none", borderRadius: "var(--radius-chip)", background: "var(--color-bg-fill-accent-default)", color: "var(--color-bg-fill-primary-active)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <span className="bq-money-oversight-row-3">
                 <Icon name="cash" size={16} />
               </span>
-              <span style={{ flex: 1, font: "700 var(--text-body-size) var(--font-family-body)" }}>Profit &amp; loss</span>
-              <span style={{ color: "var(--color-text-tertiary-default)", display: "flex" }}>
+              <span className="bq-money-oversight-title-2">Profit &amp; loss</span>
+              <span className="bq-fg-tertiary bq-flex">
                 <Icon name="chevron-right" size={16} />
               </span>
             </button>
           )}
 
-          <div style={{ textAlign: "center", font: "400 var(--text-caption-1-size)/1.5 var(--font-family-mono)", color: "var(--color-text-tertiary-default)", margin: "8px 0 18px" }}>
+          <div className="bq-money-oversight-meta-3">
             Revenue counts every sale when it happens — cash or card. Wallet top-ups and wallet-paid sales aren't counted twice.
           </div>
         </>

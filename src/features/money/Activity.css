@@ -1,0 +1,46 @@
+/* Styles for Activity.tsx. Tokens only; see DESIGN_SYSTEM.md. */
+
+.bq-money-activity-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 0;
+  background: none;
+  color: var(--color-text-secondary-default);
+  cursor: pointer;
+  font: 700 var(--text-subheadline-size) var(--font-family-body);
+  margin-bottom: 14px;
+  padding: 0;
+}
+
+.bq-money-activity-title {
+  font: 800 var(--text-title-1-size)/1.1 var(--font-family-body);
+  letter-spacing: -.02em;
+  margin-bottom: 12px;
+}
+
+.bq-money-activity-transactions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(140px,1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.bq-money-activity-transactions-title {
+  font: 800 22px/1.15 var(--font-family-body);
+  letter-spacing: -.02em;
+  margin-top: 4px;
+}
+
+.bq-money-activity-transactions-meta {
+  font: 400 var(--text-caption-1-size) var(--font-family-mono);
+  color: var(--color-text-tertiary-default);
+  margin-top: 4px;
+}
+
+.bq-money-activity-transactions-meta-2 {
+  text-align: center;
+  font: 400 var(--text-caption-1-size) var(--font-family-mono);
+  color: var(--color-text-tertiary-default);
+  margin: 14px 0;
+}

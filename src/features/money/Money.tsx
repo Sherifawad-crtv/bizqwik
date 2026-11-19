@@ -1,3 +1,4 @@
+import { cx } from "../../design-system/cx";
 import { api } from "../../shared/api/backend";
 import { useAsync } from "../../shared/api/useAsync";
 import { useSetHeader } from "../../shared/screen/header";
@@ -16,6 +17,7 @@ import { Icon } from "../../design-system/components/Icon";
 import { Card } from "../../design-system/components/Card";
 import { SectionHeader } from "../../design-system/components/SectionHeader";
 import { Tag } from "../../design-system/components/Tag";
+import "./Money.css";
 
 interface Txn { id: string; at: string; clientName: string | null; amount: number; what: string; method: string; refund: boolean; entry: ActivityEntry }
 
@@ -73,25 +75,25 @@ export function Money() {
   return (
     <div>
       <LocationSwitcher all isAll={allLocations} onAll={setAllLocations} />
-      <div style={{ display: "flex", justifyContent: "center", marginBottom: 18 }}>
+      <div className="bq-flex bq-justify-center bq-mb-18px">
         <Segmented value={range} onChange={setRange} options={RANGES} />
       </div>
       {!data ? (
         <Spinner />
       ) : (
         <>
-          <Card pad="none" style={{ padding: "22px 22px 20px" }}>
+          <Card className="bq-money-money-card" pad="none">
             <div className="bq-label">REVENUE · EGP</div>
-            <div style={{ font: "800 52px/1.05 var(--font-family-body)", letterSpacing: "-.03em", marginTop: 6 }}>{fmt(here ? data.pay.total : data.rev.totals.revenue)}</div>
-            <div style={{ font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-secondary-default)", marginTop: 6 }}>
+            <div className="bq-money-money-title">{fmt(here ? data.pay.total : data.rev.totals.revenue)}</div>
+            <div className="bq-money-money-meta">
               {here
                 ? `${data.pay.byMethod.reduce((a, m) => a + m.count, 0)} payment${data.pay.byMethod.reduce((a, m) => a + m.count, 0) === 1 ? "" : "s"} at ${current?.name ?? "this location"}`
                 : `${data.rev.activeSubscribers.total} active member${data.rev.activeSubscribers.total === 1 ? "" : "s"}`}
             </div>
             {data.pay.byMethod.length > 0 && (
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 14 }}>
+              <div className="bq-flex bq-wrap bq-gap-2 bq-mt-14px">
                 {data.pay.byMethod.map((m) => (
-                  <span key={m.method} style={{ font: "700 var(--text-caption-1-size) var(--font-family-mono)", borderRadius: 999, padding: "6px 12px", color: m.method === "instapay" ? "var(--color-bg-fill-primary-active)" : "var(--color-text-secondary-default)", background: m.method === "instapay" ? "var(--color-bg-fill-accent-default)" : "var(--color-bg-surface-secondary-default)" }}>
+                  <span className="bq-money-money-meta-2" key={m.method} style={{ color: m.method === "instapay" ? "var(--color-bg-fill-primary-active)" : "var(--color-text-secondary-default)", background: m.method === "instapay" ? "var(--color-bg-fill-accent-default)" : "var(--color-bg-surface-secondary-default)" }}>
                     {m.label} · {fmt(m.amount)}
                   </span>
                 ))}
@@ -100,17 +102,17 @@ export function Money() {
           </Card>
 
           <SectionHeader count={data.txns.length}>Transactions</SectionHeader>
-          <Card pad="none" style={{ overflow: "hidden", marginBottom: 12 }}>
+          <Card className="bq-overflow-hidden bq-mb-3" pad="none">
             {data.txns.slice(0, 100).map((t, i, arr) => (
-              <button key={t.id} className={`bq-plain bq-scale bq-listrow bq-listrow--compact ${!(i === arr.length - 1) ? "bq-listrow--divider" : ""}`} onClick={() => setOpen(t)} style={{ width: "100%", background: "none", cursor: "pointer", textAlign: "left" }}>
+              <button key={t.id} className={cx(`bq-plain bq-scale bq-listrow bq-listrow--compact ${!(i === arr.length - 1) ? "bq-listrow--divider" : ""}`, "bq-money-money-btn")} onClick={() => setOpen(t)}>
                 <div className="bq-grow">
-                  <div style={{ font: "700 var(--text-body-size) var(--font-family-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t.clientName ?? "Client"}</div>
-                  <div style={{ font: "400 var(--text-caption-1-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)" }}>
+                  <div className="bq-money-money-title-2">{t.clientName ?? "Client"}</div>
+                  <div className="bq-money-money-meta-3">
                     {t.what} · {formatDateTime(t.at)}
                   </div>
                 </div>
                 <Tag tone={t.method === "InstaPay" ? "primary" : "neutral"}>{t.method.toUpperCase()}</Tag>
-                <div style={{ flex: "none", minWidth: 64, textAlign: "right", font: "800 var(--text-body-size) var(--font-family-mono)", color: t.refund ? "var(--color-text-status-danger-default)" : "var(--color-text-primary-default)" }}>{t.refund ? "−" : ""}{fmt(t.amount)}</div>
+                <div className="bq-money-money-meta-4" style={{ color: t.refund ? "var(--color-text-status-danger-default)" : "var(--color-text-primary-default)" }}>{t.refund ? "−" : ""}{fmt(t.amount)}</div>
                 <Icon name="chevron-right" size={16} />
               </button>
             ))}
@@ -128,9 +130,9 @@ export function Money() {
 function Row({ k, v }: { k: string; v: string | null | undefined }) {
   if (!v) return null;
   return (
-    <div style={{ display: "flex", gap: 12, padding: "12px 0", borderBottom: "1px solid var(--color-border-primary-default)" }}>
-      <span style={{ width: 110, flex: "none", font: "700 var(--text-caption-2-size) var(--font-family-mono)", letterSpacing: ".08em", color: "var(--color-text-tertiary-default)", paddingTop: 2 }}>{k}</span>
-      <span style={{ flex: 1, minWidth: 0, font: "600 var(--text-body-size)/1.4 var(--font-family-body)", wordBreak: "break-word" }}>{v}</span>
+    <div className="bq-money-money-row-row">
+      <span className="bq-money-money-row-label">{k}</span>
+      <span className="bq-money-money-row-text">{v}</span>
     </div>
   );
 }
@@ -150,10 +152,10 @@ function TxnSheet({ txn, onClose }: { txn: Txn | null; onClose: () => void }) {
   return (
     <Sheet open={txn !== null} onClose={onClose}>
       <div className="bq-label">{t.refund ? "REFUND" : "PAYMENT"} · {t.method.toUpperCase()}</div>
-      <div style={{ font: "800 40px/1.1 var(--font-family-body)", letterSpacing: "-.02em", margin: "6px 0 2px", color: t.refund ? "var(--color-text-status-danger-default)" : "var(--color-text-primary-default)" }}>{t.refund ? "−" : ""}{fmt(t.amount)} <span style={{ font: "700 var(--text-callout-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)" }}>EGP</span></div>
-      <div style={{ font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-secondary-default)", marginBottom: 12 }}>{t.what}</div>
+      <div className="bq-money-money-txn-sheet-title" style={{ color: t.refund ? "var(--color-text-status-danger-default)" : "var(--color-text-primary-default)" }}>{t.refund ? "−" : ""}{fmt(t.amount)} <span className="bq-money-money-txn-sheet-meta">EGP</span></div>
+      <div className="bq-money-money-txn-sheet-meta-2">{t.what}</div>
 
-      <div style={{ font: "700 var(--text-caption-2-size) var(--font-family-mono)", letterSpacing: ".08em", color: "var(--color-text-tertiary-default)", margin: "12px 0 0" }}>TRANSACTION</div>
+      <div className="bq-money-money-txn-sheet-label">TRANSACTION</div>
       <Row k="WHAT" v={t.what} />
       <Row k="PAID VIA" v={t.method} />
       <Row k="DATE & TIME" v={formatDateTime(t.at)} />
@@ -161,13 +163,13 @@ function TxnSheet({ txn, onClose }: { txn: Txn | null; onClose: () => void }) {
       <Row k="NOTE" v={note} />
       <Row k="REFERENCE" v={t.id.slice(0, 8).toUpperCase()} />
 
-      <div style={{ font: "700 var(--text-caption-2-size) var(--font-family-mono)", letterSpacing: ".08em", color: "var(--color-text-tertiary-default)", margin: "18px 0 0" }}>CLIENT</div>
+      <div className="bq-money-money-txn-sheet-label-2">CLIENT</div>
       <Row k="NAME" v={t.clientName ?? "Unknown"} />
       <Row k="PHONE" v={client?.phone} />
       <Row k="EMAIL" v={client?.email} />
       <Row k="PLAN NOW" v={client ? (client.groupPlan ? `${client.groupPlan.name} · ends ${new Date(client.groupPlan.expiresAt).toLocaleDateString()}` : "No active plan") : null} />
 
-      <Button variant="quiet" fullWidth style={{ marginTop: 16 }} onClick={onClose}>Close</Button>
+      <Button className="bq-mt-4" variant="quiet" fullWidth onClick={onClose}>Close</Button>
     </Sheet>
   );
 }

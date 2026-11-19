@@ -12,6 +12,7 @@ import { Segmented } from "../../design-system/components/Segmented";
 import { useBackAction } from "../../shared/screen/floatingActions";
 import { useIsMobile } from "../../design-system/hooks/useIsMobile";
 import { ActivityPanel, Feed } from "../../shared/components/ActivityPanel";
+import "./Activity.css";
 
 
 export function Activity() {
@@ -28,14 +29,13 @@ export function Activity() {
   return (
     <div>
       {!isMobile && (
-      <button
+      <button className="bq-money-activity-btn"
         onClick={() => navigate(back)}
-        style={{ display: "inline-flex", alignItems: "center", gap: 4, border: 0, background: "none", color: "var(--color-text-secondary-default)", cursor: "pointer", font: "700 var(--text-subheadline-size) var(--font-family-body)", marginBottom: 14, padding: 0 }}
       >
         <Icon name="chevron-left" size={16} /> {backLabel}
       </button>
       )}
-      <div style={{ font: "800 var(--text-title-1-size)/1.1 var(--font-family-body)", letterSpacing: "-.02em", marginBottom: 12 }}>Activity</div>
+      <div className="bq-money-activity-title">Activity</div>
       <ActivityPanel />
     </div>
   );
@@ -60,7 +60,7 @@ export function Transactions() {
 
   return (
     <div>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(140px,1fr))", gap: 10, marginBottom: 16 }}>
+      <div className="bq-money-activity-transactions-grid">
         {(
           [
             ["SALES", sum("sales"), "Cash, card and wallet sales"],
@@ -70,12 +70,12 @@ export function Transactions() {
         ).map(([label, value, hint]) => (
           <div key={label} className="bq-card bq-card--sm">
             <div className="bq-label">{label}</div>
-            <div className="tabular" style={{ font: "800 22px/1.15 var(--font-family-body)", letterSpacing: "-.02em", marginTop: 4 }}>{egp(value)}</div>
-            <div style={{ font: "400 var(--text-caption-1-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)", marginTop: 4 }}>{hint}</div>
+            <div className="tabular bq-money-activity-transactions-title">{egp(value)}</div>
+            <div className="bq-money-activity-transactions-meta">{hint}</div>
           </div>
         ))}
       </div>
-      <div style={{ display: "flex", justifyContent: "center", marginBottom: 14 }}>
+      <div className="bq-flex bq-justify-center bq-mb-14px">
         <Segmented
           value={kind}
           onChange={setKind}
@@ -91,7 +91,7 @@ export function Transactions() {
       {error && <div  className="bq-error bq-rise">{error}</div>}
       {!loading && shown.length === 0 && <EmptyState icon="history" title="No transactions yet" body="Sales, refunds and wallet changes are listed here, newest first, as they happen." />}
       {shown.length > 0 && <Feed entries={shown} />}
-      {all.length >= 300 && <div style={{ textAlign: "center", font: "400 var(--text-caption-1-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)", margin: "14px 0" }}>Showing the latest 300 transactions.</div>}
+      {all.length >= 300 && <div className="bq-money-activity-transactions-meta-2">Showing the latest 300 transactions.</div>}
     </div>
   );
 }
