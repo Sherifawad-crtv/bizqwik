@@ -3,7 +3,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { mockBackend } from "./mocks";
-import type { Role } from "../src/lib/types";
+import type { Role } from "../src/shared/types";
 
 // "Nothing moved" guard for the architecture clean-up. Each main screen, per
 // role, on phone and desktop, is reduced to the computed styles of every

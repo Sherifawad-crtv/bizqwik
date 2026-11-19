@@ -1,5 +1,5 @@
 import type { Page, Route } from "@playwright/test";
-import type { Role } from "../src/lib/types";
+import type { Role } from "../src/shared/types";
 
 // Structurally-valid (unsigned) JWT so supabase-js accepts the mocked session.
 function fakeJwt(sub: string, email: string): string {

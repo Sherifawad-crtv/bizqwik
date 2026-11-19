@@ -1,5 +1,5 @@
 import { test, expect, type Page, type Route } from "@playwright/test";
-import type { Role } from "../src/lib/types";
+import type { Role } from "../src/shared/types";
 import { mockBackend } from "./mocks";
 
 // A brand-new org with nothing in it: every list, picker and sheet should say

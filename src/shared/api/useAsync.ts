@@ -1,0 +1,112 @@
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { getVersion, subscribe } from "./bus";
+import { useScreenActive } from "../screen/screenActive";
+
+interface AsyncState<T> {
+  data: T | null;
+  loading: boolean;
+  error: string | null;
+}
+
+// No caching: every screen always fetches fresh data from the server. The
+// only sharing is between identical requests made at the very same moment
+// (e.g. two parts of one screen asking for the client list), which get one
+// round trip and the same fresh answer.
+const inflight = new Map<string, Promise<unknown>>();
+export function clearAsyncCache() {
+  inflight.clear();
+}
+
+// How many screen loads are in progress, so pull-to-refresh can keep its
+// spinner up until the refresh has actually landed.
+let active = 0;
+// Every load ever started, so a waiter can tell "started and already done" from "not started yet".
+let started = 0;
+export async function waitForLoadsToFinish(maxMs = 10000) {
+  // Let the refreshed screens start their requests first.
+  await new Promise((r) => setTimeout(r, 50));
+  const until = Date.now() + maxMs;
+  while (active > 0 && Date.now() < until) await new Promise((r) => setTimeout(r, 80));
+}
+/** For the launch screen: wait for the first screen to start loading (it mounts
+ * just after sign-in is known — slower on a slow phone), then for those loads to
+ * finish. A screen that loads nothing lifts after `startWindow`. */
+export async function waitForFirstScreen(maxMs = 8000, startWindow = 1200) {
+  const before = started;
+  const startBy = Date.now() + startWindow;
+  while (started === before && Date.now() < startBy) await new Promise((r) => setTimeout(r, 25));
+  const until = Date.now() + maxMs;
+  while (active > 0 && Date.now() < until) await new Promise((r) => setTimeout(r, 50));
+}
+function keyOf(fn: () => unknown, deps: unknown[]): string {
+  try {
+    return `${fn.toString()}|${JSON.stringify(deps)}`;
+  } catch {
+    return `${fn.toString()}|${Math.random()}`;
+  }
+}
+
+/**
+ * The one shared data-fetching pattern for the app. Every screen reads its
+ * data through this hook instead of hand-rolling its own effect/fetch/state.
+ */
+export function useAsync<T>(
+  fn: () => Promise<T>,
+  deps: unknown[],
+): AsyncState<T> & { refetch: () => void; mutate: (updater: T | ((prev: T | null) => T)) => void } {
+  const key = keyOf(fn, deps);
+  const [state, setState] = useState<AsyncState<T>>({ data: null, loading: true, error: null });
+  const fnRef = useRef(fn);
+  fnRef.current = fn;
+  const [tick, setTick] = useState(0);
+  // any mutation anywhere in the app (settle, pay, addSession, …) bumps this,
+  // so every mounted useAsync revalidates together — no stale screens.
+  const dataVersion = useSyncExternalStore(subscribe, getVersion, getVersion);
+
+  const active_ = useScreenActive();
+  // Whether this screen has loaded at least once (a hidden screen that never
+  // loaded still must, once).
+  const lastFlight = useRef("");
+
+  useEffect(() => {
+    const flight = `${key}@${dataVersion}@${tick}`;
+    // A screen kept underneath (or leaving) doesn't re-request anything.
+    if (!active_ && lastFlight.current) return;
+    lastFlight.current = flight;
+    let alive = true;
+    setState((s) => ({ ...s, loading: true, error: null }));
+    let req = inflight.get(flight) as Promise<T> | undefined;
+    if (!req) {
+      req = fnRef.current();
+      inflight.set(flight, req);
+      active++;
+      started++;
+      const done = () => {
+        inflight.delete(flight);
+        active--;
+      };
+      req.then(done, done);
+    }
+    req
+      .then((data) => {
+        if (alive) setState({ data, loading: false, error: null });
+      })
+      .catch((err: unknown) => {
+        if (alive) setState({ data: null, loading: false, error: err instanceof Error ? err.message : String(err) });
+      });
+    return () => {
+      alive = false;
+    };
+    // Deliberate: `fn` is read through a ref; the caller's `deps` decide when to re-run.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [...deps, tick, dataVersion, active_]);
+
+  const refetch = useCallback(() => setTick((t) => t + 1), []);
+  // Lets a caller update the cached data immediately (an optimistic UI
+  // change) without waiting on a round-trip. The next refetch — triggered
+  // by the mutation's own bump() — reconciles it with the real server data.
+  const mutate = useCallback((updater: T | ((prev: T | null) => T)) => {
+    setState((s) => ({ ...s, data: typeof updater === "function" ? (updater as (prev: T | null) => T)(s.data) : updater }));
+  }, []);
+  return { ...state, refetch, mutate };
+}

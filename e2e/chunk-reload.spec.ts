@@ -1,12 +1,12 @@
 import { test, expect, type Page } from "@playwright/test";
 import { mockBackend } from "./mocks";
-import { isChunkLoadError } from "../src/lib/chunkReload";
+import { isChunkLoadError } from "../src/app/chunkReload";
 
 // After an update, an app that was already open asks for a screen's file that no
 // longer exists, and the server answers with the home page (text/html). The app
 // should reload once and carry on — and never loop.
 
-const WELCOME_FILE = "**/routes/Welcome.tsx*";
+const WELCOME_FILE = "**/features/auth/Welcome.tsx*";
 
 async function freshVisitor(page: Page) {
   await mockBackend(page, "dept_head", {}, false);

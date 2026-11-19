@@ -1,53 +1,126 @@
 # Bizqwik design system
 
 **Read this before building or changing any screen.** Every piece of UI comes
-from the library below. If what you need isn't here, you build it as a library
-component and add it to this file in the same change (see
-[Adding a component](#adding-a-component)). `npm run check` enforces this.
+from the library below, every value from a token. `npm run check` enforces it.
 
 The app follows Apple's Human Interface Guidelines for behaviour and motion
 (not for looks): iOS-style transitions, press feedback, sheets and tab bar.
 
 ---
 
-## 1. Foundations
+## 0. Where things live
 
-All values are tokens in `src/index.css` (`:root`). Never type a raw value that a
-token covers.
+```
+src/
+  app/            the frame: routes (App), Home, Shell, BottomNav, Sidebar,
+                  RouteTransition, PullToRefresh, Splash, Fab, guards
+  design-system/
+    tokens/       tokens.json  ← the ONLY place design values are edited
+                  tokens.css / tokens.ts  ← generated (npm run tokens), never edit
+    components/   the library: brand-agnostic building blocks (Card, Button, Sheet…)
+    motion/       motion scale (motion.ts), useTween, useReducedMotion
+    hooks/        device hooks (useIsMobile, useKeyboardInset, useSticky)
+    theme.ts      setBrandColor(): recolour the app from one hex
+  shared/
+    components/   business pieces used by two or more features (PlanPill, ClassSheet…)
+    api/          backend client, useAsync, Supabase client
+    screen/       screen plumbing: useSetHeader, floating actions, Back, nav
+    …             types, auth, format, months, locations, other cross-feature code
+  features/       one folder per business area: auth, account, coaches, clients,
+                  frontdesk, catalog, classes, money, accounting, manage, ops
+```
 
-### Colour
+**Import rules** (`npm run ds` fails otherwise):
+- A feature uses `design-system/` and `shared/`, and its own folder. Never another
+  feature, never `app/`.
+- `shared/` never uses `features/` or `app/`.
+- `design-system/` never uses `features/`, `app/` or `shared/components/`.
+- `app/` may use anything (it puts the screens together).
+
+**Where a new piece goes:**
+- Likely to be used on more than one screen or by more than one feature → the
+  library (`design-system/components/`) if it's a generic building block, or
+  `shared/components/` if it's a business piece. Add it to the directory below in
+  the same change.
+- Otherwise it stays in its feature folder. When a second feature needs it, it's
+  audited and moved up (never imported across features).
+
+---
+
+## 1. Foundations (tokens)
+
+All values come from `src/design-system/tokens/tokens.json` (W3C Design Tokens
+format). Style Dictionary generates `tokens.css` (CSS variables) and `tokens.ts`
+(constants for code). **Never type a raw value that a token covers**: no hex, no
+rgba, no hand-picked shadow.
+
+Two layers:
+- **Primitives** (`--primitive-color-brand-500`, `--primitive-color-neutral-100`…):
+  raw values with no meaning. **Screens never use them.**
+- **Semantic tokens**: say what a value is for and point at primitives. This is
+  what screens use.
+
+### Colour: `color-[ui element]-[priority]-[state]`
+
+| Part | Values |
+|---|---|
+| UI element | `bg-canvas` (page), `bg-surface` (cards, sheets), `bg-fill` (buttons, controls, tints), `bg-overlay` (scrims), `bg-media` (camera), `bg-qr`, `text`, `icon`, `border`, `mask` |
+| Priority | `primary` · `secondary` · `tertiary` · `accent` (brand) · `on-fill` / `on-media` (on top of a fill / the camera) · `success` `warning` `danger` `info` · `status-paid` `status-logging` `status-settled` `status-frozen` `status-danger` |
+| State | `default` · `active` (pressed) · `selected` · `hover` · `disabled` (+ a few variants: `strong`, `translucent`, `glass`) |
+
+The state is always written, even when it's `default`.
 
 | Token | Use |
 |---|---|
-| `--paper` | page background |
-| `--surface` | cards, sheets, the floating containers |
-| `--sunken` | inner fills: segmented tracks, search fields, neutral tags |
-| `--line` | dividers and field outlines (cards have **no** stroke) |
-| `--ink`, `--ink-muted`, `--ink-faint` | text: primary, secondary, tertiary |
-| `--primary`, `--primary-pressed`, `--primary-tint`, `--primary-light` | brand violet: buttons, active states, chart bars |
-| `--paid-*`, `--logging-*`, `--settled-*`, `--danger-*`, `--frozen-*` (`-fg` / `-bg`) | status pairs, used through **tones** (below) |
+| `--color-bg-canvas-default` | page background |
+| `--color-bg-canvas-translucent` / `-translucent-strong` | title bar / sticky header over scrolling content |
+| `--color-bg-surface-primary-default` | cards, sheets, floating containers |
+| `--color-bg-surface-secondary-default` | inner fills: segmented tracks, search fields, neutral tags |
+| `--color-bg-surface-glass-default` | frosted tab bar |
+| `--color-bg-fill-primary-default` / `-active` | primary button, active control, chart bars / pressed |
+| `--color-bg-fill-accent-default` / `-selected` / `-active` / `-strong` | soft brand tints / selected item / highlighted band / decorative light brand |
+| `--color-bg-overlay-default` / `-dim` / `-photo` | sheet scrim / screen underneath a push / fade over a photo |
+| `--color-text-primary-default` / `secondary` / `tertiary` | text: primary, secondary, tertiary (icons: `--color-icon-*`) |
+| `--color-text-on-fill-default` | text on a primary fill |
+| `--color-text-accent-default` / `-strong` | brand-coloured text / text on the light brand fill |
+| `--color-border-primary-default` | dividers and field outlines (cards have **no** stroke) |
+
+**Status colours, both ways:** general names (`success`, `warning`, `info`,
+`danger`, `accent`) and business names that point at them (`status-paid` →
+success, `status-logging` → warning, `status-frozen` → info, `status-settled` →
+accent, `status-danger` → danger). Use the business name where the screen means
+that business state.
 
 **Tones** (`bq-tone-<name>` sets `--tone-fg` / `--tone-bg`): `neutral`, `primary`,
 `logging`, `settled`, `paid`, `danger`, `frozen`. Tag and StatusBadge take a tone.
 
-### Type
+**Brand theme:** every brand colour points at `--primitive-color-brand-*`.
+`setBrandColor("#hex")` (`design-system/theme.ts`) recolours the whole app;
+`setBrandColor(null)` restores Bizqwik violet. (Not wired to gym data yet.)
 
-Fonts: `--font-body` (Urbanist) for words, `--font-mono` (Space Mono) for labels,
-meta and figures.
+### Text styles: Apple's role names, Bizqwik's sizes
 
-Sizes: `--fs-caption` 11 · `--fs-small` 12 · `--fs-note` 13 · `--fs-body-sm` 14 ·
-`--fs-body` 15 · `--fs-base` 16 · `--fs-title-sm` 20 · `--fs-title` 26 ·
-`--fs-display` 30.
+Screens pick a role, never a pixel size. Each role has `--text-<role>-size` and
+`--text-<role>-weight`, and a class `bq-text-<role>`.
 
-| Class | Use |
-|---|---|
-| `bq-label` | small uppercase mono labels (MONTH TOTAL · EGP) |
-| `bq-meta` | secondary mono text (13) |
-| `bq-h3` | row titles (16 bold) |
-| `bq-h2` | section titles (20 bold) |
-| `bq-title` | page titles (26 extra-bold) |
-| `bq-stat-xl / lg / md / sm` | big numbers: 56 / 30 / 24 / 20 |
-| `tabular` | figures that must not change width |
+| Role | Size / weight | Class | Typical use |
+|---|---|---|---|
+| Large Title | 30 / 800 | `bq-text-large-title` | the biggest heading |
+| Title 1 | 26 / 800 | `bq-text-title-1`, `bq-title` (page title with spacing) | page titles |
+| Title 2 | 20 / 700 | `bq-text-title-2`, `bq-h2` | section titles |
+| Headline | 16 / 700 | `bq-text-headline`, `bq-h3` | row titles |
+| Callout | 16 / 500 | `bq-text-callout` | larger body text |
+| Body | 15 / 500 | `bq-text-body` | body text |
+| Subheadline | 14 / 500 | `bq-text-subheadline` | secondary lines |
+| Footnote | 13 / 500 | `bq-text-footnote` | small print |
+| Caption 1 / 2 | 12 / 11, 500 | `bq-text-caption-1` / `-2` | captions |
+| Label | 11 / 700 mono, uppercase | `bq-label` | MONTH TOTAL · EGP |
+| Meta | 13 / 400 mono | `bq-meta` | secondary mono text |
+| Stat XL / LG / MD / SM | 56 / 30 / 24 / 20, 800 | `bq-stat-xl / lg / md / sm` | big numbers |
+
+Fonts: `--font-family-body` (Urbanist) for words, `--font-family-mono` (Space
+Mono) for labels, meta and figures. `tabular` for figures that must not change
+width.
 
 ### Spacing
 
@@ -55,44 +128,52 @@ Sizes: `--fs-caption` 11 · `--fs-small` 12 · `--fs-note` 13 · `--fs-body-sm` 
 `--space-6` 24 · `--space-8` 32. Page side gutter is 16; cards pad 20 (`md`) or
 14×16 (`sm`).
 
-### Corner radius: one value per kind, nested shapes follow outer = inner + padding
+### Corner radius: one value per kind; nested shapes follow outer = inner + padding
 
 | Token | px | Kind |
 |---|---|---|
-| `--r-card` | 28 | every surface on a page: cards, tiles, charts, hero, list cards |
-| `--r-sheet` | 40 | bottom sheets (20 padding inside) |
-| `--r-item` | 20 | what sits in a sheet or stands alone as an item: fields, notices, thumbnails (40 − 20) |
-| `--r-chip` | 8 | small tags, icon boxes inside cards, calendar blocks (28 − 20) |
-| `--r-button` | 24 | buttons (a 48px button is a full pill) |
-| `--r-float` | 32 | floating action container (button 24 + padding 8) |
-| `999` | | pills, circles, avatars, switches, the tab bar (circle radius + gap) |
+| `--radius-card` | 28 | every surface on a page: cards, tiles, charts, hero, list cards |
+| `--radius-sheet` | 40 | bottom sheets (20 padding inside) |
+| `--radius-item` | 20 | fields, notices, thumbnails inside a sheet or standing alone (40 − 20) |
+| `--radius-chip` | 8 | small tags, icon boxes inside cards, calendar blocks (28 − 20) |
+| `--radius-button` | 24 | buttons (a 48px button is a full pill) |
+| `--radius-float` | 32 | floating action container (button 24 + padding 8) |
+| `--radius-full` | 999 | pills, circles, avatars, switches, the tab bar |
 
-### Motion (`src/lib/motion.ts`, `--dur-*`, `--ease-*`)
+### Motion (`--duration-*`, `--ease-*`; in code `design-system/motion/motion.ts`)
 
 Nothing moves for more than **350ms** (`npm run motion` fails otherwise). One
-curve (`EASE`, the iOS standard) and one gentle `SPRING` for confirmations.
+curve (`--ease-standard`, the iOS standard) and one gentle `--ease-spring` for
+confirmations.
 
-| Name | ms | For |
+| Token / constant | ms | For |
 |---|---|---|
-| `QUICK_MS` / `--dur-quick` | 150 | fades, colour changes, presses, tooltips, titles |
-| `STANDARD_MS` / `--dur-standard` | 250 | things appearing: banners, rows, content |
-| `CONTROL_MS` / `--dur-control` | 300 | controls that travel: switches, sliding pills, reveals |
-| `SCREEN_MS` / `--dur-screen` | 340 | pushing into / backing out of a screen, sheets opening |
-| `SHEET_OUT_MS` | 280 | sheets closing |
+| `--duration-quick` / `QUICK_MS` | 150 | fades, colour changes, presses, tooltips, titles |
+| `--duration-standard` / `STANDARD_MS` | 250 | things appearing: banners, rows, content |
+| `--duration-control` / `CONTROL_MS` | 300 | controls that travel: switches, sliding pills, reveals |
+| `--duration-screen` / `SCREEN_MS` | 340 | pushing into / backing out of a screen, sheets opening |
+| `--duration-sheet-out` / `SHEET_OUT_MS` | 280 | sheets closing |
 
 Build transitions with `tr(props, ms)`. Under Reduce Motion, movement becomes a
 fade (`useReducedMotion`), never nothing.
 
 ### Elevation
 
-`--shadow-float` for things that float over the page (sheets, tab bar, floating
-actions, FAB). Cards don't have shadows.
+| Token | For |
+|---|---|
+| `--shadow-float` | things that float over the page: sheets, tab bar, floating actions |
+| `--shadow-push` | the edge of a screen sliding in |
+| `--shadow-raised` | small floating control (pull-to-refresh) |
+| `--shadow-lifted` | a card picked up / floating while scrolling |
+| `--shadow-thumb` | switch knob |
+| `--shadow-fab` / `--shadow-cta` | brand glow under the FAB / a big call to action |
+| `--shadow-glass-highlight` | inner top highlight of the frosted tab bar |
+
+Cards don't have shadows.
 
 ---
 
-## 2. Component directory: "I need… → use…"
-
-All in `src/components/` unless noted.
+## 2. Library: "I need… → use…" (`src/design-system/components/`)
 
 ### Surfaces and layout
 
@@ -103,13 +184,12 @@ All in `src/components/` unless noted.
 | A list of rows | `<Card pad="none" clip>` + `ListRow` (`divider`, `density="compact"`) or `listRowClass()` | last row: `divider={false}` |
 | A list whose rows are added / removed | wrap rows in `MotionList` | rows grow in and fold away |
 | A section heading (title · count · action) | `SectionHeader` | |
-| A screen's title and Back | `useSetHeader({ kicker, title })` (+ `useBackAction(fn)` on sub-pages) | the Shell draws the bar |
-| A sub-page's main buttons | `useFloatingActions(<Button…/>)` | they float in the tab bar's place |
+| A screen's title and Back | `useSetHeader({ kicker, title })` (+ `useBackAction(fn)` on sub-pages) | `shared/screen/`; the Shell draws the bar |
+| A sub-page's main buttons | `useFloatingActions(<Button…/>)` | `shared/screen/`; they float in the tab bar's place |
 | A collapsible section | `Reveal` | |
 | Loading: whole screen / part of one | `Spinner` (skeleton) / `InlineSpinner` | content fades in automatically |
 | Nothing to show yet | `EmptyState` | |
 | A form or action error | `ErrorBanner` (or class `bq-error`) | |
-| A locked-month notice | `LockedBanner` | |
 
 ### Controls
 
@@ -125,8 +205,6 @@ All in `src/components/` unless noted.
 | A text / number field | `TextField` | from `FormField.tsx` |
 | A choice from a list | `SelectField` | from `FormField.tsx` |
 | A date | `DateField` · a time: `TimeWheelField` | |
-| A payment method | `PaymentSelect` / `PaymentCards` | |
-| A photo for a class | `ClassPhotoField` | |
 | A QR scan | `QrScanner` | |
 
 ### Sheets and confirmation
@@ -143,34 +221,56 @@ All in `src/components/` unless noted.
 |---|---|---|
 | A big money figure that changes | `Num` (inside a `bq-stat-*`) | glides to new values |
 | The main figure + stats of a screen | `MoneyHero` | |
-| A KPI tile (icon · label · number · change) | `KpiTile` + `Delta` | `src/components/KpiTile.tsx` |
+| A KPI tile (icon · label · number · change) | `KpiTile` + `Delta` | |
 | A bar chart | `BarChart`; money over months: `RevenueChart` | `RevenueChart` / `ShareBars` in `MoneyCharts.tsx` |
 | Share of a total as bars | `ShareBars` | |
 | A chart's "no data yet" | `Empty` | in `KpiTile.tsx` |
-| A desktop data table | `RollupTable` | |
 | A small square label | `Tag` (`tone`) | Kids, location, OFF SALE |
-| A state with a dot | `StatusBadge` (`tone`); ready-made: `StatePill`, `PackageStatusPill`, `PlanPill`, ops `StatusPill` | |
-| A person | `Avatar` (`HomeAvatar` for the home greeting) | |
+| A state with a dot | `StatusBadge` (`tone`) | ready-made ones in shared (below) |
+| A person | `Avatar` | |
 | An icon | `Icon` | Solar icons, `name` from `IconName` |
 
-### App frame (used by the Shell, not by screens)
+---
+
+## 3. Shared business components (`src/shared/components/`)
+
+Used by two or more features. Not generic enough for the library.
+
+| I need | Use |
+|---|---|
+| A coach month's state | `StatePill` |
+| A PT package's state | `PackageStatusPill` |
+| A client's plan status (front desk / clients) | `PlanPill` |
+| The home greeting with avatar | `HomeAvatar` |
+| A payment method choice | `PaymentSelect` / `PaymentCards` |
+| A class photo picker | `ClassPhotoField` |
+| Create / edit a class | `ClassSheet` (form helpers in `shared/classForm.ts`) |
+| Create / edit a weekly class series | `SeriesSheet` |
+| A class roster | `ClassRosterSheet` |
+| Add a session / a day's sessions | `AddSessionSheet`, `DaySessionsSheet`, `DayList` |
+| Invite a team member | `InviteFlow`, `InviteSheet` |
+| Scan a member's QR (coach) | `ScanFlow` |
+| The activity feed / logs | `ActivityPanel`, `Feed` |
+
+Feature-only pieces (e.g. `LockedBanner`, `RollupTable` in `features/coaches/`)
+stay in their feature until a second feature needs them.
+
+### App frame (used by `app/`, not by screens)
 
 `Shell`, `BottomNav`, `Sidebar`, `RouteTransition`, `PullToRefresh`, `Fab`
-(`fab/`), `Splash` / `LaunchGate`, `DesktopAuth`. Screen-specific pieces that are
-still shared live here too: `AddSessionSheet`, `DaySessionsSheet`, `DayList`,
-`ClassRosterSheet`.
+(`fab/`), `Splash` / `LaunchGate`.
 
 ### Classes (for elements that must stay a plain element)
 
 `bq-card(--sm/md/lg/clip)`, `bq-listrow(--compact/--divider)`, `bq-plain`,
 `bq-tag`, `bq-badge`, `bq-tone-*`, `bq-iconbtn(--danger/neutral/plain)`,
-`bq-chip`, `bq-stat-xl/lg/md/sm`, `bq-label`, `bq-meta`, `bq-title`, `bq-h2`,
-`bq-h3`, `bq-grow`, `bq-stack`, `bq-panel`, `bq-error`, `bq-btn*`, press:
-`bq-scale`, `bq-still`, `bq-hit`, `bq-row`.
+`bq-chip`, `bq-stat-xl/lg/md/sm`, `bq-text-*`, `bq-label`, `bq-meta`, `bq-title`,
+`bq-h2`, `bq-h3`, `bq-grow`, `bq-stack`, `bq-panel`, `bq-error`, `bq-btn*`,
+press: `bq-scale`, `bq-still`, `bq-hit`, `bq-row`.
 
 ---
 
-## 3. Screen patterns
+## 4. Screen patterns
 
 - **Tab screens** have the tab bar (+ FAB). **Sub-pages** (anything opened from a
   tab) have no tab bar: a sticky **Back** on the title's line, and their main
@@ -183,17 +283,18 @@ still shared live here too: `AddSessionSheet`, `DaySessionsSheet`, `DayList`,
 
 ## Adding a component
 
-When a screen needs something the directory doesn't have:
-
 1. **Check again**: can an existing component take a prop instead? Prefer that.
-2. **Build it in `src/components/`** as its own file, using only tokens (colour,
-   type, spacing, radius, motion) and existing primitives. Put any CSS in the
-   "Library components" section of `src/index.css` as `bq-*` classes.
-3. **Add a row to the directory above** (what it's for, the name, its key props).
-4. Use it from the screen; never build the same thing inline "just this once".
-5. Add or extend an e2e test if it has behaviour.
-6. Run `npm run check`. It fails if a component in `src/components/` is missing
-   from this file, or if a screen hand-builds something the library covers
-   (`npm run ds` lists exactly what and where).
+2. **Decide where it lives** (section 0): library, shared, or its feature.
+3. **Build it as its own file** using only tokens and existing primitives. Put
+   any CSS in `src/index.css` as `bq-*` classes.
+4. **Library or shared? Add a row to the directory above** (what it's for, the
+   name, its key props).
+5. Use it from the screen; never build the same thing inline "just this once".
+6. Add or extend an e2e test if it has behaviour.
+7. Run `npm run check`. It fails if a library/shared component is missing from
+   this file, a screen hand-builds something the library covers, a raw colour
+   appears, or an import crosses the rules in section 0.
 
-Removing or renaming a component: update this file in the same change.
+Changing a design value: edit `tokens.json`, run `npm run tokens`, commit the
+generated files too. Removing or renaming a component: update this file in the
+same change.

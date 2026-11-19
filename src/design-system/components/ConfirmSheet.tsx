@@ -1,0 +1,65 @@
+import { useState } from "react";
+import { Sheet } from "./Sheet";
+import { Button } from "./Button";
+import { SheetSuccessIcon } from "./SheetSuccessIcon";
+import { useSheetSuccess } from "./useSheetSuccess";
+
+interface ConfirmSheetProps {
+  open: boolean;
+  onClose: () => void;
+  kicker: string;
+  title: string;
+  sub?: string;
+  confirmLabel: string;
+  danger?: boolean;
+  onConfirm: () => Promise<void>;
+}
+
+export function ConfirmSheet({ open, onClose, kicker, title, sub, confirmLabel, danger, onConfirm }: ConfirmSheetProps) {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const { confirmed, iconIn, showSuccess, cancelPending } = useSheetSuccess(open, onClose);
+
+  const go = async () => {
+    setBusy(true);
+    setError(null);
+    try {
+      await onConfirm();
+      showSuccess();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleClose = () => {
+    cancelPending();
+    onClose();
+  };
+
+  return (
+    <Sheet open={open} onClose={handleClose}>
+      {confirmed ? (
+        <SheetSuccessIcon label={confirmLabel} iconIn={iconIn} />
+      ) : (
+        <>
+          <div className="bq-label">{kicker}</div>
+          <div style={{ font: "800 var(--text-title-1-size)/1.2 var(--font-family-body)", letterSpacing: "-.02em", margin: "4px 0 4px" }}>{title}</div>
+          {sub && <div style={{ font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-secondary-default)", marginBottom: 16 }}>{sub}</div>}
+          {error && (
+            <div className="bq-rise" style={{ marginBottom: 12, font: "600 var(--text-footnote-size)/1.5 var(--font-family-body)", color: "var(--color-text-status-danger-default)", background: "var(--color-bg-fill-status-danger-default)", borderRadius: "var(--radius-item)", padding: "10px 14px" }}>
+              {error}
+            </div>
+          )}
+          <Button variant={danger ? "danger" : "primary"} fullWidth size="lg" disabled={busy} onClick={go}>
+            {busy ? "Working…" : confirmLabel}
+          </Button>
+          <Button variant="quiet" fullWidth style={{ marginTop: 8 }} onClick={handleClose} disabled={busy}>
+            Cancel
+          </Button>
+        </>
+      )}
+    </Sheet>
+  );
+}

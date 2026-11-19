@@ -1,0 +1,84 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../shared/auth";
+import { useSetHeader } from "../../shared/screen/header";
+import { auth } from "../../shared/api/backend";
+import { Button } from "../../design-system/components/Button";
+import { TextField } from "../../design-system/components/FormField";
+
+export function AccountPassword() {
+  const { profile } = useAuth();
+  const navigate = useNavigate();
+  const [current, setCurrent] = useState("");
+  const [next, setNext] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  useSetHeader({ kicker: "ACCOUNT", title: "Change password" }, []);
+
+  if (!profile) return null;
+
+  const save = async () => {
+    setError(null);
+    if (next.length < 8) {
+      setError("New password must be at least 8 characters.");
+      return;
+    }
+    if (next !== confirm) {
+      setError("New passwords don't match.");
+      return;
+    }
+    setBusy(true);
+    try {
+      // Re-verify the current password before changing anything — the update
+      // itself only needs the active session, but confirming first stops
+      // anyone with a briefly-unlocked device from silently taking over.
+      await auth.signInWithPassword(profile.email, current);
+      await auth.updatePassword(next);
+      navigate("/account", { replace: true });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div>
+      <div className="bq-card bq-card--md">
+        <div className="bq-stack">
+          <TextField
+            label="CURRENT PASSWORD"
+            type="password"
+            autoComplete="current-password"
+            value={current}
+            onChange={(e) => setCurrent(e.target.value)}
+          />
+          <TextField
+            label="NEW PASSWORD"
+            type="password"
+            autoComplete="new-password"
+            value={next}
+            onChange={(e) => setNext(e.target.value)}
+          />
+          <TextField
+            label="CONFIRM NEW PASSWORD"
+            type="password"
+            autoComplete="new-password"
+            value={confirm}
+            onChange={(e) => setConfirm(e.target.value)}
+          />
+        </div>
+        {error && (
+          <div  className="bq-error bq-error--spaced bq-rise">
+            {error}
+          </div>
+        )}
+        <Button fullWidth size="lg" style={{ marginTop: 16 }} disabled={busy} onClick={save}>
+          {busy ? "Saving…" : "Save password"}
+        </Button>
+      </div>
+    </div>
+  );
+}

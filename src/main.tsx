@@ -2,10 +2,10 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './design-system/tokens/tokens.css'
 import './index.css'
-import App from './App.tsx'
-import { startAutoUpdate } from './lib/autoUpdate'
-import { installNativeFeel } from './lib/native'
-import { startAnalytics } from './lib/analytics'
+import App from './app/App.tsx'
+import { startAutoUpdate } from './app/autoUpdate'
+import { installNativeFeel } from './shared/native'
+import { startAnalytics } from './shared/analytics'
 
 // The camera (coach QR scanning) only works on a secure, top-level page. If the
 // app is ever reached over plain http, or framed by another site (e.g. a domain

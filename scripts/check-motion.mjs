@@ -1,5 +1,5 @@
 // Fails when any transition or animation in the app is longer than 350ms, or
-// is typed by hand instead of using the motion scale (src/lib/motion.ts and the
+// is typed by hand instead of using the motion scale (src/design-system/motion/motion.ts and the
 // --dur-* tokens). Loops (spinners, skeleton pulses) are not motions. Run with:
 //   npm run motion
 import { readFileSync, readdirSync, statSync } from "node:fs";

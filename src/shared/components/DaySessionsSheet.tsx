@@ -1,0 +1,142 @@
+import { useState } from "react";
+import { Sheet } from "../../design-system/components/Sheet";
+import { Button } from "../../design-system/components/Button";
+import { DateField } from "../../design-system/components/DateField";
+import { ConfirmSheet } from "../../design-system/components/ConfirmSheet";
+import { useLatch } from "../useLatch";
+import { api } from "../api/backend";
+import type { Session } from "../types";
+import { dateLabelFull, daysInMonth, egp, isoDate, sessionStamp } from "../format";
+import { IconButton } from "../../design-system/components/IconButton";
+
+interface DaySessionsSheetProps {
+  open: boolean;
+  onClose: () => void;
+  coachId: string;
+  month: string;
+  date: string;
+  sessions: Session[];
+  rate: number;
+  editable: boolean;
+  /** Called synchronously right when "add another" is tapped, before the
+   * network call — lets the caller show the new session instantly. */
+  onOptimisticAdd?: (date: string) => void;
+  /** A coach's own day: sessions come only from scanning the coaches' QR, so
+   * no adding or re-dating here — only removing a mistaken one. */
+  scanOnly?: boolean;
+}
+
+export function DaySessionsSheet({ open, onClose, coachId, month, date, sessions, rate, editable, onOptimisticAdd, scanOnly = false }: DaySessionsSheetProps) {
+  const [busyId, setBusyId] = useState<string | null>(null);
+  const [movingId, setMovingId] = useState<string | null>(null);
+  const [removingId, setRemovingId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const min = isoDate(month, 1);
+  const max = isoDate(month, daysInMonth(month));
+
+  // The parent clears its "selected day" state as soon as onClose fires, so
+  // date/sessions go blank while this sheet is still playing its close
+  // animation — latch them so the content doesn't glitch to "undefined" /
+  // empty mid-exit.
+  const shown = useLatch(date ? { date, sessions } : null);
+
+  const move = async (id: string, newDate: string) => {
+    setBusyId(id);
+    setError(null);
+    try {
+      await api.editSession(id, coachId, month, newDate);
+      setMovingId(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Couldn't move that session.");
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const addAnother = async () => {
+    setError(null);
+    onOptimisticAdd?.(date);
+    try {
+      await api.addSession(coachId, month, date);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Couldn't add a session.");
+    }
+  };
+
+  // computed against the raw prop (not `shown`) so it stays correct even on
+  // the render where `shown` hasn't caught up yet; useLatch itself must run
+  // unconditionally on every render, before any early return below.
+  const removingIndex = sessions.findIndex((s) => s.id === removingId);
+  const shownRemovingIndex = useLatch(removingId ? removingIndex : null);
+
+  if (!shown) return null;
+  const { sessions: shownSessions } = shown;
+
+  return (
+    <>
+      <Sheet open={open} onClose={onClose}>
+        <div className="bq-label">{editable ? "EDIT DAY" : "DAY"}</div>
+        <div className="bq-stat-lg" style={{ margin: "4px 0 4px" }}>{dateLabelFull(shown.date)}</div>
+        <div style={{ font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-secondary-default)", marginBottom: 16 }}>
+          {shownSessions.length} {shownSessions.length === 1 ? "session" : "sessions"} · {egp(shownSessions.length * rate)}
+        </div>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          {shownSessions.map((s, i) => (
+            <div key={s.id} style={{ background: "var(--color-bg-surface-secondary-default)", border: "1px solid var(--color-border-primary-default)", borderRadius: "var(--radius-item)", padding: "10px 14px" }}>
+              {movingId === s.id ? (
+                <DateField value={s.date} min={min} max={max} onChange={(d) => move(s.id, d)} />
+              ) : (
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <span style={{ font: "600 var(--text-body-size) var(--font-family-body)", color: "var(--color-text-primary-default)" }}>Session {i + 1}</span>
+                  <span style={{ font: "700 10px var(--font-family-mono)", letterSpacing: ".08em", color: "var(--color-text-tertiary-default)" }}>{s.source === "qr" ? "QR" : "MANUAL"}</span>
+                  {(() => {
+                    const st = sessionStamp(s);
+                    return st ? <span data-testid="session-time" style={{ font: "600 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-secondary-default)", whiteSpace: "nowrap" }}>{st.text}</span> : null;
+                  })()}
+                  {editable && (
+                    <>
+                      {!scanOnly && (
+                      <IconButton icon="pencil" label="Change date" disabled={busyId === s.id} style={{ marginLeft: "auto" }} onClick={() => setMovingId(s.id)} />
+                      )}
+                      <IconButton icon="trash" label="Remove session" tone="danger" disabled={busyId === s.id} style={{ marginLeft: scanOnly ? "auto" : undefined }} onClick={() => setRemovingId(s.id)} />
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {error && (
+          <div  className="bq-error bq-error--spaced bq-rise">
+            {error}
+          </div>
+        )}
+
+        {editable && !scanOnly && (
+          <Button variant="secondary" fullWidth style={{ marginTop: 14 }} onClick={addAnother}>
+            + Add another session this date
+          </Button>
+        )}
+        <Button variant="quiet" fullWidth style={{ marginTop: 8 }} onClick={onClose}>
+          Close
+        </Button>
+      </Sheet>
+
+      <ConfirmSheet
+        open={!!removingId}
+        onClose={() => setRemovingId(null)}
+        kicker="REMOVE SESSION"
+        title={`Remove session ${(shownRemovingIndex ?? -1) + 1}?`}
+        sub="This can't be undone."
+        confirmLabel="Remove session"
+        danger
+        onConfirm={async () => {
+          if (!removingId) return;
+          await api.removeSession(removingId, coachId, month);
+        }}
+      />
+    </>
+  );
+}

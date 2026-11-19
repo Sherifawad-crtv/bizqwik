@@ -1,6 +1,6 @@
 import { test, expect, type Page } from "@playwright/test";
 import { mockBackend } from "./mocks";
-import { filterClients, NO_FILTERS, planFacts } from "../src/lib/clientFilters";
+import { filterClients, NO_FILTERS, planFacts } from "../src/features/clients/clientFilters";
 
 // The founder's Clients tab: find people by name, status, plan, expiry date or
 // coach — "who runs out this week", "who needs to renew", "everyone on 20 Sessions".

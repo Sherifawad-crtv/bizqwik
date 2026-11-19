@@ -1,9 +1,13 @@
 // Keeps the design system honest. Run: npm run ds   (part of npm run check)
 //
-// 1. Every component in src/components/ must be listed in DESIGN_SYSTEM.md, so
-//    a new component is always added to the library's directory.
+// 1. Every component in the library (src/design-system/components/) and in
+//    the shared business components (src/shared/components/) must be listed in
+//    DESIGN_SYSTEM.md, so a new component is always added to the directory.
 // 2. Screens must not re-define library components (a local Card, Chip, Tag…).
-// 3. Hand-built versions of things the library covers (an inline card, a row
+// 3. Import boundaries: features use design-system and shared, never another
+//    feature or the app frame; shared never reaches into features or app; the
+//    design system never reaches into features, app or shared components.
+// 4. Hand-built versions of things the library covers (an inline card, a row
 //    divider, a tag, a status pill, a styled <button>, a big number, a raw hex
 //    colour) may not increase. The leftovers from before the library are
 //    counted in scripts/ds-baseline.json; the count can only go down. After
@@ -18,21 +22,40 @@ const errors = [];
 
 // 1. directory completeness
 const doc = read("DESIGN_SYSTEM.md");
-for (const f of readdirSync("src/components").filter((f) => f.endsWith(".tsx")).map((f) => join("src/components", f))) {
+const LIB_DIRS = ["src/design-system/components", "src/shared/components"];
+for (const f of LIB_DIRS.flatMap((d) => readdirSync(d).filter((f) => f.endsWith(".tsx")).map((f) => join(d, f)))) {
   for (const m of read(f).matchAll(/export function ([A-Z]\w*)/g)) {
     if (!new RegExp("`" + m[1] + "`").test(doc)) errors.push(`${f}: component ${m[1]} is not listed in DESIGN_SYSTEM.md (add it to the directory)`);
   }
 }
 
-// 2. no local copies of library components outside src/components
+// 2. no local copies of library components outside the library
 const LIB = ["Card", "SectionCard", "ListRow", "SectionHeader", "SectionTitle", "Chip", "ChipGroup", "Tag", "StatusBadge", "IconButton", "ErrorBanner", "Button", "Sheet", "EmptyState"];
-for (const f of files.filter((f) => !f.startsWith("src/components"))) {
+for (const f of files.filter((f) => !LIB_DIRS.some((d) => f.startsWith(d)))) {
   for (const m of read(f).matchAll(/(?:^|\n)\s*(?:export )?function ([A-Z]\w*)\b/g)) {
-    if (LIB.includes(m[1])) errors.push(`${f}: defines its own ${m[1]}; use the one in src/components (see DESIGN_SYSTEM.md)`);
+    if (LIB.includes(m[1])) errors.push(`${f}: defines its own ${m[1]}; use the one in src/design-system/components (see DESIGN_SYSTEM.md)`);
   }
 }
 
-// 3. hand-built patterns (ratchet)
+// 3. import boundaries
+const area = (p) => {
+  const m = /^src\/(app|design-system|shared|features)\/?([^/]*)/.exec(p);
+  if (!m) return { top: "root" };
+  return { top: m[1], sub: m[2], comp: m[1] === "shared" && m[2] === "components" };
+};
+for (const f of files) {
+  const from = area(f);
+  for (const m of read(f).matchAll(/(?:from|import)\s*\(?\s*["'](\.{1,2}\/[^"']+)["']/g)) {
+    const to = area(join(f, "..", m[1]).replace(/\\/g, "/"));
+    let bad = null;
+    if (from.top === "features" && (to.top === "app" || (to.top === "features" && to.sub !== from.sub))) bad = "a feature may only use design-system, shared and its own folder";
+    if (from.top === "shared" && (to.top === "features" || to.top === "app")) bad = "shared code may not use features or the app frame";
+    if (from.top === "design-system" && (to.top === "features" || to.top === "app" || to.comp)) bad = "the design system may not use features, the app frame or shared components";
+    if (bad) errors.push(`${f}: imports ${m[1]} (${bad})`);
+  }
+}
+
+// 4. hand-built patterns (ratchet)
 const styleBlocks = (t) => [...t.matchAll(/style=\{\{([\s\S]*?)\}\}/g)].map((m) => m[1]);
 const RULES = {
   "inline card (use Card / cardClass)": (t) => styleBlocks(t).filter((s) => s.includes('background: "var(--color-bg-surface-primary-default)"') && s.includes("var(--radius-card)")).length,
@@ -43,7 +66,7 @@ const RULES = {
   "inline big number (use bq-stat-*)": (t) => (t.match(/font: "800 /g) || []).length,
   "raw hex colour (use a colour token)": (t) => (t.match(/["'`]#[0-9a-fA-F]{3,8}\b/g) || []).length,
 };
-const LIBRARY_FILES = new Set(["src/components/Card.tsx", "src/components/ListRow.tsx", "src/components/Tag.tsx", "src/components/IconButton.tsx", "src/components/Chip.tsx"]);
+const LIBRARY_FILES = new Set(["Card", "ListRow", "Tag", "IconButton", "Chip"].map((c) => `src/design-system/components/${c}.tsx`));
 const counts = {}; const where = {};
 for (const [rule, fn] of Object.entries(RULES)) {
   counts[rule] = 0; where[rule] = [];

@@ -1,0 +1,87 @@
+import type { Session } from "../types";
+import { StatePill } from "./StatePill";
+import { EmptyState } from "../../design-system/components/EmptyState";
+import { dateLabel, egp, sessionStamp } from "../format";
+import type { State } from "../types";
+import { MotionList } from "../../design-system/components/MotionList";
+
+interface DayGroup {
+  date: string;
+  sessions: Session[];
+}
+
+function groupByDate(sessions: Session[]): DayGroup[] {
+  const map = new Map<string, Session[]>();
+  for (const s of sessions) {
+    const list = map.get(s.date) ?? [];
+    list.push(s);
+    map.set(s.date, list);
+  }
+  return Array.from(map.entries())
+    .map(([date, list]) => ({ date, sessions: list }))
+    .sort((a, b) => b.date.localeCompare(a.date));
+}
+
+export function DayList({
+  sessions,
+  rate,
+  state,
+  onOpenDay,
+  emptyHint,
+}: {
+  sessions: Session[];
+  rate: number;
+  state: State;
+  onOpenDay: (group: DayGroup) => void;
+  /** One line on how sessions get logged, for the empty state. */
+  emptyHint?: string;
+}) {
+  const groups = groupByDate(sessions);
+
+  if (groups.length === 0) {
+    return <EmptyState icon="calendar" title="No sessions logged this month" body={emptyHint ?? "Logged sessions show up here, grouped by day."} />;
+  }
+
+  return (
+    <div className="bq-stack">
+      <MotionList gap={10}>
+{groups.map((g) => (
+        <div
+          key={g.date}
+          onClick={() => onOpenDay(g)}
+          className="bq-card bq-card--sm" style={{ display: "flex", gap: 14, alignItems: "center", cursor: "pointer" }}
+        >
+          <div className="bq-grow">
+            <div style={{ font: "700 var(--text-callout-size) var(--font-family-body)", letterSpacing: "-.01em" }}>{dateLabel(g.date)}</div>
+            <div style={{ font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-secondary-default)" }}>
+              {g.sessions.length} {g.sessions.length === 1 ? "session" : "sessions"}
+            </div>
+            {/* When each session was scanned in, so a late scan is easy to spot. */}
+            <div data-testid="session-times" style={{ marginTop: 4, display: "flex", flexDirection: "column", gap: 1 }}>
+              {[...g.sessions]
+                .sort((a, b) => String(a.createdAt ?? "").localeCompare(String(b.createdAt ?? "")))
+                .map((s) => {
+                  const st = sessionStamp(s);
+                  return st ? (
+                    <div key={s.id} style={{ display: "flex", gap: 8, alignItems: "baseline", font: "600 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-primary-default)" }}>
+                      <span style={{ font: "700 10px var(--font-family-mono)", letterSpacing: ".08em", color: "var(--color-text-tertiary-default)", minWidth: 52 }}>{s.source === "qr" ? "QR" : "MANUAL"}</span>
+                      {st.text}
+                    </div>
+                  ) : null;
+                })}
+            </div>
+            <div style={{ marginTop: 8 }}>
+              {/* A day that's on the books is "Logged"; the coach's month status (Logging / Settled / Paid) lives on their header. */}
+              {state === "logging" ? <StatePill state="paid" label="Logged" /> : <StatePill state={state} />}
+            </div>
+          </div>
+          <div style={{ textAlign: "right", flex: "none" }}>
+            <div className="tabular bq-stat-sm" >{egp(g.sessions.length * rate).split(" ")[0]}</div>
+            <div className="bq-label">EGP</div>
+          </div>
+        </div>
+      ))}
+</MotionList>
+    </div>
+  );
+}
