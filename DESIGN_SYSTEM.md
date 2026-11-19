@@ -270,6 +270,26 @@ stay in their feature until a second feature needs them.
 `bq-h2`, `bq-h3`, `bq-grow`, `bq-stack`, `bq-panel`, `bq-error`, `bq-btn*`,
 press: `bq-scale`, `bq-still`, `bq-hit`, `bq-row`.
 
+### Utilities (`src/design-system/utilities.css`)
+
+Single-purpose classes for layout that repeats everywhere. Combine them instead
+of writing a new class for a flex row with a gap.
+
+| Kind | Classes |
+|---|---|
+| Layout | `bq-flex`, `bq-inline-flex`, `bq-grid`, `bq-block`, `bq-col`, `bq-wrap`, `bq-flex-1`, `bq-flex-none`, `bq-min-w-0`, `bq-relative`, `bq-w-full` |
+| Alignment | `bq-items-center / baseline / start / end`, `bq-justify-center / between / end`, `bq-ml-auto` |
+| Spacing | `bq-gap-N`, `bq-mt-N`, `bq-mb-N` where N is the token step (`bq-gap-2` = `--space-2` = 8px). Off-scale values are marked in px (`bq-mt-6px`) and will be snapped. |
+| Text | `bq-fg-primary / secondary / tertiary` (text colour), `bq-text-left / center / right`, `bq-nowrap`, `bq-ellipsis`, `bq-overflow-hidden`, `bq-pointer` |
+
+### Feature and component CSS
+
+Anything more than a few utilities gets a named class in a CSS file next to the
+component (`Bookings.tsx` → `Bookings.css`, imported at the top of the TSX):
+`bq-<feature>-<file>-<part>`, e.g. `bq-frontdesk-bookings-row`. Values come from
+tokens. Inline `style={{}}` is only for values computed at runtime (a chart bar's
+height, a width that animates, a colour from data).
+
 ---
 
 ## 4. Screen patterns
@@ -296,8 +316,13 @@ press: `bq-scale`, `bq-still`, `bq-hit`, `bq-row`.
 5. Use it from the screen; never build the same thing inline "just this once".
 6. Add or extend an e2e test if it has behaviour.
 7. Run `npm run check`. It fails if a library/shared component is missing from
-   this file, a screen hand-builds something the library covers, a raw colour
-   appears, or an import crosses the rules in section 0.
+   this file, an import crosses the rules in section 0, or any of these goes up
+   (in TSX or CSS; leftovers are counted in `scripts/ds-baseline.json` and can
+   only go down):
+   - a hand-built row divider, styled `<button>` or big number
+   - a raw colour, font size or corner radius (use the tokens)
+   - off-scale spacing (use `--space-*`)
+   - a static inline style (use a class)
 
 Changing a design value: edit `tokens.json`, run `npm run tokens`, commit the
 generated files too. Removing or renaming a component: update this file in the

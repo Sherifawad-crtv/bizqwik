@@ -1,9 +1,10 @@
 {
-  "inline card (use Card / cardClass)": 0,
-  "inline row divider (use ListRow / listRowClass)": 17,
-  "inline tag (use Tag)": 4,
-  "inline status pill (use StatusBadge)": 0,
-  "hand-styled <button> (use Button / IconButton / Chip / ListRow)": 7,
-  "inline big number (use bq-stat-*)": 62,
-  "raw hex colour (use a colour token)": 0
+  "row divider (use ListRow / listRowClass)": 17,
+  "hand-styled <button> (use Button / IconButton / Chip / ListRow)": 1,
+  "big number outside the stat styles (use bq-stat-*)": 61,
+  "raw colour (use a colour token)": 0,
+  "raw font size (use a text style)": 39,
+  "raw corner radius (use a radius token)": 63,
+  "off-scale spacing (use --space-*)": 311,
+  "static inline style (use a class)": 4
 }

@@ -7,9 +7,10 @@
 // 3. Import boundaries: features use design-system and shared, never another
 //    feature or the app frame; shared never reaches into features or app; the
 //    design system never reaches into features, app or shared components.
-// 4. Hand-built versions of things the library covers (an inline card, a row
-//    divider, a tag, a status pill, a styled <button>, a big number, a raw hex
-//    colour) may not increase. The leftovers from before the library are
+// 4. Hand-built versions of things the library covers (a row divider, a styled
+//    <button>, a big number) and values a token should cover (raw colours, font
+//    sizes, corner radii, off-scale spacing) and static inline styles may not
+//    increase, in TSX or CSS. The leftovers from before the library are
 //    counted in scripts/ds-baseline.json; the count can only go down. After
 //    moving more screens onto the library, lower it with: npm run ds -- --update
 import { readFileSync, readdirSync, statSync, writeFileSync, existsSync } from "node:fs";
@@ -57,24 +58,56 @@ for (const f of files) {
 
 // 4. hand-built patterns (ratchet)
 const styleBlocks = (t) => [...t.matchAll(/style=\{\{([\s\S]*?)\}\}/g)].map((m) => m[1]);
+// TSX rules (inline styles) and CSS rules (classes). Library CSS that defines
+// the pattern itself is exempt; generated tokens are never scanned.
+const LIBRARY_CSS = new Set(["Card", "ListRow", "Tag", "IconButton", "Chip", "Button"].map((c) => `src/design-system/components/${c}.css`).concat(["src/design-system/typography.css", "src/design-system/utilities.css", "src/design-system/base.css"]));
+const cssRules = (t) => [...t.matchAll(/([^{}]+)\{([^{}]*)\}/g)].map((m) => m[2]);
+const decl = (body, prop) => [...body.matchAll(new RegExp(`(?:^|;|\\n)\\s*(?:${prop})\\s*:\\s*(?<v>[^;]+)`, "g"))].map((m) => m.groups.v.trim());
+const staticInline = (t) => styleBlocks(t).filter((s) => s.split(/,(?![^(]*\))/).every((p) => !p.trim() || /^\s*[a-zA-Z]+\s*:\s*("[^"]*"|-?\d+(\.\d+)?)\s*$/.test(p))).length;
 const RULES = {
-  "inline card (use Card / cardClass)": (t) => styleBlocks(t).filter((s) => s.includes('background: "var(--color-bg-surface-primary-default)"') && s.includes("var(--radius-card)")).length,
-  "inline row divider (use ListRow / listRowClass)": (t) => styleBlocks(t).filter((s) => /borderBottom: [^,]*1px solid var\(--color-border-primary-default\)/.test(s)).length,
-  "inline tag (use Tag)": (t) => (t.match(/font: "700 10px var\(--font-family-mono\)"/g) || []).length,
-  "inline status pill (use StatusBadge)": (t) => styleBlocks(t).filter((s) => s.includes("borderRadius: 999") && s.includes('padding: "4px 10px"')).length,
-  "hand-styled <button> (use Button / IconButton / Chip / ListRow)": (t) => (t.match(/<button\b[^>]*?style=\{\{[^}]*borderRadius/g) || []).length,
-  "inline big number (use bq-stat-*)": (t) => (t.match(/font: "800 /g) || []).length,
-  "raw hex colour (use a colour token)": (t) => (t.match(/["'`]#[0-9a-fA-F]{3,8}\b/g) || []).length,
+  // things the library covers
+  "row divider (use ListRow / listRowClass)": {
+    tsx: (t) => styleBlocks(t).filter((s) => /borderBottom: [^,]*1px solid var\(--color-border-primary-default\)/.test(s)).length,
+    css: (t) => cssRules(t).filter((b) => /border-bottom:\s*1px solid var\(--color-border-primary-default\)/.test(b)).length,
+  },
+  "hand-styled <button> (use Button / IconButton / Chip / ListRow)": { tsx: (t) => (t.match(/<button\b[^>]*?style=\{\{[^}]*borderRadius/g) || []).length },
+  "big number outside the stat styles (use bq-stat-*)": {
+    tsx: (t) => (t.match(/font: "800 /g) || []).length,
+    css: (t) => cssRules(t).filter((b) => decl(b, "font").some((v) => /^800\s/.test(v))).length,
+  },
+  // tokens
+  "raw colour (use a colour token)": {
+    tsx: (t) => (t.match(/["'`]#[0-9a-fA-F]{3,8}\b|rgba?\(\s*\d/g) || []).length,
+    css: (t) => (t.match(/#[0-9a-fA-F]{3,8}\b|rgba?\(\s*\d/g) || []).length,
+  },
+  "raw font size (use a text style)": {
+    tsx: (t) => (t.match(/(font|fontSize):\s*"[^"]*\b\d+px/g) || []).length,
+    css: (t) => cssRules(t).filter((b) => [...decl(b, "font"), ...decl(b, "font-size")].some((v) => /\b\d+px/.test(v))).length,
+  },
+  "raw corner radius (use a radius token)": {
+    tsx: (t) => (t.match(/borderRadius:\s*("\d+px"|[1-9]\d*)/g) || []).length,
+    css: (t) => cssRules(t).filter((b) => decl(b, "border(?:-[a-z]+)*-radius").some((v) => /\b[1-9]\d*px/.test(v))).length,
+  },
+  "off-scale spacing (use --space-*)": {
+    css: (t) => cssRules(t).filter((b) => decl(b, "(?:padding|margin|gap)(?:-[a-z]+)?").some((v) => /\b(?!(?:4|8|12|16|20|24|32)px)\d+px/.test(v))).length,
+  },
+  "static inline style (use a class)": { tsx: staticInline },
 };
 const LIBRARY_FILES = new Set(["Card", "ListRow", "Tag", "IconButton", "Chip"].map((c) => `src/design-system/components/${c}.tsx`));
+const cssFiles = (function walkCss(d, out = []) { for (const f of readdirSync(d)) { const p = join(d, f); statSync(p).isDirectory() ? walkCss(p, out) : f.endsWith(".css") && out.push(p); } return out; })("src").filter((f) => !f.startsWith("src/design-system/tokens/"));
 const counts = {}; const where = {};
-for (const [rule, fn] of Object.entries(RULES)) {
+for (const [rule, { tsx, css }] of Object.entries(RULES)) {
   counts[rule] = 0; where[rule] = [];
-  for (const f of files) {
-    if (LIBRARY_FILES.has(f)) continue;
-    const n = fn(read(f));
-    if (n) { counts[rule] += n; where[rule].push(`${relative(".", f)} (${n})`); }
-  }
+  const scan = (list, fn, skip) => {
+    if (!fn) return;
+    for (const f of list) {
+      if (skip.has(f)) continue;
+      const n = fn(read(f));
+      if (n) { counts[rule] += n; where[rule].push(`${relative(".", f)} (${n})`); }
+    }
+  };
+  scan(files.filter((f) => f.endsWith(".tsx") && f !== "src/features/ops/OrgQr.tsx"), tsx, LIBRARY_FILES);
+  scan(cssFiles, css, rule.startsWith("raw") || rule.startsWith("off-scale") ? new Set() : LIBRARY_CSS);
 }
 const BASE = "scripts/ds-baseline.json";
 if (process.argv.includes("--update") || !existsSync(BASE)) {
