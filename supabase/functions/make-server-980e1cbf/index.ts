@@ -19,6 +19,9 @@ async function fetchRetryingClockSkew(input: RequestInfo | URL, init?: RequestIn
 }
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+// Phase 2: transactional Postgres RPCs for wallet/points (default on).
+// Set MONEY_RPC=0 to force legacy JS helpers (emergency / parity only).
+const MONEY_RPC = !["0", "false", "off"].includes((Deno.env.get("MONEY_RPC") ?? "1").toLowerCase());
 // One client for the whole worker: it holds no user session, and reusing it
 // keeps its connection and the auth signing keys cached between requests.
 const adminClient = createClient(SUPABASE_URL, SERVICE_ROLE, {
@@ -248,6 +251,18 @@ async function walletBalance(clientId: string, orgId: string): Promise<number> {
   return bal;
 }
 async function creditWallet(clientId: string, orgId: string, amount: number, category: string, description: string, actorId: string | null = null, meta: any = undefined) {
+  if (MONEY_RPC) {
+    const { data, error } = await admin().rpc("wallet_credit", {
+      p_org_id: orgId,
+      p_client_id: clientId,
+      p_amount: amount,
+      p_category: category,
+      p_description: description,
+    });
+    if (error) throw error;
+    await logActivity(orgId, `wallet_${category}`, { clientId, amount, actorId, meta });
+    return Number((data as any)?.balance ?? 0);
+  }
   const settings = await orgSettingsOf(orgId);
   const ttl = settings?.wallet_credit_ttl_months ?? 12;
   const expires = new Date();
@@ -260,6 +275,17 @@ async function creditWallet(clientId: string, orgId: string, amount: number, cat
   return await walletBalance(clientId, orgId);
 }
 async function debitWallet(clientId: string, orgId: string, amount: number, category: string, description: string): Promise<{ ok: boolean; balance: number }> {
+  if (MONEY_RPC) {
+    const { data, error } = await admin().rpc("wallet_debit", {
+      p_org_id: orgId,
+      p_client_id: clientId,
+      p_amount: amount,
+      p_category: category,
+      p_description: description,
+    });
+    if (error) throw error;
+    return { ok: !!(data as any)?.ok, balance: Number((data as any)?.balance ?? 0) };
+  }
   const bal = await walletBalance(clientId, orgId);
   if (bal < amount) return { ok: false, balance: bal };
   // Record the debit BEFORE consuming any credit lots. There's no multi-row
@@ -328,6 +354,17 @@ async function bumpPointsBalance(clientId: string, orgId: string): Promise<numbe
 }
 async function earnPoints(clientId: string, orgId: string, points: number, reason: string, cfg?: Awaited<ReturnType<typeof pointsConfig>>) {
   if (points <= 0) return;
+  if (MONEY_RPC) {
+    const { error } = await admin().rpc("points_earn", {
+      p_org_id: orgId,
+      p_client_id: clientId,
+      p_points: points,
+      p_reason: reason,
+    });
+    if (error) throw error;
+    await logActivity(orgId, "points_earned", { clientId, amount: points, meta: { reason } });
+    return;
+  }
   const c = cfg ?? (await pointsConfig(orgId));
   const expires = addMonths(new Date(), c.ttlMonths).toISOString();
   await admin().from("points_ledger").insert({ org_id: orgId, client_id: clientId, points, reason, remaining: points, expires_at: expires });
@@ -338,6 +375,16 @@ async function earnPoints(clientId: string, orgId: string, points: number, reaso
 // balance re-checked before any lot is touched, so two concurrent spends
 // can't take the same points; returns the new balance, or null if short.
 async function spendPoints(clientId: string, orgId: string, points: number, reason: string): Promise<number | null> {
+  if (MONEY_RPC) {
+    const { data, error } = await admin().rpc("points_spend", {
+      p_org_id: orgId,
+      p_client_id: clientId,
+      p_points: points,
+      p_reason: reason,
+    });
+    if (error) throw error;
+    return (data as any)?.ok ? Number((data as any).balance) : null;
+  }
   const { data: debit, error } = await admin().from("points_ledger").insert({ org_id: orgId, client_id: clientId, points: -points, reason }).select().single();
   if (error) throw error;
   const after = await bumpPointsBalance(clientId, orgId);
@@ -371,6 +418,15 @@ async function earnCheckinPoints(clientId: string, orgId: string) {
 }
 // A refund takes back the points that money earned (never below zero).
 async function clawbackPoints(clientId: string, orgId: string, egp: number) {
+  if (MONEY_RPC) {
+    const { error } = await admin().rpc("points_clawback", {
+      p_org_id: orgId,
+      p_client_id: clientId,
+      p_egp: egp,
+    });
+    if (error) throw error;
+    return;
+  }
   const cfg = await pointsConfig(orgId);
   if (!cfg.earnPerEgp) return;
   const balance = await bumpPointsBalance(clientId, orgId);

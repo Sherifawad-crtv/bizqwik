@@ -479,7 +479,7 @@ You are ready for money RPCs when:
 2. You can reset local DB and click desk flows daily without dashboard archaeology.  
 3. Contract fixtures exist so Phase 2 must keep the same JSON for wallet-related routes.
 
-Next: [backend-implementation-plan.md](./backend-implementation-plan.md) → **Phase 2 — Money RPCs**.
+Next: [backend-phase-2.md](./backend-phase-2.md) → **Phase 2 — Money RPCs** (milestones M0–M7).
 
 ---
 

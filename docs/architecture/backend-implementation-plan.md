@@ -118,45 +118,9 @@ Capture what the front end expects (route list + JSON fixtures), add a local smo
 
 ## Phase 2 — Money RPCs (all local)
 
-### Purpose
+**Detailed playbook:** [backend-phase-2.md](./backend-phase-2.md) (milestones M0–M7 with tasks + acceptance criteria).
 
-Fix wallet/points races with transactional Postgres RPCs. Same JSON out of Edge as today.
-
-### 2.A Design
-
-RPCs (names illustrative) matching current JS behaviour:
-
-- `wallet_credit` / `wallet_debit` → `{ ok, balance }`  
-- expiry / FIFO lots inside the transaction  
-- points earn/redeem if they multi-write  
-
-Use row locks so two debits cannot overdraw. Private schema + restricted `EXECUTE`.
-
-### 2.B Expand locally
-
-1. Migration adds RPCs.  
-2. Edge can call RPC **or** old JS via a local flag (env or config), default off.  
-3. Optional **shadow**: run both, return old result, log diffs.
-
-### 2.C Verify locally
-
-- [ ] Insufficient funds → `ok: false`, no partial rows  
-- [ ] Two parallel full-balance debits → only one wins; balance ≥ 0  
-- [ ] Desk sale / booking / refund via **local front end** with wallet  
-- [ ] Shadow diffs clean (if used)  
-- [ ] Tenant-isolation (or a focused cross-org check) on **local**  
-
-### 2.D Switch locally
-
-1. Flag on.  
-2. Re-run concurrency + UI money flows.  
-3. Remove or schedule removal of old JS loops once you trust local (before or as part of final cutover bundle — prefer removed so Production never ships dual paths unless you want a Prod flag for belt-and-braces).
-
-**Recommendation for your workflow:** finish Phase 2 fully on local (RPC only, old JS deleted) so cutover is one clear backend. If you want an emergency switch on Production, keep a flag in the cutover build defaulting to RPC-on, with off = old JS **only if** old JS is still in the bundle.
-
-### Production
-
-**No deploy in this phase.**
+Fix wallet/points races with transactional Postgres RPCs. Same JSON out of Edge as today. Expand (migration + flag) → parity/concurrency → switch locally → remove old JS loops. **No Production deploy.**
 
 ---
 
@@ -321,8 +285,8 @@ Then: run the phase’s tests + click the screens that use the routes you touche
 | Phase | Status | Local verified | Front↔back checked | Date |
 |---|---|---|---|---|
 | 0 Contract + smoke | Done (dry-run; live smoke → Phase 1) | yes | n/a | 2026-11-17 |
-| 1 Local + baseline + seed | Not started | | | |
-| 2 Money RPCs | Not started | | | |
+| 1 Local + baseline + seed | Done | yes | yes (login + smoke) | 2026-11-19 |
+| 2 Money RPCs | Done (RPC default on; tests/money green) | yes | yes (compensate + smoke) | 2026-11-19 |
 | 3 Split Edge source | Not started | | | |
 | 4 Dedupe functions | Not started | | | |
 | 5 Validation + org helper | Not started | | | |
@@ -346,4 +310,5 @@ Then: run the phase’s tests + click the screens that use the routes you touche
 - [backend.md](./backend.md) — Current vs Target  
 - [backend-guidelines.md](./backend-guidelines.md) — day-to-day rules (local-first)  
 - [backend-phase-0-1.md](./backend-phase-0-1.md) — detailed Phase 0 & 1 playbook  
+- [backend-phase-2.md](./backend-phase-2.md) — detailed Phase 2 money RPC milestones  
 - `docs/audit/frontend-issues.md` — separate front-end track  

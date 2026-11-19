@@ -79,4 +79,15 @@ begin
   insert into public.wallets (client_id, org_id, balance)
   values (v_client, v_org, 500)
   on conflict (client_id) do nothing;
+
+  -- Real spendable credit lot (balance is sum of remaining, not wallets.balance alone).
+  insert into public.wallet_transactions (
+    org_id, client_id, type, amount, category, description, expires_at, remaining
+  )
+  select v_org, v_client, 'credit', 500, 'compensation', 'Seed wallet credit',
+         now() + interval '12 months', 500
+  where not exists (
+    select 1 from public.wallet_transactions
+    where client_id = v_client and org_id = v_org and type = 'credit' and remaining > 0
+  );
 end $$;
