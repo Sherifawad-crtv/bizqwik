@@ -1,0 +1,33 @@
+/* .bq-btn: the one button. Variants and sizes are modifiers; callers can still
+   override a single property with `style`. */
+.bq-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 48px;
+  padding: 0 22px;
+  border: 0;
+  border-radius: var(--radius-button);
+  font: 700 var(--text-callout-size) var(--font-family-body);
+  cursor: pointer;
+  transition: opacity var(--duration-standard) var(--ease-standard), transform var(--duration-quick) var(--ease-standard), filter var(--duration-quick) var(--ease-standard);
+}
+.bq-btn--lg { height: 56px; }
+.bq-btn--full { width: 100%; }
+.bq-btn--primary { background: var(--color-bg-fill-primary-default); color: var(--color-bg-surface-primary-default); }
+.bq-btn--secondary { background: var(--color-bg-fill-accent-default); color: var(--color-bg-fill-primary-active); }
+.bq-btn--quiet { background: var(--color-bg-canvas-default); color: var(--color-text-secondary-default); border: 1px solid var(--color-border-primary-default); }
+.bq-btn--danger { background: var(--color-bg-fill-status-danger-default); color: var(--color-text-status-danger-default); }
+.bq-btn:disabled { opacity: 0.45; cursor: default; }
+/* Mouse only, never touch, so hover can't get "stuck" after a tap. */
+@media (hover: hover) and (pointer: fine) {
+  .bq-btn:not(:disabled):hover {
+    filter: brightness(1.05);
+    transform: translateY(-1px);
+  }
+  .bq-btn:not(:disabled):active {
+    transform: translateY(0);
+    filter: brightness(0.98);
+  }
+}

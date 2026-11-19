@@ -1,0 +1,36 @@
+/* Fades the page out behind the bottom bar (and its floating actions). */
+.bq-bottom-fade {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: calc(var(--bar-bottom) + 64px + 36px);
+  z-index: 54;
+  pointer-events: none;
+  background: linear-gradient(to bottom, var(--color-bg-canvas-fade-start), var(--color-bg-canvas-default) 78%);
+}
+
+
+/* The bottom bar's two layers (tab bar / a sub-page's actions): one hands over
+   to the other in a single motion — the leaving one sinks and fades, the
+   arriving one rises in. Hidden layers can't be tapped. */
+.bq-barlayer {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity var(--duration-standard) var(--ease-standard), transform var(--duration-standard) var(--ease-standard), visibility 0s linear 0s;
+}
+.bq-barlayer[data-on="false"] {
+  opacity: 0;
+  transform: translateY(16px);
+  pointer-events: none;
+  visibility: hidden;
+  transition: opacity var(--duration-standard) var(--ease-standard), transform var(--duration-standard) var(--ease-standard), visibility 0s linear var(--duration-standard);
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+  .bq-barlayer, .bq-barlayer[data-on="false"] { transform: none; }
+}

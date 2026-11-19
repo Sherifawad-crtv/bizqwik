@@ -1,0 +1,22 @@
+/* Layout helpers and bare elements. */
+
+/* A flexible child that is allowed to shrink (so long text truncates, not overflows). */
+.bq-grow { min-width: 0; flex: 1; }
+
+/* ───────────────────────────── Layout helpers ───────────────────────────── */
+.bq-stack { display: flex; flex-direction: column; gap: 10px; }
+.bq-panel { background: var(--color-bg-surface-primary-default); border-radius: var(--radius-card); overflow: hidden; }
+
+/* A bare element (a button acting as a row): no border or background of its own.
+   Defined before .bq-listrow--divider so a row's divider still shows. */
+.bq-plain { border: 0; background: none; }
+
+
+/* Tones: a status colour pair, set once and read by Tag / StatusBadge. */
+.bq-tone-neutral { --tone-fg: var(--color-text-secondary-default); --tone-bg: var(--color-bg-surface-secondary-default); }
+.bq-tone-primary { --tone-fg: var(--color-bg-fill-primary-active); --tone-bg: var(--color-bg-fill-accent-default); }
+.bq-tone-logging { --tone-fg: var(--color-text-status-logging-default); --tone-bg: var(--color-bg-fill-status-logging-default); }
+.bq-tone-settled { --tone-fg: var(--color-text-status-settled-default); --tone-bg: var(--color-bg-fill-status-settled-default); }
+.bq-tone-paid { --tone-fg: var(--color-text-status-paid-default); --tone-bg: var(--color-bg-fill-status-paid-default); }
+.bq-tone-danger { --tone-fg: var(--color-text-status-danger-default); --tone-bg: var(--color-bg-fill-status-danger-default); }
+.bq-tone-frozen { --tone-fg: var(--color-text-status-frozen-default); --tone-bg: var(--color-bg-fill-status-frozen-default); }

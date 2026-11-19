@@ -1,0 +1,2 @@
+/* pull-to-refresh spinner (same spin as every other loader) */
+.bq-ptr-spin { animation: bqSpin .7s linear infinite; }

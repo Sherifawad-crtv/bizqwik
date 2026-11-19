@@ -1,0 +1,9 @@
+/* A form or action error under its field. */
+.bq-error {
+  background: var(--color-bg-fill-status-danger-default);
+  color: var(--color-text-status-danger-default);
+  border-radius: var(--radius-item);
+  padding: 10px 14px;
+  font: 600 var(--text-footnote-size)/1.5 var(--font-family-body);
+}
+.bq-error--spaced { margin-top: 12px; }

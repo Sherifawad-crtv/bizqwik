@@ -1,0 +1,64 @@
+/* ───────────────────────── Interaction primitives ─────────────────────────
+   How things respond to a finger or a mouse lives here, once, as classes.
+   Components pick a class; they don't hand-code press, hover or tap size.
+
+   Base rules use :where() (no specificity) so any class below simply wins. */
+
+/* Every tappable thing dims the instant a finger lands and eases back on release. */
+:where(button, [role="button"], a[href]) {
+  transition: opacity var(--duration-standard) var(--ease-standard);
+}
+:where(button:not(:disabled), [role="button"], a[href]):active {
+  opacity: 0.7;
+  transition-duration: 0s;
+}
+
+/* .bq-scale: tiles and big targets that shrink under the finger instead of
+   dimming, the iOS way: a small shrink (3%) the moment you touch, and a soft
+   spring back when you let go. */
+:root { --press-scale: 0.97; }
+.bq-scale {
+  transition: transform var(--duration-standard) var(--ease-spring);
+}
+.bq-scale:active {
+  transform: scale(var(--press-scale));
+  opacity: 1;
+  transition-duration: var(--duration-quick);
+  transition-timing-function: var(--ease-standard);
+}
+
+/* .bq-still: options whose state is shown another way (the sliding pill), so they never dim. */
+.bq-still,
+.bq-still:active {
+  opacity: 1;
+}
+
+/* .bq-hit: a bigger invisible tap area (Apple asks for 44pt) without changing the look. */
+.bq-hit {
+  position: relative;
+}
+.bq-hit::after {
+  content: "";
+  position: absolute;
+  inset: -5px;
+}
+
+/* .bq-row: a tappable list row. */
+.bq-row {
+  cursor: pointer;
+  transition: background var(--duration-quick) var(--ease-standard);
+}
+.bq-row:active {
+  background: var(--color-bg-surface-secondary-default);
+}
+@media (hover: hover) and (pointer: fine) {
+  .bq-row:hover {
+    background: var(--color-bg-surface-secondary-default);
+  }
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --press-scale: 1; }
+  .bq-scale:active { opacity: 0.7; }
+}

@@ -1,0 +1,30 @@
+/* Tag: a small square label (Kids, a location, OFF SALE). */
+.bq-tag {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  font: 700 10px var(--font-family-mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  border-radius: var(--radius-chip);
+  padding: 3px 7px;
+  color: var(--tone-fg, var(--color-text-secondary-default));
+  background: var(--tone-bg, var(--color-bg-surface-secondary-default));
+}
+
+/* StatusBadge: a pill with a dot that says what state something is in. */
+.bq-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+  padding: var(--space-1) 10px;
+  border-radius: 999px;
+  font: 700 var(--text-caption-2-size) var(--font-family-mono);
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+  color: var(--tone-fg);
+  background: var(--tone-bg);
+}
+.bq-badge::before { content: ""; width: 6px; height: 6px; border-radius: 999px; background: currentColor; flex: none; }

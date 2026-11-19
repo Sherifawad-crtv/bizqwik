@@ -9,7 +9,7 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 /** The one button. Look and behaviour (press, hover, disabled) live in
- * `.bq-btn` in index.css; this only picks the modifiers. */
+ * `.bq-btn` in Button.css; this only picks the modifiers. */
 export function Button({ variant = "primary", fullWidth, size = "md", className, ...rest }: ButtonProps) {
   const cls = ["bq-btn", `bq-btn--${variant}`, size === "lg" && "bq-btn--lg", fullWidth && "bq-btn--full", className].filter(Boolean).join(" ");
   return <button className={cls} {...rest} />;

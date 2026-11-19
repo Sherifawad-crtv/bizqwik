@@ -30,7 +30,7 @@ const block = (w: string | number, h: number, r = 999) => (
 export function Spinner() {
   // When the real content takes the placeholder's place, it fades in instead of
   // popping: on the way out the placeholder marks its container, and CSS fades
-  // whatever arrives there (see [data-reveal] in index.css).
+  // whatever arrives there (see [data-reveal] in design-system/base.css).
   const ref = useRef<HTMLDivElement>(null);
   useLayoutEffect(() => {
     const el = ref.current;

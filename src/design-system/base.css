@@ -1,0 +1,185 @@
+/* Base: page reset, native-app behaviour, keyframes, loading and reveal. Values come from tokens.css. */
+
+:root {
+  /* Design tokens come from src/design-system/tokens/tokens.json (generated
+     into tokens.css, loaded first). Never type a value a token covers. */
+
+  /* Layout values that depend on the device (not design tokens). */
+  /* Gap under the bottom bar: it sits just above the iOS home indicator. */
+  --bar-bottom: max(8px, calc(var(--safe-bottom) - 8px));
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+
+  color-scheme: light;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  background: var(--color-bg-canvas-default);
+  color: var(--color-text-primary-default);
+  font-family: var(--font-family-body);
+  overscroll-behavior: none; /* no rubber-band, no pull-to-refresh */
+  -webkit-text-size-adjust: 100%; /* don't resize text when the phone rotates */
+  text-size-adjust: 100%;
+  touch-action: pan-x pan-y; /* scrolling yes, pinch/double-tap zoom no */
+}
+
+/* Native apps don't let you select page text, long-press for a menu, or drag
+   pictures out. Form fields keep normal editing. */
+body {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+input,
+textarea,
+[contenteditable=""],
+[contenteditable="true"] {
+  -webkit-user-select: text;
+  user-select: text;
+  -webkit-touch-callout: default;
+}
+img,
+svg,
+canvas,
+video,
+a {
+  -webkit-user-drag: none;
+  user-drag: none;
+  -webkit-touch-callout: none;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+#root {
+  min-height: 100svh;
+}
+
+a {
+  color: var(--color-bg-fill-primary-default);
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+a:hover {
+  color: var(--color-bg-fill-primary-active);
+}
+
+button {
+  font-family: inherit;
+  /* iOS Safari paints button text its system blue when no color is set, so
+     every unstyled button would read like a link. Inherit the ink instead;
+     buttons with their own color still override this. */
+  color: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+[role="button"],
+.no-select {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+input,
+select,
+textarea {
+  font-family: inherit;
+  font-size: 16px; /* prevents iOS focus auto-zoom */
+}
+
+[data-scroll] {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+@keyframes bqSheetIn {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+@keyframes bqFadeOut {
+  to { opacity: 0; }
+}
+@keyframes bqFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes bqPop {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes bqSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+/* Loading placeholders breathe (opacity only, so it never costs layout). */
+@keyframes bqSkel {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+.bq-skel { animation: bqSkel 1.3s ease-in-out infinite; }
+/* Real content arriving where a loading placeholder was: a soft fade, not a pop. */
+[data-reveal] > :not([data-testid="skeleton"]) { animation: bqFade var(--duration-standard) var(--ease-standard) both; }
+@keyframes bqRise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.bq-rise {
+  animation: bqRise var(--duration-standard) var(--ease-standard) both;
+}
+
+
+/* Reduce Motion (iPhone Settings → Accessibility → Motion): Apple's guidance is
+   to swap movement for fades, not to remove all animation. Things still fade,
+   controls still show their state; nothing slides, rises, shrinks or pulses.
+   Each file overrides its own movement; screens and sheets switch to fades in
+   code (RouteTransition, Sheet). */
+@media (prefers-reduced-motion: reduce) {
+  .bq-rise { animation-name: bqFade; }
+  .bq-skel { animation: none; }
+}

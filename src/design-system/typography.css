@@ -1,0 +1,27 @@
+/* ───────────────────────────── Type helpers ─────────────────────────────
+   The text styles screens repeat most, once. */
+.bq-label { font: var(--text-label-weight) var(--text-label-size) var(--font-family-mono); letter-spacing: 0.08em; color: var(--color-text-tertiary-default); }
+.bq-meta { font: var(--text-meta-weight) var(--text-meta-size) var(--font-family-mono); color: var(--color-text-tertiary-default); }
+.bq-title { font: var(--text-title-1-weight) var(--text-title-1-size)/1.2 var(--font-family-body); letter-spacing: -0.02em; margin: 4px 0 16px; }
+.bq-h2 { font: var(--text-title-2-weight) var(--text-title-2-size) var(--font-family-body); letter-spacing: -0.01em; }
+.bq-h3 { font: var(--text-headline-weight) var(--text-headline-size) var(--font-family-body); }
+
+/* Text styles: Apple's role names at Bizqwik's sizes (tokens.json → text.*).
+   Screens pick a role, never a pixel size. bq-title / bq-h2 / bq-h3 above are
+   the same roles with their spacing; they stay until the screens move over. */
+.bq-text-large-title { font: var(--text-large-title-weight) var(--text-large-title-size)/1.1 var(--font-family-body); letter-spacing: -0.02em; }
+.bq-text-title-1 { font: var(--text-title-1-weight) var(--text-title-1-size)/1.2 var(--font-family-body); letter-spacing: -0.02em; }
+.bq-text-title-2 { font: var(--text-title-2-weight) var(--text-title-2-size) var(--font-family-body); letter-spacing: -0.01em; }
+.bq-text-headline { font: var(--text-headline-weight) var(--text-headline-size) var(--font-family-body); }
+.bq-text-callout { font: var(--text-callout-weight) var(--text-callout-size) var(--font-family-body); }
+.bq-text-body { font: var(--text-body-weight) var(--text-body-size)/1.5 var(--font-family-body); }
+.bq-text-subheadline { font: var(--text-subheadline-weight) var(--text-subheadline-size) var(--font-family-body); }
+.bq-text-footnote { font: var(--text-footnote-weight) var(--text-footnote-size) var(--font-family-body); }
+.bq-text-caption-1 { font: var(--text-caption-1-weight) var(--text-caption-1-size) var(--font-family-body); }
+.bq-text-caption-2 { font: var(--text-caption-2-weight) var(--text-caption-2-size) var(--font-family-body); }
+
+/* Stat: big numbers. */
+.bq-stat-xl { font: var(--text-stat-xl-weight) var(--text-stat-xl-size)/1 var(--font-family-body); letter-spacing: -0.03em; }
+.bq-stat-lg { font: var(--text-stat-lg-weight) var(--text-stat-lg-size)/1.1 var(--font-family-body); letter-spacing: -0.02em; }
+.bq-stat-md { font: var(--text-stat-md-weight) var(--text-stat-md-size)/1.15 var(--font-family-body); letter-spacing: -0.02em; }
+.bq-stat-sm { font: var(--text-stat-sm-weight) var(--text-stat-sm-size) var(--font-family-body); letter-spacing: -0.01em; }

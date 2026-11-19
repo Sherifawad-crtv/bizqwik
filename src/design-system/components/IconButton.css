@@ -1,0 +1,17 @@
+/* IconButton: a round button with only an icon (edit, delete, remove). */
+.bq-iconbtn {
+  width: 36px;
+  height: 36px;
+  flex: none;
+  border: 0;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--color-bg-fill-primary-active);
+  background: var(--color-bg-fill-accent-default);
+}
+.bq-iconbtn--danger { color: var(--color-text-status-danger-default); background: var(--color-bg-fill-status-danger-default); }
+.bq-iconbtn--neutral { color: var(--color-text-primary-default); background: var(--color-bg-surface-secondary-default); }
+.bq-iconbtn--plain { color: var(--color-text-secondary-default); background: transparent; }

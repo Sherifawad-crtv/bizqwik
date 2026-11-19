@@ -1,0 +1,6 @@
+/* Card: every surface on a page. */
+.bq-card { background: var(--color-bg-surface-primary-default); border-radius: var(--radius-card); }
+.bq-card--sm { padding: 14px var(--space-4); }
+.bq-card--md { padding: var(--space-5); }
+.bq-card--lg { padding: 30px; }
+.bq-card--clip { overflow: hidden; }

@@ -21,6 +21,8 @@ src/
     motion/       motion scale (motion.ts), useTween, useReducedMotion
     hooks/        device hooks (useIsMobile, useKeyboardInset, useSticky)
     theme.ts      setBrandColor(): recolour the app from one hex
+    styles.css    all design-system CSS in cascade order: base, interaction,
+                  typography, layout, then one Name.css per component
   shared/
     components/   business pieces used by two or more features (PlanPill, ClassSheet…)
     api/          backend client, useAsync, Supabase client
@@ -285,8 +287,10 @@ press: `bq-scale`, `bq-still`, `bq-hit`, `bq-row`.
 
 1. **Check again**: can an existing component take a prop instead? Prefer that.
 2. **Decide where it lives** (section 0): library, shared, or its feature.
-3. **Build it as its own file** using only tokens and existing primitives. Put
-   any CSS in `src/index.css` as `bq-*` classes.
+3. **Build it as its own file** using only tokens and existing primitives. Its
+   CSS goes in a file next to it (`Name.css`, `bq-*` classes). For a library
+   component, add an `@import` for it to `src/design-system/styles.css` (so its
+   classes work everywhere); a feature's own CSS uses a `bq-<feature>-` prefix.
 4. **Library or shared? Add a row to the directory above** (what it's for, the
    name, its key props).
 5. Use it from the screen; never build the same thing inline "just this once".
