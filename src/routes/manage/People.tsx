@@ -111,15 +111,15 @@ function PersonSheet({
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 18 }}>
           <Avatar name={shown.name} size={44} src={shown.avatarUrl} />
           <div>
-            <div style={{ font: "800 22px var(--font-body)", letterSpacing: "-.01em" }}>{shown.name}</div>
+            <div style={{ font: "800 22px var(--font-family-body)", letterSpacing: "-.01em" }}>{shown.name}</div>
             <div className="bq-meta">{shown.email}</div>
           </div>
         </div>
 
         <div className="bq-stack">
-          <div style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-item)", padding: "12px 16px" }}>
+          <div style={{ background: "var(--color-bg-surface-secondary-default)", border: "1px solid var(--color-border-primary-default)", borderRadius: "var(--radius-item)", padding: "12px 16px" }}>
             <div className="bq-label">ROLE</div>
-            <div style={{ font: "600 var(--fs-base) var(--font-body)" }}>{ROLE_LABELS[shown.role]}</div>
+            <div style={{ font: "600 var(--text-callout-size) var(--font-family-body)" }}>{ROLE_LABELS[shown.role]}</div>
           </div>
           {hasTier(shown.role) && (
             <SelectField
@@ -131,7 +131,7 @@ function PersonSheet({
             />
           )}
           {hasTier(shown.role) && tiers.length === 0 && (
-            <div style={{ font: "400 var(--fs-small)/1.5 var(--font-mono)", color: "var(--ink-faint)", padding: "0 2px" }}>
+            <div style={{ font: "400 var(--text-caption-1-size)/1.5 var(--font-family-mono)", color: "var(--color-text-tertiary-default)", padding: "0 2px" }}>
               No pay tiers yet — create one in the Tiers tab to set this person's rate.
             </div>
           )}

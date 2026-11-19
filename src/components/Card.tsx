@@ -19,7 +19,7 @@ export function SectionCard({ title, sub, children, style }: { title: string; su
   return (
     <div className={cardClass("md")} style={{ marginBottom: 14, ...style }}>
       <div className="bq-label">{title}</div>
-      {sub && <div style={{ font: "400 var(--fs-small) var(--font-mono)", color: "var(--ink-faint)", marginTop: 2 }}>{sub}</div>}
+      {sub && <div style={{ font: "400 var(--text-caption-1-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)", marginTop: 2 }}>{sub}</div>}
       <div style={{ marginTop: 14 }}>{children}</div>
     </div>
   );

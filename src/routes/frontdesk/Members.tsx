@@ -72,7 +72,7 @@ export function Members() {
               key={f}
               className="bq-scale"
               onClick={() => setFilter(f)}
-              style={{ flex: "none", height: 36, padding: "0 14px", borderRadius: 999, border: on ? 0 : "1px solid var(--line)", background: on ? "var(--primary)" : "var(--surface)", color: on ? "var(--surface)" : "var(--ink)", font: "700 var(--fs-note) var(--font-body)", cursor: "pointer" }}
+              style={{ flex: "none", height: 36, padding: "0 14px", borderRadius: 999, border: on ? 0 : "1px solid var(--color-border-primary-default)", background: on ? "var(--color-bg-fill-primary-default)" : "var(--color-bg-surface-primary-default)", color: on ? "var(--color-bg-surface-primary-default)" : "var(--color-text-primary-default)", font: "700 var(--text-footnote-size) var(--font-family-body)", cursor: "pointer" }}
             >
               {{ all: "All", active: "Active", soon: "Ending soon", expired: "Expired", none: "No plan" }[f]} · {n}
             </button>
@@ -104,11 +104,11 @@ export function Members() {
               className={`bq-plain bq-listrow bq-listrow--compact ${!(i === shown.length - 1) ? "bq-listrow--divider" : ""}`} style={{ width: "100%", minHeight: 64, background: "none", cursor: "pointer", textAlign: "left" }}
             >
               <div className="bq-grow">
-                <div style={{ font: "700 var(--fs-base) var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.name}</div>
-                <div style={{ font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-faint)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                <div style={{ font: "700 var(--text-callout-size) var(--font-family-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.name}</div>
+                <div style={{ font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                   {plan.title} · {plan.detail}
-                  {soon && <span style={{ color: "var(--logging-fg)", fontWeight: 700 }}> · {soon.label}</span>}
-                  {here && !c.homeLocationId && <span style={{ color: "var(--danger-fg)", fontWeight: 700 }}> · No location</span>}
+                  {soon && <span style={{ color: "var(--color-text-status-logging-default)", fontWeight: 700 }}> · {soon.label}</span>}
+                  {here && !c.homeLocationId && <span style={{ color: "var(--color-text-status-danger-default)", fontWeight: 700 }}> · No location</span>}
                 </div>
               </div>
               <PlanPill client={c} />

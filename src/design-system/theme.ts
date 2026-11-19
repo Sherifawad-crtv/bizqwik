@@ -8,7 +8,7 @@
 // Not wired to data yet: the staff app doesn't receive the gym's brand colour
 // from the server today.
 
-const VARS = ["300", "400", "500", "600", "700", "800", "alpha-10", "alpha-12", "alpha-16"].map((s) => `--primitive-color-brand-${s}`);
+const VARS = ["300", "400", "500", "600", "700", "800", "alpha-10", "alpha-12", "alpha-16", "alpha-28", "alpha-40"].map((s) => `--primitive-color-brand-${s}`);
 
 type RGB = [number, number, number];
 
@@ -39,6 +39,8 @@ export function brandScale(hex: string): Record<string, string> | null {
     "--primitive-color-brand-alpha-10": rgba(0.1),
     "--primitive-color-brand-alpha-12": rgba(0.12),
     "--primitive-color-brand-alpha-16": rgba(0.16),
+    "--primitive-color-brand-alpha-28": rgba(0.28),
+    "--primitive-color-brand-alpha-40": rgba(0.4),
   };
 }
 

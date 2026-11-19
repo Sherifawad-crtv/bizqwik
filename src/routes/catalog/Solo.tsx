@@ -99,7 +99,7 @@ export function SoloOffer() {
     }
   };
 
-  const card: React.CSSProperties = { background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-card)", padding: "16px 20px", marginBottom: 12 };
+  const card: React.CSSProperties = { background: "var(--color-bg-surface-primary-default)", border: "1px solid var(--color-border-primary-default)", borderRadius: "var(--radius-card)", padding: "16px 20px", marginBottom: 12 };
   return (
     <div style={{ marginBottom: 12 }}>
       <div style={card}>
@@ -148,12 +148,12 @@ export function SoloOffer() {
 
       <div style={card}>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          {instapayQr && <img src={instapayQr} alt="Your InstaPay QR" style={{ width: 56, height: 56, objectFit: "contain", borderRadius: "var(--r-chip)", background: "#fff", border: "1px solid var(--line)" }} />}
+          {instapayQr && <img src={instapayQr} alt="Your InstaPay QR" style={{ width: 56, height: 56, objectFit: "contain", borderRadius: "var(--radius-chip)", background: "var(--color-bg-qr-default)", border: "1px solid var(--color-border-primary-default)" }} />}
           <div className="bq-grow">
             <div className="bq-h3">InstaPay QR</div>
             <div className="bq-meta">{instapayQr ? "Shown when someone pays by InstaPay" : "Add it to show on drop-ins"}</div>
           </div>
-          <label style={{ flex: "none", display: "inline-flex", alignItems: "center", height: 40, padding: "0 16px", borderRadius: 999, background: "var(--primary-tint)", color: "var(--primary-pressed)", font: "700 var(--fs-body-sm) var(--font-body)", cursor: "pointer" }}>
+          <label style={{ flex: "none", display: "inline-flex", alignItems: "center", height: 40, padding: "0 16px", borderRadius: 999, background: "var(--color-bg-fill-accent-default)", color: "var(--color-bg-fill-primary-active)", font: "700 var(--text-subheadline-size) var(--font-family-body)", cursor: "pointer" }}>
             {instapayQr ? "Replace" : "Add QR"}
             <input type="file" accept="image/*" hidden onChange={(e) => { void pickQr(e.target.files?.[0]); e.target.value = ""; }} />
           </label>
@@ -163,7 +163,7 @@ export function SoloOffer() {
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <div className="bq-grow">
             <div className="bq-h3">InstaPay address</div>
-            <div style={{ font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-faint)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{instapayAddress ?? "Members copy this to pay you"}</div>
+            <div style={{ font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{instapayAddress ?? "Members copy this to pay you"}</div>
           </div>
           {address === null && (
             <Button size="md" variant="secondary" style={{ height: 40, padding: "0 16px" }} onClick={() => { setAddress(instapayAddress ?? ""); setError(null); }}>
@@ -181,7 +181,7 @@ export function SoloOffer() {
           </div>
         )}
       </div>
-      {error && <div className="bq-rise" style={{ font: "600 var(--fs-note)/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: "var(--r-item)", padding: "10px 14px", marginBottom: 12 }}>{error}</div>}
+      {error && <div className="bq-rise" style={{ font: "600 var(--text-footnote-size)/1.5 var(--font-family-body)", color: "var(--color-text-status-danger-default)", background: "var(--color-bg-fill-status-danger-default)", borderRadius: "var(--radius-item)", padding: "10px 14px", marginBottom: 12 }}>{error}</div>}
     </div>
   );
 }
@@ -227,9 +227,9 @@ export function LocationsCard() {
           )}
         </div>
         {list.map((l) => (
-          <div key={l.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 0", borderTop: "1px solid var(--line)" }}>
+          <div key={l.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 0", borderTop: "1px solid var(--color-border-primary-default)" }}>
             <Icon name="map-pin" size={16} />
-            <span style={{ flex: 1, minWidth: 0, font: "600 var(--fs-body) var(--font-body)" }}>{l.name}</span>
+            <span style={{ flex: 1, minWidth: 0, font: "600 var(--text-body-size) var(--font-family-body)" }}>{l.name}</span>
             <IconButton icon="pencil" label={`Rename ${l.name}`} onClick={() => { setError(null); setEditing({ id: l.id, name: l.name }); }} />
           </div>
         ))}

@@ -108,14 +108,14 @@ export function CoachWallet() {
         </div>
       )}
       {actionError && (
-        <div className="bq-rise" style={{ marginBottom: 14, font: "600 var(--fs-note)/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: "var(--r-item)", padding: "10px 14px" }}>
+        <div className="bq-rise" style={{ marginBottom: 14, font: "600 var(--text-footnote-size)/1.5 var(--font-family-body)", color: "var(--color-text-status-danger-default)", background: "var(--color-bg-fill-status-danger-default)", borderRadius: "var(--radius-item)", padding: "10px 14px" }}>
           {actionError}
         </div>
       )}
 
       <div style={{ display: "flex", alignItems: "baseline", gap: 10, padding: "2px 2px 8px" }}>
         <span className="bq-label">DAYS LOGGED</span>
-        <span style={{ marginLeft: "auto", font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-faint)" }}>
+        <span style={{ marginLeft: "auto", font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)" }}>
           {new Set(sessions.map((s) => s.date)).size} {new Set(sessions.map((s) => s.date)).size === 1 ? "DAY" : "DAYS"}
         </span>
       </div>
@@ -128,7 +128,7 @@ export function CoachWallet() {
         emptyHint={editable ? "Tap + and scan the coaches' room QR when you arrive to log your first session." : "No sessions were logged this month."}
       />
 
-      <div style={{ padding: "22px 2px 0", font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-faint)" }}>
+      <div style={{ padding: "22px 2px 0", font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)" }}>
         {editable
           ? profile.role === "coach"
             ? "Log attendance by scanning the coaches' room QR. Tap a day to remove a mistake."

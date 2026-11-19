@@ -1,55 +1,6 @@
 :root {
-  /* Design tokens live in src/design-system/tokens/tokens.json (generated into
-     tokens.css). These old names are temporary aliases while screens move to
-     the new names; they are removed at the end of the clean-up. */
-  --paper: var(--color-bg-canvas-default);
-  --surface: var(--color-bg-surface-primary-default);
-  --sunken: var(--color-bg-surface-secondary-default);
-  --line: var(--color-border-primary-default);
-  --ink: var(--color-text-primary-default);
-  --ink-muted: var(--color-text-secondary-default);
-  --ink-faint: var(--color-text-tertiary-default);
-  --primary: var(--color-bg-fill-primary-default);
-  --primary-pressed: var(--color-bg-fill-primary-active);
-  --primary-tint: var(--color-bg-fill-accent-default);
-  --primary-tint-strong: var(--color-bg-fill-accent-selected);
-  --avatar-grad: linear-gradient(135deg, var(--color-bg-avatar-start), var(--color-bg-avatar-end));
-  --primary-light: var(--color-bg-fill-accent-strong);
-  --primary-dark: var(--color-text-accent-strong);
-  --accent: var(--color-bg-fill-accent-strong);
-  --accent-tint: var(--color-bg-fill-accent-active);
-  --accent-ink: var(--color-text-accent-strong);
-  --logging-fg: var(--color-text-status-logging-default);
-  --logging-bg: var(--color-bg-fill-status-logging-default);
-  --settled-fg: var(--color-text-status-settled-default);
-  --settled-bg: var(--color-bg-fill-status-settled-default);
-  --paid-fg: var(--color-text-status-paid-default);
-  --paid-bg: var(--color-bg-fill-status-paid-default);
-  --danger-fg: var(--color-text-status-danger-default);
-  --danger-bg: var(--color-bg-fill-status-danger-default);
-  --frozen-fg: var(--color-text-status-frozen-default);
-  --frozen-bg: var(--color-bg-fill-status-frozen-default);
-  --r-card: var(--radius-card);
-  --r-sheet: var(--radius-sheet);
-  --r-item: var(--radius-item);
-  --r-chip: var(--radius-chip);
-  --r-button: var(--radius-button);
-  --r-float: var(--radius-float);
-  --font-body: var(--font-family-body);
-  --font-mono: var(--font-family-mono);
-  --dur-quick: var(--duration-quick);
-  --dur-standard: var(--duration-standard);
-  --dur-control: var(--duration-control);
-  --dur-screen: var(--duration-screen);
-  --fs-caption: var(--text-caption-2-size);
-  --fs-small: var(--text-caption-1-size);
-  --fs-note: var(--text-footnote-size);
-  --fs-body-sm: var(--text-subheadline-size);
-  --fs-body: var(--text-body-size);
-  --fs-base: var(--text-callout-size);
-  --fs-title-sm: var(--text-title-2-size);
-  --fs-title: var(--text-title-1-size);
-  --fs-display: var(--text-large-title-size);
+  /* Design tokens come from src/design-system/tokens/tokens.json (generated
+     into tokens.css, loaded first). Never type a value a token covers. */
 
   /* Layout values that depend on the device (not design tokens). */
   /* Gap under the bottom bar: it sits just above the iOS home indicator. */
@@ -77,9 +28,9 @@ body {
   margin: 0;
   padding: 0;
   min-height: 100%;
-  background: var(--paper);
-  color: var(--ink);
-  font-family: var(--font-body);
+  background: var(--color-bg-canvas-default);
+  color: var(--color-text-primary-default);
+  font-family: var(--font-family-body);
   overscroll-behavior: none; /* no rubber-band, no pull-to-refresh */
   -webkit-text-size-adjust: 100%; /* don't resize text when the phone rotates */
   text-size-adjust: 100%;
@@ -120,12 +71,12 @@ body {
 }
 
 a {
-  color: var(--primary);
+  color: var(--color-bg-fill-primary-default);
   text-decoration: none;
   -webkit-tap-highlight-color: transparent;
 }
 a:hover {
-  color: var(--primary-pressed);
+  color: var(--color-bg-fill-primary-active);
 }
 
 button {
@@ -166,7 +117,7 @@ textarea {
 
 /* Every tappable thing dims the instant a finger lands and eases back on release. */
 :where(button, [role="button"], a[href]) {
-  transition: opacity var(--dur-standard) var(--ease-standard);
+  transition: opacity var(--duration-standard) var(--ease-standard);
 }
 :where(button:not(:disabled), [role="button"], a[href]):active {
   opacity: 0.7;
@@ -178,12 +129,12 @@ textarea {
    spring back when you let go. */
 :root { --press-scale: 0.97; }
 .bq-scale {
-  transition: transform var(--dur-standard) var(--ease-spring);
+  transition: transform var(--duration-standard) var(--ease-spring);
 }
 .bq-scale:active {
   transform: scale(var(--press-scale));
   opacity: 1;
-  transition-duration: var(--dur-quick);
+  transition-duration: var(--duration-quick);
   transition-timing-function: var(--ease-standard);
 }
 
@@ -206,14 +157,14 @@ textarea {
 /* .bq-row: a tappable list row. */
 .bq-row {
   cursor: pointer;
-  transition: background var(--dur-quick) var(--ease-standard);
+  transition: background var(--duration-quick) var(--ease-standard);
 }
 .bq-row:active {
-  background: var(--sunken);
+  background: var(--color-bg-surface-secondary-default);
 }
 @media (hover: hover) and (pointer: fine) {
   .bq-row:hover {
-    background: var(--sunken);
+    background: var(--color-bg-surface-secondary-default);
   }
 }
 
@@ -227,17 +178,17 @@ textarea {
   height: 48px;
   padding: 0 22px;
   border: 0;
-  border-radius: var(--r-button);
-  font: 700 var(--fs-base) var(--font-body);
+  border-radius: var(--radius-button);
+  font: 700 var(--text-callout-size) var(--font-family-body);
   cursor: pointer;
-  transition: opacity var(--dur-standard) var(--ease-standard), transform var(--dur-quick) var(--ease-standard), filter var(--dur-quick) var(--ease-standard);
+  transition: opacity var(--duration-standard) var(--ease-standard), transform var(--duration-quick) var(--ease-standard), filter var(--duration-quick) var(--ease-standard);
 }
 .bq-btn--lg { height: 56px; }
 .bq-btn--full { width: 100%; }
-.bq-btn--primary { background: var(--primary); color: var(--surface); }
-.bq-btn--secondary { background: var(--primary-tint); color: var(--primary-pressed); }
-.bq-btn--quiet { background: var(--paper); color: var(--ink-muted); border: 1px solid var(--line); }
-.bq-btn--danger { background: var(--danger-bg); color: var(--danger-fg); }
+.bq-btn--primary { background: var(--color-bg-fill-primary-default); color: var(--color-bg-surface-primary-default); }
+.bq-btn--secondary { background: var(--color-bg-fill-accent-default); color: var(--color-bg-fill-primary-active); }
+.bq-btn--quiet { background: var(--color-bg-canvas-default); color: var(--color-text-secondary-default); border: 1px solid var(--color-border-primary-default); }
+.bq-btn--danger { background: var(--color-bg-fill-status-danger-default); color: var(--color-text-status-danger-default); }
 .bq-btn:disabled { opacity: 0.45; cursor: default; }
 /* Mouse only, never touch, so hover can't get "stuck" after a tap. */
 @media (hover: hover) and (pointer: fine) {
@@ -296,7 +247,7 @@ textarea {
 }
 .bq-skel { animation: bqSkel 1.3s ease-in-out infinite; }
 /* Real content arriving where a loading placeholder was: a soft fade, not a pop. */
-[data-reveal] > :not([data-testid="skeleton"]) { animation: bqFade var(--dur-standard) var(--ease-standard) both; }
+[data-reveal] > :not([data-testid="skeleton"]) { animation: bqFade var(--duration-standard) var(--ease-standard) both; }
 @keyframes bqRise {
   from {
     opacity: 0;
@@ -309,7 +260,7 @@ textarea {
 }
 
 .bq-rise {
-  animation: bqRise var(--dur-standard) var(--ease-standard) both;
+  animation: bqRise var(--duration-standard) var(--ease-standard) both;
 }
 
 /* Reduce Motion (iPhone Settings → Accessibility → Motion): Apple's guidance is
@@ -363,14 +314,14 @@ textarea {
 
 /* ───────────────────────────── Layout helpers ───────────────────────────── */
 .bq-stack { display: flex; flex-direction: column; gap: 10px; }
-.bq-panel { background: var(--surface); border-radius: var(--r-card); overflow: hidden; }
+.bq-panel { background: var(--color-bg-surface-primary-default); border-radius: var(--radius-card); overflow: hidden; }
 /* A form or action error under its field. */
 .bq-error {
-  background: var(--danger-bg);
-  color: var(--danger-fg);
-  border-radius: var(--r-item);
+  background: var(--color-bg-fill-status-danger-default);
+  color: var(--color-text-status-danger-default);
+  border-radius: var(--radius-item);
   padding: 10px 14px;
-  font: 600 var(--fs-note)/1.5 var(--font-body);
+  font: 600 var(--text-footnote-size)/1.5 var(--font-family-body);
 }
 .bq-error--spaced { margin-top: 12px; }
 
@@ -383,7 +334,7 @@ textarea {
   height: calc(var(--bar-bottom) + 64px + 36px);
   z-index: 54;
   pointer-events: none;
-  background: linear-gradient(to bottom, rgba(243, 242, 238, 0), var(--paper) 78%);
+  background: linear-gradient(to bottom, var(--color-bg-canvas-fade-start), var(--color-bg-canvas-default) 78%);
 }
 
 /* MotionList rows: arrive by growing in and fading up, leave by fading and
@@ -391,9 +342,9 @@ textarea {
 .bq-li {
   display: grid;
   grid-template-rows: 1fr;
-  transition: grid-template-rows var(--dur-standard) var(--ease-standard), opacity var(--dur-standard) var(--ease-standard);
+  transition: grid-template-rows var(--duration-standard) var(--ease-standard), opacity var(--duration-standard) var(--ease-standard);
 }
-.bq-li[data-state="in"] { animation: bqListIn var(--dur-standard) var(--ease-standard) both; }
+.bq-li[data-state="in"] { animation: bqListIn var(--duration-standard) var(--ease-standard) both; }
 .bq-li[data-state="out"] { grid-template-rows: 0fr; opacity: 0; pointer-events: none; }
 @keyframes bqListIn {
   from { grid-template-rows: 0fr; opacity: 0; transform: translateY(6px); }
@@ -409,14 +360,14 @@ textarea {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: opacity var(--dur-standard) var(--ease-standard), transform var(--dur-standard) var(--ease-standard), visibility 0s linear 0s;
+  transition: opacity var(--duration-standard) var(--ease-standard), transform var(--duration-standard) var(--ease-standard), visibility 0s linear 0s;
 }
 .bq-barlayer[data-on="false"] {
   opacity: 0;
   transform: translateY(16px);
   pointer-events: none;
   visibility: hidden;
-  transition: opacity var(--dur-standard) var(--ease-standard), transform var(--dur-standard) var(--ease-standard), visibility 0s linear var(--dur-standard);
+  transition: opacity var(--duration-standard) var(--ease-standard), transform var(--duration-standard) var(--ease-standard), visibility 0s linear var(--duration-standard);
 }
 
 /* ═══════════════════════════ Library components ═══════════════════════════
@@ -424,16 +375,16 @@ textarea {
    Chip, Stat). See DESIGN_SYSTEM.md before styling anything by hand. */
 
 /* Tones: a status colour pair, set once and read by Tag / StatusBadge. */
-.bq-tone-neutral { --tone-fg: var(--ink-muted); --tone-bg: var(--sunken); }
-.bq-tone-primary { --tone-fg: var(--primary-pressed); --tone-bg: var(--primary-tint); }
-.bq-tone-logging { --tone-fg: var(--logging-fg); --tone-bg: var(--logging-bg); }
-.bq-tone-settled { --tone-fg: var(--settled-fg); --tone-bg: var(--settled-bg); }
-.bq-tone-paid { --tone-fg: var(--paid-fg); --tone-bg: var(--paid-bg); }
-.bq-tone-danger { --tone-fg: var(--danger-fg); --tone-bg: var(--danger-bg); }
-.bq-tone-frozen { --tone-fg: var(--frozen-fg); --tone-bg: var(--frozen-bg); }
+.bq-tone-neutral { --tone-fg: var(--color-text-secondary-default); --tone-bg: var(--color-bg-surface-secondary-default); }
+.bq-tone-primary { --tone-fg: var(--color-bg-fill-primary-active); --tone-bg: var(--color-bg-fill-accent-default); }
+.bq-tone-logging { --tone-fg: var(--color-text-status-logging-default); --tone-bg: var(--color-bg-fill-status-logging-default); }
+.bq-tone-settled { --tone-fg: var(--color-text-status-settled-default); --tone-bg: var(--color-bg-fill-status-settled-default); }
+.bq-tone-paid { --tone-fg: var(--color-text-status-paid-default); --tone-bg: var(--color-bg-fill-status-paid-default); }
+.bq-tone-danger { --tone-fg: var(--color-text-status-danger-default); --tone-bg: var(--color-bg-fill-status-danger-default); }
+.bq-tone-frozen { --tone-fg: var(--color-text-status-frozen-default); --tone-bg: var(--color-bg-fill-status-frozen-default); }
 
 /* Card: every surface on a page. */
-.bq-card { background: var(--surface); border-radius: var(--r-card); }
+.bq-card { background: var(--color-bg-surface-primary-default); border-radius: var(--radius-card); }
 .bq-card--sm { padding: 14px var(--space-4); }
 .bq-card--md { padding: var(--space-5); }
 .bq-card--lg { padding: 30px; }
@@ -446,21 +397,21 @@ textarea {
 /* ListRow: one row of a list that sits inside a Card (pad none). */
 .bq-listrow { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-4) var(--space-5); }
 .bq-listrow--compact { padding: var(--space-3) 18px; }
-.bq-listrow--divider { border-bottom: 1px solid var(--line); }
+.bq-listrow--divider { border-bottom: 1px solid var(--color-border-primary-default); }
 
 /* Tag: a small square label (Kids, a location, OFF SALE). */
 .bq-tag {
   display: inline-flex;
   align-items: center;
   flex: none;
-  font: 700 10px var(--font-mono);
+  font: 700 10px var(--font-family-mono);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   white-space: nowrap;
-  border-radius: var(--r-chip);
+  border-radius: var(--radius-chip);
   padding: 3px 7px;
-  color: var(--tone-fg, var(--ink-muted));
-  background: var(--tone-bg, var(--sunken));
+  color: var(--tone-fg, var(--color-text-secondary-default));
+  background: var(--tone-bg, var(--color-bg-surface-secondary-default));
 }
 
 /* StatusBadge: a pill with a dot that says what state something is in. */
@@ -471,7 +422,7 @@ textarea {
   flex: none;
   padding: var(--space-1) 10px;
   border-radius: 999px;
-  font: 700 var(--fs-caption) var(--font-mono);
+  font: 700 var(--text-caption-2-size) var(--font-family-mono);
   letter-spacing: 0.08em;
   white-space: nowrap;
   color: var(--tone-fg);
@@ -490,12 +441,12 @@ textarea {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: var(--primary-pressed);
-  background: var(--primary-tint);
+  color: var(--color-bg-fill-primary-active);
+  background: var(--color-bg-fill-accent-default);
 }
-.bq-iconbtn--danger { color: var(--danger-fg); background: var(--danger-bg); }
-.bq-iconbtn--neutral { color: var(--ink); background: var(--sunken); }
-.bq-iconbtn--plain { color: var(--ink-muted); background: transparent; }
+.bq-iconbtn--danger { color: var(--color-text-status-danger-default); background: var(--color-bg-fill-status-danger-default); }
+.bq-iconbtn--neutral { color: var(--color-text-primary-default); background: var(--color-bg-surface-secondary-default); }
+.bq-iconbtn--plain { color: var(--color-text-secondary-default); background: transparent; }
 
 /* Chip: a selectable filter or choice. */
 .bq-chip {
@@ -503,16 +454,16 @@ textarea {
   height: 36px;
   padding: 0 var(--space-3);
   border-radius: 999px;
-  border: 1px solid var(--line);
-  background: var(--surface);
-  color: var(--ink);
-  font: 700 var(--fs-body-sm) var(--font-body);
+  border: 1px solid var(--color-border-primary-default);
+  background: var(--color-bg-surface-primary-default);
+  color: var(--color-text-primary-default);
+  font: 700 var(--text-subheadline-size) var(--font-family-body);
   white-space: nowrap;
   cursor: pointer;
-  transition: background var(--dur-quick) var(--ease-standard), color var(--dur-quick) var(--ease-standard), border-color var(--dur-quick) var(--ease-standard);
+  transition: background var(--duration-quick) var(--ease-standard), color var(--duration-quick) var(--ease-standard), border-color var(--duration-quick) var(--ease-standard);
 }
-.bq-chip[aria-pressed="true"] { border-color: var(--primary); background: var(--primary-tint); color: var(--primary-pressed); }
-.bq-chip--sm { height: 32px; font-size: var(--fs-small); }
+.bq-chip[aria-pressed="true"] { border-color: var(--color-bg-fill-primary-default); background: var(--color-bg-fill-accent-default); color: var(--color-bg-fill-primary-active); }
+.bq-chip--sm { height: 32px; font-size: var(--text-caption-1-size); }
 
 /* Stat: big numbers. */
 .bq-stat-xl { font: var(--text-stat-xl-weight) var(--text-stat-xl-size)/1 var(--font-family-body); letter-spacing: -0.03em; }

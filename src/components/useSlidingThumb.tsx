@@ -41,7 +41,7 @@ export function useSlidingThumb(value: string) {
         width: box.w,
         transform: `translateX(${box.x}px)`,
         borderRadius: 999,
-        background: "var(--surface)",
+        background: "var(--color-bg-surface-primary-default)",
         // Always underneath the labels: in an isolated stack, below everything
         // in the control. (Without this Safari can paint the sliding pill over
         // the text as it passes.)

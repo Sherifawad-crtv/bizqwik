@@ -110,7 +110,7 @@ export function CoachDetail() {
       {!isMobile && (
       <button
         onClick={goBack}
-        style={{ display: "flex", alignItems: "center", gap: 4, border: 0, background: "none", cursor: "pointer", color: "var(--ink-muted)", font: "600 var(--fs-note) var(--font-body)", padding: "0 0 14px" }}
+        style={{ display: "flex", alignItems: "center", gap: 4, border: 0, background: "none", cursor: "pointer", color: "var(--color-text-secondary-default)", font: "600 var(--text-footnote-size) var(--font-family-body)", padding: "0 0 14px" }}
       >
         <Icon name="chevron-left" size={16} /> {from === "history" ? "History" : "Team"}
       </button>
@@ -119,7 +119,7 @@ export function CoachDetail() {
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 18 }}>
         <Avatar name={row.name} size={44} src={row.avatarUrl} />
         <div>
-          <div style={{ font: "800 22px var(--font-body)", letterSpacing: "-.01em" }}>{row.name}</div>
+          <div style={{ font: "800 22px var(--font-family-body)", letterSpacing: "-.01em" }}>{row.name}</div>
           <div className="bq-meta">{row.tierName ?? "No tier"} · {row.email}</div>
         </div>
       </div>
@@ -157,14 +157,14 @@ export function CoachDetail() {
       </div>
       )}
       {actionError && (
-        <div className="bq-rise" style={{ marginBottom: 14, font: "600 var(--fs-note)/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: "var(--r-item)", padding: "10px 14px" }}>
+        <div className="bq-rise" style={{ marginBottom: 14, font: "600 var(--text-footnote-size)/1.5 var(--font-family-body)", color: "var(--color-text-status-danger-default)", background: "var(--color-bg-fill-status-danger-default)", borderRadius: "var(--radius-item)", padding: "10px 14px" }}>
           {actionError}
         </div>
       )}
 
       <div style={{ display: "flex", alignItems: "baseline", gap: 10, padding: "2px 2px 8px" }}>
         <span className="bq-label">DAYS LOGGED</span>
-        <span style={{ marginLeft: "auto", font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-faint)" }}>
+        <span style={{ marginLeft: "auto", font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)" }}>
           {new Set(sessions.map((s) => s.date)).size} {new Set(sessions.map((s) => s.date)).size === 1 ? "DAY" : "DAYS"}
         </span>
       </div>

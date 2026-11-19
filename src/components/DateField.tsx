@@ -27,17 +27,17 @@ export function DateField({ value, min, max, onChange }: DateFieldProps) {
           position: "relative",
           width: "100%",
           textAlign: "left",
-          background: "var(--sunken)",
-          border: "1px solid var(--line)",
-          borderRadius: "var(--r-item)",
+          background: "var(--color-bg-surface-secondary-default)",
+          border: "1px solid var(--color-border-primary-default)",
+          borderRadius: "var(--radius-item)",
           padding: "12px 16px",
           cursor: "pointer",
         }}
       >
         <div className="bq-label">DATE</div>
         <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-          <span style={{ font: "600 var(--fs-base) var(--font-body)", color: "var(--ink)" }}>{dateLabel(value)}</span>
-          <span style={{ marginLeft: "auto", font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-faint)" }}>TAP TO CHANGE</span>
+          <span style={{ font: "600 var(--text-callout-size) var(--font-family-body)", color: "var(--color-text-primary-default)" }}>{dateLabel(value)}</span>
+          <span style={{ marginLeft: "auto", font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)" }}>TAP TO CHANGE</span>
         </div>
       </div>
 
@@ -46,7 +46,7 @@ export function DateField({ value, min, max, onChange }: DateFieldProps) {
         <div className="bq-title">{monthLabel(month)}</div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 6, marginBottom: 4 }}>
           {DOW.map((d, i) => (
-            <div key={i} style={{ textAlign: "center", font: "700 var(--fs-caption) var(--font-mono)", letterSpacing: ".04em", color: "var(--ink-faint)", padding: "4px 0" }}>
+            <div key={i} style={{ textAlign: "center", font: "700 var(--text-caption-2-size) var(--font-family-mono)", letterSpacing: ".04em", color: "var(--color-text-tertiary-default)", padding: "4px 0" }}>
               {d}
             </div>
           ))}
@@ -66,11 +66,11 @@ export function DateField({ value, min, max, onChange }: DateFieldProps) {
                 style={{
                   aspectRatio: "1",
                   border: 0,
-                  borderRadius: "var(--r-item)",
-                  background: on ? "var(--primary)" : "var(--sunken)",
-                  color: disabled ? "var(--ink-faint)" : on ? "#fff" : "var(--ink)",
+                  borderRadius: "var(--radius-item)",
+                  background: on ? "var(--color-bg-fill-primary-default)" : "var(--color-bg-surface-secondary-default)",
+                  color: disabled ? "var(--color-text-tertiary-default)" : on ? "var(--color-text-on-fill-default)" : "var(--color-text-primary-default)",
                   opacity: disabled ? 0.4 : 1,
-                  font: "700 var(--fs-body) var(--font-body)",
+                  font: "700 var(--text-body-size) var(--font-family-body)",
                   cursor: disabled ? "not-allowed" : "pointer",
                 }}
               >

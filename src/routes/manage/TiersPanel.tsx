@@ -61,19 +61,19 @@ export function TiersPanel({ onOpenPeople, onOpenInvites }: { onOpenPeople: () =
       {shownDeleting && (onTier(shownDeleting.id).length > 0 || invitedTo(shownDeleting.id).length > 0) ? (
         <Sheet open={!!deleting} onClose={() => setDeleting(null)}>
           <div className="bq-label">DELETE TIER</div>
-          <div style={{ font: "800 var(--fs-title)/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 4px" }}>{shownDeleting.name} is still in use</div>
-          <div style={{ font: "400 var(--fs-note)/1.5 var(--font-mono)", color: "var(--ink-muted)", marginBottom: 14 }}>Move these to another tier first, then delete it.</div>
-          <div style={{ background: "var(--sunken)", borderRadius: "var(--r-item)", padding: "6px 16px", marginBottom: 16 }}>
+          <div style={{ font: "800 var(--text-title-1-size)/1.2 var(--font-family-body)", letterSpacing: "-.02em", margin: "4px 0 4px" }}>{shownDeleting.name} is still in use</div>
+          <div style={{ font: "400 var(--text-footnote-size)/1.5 var(--font-family-mono)", color: "var(--color-text-secondary-default)", marginBottom: 14 }}>Move these to another tier first, then delete it.</div>
+          <div style={{ background: "var(--color-bg-surface-secondary-default)", borderRadius: "var(--radius-item)", padding: "6px 16px", marginBottom: 16 }}>
             {onTier(shownDeleting.id).map((p) => (
               <div key={p.id} style={{ display: "flex", alignItems: "baseline", gap: 10, padding: "10px 0" }}>
-                <span style={{ font: "700 var(--fs-body) var(--font-body)" }}>{p.name}</span>
-                <span style={{ marginLeft: "auto", font: "400 var(--fs-small) var(--font-mono)", color: "var(--ink-faint)" }}>{ROLE_LABELS[p.role]}</span>
+                <span style={{ font: "700 var(--text-body-size) var(--font-family-body)" }}>{p.name}</span>
+                <span style={{ marginLeft: "auto", font: "400 var(--text-caption-1-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)" }}>{ROLE_LABELS[p.role]}</span>
               </div>
             ))}
             {invitedTo(shownDeleting.id).map((i) => (
               <div key={i.email} style={{ display: "flex", alignItems: "baseline", gap: 10, padding: "10px 0" }}>
-                <span style={{ font: "700 var(--fs-body) var(--font-body)", overflow: "hidden", textOverflow: "ellipsis" }}>{i.email}</span>
-                <span style={{ marginLeft: "auto", font: "400 var(--fs-small) var(--font-mono)", color: "var(--ink-faint)" }}>Pending invite</span>
+                <span style={{ font: "700 var(--text-body-size) var(--font-family-body)", overflow: "hidden", textOverflow: "ellipsis" }}>{i.email}</span>
+                <span style={{ marginLeft: "auto", font: "400 var(--text-caption-1-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)" }}>Pending invite</span>
               </div>
             ))}
           </div>

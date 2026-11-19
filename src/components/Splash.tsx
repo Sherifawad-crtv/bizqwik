@@ -12,10 +12,10 @@ export function Splash() {
       data-testid="splash"
       role="status"
       aria-label="Loading Bizqwik"
-      style={{ minHeight: "100svh", background: "var(--paper)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 22 }}
+      style={{ minHeight: "100svh", background: "var(--color-bg-canvas-default)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 22 }}
     >
       <img src="/wordmark.png" alt="Bizqwik" style={{ height: 44, width: "auto", display: "block" }} />
-      <div style={{ width: 24, height: 24, borderRadius: 999, border: "3px solid var(--primary-tint)", borderTopColor: "var(--primary)", animation: "bqSpin .7s linear infinite" }} />
+      <div style={{ width: 24, height: 24, borderRadius: 999, border: "3px solid var(--color-bg-fill-accent-default)", borderTopColor: "var(--color-bg-fill-primary-default)", animation: "bqSpin .7s linear infinite" }} />
     </div>
   );
 }

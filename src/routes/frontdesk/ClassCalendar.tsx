@@ -60,14 +60,14 @@ export function ClassCalendarScreen({ onClose }: { onClose: () => void }) {
   return createPortal(
     <div
       data-testid="class-calendar"
-      style={{ position: "fixed", inset: 0, zIndex: 150, background: "var(--surface)", display: "flex", flexDirection: "column", paddingTop: "var(--safe-top)" }}
+      style={{ position: "fixed", inset: 0, zIndex: 150, background: "var(--color-bg-surface-primary-default)", display: "flex", flexDirection: "column", paddingTop: "var(--safe-top)" }}
     >
-      <div style={{ flex: "none", display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8, padding: isMobile ? "10px 12px" : "12px 20px", borderBottom: "1px solid var(--line)" }}>
+      <div style={{ flex: "none", display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8, padding: isMobile ? "10px 12px" : "12px 20px", borderBottom: "1px solid var(--color-border-primary-default)" }}>
         <Button variant="quiet" aria-label="Close calendar" style={{ width: 44, height: 44, padding: 0 }} onClick={onClose}>
           <Icon name="close" size={18} />
         </Button>
         {!isMobile && <span className="bq-stat-sm" style={{ marginRight: 8 }}>Classes</span>}
-        <Button variant="secondary" style={{ height: 44, padding: "0 14px", font: "700 var(--fs-small) var(--font-mono)", letterSpacing: ".06em" }} onClick={() => setCursor(today)}>
+        <Button variant="secondary" style={{ height: 44, padding: "0 14px", font: "700 var(--text-caption-1-size) var(--font-family-mono)", letterSpacing: ".06em" }} onClick={() => setCursor(today)}>
           TODAY
         </Button>
         <Button variant="quiet" aria-label="Previous" style={{ width: 44, height: 44, padding: 0 }} onClick={() => step(-1)}>
@@ -76,7 +76,7 @@ export function ClassCalendarScreen({ onClose }: { onClose: () => void }) {
         <Button variant="quiet" aria-label="Next" style={{ width: 44, height: 44, padding: 0 }} onClick={() => step(1)}>
           <Icon name="chevron-right" size={18} />
         </Button>
-        <div data-testid="calendar-label" style={{ flex: 1, minWidth: 140, font: "800 18px var(--font-body)", letterSpacing: "-.01em" }}>
+        <div data-testid="calendar-label" style={{ flex: 1, minWidth: 140, font: "800 18px var(--font-family-body)", letterSpacing: "-.01em" }}>
           {title(view, cursor)}
         </div>
         <Segmented
@@ -91,7 +91,7 @@ export function ClassCalendarScreen({ onClose }: { onClose: () => void }) {
       </div>
 
       {classes.error && (
-        <div style={{ flex: "none", font: "600 var(--fs-note)/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", padding: "10px 20px" }}>{classes.error}</div>
+        <div style={{ flex: "none", font: "600 var(--text-footnote-size)/1.5 var(--font-family-body)", color: "var(--color-text-status-danger-default)", background: "var(--color-bg-fill-status-danger-default)", padding: "10px 20px" }}>{classes.error}</div>
       )}
 
       <div style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>

@@ -44,7 +44,7 @@ export function ResetPassword() {
     <div
       style={{
         minHeight: "100svh",
-        background: "var(--paper)",
+        background: "var(--color-bg-canvas-default)",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
@@ -58,7 +58,7 @@ export function ResetPassword() {
       <img src="/wordmark.png" alt="Bizqwik" style={{ height: "clamp(34px, 8vw, 42px)", width: "auto", display: "block" }} />
       <div className="bq-card bq-card--lg" style={{ width: "min(420px, 100%)" }}>
         <div className="bq-stat-lg">Set new password</div>
-        <div style={{ font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-muted)", marginTop: 6, marginBottom: 22 }}>
+        <div style={{ font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-secondary-default)", marginTop: 6, marginBottom: 22 }}>
           CHOOSE A NEW PASSWORD
         </div>
 

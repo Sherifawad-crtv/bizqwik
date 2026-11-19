@@ -87,16 +87,16 @@ export function AddSessionSheet({ open, onClose, coachId, coachName, month: mont
         <>
           <div className="bq-label">NEW ENTRY</div>
           <div className="bq-stat-lg" style={{ margin: "4px 0 4px" }}>Log a session</div>
-          <div style={{ font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-muted)", marginBottom: 16 }}>
+          <div style={{ font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-secondary-default)", marginBottom: 16 }}>
             {coachName ? `Adds to ${coachName}'s ${monthLabel(month)} total.` : `Adds to your ${monthLabel(month)} total.`}
           </div>
 
           <div className="bq-stack">
             {scan ? (
-              <div data-testid="scan-date" style={{ display: "flex", alignItems: "center", gap: 10, background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-item)", padding: "14px 16px" }}>
+              <div data-testid="scan-date" style={{ display: "flex", alignItems: "center", gap: 10, background: "var(--color-bg-surface-secondary-default)", border: "1px solid var(--color-border-primary-default)", borderRadius: "var(--radius-item)", padding: "14px 16px" }}>
                 <Icon name="check" size={18} />
-                <span style={{ font: "700 var(--fs-body) var(--font-body)" }}>Today · {shortDay(scan.date)}</span>
-                <span style={{ marginLeft: "auto", font: "700 var(--fs-caption) var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>QR VERIFIED</span>
+                <span style={{ font: "700 var(--text-body-size) var(--font-family-body)" }}>Today · {shortDay(scan.date)}</span>
+                <span style={{ marginLeft: "auto", font: "700 var(--text-caption-2-size) var(--font-family-mono)", letterSpacing: ".08em", color: "var(--color-text-tertiary-default)" }}>QR VERIFIED</span>
               </div>
             ) : (
               <DateField value={date} min={min} max={max} onChange={setDate} />
@@ -104,10 +104,10 @@ export function AddSessionSheet({ open, onClose, coachId, coachName, month: mont
             <Stepper value={qty} onChange={setQty} />
             <div style={{ display: "flex", alignItems: "baseline", gap: 10, padding: "6px 6px 0" }}>
               <span className="bq-label">ADDS</span>
-              <span className="tabular bq-rise" style={{ marginLeft: "auto", font: "800 var(--fs-display) var(--font-body)", letterSpacing: "-.02em", color: "var(--primary)" }}>
+              <span className="tabular bq-rise" style={{ marginLeft: "auto", font: "800 var(--text-large-title-size) var(--font-family-body)", letterSpacing: "-.02em", color: "var(--color-bg-fill-primary-default)" }}>
                 +{qty * rate}
               </span>
-              <span style={{ font: "700 var(--fs-caption) var(--font-mono)", letterSpacing: ".08em", color: "var(--primary)" }}>EGP</span>
+              <span style={{ font: "700 var(--text-caption-2-size) var(--font-family-mono)", letterSpacing: ".08em", color: "var(--color-bg-fill-primary-default)" }}>EGP</span>
             </div>
           </div>
 

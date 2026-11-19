@@ -47,7 +47,7 @@ export function SectionLink({ children, onClick }: { children: ReactNode; onClic
     <button
       className="bq-scale"
       onClick={onClick}
-      style={{ display: "inline-flex", alignItems: "center", gap: 2, border: 0, background: "none", color: "var(--primary-pressed)", font: "700 var(--fs-body-sm) var(--font-body)", cursor: "pointer", padding: "6px 0 6px 8px" }}
+      style={{ display: "inline-flex", alignItems: "center", gap: 2, border: 0, background: "none", color: "var(--color-bg-fill-primary-active)", font: "700 var(--text-subheadline-size) var(--font-family-body)", cursor: "pointer", padding: "6px 0 6px 8px" }}
     >
       {children} <Icon name="chevron-right" size={16} />
     </button>
@@ -58,9 +58,9 @@ export function SectionLink({ children, onClick }: { children: ReactNode; onClic
 export function SearchField({ value, onChange, placeholder = "Search by name or phone" }: { value: string; onChange: (v: string) => void; placeholder?: string }) {
   return (
     <label
-      style={{ display: "flex", alignItems: "center", gap: 10, background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-item)", padding: "0 16px", height: 52 }}
+      style={{ display: "flex", alignItems: "center", gap: 10, background: "var(--color-bg-surface-secondary-default)", border: "1px solid var(--color-border-primary-default)", borderRadius: "var(--radius-item)", padding: "0 16px", height: 52 }}
     >
-      <span style={{ color: "var(--ink-faint)", display: "flex" }}>
+      <span style={{ color: "var(--color-text-tertiary-default)", display: "flex" }}>
         <Icon name="search" size={18} />
       </span>
       <input
@@ -69,7 +69,7 @@ export function SearchField({ value, onChange, placeholder = "Search by name or 
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         aria-label={placeholder}
-        style={{ flex: 1, minWidth: 0, border: 0, background: "none", outline: "none", font: "600 var(--fs-base) var(--font-body)", color: "var(--ink)" }}
+        style={{ flex: 1, minWidth: 0, border: 0, background: "none", outline: "none", font: "600 var(--text-callout-size) var(--font-family-body)", color: "var(--color-text-primary-default)" }}
       />
     </label>
   );
@@ -111,8 +111,8 @@ export function ClientPicker({
               className={`bq-plain bq-listrow bq-listrow--compact ${!(i === shown.length - 1) ? "bq-listrow--divider" : ""}`} style={{ width: "100%", minHeight: 64, background: "none", cursor: "pointer", textAlign: "left" }}
             >
               <div className="bq-grow">
-                <div style={{ font: "700 var(--fs-base) var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.name}</div>
-                <div style={{ font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-faint)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                <div style={{ font: "700 var(--text-callout-size) var(--font-family-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.name}</div>
+                <div style={{ font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                   {plan.title} · {plan.detail}
                 </div>
               </div>

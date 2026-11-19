@@ -150,12 +150,12 @@ export function DropIn({ embedded = false, initialClient = null }: { embedded?: 
       </div>
 
       <Card pad="none" style={{ padding: "16px 18px", display: "flex", gap: 12, alignItems: "flex-start", marginBottom: 16 }}>
-        <span style={{ color: "var(--primary-pressed)", display: "flex", marginTop: 2 }}>
+        <span style={{ color: "var(--color-bg-fill-primary-active)", display: "flex", marginTop: 2 }}>
           <Icon name={mode === "class" ? "calendar" : "ticket"} size={22} />
         </span>
         <div>
           <div className="bq-h3">{mode === "class" ? "Drop into a class" : "One-time entry"}</div>
-          <div style={{ font: "400 var(--fs-note)/1.5 var(--font-mono)", color: "var(--ink-muted)" }}>
+          <div style={{ font: "400 var(--text-footnote-size)/1.5 var(--font-family-mono)", color: "var(--color-text-secondary-default)" }}>
             {mode === "class"
               ? "Charges that class's drop-in price and adds the member to its roster as arrived."
               : "Valid for a single visit. Link the member, or add a new one with their details."}
@@ -164,16 +164,16 @@ export function DropIn({ embedded = false, initialClient = null }: { embedded?: 
       </Card>
 
       {done && (
-        <div style={{ marginBottom: 14, font: "600 var(--fs-note)/1.5 var(--font-body)", color: "var(--paid-fg)", background: "var(--paid-bg)", borderRadius: "var(--r-item)", padding: "10px 14px" }}>
+        <div style={{ marginBottom: 14, font: "600 var(--text-footnote-size)/1.5 var(--font-family-body)", color: "var(--color-text-status-paid-default)", background: "var(--color-bg-fill-status-paid-default)", borderRadius: "var(--radius-item)", padding: "10px 14px" }}>
           Drop-in recorded — {done}
         </div>
       )}
 
       <div className="bq-stack">
-        <div style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-item)", padding: "10px 16px", display: "flex", alignItems: "center", gap: 10 }}>
+        <div style={{ background: "var(--color-bg-surface-secondary-default)", border: "1px solid var(--color-border-primary-default)", borderRadius: "var(--radius-item)", padding: "10px 16px", display: "flex", alignItems: "center", gap: 10 }}>
           <div className="bq-grow">
             <div className="bq-label">MEMBER</div>
-            <div style={{ font: "600 var(--fs-base) var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{client ? client.name : newMember ? "New member" : "Not linked"}</div>
+            <div style={{ font: "600 var(--text-callout-size) var(--font-family-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{client ? client.name : newMember ? "New member" : "Not linked"}</div>
           </div>
           {client || newMember ? (
             <Button
@@ -223,7 +223,7 @@ export function DropIn({ embedded = false, initialClient = null }: { embedded?: 
               empty={{ title: "No class sessions in the next 7 days", body: "Classes are scheduled by the department head in Catalog → Classes. For a visit that isn't a class, use Walk-in." }}
             />
             {session && (
-              <div style={{ font: "600 var(--fs-body-sm) var(--font-body)", padding: "0 4px" }}>
+              <div style={{ font: "600 var(--text-subheadline-size) var(--font-family-body)", padding: "0 4px" }}>
                 Drop-in price: <span className="tabular">{fmt(session.price)} EGP</span>
               </div>
             )}
@@ -251,7 +251,7 @@ export function DropIn({ embedded = false, initialClient = null }: { embedded?: 
       <Button fullWidth size="lg" style={{ marginTop: 16 }} disabled={busy} onClick={submit}>
         {busy ? "Saving…" : amount !== null ? `Charge ${fmt(amount)} EGP · ${tender}` : "Confirm drop-in"}
       </Button>
-      <div style={{ textAlign: "center", font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-faint)", marginTop: 10 }}>Take payment at the desk before confirming.</div>
+      <div style={{ textAlign: "center", font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)", marginTop: 10 }}>Take payment at the desk before confirming.</div>
 
       <PickClientSheet
         open={pickerOpen}

@@ -49,17 +49,17 @@ export function CheckInList() {
           const plan = planSummary(c, bundleTypes);
           const r = results[c.id];
           return (
-            <div key={c.id} data-testid="checkin-row" style={{ padding: "12px 16px", borderBottom: i === shown.length - 1 ? "none" : "1px solid var(--line)" }}>
+            <div key={c.id} data-testid="checkin-row" style={{ padding: "12px 16px", borderBottom: i === shown.length - 1 ? "none" : "1px solid var(--color-border-primary-default)" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                 <div className="bq-grow">
-                  <div style={{ font: "700 var(--fs-base) var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.name}</div>
+                  <div style={{ font: "700 var(--text-callout-size) var(--font-family-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.name}</div>
                   <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 2 }}>
                     <PlanPill client={c} />
-                    <span style={{ font: "400 var(--fs-small) var(--font-mono)", color: "var(--ink-faint)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{plan.detail}</span>
+                    <span style={{ font: "400 var(--text-caption-1-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{plan.detail}</span>
                   </div>
                 </div>
                 {r?.state === "done" ? (
-                  <span style={{ display: "inline-flex", alignItems: "center", gap: 6, color: "var(--paid-fg)", font: "800 var(--fs-body-sm) var(--font-body)", flex: "none" }}>
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: 6, color: "var(--color-text-status-paid-default)", font: "800 var(--text-subheadline-size) var(--font-family-body)", flex: "none" }}>
                     <Icon name="check" size={18} /> Done
                   </span>
                 ) : (
@@ -67,15 +67,15 @@ export function CheckInList() {
                     className="bq-scale"
                     disabled={r?.state === "busy"}
                     onClick={() => checkIn(c)}
-                    style={{ flex: "none", height: 42, padding: "0 18px", border: 0, borderRadius: 999, background: "var(--primary)", color: "#fff", font: "700 var(--fs-body-sm) var(--font-body)", cursor: "pointer", opacity: r?.state === "busy" ? 0.6 : 1 }}
+                    style={{ flex: "none", height: 42, padding: "0 18px", border: 0, borderRadius: 999, background: "var(--color-bg-fill-primary-default)", color: "var(--color-text-on-fill-default)", font: "700 var(--text-subheadline-size) var(--font-family-body)", cursor: "pointer", opacity: r?.state === "busy" ? 0.6 : 1 }}
                   >
                     {r?.state === "busy" ? "…" : "Check in"}
                   </button>
                 )}
               </div>
-              {r?.state === "done" && <div style={{ font: "400 var(--fs-small) var(--font-mono)", color: "var(--paid-fg)", marginTop: 6 }}>{r.note}</div>}
+              {r?.state === "done" && <div style={{ font: "400 var(--text-caption-1-size) var(--font-family-mono)", color: "var(--color-text-status-paid-default)", marginTop: 6 }}>{r.note}</div>}
               {r?.state === "error" && (
-                <div role="alert" style={{ font: "600 var(--fs-small)/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: "var(--r-item)", padding: "8px 10px", marginTop: 8 }}>
+                <div role="alert" style={{ font: "600 var(--text-caption-1-size)/1.5 var(--font-family-body)", color: "var(--color-text-status-danger-default)", background: "var(--color-bg-fill-status-danger-default)", borderRadius: "var(--radius-item)", padding: "8px 10px", marginTop: 8 }}>
                   {r.text}
                 </div>
               )}

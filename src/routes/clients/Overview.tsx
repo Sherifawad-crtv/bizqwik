@@ -22,7 +22,7 @@ export function OverviewCards({ clients, showGroupPlans, onPick }: { clients: Cl
           className="bq-card" style={{ textAlign: "left", padding: "16px 18px", cursor: "pointer" }}
         >
           <div className="bq-label">{s.k}</div>
-          <div className="tabular" style={{ font: "800 var(--fs-display) var(--font-body)", letterSpacing: "-.02em", marginTop: 6, color: "var(--ink)" }}>{s.v}</div>
+          <div className="tabular" style={{ font: "800 var(--text-large-title-size) var(--font-family-body)", letterSpacing: "-.02em", marginTop: 6, color: "var(--color-text-primary-default)" }}>{s.v}</div>
         </button>
       ))}
     </div>

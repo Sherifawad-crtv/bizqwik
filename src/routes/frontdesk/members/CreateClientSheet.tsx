@@ -189,7 +189,7 @@ export function CreateClientSheet({
           <SheetHeading kicker={`NEW CLIENT · STEP ${step + 1} OF ${CREATE_STEPS.length}`} title={CREATE_STEPS[step]} />
           <div aria-hidden style={{ display: "flex", gap: 6, margin: "-6px 0 18px" }}>
             {CREATE_STEPS.map((s, i) => (
-              <span key={s} style={{ flex: 1, height: 4, borderRadius: 999, background: i <= step ? "var(--primary)" : "var(--line)" }} />
+              <span key={s} style={{ flex: 1, height: 4, borderRadius: 999, background: i <= step ? "var(--color-bg-fill-primary-default)" : "var(--color-border-primary-default)" }} />
             ))}
           </div>
 
@@ -237,7 +237,7 @@ export function CreateClientSheet({
           {step === 2 && (
             <>
               <PaymentCards value={payMethod} onChange={setPayMethod} />
-              <div style={{ marginTop: 10, font: "400 var(--fs-small)/1.5 var(--font-mono)", color: "var(--ink-faint)" }}>A new client has no wallet yet, so it's cash or card.</div>
+              <div style={{ marginTop: 10, font: "400 var(--text-caption-1-size)/1.5 var(--font-family-mono)", color: "var(--color-text-tertiary-default)" }}>A new client has no wallet yet, so it's cash or card.</div>
             </>
           )}
 
@@ -255,17 +255,17 @@ export function CreateClientSheet({
                     ["PAYMENT", payMethod.toUpperCase()],
                   ] as [string, string][]
                 ).map(([k, v]) => (
-                  <div key={k} style={{ display: "flex", gap: 12, padding: "12px 16px", borderBottom: "1px solid var(--line)" }}>
-                    <span style={{ flex: "none", width: 84, font: "700 var(--fs-caption) var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", paddingTop: 3 }}>{k}</span>
-                    <span style={{ minWidth: 0, flex: 1, font: "600 var(--fs-body)/1.4 var(--font-body)", overflowWrap: "anywhere" }}>{v}</span>
+                  <div key={k} style={{ display: "flex", gap: 12, padding: "12px 16px", borderBottom: "1px solid var(--color-border-primary-default)" }}>
+                    <span style={{ flex: "none", width: 84, font: "700 var(--text-caption-2-size) var(--font-family-mono)", letterSpacing: ".08em", color: "var(--color-text-tertiary-default)", paddingTop: 3 }}>{k}</span>
+                    <span style={{ minWidth: 0, flex: 1, font: "600 var(--text-body-size)/1.4 var(--font-family-body)", overflowWrap: "anywhere" }}>{v}</span>
                   </div>
                 ))}
-                <div style={{ display: "flex", alignItems: "baseline", gap: 12, padding: "14px 16px", background: "var(--sunken)" }}>
-                  <span style={{ flex: 1, font: "700 var(--fs-caption) var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>TOTAL TO COLLECT</span>
-                  <span className="tabular" style={{ font: "800 22px var(--font-body)", letterSpacing: "-.02em" }}>{chosen ? `${fmt(chosen.price)} EGP` : "—"}</span>
+                <div style={{ display: "flex", alignItems: "baseline", gap: 12, padding: "14px 16px", background: "var(--color-bg-surface-secondary-default)" }}>
+                  <span style={{ flex: 1, font: "700 var(--text-caption-2-size) var(--font-family-mono)", letterSpacing: ".08em", color: "var(--color-text-tertiary-default)" }}>TOTAL TO COLLECT</span>
+                  <span className="tabular" style={{ font: "800 22px var(--font-family-body)", letterSpacing: "-.02em" }}>{chosen ? `${fmt(chosen.price)} EGP` : "—"}</span>
                 </div>
               </Card>
-              <div style={{ marginTop: 10, font: "400 var(--fs-small)/1.5 var(--font-mono)", color: "var(--ink-faint)" }}>Creating the client also sends the app invite to {mail}.</div>
+              <div style={{ marginTop: 10, font: "400 var(--text-caption-1-size)/1.5 var(--font-family-mono)", color: "var(--color-text-tertiary-default)" }}>Creating the client also sends the app invite to {mail}.</div>
             </>
           )}
 

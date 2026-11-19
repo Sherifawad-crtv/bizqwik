@@ -50,11 +50,11 @@ export function PnlPanel({ report, loading, onAddExpense, onCoachPayouts }: { re
   return (
     <>
       {report.unsettledNote && (
-        <div style={{ display: "flex", gap: 10, alignItems: "flex-start", background: "var(--logging-bg)", borderRadius: "var(--r-item)", padding: "12px 14px", marginBottom: 14 }}>
-          <span style={{ color: "var(--logging-fg)", display: "flex", flex: "none", marginTop: 1 }}>
+        <div style={{ display: "flex", gap: 10, alignItems: "flex-start", background: "var(--color-bg-fill-status-logging-default)", borderRadius: "var(--radius-item)", padding: "12px 14px", marginBottom: 14 }}>
+          <span style={{ color: "var(--color-text-status-logging-default)", display: "flex", flex: "none", marginTop: 1 }}>
             <Icon name="insights" size={18} />
           </span>
-          <span style={{ font: "500 var(--fs-note)/1.5 var(--font-body)", color: "var(--logging-fg)" }}>
+          <span style={{ font: "500 var(--text-footnote-size)/1.5 var(--font-family-body)", color: "var(--color-text-status-logging-default)" }}>
             {report.unsettledNote.count} coach session{report.unsettledNote.count === 1 ? "" : "s"} {report.unsettledNote.count === 1 ? "isn't" : "aren't"} settled yet, so payouts may be understated.
           </span>
         </div>
@@ -65,8 +65,8 @@ export function PnlPanel({ report, loading, onAddExpense, onCoachPayouts }: { re
           <span className="bq-label">REVENUE · EGP</span>
           {prev && <span style={{ marginLeft: "auto" }}><Delta pct={pctChange(current.netRevenue, prev.netRevenue)} tone="good" /></span>}
         </div>
-        <div className="tabular" style={{ font: "800 48px/1 var(--font-body)", letterSpacing: "-.03em", margin: "8px 0 0", overflowWrap: "anywhere" }}>{fmt(current.netRevenue)}</div>
-        <div style={{ font: "400 var(--fs-small)/1.4 var(--font-mono)", color: "var(--ink-faint)", marginTop: 8 }}>
+        <div className="tabular" style={{ font: "800 48px/1 var(--font-family-body)", letterSpacing: "-.03em", margin: "8px 0 0", overflowWrap: "anywhere" }}>{fmt(current.netRevenue)}</div>
+        <div style={{ font: "400 var(--text-caption-1-size)/1.4 var(--font-family-mono)", color: "var(--color-text-tertiary-default)", marginTop: 8 }}>
           {current.refunds > 0 ? `${fmt(current.grossRevenue)} gross − ${fmt(current.refunds)} refunded` : "No refunds this month"}
         </div>
       </div>
@@ -98,15 +98,15 @@ export function PnlPanel({ report, loading, onAddExpense, onCoachPayouts }: { re
                 style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", border: 0, background: "none", padding: "6px 0", cursor: s.key === "coach_payouts" ? "pointer" : "default", textAlign: "left" }}
               >
                 <span className="bq-grow">
-                  <div style={{ font: "600 var(--fs-body-sm) var(--font-body)" }}>{s.label}</div>
+                  <div style={{ font: "600 var(--text-subheadline-size) var(--font-family-body)" }}>{s.label}</div>
                   {s.key === "coach_payouts" && (
-                    <div style={{ font: "400 var(--fs-caption) var(--font-mono)", color: "var(--ink-faint)" }}>
+                    <div style={{ font: "400 var(--text-caption-2-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)" }}>
                       {s.paid !== undefined ? `${fmt(s.paid)} paid · ${fmt(Math.max(0, s.amount - s.paid))} still owed · ` : ""}Locked · settled only
                     </div>
                   )}
                 </span>
-                <span className="tabular" style={{ font: "800 var(--fs-body-sm) var(--font-body)" }}>{fmt(s.amount)}</span>
-                {s.key === "coach_payouts" && <Icon name="chevron-right" size={14} style={{ color: "var(--ink-faint)" }} />}
+                <span className="tabular" style={{ font: "800 var(--text-subheadline-size) var(--font-family-body)" }}>{fmt(s.amount)}</span>
+                {s.key === "coach_payouts" && <Icon name="chevron-right" size={14} style={{ color: "var(--color-text-tertiary-default)" }} />}
               </button>
             ))}
           </div>

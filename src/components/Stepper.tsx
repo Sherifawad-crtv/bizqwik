@@ -9,7 +9,7 @@ interface StepperProps {
 
 export function Stepper({ value, min = 1, max = 12, onChange }: StepperProps) {
   return (
-    <div style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-item)", padding: "12px 16px" }}>
+    <div style={{ background: "var(--color-bg-surface-secondary-default)", border: "1px solid var(--color-border-primary-default)", borderRadius: "var(--radius-item)", padding: "12px 16px" }}>
       <div className="bq-label">SESSIONS THAT DAY</div>
       <div style={{ display: "flex", alignItems: "center", gap: 16, marginTop: 8 }}>
         <button
@@ -21,9 +21,9 @@ export function Stepper({ value, min = 1, max = 12, onChange }: StepperProps) {
             width: 48,
             height: 48,
             borderRadius: 999,
-            border: "1px solid var(--line)",
-            background: "var(--surface)",
-            color: "var(--ink)",
+            border: "1px solid var(--color-border-primary-default)",
+            background: "var(--color-bg-surface-primary-default)",
+            color: "var(--color-text-primary-default)",
             cursor: value <= min ? "default" : "pointer",
             opacity: value <= min ? 0.4 : 1,
             display: "flex",
@@ -33,7 +33,7 @@ export function Stepper({ value, min = 1, max = 12, onChange }: StepperProps) {
         >
           <Icon name="minus" size={18} strokeWidth={2.4} />
         </button>
-        <span className="tabular" style={{ flex: 1, textAlign: "center", font: "800 44px var(--font-body)", letterSpacing: "-.03em" }}>
+        <span className="tabular" style={{ flex: 1, textAlign: "center", font: "800 44px var(--font-family-body)", letterSpacing: "-.03em" }}>
           {value}
         </span>
         <button
@@ -46,8 +46,8 @@ export function Stepper({ value, min = 1, max = 12, onChange }: StepperProps) {
             height: 48,
             borderRadius: 999,
             border: 0,
-            background: "var(--primary-tint)",
-            color: "var(--primary-pressed)",
+            background: "var(--color-bg-fill-accent-default)",
+            color: "var(--color-bg-fill-primary-active)",
             cursor: value >= max ? "default" : "pointer",
             opacity: value >= max ? 0.4 : 1,
             display: "flex",

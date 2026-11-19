@@ -62,8 +62,8 @@ function Wheel({ items, index, onIndex, label }: { items: string[]; index: numbe
         boxSizing: "border-box",
         position: "relative",
         zIndex: 1,
-        WebkitMaskImage: "linear-gradient(to bottom, transparent, #000 30%, #000 70%, transparent)",
-        maskImage: "linear-gradient(to bottom, transparent, #000 30%, #000 70%, transparent)",
+        WebkitMaskImage: "linear-gradient(to bottom, transparent, var(--color-mask-default) 30%, var(--color-mask-default) 70%, transparent)",
+        maskImage: "linear-gradient(to bottom, transparent, var(--color-mask-default) 30%, var(--color-mask-default) 70%, transparent)",
       }}
     >
       {items.map((it, i) => (
@@ -78,8 +78,8 @@ function Wheel({ items, index, onIndex, label }: { items: string[]; index: numbe
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            font: `${i === index ? 800 : 600} 22px var(--font-body)`,
-            color: i === index ? "var(--ink)" : "var(--ink-faint)",
+            font: `${i === index ? 800 : 600} 22px var(--font-family-body)`,
+            color: i === index ? "var(--color-text-primary-default)" : "var(--color-text-tertiary-default)",
             cursor: "pointer",
             userSelect: "none",
           }}
@@ -107,12 +107,12 @@ export function TimeWheelField({ label, value, onChange }: { label: string; valu
         type="button"
         onClick={() => setOpen(true)}
         aria-label={`${label}: ${timeLabel(value)}`}
-        style={{ display: "block", width: "100%", textAlign: "left", background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-item)", padding: "10px 16px", cursor: "pointer" }}
+        style={{ display: "block", width: "100%", textAlign: "left", background: "var(--color-bg-surface-secondary-default)", border: "1px solid var(--color-border-primary-default)", borderRadius: "var(--radius-item)", padding: "10px 16px", cursor: "pointer" }}
       >
         <span className="bq-label">{label}</span>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{ font: "600 var(--fs-base) var(--font-body)", color: "var(--ink)" }}>{timeLabel(value)}</span>
-          <span style={{ marginLeft: "auto", color: "var(--ink-faint)", display: "flex" }}>
+          <span style={{ font: "600 var(--text-callout-size) var(--font-family-body)", color: "var(--color-text-primary-default)" }}>{timeLabel(value)}</span>
+          <span style={{ marginLeft: "auto", color: "var(--color-text-tertiary-default)", display: "flex" }}>
             <Icon name="chevron-down" size={15} />
           </span>
         </div>
@@ -120,10 +120,10 @@ export function TimeWheelField({ label, value, onChange }: { label: string; valu
 
       <Sheet open={open} onClose={() => setOpen(false)}>
         <div className="bq-label">{label}</div>
-        <div style={{ font: "800 var(--fs-title)/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 12px" }}>{timeLabel(join(draft.h, draft.m, draft.pm))}</div>
+        <div style={{ font: "800 var(--text-title-1-size)/1.2 var(--font-family-body)", letterSpacing: "-.02em", margin: "4px 0 12px" }}>{timeLabel(join(draft.h, draft.m, draft.pm))}</div>
         <div style={{ position: "relative", display: "flex", gap: 4 }}>
           {/* selection band behind the middle row */}
-          <div aria-hidden style={{ position: "absolute", left: 0, right: 0, top: ITEM_H * 2, height: ITEM_H, borderRadius: "var(--r-chip)", background: "var(--accent-tint)" }} />
+          <div aria-hidden style={{ position: "absolute", left: 0, right: 0, top: ITEM_H * 2, height: ITEM_H, borderRadius: "var(--radius-chip)", background: "var(--color-bg-fill-accent-active)" }} />
           <Wheel label="Hour" items={HOURS} index={draft.h - 1} onIndex={(i) => setDraft((d) => ({ ...d, h: i + 1 }))} />
           <Wheel label="Minute" items={MINUTES} index={draft.m / 5} onIndex={(i) => setDraft((d) => ({ ...d, m: i * 5 }))} />
           <Wheel label="AM/PM" items={PERIODS} index={draft.pm ? 1 : 0} onIndex={(i) => setDraft((d) => ({ ...d, pm: i === 1 }))} />

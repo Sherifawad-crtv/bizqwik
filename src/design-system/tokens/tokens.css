@@ -11,6 +11,8 @@
   --primitive-color-neutral-500: #9a96a6;
   --primitive-color-neutral-600: #6c687a;
   --primitive-color-neutral-900: #1a1726;
+  --primitive-color-neutral-950: #111111;
+  --primitive-color-neutral-1000: #000000;
   --primitive-color-brand-300: #a193ff;
   --primitive-color-brand-400: #7b5cff;
   --primitive-color-brand-500: #5a41ff;
@@ -20,6 +22,8 @@
   --primitive-color-brand-alpha-10: rgba(90, 65, 255, 0.1);
   --primitive-color-brand-alpha-12: rgba(90, 65, 255, 0.12);
   --primitive-color-brand-alpha-16: rgba(90, 65, 255, 0.16);
+  --primitive-color-brand-alpha-28: rgba(90, 65, 255, 0.28);
+  --primitive-color-brand-alpha-40: rgba(90, 65, 255, 0.4);
   --primitive-color-green-100: #d8efe0;
   --primitive-color-green-700: #177a4b;
   --primitive-color-amber-100: #f6e7c4;
@@ -30,6 +34,20 @@
   --primitive-color-teal-700: #1f6a85;
   --primitive-color-ink-alpha-10: rgba(26, 23, 38, 0.1);
   --primitive-color-ink-alpha-18: rgba(26, 23, 38, 0.18);
+  --primitive-color-ink-alpha-34: rgba(26, 23, 38, 0.34);
+  --primitive-color-canvas-alpha-0: rgba(243, 242, 238, 0);
+  --primitive-color-canvas-alpha-82: rgba(243, 242, 238, 0.82);
+  --primitive-color-canvas-alpha-92: rgba(243, 242, 238, 0.92);
+  --primitive-color-canvas-alpha-94: rgba(243, 242, 238, 0.94);
+  --primitive-color-surface-alpha-55: rgba(251, 250, 247, 0.55);
+  --primitive-color-white-alpha-12: rgba(255, 255, 255, 0.12);
+  --primitive-color-white-alpha-14: rgba(255, 255, 255, 0.14);
+  --primitive-color-white-alpha-55: rgba(255, 255, 255, 0.55);
+  --primitive-color-white-alpha-70: rgba(255, 255, 255, 0.7);
+  --primitive-color-black-alpha-12: rgba(0, 0, 0, 0.12);
+  --primitive-color-black-alpha-14: rgba(0, 0, 0, 0.14);
+  --primitive-color-black-alpha-25: rgba(0, 0, 0, 0.25);
+  --primitive-color-black-alpha-70: rgba(0, 0, 0, 0.7);
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
@@ -83,8 +101,13 @@
   --ease-standard: cubic-bezier(0.32, 0.72, 0, 1); /** the iOS standard curve */
   --ease-spring: cubic-bezier(0.34, 1.36, 0.64, 1); /** gentle overshoot for confirmations */
   --color-bg-canvas-default: var(--primitive-color-neutral-100); /** page background */
+  --color-bg-canvas-translucent: var(--primitive-color-canvas-alpha-82); /** title bar over scrolling content */
+  --color-bg-canvas-translucent-strong: var(--primitive-color-canvas-alpha-94); /** sticky header that needs more cover */
+  --color-bg-canvas-fade-start: var(--primitive-color-canvas-alpha-0); /** gradient fade into the page: transparent end */
+  --color-bg-canvas-fade-middle: var(--primitive-color-canvas-alpha-92); /** gradient fade into the page: middle stop */
   --color-bg-surface-primary-default: var(--primitive-color-neutral-50); /** cards, sheets, floating containers */
   --color-bg-surface-secondary-default: var(--primitive-color-neutral-150); /** inner fills: segmented tracks, search fields, neutral tags */
+  --color-bg-surface-glass-default: var(--primitive-color-surface-alpha-55); /** frosted tab bar */
   --color-bg-fill-primary-default: var(--primitive-color-brand-500); /** primary button, active control, chart bars */
   --color-bg-fill-primary-active: var(--primitive-color-brand-600); /** primary fill while pressed */
   --color-bg-fill-accent-default: var(--primitive-color-brand-alpha-10); /** soft brand background */
@@ -95,8 +118,17 @@
   --color-bg-fill-warning-default: var(--primitive-color-amber-100);
   --color-bg-fill-danger-default: var(--primitive-color-red-100);
   --color-bg-fill-info-default: var(--primitive-color-teal-100);
+  --color-bg-fill-on-media-default: var(--primitive-color-white-alpha-14); /** button on the camera screen */
+  --color-bg-fill-on-media-secondary: var(--primitive-color-white-alpha-12); /** control group on the camera screen */
+  --color-bg-fill-on-media-selected: var(--primitive-color-neutral-0); /** chosen option on the camera screen */
   --color-bg-avatar-start: var(--primitive-color-brand-400);
   --color-bg-avatar-end: var(--primitive-color-brand-700);
+  --color-bg-overlay-default: var(--primitive-color-ink-alpha-34); /** scrim behind sheets and dialogs */
+  --color-bg-overlay-dim: var(--primitive-color-black-alpha-14); /** the screen underneath while another slides over it */
+  --color-bg-overlay-photo: var(--primitive-color-black-alpha-70); /** dark fade over a photo so text on it stays readable */
+  --color-bg-media-default: var(--primitive-color-neutral-1000); /** full-screen camera background */
+  --color-bg-media-secondary: var(--primitive-color-neutral-950); /** camera viewfinder before the picture arrives */
+  --color-bg-qr-default: var(--primitive-color-neutral-0); /** behind a QR code (scanners need pure white) */
   --color-text-primary-default: var(--primitive-color-neutral-900);
   --color-text-secondary-default: var(--primitive-color-neutral-600);
   --color-text-tertiary-default: var(--primitive-color-neutral-500);
@@ -107,7 +139,13 @@
   --color-text-warning-default: var(--primitive-color-amber-700);
   --color-text-danger-default: var(--primitive-color-red-700);
   --color-text-info-default: var(--primitive-color-teal-700);
+  --color-text-on-media-default: var(--primitive-color-neutral-0);
+  --color-text-on-media-secondary: var(--primitive-color-white-alpha-70);
+  --color-text-on-media-selected: var(--primitive-color-neutral-1000); /** text on the selected camera option */
   --color-border-primary-default: var(--primitive-color-neutral-200); /** dividers and field outlines (cards have no stroke) */
+  --color-border-glass-default: var(--primitive-color-white-alpha-55); /** edge of the frosted tab bar */
+  --color-border-glass-strong: var(--primitive-color-white-alpha-70); /** top highlight of the frosted tab bar */
+  --color-mask-default: var(--primitive-color-neutral-1000); /** opaque part of a fade mask (only its alpha matters) */
   --text-large-title-size: var(--font-size-30);
   --text-title-1-size: var(--font-size-26);
   --text-title-2-size: var(--font-size-20);
@@ -125,7 +163,12 @@
   --text-stat-md-size: var(--font-size-24);
   --text-stat-sm-size: var(--font-size-20);
   --shadow-float: 0px 14px 34px 0px var(--primitive-color-ink-alpha-18); /** things floating over the page */
-  --shadow-card: 0px 24px 60px 0px var(--primitive-color-ink-alpha-10);
+  --shadow-push: -8px 0px 24px 0px var(--primitive-color-black-alpha-12); /** left edge of a screen sliding in */
+  --shadow-raised: 0px 4px 14px 0px var(--primitive-color-black-alpha-12); /** small floating control (pull-to-refresh spinner) */
+  --shadow-lifted: 0px 12px 30px 0px var(--primitive-color-black-alpha-14); /** a card picked up / floating while scrolling */
+  --shadow-thumb: 0px 1px 3px 0px var(--primitive-color-black-alpha-25); /** switch knob */
+  --shadow-fab: 0px 12px 30px 0px var(--primitive-color-brand-alpha-40); /** glow under the floating action button */
+  --shadow-cta: 0px 12px 30px 0px var(--primitive-color-brand-alpha-28); /** glow under a big primary call to action */
   --color-bg-fill-status-paid-default: var(--color-bg-fill-success-default);
   --color-bg-fill-status-logging-default: var(--color-bg-fill-warning-default);
   --color-bg-fill-status-settled-default: var(--color-bg-fill-accent-selected);
@@ -140,4 +183,5 @@
   --color-icon-secondary-default: var(--color-text-secondary-default);
   --color-icon-tertiary-default: var(--color-text-tertiary-default);
   --color-icon-accent-default: var(--color-text-accent-default);
+  --shadow-glass-highlight: inset 0px 1px 0px 0px var(--color-border-glass-strong); /** inner top highlight of the frosted tab bar */
 }

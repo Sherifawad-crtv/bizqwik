@@ -54,7 +54,7 @@ export function Signup() {
   const card = (
     <div className="bq-card" style={{ width: isMobile ? "min(420px, 100%)" : "min(580px, 100%)", padding: isMobile ? 30 : 48 }}>
         <div className="bq-stat-lg">Create account</div>
-        <div style={{ font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-muted)", marginTop: 6, marginBottom: 22 }}>
+        <div style={{ font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-secondary-default)", marginTop: 6, marginBottom: 22 }}>
           USE THE EMAIL YOU WERE INVITED WITH
         </div>
 
@@ -81,8 +81,8 @@ export function Signup() {
           <Button type="submit" fullWidth size="lg" disabled={busy} style={{ marginTop: 4 }}>
             {busy ? "Creating account…" : "Create account"}
           </Button>
-          <Link to="/login" style={{ textAlign: "center", font: "700 var(--fs-note) var(--font-body)", color: "var(--ink-muted)", marginTop: 4 }}>
-            Already have an account? <span style={{ color: "var(--primary)" }}>Sign in</span>
+          <Link to="/login" style={{ textAlign: "center", font: "700 var(--text-footnote-size) var(--font-family-body)", color: "var(--color-text-secondary-default)", marginTop: 4 }}>
+            Already have an account? <span style={{ color: "var(--color-bg-fill-primary-default)" }}>Sign in</span>
           </Link>
         </form>
       </div>
@@ -94,7 +94,7 @@ export function Signup() {
     <div
       style={{
         minHeight: "100svh",
-        background: "var(--paper)",
+        background: "var(--color-bg-canvas-default)",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",

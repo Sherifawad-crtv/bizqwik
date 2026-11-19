@@ -39,23 +39,23 @@ export function ClassPhotoField({ value, onChange, title }: { value: string | nu
 
   return (
     <div>
-      <div style={{ font: "700 var(--fs-caption) var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", margin: "0 2px 6px" }}>PHOTO</div>
+      <div style={{ font: "700 var(--text-caption-2-size) var(--font-family-mono)", letterSpacing: ".08em", color: "var(--color-text-tertiary-default)", margin: "0 2px 6px" }}>PHOTO</div>
       <div style={{ display: "flex", gap: 14, alignItems: "center" }}>
         <div
           data-testid="class-photo-preview"
           style={{
-            position: "relative", width: 88, aspectRatio: "4 / 5", flex: "none", borderRadius: "var(--r-item)", overflow: "hidden",
-            background: "var(--sunken)", border: value ? 0 : "1.5px dashed var(--line)", display: "flex", alignItems: "center", justifyContent: "center",
+            position: "relative", width: 88, aspectRatio: "4 / 5", flex: "none", borderRadius: "var(--radius-item)", overflow: "hidden",
+            background: "var(--color-bg-surface-secondary-default)", border: value ? 0 : "1.5px dashed var(--color-border-primary-default)", display: "flex", alignItems: "center", justifyContent: "center",
           }}
         >
           {value ? (
             <>
               <img src={value} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
-              <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(0,0,0,.7), transparent 60%)" }} />
-              <div style={{ position: "absolute", left: 8, right: 8, bottom: 8, color: "#fff", font: "800 var(--fs-caption)/1.15 var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{title || "Class"}</div>
+              <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, var(--color-bg-overlay-photo), transparent 60%)" }} />
+              <div style={{ position: "absolute", left: 8, right: 8, bottom: 8, color: "var(--color-text-on-media-default)", font: "800 var(--text-caption-2-size)/1.15 var(--font-family-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{title || "Class"}</div>
             </>
           ) : (
-            <Icon name="plus" size={20} style={{ color: "var(--ink-faint)" }} />
+            <Icon name="plus" size={20} style={{ color: "var(--color-text-tertiary-default)" }} />
           )}
         </div>
         <div className="bq-grow">
@@ -65,15 +65,15 @@ export function ClassPhotoField({ value, onChange, title }: { value: string | nu
               {busy ? "Uploading…" : value ? "Replace" : "Add photo"}
             </Button>
             {value && !busy && (
-              <button onClick={() => onChange(null)} style={{ border: 0, background: "none", padding: 0, cursor: "pointer", font: "600 var(--fs-note) var(--font-body)", color: "var(--ink-faint)" }}>
+              <button onClick={() => onChange(null)} style={{ border: 0, background: "none", padding: 0, cursor: "pointer", font: "600 var(--text-footnote-size) var(--font-family-body)", color: "var(--color-text-tertiary-default)" }}>
                 Remove
               </button>
             )}
           </div>
-          <div style={{ marginTop: 6, font: "400 var(--fs-small)/1.45 var(--font-mono)", color: "var(--ink-faint)" }}>
+          <div style={{ marginTop: 6, font: "400 var(--text-caption-1-size)/1.45 var(--font-family-mono)", color: "var(--color-text-tertiary-default)" }}>
             {value ? "Cropped to fit the class card in the members' app." : "Members see a Bizqwik photo until you add one. Any photo works; it's cropped to fit."}
           </div>
-          {error && <div style={{ marginTop: 6, font: "600 var(--fs-small)/1.4 var(--font-body)", color: "var(--danger-fg)" }}>{error}</div>}
+          {error && <div style={{ marginTop: 6, font: "600 var(--text-caption-1-size)/1.4 var(--font-family-body)", color: "var(--color-text-status-danger-default)" }}>{error}</div>}
         </div>
       </div>
     </div>

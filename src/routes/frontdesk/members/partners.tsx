@@ -42,21 +42,21 @@ export function PartnerPicker({ type, buyerId, picked, onChange }: { type: Group
     setErr(null);
   };
   return (
-    <div style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-item)", padding: 14, display: "flex", flexDirection: "column", gap: 10 }}>
-      <div style={{ font: "400 var(--fs-note)/1.5 var(--font-body)", color: "var(--ink-muted)" }}>
+    <div style={{ background: "var(--color-bg-surface-secondary-default)", border: "1px solid var(--color-border-primary-default)", borderRadius: "var(--radius-item)", padding: 14, display: "flex", flexDirection: "column", gap: 10 }}>
+      <div style={{ font: "400 var(--text-footnote-size)/1.5 var(--font-family-body)", color: "var(--color-text-secondary-default)" }}>
         Shared by {seats}: {each} classes and {fmt(type.price / seats)} EGP each, {type.durationMonths} months from today. Each person gets their own plan.
       </div>
       {picked.map((p, i) => (
-        <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, font: "700 var(--fs-body) var(--font-body)" }}>
+        <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, font: "700 var(--text-body-size) var(--font-family-body)" }}>
           <span style={{ flex: 1 }}>{labelOf(p)}</span>
-          <button className="bq-scale" onClick={() => onChange(picked.filter((_, j) => j !== i))} aria-label="Remove" style={{ border: 0, background: "none", color: "var(--ink-muted)", cursor: "pointer", font: "600 var(--fs-note) var(--font-body)" }}>Remove</button>
+          <button className="bq-scale" onClick={() => onChange(picked.filter((_, j) => j !== i))} aria-label="Remove" style={{ border: 0, background: "none", color: "var(--color-text-secondary-default)", cursor: "pointer", font: "600 var(--text-footnote-size) var(--font-family-body)" }}>Remove</button>
         </div>
       ))}
       {picked.length < seats - 1 && !adding && (
         <>
           <SearchField value={q} onChange={setQ} placeholder="Search the other client" />
           {results.map((c) => (
-            <button key={c.id} className="bq-scale" onClick={() => { onChange([...picked, { clientId: c.id, label: c.name }]); setQ(""); }} style={{ textAlign: "left", minHeight: 44, border: 0, background: "none", cursor: "pointer", font: "600 var(--fs-body) var(--font-body)", color: "var(--ink)" }}>
+            <button key={c.id} className="bq-scale" onClick={() => { onChange([...picked, { clientId: c.id, label: c.name }]); setQ(""); }} style={{ textAlign: "left", minHeight: 44, border: 0, background: "none", cursor: "pointer", font: "600 var(--text-body-size) var(--font-family-body)", color: "var(--color-text-primary-default)" }}>
               {c.name}
               {c.phone && <span className="bq-meta"> · {c.phone}</span>}
             </button>
@@ -101,13 +101,13 @@ export function GroupOfferSelect({ value, onChange, planTypes, series }: { value
               aria-checked={on}
               className="bq-scale"
               onClick={() => onChange(o.value)}
-              style={{ display: "flex", alignItems: "center", gap: 12, padding: "16px 18px", cursor: "pointer", textAlign: "left", borderRadius: "var(--r-card)", border: on ? "2px solid var(--primary)" : "1px solid var(--line)", background: on ? "var(--primary-tint)" : "var(--surface)", color: "var(--ink)" }}
+              style={{ display: "flex", alignItems: "center", gap: 12, padding: "16px 18px", cursor: "pointer", textAlign: "left", borderRadius: "var(--radius-card)", border: on ? "2px solid var(--color-bg-fill-primary-default)" : "1px solid var(--color-border-primary-default)", background: on ? "var(--color-bg-fill-accent-default)" : "var(--color-bg-surface-primary-default)", color: "var(--color-text-primary-default)" }}
             >
               <span className="bq-grow">
-                <span style={{ display: "block", font: "800 18px var(--font-body)", letterSpacing: "-.01em" }}>{name}</span>
-                <span style={{ display: "block", font: "400 var(--fs-small) var(--font-mono)", color: "var(--ink-muted)", marginTop: 2 }}>{rest.join(" · ")}</span>
+                <span style={{ display: "block", font: "800 18px var(--font-family-body)", letterSpacing: "-.01em" }}>{name}</span>
+                <span style={{ display: "block", font: "400 var(--text-caption-1-size) var(--font-family-mono)", color: "var(--color-text-secondary-default)", marginTop: 2 }}>{rest.join(" · ")}</span>
               </span>
-              <span style={{ font: "800 18px var(--font-mono)", color: on ? "var(--primary-pressed)" : "var(--ink)" }}>{price}</span>
+              <span style={{ font: "800 18px var(--font-family-mono)", color: on ? "var(--color-bg-fill-primary-active)" : "var(--color-text-primary-default)" }}>{price}</span>
             </button>
           );
         })}

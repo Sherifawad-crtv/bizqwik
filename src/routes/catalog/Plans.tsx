@@ -54,7 +54,7 @@ export function PlansPanel({ solo }: { solo?: boolean }) {
             <div key={p.id} className={`bq-listrow ${!(i === rows.length - 1) ? "bq-listrow--divider" : ""}`} style={{ opacity: p.active ? 1 : 0.6 }}>
               <div className="bq-grow">
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <span style={{ font: "700 var(--fs-base) var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.name}</span>
+                  <span style={{ font: "700 var(--text-callout-size) var(--font-family-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.name}</span>
                   <CategoryPill name={p.name} />
                   <LocationPill locations={locations} id={p.locationId} />
                   {!p.active && <Tag>OFF SALE</Tag>}
@@ -81,7 +81,7 @@ export function PlansPanel({ solo }: { solo?: boolean }) {
     <div>
       {!solo && section("membership", "Memberships", solo ? "No memberships yet. A membership covers every class at its location for the months you choose." : "No memberships yet. A membership covers every class for the months you choose.")}
       {section("bundle", solo ? "Packages" : "Class bundles", solo ? "No packages yet. A package is a number of classes valid for 1 or 3 months; one class is used each day the member checks in." : "No bundles yet. A bundle is a pack of sessions: one is used each day the member checks in.")}
-      {!solo && <div style={{ font: "400 var(--fs-small)/1.5 var(--font-mono)", color: "var(--ink-faint)", margin: "-12px 2px 0" }}>
+      {!solo && <div style={{ font: "400 var(--text-caption-1-size)/1.5 var(--font-family-mono)", color: "var(--color-text-tertiary-default)", margin: "-12px 2px 0" }}>
         Each class's monthly is set on the class itself. A member holds one group plan at a time, and a new one can only be bought once the current one is finished.
       </div>}
 
@@ -194,7 +194,7 @@ export function PlanTypeSheet({ open, kind: kindProp, planType: planTypeProp, on
               <SelectField label="SHARED BY" value={shared} onChange={setShared} options={[{ value: "1", label: "One person" }, { value: "2", label: "2 people" }, { value: "3", label: "3 people" }, { value: "4", label: "4 people" }]} />
             )}
             {isBundle && Number(shared) > 1 && (
-              <div style={{ font: "400 var(--fs-small)/1.5 var(--font-mono)", color: "var(--ink-faint)", marginTop: -4 }}>
+              <div style={{ font: "400 var(--text-caption-1-size)/1.5 var(--font-family-mono)", color: "var(--color-text-tertiary-default)", marginTop: -4 }}>
                 {Number(credits) > 0 && Number(credits) % Number(shared) === 0 ? `Each person gets ${Number(credits) / Number(shared)} classes and ${fmt(Number(price) / Number(shared))} EGP of the price, valid for the months below.` : "Classes and price are split evenly. Classes must divide evenly."} Sold at the desk to everyone at once.
               </div>
             )}
@@ -211,7 +211,7 @@ export function PlanTypeSheet({ open, kind: kindProp, planType: planTypeProp, on
               />
             )}
           </div>
-          <div style={{ marginTop: 10, font: "400 var(--fs-small)/1.5 var(--font-mono)", color: "var(--ink-faint)" }}>
+          <div style={{ marginTop: 10, font: "400 var(--text-caption-1-size)/1.5 var(--font-family-mono)", color: "var(--color-text-tertiary-default)" }}>
             {isBundle ? "One session is used each day the member checks in (booking a class only reserves the spot). " : "Covers every class. "}
             Runs from the day it's bought. Changes apply to future sales only.
           </div>

@@ -6,16 +6,16 @@ import hero from "../assets/auth-desktop.webp";
  * column layout and the first-time welcome.) */
 export function DesktopAuth({ children }: { children: ReactNode }) {
   return (
-    <div style={{ minHeight: "100vh", display: "flex", gap: 20, padding: 20, background: "var(--paper)" }}>
+    <div style={{ minHeight: "100vh", display: "flex", gap: 20, padding: 20, background: "var(--color-bg-canvas-default)" }}>
       <aside
         aria-hidden
         style={{
           flex: "1 1 50%",
           minWidth: 0,
           minHeight: "calc(100vh - 40px)",
-          borderRadius: "var(--r-card)",
+          borderRadius: "var(--radius-card)",
           overflow: "hidden",
-          background: `var(--sunken) url(${hero}) center / cover no-repeat`,
+          background: `var(--color-bg-surface-secondary-default) url(${hero}) center / cover no-repeat`,
         }}
       />
       <main style={{ flex: "1 1 50%", minWidth: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 40, padding: "24px clamp(24px, 4vw, 72px)" }}>

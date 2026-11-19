@@ -75,7 +75,7 @@ function layerStyle(pathname: string, role: Role, mode: OrgMode): CSSProperties 
     padding: `calc(${top}px + var(--safe-top)) 16px calc(${BOTTOM_CLEARANCE}px + var(--safe-bottom))`,
     overflowY: "auto",
     WebkitOverflowScrolling: "touch",
-    background: "var(--paper)",
+    background: "var(--color-bg-canvas-default)",
   };
 }
 
@@ -212,7 +212,7 @@ export function RouteTransition({ tabs, role, orgMode = "team" }: { tabs: NavIte
       if (pushIn) {
         return {
           ...base,
-          boxShadow: entered ? "none" : "-8px 0 24px rgba(0,0,0,.12)",
+          boxShadow: entered ? "none" : "var(--shadow-push)",
           transform: entered ? "translate3d(0,0,0)" : "translate3d(100%,0,0)",
           transition: `transform ${PUSH_MS}ms ${PUSH_EASE}`,
           willChange: "transform",
@@ -233,7 +233,7 @@ export function RouteTransition({ tabs, role, orgMode = "team" }: { tabs: NavIte
       if (pushOut) {
         return {
           ...base,
-          boxShadow: entered ? "none" : "-8px 0 24px rgba(0,0,0,.12)",
+          boxShadow: entered ? "none" : "var(--shadow-push)",
           transform: entered ? "translate3d(100%,0,0)" : "translate3d(0,0,0)",
           transition: `transform ${PUSH_MS}ms ${PUSH_EASE}`,
           willChange: "transform",
@@ -274,7 +274,7 @@ export function RouteTransition({ tabs, role, orgMode = "team" }: { tabs: NavIte
           style={{
             position: "absolute",
             inset: 0,
-            background: "rgba(0,0,0,.14)",
+            background: "var(--color-bg-overlay-dim)",
             // dims the screen underneath as the new one covers it (and lifts as it leaves)
             opacity: pushIn ? (entered ? 1 : 0) : entered ? 0 : 1,
             transition: `opacity ${PUSH_MS}ms ${PUSH_EASE}`,

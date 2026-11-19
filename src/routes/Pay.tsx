@@ -28,7 +28,7 @@ function MonthStatus({ rows }: { rows: Rollup[] }) {
           <div key={p.state} style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <StatePill state={p.state} label={p.label} />
             <span className="bq-meta">{p.n} {p.n === 1 ? "coach" : "coaches"}</span>
-            <span className="tabular" style={{ marginLeft: "auto", font: "800 var(--fs-base) var(--font-body)" }}>{fmt(p.total)} EGP</span>
+            <span className="tabular" style={{ marginLeft: "auto", font: "800 var(--text-callout-size) var(--font-family-body)" }}>{fmt(p.total)} EGP</span>
           </div>
         ))}
       </div>
@@ -96,13 +96,13 @@ export function Pay() {
           <div key={m.month} style={{ marginBottom: 18 }}>
             <div style={{ display: "flex", alignItems: "baseline", gap: 10, padding: "6px 2px 8px" }}>
               <span className="bq-label">{monthLabel(m.month).toUpperCase()}</span>
-              <span className="tabular" style={{ marginLeft: "auto", font: "700 var(--fs-note) var(--font-mono)", color: "var(--ink-muted)" }}>{fmt(sumRemaining(m.rows))} EGP</span>
+              <span className="tabular" style={{ marginLeft: "auto", font: "700 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-secondary-default)" }}>{fmt(sumRemaining(m.rows))} EGP</span>
             </div>
             <RollupTable colA="PAYEE" colB="METHOD" rows={listRows(m.month, m.rows)} />
           </div>
         ))
       )}
-      <div style={{ padding: "0 4px", font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-faint)" }}>
+      <div style={{ padding: "0 4px", font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)" }}>
         {dueRows.length > 0 ? "Tap a payee to see the full breakdown before paying." : null}
       </div>
     </div>

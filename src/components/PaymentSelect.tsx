@@ -31,7 +31,7 @@ export function PaymentSelect({
       ];
   return (
     <div>
-      <div style={{ font: "700 var(--fs-caption) var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", margin: "0 2px 6px" }}>PAYMENT</div>
+      <div style={{ font: "700 var(--text-caption-2-size) var(--font-family-mono)", letterSpacing: ".08em", color: "var(--color-text-tertiary-default)", margin: "0 2px 6px" }}>PAYMENT</div>
       <Segmented value={value} options={options} onChange={(v) => onChange(v as PayMethod)} />
     </div>
   );

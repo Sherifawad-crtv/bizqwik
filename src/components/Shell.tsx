@@ -48,8 +48,8 @@ function TitlePill({ title }: { title: string }) {
         boxSizing: "border-box",
         padding: "8px 18px",
         borderRadius: 999,
-        background: "rgba(243,242,238,.82)",
-        font: "800 17px var(--font-body)",
+        background: "var(--color-bg-canvas-translucent)",
+        font: "800 17px var(--font-family-body)",
         letterSpacing: "-.01em",
         overflow: "hidden",
         display: "grid",
@@ -112,7 +112,7 @@ function ShellInner() {
 
   if (isMobile) {
     return (
-      <div style={{ minHeight: "100svh", background: "var(--paper)", position: "relative", overflow: "hidden" }}>
+      <div style={{ minHeight: "100svh", background: "var(--color-bg-canvas-default)", position: "relative", overflow: "hidden" }}>
         {(
           <div
             aria-hidden={!barOn}
@@ -138,7 +138,7 @@ function ShellInner() {
                   onClick={goBack}
                   aria-label="Back"
                   className="bq-hit"
-                  style={{ display: "flex", alignItems: "center", gap: 2, border: 0, cursor: "pointer", color: "var(--ink)", background: "rgba(243,242,238,.82)", borderRadius: 999, padding: "8px 14px 8px 8px", font: "700 var(--fs-body-sm) var(--font-body)" }}
+                  style={{ display: "flex", alignItems: "center", gap: 2, border: 0, cursor: "pointer", color: "var(--color-text-primary-default)", background: "var(--color-bg-canvas-translucent)", borderRadius: 999, padding: "8px 14px 8px 8px", font: "700 var(--text-subheadline-size) var(--font-family-body)" }}
                 >
                   <Icon name="chevron-left" size={18} />
                   Back
@@ -171,7 +171,7 @@ function ShellInner() {
             </div>
             <div className="bq-barlayer" data-on={showActions} aria-hidden={!showActions || undefined} inert={!showActions}>
               {actionsNode && (
-                <div className="bq-grow" style={{ display: "flex", gap: 8, maxWidth: 520, padding: 8, background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-float)", boxShadow: "var(--shadow-float)" }}>
+                <div className="bq-grow" style={{ display: "flex", gap: 8, maxWidth: 520, padding: 8, background: "var(--color-bg-surface-primary-default)", border: "1px solid var(--color-border-primary-default)", borderRadius: "var(--radius-float)", boxShadow: "var(--shadow-float)" }}>
                   {actionsNode}
                 </div>
               )}
@@ -183,7 +183,7 @@ function ShellInner() {
   }
 
   return (
-    <div style={{ minHeight: "100svh", background: "var(--paper)", display: "flex" }}>
+    <div style={{ minHeight: "100svh", background: "var(--color-bg-canvas-default)", display: "flex" }}>
       <Sidebar />
       {solo && (
         <div style={{ position: "fixed", right: 32, bottom: 32, zIndex: 40 }}>
@@ -196,8 +196,8 @@ function ShellInner() {
             position: "sticky",
             top: 0,
             zIndex: 20,
-            background: "rgba(243,242,238,.94)",
-            borderBottom: "1px solid var(--line)",
+            background: "var(--color-bg-canvas-translucent-strong)",
+            borderBottom: "1px solid var(--color-border-primary-default)",
             padding: "22px 30px 18px",
             display: "flex",
             alignItems: "flex-end",

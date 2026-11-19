@@ -77,22 +77,22 @@ export function DaySessionsSheet({ open, onClose, coachId, month, date, sessions
       <Sheet open={open} onClose={onClose}>
         <div className="bq-label">{editable ? "EDIT DAY" : "DAY"}</div>
         <div className="bq-stat-lg" style={{ margin: "4px 0 4px" }}>{dateLabelFull(shown.date)}</div>
-        <div style={{ font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-muted)", marginBottom: 16 }}>
+        <div style={{ font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-secondary-default)", marginBottom: 16 }}>
           {shownSessions.length} {shownSessions.length === 1 ? "session" : "sessions"} · {egp(shownSessions.length * rate)}
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           {shownSessions.map((s, i) => (
-            <div key={s.id} style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-item)", padding: "10px 14px" }}>
+            <div key={s.id} style={{ background: "var(--color-bg-surface-secondary-default)", border: "1px solid var(--color-border-primary-default)", borderRadius: "var(--radius-item)", padding: "10px 14px" }}>
               {movingId === s.id ? (
                 <DateField value={s.date} min={min} max={max} onChange={(d) => move(s.id, d)} />
               ) : (
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <span style={{ font: "600 var(--fs-body) var(--font-body)", color: "var(--ink)" }}>Session {i + 1}</span>
-                  <span style={{ font: "700 10px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)" }}>{s.source === "qr" ? "QR" : "MANUAL"}</span>
+                  <span style={{ font: "600 var(--text-body-size) var(--font-family-body)", color: "var(--color-text-primary-default)" }}>Session {i + 1}</span>
+                  <span style={{ font: "700 10px var(--font-family-mono)", letterSpacing: ".08em", color: "var(--color-text-tertiary-default)" }}>{s.source === "qr" ? "QR" : "MANUAL"}</span>
                   {(() => {
                     const st = sessionStamp(s);
-                    return st ? <span data-testid="session-time" style={{ font: "600 var(--fs-note) var(--font-mono)", color: "var(--ink-muted)", whiteSpace: "nowrap" }}>{st.text}</span> : null;
+                    return st ? <span data-testid="session-time" style={{ font: "600 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-secondary-default)", whiteSpace: "nowrap" }}>{st.text}</span> : null;
                   })()}
                   {editable && (
                     <>

@@ -18,11 +18,11 @@ function SidebarItem({ item }: { item: NavItem }) {
             alignItems: "center",
             gap: 12,
             padding: "11px 12px",
-            borderRadius: "var(--r-item)",
+            borderRadius: "var(--radius-item)",
             cursor: "pointer",
-            background: isActive ? "var(--primary-tint)" : hovered ? "var(--sunken)" : "transparent",
-            color: isActive ? "var(--primary-pressed)" : hovered ? "var(--ink)" : "var(--ink-muted)",
-            font: "600 var(--fs-base) var(--font-body)",
+            background: isActive ? "var(--color-bg-fill-accent-default)" : hovered ? "var(--color-bg-surface-secondary-default)" : "transparent",
+            color: isActive ? "var(--color-bg-fill-primary-active)" : hovered ? "var(--color-text-primary-default)" : "var(--color-text-secondary-default)",
+            font: "600 var(--text-callout-size) var(--font-family-body)",
             transition: tr(["background", "color"], QUICK_MS),
           }}
         >
@@ -44,8 +44,8 @@ export function Sidebar() {
       style={{
         width: 250,
         flex: "none",
-        background: "var(--surface)",
-        borderRight: "1px solid var(--line)",
+        background: "var(--color-bg-surface-primary-default)",
+        borderRight: "1px solid var(--color-border-primary-default)",
         display: "flex",
         flexDirection: "column",
         padding: "22px 16px",
@@ -55,7 +55,7 @@ export function Sidebar() {
       }}
     >
       <img src="/wordmark.png" alt="Bizqwik" style={{ height: 24, width: "auto", alignSelf: "flex-start", margin: "0 8px 12px", display: "block" }} />
-      <div style={{ font: "700 var(--fs-caption) var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", padding: "0 8px 20px" }}>
+      <div style={{ font: "700 var(--text-caption-2-size) var(--font-family-mono)", letterSpacing: ".08em", color: "var(--color-text-tertiary-default)", padding: "0 8px 20px" }}>
         {ROLE_LABELS[profile.role].toUpperCase()}
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
@@ -64,11 +64,11 @@ export function Sidebar() {
         ))}
       </div>
       <NavLink to="/account" style={{ marginTop: "auto", textDecoration: "none" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 8px 0", borderTop: "1px solid var(--line)" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 8px 0", borderTop: "1px solid var(--color-border-primary-default)" }}>
           <Avatar name={profile.name} size={34} src={profile.avatarUrl} />
           <div style={{ minWidth: 0 }}>
-            <div style={{ font: "600 var(--fs-base) var(--font-body)", lineHeight: 1.1, color: "var(--ink)" }}>{profile.name}</div>
-            <div style={{ font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-faint)", display: "flex", alignItems: "center", gap: 4 }}>
+            <div style={{ font: "600 var(--text-callout-size) var(--font-family-body)", lineHeight: 1.1, color: "var(--color-text-primary-default)" }}>{profile.name}</div>
+            <div style={{ font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)", display: "flex", alignItems: "center", gap: 4 }}>
               Account <Icon name="chevron-right" size={13} />
             </div>
           </div>

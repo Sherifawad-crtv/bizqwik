@@ -41,7 +41,7 @@ export function RecurringPanel({ categories, onChanged, onCategoriesChanged }: {
 
   return (
     <div>
-      <SectionHeader count={recurring.length} right={<button onClick={() => setManagingCats(true)} style={{ border: 0, background: "none", font: "700 var(--fs-note) var(--font-body)", color: "var(--primary-pressed)", cursor: "pointer" }}>Categories</button>}>
+      <SectionHeader count={recurring.length} right={<button onClick={() => setManagingCats(true)} style={{ border: 0, background: "none", font: "700 var(--text-footnote-size) var(--font-family-body)", color: "var(--color-bg-fill-primary-active)", cursor: "pointer" }}>Categories</button>}>
         Recurring expenses
       </SectionHeader>
       <Card pad="none" style={{ overflow: "hidden", marginBottom: 14 }}>
@@ -51,12 +51,12 @@ export function RecurringPanel({ categories, onChanged, onCategoriesChanged }: {
           return (
             <button key={r.id} className={`bq-plain bq-scale bq-listrow bq-listrow--compact ${!(i === recurring.length - 1) ? "bq-listrow--divider" : ""}`} onClick={() => setEditing(r)} style={{ width: "100%", background: "none", cursor: "pointer", textAlign: "left", opacity: r.active ? 1 : 0.5 }}>
               <div className="bq-grow">
-                <div style={{ font: "700 var(--fs-body) var(--font-body)" }}>{r.categoryName}{r.note ? ` · ${r.note}` : ""}</div>
-                <div style={{ font: "400 var(--fs-small) var(--font-mono)", color: "var(--ink-faint)" }}>
+                <div style={{ font: "700 var(--text-body-size) var(--font-family-body)" }}>{r.categoryName}{r.note ? ` · ${r.note}` : ""}</div>
+                <div style={{ font: "400 var(--text-caption-1-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)" }}>
                   Day {r.dayOfMonth} · {r.active ? (next ? `Next ${next.slice(8, 10)} ${monthAbbr(next.slice(0, 7))}` : "Ended") : "Paused"}
                 </div>
               </div>
-              <div className="tabular" style={{ flex: "none", font: "800 var(--fs-body) var(--font-mono)" }}>{fmt(r.amount)}</div>
+              <div className="tabular" style={{ flex: "none", font: "800 var(--text-body-size) var(--font-family-mono)" }}>{fmt(r.amount)}</div>
               <Icon name="chevron-right" size={16} />
             </button>
           );
@@ -159,7 +159,7 @@ function RecurringSheet({ template, categories, onClose, onSaved }: { template: 
             <TextField label="NOTE (OPTIONAL)" value={note} onChange={(e) => setNote(e.target.value)} placeholder="What it's for" />
             <TextField label="ENDS (OPTIONAL, YYYY-MM)" value={endMonth} onChange={(e) => setEndMonth(e.target.value)} placeholder="Leave blank to repeat forever" />
           </div>
-          <div style={{ marginTop: 8, font: "400 var(--fs-small)/1.5 var(--font-mono)", color: "var(--ink-faint)" }}>
+          <div style={{ marginTop: 8, font: "400 var(--text-caption-1-size)/1.5 var(--font-family-mono)", color: "var(--color-text-tertiary-default)" }}>
             {isNew ? "Changing this later only affects future months — rows already made stay as they are." : "Editing changes future months only. Rows already made for past months are untouched."}
           </div>
           {error && <div  className="bq-error bq-error--spaced bq-rise">{error}</div>}

@@ -35,7 +35,7 @@ export function ForgotPassword() {
     <div
       style={{
         minHeight: "100svh",
-        background: "var(--paper)",
+        background: "var(--color-bg-canvas-default)",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
@@ -49,13 +49,13 @@ export function ForgotPassword() {
       <img src="/wordmark.png" alt="Bizqwik" style={{ height: "clamp(34px, 8vw, 42px)", width: "auto", display: "block" }} />
       <div className="bq-card bq-card--lg" style={{ width: "min(420px, 100%)" }}>
         <div className="bq-stat-lg">Reset password</div>
-        <div style={{ font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-muted)", marginTop: 6, marginBottom: 22 }}>
+        <div style={{ font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-secondary-default)", marginTop: 6, marginBottom: 22 }}>
           {sent ? "CHECK YOUR EMAIL" : "WE'LL EMAIL YOU A RESET LINK"}
         </div>
 
         {sent ? (
           <>
-            <div style={{ font: "500 var(--fs-body)/1.5 var(--font-body)", color: "var(--ink)" }}>
+            <div style={{ font: "500 var(--text-body-size)/1.5 var(--font-family-body)", color: "var(--color-text-primary-default)" }}>
               If an account exists for <strong>{email}</strong>, a password reset link is on its way.
             </div>
             <Link to="/login" style={{ display: "block", marginTop: 22 }}>
@@ -86,7 +86,7 @@ export function ForgotPassword() {
             </Button>
             <Link
               to="/login"
-              style={{ textAlign: "center", font: "700 var(--fs-note) var(--font-body)", color: "var(--ink-muted)", marginTop: 4 }}
+              style={{ textAlign: "center", font: "700 var(--text-footnote-size) var(--font-family-body)", color: "var(--color-text-secondary-default)", marginTop: 4 }}
             >
               Back to sign in
             </Link>

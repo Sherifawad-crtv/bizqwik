@@ -73,13 +73,13 @@ export function Oversight() {
       <HomeAvatar name={profile.name} avatarUrl={profile.avatarUrl} greeting={`Hi, ${profile.name.split(" ")[0]}`} />
 
       {error && (
-        <div className="bq-rise" style={{ marginBottom: 14, font: "600 var(--fs-note)/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: "var(--r-item)", padding: "10px 14px" }}>{error}</div>
+        <div className="bq-rise" style={{ marginBottom: 14, font: "600 var(--text-footnote-size)/1.5 var(--font-family-body)", color: "var(--color-text-status-danger-default)", background: "var(--color-bg-fill-status-danger-default)", borderRadius: "var(--radius-item)", padding: "10px 14px" }}>{error}</div>
       )}
 
       <div style={{ display: "flex", alignItems: "center", gap: 10, margin: "0 0 12px" }}>
         <Segmented value={range} onChange={setRange} options={RANGE_OPTIONS} />
         {data && shown.length > 0 && (
-          <span style={{ marginLeft: "auto", font: "700 var(--fs-caption) var(--font-mono)", letterSpacing: ".06em", color: "var(--ink-faint)", textAlign: "right" }}>{caption(shown.map((m) => m.month))}</span>
+          <span style={{ marginLeft: "auto", font: "700 var(--text-caption-2-size) var(--font-family-mono)", letterSpacing: ".06em", color: "var(--color-text-tertiary-default)", textAlign: "right" }}>{caption(shown.map((m) => m.month))}</span>
         )}
       </div>
 
@@ -88,12 +88,12 @@ export function Oversight() {
       ) : (
         <>
           {short && (
-            <div style={{ display: "flex", gap: 10, alignItems: "flex-start", background: "var(--sunken)", borderRadius: "var(--r-item)", padding: "12px 14px", marginBottom: 14 }}>
-              <span style={{ color: "var(--ink-muted)", display: "flex", flex: "none", marginTop: 1 }}>
+            <div style={{ display: "flex", gap: 10, alignItems: "flex-start", background: "var(--color-bg-surface-secondary-default)", borderRadius: "var(--radius-item)", padding: "12px 14px", marginBottom: 14 }}>
+              <span style={{ color: "var(--color-text-secondary-default)", display: "flex", flex: "none", marginTop: 1 }}>
                 <Icon name="insights" size={18} />
               </span>
-              <span style={{ font: "500 var(--fs-note)/1.5 var(--font-body)", color: "var(--ink-muted)" }}>
-                <b style={{ color: "var(--ink)" }}>{depth === 1 ? "You have 1 month of data." : `You have ${depth} months of data.`}</b>{" "}
+              <span style={{ font: "500 var(--text-footnote-size)/1.5 var(--font-family-body)", color: "var(--color-text-secondary-default)" }}>
+                <b style={{ color: "var(--color-text-primary-default)" }}>{depth === 1 ? "You have 1 month of data." : `You have ${depth} months of data.`}</b>{" "}
                 {`That's all this ${n}-month view can show. Trends and comparisons with earlier periods appear as you keep selling and logging sessions.`}
               </span>
             </div>
@@ -115,7 +115,7 @@ export function Oversight() {
                 <span style={{ marginLeft: "auto" }}>{compare && <Delta pct={pctChange(report.totals.revenue, compare.revenue)} tone="good" />}</span>
               </div>
               <div className="tabular bq-stat-xl" style={{ margin: "8px 0 0", overflowWrap: "anywhere" }}>{fmt(report.totals.revenue)}</div>
-              <div style={{ font: "400 var(--fs-small)/1.4 var(--font-mono)", color: "var(--ink-faint)", marginTop: 8 }}>
+              <div style={{ font: "400 var(--text-caption-1-size)/1.4 var(--font-family-mono)", color: "var(--color-text-tertiary-default)", marginTop: 8 }}>
                 {compare && compare.revenue > 0 ? `vs ${fmt(compare.revenue)} ${prevLabel}` : "New money in from cash and card sales"}
               </div>
             </div>
@@ -152,16 +152,16 @@ export function Oversight() {
               <EmptyState bare icon="coaches" title="No coach activity in this period" body="Coaches appear here once they sell PT or get paid for sessions in these months." />
             ) : (
               <div style={{ display: "flex", flexDirection: "column" }}>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 90px 90px", gap: 8, font: "700 10px var(--font-mono)", letterSpacing: ".06em", color: "var(--ink-faint)", paddingBottom: 8 }}>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 90px 90px", gap: 8, font: "700 10px var(--font-family-mono)", letterSpacing: ".06em", color: "var(--color-text-tertiary-default)", paddingBottom: 8 }}>
                   <span>COACH</span>
                   <span style={{ textAlign: "right" }}>PT SOLD</span>
                   <span style={{ textAlign: "right" }}>PAID OUT</span>
                 </div>
                 {report.byCoach.map((c) => (
-                  <div key={c.coachId} style={{ display: "grid", gridTemplateColumns: "1fr 90px 90px", gap: 8, padding: "10px 0", borderTop: "1px solid var(--line)", alignItems: "baseline" }}>
-                    <span style={{ font: "600 var(--fs-body-sm) var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.name}</span>
-                    <span className="tabular" style={{ textAlign: "right", font: "800 var(--fs-body-sm) var(--font-body)" }}>{fmt(c.revenue)}</span>
-                    <span className="tabular" style={{ textAlign: "right", font: "600 var(--fs-note) var(--font-mono)", color: "var(--ink-muted)" }}>{fmt(c.payouts)}</span>
+                  <div key={c.coachId} style={{ display: "grid", gridTemplateColumns: "1fr 90px 90px", gap: 8, padding: "10px 0", borderTop: "1px solid var(--color-border-primary-default)", alignItems: "baseline" }}>
+                    <span style={{ font: "600 var(--text-subheadline-size) var(--font-family-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.name}</span>
+                    <span className="tabular" style={{ textAlign: "right", font: "800 var(--text-subheadline-size) var(--font-family-body)" }}>{fmt(c.revenue)}</span>
+                    <span className="tabular" style={{ textAlign: "right", font: "600 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-secondary-default)" }}>{fmt(c.payouts)}</span>
                   </div>
                 ))}
               </div>
@@ -174,17 +174,17 @@ export function Oversight() {
               onClick={() => navigate("/accounting")}
               style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", padding: "16px 18px", marginBottom: 10, cursor: "pointer", textAlign: "left" }}
             >
-              <span style={{ width: 32, height: 32, flex: "none", borderRadius: "var(--r-chip)", background: "var(--primary-tint)", color: "var(--primary-pressed)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <span style={{ width: 32, height: 32, flex: "none", borderRadius: "var(--radius-chip)", background: "var(--color-bg-fill-accent-default)", color: "var(--color-bg-fill-primary-active)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <Icon name="cash" size={16} />
               </span>
-              <span style={{ flex: 1, font: "700 var(--fs-body) var(--font-body)" }}>Profit &amp; loss</span>
-              <span style={{ color: "var(--ink-faint)", display: "flex" }}>
+              <span style={{ flex: 1, font: "700 var(--text-body-size) var(--font-family-body)" }}>Profit &amp; loss</span>
+              <span style={{ color: "var(--color-text-tertiary-default)", display: "flex" }}>
                 <Icon name="chevron-right" size={16} />
               </span>
             </button>
           )}
 
-          <div style={{ textAlign: "center", font: "400 var(--fs-small)/1.5 var(--font-mono)", color: "var(--ink-faint)", margin: "8px 0 18px" }}>
+          <div style={{ textAlign: "center", font: "400 var(--text-caption-1-size)/1.5 var(--font-family-mono)", color: "var(--color-text-tertiary-default)", margin: "8px 0 18px" }}>
             Revenue counts every sale when it happens — cash or card. Wallet top-ups and wallet-paid sales aren't counted twice.
           </div>
         </>

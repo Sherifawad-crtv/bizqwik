@@ -113,21 +113,21 @@ export function FrontDeskHome() {
             const canEnter = status.tone === "good" || status.tone === "warn" || status.tone === "pt";
             const q = quick[c.id];
             return (
-              <div key={c.id} data-testid="home-result" style={{ padding: "10px 12px 10px 18px", borderBottom: i === matches.length - 1 ? "none" : "1px solid var(--line)" }}>
+              <div key={c.id} data-testid="home-result" style={{ padding: "10px 12px 10px 18px", borderBottom: i === matches.length - 1 ? "none" : "1px solid var(--color-border-primary-default)" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                   <button
                     className="bq-scale"
                     onClick={() => setPicked(c)}
-                    style={{ minWidth: 0, flex: 1, display: "block", border: 0, background: "none", padding: "4px 0", cursor: "pointer", textAlign: "left", color: "var(--ink)" }}
+                    style={{ minWidth: 0, flex: 1, display: "block", border: 0, background: "none", padding: "4px 0", cursor: "pointer", textAlign: "left", color: "var(--color-text-primary-default)" }}
                   >
-                    <span style={{ display: "block", font: "700 var(--fs-base) var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.name}</span>
+                    <span style={{ display: "block", font: "700 var(--text-callout-size) var(--font-family-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.name}</span>
                     <span style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 4, minWidth: 0 }}>
                       <PlanPill client={c} />
-                      <span style={{ font: "400 var(--fs-small) var(--font-mono)", color: "var(--ink-faint)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", minWidth: 0 }}>{plan.title}</span>
+                      <span style={{ font: "400 var(--text-caption-1-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", minWidth: 0 }}>{plan.title}</span>
                     </span>
                   </button>
                   {q?.state === "done" ? (
-                    <span style={{ display: "inline-flex", alignItems: "center", gap: 6, color: "var(--paid-fg)", font: "800 var(--fs-body-sm) var(--font-body)", flex: "none" }}>
+                    <span style={{ display: "inline-flex", alignItems: "center", gap: 6, color: "var(--color-text-status-paid-default)", font: "800 var(--text-subheadline-size) var(--font-family-body)", flex: "none" }}>
                       <Icon name="check" size={18} /> Done
                     </span>
                   ) : canEnter ? (
@@ -135,7 +135,7 @@ export function FrontDeskHome() {
                       className="bq-scale"
                       disabled={q?.state === "busy"}
                       onClick={() => quickCheckIn(c)}
-                      style={{ flex: "none", height: 42, padding: "0 18px", border: 0, borderRadius: 999, background: "var(--primary)", color: "#fff", font: "700 var(--fs-body-sm) var(--font-body)", cursor: "pointer", opacity: q?.state === "busy" ? 0.6 : 1 }}
+                      style={{ flex: "none", height: 42, padding: "0 18px", border: 0, borderRadius: 999, background: "var(--color-bg-fill-primary-default)", color: "var(--color-text-on-fill-default)", font: "700 var(--text-subheadline-size) var(--font-family-body)", cursor: "pointer", opacity: q?.state === "busy" ? 0.6 : 1 }}
                     >
                       {q?.state === "busy" ? "…" : "Check in"}
                     </button>
@@ -143,15 +143,15 @@ export function FrontDeskHome() {
                     <button
                       className="bq-scale"
                       onClick={() => setPicked(c)}
-                      style={{ flex: "none", height: 42, padding: "0 16px", border: "1px solid var(--line)", borderRadius: 999, background: "var(--surface)", color: "var(--ink)", font: "700 var(--fs-body-sm) var(--font-body)", cursor: "pointer" }}
+                      style={{ flex: "none", height: 42, padding: "0 16px", border: "1px solid var(--color-border-primary-default)", borderRadius: 999, background: "var(--color-bg-surface-primary-default)", color: "var(--color-text-primary-default)", font: "700 var(--text-subheadline-size) var(--font-family-body)", cursor: "pointer" }}
                     >
                       Options
                     </button>
                   )}
                 </div>
-                {q?.state === "done" && <div style={{ font: "400 var(--fs-small) var(--font-mono)", color: "var(--paid-fg)", marginTop: 4 }}>{q.note}</div>}
+                {q?.state === "done" && <div style={{ font: "400 var(--text-caption-1-size) var(--font-family-mono)", color: "var(--color-text-status-paid-default)", marginTop: 4 }}>{q.note}</div>}
                 {q?.state === "error" && (
-                  <div role="alert" style={{ font: "600 var(--fs-small)/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: "var(--r-item)", padding: "8px 10px", marginTop: 6 }}>
+                  <div role="alert" style={{ font: "600 var(--text-caption-1-size)/1.5 var(--font-family-body)", color: "var(--color-text-status-danger-default)", background: "var(--color-bg-fill-status-danger-default)", borderRadius: "var(--radius-item)", padding: "8px 10px", marginTop: 6 }}>
                     {q.text}
                   </div>
                 )}
@@ -165,7 +165,7 @@ export function FrontDeskHome() {
       <button
         className="bq-scale"
         onClick={() => setModal("checkin")}
-        style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, width: "100%", height: 64, marginTop: 14, border: 0, borderRadius: "var(--r-card)", background: "var(--primary)", color: "var(--surface)", font: "800 18px var(--font-body)", cursor: "pointer", boxShadow: "0 12px 30px rgba(90,65,255,.28)" }}
+        style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, width: "100%", height: 64, marginTop: 14, border: 0, borderRadius: "var(--radius-card)", background: "var(--color-bg-fill-primary-default)", color: "var(--color-bg-surface-primary-default)", font: "800 18px var(--font-family-body)", cursor: "pointer", boxShadow: "var(--shadow-cta)" }}
       >
         <Icon name="check" size={24} /> Check someone in
       </button>
@@ -175,7 +175,7 @@ export function FrontDeskHome() {
             key={a.key}
             className="bq-scale bq-card"
             onClick={() => setModal(a.key)}
-            style={{ minHeight: 76, color: "var(--ink)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 6, padding: 8, cursor: "pointer", font: "700 var(--fs-note)/1.2 var(--font-body)", textAlign: "center" }}
+            style={{ minHeight: 76, color: "var(--color-text-primary-default)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 6, padding: 8, cursor: "pointer", font: "700 var(--text-footnote-size)/1.2 var(--font-family-body)", textAlign: "center" }}
           >
             <Icon name={a.icon} size={22} />
             {a.label}
@@ -189,8 +189,8 @@ export function FrontDeskHome() {
           { k: "Drop-ins", v: data.todayDropIns },
           { k: "In the last 2h", v: data.activeNow },
         ].map((x) => (
-          <span key={x.k} style={{ font: "600 var(--fs-note) var(--font-body)", color: "var(--ink-muted)", background: "var(--sunken)", borderRadius: 999, padding: "6px 12px" }}>
-            <b style={{ color: "var(--ink)", font: "800 var(--fs-body-sm) var(--font-mono)" }}>{x.v}</b> {x.k}
+          <span key={x.k} style={{ font: "600 var(--text-footnote-size) var(--font-family-body)", color: "var(--color-text-secondary-default)", background: "var(--color-bg-surface-secondary-default)", borderRadius: 999, padding: "6px 12px" }}>
+            <b style={{ color: "var(--color-text-primary-default)", font: "800 var(--text-subheadline-size) var(--font-family-mono)" }}>{x.v}</b> {x.k}
           </span>
         ))}
       </div>
@@ -198,7 +198,7 @@ export function FrontDeskHome() {
       <SectionHeader right={<SectionLink onClick={() => navigate("/bookings")}>All bookings</SectionLink>}>Next up</SectionHeader>
       <Card pad="none" style={{ overflow: "hidden", marginBottom: 24 }}>
         {nextDay && nextUp.length > 0 && (
-          <div data-testid="next-day-label" style={{ padding: "12px 18px 0", font: "600 var(--fs-note) var(--font-body)", color: "var(--ink-muted)" }}>
+          <div data-testid="next-day-label" style={{ padding: "12px 18px 0", font: "600 var(--text-footnote-size) var(--font-family-body)", color: "var(--color-text-secondary-default)" }}>
             Nothing left today · {nextDay}
           </div>
         )}
@@ -209,10 +209,10 @@ export function FrontDeskHome() {
             onClick={() => setRoster(c)}
             style={{ width: "100%", minHeight: 60, background: "none", cursor: "pointer", textAlign: "left" }}
           >
-            <span style={{ width: 84, flex: "none", whiteSpace: "nowrap", font: "700 var(--fs-body-sm) var(--font-mono)" }}>{clockOf(c.startsAt)}</span>
+            <span style={{ width: 84, flex: "none", whiteSpace: "nowrap", font: "700 var(--text-subheadline-size) var(--font-family-mono)" }}>{clockOf(c.startsAt)}</span>
             <span className="bq-grow">
-              <span style={{ display: "block", font: "700 var(--fs-body) var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.title}</span>
-              <span style={{ display: "block", font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-faint)" }}>{(c.bookedCount ?? 0) === 0 ? "No one booked" : `${c.bookedCount} booked`}</span>
+              <span style={{ display: "block", font: "700 var(--text-body-size) var(--font-family-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.title}</span>
+              <span style={{ display: "block", font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)" }}>{(c.bookedCount ?? 0) === 0 ? "No one booked" : `${c.bookedCount} booked`}</span>
             </span>
             <Icon name="chevron-right" size={16} />
           </button>
@@ -223,7 +223,7 @@ export function FrontDeskHome() {
       <SectionHeader right={<SectionLink onClick={() => navigate("/activity")}>Full activity &amp; logs</SectionLink>}>Recent activity</SectionHeader>
       <Card pad="none" style={{ overflow: "hidden" }}>
         {data.recent.slice(0, 5).map((r, i) => (
-          <div key={r.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 18px", borderBottom: i === Math.min(data.recent.length, 5) - 1 ? "none" : "1px solid var(--line)" }}>
+          <div key={r.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 18px", borderBottom: i === Math.min(data.recent.length, 5) - 1 ? "none" : "1px solid var(--color-border-primary-default)" }}>
             <span
               style={{
                 width: 36,
@@ -233,17 +233,17 @@ export function FrontDeskHome() {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                background: r.kind === "check_in" ? "var(--paid-bg)" : "var(--primary-tint)",
-                color: r.kind === "check_in" ? "var(--paid-fg)" : "var(--primary-pressed)",
+                background: r.kind === "check_in" ? "var(--color-bg-fill-status-paid-default)" : "var(--color-bg-fill-accent-default)",
+                color: r.kind === "check_in" ? "var(--color-text-status-paid-default)" : "var(--color-bg-fill-primary-active)",
               }}
             >
               <Icon name={r.kind === "check_in" ? "check" : "ticket"} size={18} />
             </span>
             <div className="bq-grow">
-              <div style={{ font: "700 var(--fs-body) var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.name}</div>
+              <div style={{ font: "700 var(--text-body-size) var(--font-family-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.name}</div>
               <div className="bq-meta">{r.detail}</div>
             </div>
-            <span style={{ font: "400 var(--fs-small) var(--font-mono)", color: "var(--ink-faint)", whiteSpace: "nowrap" }}>{timeAgo(r.at)}</span>
+            <span style={{ font: "400 var(--text-caption-1-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)", whiteSpace: "nowrap" }}>{timeAgo(r.at)}</span>
           </div>
         ))}
         {data.recent.length === 0 && (

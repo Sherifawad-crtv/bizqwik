@@ -16,7 +16,7 @@ function StatTile({ label, value }: { label: string; value: string }) {
   return (
     <Card pad="none" style={{ padding: "16px 18px" }}>
       <div className="bq-label">{label}</div>
-      <div style={{ font: "800 var(--fs-title)/1.1 var(--font-body)", letterSpacing: "-.02em", marginTop: 6 }} className="tabular">{value}</div>
+      <div style={{ font: "800 var(--text-title-1-size)/1.1 var(--font-family-body)", letterSpacing: "-.02em", marginTop: 6 }} className="tabular">{value}</div>
     </Card>
   );
 }
@@ -64,18 +64,18 @@ export function Overview() {
             className={`bq-plain bq-listrow ${!(i === orgs.length - 1) ? "bq-listrow--divider" : ""}`} style={{ width: "100%", background: "none", cursor: "pointer", textAlign: "left" }}
           >
             <div className="bq-grow">
-              <div style={{ font: "700 var(--fs-base) var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{o.name}</div>
+              <div style={{ font: "700 var(--text-callout-size) var(--font-family-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{o.name}</div>
               <div className="bq-meta">
                 {o.planName ?? "No plan"} · {o.staffCount} staff · {o.clientCount} clients
               </div>
             </div>
             <div style={{ textAlign: "right", flex: "none" }}>
-              <div style={{ font: "700 var(--fs-body) var(--font-body)" }} className="tabular">{egp(o.gmv)}</div>
+              <div style={{ font: "700 var(--text-body-size) var(--font-family-body)" }} className="tabular">{egp(o.gmv)}</div>
               <div style={{ marginTop: 4 }}>
                 <StatusPill status={o.status} />
               </div>
             </div>
-            <span style={{ color: "var(--ink-faint)", display: "flex", flex: "none" }}>
+            <span style={{ color: "var(--color-text-tertiary-default)", display: "flex", flex: "none" }}>
               <Icon name="chevron-right" size={16} />
             </span>
           </button>

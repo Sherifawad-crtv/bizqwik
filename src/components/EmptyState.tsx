@@ -25,9 +25,9 @@ export function EmptyState({
 
       data-testid={testId ?? "empty-state"}
       style={{
-        background: bare ? "transparent" : "var(--surface)",
+        background: bare ? "transparent" : "var(--color-bg-surface-primary-default)",
         border: 0,
-        borderRadius: "var(--r-card)",
+        borderRadius: "var(--radius-card)",
         padding: bare ? "18px 8px" : "28px 20px",
         display: "flex",
         flexDirection: "column",
@@ -36,11 +36,11 @@ export function EmptyState({
         gap: 6,
       }}
     >
-      <span style={{ width: 44, height: 44, borderRadius: "var(--r-chip)", background: "var(--primary-tint)", color: "var(--primary-pressed)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 4 }}>
+      <span style={{ width: 44, height: 44, borderRadius: "var(--radius-chip)", background: "var(--color-bg-fill-accent-default)", color: "var(--color-bg-fill-primary-active)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 4 }}>
         <Icon name={icon} size={22} />
       </span>
-      <div style={{ font: "700 var(--fs-base)/1.3 var(--font-body)", color: "var(--ink)" }}>{title}</div>
-      {body && <div style={{ font: "500 var(--fs-note)/1.5 var(--font-body)", color: "var(--ink-muted)", maxWidth: 340 }}>{body}</div>}
+      <div style={{ font: "700 var(--text-callout-size)/1.3 var(--font-family-body)", color: "var(--color-text-primary-default)" }}>{title}</div>
+      {body && <div style={{ font: "500 var(--text-footnote-size)/1.5 var(--font-family-body)", color: "var(--color-text-secondary-default)", maxWidth: 340 }}>{body}</div>}
       {action && (
         <Button variant="secondary" style={{ marginTop: 8 }} onClick={action.onClick}>
           {action.label}

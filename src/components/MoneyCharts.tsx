@@ -37,12 +37,12 @@ export function ShareBars({ slices }: { slices: RevenueSlice[] }) {
         return (
           <div key={s.key}>
             <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 5 }}>
-              <span style={{ flex: 1, minWidth: 0, font: "600 var(--fs-body-sm) var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s.label}</span>
-              <span className="tabular" style={{ font: "800 var(--fs-body-sm) var(--font-body)" }}>{fmt(s.amount)}</span>
-              <span className="tabular" style={{ width: 40, textAlign: "right", font: "600 var(--fs-small) var(--font-mono)", color: "var(--ink-faint)" }}>{Math.round(pct)}%</span>
+              <span style={{ flex: 1, minWidth: 0, font: "600 var(--text-subheadline-size) var(--font-family-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s.label}</span>
+              <span className="tabular" style={{ font: "800 var(--text-subheadline-size) var(--font-family-body)" }}>{fmt(s.amount)}</span>
+              <span className="tabular" style={{ width: 40, textAlign: "right", font: "600 var(--text-caption-1-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)" }}>{Math.round(pct)}%</span>
             </div>
-            <div style={{ height: 8, background: "var(--sunken)", borderRadius: 999, overflow: "hidden" }}>
-              <div style={{ width: `${pct}%`, height: "100%", background: "var(--primary)", borderRadius: "0 4px 4px 0" }} />
+            <div style={{ height: 8, background: "var(--color-bg-surface-secondary-default)", borderRadius: 999, overflow: "hidden" }}>
+              <div style={{ width: `${pct}%`, height: "100%", background: "var(--color-bg-fill-primary-default)", borderRadius: "0 4px 4px 0" }} />
             </div>
           </div>
         );

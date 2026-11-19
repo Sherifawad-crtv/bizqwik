@@ -60,19 +60,19 @@ export function ClassesPanel({ solo }: { solo?: boolean }) {
         onClick={() => navigate(solo ? "/bookings" : "/classes")}
         className="bq-card" style={{ width: "100%", marginTop: 12, textAlign: "left", padding: "14px 18px", cursor: "pointer", display: "flex", alignItems: "center", gap: 12 }}
       >
-        <span style={{ color: "var(--primary-pressed)", display: "flex" }}>
+        <span style={{ color: "var(--color-bg-fill-primary-active)", display: "flex" }}>
           <Icon name="calendar" size={20} />
         </span>
         <span className="bq-grow">
-          <span style={{ display: "block", font: "700 var(--fs-body) var(--font-body)" }}>Upcoming sessions & rosters</span>
-          <span style={{ display: "block", font: "400 var(--fs-small) var(--font-mono)", color: "var(--ink-faint)", marginTop: 2 }}>Who's booked, attendance, one-off changes</span>
+          <span style={{ display: "block", font: "700 var(--text-body-size) var(--font-family-body)" }}>Upcoming sessions & rosters</span>
+          <span style={{ display: "block", font: "400 var(--text-caption-1-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)", marginTop: 2 }}>Who's booked, attendance, one-off changes</span>
         </span>
         <Icon name="chevron-right" size={18} />
       </button>
 
       {ended.length > 0 && (
         <>
-          <div style={{ font: "700 var(--fs-caption) var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", margin: "24px 2px 10px" }}>ENDED · {ended.length}</div>
+          <div style={{ font: "700 var(--text-caption-2-size) var(--font-family-mono)", letterSpacing: ".08em", color: "var(--color-text-tertiary-default)", margin: "24px 2px 10px" }}>ENDED · {ended.length}</div>
           <div className="bq-card bq-card--clip" style={{ opacity: 0.6 }}>
             {ended.map((s, i) => (
               <SeriesRow key={s.id} s={s} last={i === ended.length - 1} />
@@ -89,16 +89,16 @@ export function ClassesPanel({ solo }: { solo?: boolean }) {
 function SeriesRow({ s, last, onEdit, locations = [] }: { s: ClassSeries; last: boolean; onEdit?: () => void; locations?: Location[] }) {
   return (
     <div className={`bq-listrow ${!(last) ? "bq-listrow--divider" : ""}`}>
-      {s.imageUrl && <img src={s.imageUrl} alt="" style={{ width: 40, height: 50, flex: "none", borderRadius: "var(--r-chip)", objectFit: "cover" }} />}
+      {s.imageUrl && <img src={s.imageUrl} alt="" style={{ width: 40, height: 50, flex: "none", borderRadius: "var(--radius-chip)", objectFit: "cover" }} />}
       <div className="bq-grow">
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{ font: "700 var(--fs-base) var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s.title}</span>
+          <span style={{ font: "700 var(--text-callout-size) var(--font-family-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s.title}</span>
           <LocationPill locations={locations} id={s.locationId} />
         </div>
         <div className="bq-meta">
           {weekdaysLabel(s.weekdays)} · {timeLabel(s.startTime)} · {s.durationMin} min
         </div>
-        <div style={{ font: "500 var(--fs-note) var(--font-mono)", color: "var(--ink-muted)", marginTop: 2 }}>
+        <div style={{ font: "500 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-secondary-default)", marginTop: 2 }}>
           {s.dropInPrice === 0 && s.monthlyPrice === 0 ? "" : <>Drop-in {egp(s.dropInPrice)} · Monthly {egp(s.monthlyPrice)}</>}
           {s.activeMonthlySubscribers ? ` · ${s.activeMonthlySubscribers} monthly` : ""}
         </div>
@@ -113,7 +113,7 @@ function SeriesRow({ s, last, onEdit, locations = [] }: { s: ClassSeries; last: 
 function WeekdayPicker({ value, onChange }: { value: number[]; onChange: (v: number[]) => void }) {
   return (
     <div>
-      <div style={{ font: "700 var(--fs-caption) var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", marginBottom: 8 }}>DAYS</div>
+      <div style={{ font: "700 var(--text-caption-2-size) var(--font-family-mono)", letterSpacing: ".08em", color: "var(--color-text-tertiary-default)", marginBottom: 8 }}>DAYS</div>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 6 }}>
         {WEEKDAY_ORDER.map((d) => {
           const on = value.includes(d);
@@ -125,11 +125,11 @@ function WeekdayPicker({ value, onChange }: { value: number[]; onChange: (v: num
               onClick={() => onChange(on ? value.filter((x) => x !== d) : [...value, d])}
               style={{
                 height: 44,
-                borderRadius: "var(--r-button)",
-                border: on ? "0" : "1px solid var(--line)",
-                background: on ? "var(--accent)" : "var(--sunken)",
-                color: on ? "var(--accent-ink)" : "var(--ink-muted)",
-                font: "700 var(--fs-small) var(--font-mono)",
+                borderRadius: "var(--radius-button)",
+                border: on ? "0" : "1px solid var(--color-border-primary-default)",
+                background: on ? "var(--color-bg-fill-accent-strong)" : "var(--color-bg-surface-secondary-default)",
+                color: on ? "var(--color-text-accent-strong)" : "var(--color-text-secondary-default)",
+                font: "700 var(--text-caption-1-size) var(--font-family-mono)",
                 cursor: "pointer",
               }}
             >
@@ -240,7 +240,7 @@ export function SeriesSheet({ open, series: seriesProp, onClose }: { open: boole
                 </div>
               )}
             </div>
-            <div style={{ marginTop: 10, font: "400 var(--fs-small)/1.5 var(--font-mono)", color: "var(--ink-faint)" }}>
+            <div style={{ marginTop: 10, font: "400 var(--text-caption-1-size)/1.5 var(--font-family-mono)", color: "var(--color-text-tertiary-default)" }}>
               {series
                 ? (seriesSolo ? "Changes apply to all upcoming sessions of this class." : "Changes apply to upcoming sessions nobody has booked yet. Booked sessions keep their time and price.")
                 : seriesSolo

@@ -39,11 +39,11 @@ export function BottomNav({ items }: { items: NavItem[] }) {
         minWidth: 0,
         height: BAR_H,
         borderRadius: ITEM / 2 + PAD + BAR_BORDER,
-        background: "rgba(251,250,247,.55)",
+        background: "var(--color-bg-surface-glass-default)",
         backdropFilter: "blur(28px) saturate(180%)",
         WebkitBackdropFilter: "blur(28px) saturate(180%)",
-        border: "1px solid rgba(255,255,255,.55)",
-        boxShadow: "var(--shadow-float), inset 0 1px 0 rgba(255,255,255,.7)",
+        border: "1px solid var(--color-border-glass-default)",
+        boxShadow: "var(--shadow-float), var(--shadow-glass-highlight)",
         display: "flex",
         alignItems: "center",
         gap: GAP,
@@ -61,7 +61,7 @@ export function BottomNav({ items }: { items: NavItem[] }) {
             width: INDICATOR,
             height: INDICATOR,
             borderRadius: 999,
-            background: "var(--primary-tint-strong)",
+            background: "var(--color-bg-fill-accent-selected)",
             transform: `translateX(${activeIndex * (ITEM + GAP)}px)`,
             transition: tr("transform", CONTROL_MS),
           }}
@@ -89,7 +89,7 @@ export function BottomNav({ items }: { items: NavItem[] }) {
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  color: isActive ? "var(--primary-pressed)" : "var(--ink-muted)",
+                  color: isActive ? "var(--color-bg-fill-primary-active)" : "var(--color-text-secondary-default)",
                   transition: tr("color", QUICK_MS),
                 }}
               >

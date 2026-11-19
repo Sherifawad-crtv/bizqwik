@@ -114,15 +114,15 @@ export function Plans() {
         {plans.map((p) => (
           <Card pad="none" key={p.id} style={{ padding: "16px 18px", display: "flex", alignItems: "center", gap: 12 }}>
             <div className="bq-grow">
-              <div style={{ font: "700 17px var(--font-body)" }}>{p.name}</div>
-              <div style={{ font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-faint)", marginTop: 3 }}>
+              <div style={{ font: "700 17px var(--font-family-body)" }}>{p.name}</div>
+              <div style={{ font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)", marginTop: 3 }}>
                 {egp(p.price)}/mo · {limitLabel(p.teamSizeLimit)} staff · {limitLabel(p.clientSizeLimit)} clients
               </div>
             </div>
-            <button className="bq-hit" onClick={() => openEdit(p)} aria-label={`Edit ${p.name}`} style={{ border: 0, background: "var(--sunken)", borderRadius: 999, width: 38, height: 38, display: "flex", alignItems: "center", justifyContent: "center", color: "var(--ink-muted)", cursor: "pointer", flex: "none" }}>
+            <button className="bq-hit" onClick={() => openEdit(p)} aria-label={`Edit ${p.name}`} style={{ border: 0, background: "var(--color-bg-surface-secondary-default)", borderRadius: 999, width: 38, height: 38, display: "flex", alignItems: "center", justifyContent: "center", color: "var(--color-text-secondary-default)", cursor: "pointer", flex: "none" }}>
               <Icon name="pencil" size={17} />
             </button>
-            <button className="bq-hit" onClick={() => setDeleting(p)} aria-label={`Delete ${p.name}`} style={{ border: 0, background: "var(--danger-bg)", borderRadius: 999, width: 38, height: 38, display: "flex", alignItems: "center", justifyContent: "center", color: "var(--danger-fg)", cursor: "pointer", flex: "none" }}>
+            <button className="bq-hit" onClick={() => setDeleting(p)} aria-label={`Delete ${p.name}`} style={{ border: 0, background: "var(--color-bg-fill-status-danger-default)", borderRadius: 999, width: 38, height: 38, display: "flex", alignItems: "center", justifyContent: "center", color: "var(--color-text-status-danger-default)", cursor: "pointer", flex: "none" }}>
               <Icon name="trash" size={17} />
             </button>
           </Card>

@@ -52,8 +52,8 @@ export function DayList({
           className="bq-card bq-card--sm" style={{ display: "flex", gap: 14, alignItems: "center", cursor: "pointer" }}
         >
           <div className="bq-grow">
-            <div style={{ font: "700 var(--fs-base) var(--font-body)", letterSpacing: "-.01em" }}>{dateLabel(g.date)}</div>
-            <div style={{ font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-muted)" }}>
+            <div style={{ font: "700 var(--text-callout-size) var(--font-family-body)", letterSpacing: "-.01em" }}>{dateLabel(g.date)}</div>
+            <div style={{ font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-secondary-default)" }}>
               {g.sessions.length} {g.sessions.length === 1 ? "session" : "sessions"}
             </div>
             {/* When each session was scanned in, so a late scan is easy to spot. */}
@@ -63,8 +63,8 @@ export function DayList({
                 .map((s) => {
                   const st = sessionStamp(s);
                   return st ? (
-                    <div key={s.id} style={{ display: "flex", gap: 8, alignItems: "baseline", font: "600 var(--fs-note) var(--font-mono)", color: "var(--ink)" }}>
-                      <span style={{ font: "700 10px var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", minWidth: 52 }}>{s.source === "qr" ? "QR" : "MANUAL"}</span>
+                    <div key={s.id} style={{ display: "flex", gap: 8, alignItems: "baseline", font: "600 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-primary-default)" }}>
+                      <span style={{ font: "700 10px var(--font-family-mono)", letterSpacing: ".08em", color: "var(--color-text-tertiary-default)", minWidth: 52 }}>{s.source === "qr" ? "QR" : "MANUAL"}</span>
                       {st.text}
                     </div>
                   ) : null;

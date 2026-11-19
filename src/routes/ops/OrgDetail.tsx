@@ -87,13 +87,13 @@ export function OrgDetail() {
     <div>
       <button
         onClick={() => navigate("/bizqwik")}
-        style={{ display: "inline-flex", alignItems: "center", gap: 4, border: 0, background: "none", color: "var(--ink-muted)", cursor: "pointer", font: "700 var(--fs-body-sm) var(--font-body)", marginBottom: 12, padding: 0 }}
+        style={{ display: "inline-flex", alignItems: "center", gap: 4, border: 0, background: "none", color: "var(--color-text-secondary-default)", cursor: "pointer", font: "700 var(--text-subheadline-size) var(--font-family-body)", marginBottom: 12, padding: 0 }}
       >
         <Icon name="chevron-left" size={16} /> Overview
       </button>
 
       <div className="bq-stat-lg">{org.name}</div>
-      <div style={{ font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-faint)", marginTop: 6 }}>
+      <div style={{ font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)", marginTop: 6 }}>
         /{org.slug} · Created {formatDateTime(org.createdAt)}
       </div>
 
@@ -110,7 +110,7 @@ export function OrgDetail() {
             options={[{ value: "team", label: "TEAM" }, { value: "solo", label: "SOLO" }]}
             onChange={setMode}
           />
-          <div style={{ font: "500 var(--fs-small)/1.6 var(--font-mono)", color: "var(--ink-faint)", padding: "8px 2px 0" }}>
+          <div style={{ font: "500 var(--text-caption-1-size)/1.6 var(--font-family-mono)", color: "var(--color-text-tertiary-default)", padding: "8px 2px 0" }}>
             Solo: the owner runs everything herself (Today, Members, Schedule, Money). Team: coaches, tiers and payouts.
           </div>
         </div>
@@ -119,7 +119,7 @@ export function OrgDetail() {
           <SectionHeader>Plan</SectionHeader>
           <SelectField label="SAAS PLAN" value={org.planId ?? ""} options={planOptions} onChange={setPlan} placeholder="No plan" />
           {activePlan && (
-            <div style={{ font: "500 var(--fs-small)/1.6 var(--font-mono)", color: "var(--ink-faint)", padding: "8px 2px 0" }}>
+            <div style={{ font: "500 var(--text-caption-1-size)/1.6 var(--font-family-mono)", color: "var(--color-text-tertiary-default)", padding: "8px 2px 0" }}>
               {egp(activePlan.price)}/mo · up to {limitLabel(activePlan.teamSizeLimit)} staff · {limitLabel(activePlan.clientSizeLimit)} clients
             </div>
           )}
@@ -132,8 +132,8 @@ export function OrgDetail() {
         <SectionHeader>QR codes</SectionHeader>
         <Card pad="none" style={{ padding: 18, display: "flex", alignItems: "center", gap: 14 }}>
           <div className="bq-grow">
-            <div style={{ font: "700 var(--fs-body) var(--font-body)" }}>Lifetime check-in code</div>
-            <div style={{ font: "400 var(--fs-note)/1.5 var(--font-mono)", color: "var(--ink-faint)", marginTop: 2 }}>
+            <div style={{ font: "700 var(--text-body-size) var(--font-family-body)" }}>Lifetime check-in code</div>
+            <div style={{ font: "400 var(--text-footnote-size)/1.5 var(--font-family-mono)", color: "var(--color-text-tertiary-default)", marginTop: 2 }}>
               Print it for {org.name}'s front desk — members scan it in the app to check in.
             </div>
           </div>
@@ -143,8 +143,8 @@ export function OrgDetail() {
         </Card>
         <Card pad="none" style={{ padding: 18, display: "flex", alignItems: "center", gap: 14, marginTop: 10 }}>
           <div className="bq-grow">
-            <div style={{ font: "700 var(--fs-body) var(--font-body)" }}>Coaches' attendance code</div>
-            <div style={{ font: "400 var(--fs-note)/1.5 var(--font-mono)", color: "var(--ink-faint)", marginTop: 2 }}>
+            <div style={{ font: "700 var(--text-body-size) var(--font-family-body)" }}>Coaches' attendance code</div>
+            <div style={{ font: "400 var(--text-footnote-size)/1.5 var(--font-family-mono)", color: "var(--color-text-tertiary-default)", marginTop: 2 }}>
               Print it for the coaches' room — coaches scan it with the + button to log their sessions.
             </div>
           </div>
@@ -164,8 +164,8 @@ export function OrgDetail() {
           <UsageRow label="Packages sold" value={String(usage.packagesSold)} />
           <UsageRow label="Memberships sold" value={String(usage.membershipsSold)} />
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 18px" }}>
-            <span style={{ font: "600 var(--fs-body) var(--font-body)", color: "var(--ink-muted)" }}>Last activity</span>
-            <span style={{ font: "700 var(--fs-body) var(--font-body)" }}>{usage.lastActivity ? formatDateTime(usage.lastActivity) : "—"}</span>
+            <span style={{ font: "600 var(--text-body-size) var(--font-family-body)", color: "var(--color-text-secondary-default)" }}>Last activity</span>
+            <span style={{ font: "700 var(--text-body-size) var(--font-family-body)" }}>{usage.lastActivity ? formatDateTime(usage.lastActivity) : "—"}</span>
           </div>
         </Card>
       </div>
@@ -177,10 +177,10 @@ export function OrgDetail() {
             <div key={p.id} className={`bq-listrow bq-listrow--compact ${!(i === staff.length - 1) ? "bq-listrow--divider" : ""}`}>
               <Avatar name={p.name} size={34} src={p.avatarUrl} />
               <div className="bq-grow">
-                <div style={{ font: "700 var(--fs-body) var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.name}</div>
-                <div style={{ font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-faint)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.email}</div>
+                <div style={{ font: "700 var(--text-body-size) var(--font-family-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.name}</div>
+                <div style={{ font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.email}</div>
               </div>
-              <span style={{ font: "700 var(--fs-caption) var(--font-mono)", letterSpacing: ".06em", color: "var(--ink-muted)", flex: "none" }}>{ROLE_LABELS[p.role].toUpperCase()}</span>
+              <span style={{ font: "700 var(--text-caption-2-size) var(--font-family-mono)", letterSpacing: ".06em", color: "var(--color-text-secondary-default)", flex: "none" }}>{ROLE_LABELS[p.role].toUpperCase()}</span>
             </div>
           ))}
           {staff.length === 0 && (
@@ -200,9 +200,9 @@ export function OrgDetail() {
           <Card pad="none" style={{ overflow: "hidden" }}>
             {pendingInvites.map((inv, i) => (
               <div key={inv.email} className={`bq-listrow bq-listrow--compact ${!(i === pendingInvites.length - 1) ? "bq-listrow--divider" : ""}`}>
-                <span style={{ color: "var(--ink-faint)", display: "flex" }}><Icon name="envelope" size={18} /></span>
-                <div style={{ font: "600 var(--fs-body) var(--font-body)", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{inv.email}</div>
-                <span style={{ font: "700 var(--fs-caption) var(--font-mono)", letterSpacing: ".06em", color: "var(--ink-muted)" }}>{ROLE_LABELS[inv.role].toUpperCase()}</span>
+                <span style={{ color: "var(--color-text-tertiary-default)", display: "flex" }}><Icon name="envelope" size={18} /></span>
+                <div style={{ font: "600 var(--text-body-size) var(--font-family-body)", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{inv.email}</div>
+                <span style={{ font: "700 var(--text-caption-2-size) var(--font-family-mono)", letterSpacing: ".06em", color: "var(--color-text-secondary-default)" }}>{ROLE_LABELS[inv.role].toUpperCase()}</span>
               </div>
             ))}
           </Card>
@@ -213,8 +213,8 @@ export function OrgDetail() {
         <SectionHeader>Danger zone</SectionHeader>
         <Card pad="none" style={{ padding: 18, display: "flex", alignItems: "center", gap: 14 }}>
           <div className="bq-grow">
-            <div style={{ font: "700 var(--fs-body) var(--font-body)" }}>Delete organization</div>
-            <div style={{ font: "400 var(--fs-note)/1.5 var(--font-mono)", color: "var(--ink-faint)", marginTop: 2 }}>
+            <div style={{ font: "700 var(--text-body-size) var(--font-family-body)" }}>Delete organization</div>
+            <div style={{ font: "400 var(--text-footnote-size)/1.5 var(--font-family-mono)", color: "var(--color-text-tertiary-default)", marginTop: 2 }}>
               Permanently removes {org.name} and all its staff, members, sales, sessions, wallets and points. This can't be undone.
             </div>
           </div>

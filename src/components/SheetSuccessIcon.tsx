@@ -17,7 +17,7 @@ export function SheetSuccessIcon({ label, iconIn }: { label: string; iconIn: boo
           width: 84,
           height: 84,
           borderRadius: 999,
-          background: "var(--primary-tint)",
+          background: "var(--color-bg-fill-accent-default)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -31,7 +31,7 @@ export function SheetSuccessIcon({ label, iconIn }: { label: string; iconIn: boo
             cx={32}
             cy={32}
             r={28}
-            stroke="var(--primary)"
+            stroke="var(--color-bg-fill-primary-default)"
             strokeWidth={3}
             strokeLinecap="round"
             style={{
@@ -42,7 +42,7 @@ export function SheetSuccessIcon({ label, iconIn }: { label: string; iconIn: boo
           />
           <path
             d="M18 34 L27 43 L46 21"
-            stroke="var(--primary)"
+            stroke="var(--color-bg-fill-primary-default)"
             strokeWidth={4}
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -54,7 +54,7 @@ export function SheetSuccessIcon({ label, iconIn }: { label: string; iconIn: boo
           />
         </svg>
       </div>
-      <div style={{ marginTop: 16, font: "700 var(--fs-base) var(--font-body)", color: "var(--ink)" }}>{label}</div>
+      <div style={{ marginTop: 16, font: "700 var(--text-callout-size) var(--font-family-body)", color: "var(--color-text-primary-default)" }}>{label}</div>
     </div>
   );
 }

@@ -34,10 +34,10 @@ function dayOf(iso: string): string {
 
 type Tone = { fg: string; bg: string };
 const TONES: Record<"primary" | "good" | "warn" | "neutral", Tone> = {
-  primary: { fg: "var(--primary-pressed)", bg: "var(--primary-tint)" },
-  good: { fg: "var(--paid-fg)", bg: "var(--paid-bg)" },
-  warn: { fg: "var(--logging-fg)", bg: "var(--logging-bg)" },
-  neutral: { fg: "var(--ink-muted)", bg: "var(--sunken)" },
+  primary: { fg: "var(--color-bg-fill-primary-active)", bg: "var(--color-bg-fill-accent-default)" },
+  good: { fg: "var(--color-text-status-paid-default)", bg: "var(--color-bg-fill-status-paid-default)" },
+  warn: { fg: "var(--color-text-status-logging-default)", bg: "var(--color-bg-fill-status-logging-default)" },
+  neutral: { fg: "var(--color-text-secondary-default)", bg: "var(--color-bg-surface-secondary-default)" },
 };
 
 function Stat({ label, value, sub, icon, tone, onClick }: { label: string; value: string; sub: string; icon: IconName; tone: keyof typeof TONES; onClick?: () => void }) {
@@ -54,7 +54,7 @@ function Stat({ label, value, sub, icon, tone, onClick }: { label: string; value
         <span className="bq-label">{label}</span>
       </div>
       <div className="bq-stat-lg" style={{ marginTop: 10, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{value}</div>
-      <div style={{ font: "400 var(--fs-small) var(--font-mono)", color: "var(--ink-muted)", marginTop: 4 }}>{sub}</div>
+      <div style={{ font: "400 var(--text-caption-1-size) var(--font-family-mono)", color: "var(--color-text-secondary-default)", marginTop: 4 }}>{sub}</div>
     </button>
   );
 }
@@ -129,7 +129,7 @@ export function SoloHome() {
       </div>
 
       <Card pad="none" style={{ padding: "18px 18px 12px", marginTop: 10 }}>
-        <div style={{ font: "700 var(--fs-caption) var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", marginBottom: 10 }}>REVENUE BY MONTH · EGP</div>
+        <div style={{ font: "700 var(--text-caption-2-size) var(--font-family-mono)", letterSpacing: ".08em", color: "var(--color-text-tertiary-default)", marginBottom: 10 }}>REVENUE BY MONTH · EGP</div>
         <RevenueChart months={trend} revenueOnly />
       </Card>
 
@@ -143,13 +143,13 @@ export function SoloHome() {
             onClick={() => navigate("/bookings")}
             style={{ width: "100%", minHeight: 60, background: "none", cursor: "pointer", textAlign: "left" }}
           >
-            <span style={{ width: 84, flex: "none", font: "700 var(--fs-body-sm) var(--font-mono)" }}>
+            <span style={{ width: 84, flex: "none", font: "700 var(--text-subheadline-size) var(--font-family-mono)" }}>
               <span style={{ display: "block", whiteSpace: "nowrap" }}>{clockOf(c.startsAt)}</span>
-              <span style={{ display: "block", font: "400 var(--fs-caption) var(--font-mono)", color: "var(--ink-faint)" }}>{dayOf(c.startsAt)}</span>
+              <span style={{ display: "block", font: "400 var(--text-caption-2-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)" }}>{dayOf(c.startsAt)}</span>
             </span>
             <span className="bq-grow">
-              <span style={{ display: "block", font: "700 var(--fs-body) var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.title}</span>
-              <span style={{ display: "block", font: "400 var(--fs-small) var(--font-mono)", color: (c.bookedCount ?? 0) > 0 ? "var(--primary-pressed)" : "var(--ink-faint)" }}>
+              <span style={{ display: "block", font: "700 var(--text-body-size) var(--font-family-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.title}</span>
+              <span style={{ display: "block", font: "400 var(--text-caption-1-size) var(--font-family-mono)", color: (c.bookedCount ?? 0) > 0 ? "var(--color-bg-fill-primary-active)" : "var(--color-text-tertiary-default)" }}>
                 {(c.bookedCount ?? 0) > 0 ? `${c.bookedCount} coming` : "No one yet"}
                 {c.id === nextUpId ? " · NEXT" : ""}
               </span>

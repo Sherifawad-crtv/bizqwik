@@ -26,8 +26,8 @@ export function Account() {
     <div>
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4, padding: "24px 0 28px" }}>
         <Avatar name={profile.name} size={120} src={profile.avatarUrl} />
-        <div style={{ font: "800 24px var(--font-body)", letterSpacing: "-.01em", marginTop: 12 }}>{profile.name}</div>
-        <div style={{ font: "600 var(--fs-body-sm) var(--font-body)", color: "var(--ink-faint)" }}>{ROLE_LABELS[profile.role]}</div>
+        <div style={{ font: "800 24px var(--font-family-body)", letterSpacing: "-.01em", marginTop: 12 }}>{profile.name}</div>
+        <div style={{ font: "600 var(--text-subheadline-size) var(--font-family-body)", color: "var(--color-text-tertiary-default)" }}>{ROLE_LABELS[profile.role]}</div>
       </div>
 
       <div className="bq-card" style={{ padding: "6px 4px", marginBottom: 16 }}>
@@ -107,14 +107,14 @@ function NotificationsRow() {
 
   if (needsHomeScreenInstall || iosVersionTooOld) {
     return (
-      <div style={{ borderBottom: "1px solid var(--line)", padding: "14px 16px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 12, font: "600 var(--fs-body) var(--font-body)", color: "var(--ink)" }}>
-          <span style={{ flex: "none", display: "flex", color: "var(--ink-muted)" }}>
+      <div style={{ borderBottom: "1px solid var(--color-border-primary-default)", padding: "14px 16px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, font: "600 var(--text-body-size) var(--font-family-body)", color: "var(--color-text-primary-default)" }}>
+          <span style={{ flex: "none", display: "flex", color: "var(--color-text-secondary-default)" }}>
             <Icon name="bell" size={19} />
           </span>
           Push Notifications
         </div>
-        <div style={{ marginTop: 6, marginLeft: 31, font: "500 var(--fs-note)/1.5 var(--font-body)", color: "var(--ink-muted)" }}>
+        <div style={{ marginTop: 6, marginLeft: 31, font: "500 var(--text-footnote-size)/1.5 var(--font-family-body)", color: "var(--color-text-secondary-default)" }}>
           {iosVersionTooOld
             ? "Notifications need iOS/iPadOS 16.4 or later — update to enable this."
             : "On iPhone/iPad, add Bizqwik to your Home Screen first (Share → Add to Home Screen), then open it from there to turn this on."}
@@ -126,7 +126,7 @@ function NotificationsRow() {
   if (!supported) return null;
 
   return (
-    <div style={{ borderBottom: "1px solid var(--line)" }}>
+    <div style={{ borderBottom: "1px solid var(--color-border-primary-default)" }}>
       <button
         onClick={toggle}
         role="switch"
@@ -140,19 +140,19 @@ function NotificationsRow() {
           background: "none",
           cursor: "pointer",
           padding: "14px 16px",
-          font: "600 var(--fs-body) var(--font-body)",
-          color: "var(--ink)",
+          font: "600 var(--text-body-size) var(--font-family-body)",
+          color: "var(--color-text-primary-default)",
           textAlign: "left",
         }}
       >
-        <span style={{ flex: "none", display: "flex", color: "var(--ink-muted)" }}>
+        <span style={{ flex: "none", display: "flex", color: "var(--color-text-secondary-default)" }}>
           <Icon name="bell" size={19} />
         </span>
         <span style={{ flex: 1 }}>Push Notifications</span>
         <SwitchVisual checked={on} animate={ready} busy={busy} />
       </button>
       {error && (
-        <div style={{ margin: "0 16px 12px", font: "600 var(--fs-small)/1.4 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: "var(--r-item)", padding: "8px 10px" }}>
+        <div style={{ margin: "0 16px 12px", font: "600 var(--text-caption-1-size)/1.4 var(--font-family-body)", color: "var(--color-text-status-danger-default)", background: "var(--color-bg-fill-status-danger-default)", borderRadius: "var(--radius-item)", padding: "8px 10px" }}>
           {error}
         </div>
       )}
@@ -164,9 +164,9 @@ function SettingsRow({ icon, label, onClick, last }: { icon: IconName; label: st
   return (
     <button
       onClick={onClick}
-      className={`bq-plain bq-listrow bq-listrow--compact ${!(last) ? "bq-listrow--divider" : ""}`} style={{ width: "100%", background: "none", cursor: "pointer", font: "600 var(--fs-body) var(--font-body)", color: "var(--ink)", textAlign: "left" }}
+      className={`bq-plain bq-listrow bq-listrow--compact ${!(last) ? "bq-listrow--divider" : ""}`} style={{ width: "100%", background: "none", cursor: "pointer", font: "600 var(--text-body-size) var(--font-family-body)", color: "var(--color-text-primary-default)", textAlign: "left" }}
     >
-      <span style={{ flex: "none", display: "flex", color: "var(--ink-muted)" }}>
+      <span style={{ flex: "none", display: "flex", color: "var(--color-text-secondary-default)" }}>
         <Icon name={icon} size={19} />
       </span>
       {label}

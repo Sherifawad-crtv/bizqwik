@@ -117,7 +117,7 @@ export function ExpenseSheet({
             {editing ? editing.categoryName : "What did the business spend on?"}
           </div>
           <div className="bq-stack">
-            <label style={{ display: "block", background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-item)", padding: "10px 16px" }}>
+            <label style={{ display: "block", background: "var(--color-bg-surface-secondary-default)", border: "1px solid var(--color-border-primary-default)", borderRadius: "var(--radius-item)", padding: "10px 16px" }}>
               <span className="bq-label">AMOUNT (EGP)</span>
               <input
                 ref={amountInput}
@@ -125,7 +125,7 @@ export function ExpenseSheet({
                 onChange={(e) => setAmount(e.target.value)}
                 inputMode="decimal"
                 placeholder="0"
-                style={{ display: "block", width: "100%", border: 0, background: "none", outline: "none", font: "800 28px var(--font-body)", color: "var(--ink)", padding: "2px 0 0" }}
+                style={{ display: "block", width: "100%", border: 0, background: "none", outline: "none", font: "800 28px var(--font-family-body)", color: "var(--color-text-primary-default)", padding: "2px 0 0" }}
               />
             </label>
             <SelectField label="CATEGORY" value={categoryId} onChange={setCategoryId} placeholder="Choose a category" options={catOptions(categories)} />
@@ -137,10 +137,10 @@ export function ExpenseSheet({
                 <input ref={fileInput} type="file" accept="image/*" capture="environment" onChange={onPickReceipt} style={{ display: "none" }} data-testid="receipt-input" />
                 <button
                   onClick={() => fileInput.current?.click()}
-                  style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", textAlign: "left", background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-item)", padding: "12px 16px", cursor: "pointer" }}
+                  style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", textAlign: "left", background: "var(--color-bg-surface-secondary-default)", border: "1px solid var(--color-border-primary-default)", borderRadius: "var(--radius-item)", padding: "12px 16px", cursor: "pointer" }}
                 >
-                  <Icon name="card" size={18} style={{ color: "var(--ink-faint)" }} />
-                  <span style={{ font: "600 var(--fs-body-sm) var(--font-body)" }}>{receipt ? "Receipt attached" : "Attach a receipt photo (optional)"}</span>
+                  <Icon name="card" size={18} style={{ color: "var(--color-text-tertiary-default)" }} />
+                  <span style={{ font: "600 var(--text-subheadline-size) var(--font-family-body)" }}>{receipt ? "Receipt attached" : "Attach a receipt photo (optional)"}</span>
                 </button>
               </>
             )}
@@ -151,9 +151,9 @@ export function ExpenseSheet({
                 role="switch"
                 aria-checked={repeat}
                 onClick={() => setRepeat(!repeat)}
-                style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", textAlign: "left", background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-item)", padding: "12px 16px", cursor: "pointer", color: "var(--ink)" }}
+                style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", textAlign: "left", background: "var(--color-bg-surface-secondary-default)", border: "1px solid var(--color-border-primary-default)", borderRadius: "var(--radius-item)", padding: "12px 16px", cursor: "pointer", color: "var(--color-text-primary-default)" }}
               >
-                <span style={{ flex: 1, font: "600 var(--fs-body-sm) var(--font-body)" }}>Repeat monthly</span>
+                <span style={{ flex: 1, font: "600 var(--text-subheadline-size) var(--font-family-body)" }}>Repeat monthly</span>
                 <SwitchVisual checked={repeat} />
               </button>
             )}
@@ -230,15 +230,15 @@ export function CategoriesSheet({ open, categories, onClose, onChanged }: { open
 
   return (
     <Sheet open={open} onClose={onClose}>
-      <div style={{ font: "800 var(--fs-title)/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "0 0 16px" }}>Expense categories</div>
+      <div style={{ font: "800 var(--text-title-1-size)/1.2 var(--font-family-body)", letterSpacing: "-.02em", margin: "0 0 16px" }}>Expense categories</div>
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
         {categories.map((c) => (
-          <div key={c.id} style={{ display: "flex", alignItems: "center", gap: 10, background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-item)", padding: "10px 14px" }}>
-            <span style={{ flex: 1, font: "600 var(--fs-body) var(--font-body)" }}>{c.name}</span>
+          <div key={c.id} style={{ display: "flex", alignItems: "center", gap: 10, background: "var(--color-bg-surface-secondary-default)", border: "1px solid var(--color-border-primary-default)", borderRadius: "var(--radius-item)", padding: "10px 14px" }}>
+            <span style={{ flex: 1, font: "600 var(--text-body-size) var(--font-family-body)" }}>{c.name}</span>
             {!c.isDefault && (
               <button
                 onClick={() => api.setExpenseCategoryArchived(c.id, true).then(onChanged)}
-                style={{ border: 0, background: "none", color: "var(--danger-fg)", font: "700 var(--fs-small) var(--font-mono)", cursor: "pointer" }}
+                style={{ border: 0, background: "none", color: "var(--color-text-status-danger-default)", font: "700 var(--text-caption-1-size) var(--font-family-mono)", cursor: "pointer" }}
               >
                 ARCHIVE
               </button>
@@ -249,7 +249,7 @@ export function CategoriesSheet({ open, categories, onClose, onChanged }: { open
       {adding ? (
         <div style={{ marginTop: 12 }}>
           <TextField label="NEW CATEGORY" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Insurance" />
-          {error && <div style={{ marginTop: 8, font: "600 var(--fs-note) var(--font-body)", color: "var(--danger-fg)" }}>{error}</div>}
+          {error && <div style={{ marginTop: 8, font: "600 var(--text-footnote-size) var(--font-family-body)", color: "var(--color-text-status-danger-default)" }}>{error}</div>}
           <Button fullWidth style={{ marginTop: 10 }} disabled={busy} onClick={add}>{busy ? "Adding…" : "Add category"}</Button>
         </div>
       ) : (

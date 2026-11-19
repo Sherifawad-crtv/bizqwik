@@ -85,9 +85,9 @@ export function ClassSheet({
         {!solo && <TextField label="DESCRIPTION" value={draft.description} onChange={(e) => setDraft({ ...draft, description: e.target.value })} placeholder="Optional — shown to members" />}
         {!solo && !draft.seriesId && <ClassPhotoField value={draft.imageUrl} onChange={(url) => setDraft({ ...draft, imageUrl: url })} title={draft.title} />}
         {solo && editing && (
-          <div style={{ background: "var(--sunken)", borderRadius: "var(--r-item)", padding: "12px 14px" }}>
+          <div style={{ background: "var(--color-bg-surface-secondary-default)", borderRadius: "var(--radius-item)", padding: "12px 14px" }}>
             <div className="bq-label">COMING · {draft.coming?.length ?? 0}</div>
-            <div style={{ font: "600 var(--fs-body-sm)/1.5 var(--font-body)", marginTop: 4 }}>{draft.coming?.length ? draft.coming.join(", ") : "No one has said they're coming yet."}</div>
+            <div style={{ font: "600 var(--text-subheadline-size)/1.5 var(--font-family-body)", marginTop: 4 }}>{draft.coming?.length ? draft.coming.join(", ") : "No one has said they're coming yet."}</div>
           </div>
         )}
         <LocationField locations={locations} value={draft.locationId} onChange={(id) => setDraft({ ...draft, locationId: id })} />

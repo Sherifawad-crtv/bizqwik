@@ -15,7 +15,7 @@ export function HomeAvatar({ name, avatarUrl, greeting }: { name: string; avatar
   return (
     <div style={{ display: "flex", alignItems: "center", justifyContent: greeting ? "space-between" : "flex-end", gap: 12, marginBottom: 28 }}>
       {greeting && (
-        <div style={{ flex: 1, minWidth: 0, font: "800 28px/1.15 var(--font-body)", letterSpacing: "-.02em" }}>{greeting}</div>
+        <div style={{ flex: 1, minWidth: 0, font: "800 28px/1.15 var(--font-family-body)", letterSpacing: "-.02em" }}>{greeting}</div>
       )}
       <NavLink to="/account" aria-label="Account" style={{ flex: "none" }}>
         <Avatar name={name} size={64} src={avatarUrl} />

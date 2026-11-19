@@ -70,6 +70,8 @@ export function OrgQr() {
     if (!pngUrl) return;
     const w = window.open("", "_blank", "width=800,height=1000");
     if (!w) return;
+    // A printable poster in its own window: the app's CSS variables don't exist
+    // there, so it carries its own small print palette (exempt from tokens).
     w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${escapeHtml(appName)} — ${copy.title}</title>
 <style>
   @page { margin: 24mm; }
@@ -98,7 +100,7 @@ export function OrgQr() {
     <div>
       <button
         onClick={() => navigate(`/bizqwik/orgs/${id}`)}
-        style={{ display: "inline-flex", alignItems: "center", gap: 4, border: 0, background: "none", color: "var(--ink-muted)", cursor: "pointer", font: "700 var(--fs-body-sm) var(--font-body)", marginBottom: 12, padding: 0 }}
+        style={{ display: "inline-flex", alignItems: "center", gap: 4, border: 0, background: "none", color: "var(--color-text-secondary-default)", cursor: "pointer", font: "700 var(--text-subheadline-size) var(--font-family-body)", marginBottom: 12, padding: 0 }}
       >
         <Icon name="chevron-left" size={16} /> {org.name}
       </button>
@@ -111,18 +113,18 @@ export function OrgQr() {
         />
       </div>
       <div className="bq-stat-lg">{copy.title}</div>
-      <div style={{ font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-faint)", marginTop: 6 }}>{copy.intro}</div>
+      <div style={{ font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)", marginTop: 6 }}>{copy.intro}</div>
 
       <div style={{ marginTop: 22, maxWidth: 520 }}>
         <SectionHeader>Code</SectionHeader>
         <Card pad="none" style={{ padding: 24, display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
           {qrError && <ErrorBanner text={qrError} />}
-          {!pngUrl && !qrError && <div style={{ padding: "40px 0", color: "var(--ink-faint)", font: "500 var(--fs-body-sm) var(--font-body)" }}>Rendering…</div>}
+          {!pngUrl && !qrError && <div style={{ padding: "40px 0", color: "var(--color-text-tertiary-default)", font: "500 var(--text-subheadline-size) var(--font-family-body)" }}>Rendering…</div>}
           {pngUrl && (
             <>
               <img src={pngUrl} alt={`${org.name} ${copy.title}`} width={260} height={260} style={{ width: 260, height: 260, imageRendering: "pixelated" }} />
-              <div style={{ font: "700 18px var(--font-body)", marginTop: 14 }}>{org.name}</div>
-              <div style={{ font: "400 var(--fs-note)/1.6 var(--font-mono)", color: "var(--ink-faint)", marginTop: 4 }}>
+              <div style={{ font: "700 18px var(--font-family-body)", marginTop: 14 }}>{org.name}</div>
+              <div style={{ font: "400 var(--text-footnote-size)/1.6 var(--font-family-mono)", color: "var(--color-text-tertiary-default)", marginTop: 4 }}>
                 {forCoaches ? copy.label : <>Encodes check-in code <b>{org.slug}</b></>}
               </div>
             </>

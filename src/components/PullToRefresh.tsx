@@ -104,13 +104,13 @@ export function PullToRefresh({ children }: { children: ReactNode }) {
           height: 40,
           marginLeft: -20,
           borderRadius: 999,
-          background: "var(--surface)",
-          border: "1px solid var(--line)",
-          boxShadow: "0 4px 14px rgba(0,0,0,.12)",
+          background: "var(--color-bg-surface-primary-default)",
+          border: "1px solid var(--color-border-primary-default)",
+          boxShadow: "var(--shadow-raised)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          color: ready || refreshing ? "var(--primary-pressed)" : "var(--ink-muted)",
+          color: ready || refreshing ? "var(--color-bg-fill-primary-active)" : "var(--color-text-secondary-default)",
           transform: `translateY(${shown ? pull : -60}px)`,
           opacity: shown ? Math.min(1, pull / 40 + (refreshing ? 1 : 0)) : 0,
           transition: dragging ? "none" : tr(["transform", "opacity"], STANDARD_MS),
@@ -118,7 +118,7 @@ export function PullToRefresh({ children }: { children: ReactNode }) {
         }}
       >
         {refreshing ? (
-          <span className="bq-ptr-spin" style={{ width: 18, height: 18, borderRadius: 999, border: "2.5px solid var(--primary-tint)", borderTopColor: "var(--primary-pressed)" }} />
+          <span className="bq-ptr-spin" style={{ width: 18, height: 18, borderRadius: 999, border: "2.5px solid var(--color-bg-fill-accent-default)", borderTopColor: "var(--color-bg-fill-primary-active)" }} />
         ) : (
           <span style={{ display: "flex", transform: `rotate(${ready ? 180 : 0}deg)`, transition: tr("transform", QUICK_MS) }}>
             <Icon name="chevron-down" size={20} />

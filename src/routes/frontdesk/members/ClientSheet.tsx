@@ -187,23 +187,23 @@ export function ClientSheet({
         ) : mode === "view" ? (
           <>
             <SheetHeading kicker="CLIENT" title={shown.name} />
-            {shown.phone && <div style={{ font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-muted)", marginTop: -8, marginBottom: 14 }}>{shown.phone}</div>}
+            {shown.phone && <div style={{ font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-secondary-default)", marginTop: -8, marginBottom: 14 }}>{shown.phone}</div>}
 
-            <div style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-item)", padding: "14px 16px" }}>
+            <div style={{ background: "var(--color-bg-surface-secondary-default)", border: "1px solid var(--color-border-primary-default)", borderRadius: "var(--radius-item)", padding: "14px 16px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <div style={{ font: "800 18px var(--font-body)", flex: 1, minWidth: 0 }}>{summary.title}</div>
+                <div style={{ font: "800 18px var(--font-family-body)", flex: 1, minWidth: 0 }}>{summary.title}</div>
                 <PlanPill client={shown} />
               </div>
-              <div style={{ font: "400 var(--fs-body-sm) var(--font-mono)", color: "var(--ink-muted)", marginTop: 4 }}>{summary.detail}</div>
-              {plan && plan.kind === "bundle" && <div style={{ font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-faint)", marginTop: 2 }}>Until {dateLabel(plan.expiresAt.slice(0, 10))}</div>}
+              <div style={{ font: "400 var(--text-subheadline-size) var(--font-family-mono)", color: "var(--color-text-secondary-default)", marginTop: 4 }}>{summary.detail}</div>
+              {plan && plan.kind === "bundle" && <div style={{ font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)", marginTop: 2 }}>Until {dateLabel(plan.expiresAt.slice(0, 10))}</div>}
               {packageActive && plan && (
-                <div style={{ font: "600 var(--fs-note) var(--font-body)", color: "var(--ink)", marginTop: 8, paddingTop: 8, borderTop: "1px solid var(--line)" }}>
+                <div style={{ font: "600 var(--text-footnote-size) var(--font-family-body)", color: "var(--color-text-primary-default)", marginTop: 8, paddingTop: 8, borderTop: "1px solid var(--color-border-primary-default)" }}>
                   + {bType?.name ?? "Package"}: {pkg!.sessionsRemaining} of {pkg!.sessionsIncluded} sessions left
                 </div>
               )}
-              {coachName && !solo && <div style={{ font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-faint)", marginTop: 6 }}>Coach: {coachName}</div>}
+              {coachName && !solo && <div style={{ font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)", marginTop: 6 }}>Coach: {coachName}</div>}
               {sheetLocations.length > 0 && (
-                <div style={{ font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-faint)", marginTop: 6 }}>Location: {locationName(sheetLocations, shown.homeLocationId) ?? "Not set"}</div>
+                <div style={{ font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)", marginTop: 6 }}>Location: {locationName(sheetLocations, shown.homeLocationId) ?? "Not set"}</div>
               )}
             </div>
             {solo && packageActive && pkg && me && pkg.coachId === me.id && (
@@ -268,12 +268,12 @@ export function ClientSheet({
               className="bq-scale"
               onClick={() => setShowMore((v) => !v)}
               aria-expanded={showMore}
-              style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 4, width: "100%", height: 48, marginTop: 6, border: 0, background: "none", color: "var(--primary-pressed)", font: "700 var(--fs-body-sm) var(--font-body)", cursor: "pointer" }}
+              style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 4, width: "100%", height: 48, marginTop: 6, border: 0, background: "none", color: "var(--color-bg-fill-primary-active)", font: "700 var(--text-subheadline-size) var(--font-family-body)", cursor: "pointer" }}
             >
               {showMore ? "Fewer options" : "More options"}
             </button>
             <Reveal show={showMore}>
-              <div style={{ border: "1px solid var(--line)", borderRadius: "var(--r-item)", overflow: "hidden" }}>
+              <div style={{ border: "1px solid var(--color-border-primary-default)", borderRadius: "var(--radius-item)", overflow: "hidden" }}>
                 {[
                   !plan && summary.tone === "active" ? { label: "Sell a group plan", go: () => setMode("sell-plan") } : null,
                   !packageActive ? { label: pkg ? "Renew package" : "Sell a package", go: () => setMode("renew-package") } : null,
@@ -288,7 +288,7 @@ export function ClientSheet({
                       key={x.label}
                       className="bq-scale"
                       onClick={x.go}
-                      style={{ display: "flex", alignItems: "center", width: "100%", minHeight: 52, padding: "0 16px", border: 0, borderBottom: i === arr.length - 1 ? "none" : "1px solid var(--line)", background: "none", cursor: "pointer", textAlign: "left", font: "600 var(--fs-body) var(--font-body)", color: x.danger ? "var(--danger-fg)" : "var(--ink)" }}
+                      style={{ display: "flex", alignItems: "center", width: "100%", minHeight: 52, padding: "0 16px", border: 0, borderBottom: i === arr.length - 1 ? "none" : "1px solid var(--color-border-primary-default)", background: "none", cursor: "pointer", textAlign: "left", font: "600 var(--text-body-size) var(--font-family-body)", color: x.danger ? "var(--color-text-status-danger-default)" : "var(--color-text-primary-default)" }}
                     >
                       <span style={{ flex: 1 }}>{x.label}</span>
                       <Icon name="chevron-right" size={16} />
@@ -308,7 +308,7 @@ export function ClientSheet({
                 <>
                   <TextField label="AMOUNT (EGP)" value={refundAmount} onChange={(e) => setRefundAmount(e.target.value)} inputMode="decimal" placeholder="0" />
                   {refundable && (
-                    <div style={{ font: "400 var(--fs-small)/1.5 var(--font-mono)", color: "var(--ink-faint)" }}>
+                    <div style={{ font: "400 var(--text-caption-1-size)/1.5 var(--font-family-mono)", color: "var(--color-text-tertiary-default)" }}>
                       Up to {fmt(refundable.refundable)} EGP · {fmt(refundable.paid)} paid, {fmt(refundable.refunded)} already refunded.
                     </div>
                   )}
@@ -320,7 +320,7 @@ export function ClientSheet({
                     ]}
                     onChange={(v) => setRefundDest(v as "wallet" | "desk")}
                   />
-                  <div style={{ font: "400 var(--fs-small)/1.5 var(--font-mono)", color: "var(--ink-faint)" }}>
+                  <div style={{ font: "400 var(--text-caption-1-size)/1.5 var(--font-family-mono)", color: "var(--color-text-tertiary-default)" }}>
                     {refundDest === "wallet"
                       ? "Adds store credit to their wallet (expires per the org's policy)."
                       : solo ? "You send the money yourself on InstaPay — this just records it." : "You hand back cash/card outside Bizqwik — this just records the amount."}
@@ -331,7 +331,7 @@ export function ClientSheet({
               {mode === "invite" && (
                 <>
                   <TextField label="EMAIL" value={email} onChange={(e) => setEmail(e.target.value)} inputMode="email" placeholder="member@email.com" />
-                  <div style={{ font: "400 var(--fs-small)/1.5 var(--font-mono)", color: "var(--ink-faint)" }}>
+                  <div style={{ font: "400 var(--text-caption-1-size)/1.5 var(--font-family-mono)", color: "var(--color-text-tertiary-default)" }}>
                     They'll use this email to sign in to the branded member app.
                   </div>
                 </>

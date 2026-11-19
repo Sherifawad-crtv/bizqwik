@@ -14,8 +14,8 @@ export interface BarDatum {
   tip: { title: string; lines: string[] };
 }
 
-const LIGHT = "var(--primary-light)";
-const DEEP = "var(--primary)";
+const LIGHT = "var(--color-bg-fill-accent-strong)";
+const DEEP = "var(--color-bg-fill-primary-default)";
 
 function niceStep(max: number): number {
   const raw = max / 4;
@@ -68,8 +68,8 @@ export function BarChart({ data, aLabel, bLabel, ariaLabel }: { data: BarDatum[]
       <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={{ display: "block", overflow: "visible" }} role="img" aria-label={ariaLabel}>
         {ticks.map((t) => (
           <g key={t}>
-            <line x1={padL} y1={y(t)} x2={W} y2={y(t)} stroke="var(--line)" strokeWidth={1} />
-            <text x={0} y={y(t) + 4} style={{ font: "500 var(--fs-caption) var(--font-body)", fill: "var(--ink-faint)" }}>
+            <line x1={padL} y1={y(t)} x2={W} y2={y(t)} stroke="var(--color-border-primary-default)" strokeWidth={1} />
+            <text x={0} y={y(t) + 4} style={{ font: "500 var(--text-caption-2-size) var(--font-family-body)", fill: "var(--color-text-tertiary-default)" }}>
               {short(t)}
             </text>
           </g>
@@ -101,7 +101,7 @@ export function BarChart({ data, aLabel, bLabel, ariaLabel }: { data: BarDatum[]
                   {aVal > 0.5 && bar(x, aVal, LIGHT, "a")}
                 </>
               )}
-              <text x={padL + i * slot + slot / 2} y={H - 8} textAnchor="middle" style={{ font: "500 var(--fs-small) var(--font-body)", fill: "var(--ink-muted)" }}>
+              <text x={padL + i * slot + slot / 2} y={H - 8} textAnchor="middle" style={{ font: "500 var(--text-caption-1-size) var(--font-family-body)", fill: "var(--color-text-secondary-default)" }}>
                 {d.label}
               </text>
             </g>
@@ -110,7 +110,7 @@ export function BarChart({ data, aLabel, bLabel, ariaLabel }: { data: BarDatum[]
       </svg>
       <div style={{ display: "flex", gap: 18, marginTop: 4 }}>
         {[[aLabel, LIGHT], ...(bLabel ? [[bLabel, DEEP]] : [])].map(([label, color]) => (
-          <span key={label} style={{ display: "flex", alignItems: "center", gap: 7, font: "500 var(--fs-small) var(--font-body)", color: "var(--ink-muted)" }}>
+          <span key={label} style={{ display: "flex", alignItems: "center", gap: 7, font: "500 var(--text-caption-1-size) var(--font-family-body)", color: "var(--color-text-secondary-default)" }}>
             <i style={{ width: 10, height: 10, borderRadius: 999, background: color, display: "block" }} />
             {label}
           </span>
@@ -125,11 +125,11 @@ export function BarChart({ data, aLabel, bLabel, ariaLabel }: { data: BarDatum[]
             top: 6,
             left: Math.min(Math.max(padL + (pick + 0.5) * slot - 80, 0), W - 160),
             width: 160,
-            background: "var(--ink)",
-            color: "var(--surface)",
-            borderRadius: "var(--r-chip)",
+            background: "var(--color-text-primary-default)",
+            color: "var(--color-bg-surface-primary-default)",
+            borderRadius: "var(--radius-chip)",
             padding: "8px 12px",
-            font: "600 var(--fs-small)/1.6 var(--font-mono)",
+            font: "600 var(--text-caption-1-size)/1.6 var(--font-family-mono)",
             pointerEvents: "none",
           }}
         >

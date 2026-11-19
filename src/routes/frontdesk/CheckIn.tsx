@@ -40,7 +40,7 @@ export function CheckIn({ embedded = false, onDropIn, onCreateClient }: { embedd
 
   return (
     <div>
-      <div style={{ font: "400 var(--fs-note)/1.5 var(--font-mono)", color: "var(--ink-muted)", margin: "0 2px 14px" }}>
+      <div style={{ font: "400 var(--text-footnote-size)/1.5 var(--font-family-mono)", color: "var(--color-text-secondary-default)", margin: "0 2px 14px" }}>
         Find the client by name or phone to check them in by hand.
       </div>
       <ClientPicker clients={data.clients} bundleTypes={bundleTypes} onPick={setPicked} onCreate={onCreateClient ?? newClient.open} />
@@ -140,24 +140,24 @@ export function ConfirmCheckInSheet({ client, onClose, onDropIn }: { client: Cli
         <>
           <div className="bq-label">CHECK-IN</div>
           <div className="bq-title">{shown.name}</div>
-          <div style={{ background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-item)", padding: "12px 16px" }}>
+          <div style={{ background: "var(--color-bg-surface-secondary-default)", border: "1px solid var(--color-border-primary-default)", borderRadius: "var(--radius-item)", padding: "12px 16px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <div style={{ font: "700 var(--fs-caption) var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", flex: 1 }}>CURRENT PLAN</div>
+              <div style={{ font: "700 var(--text-caption-2-size) var(--font-family-mono)", letterSpacing: ".08em", color: "var(--color-text-tertiary-default)", flex: 1 }}>CURRENT PLAN</div>
               <PlanPill client={current} />
             </div>
-            <div style={{ font: "700 var(--fs-base) var(--font-body)", marginTop: 4 }}>{plan.title}</div>
-            <div style={{ font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-muted)" }}>{plan.detail}</div>
+            <div style={{ font: "700 var(--text-callout-size) var(--font-family-body)", marginTop: 4 }}>{plan.title}</div>
+            <div style={{ font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-secondary-default)" }}>{plan.detail}</div>
           </div>
           {error && <ErrorBanner text={error} />}
           {bundle && eligible && (
-            <div style={{ marginTop: 12, font: "600 var(--fs-note)/1.5 var(--font-body)", color: "var(--ink)", background: "var(--primary-tint)", borderRadius: "var(--r-item)", padding: "10px 14px" }}>
+            <div style={{ marginTop: 12, font: "600 var(--text-footnote-size)/1.5 var(--font-family-body)", color: "var(--color-text-primary-default)", background: "var(--color-bg-fill-accent-default)", borderRadius: "var(--radius-item)", padding: "10px 14px" }}>
               Checking in uses 1 session of {bundle.name} ({bundle.creditsRemaining} → {Math.max(0, (bundle.creditsRemaining ?? 0) - 1)} left). Every visit counts, even twice in a day.
             </div>
           )}
           {(empty || noSessions) && (
-            <div role="alert" data-testid="no-sessions" style={{ marginTop: 12, background: "var(--danger-bg)", color: "var(--danger-fg)", borderRadius: "var(--r-item)", padding: "12px 14px" }}>
-              <div style={{ font: "800 var(--fs-body) var(--font-body)" }}>No sessions left</div>
-              <div style={{ font: "600 var(--fs-note)/1.5 var(--font-body)", marginTop: 2 }}>
+            <div role="alert" data-testid="no-sessions" style={{ marginTop: 12, background: "var(--color-bg-fill-status-danger-default)", color: "var(--color-text-status-danger-default)", borderRadius: "var(--radius-item)", padding: "12px 14px" }}>
+              <div style={{ font: "800 var(--text-body-size) var(--font-family-body)" }}>No sessions left</div>
+              <div style={{ font: "600 var(--text-footnote-size)/1.5 var(--font-family-body)", marginTop: 2 }}>
                 {noSessions ?? `${shown.name} has used all ${bundle?.creditsTotal ?? ""} sessions of ${bundle?.name ?? "their bundle"}.`} Renew their plan below, or sell a drop-in for today.
               </div>
             </div>
@@ -168,7 +168,7 @@ export function ConfirmCheckInSheet({ client, onClose, onDropIn }: { client: Cli
             </Button>
           ) : (
             <>
-              <div style={{ marginTop: 12, font: "600 var(--fs-note)/1.5 var(--font-body)", color: "var(--logging-fg)", background: "var(--logging-bg)", borderRadius: "var(--r-item)", padding: "10px 14px" }}>
+              <div style={{ marginTop: 12, font: "600 var(--text-footnote-size)/1.5 var(--font-family-body)", color: "var(--color-text-status-logging-default)", background: "var(--color-bg-fill-status-logging-default)", borderRadius: "var(--radius-item)", padding: "10px 14px" }}>
                 {frozenUntil
                   ? `Their plan is frozen until ${dateLabel(frozenUntil.slice(0, 10))} and restarts by itself. Until then they can pay for a drop-in.`
                   : empty || noSessions ? "Nothing to check in on today." : "No active plan or package — they can renew a plan below, or pay for a drop-in."}

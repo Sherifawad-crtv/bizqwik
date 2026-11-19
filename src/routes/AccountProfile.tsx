@@ -118,9 +118,9 @@ export function AccountProfile() {
                   width: 30,
                   height: 30,
                   borderRadius: 999,
-                  background: "var(--primary)",
-                  color: "var(--surface)",
-                  border: "2px solid var(--surface)",
+                  background: "var(--color-bg-fill-primary-default)",
+                  color: "var(--color-bg-surface-primary-default)",
+                  border: "2px solid var(--color-bg-surface-primary-default)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -132,20 +132,20 @@ export function AccountProfile() {
             <button
               onClick={pickPhoto}
               disabled={photoBusy}
-              style={{ border: 0, background: "none", padding: 0, cursor: photoBusy ? "default" : "pointer", font: "700 var(--fs-note) var(--font-body)", color: "var(--primary-pressed)" }}
+              style={{ border: 0, background: "none", padding: 0, cursor: photoBusy ? "default" : "pointer", font: "700 var(--text-footnote-size) var(--font-family-body)", color: "var(--color-bg-fill-primary-active)" }}
             >
               {photoBusy ? "Uploading…" : "Change photo"}
             </button>
             {profile.avatarUrl && !photoBusy && (
               <button
                 onClick={removePhoto}
-                style={{ border: 0, background: "none", padding: 0, cursor: "pointer", font: "600 var(--fs-note) var(--font-body)", color: "var(--ink-faint)" }}
+                style={{ border: 0, background: "none", padding: 0, cursor: "pointer", font: "600 var(--text-footnote-size) var(--font-family-body)", color: "var(--color-text-tertiary-default)" }}
               >
                 Remove photo
               </button>
             )}
             {photoError && (
-              <div className="bq-rise" style={{ width: "100%", font: "600 var(--fs-note)/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: "var(--r-item)", padding: "10px 14px" }}>
+              <div className="bq-rise" style={{ width: "100%", font: "600 var(--text-footnote-size)/1.5 var(--font-family-body)", color: "var(--color-text-status-danger-default)", background: "var(--color-bg-fill-status-danger-default)", borderRadius: "var(--radius-item)", padding: "10px 14px" }}>
                 {photoError}
               </div>
             )}
@@ -170,7 +170,7 @@ export function AccountProfile() {
           </div>
         )}
         {saved && !error && (
-          <div style={{ marginTop: 12, font: "600 var(--fs-note)/1.5 var(--font-body)", color: "var(--primary-pressed)", background: "var(--primary-tint)", borderRadius: "var(--r-item)", padding: "10px 14px" }}>
+          <div style={{ marginTop: 12, font: "600 var(--text-footnote-size)/1.5 var(--font-family-body)", color: "var(--color-bg-fill-primary-active)", background: "var(--color-bg-fill-accent-default)", borderRadius: "var(--radius-item)", padding: "10px 14px" }}>
             Saved.
           </div>
         )}
@@ -186,7 +186,7 @@ export function AccountProfile() {
           <Row k="TIER" v={tier ? `${tier.name} · ${tier.rate} EGP / session` : "Not assigned"} last />
         )}
       </div>
-      <div style={{ padding: "0 4px", font: "400 var(--fs-note)/1.5 var(--font-mono)", color: "var(--ink-faint)" }}>
+      <div style={{ padding: "0 4px", font: "400 var(--text-footnote-size)/1.5 var(--font-family-mono)", color: "var(--color-text-tertiary-default)" }}>
         Email, role, and tier are managed by a department head.
       </div>
     </div>
@@ -196,8 +196,8 @@ export function AccountProfile() {
 function Row({ k, v, last }: { k: string; v: string; last?: boolean }) {
   return (
     <div className={`bq-listrow bq-listrow--compact ${!(last) ? "bq-listrow--divider" : ""}`}>
-      <span style={{ font: "700 var(--fs-caption) var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", width: 90, flex: "none" }}>{k}</span>
-      <span style={{ font: "600 var(--fs-body) var(--font-body)", color: "var(--ink)", flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{v}</span>
+      <span style={{ font: "700 var(--text-caption-2-size) var(--font-family-mono)", letterSpacing: ".08em", color: "var(--color-text-tertiary-default)", width: 90, flex: "none" }}>{k}</span>
+      <span style={{ font: "600 var(--text-body-size) var(--font-family-body)", color: "var(--color-text-primary-default)", flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{v}</span>
     </div>
   );
 }

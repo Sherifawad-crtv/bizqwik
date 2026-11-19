@@ -64,16 +64,16 @@ export function ImageUploadField({
 
   return (
     <div>
-      <div style={{ font: "700 var(--fs-caption) var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", margin: "0 2px 6px" }}>{label}</div>
+      <div style={{ font: "700 var(--text-caption-2-size) var(--font-family-mono)", letterSpacing: ".08em", color: "var(--color-text-tertiary-default)", margin: "0 2px 6px" }}>{label}</div>
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
         <div
           style={{
             width: 56,
             height: 56,
             flex: "none",
-            borderRadius: "var(--r-item)",
-            background: "var(--sunken)",
-            border: "1px solid var(--line)",
+            borderRadius: "var(--radius-item)",
+            background: "var(--color-bg-surface-secondary-default)",
+            border: "1px solid var(--color-border-primary-default)",
             overflow: "hidden",
             display: "flex",
             alignItems: "center",
@@ -83,7 +83,7 @@ export function ImageUploadField({
           {value ? (
             <img src={value} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
           ) : (
-            <Icon name="plus" size={18} style={{ color: "var(--ink-faint)" }} />
+            <Icon name="plus" size={18} style={{ color: "var(--color-text-tertiary-default)" }} />
           )}
         </div>
         <input ref={fileInput} type="file" accept="image/*" onChange={onSelected} style={{ display: "none" }} />
@@ -93,15 +93,15 @@ export function ImageUploadField({
         {value && !busy && (
           <button
             onClick={() => onChange("")}
-            style={{ border: 0, background: "none", padding: 0, cursor: "pointer", font: "600 var(--fs-note) var(--font-body)", color: "var(--ink-faint)" }}
+            style={{ border: 0, background: "none", padding: 0, cursor: "pointer", font: "600 var(--text-footnote-size) var(--font-family-body)", color: "var(--color-text-tertiary-default)" }}
           >
             Remove
           </button>
         )}
       </div>
-      {hint && <div style={{ font: "400 var(--fs-small)/1.5 var(--font-mono)", color: "var(--ink-faint)", margin: "6px 2px 0" }}>{hint}</div>}
+      {hint && <div style={{ font: "400 var(--text-caption-1-size)/1.5 var(--font-family-mono)", color: "var(--color-text-tertiary-default)", margin: "6px 2px 0" }}>{hint}</div>}
       {error && (
-        <div className="bq-rise" style={{ marginTop: 8, font: "600 var(--fs-note)/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: "var(--r-item)", padding: "10px 14px" }}>
+        <div className="bq-rise" style={{ marginTop: 8, font: "600 var(--text-footnote-size)/1.5 var(--font-family-body)", color: "var(--color-text-status-danger-default)", background: "var(--color-bg-fill-status-danger-default)", borderRadius: "var(--radius-item)", padding: "10px 14px" }}>
           {error}
         </div>
       )}

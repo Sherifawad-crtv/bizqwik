@@ -5,5 +5,5 @@
   "inline status pill (use StatusBadge)": 0,
   "hand-styled <button> (use Button / IconButton / Chip / ListRow)": 7,
   "inline big number (use bq-stat-*)": 62,
-  "raw hex colour (use a colour token)": 15
+  "raw hex colour (use a colour token)": 0
 }

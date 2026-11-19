@@ -18,7 +18,7 @@ export function MoneyHero({ label, value, stats }: { label: string; value: React
           {stats.map((s) => (
             <div key={s.k}>
               <div className="bq-label">{s.k}</div>
-              <div style={{ font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-muted)" }}>{s.v}</div>
+              <div style={{ font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-secondary-default)" }}>{s.v}</div>
             </div>
           ))}
         </div>
@@ -35,7 +35,7 @@ export function MoneyHero({ label, value, stats }: { label: string; value: React
       {stats.map((s) => (
         <div key={s.k} className="bq-card bq-card--md">
           <div className="bq-label">{s.k}</div>
-          <div style={{ font: "800 var(--fs-display) var(--font-body)", letterSpacing: "-.02em", marginTop: 8 }}>{s.v}</div>
+          <div style={{ font: "800 var(--text-large-title-size) var(--font-family-body)", letterSpacing: "-.02em", marginTop: 8 }}>{s.v}</div>
         </div>
       ))}
     </div>

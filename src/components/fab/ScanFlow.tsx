@@ -56,8 +56,8 @@ export function ScanFlow({ trigger, hint }: { trigger: (open: () => void, busy: 
       )}
       <Sheet open={!!problem} onClose={() => setProblem(null)}>
         <div className="bq-label">SCAN</div>
-        <div style={{ font: "800 var(--fs-title)/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "4px 0 12px" }}>That didn't work</div>
-        <div role="alert" style={{ font: "600 var(--fs-body-sm)/1.5 var(--font-body)", color: "var(--danger-fg)", background: "var(--danger-bg)", borderRadius: "var(--r-item)", padding: "12px 14px" }}>
+        <div style={{ font: "800 var(--text-title-1-size)/1.2 var(--font-family-body)", letterSpacing: "-.02em", margin: "4px 0 12px" }}>That didn't work</div>
+        <div role="alert" style={{ font: "600 var(--text-subheadline-size)/1.5 var(--font-family-body)", color: "var(--color-text-status-danger-default)", background: "var(--color-bg-fill-status-danger-default)", borderRadius: "var(--radius-item)", padding: "12px 14px" }}>
           {problem}
         </div>
         <Button fullWidth size="lg" style={{ marginTop: 16 }} onClick={() => { setProblem(null); setScanning(true); }}>
@@ -111,12 +111,12 @@ function PtDeliverSheet({ scan, onClose }: { scan: { token: string; preview: PtS
         <>
           <div className="bq-label">PRIVATE TRAINING</div>
           <div className="bq-stat-lg" style={{ margin: "4px 0 4px" }}>{p.clientName}</div>
-          <div style={{ font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-muted)", marginBottom: 16 }}>
+          <div style={{ font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-secondary-default)", marginBottom: 16 }}>
             {p.bundleName} · expires {p.expiryDate}
           </div>
-          <div style={{ display: "flex", alignItems: "baseline", gap: 10, background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-item)", padding: "14px 16px" }}>
+          <div style={{ display: "flex", alignItems: "baseline", gap: 10, background: "var(--color-bg-surface-secondary-default)", border: "1px solid var(--color-border-primary-default)", borderRadius: "var(--radius-item)", padding: "14px 16px" }}>
             <span className="bq-label">SESSIONS LEFT</span>
-            <span className="tabular" style={{ marginLeft: "auto", font: "800 var(--fs-title) var(--font-body)" }}>
+            <span className="tabular" style={{ marginLeft: "auto", font: "800 var(--text-title-1-size) var(--font-family-body)" }}>
               {p.sessionsRemaining} → {p.sessionsRemaining - 1}
             </span>
             <span className="bq-meta">of {p.sessionsIncluded}</span>

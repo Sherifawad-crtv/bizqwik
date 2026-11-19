@@ -33,16 +33,16 @@ export function PaymentCards({ value, onChange }: { value: PayMethod; onChange: 
               display: "flex",
               flexDirection: "column",
               justifyContent: "space-between",
-              borderRadius: "var(--r-card)",
-              border: on ? "2px solid var(--primary)" : "1px solid var(--line)",
-              background: on ? "var(--primary-tint)" : "var(--surface)",
-              color: on ? "var(--primary-pressed)" : "var(--ink)",
+              borderRadius: "var(--radius-card)",
+              border: on ? "2px solid var(--color-bg-fill-primary-default)" : "1px solid var(--color-border-primary-default)",
+              background: on ? "var(--color-bg-fill-accent-default)" : "var(--color-bg-surface-primary-default)",
+              color: on ? "var(--color-bg-fill-primary-active)" : "var(--color-text-primary-default)",
             }}
           >
             <Icon name={o.icon} size={40} solid={on} />
             <span>
-              <span style={{ display: "block", font: "800 17px var(--font-body)", letterSpacing: "-.01em" }}>{o.label}</span>
-              <span style={{ display: "block", font: "400 var(--fs-small) var(--font-mono)", color: "var(--ink-muted)", marginTop: 2 }}>{o.note}</span>
+              <span style={{ display: "block", font: "800 17px var(--font-family-body)", letterSpacing: "-.01em" }}>{o.label}</span>
+              <span style={{ display: "block", font: "400 var(--text-caption-1-size) var(--font-family-mono)", color: "var(--color-text-secondary-default)", marginTop: 2 }}>{o.note}</span>
             </span>
           </button>
         );

@@ -6,11 +6,11 @@ import { EmptyState } from "./EmptyState";
 
 export function TextField({ label, ...rest }: { label: string } & InputHTMLAttributes<HTMLInputElement>) {
   return (
-    <label style={{ display: "block", background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-item)", padding: "10px 16px" }}>
+    <label style={{ display: "block", background: "var(--color-bg-surface-secondary-default)", border: "1px solid var(--color-border-primary-default)", borderRadius: "var(--radius-item)", padding: "10px 16px" }}>
       <span className="bq-label">{label}</span>
       <input
         {...rest}
-        style={{ display: "block", width: "100%", border: 0, background: "none", outline: "none", font: "600 var(--fs-base) var(--font-body)", color: "var(--ink)", padding: "2px 0 0" }}
+        style={{ display: "block", width: "100%", border: 0, background: "none", outline: "none", font: "600 var(--text-callout-size) var(--font-family-body)", color: "var(--color-text-primary-default)", padding: "2px 0 0" }}
       />
     </label>
   );
@@ -48,9 +48,9 @@ export function SelectField({ label, value, options, onChange, placeholder, disa
           display: "block",
           width: "100%",
           textAlign: "left",
-          background: "var(--sunken)",
-          border: "1px solid var(--line)",
-          borderRadius: "var(--r-item)",
+          background: "var(--color-bg-surface-secondary-default)",
+          border: "1px solid var(--color-border-primary-default)",
+          borderRadius: "var(--radius-item)",
           padding: "10px 16px",
           cursor: disabled ? "default" : "pointer",
           opacity: disabled ? 0.6 : 1,
@@ -58,10 +58,10 @@ export function SelectField({ label, value, options, onChange, placeholder, disa
       >
         <span className="bq-label">{label}</span>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{ font: "600 var(--fs-base) var(--font-body)", color: selected ? "var(--ink)" : "var(--ink-faint)" }}>
+          <span style={{ font: "600 var(--text-callout-size) var(--font-family-body)", color: selected ? "var(--color-text-primary-default)" : "var(--color-text-tertiary-default)" }}>
             {selected?.label ?? (options.length === 0 ? (empty?.title ?? "Nothing to choose yet") : (placeholder ?? "Select…"))}
           </span>
-          <span style={{ marginLeft: "auto", color: "var(--ink-faint)", display: "flex" }}>
+          <span style={{ marginLeft: "auto", color: "var(--color-text-tertiary-default)", display: "flex" }}>
             <Icon name="chevron-down" size={15} />
           </span>
         </div>
@@ -95,13 +95,13 @@ export function SelectField({ label, value, options, onChange, placeholder, disa
                   alignItems: "center",
                   gap: 10,
                   textAlign: "left",
-                  background: on ? "var(--primary-tint)" : "var(--sunken)",
-                  border: "1px solid var(--line)",
-                  borderRadius: "var(--r-item)",
+                  background: on ? "var(--color-bg-fill-accent-default)" : "var(--color-bg-surface-secondary-default)",
+                  border: "1px solid var(--color-border-primary-default)",
+                  borderRadius: "var(--radius-item)",
                   padding: "14px 16px",
                   cursor: "pointer",
-                  font: "700 var(--fs-base) var(--font-body)",
-                  color: on ? "var(--primary-pressed)" : "var(--ink)",
+                  font: "700 var(--text-callout-size) var(--font-family-body)",
+                  color: on ? "var(--color-bg-fill-primary-active)" : "var(--color-text-primary-default)",
                 }}
               >
                 {o.label}

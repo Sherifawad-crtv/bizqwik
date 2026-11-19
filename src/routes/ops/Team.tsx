@@ -56,7 +56,7 @@ function InviteSheet({ open, onClose, onDone }: { open: boolean; onClose: () => 
         <TextField label="NAME" value={name} onChange={(e) => setName(e.target.value)} placeholder="Optional" />
         <TextField label="EMAIL" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="teammate@bizqwik.com" />
         <SelectField label="ROLE" value={role} options={INVITE_ROLES} onChange={(v) => setRole(v as BizqwikRole)} />
-        <div style={{ font: "500 var(--fs-small)/1.5 var(--font-mono)", color: "var(--ink-faint)", padding: "0 2px" }}>
+        <div style={{ font: "500 var(--text-caption-1-size)/1.5 var(--font-family-mono)", color: "var(--color-text-tertiary-default)", padding: "0 2px" }}>
           They'll sign up with this email to join the ops team.
         </div>
         {error && <ErrorBanner text={error} />}
@@ -105,10 +105,10 @@ export function Team() {
           <div key={m.id} className={`bq-listrow bq-listrow--compact ${!(i === members.length - 1) ? "bq-listrow--divider" : ""}`}>
             <Avatar name={m.name} size={34} />
             <div className="bq-grow">
-              <div style={{ font: "700 var(--fs-body) var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{m.name}</div>
-              <div style={{ font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-faint)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{m.email}</div>
+              <div style={{ font: "700 var(--text-body-size) var(--font-family-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{m.name}</div>
+              <div style={{ font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{m.email}</div>
             </div>
-            <span style={{ font: "700 var(--fs-caption) var(--font-mono)", letterSpacing: ".06em", color: "var(--ink-muted)", flex: "none" }}>{BIZQWIK_ROLE_LABELS[m.role].toUpperCase()}</span>
+            <span style={{ font: "700 var(--text-caption-2-size) var(--font-family-mono)", letterSpacing: ".06em", color: "var(--color-text-secondary-default)", flex: "none" }}>{BIZQWIK_ROLE_LABELS[m.role].toUpperCase()}</span>
           </div>
         ))}
         {members.length === 0 && (
@@ -122,15 +122,15 @@ export function Team() {
           <Card pad="none" style={{ overflow: "hidden" }}>
             {invites.map((inv, i) => (
               <div key={inv.email} className={`bq-listrow bq-listrow--compact ${!(i === invites.length - 1) ? "bq-listrow--divider" : ""}`}>
-                <span style={{ color: "var(--ink-faint)", display: "flex" }}><Icon name="envelope" size={18} /></span>
+                <span style={{ color: "var(--color-text-tertiary-default)", display: "flex" }}><Icon name="envelope" size={18} /></span>
                 <div className="bq-grow">
-                  <div style={{ font: "600 var(--fs-body) var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{inv.email}</div>
-                  <div style={{ font: "400 var(--fs-small) var(--font-mono)", color: "var(--ink-faint)" }}>{BIZQWIK_ROLE_LABELS[inv.role]}</div>
+                  <div style={{ font: "600 var(--text-body-size) var(--font-family-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{inv.email}</div>
+                  <div style={{ font: "400 var(--text-caption-1-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)" }}>{BIZQWIK_ROLE_LABELS[inv.role]}</div>
                 </div>
                 <button
                   onClick={() => cancel(inv.email)}
                   aria-label={`Cancel invite for ${inv.email}`}
-                  style={{ border: 0, background: "none", color: "var(--ink-faint)", cursor: "pointer", display: "flex", flex: "none", padding: 4 }}
+                  style={{ border: 0, background: "none", color: "var(--color-text-tertiary-default)", cursor: "pointer", display: "flex", flex: "none", padding: 4 }}
                 >
                   <Icon name="close" size={18} />
                 </button>

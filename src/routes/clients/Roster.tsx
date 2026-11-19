@@ -36,8 +36,8 @@ function RowActionButton({
         flex: "none",
         borderRadius: 999,
         border: 0,
-        background: danger ? "var(--danger-bg)" : "var(--primary-tint)",
-        color: danger ? "var(--danger-fg)" : "var(--primary-pressed)",
+        background: danger ? "var(--color-bg-fill-status-danger-default)" : "var(--color-bg-fill-accent-default)",
+        color: danger ? "var(--color-text-status-danger-default)" : "var(--color-bg-fill-primary-active)",
         cursor: "pointer",
         display: "flex",
         alignItems: "center",
@@ -106,8 +106,8 @@ export function ClientRoster({
           >
             <Avatar name={c.name} size={38} />
             <div className="bq-grow">
-              <div style={{ font: "700 var(--fs-base) var(--font-body)", letterSpacing: "-.01em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{c.name}</div>
-              <div style={{ font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-muted)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{metaFor(c)}</div>
+              <div style={{ font: "700 var(--text-callout-size) var(--font-family-body)", letterSpacing: "-.01em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{c.name}</div>
+              <div style={{ font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-secondary-default)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{metaFor(c)}</div>
               <div style={{ marginTop: 8, display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
                 {pillFor(c)}
                 {subFor(c) && <span className="bq-meta">{subFor(c)}</span>}
@@ -134,7 +134,7 @@ export function ClientRoster({
 
   return (
     <div className="bq-panel">
-      <div style={{ display: "grid", gridTemplateColumns: rosterGrid(canManage), gap: 12, padding: "10px 20px", background: "var(--sunken)", font: "700 var(--fs-caption) var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-muted)" }}>
+      <div style={{ display: "grid", gridTemplateColumns: rosterGrid(canManage), gap: 12, padding: "10px 20px", background: "var(--color-bg-surface-secondary-default)", font: "700 var(--text-caption-2-size) var(--font-family-mono)", letterSpacing: ".08em", color: "var(--color-text-secondary-default)" }}>
         <span>CLIENT</span>
         <span>{showAssignedCoach ? "COACH" : "PACKAGE"}</span>
         <span>STATUS</span>
@@ -191,24 +191,24 @@ function ClientDesktopRow({
         gridTemplateColumns: rosterGrid(canManage),
         gap: 12,
         padding: "14px 20px",
-        borderBottom: "1px solid var(--line)",
+        borderBottom: "1px solid var(--color-border-primary-default)",
         alignItems: "center",
         cursor: "pointer",
-        background: hovered ? "var(--sunken)" : "transparent",
+        background: hovered ? "var(--color-bg-surface-secondary-default)" : "transparent",
         transition: tr("background", QUICK_MS),
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
         <Avatar name={client.name} size={32} />
         <div style={{ minWidth: 0 }}>
-          <div style={{ font: "600 var(--fs-base) var(--font-body)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{client.name}</div>
+          <div style={{ font: "600 var(--text-callout-size) var(--font-family-body)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{client.name}</div>
           {sub && <div className="bq-meta">{sub}</div>}
         </div>
       </div>
-      <div style={{ font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-muted)", minWidth: 0, overflow: "hidden", textOverflow: "ellipsis" }}>{meta}</div>
+      <div style={{ font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-secondary-default)", minWidth: 0, overflow: "hidden", textOverflow: "ellipsis" }}>{meta}</div>
       <div>{pill}</div>
       <div className="tabular bq-stat-sm" style={{ textAlign: "right" }}>{value}</div>
-      <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 6, color: "var(--ink-faint)" }}>
+      <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 6, color: "var(--color-text-tertiary-default)" }}>
         {canManage && (
           <>
             <RowActionButton icon="pencil" label="Edit client" onClick={onEdit} />

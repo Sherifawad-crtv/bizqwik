@@ -40,7 +40,7 @@ const SORT_OPTIONS: { value: SortKey; label: string }[] = [
 function FilterGroup({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div style={{ marginBottom: 18 }}>
-      <div style={{ font: "700 var(--fs-caption) var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", marginBottom: 8 }}>{label}</div>
+      <div style={{ font: "700 var(--text-caption-2-size) var(--font-family-mono)", letterSpacing: ".08em", color: "var(--color-text-tertiary-default)", marginBottom: 8 }}>{label}</div>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>{children}</div>
     </div>
   );
@@ -71,9 +71,9 @@ export function ClientFilterBar({
     <div data-testid="client-filters" style={{ marginBottom: 14 }}>
       <div style={{ display: "flex", gap: 8 }}>
         <label
-          style={{ flex: 1, minWidth: 0, display: "flex", alignItems: "center", gap: 10, height: 48, padding: "0 14px", background: "var(--sunken)", border: "1px solid var(--line)", borderRadius: "var(--r-item)" }}
+          style={{ flex: 1, minWidth: 0, display: "flex", alignItems: "center", gap: 10, height: 48, padding: "0 14px", background: "var(--color-bg-surface-secondary-default)", border: "1px solid var(--color-border-primary-default)", borderRadius: "var(--radius-item)" }}
         >
-          <span style={{ color: "var(--ink-faint)", display: "flex" }}>
+          <span style={{ color: "var(--color-text-tertiary-default)", display: "flex" }}>
             <Icon name="search" size={18} />
           </span>
           <input
@@ -81,17 +81,17 @@ export function ClientFilterBar({
             value={filters.q}
             onChange={(e) => set({ q: e.target.value })}
             placeholder="Search clients"
-            style={{ flex: 1, minWidth: 0, border: 0, background: "none", outline: "none", font: "600 var(--fs-base) var(--font-body)", color: "var(--ink)" }}
+            style={{ flex: 1, minWidth: 0, border: 0, background: "none", outline: "none", font: "600 var(--text-callout-size) var(--font-family-body)", color: "var(--color-text-primary-default)" }}
           />
         </label>
         <button
           type="button"
           onClick={() => setOpen(true)}
-          style={{ flex: "none", height: 48, padding: "0 16px", display: "flex", alignItems: "center", gap: 8, background: inSheet ? "var(--primary-tint)" : "var(--surface)", color: inSheet ? "var(--primary-pressed)" : "var(--ink)", border: `1px solid ${inSheet ? "var(--primary)" : "var(--line)"}`, borderRadius: "var(--r-item)", font: "700 var(--fs-body) var(--font-body)", cursor: "pointer" }}
+          style={{ flex: "none", height: 48, padding: "0 16px", display: "flex", alignItems: "center", gap: 8, background: inSheet ? "var(--color-bg-fill-accent-default)" : "var(--color-bg-surface-primary-default)", color: inSheet ? "var(--color-bg-fill-primary-active)" : "var(--color-text-primary-default)", border: `1px solid ${inSheet ? "var(--color-bg-fill-primary-default)" : "var(--color-border-primary-default)"}`, borderRadius: "var(--radius-item)", font: "700 var(--text-body-size) var(--font-family-body)", cursor: "pointer" }}
         >
           Filters
           {inSheet > 0 && (
-            <span data-testid="filter-badge" style={{ minWidth: 20, height: 20, padding: "0 6px", borderRadius: 999, background: "var(--primary)", color: "#fff", font: "700 var(--fs-small)/20px var(--font-body)", textAlign: "center" }}>
+            <span data-testid="filter-badge" style={{ minWidth: 20, height: 20, padding: "0 6px", borderRadius: 999, background: "var(--color-bg-fill-primary-default)", color: "var(--color-text-on-fill-default)", font: "700 var(--text-caption-1-size)/20px var(--font-family-body)", textAlign: "center" }}>
               {inSheet}
             </span>
           )}
@@ -107,7 +107,7 @@ export function ClientFilterBar({
       </div>
 
       <Sheet open={open} onClose={() => setOpen(false)}>
-        <div style={{ font: "800 var(--fs-title)/1.2 var(--font-body)", letterSpacing: "-.02em", margin: "0 0 18px" }}>Filters</div>
+        <div style={{ font: "800 var(--text-title-1-size)/1.2 var(--font-family-body)", letterSpacing: "-.02em", margin: "0 0 18px" }}>Filters</div>
 
         <FilterGroup label="PLAN">
           <Chip on={filters.plan === ""} onClick={() => set({ plan: "" })}>All plans</Chip>
@@ -132,11 +132,11 @@ export function ClientFilterBar({
         {filters.expiry === "custom" && (
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, margin: "-6px 0 18px" }}>
             <div>
-              <div style={{ font: "700 var(--fs-caption) var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", margin: "0 0 4px 4px" }}>FROM</div>
+              <div style={{ font: "700 var(--text-caption-2-size) var(--font-family-mono)", letterSpacing: ".08em", color: "var(--color-text-tertiary-default)", margin: "0 0 4px 4px" }}>FROM</div>
               <DateField value={filters.from || todayIso()} max={filters.to || undefined} onChange={(from) => set({ from })} />
             </div>
             <div>
-              <div style={{ font: "700 var(--fs-caption) var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", margin: "0 0 4px 4px" }}>TO</div>
+              <div style={{ font: "700 var(--text-caption-2-size) var(--font-family-mono)", letterSpacing: ".08em", color: "var(--color-text-tertiary-default)", margin: "0 0 4px 4px" }}>TO</div>
               <DateField value={filters.to || plusDays(todayIso(), 30)} min={filters.from || undefined} onChange={(to) => set({ to })} />
             </div>
           </div>

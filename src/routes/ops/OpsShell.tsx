@@ -21,11 +21,11 @@ function NavItem({ to, label, icon, end, onNavigate }: { to: string; label: stri
             alignItems: "center",
             gap: 12,
             padding: "11px 12px",
-            borderRadius: "var(--r-item)",
+            borderRadius: "var(--radius-item)",
             cursor: "pointer",
-            background: isActive ? "var(--primary-tint)" : "transparent",
-            color: isActive ? "var(--primary-pressed)" : "var(--ink-muted)",
-            font: "600 var(--fs-base) var(--font-body)",
+            background: isActive ? "var(--color-bg-fill-accent-default)" : "transparent",
+            color: isActive ? "var(--color-bg-fill-primary-active)" : "var(--color-text-secondary-default)",
+            font: "600 var(--text-callout-size) var(--font-family-body)",
           }}
         >
           <Icon name={icon} size={19} solid={isActive} />
@@ -43,14 +43,14 @@ export function OpsShell() {
 
   if (isMobile) {
     return (
-      <div style={{ minHeight: "100svh", background: "var(--paper)", display: "flex", flexDirection: "column" }}>
+      <div style={{ minHeight: "100svh", background: "var(--color-bg-canvas-default)", display: "flex", flexDirection: "column" }}>
         <div
           style={{
             position: "sticky",
             top: 0,
             zIndex: 10,
-            background: "var(--surface)",
-            borderBottom: "1px solid var(--line)",
+            background: "var(--color-bg-surface-primary-default)",
+            borderBottom: "1px solid var(--color-border-primary-default)",
             padding: "calc(12px + var(--safe-top)) 16px 0",
           }}
         >
@@ -60,7 +60,7 @@ export function OpsShell() {
             <button
               onClick={logout}
               aria-label="Sign out"
-              style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 6, border: 0, background: "none", color: "var(--ink-faint)", cursor: "pointer", font: "700 var(--fs-note) var(--font-body)" }}
+              style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 6, border: 0, background: "none", color: "var(--color-text-tertiary-default)", cursor: "pointer", font: "700 var(--text-footnote-size) var(--font-family-body)" }}
             >
               <Icon name="logout" size={18} />
             </button>
@@ -72,9 +72,9 @@ export function OpsShell() {
                   <div
                     style={{
                       padding: "8px 6px 12px",
-                      font: "700 var(--fs-body) var(--font-body)",
-                      color: isActive ? "var(--primary-pressed)" : "var(--ink-faint)",
-                      borderBottom: isActive ? "2px solid var(--primary)" : "2px solid transparent",
+                      font: "700 var(--text-body-size) var(--font-family-body)",
+                      color: isActive ? "var(--color-bg-fill-primary-active)" : "var(--color-text-tertiary-default)",
+                      borderBottom: isActive ? "2px solid var(--color-bg-fill-primary-default)" : "2px solid transparent",
                     }}
                   >
                     {n.label}
@@ -92,13 +92,13 @@ export function OpsShell() {
   }
 
   return (
-    <div style={{ display: "flex", minHeight: "100svh", background: "var(--paper)" }}>
+    <div style={{ display: "flex", minHeight: "100svh", background: "var(--color-bg-canvas-default)" }}>
       <div
         style={{
           width: 250,
           flex: "none",
-          background: "var(--surface)",
-          borderRight: "1px solid var(--line)",
+          background: "var(--color-bg-surface-primary-default)",
+          borderRight: "1px solid var(--color-border-primary-default)",
           display: "flex",
           flexDirection: "column",
           padding: "22px 16px",
@@ -108,23 +108,23 @@ export function OpsShell() {
         }}
       >
         <img src="/wordmark.png" alt="Bizqwik" style={{ height: 24, width: "auto", alignSelf: "flex-start", margin: "0 8px 12px", display: "block" }} />
-        <div style={{ font: "700 var(--fs-caption) var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-faint)", padding: "0 8px 20px" }}>OPS DASHBOARD</div>
+        <div style={{ font: "700 var(--text-caption-2-size) var(--font-family-mono)", letterSpacing: ".08em", color: "var(--color-text-tertiary-default)", padding: "0 8px 20px" }}>OPS DASHBOARD</div>
         <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
           {NAV.map((n) => (
             <NavItem key={n.to} {...n} />
           ))}
         </div>
-        <div style={{ marginTop: "auto", paddingTop: 12, borderTop: "1px solid var(--line)" }}>
+        <div style={{ marginTop: "auto", paddingTop: 12, borderTop: "1px solid var(--color-border-primary-default)" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "6px 8px" }}>
             <Avatar name={bizqwikTeam.name} size={34} />
             <div style={{ minWidth: 0 }}>
-              <div style={{ font: "600 var(--fs-body) var(--font-body)", lineHeight: 1.1, color: "var(--ink)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{bizqwikTeam.name}</div>
-              <div style={{ font: "400 var(--fs-small) var(--font-mono)", color: "var(--ink-faint)" }}>{BIZQWIK_ROLE_LABELS[bizqwikTeam.role]}</div>
+              <div style={{ font: "600 var(--text-body-size) var(--font-family-body)", lineHeight: 1.1, color: "var(--color-text-primary-default)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{bizqwikTeam.name}</div>
+              <div style={{ font: "400 var(--text-caption-1-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)" }}>{BIZQWIK_ROLE_LABELS[bizqwikTeam.role]}</div>
             </div>
           </div>
           <button
             onClick={logout}
-            style={{ display: "flex", alignItems: "center", gap: 8, width: "100%", marginTop: 6, padding: "10px 12px", border: 0, background: "none", color: "var(--ink-muted)", cursor: "pointer", font: "600 var(--fs-body) var(--font-body)", borderRadius: "var(--r-item)" }}
+            style={{ display: "flex", alignItems: "center", gap: 8, width: "100%", marginTop: 6, padding: "10px 12px", border: 0, background: "none", color: "var(--color-text-secondary-default)", cursor: "pointer", font: "600 var(--text-body-size) var(--font-family-body)", borderRadius: "var(--radius-item)" }}
           >
             <Icon name="logout" size={18} /> Sign out
           </button>

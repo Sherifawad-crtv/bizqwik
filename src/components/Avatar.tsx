@@ -11,13 +11,13 @@ export function Avatar({ name, size = 40, src }: { name: string; size?: number; 
         width: size,
         height: size,
         borderRadius: 999,
-        background: "var(--avatar-grad)",
-        color: "var(--surface)",
+        background: "linear-gradient(135deg, var(--color-bg-avatar-start), var(--color-bg-avatar-end))",
+        color: "var(--color-bg-surface-primary-default)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         flex: "none",
-        font: `800 ${Math.round(size * 0.34)}px var(--font-body)`,
+        font: `800 ${Math.round(size * 0.34)}px var(--font-family-body)`,
         overflow: "hidden",
       }}
     >

@@ -226,11 +226,11 @@ export function Sheet({ open, onClose, children, width = 460 }: SheetProps) {
         e.stopPropagation();
         setAsking(false);
       }}
-      style={{ position: "absolute", inset: 0, zIndex: 2, background: "rgba(26,23,38,.34)", display: "flex", alignItems: isMobile ? "flex-end" : "center", justifyContent: "center", padding: isMobile ? "0 8px calc(8px + var(--safe-bottom))" : 0, animation: `bqFade ${QUICK_MS}ms ${EASE}` }}
+      style={{ position: "absolute", inset: 0, zIndex: 2, background: "var(--color-bg-overlay-default)", display: "flex", alignItems: isMobile ? "flex-end" : "center", justifyContent: "center", padding: isMobile ? "0 8px calc(8px + var(--safe-bottom))" : 0, animation: `bqFade ${QUICK_MS}ms ${EASE}` }}
     >
       <div role="alertdialog" aria-modal="true" aria-label="Discard changes?" onClick={stop} className="bq-card bq-card--md" style={{ width: "100%", maxWidth: 420, animation: `bqRise ${STANDARD_MS}ms ${EASE}` }}>
         <div className="bq-stat-sm">Discard changes?</div>
-        <div style={{ font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-muted)", margin: "4px 0 16px" }}>What you've entered here won't be saved.</div>
+        <div style={{ font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-secondary-default)", margin: "4px 0 16px" }}>What you've entered here won't be saved.</div>
         <Button variant="danger" fullWidth onClick={() => { dirty.current = false; setAsking(false); onClose(); }}>
           Discard changes
         </Button>
@@ -254,7 +254,7 @@ export function Sheet({ open, onClose, children, width = 460 }: SheetProps) {
 
     return createPortal(
       <div ref={rootRef} tabIndex={-1} role="dialog" aria-modal="true" onClick={requestDismiss} onInput={noteTyping} style={{ position: "fixed", inset: 0, zIndex: 200, outline: "none" }}>
-        <div data-testid="sheet-backdrop" aria-hidden style={{ position: "absolute", inset: 0, background: "rgba(26,23,38,.34)", opacity: backdropOpacity, transition: backdropTransition, touchAction: "none" }} />
+        <div data-testid="sheet-backdrop" aria-hidden style={{ position: "absolute", inset: 0, background: "var(--color-bg-overlay-default)", opacity: backdropOpacity, transition: backdropTransition, touchAction: "none" }} />
         <div
           ref={panelRef}
           onClick={stop}
@@ -277,9 +277,9 @@ export function Sheet({ open, onClose, children, width = 460 }: SheetProps) {
               display: "flex",
               flexDirection: "column",
               minHeight: 0,
-              background: "var(--surface)",
-              borderRadius: "var(--r-sheet)",
-              border: "1px solid var(--line)",
+              background: "var(--color-bg-surface-primary-default)",
+              borderRadius: "var(--radius-sheet)",
+              border: "1px solid var(--color-border-primary-default)",
               boxShadow: "var(--shadow-float)",
               padding: "10px 20px 20px",
             }}
@@ -295,7 +295,7 @@ export function Sheet({ open, onClose, children, width = 460 }: SheetProps) {
               onPointerCancel={endDrag}
               style={{ padding: "8px 0 14px", cursor: "grab", touchAction: "none", flex: "none" }}
             >
-              <div style={{ width: 44, height: 5, borderRadius: 999, background: "var(--line)", margin: "0 auto" }} />
+              <div style={{ width: 44, height: 5, borderRadius: 999, background: "var(--color-border-primary-default)", margin: "0 auto" }} />
             </div>
             <div ref={scrollRef} data-scroll style={{ overflowY: "auto", overscrollBehavior: "contain" }}>
               {children}
@@ -320,7 +320,7 @@ export function Sheet({ open, onClose, children, width = 460 }: SheetProps) {
         position: "fixed",
         inset: 0,
         zIndex: 200,
-        background: "rgba(26,23,38,.34)",
+        background: "var(--color-bg-overlay-default)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",

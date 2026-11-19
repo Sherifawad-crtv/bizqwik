@@ -116,12 +116,12 @@ export function Activity() {
       {!isMobile && (
       <button
         onClick={() => navigate(back)}
-        style={{ display: "inline-flex", alignItems: "center", gap: 4, border: 0, background: "none", color: "var(--ink-muted)", cursor: "pointer", font: "700 var(--fs-body-sm) var(--font-body)", marginBottom: 14, padding: 0 }}
+        style={{ display: "inline-flex", alignItems: "center", gap: 4, border: 0, background: "none", color: "var(--color-text-secondary-default)", cursor: "pointer", font: "700 var(--text-subheadline-size) var(--font-family-body)", marginBottom: 14, padding: 0 }}
       >
         <Icon name="chevron-left" size={16} /> {backLabel}
       </button>
       )}
-      <div style={{ font: "800 var(--fs-title)/1.1 var(--font-body)", letterSpacing: "-.02em", marginBottom: 12 }}>Activity</div>
+      <div style={{ font: "800 var(--text-title-1-size)/1.1 var(--font-family-body)", letterSpacing: "-.02em", marginBottom: 12 }}>Activity</div>
       <ActivityPanel />
     </div>
   );
@@ -174,10 +174,10 @@ function Feed({ entries }: { entries: ActivityEntry[] }) {
           <div key={e.id} className="bq-card" style={{ padding: "12px 14px", display: "flex", alignItems: "center", gap: 12 }}>
             <Tag tone={tone.tone} style={{ minWidth: 74, justifyContent: "center" }}>{tone.label}</Tag>
             <span className="bq-grow">
-              <span style={{ display: "block", font: "600 var(--fs-body-sm)/1.35 var(--font-body)" }}>{describe(e)}</span>
-              <span style={{ display: "block", font: "400 var(--fs-small) var(--font-mono)", color: "var(--ink-faint)", marginTop: 2 }}>{timeLabel(e.at)}{e.actorName ? ` · by ${e.actorName}` : ""}</span>
+              <span style={{ display: "block", font: "600 var(--text-subheadline-size)/1.35 var(--font-family-body)" }}>{describe(e)}</span>
+              <span style={{ display: "block", font: "400 var(--text-caption-1-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)", marginTop: 2 }}>{timeLabel(e.at)}{e.actorName ? ` · by ${e.actorName}` : ""}</span>
             </span>
-            {amt && <span className={`tabular bq-tone-${tone.tone}`} style={{ flex: "none", font: "800 var(--fs-body-sm) var(--font-body)", color: "var(--tone-fg)" }}>{amt}</span>}
+            {amt && <span className={`tabular bq-tone-${tone.tone}`} style={{ flex: "none", font: "800 var(--text-subheadline-size) var(--font-family-body)", color: "var(--tone-fg)" }}>{amt}</span>}
           </div>
         );
       })}
@@ -192,11 +192,11 @@ function Logs({ entries }: { entries: ActivityEntry[] }) {
       {entries.map((e, i) => {
         const amt = amountLabel(e);
         return (
-          <div key={e.id} style={{ display: "flex", alignItems: "baseline", gap: 10, padding: "10px 14px", borderBottom: i === entries.length - 1 ? "none" : "1px solid var(--line)" }}>
-            <span style={{ flex: "none", width: 96, font: "400 var(--fs-caption) var(--font-mono)", color: "var(--ink-faint)" }}>{timeLabel(e.at)}</span>
-            <span style={{ flex: "none", width: 128, font: "700 var(--fs-caption) var(--font-mono)", letterSpacing: ".04em", color: "var(--ink-muted)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{e.type}</span>
-            <span style={{ flex: 1, minWidth: 0, font: "500 var(--fs-note) var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{e.clientName ?? "—"}{e.actorName ? ` · by ${e.actorName}` : ""}</span>
-            <span className="tabular" style={{ flex: "none", font: "700 var(--fs-small) var(--font-mono)", color: "var(--ink-muted)" }}>{amt ?? ""}</span>
+          <div key={e.id} style={{ display: "flex", alignItems: "baseline", gap: 10, padding: "10px 14px", borderBottom: i === entries.length - 1 ? "none" : "1px solid var(--color-border-primary-default)" }}>
+            <span style={{ flex: "none", width: 96, font: "400 var(--text-caption-2-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)" }}>{timeLabel(e.at)}</span>
+            <span style={{ flex: "none", width: 128, font: "700 var(--text-caption-2-size) var(--font-family-mono)", letterSpacing: ".04em", color: "var(--color-text-secondary-default)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{e.type}</span>
+            <span style={{ flex: 1, minWidth: 0, font: "500 var(--text-footnote-size) var(--font-family-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{e.clientName ?? "—"}{e.actorName ? ` · by ${e.actorName}` : ""}</span>
+            <span className="tabular" style={{ flex: "none", font: "700 var(--text-caption-1-size) var(--font-family-mono)", color: "var(--color-text-secondary-default)" }}>{amt ?? ""}</span>
           </div>
         );
       })}
@@ -234,8 +234,8 @@ export function Transactions() {
         ).map(([label, value, hint]) => (
           <div key={label} className="bq-card bq-card--sm">
             <div className="bq-label">{label}</div>
-            <div className="tabular" style={{ font: "800 22px/1.15 var(--font-body)", letterSpacing: "-.02em", marginTop: 4 }}>{egp(value)}</div>
-            <div style={{ font: "400 var(--fs-small) var(--font-mono)", color: "var(--ink-faint)", marginTop: 4 }}>{hint}</div>
+            <div className="tabular" style={{ font: "800 22px/1.15 var(--font-family-body)", letterSpacing: "-.02em", marginTop: 4 }}>{egp(value)}</div>
+            <div style={{ font: "400 var(--text-caption-1-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)", marginTop: 4 }}>{hint}</div>
           </div>
         ))}
       </div>
@@ -255,7 +255,7 @@ export function Transactions() {
       {error && <div  className="bq-error bq-rise">{error}</div>}
       {!loading && shown.length === 0 && <EmptyState icon="history" title="No transactions yet" body="Sales, refunds and wallet changes are listed here, newest first, as they happen." />}
       {shown.length > 0 && <Feed entries={shown} />}
-      {all.length >= 300 && <div style={{ textAlign: "center", font: "400 var(--fs-small) var(--font-mono)", color: "var(--ink-faint)", margin: "14px 0" }}>Showing the latest 300 transactions.</div>}
+      {all.length >= 300 && <div style={{ textAlign: "center", font: "400 var(--text-caption-1-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)", margin: "14px 0" }}>Showing the latest 300 transactions.</div>}
     </div>
   );
 }

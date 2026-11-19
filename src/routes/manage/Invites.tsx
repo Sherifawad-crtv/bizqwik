@@ -43,7 +43,7 @@ export function InvitesPanel() {
 {data.invites.map((inv, i) => (
           <div key={inv.email} className={`bq-listrow ${!(i === data.invites.length - 1) ? "bq-listrow--divider" : ""}`}>
             <div className="bq-grow">
-              <div style={{ font: "700 var(--fs-base) var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{inv.email}</div>
+              <div style={{ font: "700 var(--text-callout-size) var(--font-family-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{inv.email}</div>
               <div className="bq-meta">
                 {ROLE_LABELS[inv.role].toUpperCase()}
                 {inv.tierId ? ` · ${tiers.find((t) => t.id === inv.tierId)?.name ?? ""}` : ""}
@@ -146,7 +146,7 @@ function InviteSheet({ open, tiers: tiersProp, onClose }: { open: boolean; tiers
               />
             )}
             {hasTier(role) && tiers.length === 0 && (
-              <div style={{ font: "400 var(--fs-small)/1.5 var(--font-mono)", color: "var(--ink-faint)", padding: "0 2px" }}>
+              <div style={{ font: "400 var(--text-caption-1-size)/1.5 var(--font-family-mono)", color: "var(--color-text-tertiary-default)", padding: "0 2px" }}>
                 No pay tiers yet — create one in the Tiers tab, then assign it here or later from People.
               </div>
             )}

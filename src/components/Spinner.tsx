@@ -11,8 +11,8 @@ export function InlineSpinner() {
           width: 28,
           height: 28,
           borderRadius: 999,
-          border: "3px solid var(--primary-tint)",
-          borderTopColor: "var(--primary)",
+          border: "3px solid var(--color-bg-fill-accent-default)",
+          borderTopColor: "var(--color-bg-fill-primary-default)",
           animation: "bqSpin .7s linear infinite",
         }}
       />
@@ -21,7 +21,7 @@ export function InlineSpinner() {
 }
 
 const block = (w: string | number, h: number, r = 999) => (
-  <div className="bq-skel" style={{ width: w, height: h, borderRadius: r, background: "var(--line)" }} />
+  <div className="bq-skel" style={{ width: w, height: h, borderRadius: r, background: "var(--color-border-primary-default)" }} />
 );
 
 /** What a whole screen shows while its data loads: the shape of a list, so the

@@ -35,9 +35,9 @@ for (const f of files.filter((f) => !f.startsWith("src/components"))) {
 // 3. hand-built patterns (ratchet)
 const styleBlocks = (t) => [...t.matchAll(/style=\{\{([\s\S]*?)\}\}/g)].map((m) => m[1]);
 const RULES = {
-  "inline card (use Card / cardClass)": (t) => styleBlocks(t).filter((s) => s.includes('background: "var(--surface)"') && s.includes("var(--r-card)")).length,
-  "inline row divider (use ListRow / listRowClass)": (t) => styleBlocks(t).filter((s) => /borderBottom: [^,]*1px solid var\(--line\)/.test(s)).length,
-  "inline tag (use Tag)": (t) => (t.match(/font: "700 10px var\(--font-mono\)"/g) || []).length,
+  "inline card (use Card / cardClass)": (t) => styleBlocks(t).filter((s) => s.includes('background: "var(--color-bg-surface-primary-default)"') && s.includes("var(--radius-card)")).length,
+  "inline row divider (use ListRow / listRowClass)": (t) => styleBlocks(t).filter((s) => /borderBottom: [^,]*1px solid var\(--color-border-primary-default\)/.test(s)).length,
+  "inline tag (use Tag)": (t) => (t.match(/font: "700 10px var\(--font-family-mono\)"/g) || []).length,
   "inline status pill (use StatusBadge)": (t) => styleBlocks(t).filter((s) => s.includes("borderRadius: 999") && s.includes('padding: "4px 10px"')).length,
   "hand-styled <button> (use Button / IconButton / Chip / ListRow)": (t) => (t.match(/<button\b[^>]*?style=\{\{[^}]*borderRadius/g) || []).length,
   "inline big number (use bq-stat-*)": (t) => (t.match(/font: "800 /g) || []).length,

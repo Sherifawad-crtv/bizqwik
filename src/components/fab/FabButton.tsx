@@ -13,13 +13,13 @@ export function FabButton({ size, label, onClick, opacity = 1 }: { size: number;
         height: size,
         borderRadius: 999,
         border: 0,
-        background: "var(--primary)",
-        color: "var(--surface)",
+        background: "var(--color-bg-fill-primary-default)",
+        color: "var(--color-bg-surface-primary-default)",
         cursor: "pointer",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        boxShadow: "0 12px 30px rgba(90,65,255,.40)",
+        boxShadow: "var(--shadow-fab)",
         opacity,
       }}
     >

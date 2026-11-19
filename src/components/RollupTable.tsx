@@ -31,21 +31,21 @@ function DesktopRow({ r }: { r: ListRow }) {
         gridTemplateColumns: "2fr 1.3fr 1fr 1.1fr 20px",
         gap: 12,
         padding: "14px 20px",
-        borderBottom: "1px solid var(--line)",
+        borderBottom: "1px solid var(--color-border-primary-default)",
         alignItems: "center",
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
         <Avatar name={r.name} size={32} src={r.avatarUrl} />
         <div style={{ minWidth: 0 }}>
-          <div style={{ font: "600 var(--fs-base) var(--font-body)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{r.title}</div>
+          <div style={{ font: "600 var(--text-callout-size) var(--font-family-body)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{r.title}</div>
           {r.sub && <div className="bq-meta">{r.sub}</div>}
         </div>
       </div>
-      <div style={{ font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-muted)", minWidth: 0, overflow: "hidden", textOverflow: "ellipsis" }}>{r.meta}</div>
+      <div style={{ font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-secondary-default)", minWidth: 0, overflow: "hidden", textOverflow: "ellipsis" }}>{r.meta}</div>
       <div>{r.state && <StatePill state={r.state} />}</div>
       <div className="tabular bq-stat-sm" style={{ textAlign: "right" }}>{egp(r.amount)}</div>
-      <div style={{ display: "flex", justifyContent: "flex-end", color: "var(--ink-faint)" }}>
+      <div style={{ display: "flex", justifyContent: "flex-end", color: "var(--color-text-tertiary-default)" }}>
         {r.onClick && <Icon name="chevron-right" size={16} />}
       </div>
     </div>
@@ -81,8 +81,8 @@ export function RollupTable({
           >
             <Avatar name={r.name} size={38} src={r.avatarUrl} />
             <div className="bq-grow">
-              <div style={{ font: "700 var(--fs-base) var(--font-body)", letterSpacing: "-.01em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{r.title}</div>
-              <div style={{ font: "400 var(--fs-note) var(--font-mono)", color: "var(--ink-muted)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{r.meta}</div>
+              <div style={{ font: "700 var(--text-callout-size) var(--font-family-body)", letterSpacing: "-.01em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{r.title}</div>
+              <div style={{ font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-secondary-default)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{r.meta}</div>
               <div style={{ marginTop: 8, display: "flex", gap: 8, alignItems: "center" }}>
                 {r.state && <StatePill state={r.state} />}
                 {r.sub && <span className="bq-meta">{r.sub}</span>}
@@ -93,7 +93,7 @@ export function RollupTable({
               <div className="bq-label">EGP</div>
             </div>
             {r.onClick && (
-              <span style={{ flex: "none", color: "var(--ink-faint)", display: "flex" }}>
+              <span style={{ flex: "none", color: "var(--color-text-tertiary-default)", display: "flex" }}>
                 <Icon name="chevron-right" size={16} />
               </span>
             )}
@@ -105,7 +105,7 @@ export function RollupTable({
 
   return (
     <div className="bq-panel">
-      <div style={{ display: "grid", gridTemplateColumns: "2fr 1.3fr 1fr 1.1fr 20px", gap: 12, padding: "10px 20px", background: "var(--sunken)", font: "700 var(--fs-caption) var(--font-mono)", letterSpacing: ".08em", color: "var(--ink-muted)" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "2fr 1.3fr 1fr 1.1fr 20px", gap: 12, padding: "10px 20px", background: "var(--color-bg-surface-secondary-default)", font: "700 var(--text-caption-2-size) var(--font-family-mono)", letterSpacing: ".08em", color: "var(--color-text-secondary-default)" }}>
         <span>{colA}</span>
         <span>{colB}</span>
         <span>STATUS</span>
