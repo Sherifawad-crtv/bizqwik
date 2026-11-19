@@ -14,6 +14,7 @@ import { TextField, SelectField } from "../../design-system/components/FormField
 import { DateField } from "../../design-system/components/DateField";
 import { SheetSuccessIcon } from "../../design-system/components/SheetSuccessIcon";
 import { catOptions } from "./options";
+import "./ExpenseSheet.css";
 
 /** Add or edit one expense: amount, category, date (today by default), note,
  * an optional receipt photo, and — add mode only — "repeat monthly", which
@@ -117,15 +118,14 @@ export function ExpenseSheet({
             {editing ? editing.categoryName : "What did the business spend on?"}
           </div>
           <div className="bq-stack">
-            <label style={{ display: "block", background: "var(--color-bg-surface-secondary-default)", border: "1px solid var(--color-border-primary-default)", borderRadius: "var(--radius-item)", padding: "10px 16px" }}>
+            <label className="bq-accounting-expense-sheet-label">
               <span className="bq-label">AMOUNT (EGP)</span>
-              <input
+              <input className="bq-accounting-expense-sheet-input"
                 ref={amountInput}
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 inputMode="decimal"
                 placeholder="0"
-                style={{ display: "block", width: "100%", border: 0, background: "none", outline: "none", font: "800 28px var(--font-family-body)", color: "var(--color-text-primary-default)", padding: "2px 0 0" }}
               />
             </label>
             <SelectField label="CATEGORY" value={categoryId} onChange={setCategoryId} placeholder="Choose a category" options={catOptions(categories)} />
@@ -134,26 +134,24 @@ export function ExpenseSheet({
 
             {!editing && (
               <>
-                <input ref={fileInput} type="file" accept="image/*" capture="environment" onChange={onPickReceipt} style={{ display: "none" }} data-testid="receipt-input" />
-                <button
+                <input className="bq-accounting-expense-sheet-input-2" ref={fileInput} type="file" accept="image/*" capture="environment" onChange={onPickReceipt} data-testid="receipt-input" />
+                <button className="bq-accounting-expense-sheet-btn"
                   onClick={() => fileInput.current?.click()}
-                  style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", textAlign: "left", background: "var(--color-bg-surface-secondary-default)", border: "1px solid var(--color-border-primary-default)", borderRadius: "var(--radius-item)", padding: "12px 16px", cursor: "pointer" }}
                 >
                   <Icon name="card" size={18} style={{ color: "var(--color-text-tertiary-default)" }} />
-                  <span style={{ font: "600 var(--text-subheadline-size) var(--font-family-body)" }}>{receipt ? "Receipt attached" : "Attach a receipt photo (optional)"}</span>
+                  <span className="bq-accounting-expense-sheet-text">{receipt ? "Receipt attached" : "Attach a receipt photo (optional)"}</span>
                 </button>
               </>
             )}
 
             {!editing && (
-              <button
+              <button className="bq-accounting-expense-sheet-btn-2"
                 type="button"
                 role="switch"
                 aria-checked={repeat}
                 onClick={() => setRepeat(!repeat)}
-                style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", textAlign: "left", background: "var(--color-bg-surface-secondary-default)", border: "1px solid var(--color-border-primary-default)", borderRadius: "var(--radius-item)", padding: "12px 16px", cursor: "pointer", color: "var(--color-text-primary-default)" }}
               >
-                <span style={{ flex: 1, font: "600 var(--text-subheadline-size) var(--font-family-body)" }}>Repeat monthly</span>
+                <span className="bq-accounting-expense-sheet-text-2">Repeat monthly</span>
                 <SwitchVisual checked={repeat} />
               </button>
             )}
@@ -166,13 +164,13 @@ export function ExpenseSheet({
           {error && (
             <div  className="bq-error bq-error--spaced bq-rise">{error}</div>
           )}
-          <Button fullWidth size="lg" style={{ marginTop: 16 }} disabled={busy} onClick={save}>
+          <Button className="bq-mt-4" fullWidth size="lg" disabled={busy} onClick={save}>
             {busy ? "Saving…" : editing ? "Save changes" : repeat ? "Set up repeating expense" : "Add expense"}
           </Button>
           {editing && (
             <DeleteExpenseButton id={editing.id} onDeleted={() => { onSaved(); onClose(); }} />
           )}
-          <Button variant="secondary" fullWidth style={{ marginTop: 8 }} onClick={onClose} disabled={busy}>
+          <Button className="bq-mt-2" variant="secondary" fullWidth onClick={onClose} disabled={busy}>
             Cancel
           </Button>
         </>
@@ -185,7 +183,7 @@ function DeleteExpenseButton({ id, onDeleted }: { id: string; onDeleted: () => v
   const [confirming, setConfirming] = useState(false);
   return (
     <>
-      <Button variant="danger" fullWidth style={{ marginTop: 8 }} onClick={() => setConfirming(true)}>
+      <Button className="bq-mt-2" variant="danger" fullWidth onClick={() => setConfirming(true)}>
         Delete expense
       </Button>
       <ConfirmSheet
@@ -230,15 +228,14 @@ export function CategoriesSheet({ open, categories, onClose, onChanged }: { open
 
   return (
     <Sheet open={open} onClose={onClose}>
-      <div style={{ font: "800 var(--text-title-1-size)/1.2 var(--font-family-body)", letterSpacing: "-.02em", margin: "0 0 16px" }}>Expense categories</div>
-      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+      <div className="bq-accounting-expense-sheet-categories-sheet-title">Expense categories</div>
+      <div className="bq-flex bq-col bq-gap-2">
         {categories.map((c) => (
-          <div key={c.id} style={{ display: "flex", alignItems: "center", gap: 10, background: "var(--color-bg-surface-secondary-default)", border: "1px solid var(--color-border-primary-default)", borderRadius: "var(--radius-item)", padding: "10px 14px" }}>
-            <span style={{ flex: 1, font: "600 var(--text-body-size) var(--font-family-body)" }}>{c.name}</span>
+          <div className="bq-accounting-expense-sheet-categories-sheet-row" key={c.id}>
+            <span className="bq-accounting-expense-sheet-categories-sheet-text">{c.name}</span>
             {!c.isDefault && (
-              <button
+              <button className="bq-accounting-expense-sheet-categories-sheet-btn"
                 onClick={() => api.setExpenseCategoryArchived(c.id, true).then(onChanged)}
-                style={{ border: 0, background: "none", color: "var(--color-text-status-danger-default)", font: "700 var(--text-caption-1-size) var(--font-family-mono)", cursor: "pointer" }}
               >
                 ARCHIVE
               </button>
@@ -247,15 +244,15 @@ export function CategoriesSheet({ open, categories, onClose, onChanged }: { open
         ))}
       </div>
       {adding ? (
-        <div style={{ marginTop: 12 }}>
+        <div className="bq-mt-3">
           <TextField label="NEW CATEGORY" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Insurance" />
-          {error && <div style={{ marginTop: 8, font: "600 var(--text-footnote-size) var(--font-family-body)", color: "var(--color-text-status-danger-default)" }}>{error}</div>}
-          <Button fullWidth style={{ marginTop: 10 }} disabled={busy} onClick={add}>{busy ? "Adding…" : "Add category"}</Button>
+          {error && <div className="bq-accounting-expense-sheet-categories-sheet-text-2">{error}</div>}
+          <Button className="bq-mt-10px" fullWidth disabled={busy} onClick={add}>{busy ? "Adding…" : "Add category"}</Button>
         </div>
       ) : (
-        <Button variant="secondary" fullWidth style={{ marginTop: 12 }} onClick={() => setAdding(true)}>+ New category</Button>
+        <Button className="bq-mt-3" variant="secondary" fullWidth onClick={() => setAdding(true)}>+ New category</Button>
       )}
-      <Button variant="quiet" fullWidth style={{ marginTop: 8 }} onClick={onClose}>Close</Button>
+      <Button className="bq-mt-2" variant="quiet" fullWidth onClick={onClose}>Close</Button>
     </Sheet>
   );
 }

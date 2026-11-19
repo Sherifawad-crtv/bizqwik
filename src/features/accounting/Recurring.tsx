@@ -1,3 +1,4 @@
+import { cx } from "../../design-system/cx";
 import { EmptyState } from "../../design-system/components/EmptyState";
 import { useEffect, useState } from "react";
 import { useAsync } from "../../shared/api/useAsync";
@@ -17,6 +18,7 @@ import { SectionHeader } from "../../design-system/components/SectionHeader";
 import { CategoriesSheet } from "./ExpenseSheet";
 import { catOptions } from "./options";
 import { MotionList } from "../../design-system/components/MotionList";
+import "./Recurring.css";
 
 function nextOccurrence(r: RecurringExpense): string | null {
   if (!r.active) return null;
@@ -41,22 +43,22 @@ export function RecurringPanel({ categories, onChanged, onCategoriesChanged }: {
 
   return (
     <div>
-      <SectionHeader count={recurring.length} right={<button onClick={() => setManagingCats(true)} style={{ border: 0, background: "none", font: "700 var(--text-footnote-size) var(--font-family-body)", color: "var(--color-bg-fill-primary-active)", cursor: "pointer" }}>Categories</button>}>
+      <SectionHeader count={recurring.length} right={<button className="bq-accounting-recurring-recurring-panel-btn" onClick={() => setManagingCats(true)}>Categories</button>}>
         Recurring expenses
       </SectionHeader>
-      <Card pad="none" style={{ overflow: "hidden", marginBottom: 14 }}>
+      <Card className="bq-overflow-hidden bq-mb-14px" pad="none">
         <MotionList>
 {recurring.map((r, i) => {
           const next = nextOccurrence(r);
           return (
-            <button key={r.id} className={`bq-plain bq-scale bq-listrow bq-listrow--compact ${!(i === recurring.length - 1) ? "bq-listrow--divider" : ""}`} onClick={() => setEditing(r)} style={{ width: "100%", background: "none", cursor: "pointer", textAlign: "left", opacity: r.active ? 1 : 0.5 }}>
+            <button key={r.id} className={cx(`bq-plain bq-scale bq-listrow bq-listrow--compact ${!(i === recurring.length - 1) ? "bq-listrow--divider" : ""}`, "bq-accounting-recurring-recurring-panel-btn-2")} onClick={() => setEditing(r)} style={{ opacity: r.active ? 1 : 0.5 }}>
               <div className="bq-grow">
-                <div style={{ font: "700 var(--text-body-size) var(--font-family-body)" }}>{r.categoryName}{r.note ? ` · ${r.note}` : ""}</div>
-                <div style={{ font: "400 var(--text-caption-1-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)" }}>
+                <div className="bq-accounting-recurring-recurring-panel-title">{r.categoryName}{r.note ? ` · ${r.note}` : ""}</div>
+                <div className="bq-accounting-recurring-recurring-panel-meta">
                   Day {r.dayOfMonth} · {r.active ? (next ? `Next ${next.slice(8, 10)} ${monthAbbr(next.slice(0, 7))}` : "Ended") : "Paused"}
                 </div>
               </div>
-              <div className="tabular" style={{ flex: "none", font: "800 var(--text-body-size) var(--font-family-mono)" }}>{fmt(r.amount)}</div>
+              <div className="tabular bq-accounting-recurring-recurring-panel-meta-2">{fmt(r.amount)}</div>
               <Icon name="chevron-right" size={16} />
             </button>
           );
@@ -66,7 +68,7 @@ export function RecurringPanel({ categories, onChanged, onCategoriesChanged }: {
           <EmptyState bare icon="cash" title={data ? "No repeating expenses" : "Loading…"} body="Rent, salaries and anything else that happens every month — set it up once." />
         )}
       </Card>
-      <Button fullWidth size="lg" style={{ marginBottom: 18 }} onClick={() => setEditing({ id: "", categoryId: categories.find((c) => !c.archived)?.id ?? "", categoryName: "", amount: 0, note: null, dayOfMonth: new Date().getDate() > 28 ? 28 : new Date().getDate(), startMonth: MOCK.CURRENT_MONTH, endMonth: null, active: true })}>
+      <Button className="bq-mb-18px" fullWidth size="lg" onClick={() => setEditing({ id: "", categoryId: categories.find((c) => !c.archived)?.id ?? "", categoryName: "", amount: 0, note: null, dayOfMonth: new Date().getDate() > 28 ? 28 : new Date().getDate(), startMonth: MOCK.CURRENT_MONTH, endMonth: null, active: true })}>
         Add a repeating expense
       </Button>
       <RecurringSheet
@@ -159,19 +161,19 @@ function RecurringSheet({ template, categories, onClose, onSaved }: { template: 
             <TextField label="NOTE (OPTIONAL)" value={note} onChange={(e) => setNote(e.target.value)} placeholder="What it's for" />
             <TextField label="ENDS (OPTIONAL, YYYY-MM)" value={endMonth} onChange={(e) => setEndMonth(e.target.value)} placeholder="Leave blank to repeat forever" />
           </div>
-          <div style={{ marginTop: 8, font: "400 var(--text-caption-1-size)/1.5 var(--font-family-mono)", color: "var(--color-text-tertiary-default)" }}>
+          <div className="bq-accounting-recurring-recurring-sheet-meta">
             {isNew ? "Changing this later only affects future months — rows already made stay as they are." : "Editing changes future months only. Rows already made for past months are untouched."}
           </div>
           {error && <div  className="bq-error bq-error--spaced bq-rise">{error}</div>}
-          <Button fullWidth size="lg" style={{ marginTop: 16 }} disabled={busy} onClick={save}>
+          <Button className="bq-mt-4" fullWidth size="lg" disabled={busy} onClick={save}>
             {busy ? "Saving…" : isNew ? "Set up repeating expense" : "Save changes"}
           </Button>
           {!isNew && (
             <>
-              <Button variant="secondary" fullWidth style={{ marginTop: 8 }} disabled={busy} onClick={togglePause}>
+              <Button className="bq-mt-2" variant="secondary" fullWidth disabled={busy} onClick={togglePause}>
                 {shown.active ? "Pause" : "Resume"}
               </Button>
-              <Button variant="danger" fullWidth style={{ marginTop: 8 }} onClick={() => setConfirmingDelete(true)}>
+              <Button className="bq-mt-2" variant="danger" fullWidth onClick={() => setConfirmingDelete(true)}>
                 Delete template
               </Button>
               <ConfirmSheet
@@ -190,7 +192,7 @@ function RecurringSheet({ template, categories, onClose, onSaved }: { template: 
               />
             </>
           )}
-          <Button variant="secondary" fullWidth style={{ marginTop: 8 }} onClick={onClose} disabled={busy}>
+          <Button className="bq-mt-2" variant="secondary" fullWidth onClick={onClose} disabled={busy}>
             Cancel
           </Button>
         </>

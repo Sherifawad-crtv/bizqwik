@@ -1,0 +1,95 @@
+/* Styles for ExpenseSheet.tsx. Tokens only; see DESIGN_SYSTEM.md. */
+
+.bq-accounting-expense-sheet-label {
+  display: block;
+  background: var(--color-bg-surface-secondary-default);
+  border: 1px solid var(--color-border-primary-default);
+  border-radius: var(--radius-item);
+  padding: 10px 16px;
+}
+
+.bq-accounting-expense-sheet-input {
+  display: block;
+  width: 100%;
+  border: 0;
+  background: none;
+  outline: none;
+  font: 800 28px var(--font-family-body);
+  color: var(--color-text-primary-default);
+  padding: 2px 0 0;
+}
+
+.bq-accounting-expense-sheet-input-2 {
+  display: none;
+}
+
+.bq-accounting-expense-sheet-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  text-align: left;
+  background: var(--color-bg-surface-secondary-default);
+  border: 1px solid var(--color-border-primary-default);
+  border-radius: var(--radius-item);
+  padding: 12px 16px;
+  cursor: pointer;
+}
+
+.bq-accounting-expense-sheet-text {
+  font: 600 var(--text-subheadline-size) var(--font-family-body);
+}
+
+.bq-accounting-expense-sheet-btn-2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  text-align: left;
+  background: var(--color-bg-surface-secondary-default);
+  border: 1px solid var(--color-border-primary-default);
+  border-radius: var(--radius-item);
+  padding: 12px 16px;
+  cursor: pointer;
+  color: var(--color-text-primary-default);
+}
+
+.bq-accounting-expense-sheet-text-2 {
+  flex: 1;
+  font: 600 var(--text-subheadline-size) var(--font-family-body);
+}
+
+.bq-accounting-expense-sheet-categories-sheet-title {
+  font: 800 var(--text-title-1-size)/1.2 var(--font-family-body);
+  letter-spacing: -.02em;
+  margin: 0 0 16px;
+}
+
+.bq-accounting-expense-sheet-categories-sheet-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--color-bg-surface-secondary-default);
+  border: 1px solid var(--color-border-primary-default);
+  border-radius: var(--radius-item);
+  padding: 10px 14px;
+}
+
+.bq-accounting-expense-sheet-categories-sheet-text {
+  flex: 1;
+  font: 600 var(--text-body-size) var(--font-family-body);
+}
+
+.bq-accounting-expense-sheet-categories-sheet-btn {
+  border: 0;
+  background: none;
+  color: var(--color-text-status-danger-default);
+  font: 700 var(--text-caption-1-size) var(--font-family-mono);
+  cursor: pointer;
+}
+
+.bq-accounting-expense-sheet-categories-sheet-text-2 {
+  margin-top: 8px;
+  font: 600 var(--text-footnote-size) var(--font-family-body);
+  color: var(--color-text-status-danger-default);
+}

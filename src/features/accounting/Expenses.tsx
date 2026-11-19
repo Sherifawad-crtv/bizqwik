@@ -1,3 +1,4 @@
+import { cx } from "../../design-system/cx";
 import { EmptyState } from "../../design-system/components/EmptyState";
 import { useEffect, useState } from "react";
 import { useAsync } from "../../shared/api/useAsync";
@@ -11,11 +12,12 @@ import { SectionHeader } from "../../design-system/components/SectionHeader";
 import { CategoriesSheet, ExpenseSheet } from "./ExpenseSheet";
 import { MotionList } from "../../design-system/components/MotionList";
 import { Chip } from "../../design-system/components/Chip";
+import "./Expenses.css";
 
 function ReceiptIcon({ has }: { has: boolean }) {
   if (!has) return null;
   return (
-    <span style={{ color: "var(--color-text-tertiary-default)", display: "flex", flex: "none" }}>
+    <span className="bq-fg-tertiary bq-flex bq-flex-none">
       <Icon name="card" size={14} />
     </span>
   );
@@ -60,53 +62,52 @@ export function ExpensesPanel({
 
   return (
     <div>
-      <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
-        <label style={{ flex: 1, minWidth: 0, display: "flex", alignItems: "center", gap: 10, height: 48, padding: "0 14px", background: "var(--color-bg-surface-secondary-default)", border: "1px solid var(--color-border-primary-default)", borderRadius: "var(--radius-item)" }}>
-          <span style={{ color: "var(--color-text-tertiary-default)", display: "flex" }}><Icon name="search" size={18} /></span>
-          <input
+      <div className="bq-flex bq-gap-2 bq-mb-3">
+        <label className="bq-accounting-expenses-expenses-panel-label">
+          <span className="bq-fg-tertiary bq-flex"><Icon name="search" size={18} /></span>
+          <input className="bq-accounting-expenses-expenses-panel-input"
             aria-label="Search expense notes"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search notes"
-            style={{ flex: 1, minWidth: 0, border: 0, background: "none", outline: "none", font: "600 var(--text-callout-size) var(--font-family-body)", color: "var(--color-text-primary-default)" }}
           />
         </label>
       </div>
-      <div style={{ display: "flex", gap: 6, overflowX: "auto", marginBottom: 14, paddingBottom: 2 }}>
+      <div className="bq-accounting-expenses-expenses-panel-row">
         <Chip size="sm" on={categoryFilter === ""} onClick={() => setCategoryFilter("")}>All</Chip>
         {categories.map((c) => (
           <Chip size="sm" key={c.id} on={categoryFilter === c.id} onClick={() => setCategoryFilter(c.id)}>{c.name}</Chip>
         ))}
       </div>
 
-      <SectionHeader count={fmt(total) + " EGP"} right={<button onClick={() => setManagingCats(true)} style={{ border: 0, background: "none", font: "700 var(--text-footnote-size) var(--font-family-body)", color: "var(--color-bg-fill-primary-active)", cursor: "pointer" }}>Categories</button>}>
+      <SectionHeader count={fmt(total) + " EGP"} right={<button className="bq-accounting-expenses-expenses-panel-btn" onClick={() => setManagingCats(true)}>Categories</button>}>
         Expenses
       </SectionHeader>
 
-      <Card pad="none" style={{ overflow: "hidden", marginBottom: 14 }}>
+      <Card className="bq-overflow-hidden bq-mb-14px" pad="none">
         {coachPayouts > 0 && !categoryFilter && !query && (
-          <button className="bq-plain bq-scale bq-listrow bq-listrow--compact bq-listrow--divider" onClick={onCoachPayouts} style={{ width: "100%", background: "var(--color-bg-surface-secondary-default)", cursor: "pointer", textAlign: "left" }}>
+          <button className="bq-plain bq-scale bq-listrow bq-listrow--compact bq-listrow--divider bq-accounting-expenses-expenses-panel-btn-2" onClick={onCoachPayouts}>
             <div className="bq-grow">
-              <div style={{ font: "700 var(--text-body-size) var(--font-family-body)" }}>Coach payouts</div>
-              <div style={{ font: "400 var(--text-caption-1-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)" }}>Settled this month · locked</div>
+              <div className="bq-accounting-expenses-expenses-panel-title">Coach payouts</div>
+              <div className="bq-accounting-expenses-expenses-panel-meta">Settled this month · locked</div>
             </div>
-            <div className="tabular" style={{ flex: "none", font: "800 var(--text-body-size) var(--font-family-mono)" }}>{fmt(coachPayouts)}</div>
+            <div className="tabular bq-accounting-expenses-expenses-panel-meta-2">{fmt(coachPayouts)}</div>
             <Icon name="chevron-right" size={16} />
           </button>
         )}
         <MotionList>
 {expenses.map((e, i) => (
-          <button key={e.id} className={`bq-plain bq-scale bq-listrow bq-listrow--compact ${!(i === expenses.length - 1) ? "bq-listrow--divider" : ""}`} onClick={() => setSheetMode(e)} style={{ width: "100%", background: "none", cursor: "pointer", textAlign: "left" }}>
+          <button key={e.id} className={cx(`bq-plain bq-scale bq-listrow bq-listrow--compact ${!(i === expenses.length - 1) ? "bq-listrow--divider" : ""}`, "bq-accounting-expenses-expenses-panel-btn-3")} onClick={() => setSheetMode(e)}>
             <div className="bq-grow">
-              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                <span style={{ font: "700 var(--text-body-size) var(--font-family-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{e.categoryName}</span>
+              <div className="bq-flex bq-items-center bq-gap-6px">
+                <span className="bq-accounting-expenses-expenses-panel-title-2">{e.categoryName}</span>
                 <ReceiptIcon has={e.hasReceipt} />
               </div>
-              <div style={{ font: "400 var(--text-caption-1-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              <div className="bq-accounting-expenses-expenses-panel-meta-3">
                 {e.date.slice(8, 10)} {monthAbbr(e.date.slice(0, 7))}{e.note ? ` · ${e.note}` : ""}{e.editedAfterMonthEnd ? " · edited after month end" : ""}
               </div>
             </div>
-            <div className="tabular" style={{ flex: "none", font: "800 var(--text-body-size) var(--font-family-mono)" }}>{fmt(e.amount)}</div>
+            <div className="tabular bq-accounting-expenses-expenses-panel-meta-2">{fmt(e.amount)}</div>
             <Icon name="chevron-right" size={16} />
           </button>
         ))}
@@ -117,7 +118,7 @@ export function ExpensesPanel({
       </Card>
 
       {!sheetMode && (
-        <Button fullWidth size="lg" style={{ marginBottom: 18 }} onClick={() => setSheetMode("add")}>
+        <Button className="bq-mb-18px" fullWidth size="lg" onClick={() => setSheetMode("add")}>
           Add expense
         </Button>
       )}

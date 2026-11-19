@@ -31,7 +31,7 @@ export function Accounting() {
 
   return (
     <div>
-      <div style={{ display: "flex", justifyContent: "center", marginBottom: 14 }}>
+      <div className="bq-flex bq-justify-center bq-mb-14px">
         <Segmented
           value={tab}
           onChange={setTab}

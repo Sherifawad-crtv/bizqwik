@@ -10,6 +10,7 @@ import { pctChange, caption } from "../../design-system/components/chartHelpers"
 import { BarChart } from "../../design-system/components/BarChart";
 import { ShareBars } from "../../design-system/components/MoneyCharts";
 import { Num } from "../../design-system/components/Num";
+import "./PnlPanel.css";
 
 function PnlChart({ trend }: { trend: PnlReport["trend"] }) {
   if (trend.every((m) => m.netRevenue === 0 && m.totalExpenses === 0)) {
@@ -50,28 +51,28 @@ export function PnlPanel({ report, loading, onAddExpense, onCoachPayouts }: { re
   return (
     <>
       {report.unsettledNote && (
-        <div style={{ display: "flex", gap: 10, alignItems: "flex-start", background: "var(--color-bg-fill-status-logging-default)", borderRadius: "var(--radius-item)", padding: "12px 14px", marginBottom: 14 }}>
-          <span style={{ color: "var(--color-text-status-logging-default)", display: "flex", flex: "none", marginTop: 1 }}>
+        <div className="bq-accounting-pnl-panel-row">
+          <span className="bq-accounting-pnl-panel-row-2">
             <Icon name="insights" size={18} />
           </span>
-          <span style={{ font: "500 var(--text-footnote-size)/1.5 var(--font-family-body)", color: "var(--color-text-status-logging-default)" }}>
+          <span className="bq-accounting-pnl-panel-text">
             {report.unsettledNote.count} coach session{report.unsettledNote.count === 1 ? "" : "s"} {report.unsettledNote.count === 1 ? "isn't" : "aren't"} settled yet, so payouts may be understated.
           </span>
         </div>
       )}
 
-      <div className="bq-card" style={{ padding: "20px 20px 18px", marginBottom: 10 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+      <div className="bq-card bq-accounting-pnl-panel-spacing">
+        <div className="bq-flex bq-items-center bq-gap-2">
           <span className="bq-label">REVENUE · EGP</span>
-          {prev && <span style={{ marginLeft: "auto" }}><Delta pct={pctChange(current.netRevenue, prev.netRevenue)} tone="good" /></span>}
+          {prev && <span className="bq-ml-auto"><Delta pct={pctChange(current.netRevenue, prev.netRevenue)} tone="good" /></span>}
         </div>
-        <div className="tabular" style={{ font: "800 48px/1 var(--font-family-body)", letterSpacing: "-.03em", margin: "8px 0 0", overflowWrap: "anywhere" }}>{fmt(current.netRevenue)}</div>
-        <div style={{ font: "400 var(--text-caption-1-size)/1.4 var(--font-family-mono)", color: "var(--color-text-tertiary-default)", marginTop: 8 }}>
+        <div className="tabular bq-accounting-pnl-panel-title">{fmt(current.netRevenue)}</div>
+        <div className="bq-accounting-pnl-panel-meta">
           {current.refunds > 0 ? `${fmt(current.grossRevenue)} gross − ${fmt(current.refunds)} refunded` : "No refunds this month"}
         </div>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(150px,1fr))", gap: 10, marginBottom: 14 }}>
+      <div className="bq-accounting-pnl-panel-grid">
         <KpiTile label="EXPENSES" icon="topay" value={<Num value={current.totalExpenses} />} sub={`${fmt(current.coachPayouts)} coach payouts`} delta={prev && <Delta pct={pctChange(current.totalExpenses, prev.totalExpenses)} tone="neutral" />} />
         <KpiTile label="PROFIT" icon="insights" value={<Num value={current.profit} />} sub={margin !== null ? `${margin >= 0 ? "" : "−"}${Math.abs(Math.round(margin))}% margin` : "Margin needs revenue"} delta={prev && <Delta pct={pctChange(current.profit, prev.profit)} tone="good" />} />
       </div>
@@ -92,20 +93,20 @@ export function PnlPanel({ report, loading, onAddExpense, onCoachPayouts }: { re
             {report.expensesBySource.map((s) => (
               <button
                 key={s.key}
-                className="bq-scale"
+                className="bq-scale bq-accounting-pnl-panel-btn"
                 onClick={s.key === "coach_payouts" ? onCoachPayouts : undefined}
                 disabled={s.key !== "coach_payouts"}
-                style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", border: 0, background: "none", padding: "6px 0", cursor: s.key === "coach_payouts" ? "pointer" : "default", textAlign: "left" }}
+                style={{ cursor: s.key === "coach_payouts" ? "pointer" : "default" }}
               >
                 <span className="bq-grow">
-                  <div style={{ font: "600 var(--text-subheadline-size) var(--font-family-body)" }}>{s.label}</div>
+                  <div className="bq-accounting-pnl-panel-text-2">{s.label}</div>
                   {s.key === "coach_payouts" && (
-                    <div style={{ font: "400 var(--text-caption-2-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)" }}>
+                    <div className="bq-accounting-pnl-panel-meta-2">
                       {s.paid !== undefined ? `${fmt(s.paid)} paid · ${fmt(Math.max(0, s.amount - s.paid))} still owed · ` : ""}Locked · settled only
                     </div>
                   )}
                 </span>
-                <span className="tabular" style={{ font: "800 var(--text-subheadline-size) var(--font-family-body)" }}>{fmt(s.amount)}</span>
+                <span className="tabular bq-accounting-pnl-panel-title-2">{fmt(s.amount)}</span>
                 {s.key === "coach_payouts" && <Icon name="chevron-right" size={14} style={{ color: "var(--color-text-tertiary-default)" }} />}
               </button>
             ))}
@@ -113,7 +114,7 @@ export function PnlPanel({ report, loading, onAddExpense, onCoachPayouts }: { re
         )}
       </SectionCard>
 
-      <Button fullWidth size="lg" style={{ marginTop: 4, marginBottom: 18 }} onClick={onAddExpense}>
+      <Button className="bq-mt-1 bq-mb-18px" fullWidth size="lg" onClick={onAddExpense}>
         Add expense
       </Button>
     </>
