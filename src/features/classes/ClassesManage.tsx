@@ -18,6 +18,7 @@ import { type FormState, emptyForm, formOf } from "../../shared/classForm";
 import { ClassSheet } from "../../shared/components/ClassSheet";
 import { useBackAction } from "../../shared/screen/floatingActions";
 import { useIsMobile } from "../../design-system/hooks/useIsMobile";
+import "./ClassesManage.css";
 
 export function ClassesManage() {
   const navigate = useNavigate();
@@ -42,22 +43,21 @@ export function ClassesManage() {
   return (
     <div>
       {!isMobile && (
-      <button
+      <button className="bq-classes-classes-manage-btn"
         onClick={() => navigate("/catalog")}
-        style={{ display: "inline-flex", alignItems: "center", gap: 4, border: 0, background: "none", color: "var(--color-text-secondary-default)", cursor: "pointer", font: "700 var(--text-subheadline-size) var(--font-family-body)", marginBottom: 14, padding: 0 }}
       >
         <Icon name="chevron-left" size={16} /> Catalog
       </button>
       )}
 
-      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+      <div className="bq-flex bq-items-center bq-gap-3 bq-mb-4">
         <div className="bq-grow">
-          <div style={{ font: "800 var(--text-title-1-size)/1.1 var(--font-family-body)", letterSpacing: "-.02em" }}>Sessions</div>
-          <div style={{ font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)", marginTop: 4 }}>
+          <div className="bq-classes-classes-manage-title">Sessions</div>
+          <div className="bq-classes-classes-manage-meta">
             Upcoming sessions from your classes. Tap one to edit just that session.
           </div>
         </div>
-        <Button variant="secondary" onClick={() => setForm(emptyForm())} style={{ flex: "none" }}>
+        <Button className="bq-flex-none" variant="secondary" onClick={() => setForm(emptyForm())}>
           <Icon name="plus" size={18} /> One-off
         </Button>
       </div>
@@ -81,7 +81,7 @@ export function ClassesManage() {
 
       {past.length > 0 && (
         <>
-          <div style={{ font: "700 var(--text-caption-2-size) var(--font-family-mono)", letterSpacing: ".08em", color: "var(--color-text-tertiary-default)", margin: "24px 2px 10px" }}>
+          <div className="bq-classes-classes-manage-label">
             LAST 2 WEEKS · {past.length}
           </div>
           <div className="bq-stack">
@@ -94,7 +94,7 @@ export function ClassesManage() {
 
       {cancelled.length > 0 && (
         <>
-          <div style={{ font: "700 var(--text-caption-2-size) var(--font-family-mono)", letterSpacing: ".08em", color: "var(--color-text-tertiary-default)", margin: "24px 2px 10px" }}>
+          <div className="bq-classes-classes-manage-label">
             CANCELLED · {cancelled.length}
           </div>
           <div className="bq-stack">
@@ -150,32 +150,31 @@ function ClassCard({ c, onEdit, onRoster }: { c: GymClass; onEdit?: () => void; 
     <div
       className="bq-card bq-card--sm" style={{ opacity: cancelled ? 0.55 : 1 }}
     >
-      <div onClick={onEdit} style={{ display: "flex", alignItems: "center", gap: 12, cursor: onEdit ? "pointer" : "default" }}>
+      <div className="bq-flex bq-items-center bq-gap-3" onClick={onEdit} style={{ cursor: onEdit ? "pointer" : "default" }}>
         <div className="bq-grow">
-          <div style={{ font: "700 var(--text-callout-size) var(--font-family-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", textDecoration: cancelled ? "line-through" : "none" }}>{c.title}</div>
-          <div style={{ font: "500 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-secondary-default)", marginTop: 3 }}>{whenLabel(c.startsAt)}</div>
+          <div className="bq-classes-classes-manage-class-card-title" style={{ textDecoration: cancelled ? "line-through" : "none" }}>{c.title}</div>
+          <div className="bq-classes-classes-manage-class-card-meta">{whenLabel(c.startsAt)}</div>
           {!cancelled && (c.bookedCount ?? 0) > 0 && (
-            <div style={{ font: "500 var(--text-caption-1-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)", marginTop: 3 }}>
+            <div className="bq-classes-classes-manage-class-card-meta-2">
               {c.bookedCount} booked · {c.planSeats ?? 0} on a plan · {c.dropInSeats ?? 0} drop-in
             </div>
           )}
           {c.description && (
-            <div style={{ font: "400 var(--text-footnote-size)/1.4 var(--font-family-body)", color: "var(--color-text-tertiary-default)", marginTop: 6, overflow: "hidden", textOverflow: "ellipsis", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>
+            <div className="bq-classes-classes-manage-class-card-text">
               {c.description}
             </div>
           )}
         </div>
-        <div style={{ flex: "none", textAlign: "right" }}>
-          <div className="tabular" style={{ font: "800 var(--text-callout-size) var(--font-family-body)" }}>{c.price > 0 ? egp(c.price) : "Free"}</div>
-          <div style={{ font: "600 10px var(--font-family-mono)", letterSpacing: ".06em", color: "var(--color-text-tertiary-default)" }}>DROP-IN</div>
-          {onEdit && <div style={{ font: "700 var(--text-caption-2-size) var(--font-family-mono)", letterSpacing: ".06em", color: "var(--color-text-tertiary-default)", marginTop: 4 }}>EDIT</div>}
+        <div className="bq-flex-none bq-text-right">
+          <div className="tabular bq-classes-classes-manage-class-card-title-2">{c.price > 0 ? egp(c.price) : "Free"}</div>
+          <div className="bq-classes-classes-manage-class-card-label">DROP-IN</div>
+          {onEdit && <div className="bq-classes-classes-manage-class-card-label-2">EDIT</div>}
         </div>
       </div>
       {onRoster && (
-        <button
+        <button className="bq-classes-classes-manage-class-card-btn"
           type="button"
           onClick={onRoster}
-          style={{ marginTop: 12, width: "100%", border: "1px solid var(--color-border-primary-default)", background: "var(--color-bg-canvas-default)", color: "var(--color-text-secondary-default)", borderRadius: "var(--radius-button)", padding: "8px 0", font: "700 var(--text-footnote-size) var(--font-family-body)", cursor: "pointer" }}
         >
           View roster
         </button>
