@@ -13,7 +13,7 @@
   z-index: 3;
   display: grid;
   background: var(--color-bg-surface-primary-default);
-  border-bottom: 1px solid var(--color-border-primary-default);
+  border-bottom: var(--border-divider);
 }
 
 .bq-frontdesk-time-grid-btn {
@@ -21,7 +21,7 @@
   background: none;
   padding: 8px 4px;
   text-align: center;
-  border-left: 1px solid var(--color-border-primary-default);
+  border-left: var(--border-divider);
 }
 
 .bq-frontdesk-time-grid-label {
@@ -33,7 +33,7 @@
   margin: 2px auto 0;
   width: 36px;
   height: 36px;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -49,7 +49,7 @@
 
 .bq-frontdesk-time-grid-part {
   position: relative;
-  border-left: 1px solid var(--color-border-primary-default);
+  border-left: var(--border-divider);
   background-image: linear-gradient(var(--color-border-primary-default) 1px, transparent 1px);
 }
 
@@ -97,7 +97,7 @@
   top: -6px;
   width: 10px;
   height: 10px;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: var(--color-text-status-danger-default);
 }
 
@@ -112,7 +112,7 @@
 
 .bq-frontdesk-time-grid-box {
   background: var(--color-bg-surface-primary-default);
-  border: 1px solid var(--color-border-primary-default);
-  border-radius: 999px;
+  border: var(--border-outline);
+  border-radius: var(--radius-full);
   padding: 8px 16px;
 }

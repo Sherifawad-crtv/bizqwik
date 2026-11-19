@@ -1,3 +1,4 @@
+import { cx } from "../../design-system/cx";
 import { EmptyState } from "../../design-system/components/EmptyState";
 import { useState } from "react";
 import { api } from "../api/backend";
@@ -152,16 +153,7 @@ function RowBtn({ children, onClick, disabled, active, primary }: { children: Re
       type="button"
       disabled={disabled}
       onClick={onClick}
-      style={{
-        flex: "1 1 0",
-        border: active || primary ? 0 : "1px solid var(--color-border-primary-default)",
-        background: primary ? "var(--color-bg-fill-primary-default)" : active ? "var(--color-bg-fill-accent-selected)" : "var(--color-bg-surface-primary-default)",
-        color: primary ? "var(--color-bg-surface-primary-default)" : active ? "var(--color-bg-fill-primary-active)" : "var(--color-text-secondary-default)",
-        borderRadius: "var(--radius-button)",
-        padding: "8px 4px",
-        font: "700 var(--text-footnote-size) var(--font-family-body)",
-        cursor: disabled ? "default" : "pointer",
-      }}
+      className={cx("bq-roster-choice", primary ? "bq-roster-choice--primary" : active && "bq-roster-choice--active")}
     >
       {children}
     </button>

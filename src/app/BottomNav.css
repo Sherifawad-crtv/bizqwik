@@ -2,7 +2,7 @@
 
 .bq-bottom-nav-layer {
   position: absolute;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: var(--color-bg-fill-accent-selected);
 }
 
@@ -23,7 +23,7 @@
 }
 
 .bq-bottom-nav-row-2 {
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   display: flex;
   align-items: center;
   justify-content: center;

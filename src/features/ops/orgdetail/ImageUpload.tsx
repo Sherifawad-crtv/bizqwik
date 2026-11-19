@@ -72,7 +72,7 @@ export function ImageUploadField({
           {value ? (
             <img className="bq-ops-image-upload-field-img" src={value} alt="" />
           ) : (
-            <Icon name="plus" size={18} style={{ color: "var(--color-text-tertiary-default)" }} />
+            <Icon name="plus" size={18} className="bq-fg-tertiary" />
           )}
         </div>
         <input className="bq-ops-image-upload-field-input" ref={fileInput} type="file" accept="image/*" onChange={onSelected} />

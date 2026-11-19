@@ -51,7 +51,7 @@ export function CheckInList() {
           const plan = planSummary(c, bundleTypes);
           const r = results[c.id];
           return (
-            <div className="bq-frontdesk-check-in-list-spacing" key={c.id} data-testid="checkin-row" style={{ borderBottom: i === shown.length - 1 ? "none" : "1px solid var(--color-border-primary-default)" }}>
+            <div className="bq-frontdesk-check-in-list-spacing" key={c.id} data-testid="checkin-row" style={{ borderBottom: i === shown.length - 1 ? "none" : "var(--border-divider)" }}>
               <div className="bq-flex bq-items-center bq-gap-3">
                 <div className="bq-grow">
                   <div className="bq-frontdesk-check-in-list-title">{c.name}</div>

@@ -10,7 +10,7 @@
 .bq-sheet-success-icon-row {
   width: 84px;
   height: 84px;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: var(--color-bg-fill-accent-default);
   display: flex;
   align-items: center;

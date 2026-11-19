@@ -18,7 +18,7 @@
   object-fit: contain;
   border-radius: var(--radius-chip);
   background: var(--color-bg-qr-default);
-  border: 1px solid var(--color-border-primary-default);
+  border: var(--border-outline);
 }
 
 .bq-catalog-solo-offer-label {
@@ -27,7 +27,7 @@
   align-items: center;
   height: 40px;
   padding: 0 16px;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: var(--color-bg-fill-accent-default);
   color: var(--color-bg-fill-primary-active);
   font: 700 var(--text-subheadline-size) var(--font-family-body);
@@ -60,7 +60,7 @@
   align-items: center;
   gap: 10px;
   padding: 10px 0;
-  border-top: 1px solid var(--color-border-primary-default);
+  border-top: var(--border-divider);
 }
 
 .bq-catalog-solo-locations-card-text {

@@ -138,6 +138,7 @@ width.
 | `--radius-sheet` | 40 | bottom sheets (20 padding inside) |
 | `--radius-item` | 20 | fields, notices, thumbnails inside a sheet or standing alone (40 − 20) |
 | `--radius-chip` | 8 | small tags, icon boxes inside cards, calendar blocks (28 − 20) |
+| `--radius-bar` | 4 | the rounded end of a bar in a bar chart |
 | `--radius-button` | 24 | buttons (a 48px button is a full pill) |
 | `--radius-float` | 32 | floating action container (button 24 + padding 8) |
 | `--radius-full` | 999 | pills, circles, avatars, switches, the tab bar |
@@ -158,6 +159,13 @@ confirmations.
 
 Build transitions with `tr(props, ms)`. Under Reduce Motion, movement becomes a
 fade (`useReducedMotion`), never nothing.
+
+### Lines
+
+| Token | For |
+|---|---|
+| `--border-divider` | the line between rows, grid cells and under sticky headers (`border-bottom: var(--border-divider)`) |
+| `--border-outline` | the outline of fields and outlined controls |
 
 ### Elevation
 
@@ -319,7 +327,7 @@ height, a width that animates, a colour from data).
    this file, an import crosses the rules in section 0, or any of these goes up
    (in TSX or CSS; leftovers are counted in `scripts/ds-baseline.json` and can
    only go down):
-   - a hand-built row divider, styled `<button>` or big number
+   - a row divider typed by hand, a styled `<button>`, or an extra-bold number at a raw pixel size
    - a raw colour, font size or corner radius (use the tokens)
    - off-scale spacing (use `--space-*`)
    - a static inline style (use a class)

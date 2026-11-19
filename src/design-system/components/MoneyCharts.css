@@ -23,12 +23,12 @@
 .bq-money-charts-share-bars-box {
   height: 8px;
   background: var(--color-bg-surface-secondary-default);
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   overflow: hidden;
 }
 
 .bq-money-charts-share-bars-box-2 {
   height: 100%;
   background: var(--color-bg-fill-primary-default);
-  border-radius: 0 4px 4px 0;
+  border-radius: 0 var(--radius-bar) var(--radius-bar) 0;
 }

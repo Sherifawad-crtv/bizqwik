@@ -287,7 +287,7 @@ export function ClientSheet({
                       key={x.label}
                       className="bq-scale"
                       onClick={x.go}
-                      style={{ display: "flex", alignItems: "center", width: "100%", minHeight: 52, padding: "0 16px", border: 0, borderBottom: i === arr.length - 1 ? "none" : "1px solid var(--color-border-primary-default)", background: "none", cursor: "pointer", textAlign: "left", font: "600 var(--text-body-size) var(--font-family-body)", color: x.danger ? "var(--color-text-status-danger-default)" : "var(--color-text-primary-default)" }}
+                      style={{ display: "flex", alignItems: "center", width: "100%", minHeight: 52, padding: "0 16px", border: 0, borderBottom: i === arr.length - 1 ? "none" : "var(--border-divider)", background: "none", cursor: "pointer", textAlign: "left", font: "600 var(--text-body-size) var(--font-family-body)", color: x.danger ? "var(--color-text-status-danger-default)" : "var(--color-text-primary-default)" }}
                     >
                       <span className="bq-flex-1">{x.label}</span>
                       <Icon name="chevron-right" size={16} />

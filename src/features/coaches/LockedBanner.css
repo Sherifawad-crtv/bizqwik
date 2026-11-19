@@ -12,7 +12,7 @@
 .bq-coaches-locked-banner-box {
   width: 8px;
   height: 8px;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   flex: none;
   margin-top: 6px;
   display: block;

@@ -51,7 +51,7 @@
   min-height: 0;
   background: var(--color-bg-surface-primary-default);
   border-radius: var(--radius-sheet);
-  border: 1px solid var(--color-border-primary-default);
+  border: var(--border-outline);
   box-shadow: var(--shadow-float);
   padding: 10px 20px 20px;
 }
@@ -66,7 +66,7 @@
 .bq-sheet-box {
   width: 44px;
   height: 5px;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: var(--color-border-primary-default);
   margin: 0 auto;
 }

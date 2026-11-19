@@ -1,10 +1,10 @@
 {
-  "row divider (use ListRow / listRowClass)": 17,
-  "hand-styled <button> (use Button / IconButton / Chip / ListRow)": 1,
-  "big number outside the stat styles (use bq-stat-*)": 61,
+  "row divider typed by hand (use --border-divider or ListRow)": 0,
+  "hand-styled <button> (use Button / IconButton / Chip / ListRow)": 0,
+  "big number at an off-scale size (use bq-stat-* or a text style)": 28,
   "raw colour (use a colour token)": 0,
   "raw font size (use a text style)": 39,
-  "raw corner radius (use a radius token)": 63,
+  "raw corner radius (use a radius token)": 0,
   "off-scale spacing (use --space-*)": 311,
-  "static inline style (use a class)": 4
+  "static inline style (use a class)": 0
 }

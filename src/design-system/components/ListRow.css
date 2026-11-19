@@ -1,4 +1,4 @@
 /* ListRow: one row of a list that sits inside a Card (pad none). */
 .bq-listrow { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-4) var(--space-5); }
 .bq-listrow--compact { padding: var(--space-3) 18px; }
-.bq-listrow--divider { border-bottom: 1px solid var(--color-border-primary-default); }
+.bq-listrow--divider { border-bottom: var(--border-divider); }

@@ -1,7 +1,7 @@
 /* Styles for Avatar.tsx. Tokens only; see DESIGN_SYSTEM.md. */
 
 .bq-avatar-row {
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: linear-gradient(135deg, var(--color-bg-avatar-start), var(--color-bg-avatar-end));
   color: var(--color-bg-surface-primary-default);
   display: flex;

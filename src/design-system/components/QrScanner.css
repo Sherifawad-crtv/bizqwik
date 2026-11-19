@@ -38,7 +38,7 @@
   width: 40px;
   height: 40px;
   flex: none;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   border: 0;
   background: var(--color-bg-fill-on-media-default);
   color: var(--color-text-on-media-default);
@@ -87,7 +87,7 @@
   display: flex;
   gap: 6px;
   padding: 4px;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: var(--color-bg-fill-on-media-secondary);
 }
 
@@ -95,7 +95,7 @@
   min-width: 44px;
   height: 36px;
   padding: 0 10px;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   border: 0;
   cursor: pointer;
   font: 700 var(--text-footnote-size) var(--font-family-mono);

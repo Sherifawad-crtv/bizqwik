@@ -2,7 +2,7 @@
 
 .bq-fab-button-btn {
   flex: none;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   border: 0;
   background: var(--color-bg-fill-primary-default);
   color: var(--color-bg-surface-primary-default);

@@ -116,7 +116,7 @@ export function FrontDeskHome() {
             const canEnter = status.tone === "good" || status.tone === "warn" || status.tone === "pt";
             const q = quick[c.id];
             return (
-              <div className="bq-frontdesk-front-desk-home-spacing" key={c.id} data-testid="home-result" style={{ borderBottom: i === matches.length - 1 ? "none" : "1px solid var(--color-border-primary-default)" }}>
+              <div className="bq-frontdesk-front-desk-home-spacing" key={c.id} data-testid="home-result" style={{ borderBottom: i === matches.length - 1 ? "none" : "var(--border-divider)" }}>
                 <div className="bq-flex bq-items-center bq-gap-3">
                   <button
                     className="bq-scale bq-frontdesk-front-desk-home-btn"

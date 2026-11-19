@@ -161,7 +161,7 @@ function Logs({ entries }: { entries: ActivityEntry[] }) {
       {entries.map((e, i) => {
         const amt = amountLabel(e);
         return (
-          <div className="bq-activity-panel-logs-row" key={e.id} style={{ borderBottom: i === entries.length - 1 ? "none" : "1px solid var(--color-border-primary-default)" }}>
+          <div className="bq-activity-panel-logs-row" key={e.id} style={{ borderBottom: i === entries.length - 1 ? "none" : "var(--border-divider)" }}>
             <span className="bq-activity-panel-logs-meta">{timeLabel(e.at)}</span>
             <span className="bq-activity-panel-logs-label">{e.type}</span>
             <span className="bq-activity-panel-logs-text">{e.clientName ?? "—"}{e.actorName ? ` · by ${e.actorName}` : ""}</span>

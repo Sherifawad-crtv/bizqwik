@@ -56,7 +56,7 @@ export function ClassPhotoField({ value, onChange, title }: { value: string | nu
               <div className="bq-class-photo-field-title">{title || "Class"}</div>
             </>
           ) : (
-            <Icon name="plus" size={20} style={{ color: "var(--color-text-tertiary-default)" }} />
+            <Icon name="plus" size={20} className="bq-fg-tertiary" />
           )}
         </div>
         <div className="bq-grow">

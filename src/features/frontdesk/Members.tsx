@@ -75,7 +75,7 @@ export function Members() {
               key={f}
               className="bq-scale"
               onClick={() => setFilter(f)}
-              style={{ flex: "none", height: 36, padding: "0 14px", borderRadius: 999, border: on ? 0 : "1px solid var(--color-border-primary-default)", background: on ? "var(--color-bg-fill-primary-default)" : "var(--color-bg-surface-primary-default)", color: on ? "var(--color-bg-surface-primary-default)" : "var(--color-text-primary-default)", font: "700 var(--text-footnote-size) var(--font-family-body)", cursor: "pointer" }}
+              style={{ flex: "none", height: 36, padding: "0 14px", borderRadius: "var(--radius-full)", border: on ? 0 : "1px solid var(--color-border-primary-default)", background: on ? "var(--color-bg-fill-primary-default)" : "var(--color-bg-surface-primary-default)", color: on ? "var(--color-bg-surface-primary-default)" : "var(--color-text-primary-default)", font: "700 var(--text-footnote-size) var(--font-family-body)", cursor: "pointer" }}
             >
               {{ all: "All", active: "Active", soon: "Ending soon", expired: "Expired", none: "No plan" }[f]} · {n}
             </button>

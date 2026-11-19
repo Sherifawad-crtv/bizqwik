@@ -66,14 +66,16 @@ const decl = (body, prop) => [...body.matchAll(new RegExp(`(?:^|;|\\n)\\s*(?:${p
 const staticInline = (t) => styleBlocks(t).filter((s) => s.split(/,(?![^(]*\))/).every((p) => !p.trim() || /^\s*[a-zA-Z]+\s*:\s*("[^"]*"|-?\d+(\.\d+)?)\s*$/.test(p))).length;
 const RULES = {
   // things the library covers
-  "row divider (use ListRow / listRowClass)": {
+  "row divider typed by hand (use --border-divider or ListRow)": {
     tsx: (t) => styleBlocks(t).filter((s) => /borderBottom: [^,]*1px solid var\(--color-border-primary-default\)/.test(s)).length,
     css: (t) => cssRules(t).filter((b) => /border-bottom:\s*1px solid var\(--color-border-primary-default\)/.test(b)).length,
   },
   "hand-styled <button> (use Button / IconButton / Chip / ListRow)": { tsx: (t) => (t.match(/<button\b[^>]*?style=\{\{[^}]*borderRadius/g) || []).length },
-  "big number outside the stat styles (use bq-stat-*)": {
-    tsx: (t) => (t.match(/font: "800 /g) || []).length,
-    css: (t) => cssRules(t).filter((b) => decl(b, "font").some((v) => /^800\s/.test(v))).length,
+  // Extra-bold (800) text at a raw pixel size: a big number or heading that
+  // should be a bq-stat-* or a text style. 800 at a text-style size is fine.
+  "big number at an off-scale size (use bq-stat-* or a text style)": {
+    tsx: (t) => (t.match(/font: "800 \d+px/g) || []).length,
+    css: (t) => cssRules(t).filter((b) => decl(b, "font").some((v) => /^800\s+\d+px/.test(v))).length,
   },
   // tokens
   "raw colour (use a colour token)": {

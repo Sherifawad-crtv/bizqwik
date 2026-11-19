@@ -9,7 +9,7 @@
   border: 0;
   background: none;
   padding: 0;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
 }
 
 .bq-account-profile-row {
@@ -18,7 +18,7 @@
   bottom: -2px;
   width: 30px;
   height: 30px;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: var(--color-bg-fill-primary-default);
   color: var(--color-bg-surface-primary-default);
   border: 2px solid var(--color-bg-surface-primary-default);

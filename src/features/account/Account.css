@@ -25,7 +25,7 @@
 }
 
 .bq-account-notifications-row-part {
-  border-bottom: 1px solid var(--color-border-primary-default);
+  border-bottom: var(--border-divider);
   padding: 14px 16px;
 }
 
@@ -45,7 +45,7 @@
 }
 
 .bq-account-notifications-row-part-2 {
-  border-bottom: 1px solid var(--color-border-primary-default);
+  border-bottom: var(--border-divider);
 }
 
 .bq-account-notifications-row-btn {

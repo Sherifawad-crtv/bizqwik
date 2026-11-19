@@ -2,7 +2,7 @@
 
 .bq-kpi-tile-delta-label {
   flex: none;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   padding: 3px 9px;
   font: 700 var(--text-caption-2-size) var(--font-family-mono);
   letter-spacing: .02em;

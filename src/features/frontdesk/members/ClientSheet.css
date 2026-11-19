@@ -9,7 +9,7 @@
 
 .bq-frontdesk-client-sheet-box {
   background: var(--color-bg-surface-secondary-default);
-  border: 1px solid var(--color-border-primary-default);
+  border: var(--border-outline);
   border-radius: var(--radius-item);
   padding: 14px 16px;
 }
@@ -37,7 +37,7 @@
   color: var(--color-text-primary-default);
   margin-top: 8px;
   padding-top: 8px;
-  border-top: 1px solid var(--color-border-primary-default);
+  border-top: var(--border-divider);
 }
 
 .bq-frontdesk-client-sheet-meta-4 {
@@ -66,7 +66,7 @@
 }
 
 .bq-frontdesk-client-sheet-box-2 {
-  border: 1px solid var(--color-border-primary-default);
+  border: var(--border-outline);
   border-radius: var(--radius-item);
   overflow: hidden;
 }

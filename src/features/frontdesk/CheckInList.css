@@ -33,7 +33,7 @@
   height: 42px;
   padding: 0 18px;
   border: 0;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: var(--color-bg-fill-primary-default);
   color: var(--color-text-on-fill-default);
   font: 700 var(--text-subheadline-size) var(--font-family-body);

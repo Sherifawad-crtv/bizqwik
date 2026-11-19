@@ -222,7 +222,7 @@ export function Bookings() {
 /** "One Class" / "Recurring Schedule". On a phone they float just above the
  * bottom bar, within thumb reach; on a desktop they sit at the top of the list. */
 function AddClassPills({ floating, hidden, onOne, onRecurring }: { floating: boolean; hidden: boolean; onOne: () => void; onRecurring: () => void }) {
-  const pill: React.CSSProperties = { flex: 1, height: 52, padding: "0 18px", border: 0, borderRadius: 999, cursor: "pointer", font: "700 var(--text-body-size) var(--font-family-body)", whiteSpace: "nowrap" };
+  const pill: React.CSSProperties = { flex: 1, height: 52, padding: "0 18px", border: 0, borderRadius: "var(--radius-full)", cursor: "pointer", font: "700 var(--text-body-size) var(--font-family-body)", whiteSpace: "nowrap" };
   const group = (
     <div
       role="group"
@@ -231,7 +231,7 @@ function AddClassPills({ floating, hidden, onOne, onRecurring }: { floating: boo
         display: "flex",
         gap: 8,
         padding: 6,
-        borderRadius: 999,
+        borderRadius: "var(--radius-full)",
         background: "var(--color-bg-surface-primary-default)",
         border: "1px solid var(--color-border-primary-default)",
         boxShadow: floating ? "var(--shadow-lifted)" : "none",

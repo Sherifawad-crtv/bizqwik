@@ -4,7 +4,7 @@
   height: 36px;
   flex: none;
   border: 0;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   display: inline-flex;
   align-items: center;
   justify-content: center;

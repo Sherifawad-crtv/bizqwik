@@ -3,7 +3,7 @@
 .bq-frontdesk-bookings-row {
   display: flex;
   align-items: center;
-  border-bottom: 1px solid var(--color-border-primary-default);
+  border-bottom: var(--border-divider);
 }
 
 .bq-frontdesk-bookings-row-btn {
@@ -50,7 +50,7 @@
   color: var(--color-text-status-paid-default);
   background: var(--color-bg-fill-status-paid-default);
   padding: 3px 8px;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
 }
 
 .bq-frontdesk-bookings-row-meta-5 {
@@ -58,7 +58,7 @@
   color: var(--color-bg-fill-primary-active);
   background: var(--color-bg-fill-accent-default);
   padding: 3px 8px;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
 }
 
 .bq-frontdesk-bookings-label {

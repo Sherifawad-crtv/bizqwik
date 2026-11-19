@@ -5,7 +5,7 @@
   top: 4px;
   bottom: 4px;
   left: 0;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: var(--color-bg-surface-primary-default);
   z-index: -1;
   pointer-events: none;

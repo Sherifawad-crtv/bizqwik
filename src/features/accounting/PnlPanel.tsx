@@ -107,7 +107,7 @@ export function PnlPanel({ report, loading, onAddExpense, onCoachPayouts }: { re
                   )}
                 </span>
                 <span className="tabular bq-accounting-pnl-panel-title-2">{fmt(s.amount)}</span>
-                {s.key === "coach_payouts" && <Icon name="chevron-right" size={14} style={{ color: "var(--color-text-tertiary-default)" }} />}
+                {s.key === "coach_payouts" && <Icon name="chevron-right" size={14} className="bq-fg-tertiary" />}
               </button>
             ))}
           </div>

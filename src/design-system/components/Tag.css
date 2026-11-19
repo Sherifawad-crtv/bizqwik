@@ -20,11 +20,11 @@
   gap: 6px;
   flex: none;
   padding: var(--space-1) 10px;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   font: 700 var(--text-caption-2-size) var(--font-family-mono);
   letter-spacing: 0.08em;
   white-space: nowrap;
   color: var(--tone-fg);
   background: var(--tone-bg);
 }
-.bq-badge::before { content: ""; width: 6px; height: 6px; border-radius: 999px; background: currentColor; flex: none; }
+.bq-badge::before { content: ""; width: 6px; height: 6px; border-radius: var(--radius-full); background: currentColor; flex: none; }

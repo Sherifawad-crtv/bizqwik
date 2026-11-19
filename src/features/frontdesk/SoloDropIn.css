@@ -11,7 +11,7 @@
 .bq-frontdesk-solo-drop-in-btn {
   min-height: 84px;
   border-radius: var(--radius-item);
-  border: 1px solid var(--color-border-primary-default);
+  border: var(--border-outline);
   background: var(--color-bg-surface-primary-default);
   cursor: pointer;
   padding: 12px;
@@ -46,7 +46,7 @@
 .bq-frontdesk-solo-drop-in-row {
   width: 64px;
   height: 64px;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   margin: 0 auto 12px;
   display: flex;
   align-items: center;
@@ -86,7 +86,7 @@
 .bq-frontdesk-solo-drop-in-btn-2 {
   height: 64px;
   border-radius: var(--radius-item);
-  border: 1px solid var(--color-border-primary-default);
+  border: var(--border-outline);
   background: var(--color-bg-surface-primary-default);
   font: 700 var(--text-callout-size) var(--font-family-body);
   cursor: pointer;
@@ -99,7 +99,7 @@
   object-fit: contain;
   background: var(--color-bg-qr-default);
   border-radius: var(--radius-item);
-  border: 1px solid var(--color-border-primary-default);
+  border: var(--border-outline);
 }
 
 .bq-frontdesk-solo-drop-in-meta-4 {

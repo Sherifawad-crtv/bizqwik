@@ -138,7 +138,7 @@ export function ExpenseSheet({
                 <button className="bq-accounting-expense-sheet-btn"
                   onClick={() => fileInput.current?.click()}
                 >
-                  <Icon name="card" size={18} style={{ color: "var(--color-text-tertiary-default)" }} />
+                  <Icon name="card" size={18} className="bq-fg-tertiary" />
                   <span className="bq-accounting-expense-sheet-text">{receipt ? "Receipt attached" : "Attach a receipt photo (optional)"}</span>
                 </button>
               </>

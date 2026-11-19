@@ -59,6 +59,7 @@
   --radius-sheet: 40px; /** bottom sheets (20 padding inside) */
   --radius-item: 20px; /** fields, notices, thumbnails inside a sheet (40 - 20) */
   --radius-chip: 8px; /** small tags, icon boxes in cards, calendar blocks (28 - 20) */
+  --radius-bar: 4px; /** the rounded end of a bar in a bar chart */
   --radius-button: 24px; /** buttons (a 48px button is a full pill) */
   --radius-float: 32px; /** floating action container (button 24 + padding 8) */
   --radius-full: 999px; /** pills, circles, avatars, switches, the tab bar */
@@ -183,5 +184,7 @@
   --color-icon-secondary-default: var(--color-text-secondary-default);
   --color-icon-tertiary-default: var(--color-text-tertiary-default);
   --color-icon-accent-default: var(--color-text-accent-default);
+  --border-divider: 1px solid var(--color-border-primary-default); /** the line between rows, grid cells and under sticky headers */
+  --border-outline: 1px solid var(--color-border-primary-default); /** the outline of fields and outlined controls */
   --shadow-glass-highlight: inset 0px 1px 0px 0px var(--color-border-glass-strong); /** inner top highlight of the frosted tab bar */
 }

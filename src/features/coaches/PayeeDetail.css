@@ -13,9 +13,9 @@
 }
 
 .bq-coaches-payee-detail-record-payment-sheet-btn {
-  border: 1px solid var(--color-border-primary-default);
+  border: var(--border-outline);
   background: var(--color-bg-surface-secondary-default);
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   padding: 8px 14px;
   font: 600 var(--text-footnote-size) var(--font-family-body);
   color: var(--color-text-primary-default);
@@ -92,7 +92,7 @@
 .bq-coaches-payee-detail-part {
   margin-top: 14px;
   padding-top: 12px;
-  border-top: 1px solid var(--color-border-primary-default);
+  border-top: var(--border-divider);
 }
 
 .bq-coaches-payee-detail-meta-2 {

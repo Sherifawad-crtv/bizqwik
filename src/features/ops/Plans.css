@@ -20,7 +20,7 @@
 .bq-ops-plans-btn {
   border: 0;
   background: var(--color-bg-surface-secondary-default);
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   width: 38px;
   height: 38px;
   display: flex;
@@ -34,7 +34,7 @@
 .bq-ops-plans-btn-2 {
   border: 0;
   background: var(--color-bg-fill-status-danger-default);
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   width: 38px;
   height: 38px;
   display: flex;

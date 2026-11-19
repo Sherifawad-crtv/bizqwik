@@ -7,7 +7,7 @@
 
 .bq-clients-sheets-client-detail-sheet-box {
   background: var(--color-bg-surface-secondary-default);
-  border: 1px solid var(--color-border-primary-default);
+  border: var(--border-outline);
   border-radius: var(--radius-item);
   padding: 12px 16px;
   margin-bottom: 10px;

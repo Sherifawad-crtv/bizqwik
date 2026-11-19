@@ -47,7 +47,7 @@
   height: 42px;
   padding: 0 18px;
   border: 0;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: var(--color-bg-fill-primary-default);
   color: var(--color-text-on-fill-default);
   font: 700 var(--text-subheadline-size) var(--font-family-body);
@@ -58,8 +58,8 @@
   flex: none;
   height: 42px;
   padding: 0 16px;
-  border: 1px solid var(--color-border-primary-default);
-  border-radius: 999px;
+  border: var(--border-outline);
+  border-radius: var(--radius-full);
   background: var(--color-bg-surface-primary-default);
   color: var(--color-text-primary-default);
   font: 700 var(--text-subheadline-size) var(--font-family-body);
@@ -123,7 +123,7 @@
   font: 600 var(--text-footnote-size) var(--font-family-body);
   color: var(--color-text-secondary-default);
   background: var(--color-bg-surface-secondary-default);
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   padding: 6px 12px;
 }
 
@@ -177,7 +177,7 @@
 .bq-frontdesk-front-desk-home-row-2 {
   width: 36px;
   height: 36px;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   flex: none;
   display: flex;
   align-items: center;

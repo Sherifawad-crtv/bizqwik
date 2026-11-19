@@ -10,7 +10,7 @@
 .bq-spinner-inline-spinner-box {
   width: 28px;
   height: 28px;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   border: 3px solid var(--color-bg-fill-accent-default);
   border-top-color: var(--color-bg-fill-primary-default);
   animation: bqSpin .7s linear infinite;

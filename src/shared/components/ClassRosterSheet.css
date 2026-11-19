@@ -23,7 +23,7 @@
 
 .bq-class-roster-sheet-roster-row-box {
   background: var(--color-bg-surface-secondary-default);
-  border: 1px solid var(--color-border-primary-default);
+  border: var(--border-outline);
   border-radius: var(--radius-item);
   padding: 12px 14px;
 }
@@ -46,4 +46,28 @@
   letter-spacing: .06em;
   color: var(--color-text-tertiary-default);
   margin-bottom: 6px;
+}
+
+/* RowBtn: a choice in the roster's collect-payment row. Neutral, chosen
+   (active) or the main action (primary). */
+.bq-roster-choice {
+  flex: 1 1 0;
+  border: var(--border-outline);
+  background: var(--color-bg-surface-primary-default);
+  color: var(--color-text-secondary-default);
+  border-radius: var(--radius-button);
+  padding: var(--space-2) var(--space-1);
+  font: 700 var(--text-footnote-size) var(--font-family-body);
+  cursor: pointer;
+}
+.bq-roster-choice:disabled { cursor: default; }
+.bq-roster-choice--active {
+  border: 0;
+  background: var(--color-bg-fill-accent-selected);
+  color: var(--color-bg-fill-primary-active);
+}
+.bq-roster-choice--primary {
+  border: 0;
+  background: var(--color-bg-fill-primary-default);
+  color: var(--color-bg-surface-primary-default);
 }

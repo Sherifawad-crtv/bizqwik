@@ -17,7 +17,7 @@
 .bq-btn--full { width: 100%; }
 .bq-btn--primary { background: var(--color-bg-fill-primary-default); color: var(--color-bg-surface-primary-default); }
 .bq-btn--secondary { background: var(--color-bg-fill-accent-default); color: var(--color-bg-fill-primary-active); }
-.bq-btn--quiet { background: var(--color-bg-canvas-default); color: var(--color-text-secondary-default); border: 1px solid var(--color-border-primary-default); }
+.bq-btn--quiet { background: var(--color-bg-canvas-default); color: var(--color-text-secondary-default); border: var(--border-divider); }
 .bq-btn--danger { background: var(--color-bg-fill-status-danger-default); color: var(--color-text-status-danger-default); }
 .bq-btn:disabled { opacity: 0.45; cursor: default; }
 /* Mouse only, never touch, so hover can't get "stuck" after a tap. */
