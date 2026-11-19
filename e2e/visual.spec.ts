@@ -130,7 +130,18 @@ async function snapshot(page: Page): Promise<string[]> {
       if (r.width === 0 && r.height === 0) continue;
       const cs = getComputedStyle(el);
       if (cs.visibility === "hidden") continue;
-      out.push(`${key(el)} ${props.map((p) => `${p}:${cs.getPropertyValue(p)}`).join(";")}`);
+      // computedStyleMap gives the computed value before layout (margin stays
+      // "auto", grid columns stay "1fr 90px"), so the snapshot doesn't depend
+      // on how wide the machine's fonts render text.
+      const map = el.computedStyleMap();
+      const val = (p: string) => {
+        try {
+          return String(map.get(p) ?? cs.getPropertyValue(p));
+        } catch {
+          return cs.getPropertyValue(p);
+        }
+      };
+      out.push(`${key(el)} ${props.map((p) => `${p}:${val(p)}`).join(";")}`);
     }
     return out;
   }, PROPS);
