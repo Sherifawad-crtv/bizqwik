@@ -11,6 +11,7 @@ import { SearchField } from "../shared";
 import { ErrorBanner } from "../../../design-system/components/ErrorBanner";
 import { matchesClient } from "../../../shared/deskStatus";
 import { groupOfferOptions } from "./offers";
+import "./partners.css";
 
 // Who shares a shared bundle with the client being sold to: someone already on
 // file or a brand-new client. Each person gets an even share of the classes and
@@ -42,21 +43,21 @@ export function PartnerPicker({ type, buyerId, picked, onChange }: { type: Group
     setErr(null);
   };
   return (
-    <div style={{ background: "var(--color-bg-surface-secondary-default)", border: "1px solid var(--color-border-primary-default)", borderRadius: "var(--radius-item)", padding: 14, display: "flex", flexDirection: "column", gap: 10 }}>
-      <div style={{ font: "400 var(--text-footnote-size)/1.5 var(--font-family-body)", color: "var(--color-text-secondary-default)" }}>
+    <div className="bq-frontdesk-partners-partner-picker-stack">
+      <div className="bq-frontdesk-partners-partner-picker-text">
         Shared by {seats}: {each} classes and {fmt(type.price / seats)} EGP each, {type.durationMonths} months from today. Each person gets their own plan.
       </div>
       {picked.map((p, i) => (
-        <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, font: "700 var(--text-body-size) var(--font-family-body)" }}>
-          <span style={{ flex: 1 }}>{labelOf(p)}</span>
-          <button className="bq-scale" onClick={() => onChange(picked.filter((_, j) => j !== i))} aria-label="Remove" style={{ border: 0, background: "none", color: "var(--color-text-secondary-default)", cursor: "pointer", font: "600 var(--text-footnote-size) var(--font-family-body)" }}>Remove</button>
+        <div className="bq-frontdesk-partners-partner-picker-title" key={i}>
+          <span className="bq-flex-1">{labelOf(p)}</span>
+          <button className="bq-scale bq-frontdesk-partners-partner-picker-btn" onClick={() => onChange(picked.filter((_, j) => j !== i))} aria-label="Remove">Remove</button>
         </div>
       ))}
       {picked.length < seats - 1 && !adding && (
         <>
           <SearchField value={q} onChange={setQ} placeholder="Search the other client" />
           {results.map((c) => (
-            <button key={c.id} className="bq-scale" onClick={() => { onChange([...picked, { clientId: c.id, label: c.name }]); setQ(""); }} style={{ textAlign: "left", minHeight: 44, border: 0, background: "none", cursor: "pointer", font: "600 var(--text-body-size) var(--font-family-body)", color: "var(--color-text-primary-default)" }}>
+            <button key={c.id} className="bq-scale bq-frontdesk-partners-partner-picker-btn-2" onClick={() => { onChange([...picked, { clientId: c.id, label: c.name }]); setQ(""); }}>
               {c.name}
               {c.phone && <span className="bq-meta"> · {c.phone}</span>}
             </button>
@@ -70,9 +71,9 @@ export function PartnerPicker({ type, buyerId, picked, onChange }: { type: Group
           <TextField label="PHONE" type="tel" value={nPhone} onChange={(e) => setNPhone(e.target.value)} placeholder="01xxxxxxxxx" autoComplete="off" />
           <TextField label="EMAIL" type="email" value={nEmail} onChange={(e) => setNEmail(e.target.value)} autoComplete="off" />
           {err && <ErrorBanner text={err} />}
-          <div style={{ display: "flex", gap: 8 }}>
-            <Button variant="secondary" style={{ flex: 1 }} onClick={() => { setAdding(false); setErr(null); }}>Cancel</Button>
-            <Button style={{ flex: 1 }} onClick={addNew}>Add client</Button>
+          <div className="bq-flex bq-gap-2">
+            <Button className="bq-flex-1" variant="secondary" onClick={() => { setAdding(false); setErr(null); }}>Cancel</Button>
+            <Button className="bq-flex-1" onClick={addNew}>Add client</Button>
           </div>
         </>
       )}
@@ -104,10 +105,10 @@ export function GroupOfferSelect({ value, onChange, planTypes, series }: { value
               style={{ display: "flex", alignItems: "center", gap: 12, padding: "16px 18px", cursor: "pointer", textAlign: "left", borderRadius: "var(--radius-card)", border: on ? "2px solid var(--color-bg-fill-primary-default)" : "1px solid var(--color-border-primary-default)", background: on ? "var(--color-bg-fill-accent-default)" : "var(--color-bg-surface-primary-default)", color: "var(--color-text-primary-default)" }}
             >
               <span className="bq-grow">
-                <span style={{ display: "block", font: "800 18px var(--font-family-body)", letterSpacing: "-.01em" }}>{name}</span>
-                <span style={{ display: "block", font: "400 var(--text-caption-1-size) var(--font-family-mono)", color: "var(--color-text-secondary-default)", marginTop: 2 }}>{rest.join(" · ")}</span>
+                <span className="bq-frontdesk-partners-group-offer-select-title">{name}</span>
+                <span className="bq-frontdesk-partners-group-offer-select-meta">{rest.join(" · ")}</span>
               </span>
-              <span style={{ font: "800 18px var(--font-family-mono)", color: on ? "var(--color-bg-fill-primary-active)" : "var(--color-text-primary-default)" }}>{price}</span>
+              <span className="bq-frontdesk-partners-group-offer-select-meta-2" style={{ color: on ? "var(--color-bg-fill-primary-active)" : "var(--color-text-primary-default)" }}>{price}</span>
             </button>
           );
         })}

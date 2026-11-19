@@ -22,6 +22,7 @@ import { endingSoon, planSummary, renewalMessage, whatsappUrl } from "../../../s
 import { bundleOptions, coachOptions, offerOf } from "./offers";
 import { GroupOfferSelect, PartnerPicker } from "./partners";
 import { inviteNewPartners } from "./invitePartners";
+import "./ClientSheet.css";
 
 type Mode = "view" | "sell-plan" | "renew-package" | "assign" | "invite" | "refund" | "pt-log" | "location";
 
@@ -188,30 +189,29 @@ export function ClientSheet({
         ) : mode === "view" ? (
           <>
             <SheetHeading kicker="CLIENT" title={shown.name} />
-            {shown.phone && <div style={{ font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-secondary-default)", marginTop: -8, marginBottom: 14 }}>{shown.phone}</div>}
+            {shown.phone && <div className="bq-frontdesk-client-sheet-meta">{shown.phone}</div>}
 
-            <div style={{ background: "var(--color-bg-surface-secondary-default)", border: "1px solid var(--color-border-primary-default)", borderRadius: "var(--radius-item)", padding: "14px 16px" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <div style={{ font: "800 18px var(--font-family-body)", flex: 1, minWidth: 0 }}>{summary.title}</div>
+            <div className="bq-frontdesk-client-sheet-box">
+              <div className="bq-flex bq-items-center bq-gap-10px">
+                <div className="bq-frontdesk-client-sheet-title">{summary.title}</div>
                 <PlanPill client={shown} />
               </div>
-              <div style={{ font: "400 var(--text-subheadline-size) var(--font-family-mono)", color: "var(--color-text-secondary-default)", marginTop: 4 }}>{summary.detail}</div>
-              {plan && plan.kind === "bundle" && <div style={{ font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)", marginTop: 2 }}>Until {dateLabel(plan.expiresAt.slice(0, 10))}</div>}
+              <div className="bq-frontdesk-client-sheet-meta-2">{summary.detail}</div>
+              {plan && plan.kind === "bundle" && <div className="bq-frontdesk-client-sheet-meta-3">Until {dateLabel(plan.expiresAt.slice(0, 10))}</div>}
               {packageActive && plan && (
-                <div style={{ font: "600 var(--text-footnote-size) var(--font-family-body)", color: "var(--color-text-primary-default)", marginTop: 8, paddingTop: 8, borderTop: "1px solid var(--color-border-primary-default)" }}>
+                <div className="bq-frontdesk-client-sheet-text">
                   + {bType?.name ?? "Package"}: {pkg!.sessionsRemaining} of {pkg!.sessionsIncluded} sessions left
                 </div>
               )}
-              {coachName && !solo && <div style={{ font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)", marginTop: 6 }}>Coach: {coachName}</div>}
+              {coachName && !solo && <div className="bq-frontdesk-client-sheet-meta-4">Coach: {coachName}</div>}
               {sheetLocations.length > 0 && (
-                <div style={{ font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)", marginTop: 6 }}>Location: {locationName(sheetLocations, shown.homeLocationId) ?? "Not set"}</div>
+                <div className="bq-frontdesk-client-sheet-meta-4">Location: {locationName(sheetLocations, shown.homeLocationId) ?? "Not set"}</div>
               )}
             </div>
             {solo && packageActive && pkg && me && pkg.coachId === me.id && (
-              <Button
+              <Button className="bq-mt-3"
                 variant="secondary"
                 fullWidth
-                style={{ marginTop: 12 }}
                 disabled={busy}
                 onClick={async () => {
                   setMode("pt-log");
@@ -238,27 +238,26 @@ export function ClientSheet({
               // Selling sits next to checking in — the desk's two jobs. A new group plan
               // can only start once the running one ends, so "Sell" offers what can be
               // sold now: a group plan if none is running, else a PT package.
-              <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
-                <Button fullWidth size="lg" style={{ flex: 2 }} onClick={() => onCheckIn(shown)}>
+              <div className="bq-flex bq-gap-2 bq-mt-4">
+                <Button className="bq-frontdesk-client-sheet-btn" fullWidth size="lg" onClick={() => onCheckIn(shown)}>
                   Check in
                 </Button>
                 {(!plan || !packageActive) && (
-                  <Button variant="secondary" size="lg" style={{ flex: 1 }} onClick={() => setMode(!plan ? "sell-plan" : "renew-package")}>
+                  <Button className="bq-flex-1" variant="secondary" size="lg" onClick={() => setMode(!plan ? "sell-plan" : "renew-package")}>
                     {!plan ? "Sell plan" : "Sell PT"}
                   </Button>
                 )}
               </div>
             ) : (
-              <Button fullWidth size="lg" style={{ marginTop: 16 }} onClick={() => setMode(plan ? "renew-package" : "sell-plan")}>
+              <Button className="bq-mt-4" fullWidth size="lg" onClick={() => setMode(plan ? "renew-package" : "sell-plan")}>
                 Sell a plan
               </Button>
             )}
 
             {(summary.tone !== "active" || endingSoon(shown) !== null) && whatsappUrl(shown.phone, "") && (
-              <Button
+              <Button className="bq-mt-2"
                 variant="secondary"
                 fullWidth
-                style={{ marginTop: 8 }}
                 onClick={() => window.open(whatsappUrl(shown.phone, renewalMessage(shown, bundleTypes))!, "_blank", "noopener")}
               >
                 {summary.tone === "active" ? "Remind to renew on WhatsApp" : "Message on WhatsApp"}
@@ -266,15 +265,14 @@ export function ClientSheet({
             )}
 
             <button
-              className="bq-scale"
+              className="bq-scale bq-frontdesk-client-sheet-btn-2"
               onClick={() => setShowMore((v) => !v)}
               aria-expanded={showMore}
-              style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 4, width: "100%", height: 48, marginTop: 6, border: 0, background: "none", color: "var(--color-bg-fill-primary-active)", font: "700 var(--text-subheadline-size) var(--font-family-body)", cursor: "pointer" }}
             >
               {showMore ? "Fewer options" : "More options"}
             </button>
             <Reveal show={showMore}>
-              <div style={{ border: "1px solid var(--color-border-primary-default)", borderRadius: "var(--radius-item)", overflow: "hidden" }}>
+              <div className="bq-frontdesk-client-sheet-box-2">
                 {[
                   !plan && summary.tone === "active" ? { label: "Sell a group plan", go: () => setMode("sell-plan") } : null,
                   !packageActive ? { label: pkg ? "Renew package" : "Sell a package", go: () => setMode("renew-package") } : null,
@@ -291,7 +289,7 @@ export function ClientSheet({
                       onClick={x.go}
                       style={{ display: "flex", alignItems: "center", width: "100%", minHeight: 52, padding: "0 16px", border: 0, borderBottom: i === arr.length - 1 ? "none" : "1px solid var(--color-border-primary-default)", background: "none", cursor: "pointer", textAlign: "left", font: "600 var(--text-body-size) var(--font-family-body)", color: x.danger ? "var(--color-text-status-danger-default)" : "var(--color-text-primary-default)" }}
                     >
-                      <span style={{ flex: 1 }}>{x.label}</span>
+                      <span className="bq-flex-1">{x.label}</span>
                       <Icon name="chevron-right" size={16} />
                     </button>
                   ))}
@@ -309,7 +307,7 @@ export function ClientSheet({
                 <>
                   <TextField label="AMOUNT (EGP)" value={refundAmount} onChange={(e) => setRefundAmount(e.target.value)} inputMode="decimal" placeholder="0" />
                   {refundable && (
-                    <div style={{ font: "400 var(--text-caption-1-size)/1.5 var(--font-family-mono)", color: "var(--color-text-tertiary-default)" }}>
+                    <div className="bq-frontdesk-client-sheet-meta-5">
                       Up to {fmt(refundable.refundable)} EGP · {fmt(refundable.paid)} paid, {fmt(refundable.refunded)} already refunded.
                     </div>
                   )}
@@ -321,7 +319,7 @@ export function ClientSheet({
                     ]}
                     onChange={(v) => setRefundDest(v as "wallet" | "desk")}
                   />
-                  <div style={{ font: "400 var(--text-caption-1-size)/1.5 var(--font-family-mono)", color: "var(--color-text-tertiary-default)" }}>
+                  <div className="bq-frontdesk-client-sheet-meta-5">
                     {refundDest === "wallet"
                       ? "Adds store credit to their wallet (expires per the org's policy)."
                       : solo ? "You send the money yourself on InstaPay — this just records it." : "You hand back cash/card outside Bizqwik — this just records the amount."}
@@ -332,7 +330,7 @@ export function ClientSheet({
               {mode === "invite" && (
                 <>
                   <TextField label="EMAIL" value={email} onChange={(e) => setEmail(e.target.value)} inputMode="email" placeholder="member@email.com" />
-                  <div style={{ font: "400 var(--text-caption-1-size)/1.5 var(--font-family-mono)", color: "var(--color-text-tertiary-default)" }}>
+                  <div className="bq-frontdesk-client-sheet-meta-5">
                     They'll use this email to sign in to the branded member app.
                   </div>
                 </>
@@ -349,13 +347,12 @@ export function ClientSheet({
               )}
             </div>
             {error && <ErrorBanner text={error} />}
-            <Button fullWidth size="lg" style={{ marginTop: 16 }} disabled={busy} onClick={confirmMode}>
+            <Button className="bq-mt-4" fullWidth size="lg" disabled={busy} onClick={confirmMode}>
               {busy ? "Saving…" : mode === "assign" ? "Assign coach" : mode === "invite" ? "Send invitation" : mode === "refund" ? "Issue refund" : mode === "sell-plan" ? "Start plan" : mode === "location" ? "Save location" : "Sell package"}
             </Button>
-            <Button
+            <Button className="bq-mt-2"
               variant="secondary"
               fullWidth
-              style={{ marginTop: 8 }}
               disabled={busy}
               onClick={() => {
                 setMode("view");

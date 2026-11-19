@@ -8,6 +8,7 @@ import { Button } from "../../design-system/components/Button";
 import { Icon } from "../../design-system/components/Icon";
 import { Spinner } from "../../design-system/components/Spinner";
 import { ErrorBanner } from "../../design-system/components/ErrorBanner";
+import "./SoloDropIn.css";
 
 type Method = "cash" | "instapay";
 
@@ -37,12 +38,12 @@ export function SoloDropIn({ onDone }: { onDone: () => void }) {
   if (options.length > 0 && !chosen) {
     return (
       <div>
-        <div style={{ font: "700 var(--text-caption-1-size) var(--font-family-mono)", letterSpacing: ".08em", color: "var(--color-text-tertiary-default)", textAlign: "center", marginBottom: 12 }}>WHO'S DROPPING IN{current ? ` · ${current.name.toUpperCase()}` : ""}</div>
-        <div style={{ display: "grid", gridTemplateColumns: options.length > 2 ? "1fr" : "1fr 1fr", gap: 10 }}>
+        <div className="bq-frontdesk-solo-drop-in-label">WHO'S DROPPING IN{current ? ` · ${current.name.toUpperCase()}` : ""}</div>
+        <div className="bq-grid bq-gap-10px" style={{ gridTemplateColumns: options.length > 2 ? "1fr" : "1fr 1fr" }}>
           {options.map((o) => (
-            <button key={o.label} className="bq-scale" onClick={() => setKind(o.label)} style={{ minHeight: 84, borderRadius: "var(--radius-item)", border: "1px solid var(--color-border-primary-default)", background: "var(--color-bg-surface-primary-default)", cursor: "pointer", padding: 12 }}>
-              <div style={{ font: "800 18px var(--font-family-body)" }}>{o.label}</div>
-              <div style={{ font: "700 var(--text-subheadline-size) var(--font-family-mono)", color: "var(--color-bg-fill-primary-active)", marginTop: 2 }}>{fmt(o.price)} EGP</div>
+            <button key={o.label} className="bq-scale bq-frontdesk-solo-drop-in-btn" onClick={() => setKind(o.label)}>
+              <div className="bq-frontdesk-solo-drop-in-title">{o.label}</div>
+              <div className="bq-frontdesk-solo-drop-in-meta">{fmt(o.price)} EGP</div>
             </button>
           ))}
         </div>
@@ -52,9 +53,9 @@ export function SoloDropIn({ onDone }: { onDone: () => void }) {
 
   if (price === null) {
     return (
-      <div style={{ textAlign: "center", padding: "8px 0 4px" }}>
+      <div className="bq-frontdesk-solo-drop-in-part">
         <div className="bq-h3">Set {here && current ? `${current.name}'s` : "your"} drop-in price first</div>
-        <div style={{ font: "400 var(--text-footnote-size)/1.5 var(--font-family-mono)", color: "var(--color-text-secondary-default)", margin: "6px 0 16px" }}>It lives with your plans, so you only set it once.</div>
+        <div className="bq-frontdesk-solo-drop-in-meta-2">It lives with your plans, so you only set it once.</div>
         <Button fullWidth size="lg" onClick={() => navigate("/catalog")}>Go to Plans</Button>
       </div>
     );
@@ -76,12 +77,12 @@ export function SoloDropIn({ onDone }: { onDone: () => void }) {
 
   if (done) {
     return (
-      <div style={{ textAlign: "center", padding: "12px 0 4px" }}>
-        <span style={{ width: 64, height: 64, borderRadius: 999, margin: "0 auto 12px", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--color-bg-fill-status-paid-default)", color: "var(--color-text-status-paid-default)" }}>
+      <div className="bq-frontdesk-solo-drop-in-part-2">
+        <span className="bq-frontdesk-solo-drop-in-row">
           <Icon name="check" size={32} />
         </span>
-        <div style={{ font: "800 24px var(--font-family-body)" }}>Drop-in recorded</div>
-        <div style={{ font: "400 var(--text-subheadline-size) var(--font-family-mono)", color: "var(--color-text-secondary-default)", margin: "4px 0 18px" }}>{fmt(price)} EGP · {done === "instapay" ? "InstaPay" : "Cash"}</div>
+        <div className="bq-frontdesk-solo-drop-in-title-2">Drop-in recorded</div>
+        <div className="bq-frontdesk-solo-drop-in-meta-3">{fmt(price)} EGP · {done === "instapay" ? "InstaPay" : "Cash"}</div>
         <Button fullWidth size="lg" onClick={onDone}>Done</Button>
       </div>
     );
@@ -89,19 +90,18 @@ export function SoloDropIn({ onDone }: { onDone: () => void }) {
 
   return (
     <div>
-      <div style={{ textAlign: "center", marginBottom: 16 }}>
-        <div style={{ font: "800 48px/1.05 var(--font-family-body)", letterSpacing: "-.03em" }}>{fmt(price)}</div>
-        <div style={{ font: "700 var(--text-caption-1-size) var(--font-family-mono)", letterSpacing: ".08em", color: "var(--color-text-tertiary-default)", marginTop: 4 }}>EGP · {chosen ? `${chosen.label.toUpperCase()} DROP-IN` : "ONE DROP-IN"}{here && current ? ` · ${current.name.toUpperCase()}` : ""}</div>
+      <div className="bq-text-center bq-mb-4">
+        <div className="bq-frontdesk-solo-drop-in-title-3">{fmt(price)}</div>
+        <div className="bq-frontdesk-solo-drop-in-label-2">EGP · {chosen ? `${chosen.label.toUpperCase()} DROP-IN` : "ONE DROP-IN"}{here && current ? ` · ${current.name.toUpperCase()}` : ""}</div>
       </div>
 
       {!method && (
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+        <div className="bq-frontdesk-solo-drop-in-grid">
           {(["cash", "instapay"] as const).map((m) => (
             <button
               key={m}
-              className="bq-scale"
+              className="bq-scale bq-frontdesk-solo-drop-in-btn-2"
               onClick={() => setMethod(m)}
-              style={{ height: 64, borderRadius: "var(--radius-item)", border: "1px solid var(--color-border-primary-default)", background: "var(--color-bg-surface-primary-default)", font: "700 var(--text-callout-size) var(--font-family-body)", cursor: "pointer" }}
             >
               {m === "cash" ? "Cash" : "InstaPay"}
             </button>
@@ -110,13 +110,13 @@ export function SoloDropIn({ onDone }: { onDone: () => void }) {
       )}
 
       {method === "instapay" && (
-        <div style={{ textAlign: "center" }}>
+        <div className="bq-text-center">
           {qr ? (
-            <img src={qr} alt="InstaPay QR code" style={{ width: "100%", maxWidth: 280, aspectRatio: "1", objectFit: "contain", background: "var(--color-bg-qr-default)", borderRadius: "var(--radius-item)", border: "1px solid var(--color-border-primary-default)" }} />
+            <img className="bq-frontdesk-solo-drop-in-img" src={qr} alt="InstaPay QR code" />
           ) : (
-            <div style={{ font: "400 var(--text-footnote-size)/1.5 var(--font-family-mono)", color: "var(--color-text-secondary-default)", background: "var(--color-bg-surface-secondary-default)", borderRadius: "var(--radius-item)", padding: "14px 16px" }}>
+            <div className="bq-frontdesk-solo-drop-in-meta-4">
               Add your InstaPay QR on the Plans tab to show it here.
-              <div><button onClick={() => navigate("/catalog")} style={{ border: 0, background: "none", color: "var(--color-bg-fill-primary-active)", font: "700 var(--text-subheadline-size) var(--font-family-body)", cursor: "pointer", padding: "8px 0 0" }}>Add QR</button></div>
+              <div><button className="bq-frontdesk-solo-drop-in-btn-3" onClick={() => navigate("/catalog")}>Add QR</button></div>
             </div>
           )}
         </div>
@@ -125,10 +125,10 @@ export function SoloDropIn({ onDone }: { onDone: () => void }) {
       {method && (
         <>
           {error && <ErrorBanner text={error} />}
-          <Button fullWidth size="lg" style={{ marginTop: 16 }} disabled={busy} onClick={confirm}>
+          <Button className="bq-mt-4" fullWidth size="lg" disabled={busy} onClick={confirm}>
             {busy ? "Saving…" : method === "instapay" ? "Payment received" : "Cash received"}
           </Button>
-          <Button variant="quiet" fullWidth style={{ marginTop: 8 }} disabled={busy} onClick={() => setMethod(null)}>Back</Button>
+          <Button className="bq-mt-2" variant="quiet" fullWidth disabled={busy} onClick={() => setMethod(null)}>Back</Button>
         </>
       )}
     </div>

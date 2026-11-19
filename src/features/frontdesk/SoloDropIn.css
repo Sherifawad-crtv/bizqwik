@@ -1,0 +1,120 @@
+/* Styles for SoloDropIn.tsx. Tokens only; see DESIGN_SYSTEM.md. */
+
+.bq-frontdesk-solo-drop-in-label {
+  font: 700 var(--text-caption-1-size) var(--font-family-mono);
+  letter-spacing: .08em;
+  color: var(--color-text-tertiary-default);
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.bq-frontdesk-solo-drop-in-btn {
+  min-height: 84px;
+  border-radius: var(--radius-item);
+  border: 1px solid var(--color-border-primary-default);
+  background: var(--color-bg-surface-primary-default);
+  cursor: pointer;
+  padding: 12px;
+}
+
+.bq-frontdesk-solo-drop-in-title {
+  font: 800 18px var(--font-family-body);
+}
+
+.bq-frontdesk-solo-drop-in-meta {
+  font: 700 var(--text-subheadline-size) var(--font-family-mono);
+  color: var(--color-bg-fill-primary-active);
+  margin-top: 2px;
+}
+
+.bq-frontdesk-solo-drop-in-part {
+  text-align: center;
+  padding: 8px 0 4px;
+}
+
+.bq-frontdesk-solo-drop-in-meta-2 {
+  font: 400 var(--text-footnote-size)/1.5 var(--font-family-mono);
+  color: var(--color-text-secondary-default);
+  margin: 6px 0 16px;
+}
+
+.bq-frontdesk-solo-drop-in-part-2 {
+  text-align: center;
+  padding: 12px 0 4px;
+}
+
+.bq-frontdesk-solo-drop-in-row {
+  width: 64px;
+  height: 64px;
+  border-radius: 999px;
+  margin: 0 auto 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg-fill-status-paid-default);
+  color: var(--color-text-status-paid-default);
+}
+
+.bq-frontdesk-solo-drop-in-title-2 {
+  font: 800 24px var(--font-family-body);
+}
+
+.bq-frontdesk-solo-drop-in-meta-3 {
+  font: 400 var(--text-subheadline-size) var(--font-family-mono);
+  color: var(--color-text-secondary-default);
+  margin: 4px 0 18px;
+}
+
+.bq-frontdesk-solo-drop-in-title-3 {
+  font: 800 48px/1.05 var(--font-family-body);
+  letter-spacing: -.03em;
+}
+
+.bq-frontdesk-solo-drop-in-label-2 {
+  font: 700 var(--text-caption-1-size) var(--font-family-mono);
+  letter-spacing: .08em;
+  color: var(--color-text-tertiary-default);
+  margin-top: 4px;
+}
+
+.bq-frontdesk-solo-drop-in-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.bq-frontdesk-solo-drop-in-btn-2 {
+  height: 64px;
+  border-radius: var(--radius-item);
+  border: 1px solid var(--color-border-primary-default);
+  background: var(--color-bg-surface-primary-default);
+  font: 700 var(--text-callout-size) var(--font-family-body);
+  cursor: pointer;
+}
+
+.bq-frontdesk-solo-drop-in-img {
+  width: 100%;
+  max-width: 280px;
+  aspect-ratio: 1;
+  object-fit: contain;
+  background: var(--color-bg-qr-default);
+  border-radius: var(--radius-item);
+  border: 1px solid var(--color-border-primary-default);
+}
+
+.bq-frontdesk-solo-drop-in-meta-4 {
+  font: 400 var(--text-footnote-size)/1.5 var(--font-family-mono);
+  color: var(--color-text-secondary-default);
+  background: var(--color-bg-surface-secondary-default);
+  border-radius: var(--radius-item);
+  padding: 14px 16px;
+}
+
+.bq-frontdesk-solo-drop-in-btn-3 {
+  border: 0;
+  background: none;
+  color: var(--color-bg-fill-primary-active);
+  font: 700 var(--text-subheadline-size) var(--font-family-body);
+  cursor: pointer;
+  padding: 8px 0 0;
+}

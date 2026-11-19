@@ -18,6 +18,7 @@ import { ErrorBanner } from "../../../design-system/components/ErrorBanner";
 import { Card } from "../../../design-system/components/Card";
 import { type PlanKind, bundleOptions, coachOptions, offerOf } from "./offers";
 import { GroupOfferSelect, PartnerPicker } from "./partners";
+import "./CreateClientSheet.css";
 
 const CREATE_STEPS = ["Client info", "Package", "Payment", "Summary"] as const;
 
@@ -187,9 +188,9 @@ export function CreateClientSheet({
       ) : (
         <>
           <SheetHeading kicker={`NEW CLIENT · STEP ${step + 1} OF ${CREATE_STEPS.length}`} title={CREATE_STEPS[step]} />
-          <div aria-hidden style={{ display: "flex", gap: 6, margin: "-6px 0 18px" }}>
+          <div className="bq-frontdesk-create-client-sheet-row" aria-hidden>
             {CREATE_STEPS.map((s, i) => (
-              <span key={s} style={{ flex: 1, height: 4, borderRadius: 999, background: i <= step ? "var(--color-bg-fill-primary-default)" : "var(--color-border-primary-default)" }} />
+              <span className="bq-frontdesk-create-client-sheet-box" key={s} style={{ background: i <= step ? "var(--color-bg-fill-primary-default)" : "var(--color-border-primary-default)" }} />
             ))}
           </div>
 
@@ -204,7 +205,7 @@ export function CreateClientSheet({
           {step === 1 && (
             <>
               {!(profile?.role === "dept_head" && orgMode === "solo" && bundleTypes.length === 0) && (
-              <div style={{ display: "flex", justifyContent: "center", marginBottom: 14 }}>
+              <div className="bq-flex bq-justify-center bq-mb-14px">
                 <Segmented
                   value={kind}
                   onChange={(v) => {
@@ -237,13 +238,13 @@ export function CreateClientSheet({
           {step === 2 && (
             <>
               <PaymentCards value={payMethod} onChange={setPayMethod} />
-              <div style={{ marginTop: 10, font: "400 var(--text-caption-1-size)/1.5 var(--font-family-mono)", color: "var(--color-text-tertiary-default)" }}>A new client has no wallet yet, so it's cash or card.</div>
+              <div className="bq-frontdesk-create-client-sheet-meta">A new client has no wallet yet, so it's cash or card.</div>
             </>
           )}
 
           {step === 3 && (
             <>
-              <Card pad="none" style={{ overflow: "hidden" }}>
+              <Card className="bq-overflow-hidden" pad="none">
                 {(
                   [
                     ["CLIENT", name.trim()],
@@ -255,31 +256,31 @@ export function CreateClientSheet({
                     ["PAYMENT", payMethod.toUpperCase()],
                   ] as [string, string][]
                 ).map(([k, v]) => (
-                  <div key={k} style={{ display: "flex", gap: 12, padding: "12px 16px", borderBottom: "1px solid var(--color-border-primary-default)" }}>
-                    <span style={{ flex: "none", width: 84, font: "700 var(--text-caption-2-size) var(--font-family-mono)", letterSpacing: ".08em", color: "var(--color-text-tertiary-default)", paddingTop: 3 }}>{k}</span>
-                    <span style={{ minWidth: 0, flex: 1, font: "600 var(--text-body-size)/1.4 var(--font-family-body)", overflowWrap: "anywhere" }}>{v}</span>
+                  <div className="bq-frontdesk-create-client-sheet-row-2" key={k}>
+                    <span className="bq-frontdesk-create-client-sheet-label">{k}</span>
+                    <span className="bq-frontdesk-create-client-sheet-text">{v}</span>
                   </div>
                 ))}
-                <div style={{ display: "flex", alignItems: "baseline", gap: 12, padding: "14px 16px", background: "var(--color-bg-surface-secondary-default)" }}>
-                  <span style={{ flex: 1, font: "700 var(--text-caption-2-size) var(--font-family-mono)", letterSpacing: ".08em", color: "var(--color-text-tertiary-default)" }}>TOTAL TO COLLECT</span>
-                  <span className="tabular" style={{ font: "800 22px var(--font-family-body)", letterSpacing: "-.02em" }}>{chosen ? `${fmt(chosen.price)} EGP` : "—"}</span>
+                <div className="bq-frontdesk-create-client-sheet-row-3">
+                  <span className="bq-frontdesk-create-client-sheet-label-2">TOTAL TO COLLECT</span>
+                  <span className="tabular bq-frontdesk-create-client-sheet-title">{chosen ? `${fmt(chosen.price)} EGP` : "—"}</span>
                 </div>
               </Card>
-              <div style={{ marginTop: 10, font: "400 var(--text-caption-1-size)/1.5 var(--font-family-mono)", color: "var(--color-text-tertiary-default)" }}>Creating the client also sends the app invite to {mail}.</div>
+              <div className="bq-frontdesk-create-client-sheet-meta">Creating the client also sends the app invite to {mail}.</div>
             </>
           )}
 
           {error && <ErrorBanner text={error} />}
           {step < 3 ? (
-            <Button fullWidth size="lg" style={{ marginTop: 16 }} onClick={next}>
+            <Button className="bq-mt-4" fullWidth size="lg" onClick={next}>
               Next
             </Button>
           ) : (
-            <Button fullWidth size="lg" style={{ marginTop: 16 }} disabled={busy} onClick={submit}>
+            <Button className="bq-mt-4" fullWidth size="lg" disabled={busy} onClick={submit}>
               {busy ? "Saving…" : kind === "plan" ? "Create & start plan" : "Create & sell package"}
             </Button>
           )}
-          <Button variant="secondary" fullWidth style={{ marginTop: 8 }} onClick={step === 0 ? onClose : back} disabled={busy}>
+          <Button className="bq-mt-2" variant="secondary" fullWidth onClick={step === 0 ? onClose : back} disabled={busy}>
             {step === 0 ? "Cancel" : "Back"}
           </Button>
         </>

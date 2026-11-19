@@ -1,0 +1,63 @@
+/* Styles for DropIn.tsx. Tokens only; see DESIGN_SYSTEM.md. */
+
+.bq-frontdesk-drop-in-card {
+  padding: 16px 18px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.bq-frontdesk-drop-in-row {
+  color: var(--color-bg-fill-primary-active);
+  display: flex;
+  margin-top: 2px;
+}
+
+.bq-frontdesk-drop-in-meta {
+  font: 400 var(--text-footnote-size)/1.5 var(--font-family-mono);
+  color: var(--color-text-secondary-default);
+}
+
+.bq-frontdesk-drop-in-text {
+  margin-bottom: 14px;
+  font: 600 var(--text-footnote-size)/1.5 var(--font-family-body);
+  color: var(--color-text-status-paid-default);
+  background: var(--color-bg-fill-status-paid-default);
+  border-radius: var(--radius-item);
+  padding: 10px 14px;
+}
+
+.bq-frontdesk-drop-in-row-2 {
+  background: var(--color-bg-surface-secondary-default);
+  border: 1px solid var(--color-border-primary-default);
+  border-radius: var(--radius-item);
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.bq-frontdesk-drop-in-text-2 {
+  font: 600 var(--text-callout-size) var(--font-family-body);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bq-frontdesk-drop-in-btn {
+  height: 36px;
+  padding: 0 12px;
+}
+
+.bq-frontdesk-drop-in-text-3 {
+  font: 600 var(--text-subheadline-size) var(--font-family-body);
+  padding: 0 4px;
+}
+
+.bq-frontdesk-drop-in-meta-2 {
+  text-align: center;
+  font: 400 var(--text-footnote-size) var(--font-family-mono);
+  color: var(--color-text-tertiary-default);
+  margin-top: 10px;
+}

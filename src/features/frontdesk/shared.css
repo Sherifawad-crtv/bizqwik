@@ -1,0 +1,57 @@
+/* Styles for shared.tsx. Tokens only; see DESIGN_SYSTEM.md. */
+
+.bq-frontdesk-shared-section-link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  border: 0;
+  background: none;
+  color: var(--color-bg-fill-primary-active);
+  font: 700 var(--text-subheadline-size) var(--font-family-body);
+  cursor: pointer;
+  padding: 6px 0 6px 8px;
+}
+
+.bq-frontdesk-shared-search-field-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--color-bg-surface-secondary-default);
+  border: 1px solid var(--color-border-primary-default);
+  border-radius: var(--radius-item);
+  padding: 0 16px;
+  height: 52px;
+}
+
+.bq-frontdesk-shared-search-field-input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: none;
+  outline: none;
+  font: 600 var(--text-callout-size) var(--font-family-body);
+  color: var(--color-text-primary-default);
+}
+
+.bq-frontdesk-shared-client-picker-btn {
+  width: 100%;
+  min-height: 64px;
+  background: none;
+  cursor: pointer;
+  text-align: left;
+}
+
+.bq-frontdesk-shared-client-picker-title {
+  font: 700 var(--text-callout-size) var(--font-family-body);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bq-frontdesk-shared-client-picker-meta {
+  font: 400 var(--text-footnote-size) var(--font-family-mono);
+  color: var(--color-text-tertiary-default);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

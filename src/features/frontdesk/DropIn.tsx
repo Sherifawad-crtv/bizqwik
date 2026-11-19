@@ -20,6 +20,7 @@ import { useNewClient } from "./NewClientModal";
 import { useFrontDeskCatalog } from "./members/offers";
 import type { PayMethod } from "../../shared/types";
 import { useNow } from "../../shared/useNow";
+import "./DropIn.css";
 
 type Mode = "class" | "walkin";
 
@@ -134,7 +135,7 @@ export function DropIn({ embedded = false, initialClient = null }: { embedded?: 
 
   return (
     <div>
-      <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}>
+      <div className="bq-flex bq-justify-center bq-mb-4">
         <Segmented
           value={mode}
           onChange={(v) => {
@@ -149,13 +150,13 @@ export function DropIn({ embedded = false, initialClient = null }: { embedded?: 
         />
       </div>
 
-      <Card pad="none" style={{ padding: "16px 18px", display: "flex", gap: 12, alignItems: "flex-start", marginBottom: 16 }}>
-        <span style={{ color: "var(--color-bg-fill-primary-active)", display: "flex", marginTop: 2 }}>
+      <Card className="bq-frontdesk-drop-in-card" pad="none">
+        <span className="bq-frontdesk-drop-in-row">
           <Icon name={mode === "class" ? "calendar" : "ticket"} size={22} />
         </span>
         <div>
           <div className="bq-h3">{mode === "class" ? "Drop into a class" : "One-time entry"}</div>
-          <div style={{ font: "400 var(--text-footnote-size)/1.5 var(--font-family-mono)", color: "var(--color-text-secondary-default)" }}>
+          <div className="bq-frontdesk-drop-in-meta">
             {mode === "class"
               ? "Charges that class's drop-in price and adds the member to its roster as arrived."
               : "Valid for a single visit. Link the member, or add a new one with their details."}
@@ -164,22 +165,21 @@ export function DropIn({ embedded = false, initialClient = null }: { embedded?: 
       </Card>
 
       {done && (
-        <div style={{ marginBottom: 14, font: "600 var(--text-footnote-size)/1.5 var(--font-family-body)", color: "var(--color-text-status-paid-default)", background: "var(--color-bg-fill-status-paid-default)", borderRadius: "var(--radius-item)", padding: "10px 14px" }}>
+        <div className="bq-frontdesk-drop-in-text">
           Drop-in recorded — {done}
         </div>
       )}
 
       <div className="bq-stack">
-        <div style={{ background: "var(--color-bg-surface-secondary-default)", border: "1px solid var(--color-border-primary-default)", borderRadius: "var(--radius-item)", padding: "10px 16px", display: "flex", alignItems: "center", gap: 10 }}>
+        <div className="bq-frontdesk-drop-in-row-2">
           <div className="bq-grow">
             <div className="bq-label">MEMBER</div>
-            <div style={{ font: "600 var(--text-callout-size) var(--font-family-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{client ? client.name : newMember ? "New member" : "Not linked"}</div>
+            <div className="bq-frontdesk-drop-in-text-2">{client ? client.name : newMember ? "New member" : "Not linked"}</div>
           </div>
           {client || newMember ? (
-            <Button
+            <Button className="bq-frontdesk-drop-in-btn"
               variant="quiet"
               size="md"
-              style={{ height: 36, padding: "0 12px" }}
               onClick={() => {
                 setClient(null);
                 setAdding(false);
@@ -190,11 +190,11 @@ export function DropIn({ embedded = false, initialClient = null }: { embedded?: 
           ) : (
             <>
               {mode === "walkin" && (
-                <Button variant="quiet" size="md" style={{ height: 36, padding: "0 12px" }} onClick={() => setAdding(true)}>
+                <Button className="bq-frontdesk-drop-in-btn" variant="quiet" size="md" onClick={() => setAdding(true)}>
                   New member
                 </Button>
               )}
-              <Button variant="secondary" size="md" style={{ height: 36, padding: "0 12px" }} onClick={() => setPickerOpen(true)}>
+              <Button className="bq-frontdesk-drop-in-btn" variant="secondary" size="md" onClick={() => setPickerOpen(true)}>
                 Link member
               </Button>
             </>
@@ -223,7 +223,7 @@ export function DropIn({ embedded = false, initialClient = null }: { embedded?: 
               empty={{ title: "No class sessions in the next 7 days", body: "Classes are scheduled by the department head in Catalog → Classes. For a visit that isn't a class, use Walk-in." }}
             />
             {session && (
-              <div style={{ font: "600 var(--text-subheadline-size) var(--font-family-body)", padding: "0 4px" }}>
+              <div className="bq-frontdesk-drop-in-text-3">
                 Drop-in price: <span className="tabular">{fmt(session.price)} EGP</span>
               </div>
             )}
@@ -248,10 +248,10 @@ export function DropIn({ embedded = false, initialClient = null }: { embedded?: 
       </div>
 
       {error && <ErrorBanner text={error} />}
-      <Button fullWidth size="lg" style={{ marginTop: 16 }} disabled={busy} onClick={submit}>
+      <Button className="bq-mt-4" fullWidth size="lg" disabled={busy} onClick={submit}>
         {busy ? "Saving…" : amount !== null ? `Charge ${fmt(amount)} EGP · ${tender}` : "Confirm drop-in"}
       </Button>
-      <div style={{ textAlign: "center", font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)", marginTop: 10 }}>Take payment at the desk before confirming.</div>
+      <div className="bq-frontdesk-drop-in-meta-2">Take payment at the desk before confirming.</div>
 
       <PickClientSheet
         open={pickerOpen}
@@ -285,7 +285,7 @@ function PickClientSheet({ open, onClose, onPick }: { open: boolean; onClose: ()
       <div className="bq-label">DROP-IN</div>
       <div className="bq-title">Link a member</div>
       <ClientPicker clients={data?.clients ?? []} bundleTypes={bundleTypes} onPick={onPick} onCreate={newClient.open} />
-      <Button variant="quiet" fullWidth style={{ marginTop: 10 }} onClick={onClose}>
+      <Button className="bq-mt-10px" variant="quiet" fullWidth onClick={onClose}>
         Cancel
       </Button>
       {newClient.modal}

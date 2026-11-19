@@ -1,3 +1,4 @@
+import { cx } from "../../design-system/cx";
 import { useMemo, useState, type ReactNode } from "react";
 import { Icon } from "../../design-system/components/Icon";
 import { EmptyState } from "../../design-system/components/EmptyState";
@@ -5,6 +6,7 @@ import type { BundleType, ClientWithPackage } from "../../shared/types";
 import { planSummary, matchesClient } from "../../shared/deskStatus";
 import { Card } from "../../design-system/components/Card";
 import { PlanPill } from "../../shared/components/PlanPill";
+import "./shared.css";
 
 
 
@@ -22,9 +24,8 @@ export function SheetHeading({ kicker, title }: { kicker: string; title: string 
 export function SectionLink({ children, onClick }: { children: ReactNode; onClick: () => void }) {
   return (
     <button
-      className="bq-scale"
+      className="bq-scale bq-frontdesk-shared-section-link-btn"
       onClick={onClick}
-      style={{ display: "inline-flex", alignItems: "center", gap: 2, border: 0, background: "none", color: "var(--color-bg-fill-primary-active)", font: "700 var(--text-subheadline-size) var(--font-family-body)", cursor: "pointer", padding: "6px 0 6px 8px" }}
     >
       {children} <Icon name="chevron-right" size={16} />
     </button>
@@ -33,19 +34,17 @@ export function SectionLink({ children, onClick }: { children: ReactNode; onClic
 
 export function SearchField({ value, onChange, placeholder = "Search by name or phone" }: { value: string; onChange: (v: string) => void; placeholder?: string }) {
   return (
-    <label
-      style={{ display: "flex", alignItems: "center", gap: 10, background: "var(--color-bg-surface-secondary-default)", border: "1px solid var(--color-border-primary-default)", borderRadius: "var(--radius-item)", padding: "0 16px", height: 52 }}
+    <label className="bq-frontdesk-shared-search-field-label"
     >
-      <span style={{ color: "var(--color-text-tertiary-default)", display: "flex" }}>
+      <span className="bq-fg-tertiary bq-flex">
         <Icon name="search" size={18} />
       </span>
-      <input
+      <input className="bq-frontdesk-shared-search-field-input"
         data-no-dirty
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         aria-label={placeholder}
-        style={{ flex: 1, minWidth: 0, border: 0, background: "none", outline: "none", font: "600 var(--text-callout-size) var(--font-family-body)", color: "var(--color-text-primary-default)" }}
       />
     </label>
   );
@@ -77,18 +76,18 @@ export function ClientPicker({
   return (
     <div>
       <SearchField value={query} onChange={setQuery} />
-      <Card pad="none" style={{ marginTop: 10, overflow: "hidden" }}>
+      <Card className="bq-mt-10px bq-overflow-hidden" pad="none">
         {shown.map((c, i) => {
           const plan = planSummary(c, bundleTypes);
           return (
             <button
               key={c.id}
               onClick={() => onPick(c)}
-              className={`bq-plain bq-listrow bq-listrow--compact ${!(i === shown.length - 1) ? "bq-listrow--divider" : ""}`} style={{ width: "100%", minHeight: 64, background: "none", cursor: "pointer", textAlign: "left" }}
+              className={cx(`bq-plain bq-listrow bq-listrow--compact ${!(i === shown.length - 1) ? "bq-listrow--divider" : ""}`, "bq-frontdesk-shared-client-picker-btn")}
             >
               <div className="bq-grow">
-                <div style={{ font: "700 var(--text-callout-size) var(--font-family-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.name}</div>
-                <div style={{ font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                <div className="bq-frontdesk-shared-client-picker-title">{c.name}</div>
+                <div className="bq-frontdesk-shared-client-picker-meta">
                   {plan.title} · {plan.detail}
                 </div>
               </div>

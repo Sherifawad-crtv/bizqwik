@@ -1,0 +1,58 @@
+/* Styles for partners.tsx. Tokens only; see DESIGN_SYSTEM.md. */
+
+.bq-frontdesk-partners-partner-picker-stack {
+  background: var(--color-bg-surface-secondary-default);
+  border: 1px solid var(--color-border-primary-default);
+  border-radius: var(--radius-item);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bq-frontdesk-partners-partner-picker-text {
+  font: 400 var(--text-footnote-size)/1.5 var(--font-family-body);
+  color: var(--color-text-secondary-default);
+}
+
+.bq-frontdesk-partners-partner-picker-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font: 700 var(--text-body-size) var(--font-family-body);
+}
+
+.bq-frontdesk-partners-partner-picker-btn {
+  border: 0;
+  background: none;
+  color: var(--color-text-secondary-default);
+  cursor: pointer;
+  font: 600 var(--text-footnote-size) var(--font-family-body);
+}
+
+.bq-frontdesk-partners-partner-picker-btn-2 {
+  text-align: left;
+  min-height: 44px;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font: 600 var(--text-body-size) var(--font-family-body);
+  color: var(--color-text-primary-default);
+}
+
+.bq-frontdesk-partners-group-offer-select-title {
+  display: block;
+  font: 800 18px var(--font-family-body);
+  letter-spacing: -.01em;
+}
+
+.bq-frontdesk-partners-group-offer-select-meta {
+  display: block;
+  font: 400 var(--text-caption-1-size) var(--font-family-mono);
+  color: var(--color-text-secondary-default);
+  margin-top: 2px;
+}
+
+.bq-frontdesk-partners-group-offer-select-meta-2 {
+  font: 800 18px var(--font-family-mono);
+}

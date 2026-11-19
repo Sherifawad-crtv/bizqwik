@@ -12,6 +12,7 @@ import { ClassRosterSheet } from "../../shared/components/ClassRosterSheet";
 import { type View, addDays, dayKey, startOfDay, startOfWeek, title } from "./calendar/dates";
 import { TimeGrid } from "./calendar/TimeGrid";
 import { MonthGrid } from "./calendar/MonthGrid";
+import "./ClassCalendar.css";
 
 /** The desk's class calendar, full screen: a day or week on an hourly grid,
  * or the whole month. Opening a class shows its roster, where arrivals are
@@ -58,25 +59,24 @@ export function ClassCalendarScreen({ onClose }: { onClose: () => void }) {
     setCursor((c) => (view === "day" ? addDays(c, dir) : view === "week" ? addDays(c, 7 * dir) : new Date(c.getFullYear(), c.getMonth() + dir, 1)));
 
   return createPortal(
-    <div
+    <div className="bq-frontdesk-class-calendar-class-calendar-screen-stack"
       data-testid="class-calendar"
-      style={{ position: "fixed", inset: 0, zIndex: 150, background: "var(--color-bg-surface-primary-default)", display: "flex", flexDirection: "column", paddingTop: "var(--safe-top)" }}
     >
-      <div style={{ flex: "none", display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8, padding: isMobile ? "10px 12px" : "12px 20px", borderBottom: "1px solid var(--color-border-primary-default)" }}>
-        <Button variant="quiet" aria-label="Close calendar" style={{ width: 44, height: 44, padding: 0 }} onClick={onClose}>
+      <div className="bq-frontdesk-class-calendar-class-calendar-screen-row" style={{ padding: isMobile ? "10px 12px" : "12px 20px" }}>
+        <Button className="bq-frontdesk-class-calendar-class-calendar-screen-btn" variant="quiet" aria-label="Close calendar" onClick={onClose}>
           <Icon name="close" size={18} />
         </Button>
-        {!isMobile && <span className="bq-stat-sm" style={{ marginRight: 8 }}>Classes</span>}
-        <Button variant="secondary" style={{ height: 44, padding: "0 14px", font: "700 var(--text-caption-1-size) var(--font-family-mono)", letterSpacing: ".06em" }} onClick={() => setCursor(today)}>
+        {!isMobile && <span className="bq-stat-sm bq-frontdesk-class-calendar-class-calendar-screen-spacing">Classes</span>}
+        <Button className="bq-frontdesk-class-calendar-class-calendar-screen-btn-2" variant="secondary" onClick={() => setCursor(today)}>
           TODAY
         </Button>
-        <Button variant="quiet" aria-label="Previous" style={{ width: 44, height: 44, padding: 0 }} onClick={() => step(-1)}>
+        <Button className="bq-frontdesk-class-calendar-class-calendar-screen-btn" variant="quiet" aria-label="Previous" onClick={() => step(-1)}>
           <Icon name="chevron-left" size={18} />
         </Button>
-        <Button variant="quiet" aria-label="Next" style={{ width: 44, height: 44, padding: 0 }} onClick={() => step(1)}>
+        <Button className="bq-frontdesk-class-calendar-class-calendar-screen-btn" variant="quiet" aria-label="Next" onClick={() => step(1)}>
           <Icon name="chevron-right" size={18} />
         </Button>
-        <div data-testid="calendar-label" style={{ flex: 1, minWidth: 140, font: "800 18px var(--font-family-body)", letterSpacing: "-.01em" }}>
+        <div className="bq-frontdesk-class-calendar-class-calendar-screen-title" data-testid="calendar-label">
           {title(view, cursor)}
         </div>
         <Segmented
@@ -91,10 +91,10 @@ export function ClassCalendarScreen({ onClose }: { onClose: () => void }) {
       </div>
 
       {classes.error && (
-        <div style={{ flex: "none", font: "600 var(--text-footnote-size)/1.5 var(--font-family-body)", color: "var(--color-text-status-danger-default)", background: "var(--color-bg-fill-status-danger-default)", padding: "10px 20px" }}>{classes.error}</div>
+        <div className="bq-frontdesk-class-calendar-class-calendar-screen-text">{classes.error}</div>
       )}
 
-      <div style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
+      <div className="bq-frontdesk-class-calendar-class-calendar-screen-stack-2">
         {classes.loading && !classes.data ? (
           <InlineSpinner />
         ) : view === "month" ? (

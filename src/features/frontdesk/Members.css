@@ -1,0 +1,47 @@
+/* Styles for Members.tsx. Tokens only; see DESIGN_SYSTEM.md. */
+
+.bq-frontdesk-members-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0 4px;
+  overflow-x: auto;
+}
+
+.bq-frontdesk-members-btn {
+  height: 36px;
+  padding: 0 14px;
+}
+
+.bq-frontdesk-members-btn-2 {
+  width: 100%;
+  min-height: 64px;
+  background: none;
+  cursor: pointer;
+  text-align: left;
+}
+
+.bq-frontdesk-members-title {
+  font: 700 var(--text-callout-size) var(--font-family-body);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bq-frontdesk-members-meta {
+  font: 400 var(--text-footnote-size) var(--font-family-mono);
+  color: var(--color-text-tertiary-default);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bq-frontdesk-members-part {
+  color: var(--color-text-status-logging-default);
+  font-weight: 700;
+}
+
+.bq-frontdesk-members-part-2 {
+  color: var(--color-text-status-danger-default);
+  font-weight: 700;
+}

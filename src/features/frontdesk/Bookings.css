@@ -1,0 +1,102 @@
+/* Styles for Bookings.tsx. Tokens only; see DESIGN_SYSTEM.md. */
+
+.bq-frontdesk-bookings-row-row {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid var(--color-border-primary-default);
+}
+
+.bq-frontdesk-bookings-row-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+  padding: 14px 18px;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  text-align: left;
+}
+
+.bq-frontdesk-bookings-row-meta {
+  width: 84px;
+  flex: none;
+  white-space: nowrap;
+  font: 700 var(--text-subheadline-size) var(--font-family-mono);
+}
+
+.bq-frontdesk-bookings-row-title {
+  display: block;
+  font: 700 var(--text-body-size) var(--font-family-body);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bq-frontdesk-bookings-row-meta-2 {
+  display: block;
+  font: 400 var(--text-footnote-size) var(--font-family-mono);
+}
+
+.bq-frontdesk-bookings-row-meta-3 {
+  display: block;
+  font: 400 var(--text-footnote-size) var(--font-family-mono);
+  color: var(--color-text-tertiary-default);
+}
+
+.bq-frontdesk-bookings-row-meta-4 {
+  font: 700 var(--text-caption-2-size) var(--font-family-mono);
+  color: var(--color-text-status-paid-default);
+  background: var(--color-bg-fill-status-paid-default);
+  padding: 3px 8px;
+  border-radius: 999px;
+}
+
+.bq-frontdesk-bookings-row-meta-5 {
+  font: 700 var(--text-caption-2-size) var(--font-family-mono);
+  color: var(--color-bg-fill-primary-active);
+  background: var(--color-bg-fill-accent-default);
+  padding: 3px 8px;
+  border-radius: 999px;
+}
+
+.bq-frontdesk-bookings-label {
+  font: 700 var(--text-caption-1-size) var(--font-family-mono);
+  letter-spacing: 1px;
+  color: var(--color-text-tertiary-default);
+  text-transform: uppercase;
+  margin: 20px 4px 8px;
+}
+
+.bq-frontdesk-bookings-label-2 {
+  font: 700 var(--text-caption-1-size) var(--font-family-mono);
+  letter-spacing: 1px;
+  color: var(--color-text-tertiary-default);
+  text-transform: uppercase;
+  margin: 0 4px 8px;
+}
+
+.bq-frontdesk-bookings-btn {
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font: 700 var(--text-subheadline-size) var(--font-family-body);
+  color: var(--color-bg-fill-primary-active);
+  padding: 4px 0;
+}
+
+.bq-frontdesk-bookings-size {
+  height: 84px;
+}
+
+.bq-frontdesk-bookings-add-class-pills-row {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: calc(80px + var(--bar-bottom));
+  z-index: 54;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}

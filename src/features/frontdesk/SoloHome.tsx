@@ -1,3 +1,4 @@
+import { cx } from "../../design-system/cx";
 import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../shared/auth";
@@ -19,6 +20,7 @@ import { Card } from "../../design-system/components/Card";
 import { SectionHeader } from "../../design-system/components/SectionHeader";
 import { endingSoon, planSummary } from "../../shared/deskStatus";
 import { useNow } from "../../shared/useNow";
+import "./SoloHome.css";
 
 const clockOf = (iso: string) => {
   const d = new Date(iso);
@@ -43,18 +45,18 @@ const TONES: Record<"primary" | "good" | "warn" | "neutral", Tone> = {
 function Stat({ label, value, sub, icon, tone, onClick }: { label: string; value: string; sub: string; icon: IconName; tone: keyof typeof TONES; onClick?: () => void }) {
   return (
     <button
-      className="bq-scale bq-card"
+      className="bq-scale bq-card bq-frontdesk-solo-home-stat-btn"
       onClick={onClick}
-      style={{ textAlign: "left", padding: "16px 18px", cursor: onClick ? "pointer" : "default", minWidth: 0 }}
+      style={{ cursor: onClick ? "pointer" : "default" }}
     >
-      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-        <span style={{ width: 32, height: 32, borderRadius: 999, flex: "none", display: "flex", alignItems: "center", justifyContent: "center", background: TONES[tone].bg, color: TONES[tone].fg }}>
+      <div className="bq-flex bq-items-center bq-gap-2">
+        <span className="bq-frontdesk-solo-home-stat-row" style={{ background: TONES[tone].bg, color: TONES[tone].fg }}>
           <Icon name={icon} size={17} />
         </span>
         <span className="bq-label">{label}</span>
       </div>
-      <div className="bq-stat-lg" style={{ marginTop: 10, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{value}</div>
-      <div style={{ font: "400 var(--text-caption-1-size) var(--font-family-mono)", color: "var(--color-text-secondary-default)", marginTop: 4 }}>{sub}</div>
+      <div className="bq-stat-lg bq-mt-10px bq-overflow-hidden bq-ellipsis bq-nowrap">{value}</div>
+      <div className="bq-frontdesk-solo-home-stat-meta">{sub}</div>
     </button>
   );
 }
@@ -121,35 +123,34 @@ export function SoloHome() {
       <LocationSwitcher />
       <PaymentRequestsCard />
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+      <div className="bq-frontdesk-solo-home-grid">
         <Stat label="REVENUE" icon="cash" tone="primary" value={fmt(thisMonth)} sub={delta === null ? "EGP this month" : `${delta >= 0 ? "▲" : "▼"} ${Math.abs(delta)}% this month`} onClick={() => navigate("/money")} />
         <Stat label="MEMBERS" icon="members" tone="neutral" value={String(stats.total)} sub="All clients" onClick={() => goMembers("all")} />
         <Stat label="ACTIVE" icon="check" tone="good" value={String(stats.active)} sub="On a running plan" onClick={() => goMembers("active")} />
         <Stat label="ENDING SOON" icon="history" tone="warn" value={String(stats.soon)} sub="Next 7 days" onClick={() => goMembers("soon")} />
       </div>
 
-      <Card pad="none" style={{ padding: "18px 18px 12px", marginTop: 10 }}>
-        <div style={{ font: "700 var(--text-caption-2-size) var(--font-family-mono)", letterSpacing: ".08em", color: "var(--color-text-tertiary-default)", marginBottom: 10 }}>REVENUE BY MONTH · EGP</div>
+      <Card className="bq-frontdesk-solo-home-card" pad="none">
+        <div className="bq-frontdesk-solo-home-label">REVENUE BY MONTH · EGP</div>
         <RevenueChart months={trend} revenueOnly />
       </Card>
 
 
       <SectionHeader right={<SectionLink onClick={() => navigate("/bookings")}>Schedule</SectionLink>}>Coming up</SectionHeader>
-      <Card pad="none" style={{ overflow: "hidden", marginBottom: 24 }}>
+      <Card className="bq-overflow-hidden bq-mb-6" pad="none">
         {nextUp.map((c, i) => (
           <button
             key={c.id}
-            className={`bq-plain bq-scale bq-listrow bq-listrow--compact ${!(i === nextUp.length - 1) ? "bq-listrow--divider" : ""}`}
+            className={cx(`bq-plain bq-scale bq-listrow bq-listrow--compact ${!(i === nextUp.length - 1) ? "bq-listrow--divider" : ""}`, "bq-frontdesk-solo-home-btn")}
             onClick={() => navigate("/bookings")}
-            style={{ width: "100%", minHeight: 60, background: "none", cursor: "pointer", textAlign: "left" }}
           >
-            <span style={{ width: 84, flex: "none", font: "700 var(--text-subheadline-size) var(--font-family-mono)" }}>
-              <span style={{ display: "block", whiteSpace: "nowrap" }}>{clockOf(c.startsAt)}</span>
-              <span style={{ display: "block", font: "400 var(--text-caption-2-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)" }}>{dayOf(c.startsAt)}</span>
+            <span className="bq-frontdesk-solo-home-meta">
+              <span className="bq-block bq-nowrap">{clockOf(c.startsAt)}</span>
+              <span className="bq-frontdesk-solo-home-meta-2">{dayOf(c.startsAt)}</span>
             </span>
             <span className="bq-grow">
-              <span style={{ display: "block", font: "700 var(--text-body-size) var(--font-family-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.title}</span>
-              <span style={{ display: "block", font: "400 var(--text-caption-1-size) var(--font-family-mono)", color: (c.bookedCount ?? 0) > 0 ? "var(--color-bg-fill-primary-active)" : "var(--color-text-tertiary-default)" }}>
+              <span className="bq-frontdesk-solo-home-title">{c.title}</span>
+              <span className="bq-frontdesk-solo-home-meta-3" style={{ color: (c.bookedCount ?? 0) > 0 ? "var(--color-bg-fill-primary-active)" : "var(--color-text-tertiary-default)" }}>
                 {(c.bookedCount ?? 0) > 0 ? `${c.bookedCount} coming` : "No one yet"}
                 {c.id === nextUpId ? " · NEXT" : ""}
               </span>

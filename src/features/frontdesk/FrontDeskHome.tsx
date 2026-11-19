@@ -1,3 +1,4 @@
+import { cx } from "../../design-system/cx";
 import { EmptyState } from "../../design-system/components/EmptyState";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -25,6 +26,7 @@ import { ClassRosterSheet } from "../../shared/components/ClassRosterSheet";
 import { timeLabel, pad } from "../../shared/classTime";
 import type { ClientWithPackage, GymClass } from "../../shared/types";
 import { useNow } from "../../shared/useNow";
+import "./FrontDeskHome.css";
 
 type Modal = "checkin" | "new" | "dropin" | "invite";
 
@@ -107,52 +109,50 @@ export function FrontDeskHome() {
 
       <SearchField value={query} onChange={setQuery} placeholder="Find a client by name or phone" />
       {query.trim() !== "" && (
-        <Card pad="none" style={{ marginTop: 10, overflow: "hidden" }}>
+        <Card className="bq-mt-10px bq-overflow-hidden" pad="none">
           {matches.map((c, i) => {
             const plan = planSummary(c, bundleTypes);
             const status = deskStatus(c);
             const canEnter = status.tone === "good" || status.tone === "warn" || status.tone === "pt";
             const q = quick[c.id];
             return (
-              <div key={c.id} data-testid="home-result" style={{ padding: "10px 12px 10px 18px", borderBottom: i === matches.length - 1 ? "none" : "1px solid var(--color-border-primary-default)" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <div className="bq-frontdesk-front-desk-home-spacing" key={c.id} data-testid="home-result" style={{ borderBottom: i === matches.length - 1 ? "none" : "1px solid var(--color-border-primary-default)" }}>
+                <div className="bq-flex bq-items-center bq-gap-3">
                   <button
-                    className="bq-scale"
+                    className="bq-scale bq-frontdesk-front-desk-home-btn"
                     onClick={() => setPicked(c)}
-                    style={{ minWidth: 0, flex: 1, display: "block", border: 0, background: "none", padding: "4px 0", cursor: "pointer", textAlign: "left", color: "var(--color-text-primary-default)" }}
                   >
-                    <span style={{ display: "block", font: "700 var(--text-callout-size) var(--font-family-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.name}</span>
-                    <span style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 4, minWidth: 0 }}>
+                    <span className="bq-frontdesk-front-desk-home-title">{c.name}</span>
+                    <span className="bq-flex bq-items-center bq-gap-2 bq-mt-1 bq-min-w-0">
                       <PlanPill client={c} />
-                      <span style={{ font: "400 var(--text-caption-1-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", minWidth: 0 }}>{plan.title}</span>
+                      <span className="bq-frontdesk-front-desk-home-meta">{plan.title}</span>
                     </span>
                   </button>
                   {q?.state === "done" ? (
-                    <span style={{ display: "inline-flex", alignItems: "center", gap: 6, color: "var(--color-text-status-paid-default)", font: "800 var(--text-subheadline-size) var(--font-family-body)", flex: "none" }}>
+                    <span className="bq-frontdesk-front-desk-home-title-2">
                       <Icon name="check" size={18} /> Done
                     </span>
                   ) : canEnter ? (
                     <button
-                      className="bq-scale"
+                      className="bq-scale bq-frontdesk-front-desk-home-btn-2"
                       disabled={q?.state === "busy"}
                       onClick={() => quickCheckIn(c)}
-                      style={{ flex: "none", height: 42, padding: "0 18px", border: 0, borderRadius: 999, background: "var(--color-bg-fill-primary-default)", color: "var(--color-text-on-fill-default)", font: "700 var(--text-subheadline-size) var(--font-family-body)", cursor: "pointer", opacity: q?.state === "busy" ? 0.6 : 1 }}
+                      style={{ opacity: q?.state === "busy" ? 0.6 : 1 }}
                     >
                       {q?.state === "busy" ? "…" : "Check in"}
                     </button>
                   ) : (
                     <button
-                      className="bq-scale"
+                      className="bq-scale bq-frontdesk-front-desk-home-btn-3"
                       onClick={() => setPicked(c)}
-                      style={{ flex: "none", height: 42, padding: "0 16px", border: "1px solid var(--color-border-primary-default)", borderRadius: 999, background: "var(--color-bg-surface-primary-default)", color: "var(--color-text-primary-default)", font: "700 var(--text-subheadline-size) var(--font-family-body)", cursor: "pointer" }}
                     >
                       Options
                     </button>
                   )}
                 </div>
-                {q?.state === "done" && <div style={{ font: "400 var(--text-caption-1-size) var(--font-family-mono)", color: "var(--color-text-status-paid-default)", marginTop: 4 }}>{q.note}</div>}
+                {q?.state === "done" && <div className="bq-frontdesk-front-desk-home-meta-2">{q.note}</div>}
                 {q?.state === "error" && (
-                  <div role="alert" style={{ font: "600 var(--text-caption-1-size)/1.5 var(--font-family-body)", color: "var(--color-text-status-danger-default)", background: "var(--color-bg-fill-status-danger-default)", borderRadius: "var(--radius-item)", padding: "8px 10px", marginTop: 6 }}>
+                  <div className="bq-frontdesk-front-desk-home-text" role="alert">
                     {q.text}
                   </div>
                 )}
@@ -164,19 +164,17 @@ export function FrontDeskHome() {
       )}
 
       <button
-        className="bq-scale"
+        className="bq-scale bq-frontdesk-front-desk-home-btn-4"
         onClick={() => setModal("checkin")}
-        style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, width: "100%", height: 64, marginTop: 14, border: 0, borderRadius: "var(--radius-card)", background: "var(--color-bg-fill-primary-default)", color: "var(--color-bg-surface-primary-default)", font: "800 18px var(--font-family-body)", cursor: "pointer", boxShadow: "var(--shadow-cta)" }}
       >
         <Icon name="check" size={24} /> Check someone in
       </button>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10, marginTop: 10 }}>
+      <div className="bq-frontdesk-front-desk-home-grid">
         {ACTIONS.map((a) => (
           <button
             key={a.key}
-            className="bq-scale bq-card"
+            className="bq-scale bq-card bq-frontdesk-front-desk-home-btn-5"
             onClick={() => setModal(a.key)}
-            style={{ minHeight: 76, color: "var(--color-text-primary-default)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 6, padding: 8, cursor: "pointer", font: "700 var(--text-footnote-size)/1.2 var(--font-family-body)", textAlign: "center" }}
           >
             <Icon name={a.icon} size={22} />
             {a.label}
@@ -184,36 +182,35 @@ export function FrontDeskHome() {
         ))}
       </div>
 
-      <div style={{ display: "flex", gap: 8, marginTop: 14, flexWrap: "wrap" }}>
+      <div className="bq-flex bq-gap-2 bq-mt-14px bq-wrap">
         {[
           { k: "Checked in today", v: data.todayCheckIns },
           { k: "Drop-ins", v: data.todayDropIns },
           { k: "In the last 2h", v: data.activeNow },
         ].map((x) => (
-          <span key={x.k} style={{ font: "600 var(--text-footnote-size) var(--font-family-body)", color: "var(--color-text-secondary-default)", background: "var(--color-bg-surface-secondary-default)", borderRadius: 999, padding: "6px 12px" }}>
-            <b style={{ color: "var(--color-text-primary-default)", font: "800 var(--text-subheadline-size) var(--font-family-mono)" }}>{x.v}</b> {x.k}
+          <span className="bq-frontdesk-front-desk-home-text-2" key={x.k}>
+            <b className="bq-frontdesk-front-desk-home-meta-3">{x.v}</b> {x.k}
           </span>
         ))}
       </div>
 
       <SectionHeader right={<SectionLink onClick={() => navigate("/bookings")}>All bookings</SectionLink>}>Next up</SectionHeader>
-      <Card pad="none" style={{ overflow: "hidden", marginBottom: 24 }}>
+      <Card className="bq-overflow-hidden bq-mb-6" pad="none">
         {nextDay && nextUp.length > 0 && (
-          <div data-testid="next-day-label" style={{ padding: "12px 18px 0", font: "600 var(--text-footnote-size) var(--font-family-body)", color: "var(--color-text-secondary-default)" }}>
+          <div className="bq-frontdesk-front-desk-home-text-3" data-testid="next-day-label">
             Nothing left today · {nextDay}
           </div>
         )}
         {nextUp.map((c, i) => (
           <button
             key={c.id}
-            className={`bq-plain bq-scale bq-listrow bq-listrow--compact ${!(i === nextUp.length - 1) ? "bq-listrow--divider" : ""}`}
+            className={cx(`bq-plain bq-scale bq-listrow bq-listrow--compact ${!(i === nextUp.length - 1) ? "bq-listrow--divider" : ""}`, "bq-frontdesk-front-desk-home-btn-6")}
             onClick={() => setRoster(c)}
-            style={{ width: "100%", minHeight: 60, background: "none", cursor: "pointer", textAlign: "left" }}
           >
-            <span style={{ width: 84, flex: "none", whiteSpace: "nowrap", font: "700 var(--text-subheadline-size) var(--font-family-mono)" }}>{clockOf(c.startsAt)}</span>
+            <span className="bq-frontdesk-front-desk-home-meta-4">{clockOf(c.startsAt)}</span>
             <span className="bq-grow">
-              <span style={{ display: "block", font: "700 var(--text-body-size) var(--font-family-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.title}</span>
-              <span style={{ display: "block", font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)" }}>{(c.bookedCount ?? 0) === 0 ? "No one booked" : `${c.bookedCount} booked`}</span>
+              <span className="bq-frontdesk-front-desk-home-title-3">{c.title}</span>
+              <span className="bq-frontdesk-front-desk-home-meta-5">{(c.bookedCount ?? 0) === 0 ? "No one booked" : `${c.bookedCount} booked`}</span>
             </span>
             <Icon name="chevron-right" size={16} />
           </button>
@@ -222,29 +219,19 @@ export function FrontDeskHome() {
       </Card>
 
       <SectionHeader right={<SectionLink onClick={() => navigate("/activity")}>Full activity &amp; logs</SectionLink>}>Recent activity</SectionHeader>
-      <Card pad="none" style={{ overflow: "hidden" }}>
+      <Card className="bq-overflow-hidden" pad="none">
         {data.recent.slice(0, 5).map((r, i) => (
-          <div key={r.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 18px", borderBottom: i === Math.min(data.recent.length, 5) - 1 ? "none" : "1px solid var(--color-border-primary-default)" }}>
-            <span
-              style={{
-                width: 36,
-                height: 36,
-                borderRadius: 999,
-                flex: "none",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                background: r.kind === "check_in" ? "var(--color-bg-fill-status-paid-default)" : "var(--color-bg-fill-accent-default)",
-                color: r.kind === "check_in" ? "var(--color-text-status-paid-default)" : "var(--color-bg-fill-primary-active)",
-              }}
+          <div className="bq-frontdesk-front-desk-home-row" key={r.id} style={{ borderBottom: i === Math.min(data.recent.length, 5) - 1 ? "none" : "1px solid var(--color-border-primary-default)" }}>
+            <span className="bq-frontdesk-front-desk-home-row-2"
+              style={{ background: r.kind === "check_in" ? "var(--color-bg-fill-status-paid-default)" : "var(--color-bg-fill-accent-default)", color: r.kind === "check_in" ? "var(--color-text-status-paid-default)" : "var(--color-bg-fill-primary-active)" }}
             >
               <Icon name={r.kind === "check_in" ? "check" : "ticket"} size={18} />
             </span>
             <div className="bq-grow">
-              <div style={{ font: "700 var(--text-body-size) var(--font-family-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.name}</div>
+              <div className="bq-frontdesk-front-desk-home-title-4">{r.name}</div>
               <div className="bq-meta">{r.detail}</div>
             </div>
-            <span style={{ font: "400 var(--text-caption-1-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)", whiteSpace: "nowrap" }}>{timeAgo(r.at)}</span>
+            <span className="bq-frontdesk-front-desk-home-meta-6">{timeAgo(r.at)}</span>
           </div>
         ))}
         {data.recent.length === 0 && (

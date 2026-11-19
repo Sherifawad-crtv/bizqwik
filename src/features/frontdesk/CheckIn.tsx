@@ -21,6 +21,7 @@ import { DropIn } from "./DropIn";
 import { SheetHeading } from "./shared";
 import { dateLabel } from "../../shared/format";
 import { useNow } from "../../shared/useNow";
+import "./CheckIn.css";
 
 const hasActivePlan = (c: ClientWithPackage) => !!c.groupPlan || c.currentPackage?.status === "active";
 // A class bundle with nothing left can't be checked in on (unless PT covers them).
@@ -41,7 +42,7 @@ export function CheckIn({ embedded = false, onDropIn, onCreateClient }: { embedd
 
   return (
     <div>
-      <div style={{ font: "400 var(--text-footnote-size)/1.5 var(--font-family-mono)", color: "var(--color-text-secondary-default)", margin: "0 2px 14px" }}>
+      <div className="bq-frontdesk-check-in-meta">
         Find the client by name or phone to check them in by hand.
       </div>
       <ClientPicker clients={data.clients} bundleTypes={bundleTypes} onPick={setPicked} onCreate={onCreateClient ?? newClient.open} />
@@ -141,47 +142,47 @@ export function ConfirmCheckInSheet({ client, onClose, onDropIn }: { client: Cli
         <>
           <div className="bq-label">CHECK-IN</div>
           <div className="bq-title">{shown.name}</div>
-          <div style={{ background: "var(--color-bg-surface-secondary-default)", border: "1px solid var(--color-border-primary-default)", borderRadius: "var(--radius-item)", padding: "12px 16px" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <div style={{ font: "700 var(--text-caption-2-size) var(--font-family-mono)", letterSpacing: ".08em", color: "var(--color-text-tertiary-default)", flex: 1 }}>CURRENT PLAN</div>
+          <div className="bq-frontdesk-check-in-confirm-check-in-sheet-box">
+            <div className="bq-flex bq-items-center bq-gap-10px">
+              <div className="bq-frontdesk-check-in-confirm-check-in-sheet-label">CURRENT PLAN</div>
               <PlanPill client={current} />
             </div>
-            <div style={{ font: "700 var(--text-callout-size) var(--font-family-body)", marginTop: 4 }}>{plan.title}</div>
-            <div style={{ font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-secondary-default)" }}>{plan.detail}</div>
+            <div className="bq-frontdesk-check-in-confirm-check-in-sheet-title">{plan.title}</div>
+            <div className="bq-frontdesk-check-in-confirm-check-in-sheet-meta">{plan.detail}</div>
           </div>
           {error && <ErrorBanner text={error} />}
           {bundle && eligible && (
-            <div style={{ marginTop: 12, font: "600 var(--text-footnote-size)/1.5 var(--font-family-body)", color: "var(--color-text-primary-default)", background: "var(--color-bg-fill-accent-default)", borderRadius: "var(--radius-item)", padding: "10px 14px" }}>
+            <div className="bq-frontdesk-check-in-confirm-check-in-sheet-text">
               Checking in uses 1 session of {bundle.name} ({bundle.creditsRemaining} → {Math.max(0, (bundle.creditsRemaining ?? 0) - 1)} left). Every visit counts, even twice in a day.
             </div>
           )}
           {(empty || noSessions) && (
-            <div role="alert" data-testid="no-sessions" style={{ marginTop: 12, background: "var(--color-bg-fill-status-danger-default)", color: "var(--color-text-status-danger-default)", borderRadius: "var(--radius-item)", padding: "12px 14px" }}>
-              <div style={{ font: "800 var(--text-body-size) var(--font-family-body)" }}>No sessions left</div>
-              <div style={{ font: "600 var(--text-footnote-size)/1.5 var(--font-family-body)", marginTop: 2 }}>
+            <div className="bq-frontdesk-check-in-confirm-check-in-sheet-box-2" role="alert" data-testid="no-sessions">
+              <div className="bq-frontdesk-check-in-confirm-check-in-sheet-title-2">No sessions left</div>
+              <div className="bq-frontdesk-check-in-confirm-check-in-sheet-text-2">
                 {noSessions ?? `${shown.name} has used all ${bundle?.creditsTotal ?? ""} sessions of ${bundle?.name ?? "their bundle"}.`} Renew their plan below, or sell a drop-in for today.
               </div>
             </div>
           )}
           {eligible ? (
-            <Button fullWidth size="lg" style={{ marginTop: 16 }} disabled={busy} onClick={confirm}>
+            <Button className="bq-mt-4" fullWidth size="lg" disabled={busy} onClick={confirm}>
               {busy ? "Checking in…" : "Confirm check-in"}
             </Button>
           ) : (
             <>
-              <div style={{ marginTop: 12, font: "600 var(--text-footnote-size)/1.5 var(--font-family-body)", color: "var(--color-text-status-logging-default)", background: "var(--color-bg-fill-status-logging-default)", borderRadius: "var(--radius-item)", padding: "10px 14px" }}>
+              <div className="bq-frontdesk-check-in-confirm-check-in-sheet-text-3">
                 {frozenUntil
                   ? `Their plan is frozen until ${dateLabel(frozenUntil.slice(0, 10))} and restarts by itself. Until then they can pay for a drop-in.`
                   : empty || noSessions ? "Nothing to check in on today." : "No active plan or package — they can renew a plan below, or pay for a drop-in."}
               </div>
               {/* Whoever can't check in can be sold what they need, right here. A frozen plan is still theirs. */}
               {!frozenUntil && (
-                <Button fullWidth size="lg" style={{ marginTop: 16 }} data-testid="renew-plan" onClick={() => startSell("sell-plan")}>
+                <Button className="bq-mt-4" fullWidth size="lg" data-testid="renew-plan" onClick={() => startSell("sell-plan")}>
                   {current.lastGroupPlan || current.currentPackage ? "Renew plan" : "Sell a plan"}
                 </Button>
               )}
               {!frozenUntil && current.currentPackage?.status !== "active" && bundleTypes.length > 0 && (
-                <Button variant="secondary" fullWidth style={{ marginTop: 8 }} data-testid="sell-pt" onClick={() => startSell("renew-package")}>
+                <Button className="bq-mt-2" variant="secondary" fullWidth data-testid="sell-pt" onClick={() => startSell("renew-package")}>
                   {current.currentPackage ? "Renew PT package" : "Sell a PT package"}
                 </Button>
               )}
@@ -190,7 +191,7 @@ export function ConfirmCheckInSheet({ client, onClose, onDropIn }: { client: Cli
               </Button>
             </>
           )}
-          <Button variant="secondary" fullWidth style={{ marginTop: 8 }} onClick={onClose} disabled={busy}>
+          <Button className="bq-mt-2" variant="secondary" fullWidth onClick={onClose} disabled={busy}>
             Cancel
           </Button>
         </>

@@ -13,6 +13,7 @@ import { Card } from "../../design-system/components/Card";
 import { SectionHeader } from "../../design-system/components/SectionHeader";
 import { useNewClient } from "./NewClientModal";
 import { useFrontDeskCatalog } from "./members/offers";
+import "./Invitations.css";
 
 export function Invitations({ embedded = false, onCreateClient }: { embedded?: boolean; onCreateClient?: () => void } = {}) {
   useSetHeader(embedded ? null : { kicker: "FRONT DESK", title: "Invitations" }, []);
@@ -60,18 +61,18 @@ export function Invitations({ embedded = false, onCreateClient }: { embedded?: b
 
   return (
     <div>
-      <Card pad="none" style={{ padding: "16px 18px", display: "flex", gap: 12, alignItems: "flex-start", marginBottom: 16 }}>
-        <span style={{ color: "var(--color-bg-fill-primary-active)", display: "flex", marginTop: 2 }}>
+      <Card className="bq-frontdesk-invitations-card" pad="none">
+        <span className="bq-frontdesk-invitations-row">
           <Icon name="gift" size={22} />
         </span>
         <div>
           <div className="bq-h3">Guest invitations</div>
-          <div style={{ font: "400 var(--text-footnote-size)/1.5 var(--font-family-mono)", color: "var(--color-text-secondary-default)" }}>Members on an active plan can bring guests, up to the guest passes their plan includes.</div>
+          <div className="bq-frontdesk-invitations-meta">Members on an active plan can bring guests, up to the guest passes their plan includes.</div>
         </div>
       </Card>
 
       {done && (
-        <div style={{ marginBottom: 14, font: "600 var(--text-footnote-size)/1.5 var(--font-family-body)", color: "var(--color-text-status-paid-default)", background: "var(--color-bg-fill-status-paid-default)", borderRadius: "var(--radius-item)", padding: "10px 14px" }}>
+        <div className="bq-frontdesk-invitations-text">
           Invitation recorded — {done}
         </div>
       )}
@@ -94,16 +95,15 @@ export function Invitations({ embedded = false, onCreateClient }: { embedded?: b
         </>
       ) : (
         <>
-          <Card pad="none" style={{ padding: "16px 18px", marginBottom: 14 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <Card className="bq-frontdesk-invitations-card-2" pad="none">
+            <div className="bq-flex bq-items-center bq-gap-10px">
               <div className="bq-grow">
                 <div className="bq-label">MEMBER</div>
-                <div style={{ font: "800 var(--text-title-2-size) var(--font-family-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{member.name}</div>
+                <div className="bq-frontdesk-invitations-title">{member.name}</div>
               </div>
-              <Button
+              <Button className="bq-frontdesk-invitations-btn"
                 variant="quiet"
                 size="md"
-                style={{ height: 36, padding: "0 12px" }}
                 onClick={() => {
                   setMemberId(null);
                   setDone(null);
@@ -113,9 +113,9 @@ export function Invitations({ embedded = false, onCreateClient }: { embedded?: b
                 Change
               </Button>
             </div>
-            <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginTop: 10 }}>
-              <span style={{ font: "800 34px/1 var(--font-family-body)", letterSpacing: "-.02em", color: left > 0 ? "var(--color-bg-fill-primary-active)" : "var(--color-text-tertiary-default)" }}>{left}</span>
-              <span style={{ font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-secondary-default)" }}>invitation{left === 1 ? "" : "s"} left</span>
+            <div className="bq-flex bq-items-baseline bq-gap-2 bq-mt-10px">
+              <span className="bq-frontdesk-invitations-title-2" style={{ color: left > 0 ? "var(--color-bg-fill-primary-active)" : "var(--color-text-tertiary-default)" }}>{left}</span>
+              <span className="bq-frontdesk-invitations-meta-2">invitation{left === 1 ? "" : "s"} left</span>
             </div>
           </Card>
 
@@ -127,7 +127,7 @@ export function Invitations({ embedded = false, onCreateClient }: { embedded?: b
                 <TextField label="VISIT DATE" type="date" min={todayIso()} value={visitDate} onChange={(e) => setVisitDate(e.target.value)} />
               </div>
               {error && <ErrorBanner text={error} />}
-              <Button fullWidth size="lg" style={{ marginTop: 16 }} disabled={busy} onClick={submit}>
+              <Button className="bq-mt-4" fullWidth size="lg" disabled={busy} onClick={submit}>
                 {busy ? "Saving…" : "Record invitation"}
               </Button>
             </>

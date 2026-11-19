@@ -1,0 +1,56 @@
+/* Styles for Invitations.tsx. Tokens only; see DESIGN_SYSTEM.md. */
+
+.bq-frontdesk-invitations-card {
+  padding: 16px 18px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.bq-frontdesk-invitations-row {
+  color: var(--color-bg-fill-primary-active);
+  display: flex;
+  margin-top: 2px;
+}
+
+.bq-frontdesk-invitations-meta {
+  font: 400 var(--text-footnote-size)/1.5 var(--font-family-mono);
+  color: var(--color-text-secondary-default);
+}
+
+.bq-frontdesk-invitations-text {
+  margin-bottom: 14px;
+  font: 600 var(--text-footnote-size)/1.5 var(--font-family-body);
+  color: var(--color-text-status-paid-default);
+  background: var(--color-bg-fill-status-paid-default);
+  border-radius: var(--radius-item);
+  padding: 10px 14px;
+}
+
+.bq-frontdesk-invitations-card-2 {
+  padding: 16px 18px;
+  margin-bottom: 14px;
+}
+
+.bq-frontdesk-invitations-title {
+  font: 800 var(--text-title-2-size) var(--font-family-body);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bq-frontdesk-invitations-btn {
+  height: 36px;
+  padding: 0 12px;
+}
+
+.bq-frontdesk-invitations-title-2 {
+  font: 800 34px/1 var(--font-family-body);
+  letter-spacing: -.02em;
+}
+
+.bq-frontdesk-invitations-meta-2 {
+  font: 400 var(--text-footnote-size) var(--font-family-mono);
+  color: var(--color-text-secondary-default);
+}

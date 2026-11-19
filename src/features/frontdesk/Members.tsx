@@ -1,3 +1,4 @@
+import { cx } from "../../design-system/cx";
 import { EmptyState } from "../../design-system/components/EmptyState";
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -21,6 +22,7 @@ import { DropIn } from "./DropIn";
 import { useFrontDeskCatalog, useSellableCoaches } from "./members/offers";
 import { CreateClientSheet } from "./members/CreateClientSheet";
 import { ClientSheet } from "./members/ClientSheet";
+import "./Members.css";
 
 export function Members() {
   useSetHeader({ kicker: "FRONT DESK", title: "Clients" }, []);
@@ -64,7 +66,7 @@ export function Members() {
     <div>
       <LocationSwitcher />
       <SearchField value={query} onChange={setQuery} />
-      <div style={{ display: "flex", alignItems: "center", gap: 8, margin: "12px 0 4px", overflowX: "auto" }}>
+      <div className="bq-frontdesk-members-row">
         {(["all", "active", "soon", "expired", "none"] as const).map((f) => {
           const n = f === "all" ? clients.length : f === "soon" ? clients.filter((c) => endingSoon(c) !== null).length : clients.filter((c) => planSummary(c, bundleTypes).tone === f).length;
           const on = filter === f;
@@ -81,11 +83,11 @@ export function Members() {
         })}
       </div>
 
-      <div style={{ marginTop: 14 }}>
+      <div className="bq-mt-14px">
         <SectionHeader
           count={shown.length}
           right={
-            <Button size="md" style={{ height: 36, padding: "0 14px" }} onClick={() => setCreating(true)}>
+            <Button className="bq-frontdesk-members-btn" size="md" onClick={() => setCreating(true)}>
               + New client
             </Button>
           }
@@ -94,7 +96,7 @@ export function Members() {
         </SectionHeader>
       </div>
 
-      <Card pad="none" style={{ overflow: "hidden" }}>
+      <Card className="bq-overflow-hidden" pad="none">
         {shown.map((c, i) => {
           const plan = planSummary(c, bundleTypes);
           const soon = endingSoon(c);
@@ -102,14 +104,14 @@ export function Members() {
             <button
               key={c.id}
               onClick={() => setSelectedId(c.id)}
-              className={`bq-plain bq-listrow bq-listrow--compact ${!(i === shown.length - 1) ? "bq-listrow--divider" : ""}`} style={{ width: "100%", minHeight: 64, background: "none", cursor: "pointer", textAlign: "left" }}
+              className={cx(`bq-plain bq-listrow bq-listrow--compact ${!(i === shown.length - 1) ? "bq-listrow--divider" : ""}`, "bq-frontdesk-members-btn-2")}
             >
               <div className="bq-grow">
-                <div style={{ font: "700 var(--text-callout-size) var(--font-family-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.name}</div>
-                <div style={{ font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                <div className="bq-frontdesk-members-title">{c.name}</div>
+                <div className="bq-frontdesk-members-meta">
                   {plan.title} · {plan.detail}
-                  {soon && <span style={{ color: "var(--color-text-status-logging-default)", fontWeight: 700 }}> · {soon.label}</span>}
-                  {here && !c.homeLocationId && <span style={{ color: "var(--color-text-status-danger-default)", fontWeight: 700 }}> · No location</span>}
+                  {soon && <span className="bq-frontdesk-members-part"> · {soon.label}</span>}
+                  {here && !c.homeLocationId && <span className="bq-frontdesk-members-part-2"> · No location</span>}
                 </div>
               </div>
               <PlanPill client={c} />

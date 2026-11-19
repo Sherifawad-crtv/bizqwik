@@ -11,6 +11,7 @@ import { PlanPill } from "../../shared/components/PlanPill";
 import { Card } from "../../design-system/components/Card";
 import { matchesClient, planSummary } from "../../shared/deskStatus";
 import { useFrontDeskCatalog } from "./members/offers";
+import "./CheckInList.css";
 
 type Result = { state: "busy" } | { state: "done"; note: string } | { state: "error"; text: string };
 
@@ -45,38 +46,38 @@ export function CheckInList() {
   return (
     <div>
       <SearchField value={query} onChange={setQuery} placeholder="Search name or phone" />
-      <Card pad="none" style={{ marginTop: 10, overflow: "hidden" }}>
+      <Card className="bq-mt-10px bq-overflow-hidden" pad="none">
         {shown.map((c, i) => {
           const plan = planSummary(c, bundleTypes);
           const r = results[c.id];
           return (
-            <div key={c.id} data-testid="checkin-row" style={{ padding: "12px 16px", borderBottom: i === shown.length - 1 ? "none" : "1px solid var(--color-border-primary-default)" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <div className="bq-frontdesk-check-in-list-spacing" key={c.id} data-testid="checkin-row" style={{ borderBottom: i === shown.length - 1 ? "none" : "1px solid var(--color-border-primary-default)" }}>
+              <div className="bq-flex bq-items-center bq-gap-3">
                 <div className="bq-grow">
-                  <div style={{ font: "700 var(--text-callout-size) var(--font-family-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.name}</div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 2 }}>
+                  <div className="bq-frontdesk-check-in-list-title">{c.name}</div>
+                  <div className="bq-flex bq-items-center bq-gap-2 bq-mt-2px">
                     <PlanPill client={c} />
-                    <span style={{ font: "400 var(--text-caption-1-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{plan.detail}</span>
+                    <span className="bq-frontdesk-check-in-list-meta">{plan.detail}</span>
                   </div>
                 </div>
                 {r?.state === "done" ? (
-                  <span style={{ display: "inline-flex", alignItems: "center", gap: 6, color: "var(--color-text-status-paid-default)", font: "800 var(--text-subheadline-size) var(--font-family-body)", flex: "none" }}>
+                  <span className="bq-frontdesk-check-in-list-title-2">
                     <Icon name="check" size={18} /> Done
                   </span>
                 ) : (
                   <button
-                    className="bq-scale"
+                    className="bq-scale bq-frontdesk-check-in-list-btn"
                     disabled={r?.state === "busy"}
                     onClick={() => checkIn(c)}
-                    style={{ flex: "none", height: 42, padding: "0 18px", border: 0, borderRadius: 999, background: "var(--color-bg-fill-primary-default)", color: "var(--color-text-on-fill-default)", font: "700 var(--text-subheadline-size) var(--font-family-body)", cursor: "pointer", opacity: r?.state === "busy" ? 0.6 : 1 }}
+                    style={{ opacity: r?.state === "busy" ? 0.6 : 1 }}
                   >
                     {r?.state === "busy" ? "…" : "Check in"}
                   </button>
                 )}
               </div>
-              {r?.state === "done" && <div style={{ font: "400 var(--text-caption-1-size) var(--font-family-mono)", color: "var(--color-text-status-paid-default)", marginTop: 6 }}>{r.note}</div>}
+              {r?.state === "done" && <div className="bq-frontdesk-check-in-list-meta-2">{r.note}</div>}
               {r?.state === "error" && (
-                <div role="alert" style={{ font: "600 var(--text-caption-1-size)/1.5 var(--font-family-body)", color: "var(--color-text-status-danger-default)", background: "var(--color-bg-fill-status-danger-default)", borderRadius: "var(--radius-item)", padding: "8px 10px", marginTop: 8 }}>
+                <div className="bq-frontdesk-check-in-list-text" role="alert">
                   {r.text}
                 </div>
               )}

@@ -8,6 +8,7 @@ import { Icon } from "../../design-system/components/Icon";
 import { Sheet } from "../../design-system/components/Sheet";
 import { TextField } from "../../design-system/components/FormField";
 import { Card } from "../../design-system/components/Card";
+import "./PaymentRequests.css";
 
 const when = (iso: string) => new Date(iso).toLocaleString(undefined, { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" });
 
@@ -21,26 +22,25 @@ export function PaymentRequestsCard() {
   return (
     <>
       <button
-        className="bq-scale"
+        className="bq-scale bq-frontdesk-payment-requests-payment-requests-card-btn"
         onClick={() => setOpen(true)}
-        style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", marginBottom: 10, textAlign: "left", cursor: "pointer", background: "var(--color-bg-fill-status-logging-default)", borderRadius: "var(--radius-card)", padding: "14px 18px" }}
       >
-        <span style={{ width: 34, height: 34, borderRadius: 999, flex: "none", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--color-bg-surface-primary-default)", color: "var(--color-text-status-logging-default)" }}>
+        <span className="bq-frontdesk-payment-requests-payment-requests-card-row">
           <Icon name="cash" size={18} />
         </span>
         <span className="bq-grow">
-          <span style={{ display: "block", font: "700 var(--text-body-size) var(--font-family-body)", color: "var(--color-text-status-logging-default)" }}>
+          <span className="bq-frontdesk-payment-requests-payment-requests-card-title">
             {list.length} payment{list.length === 1 ? "" : "s"} to approve
           </span>
-          <span style={{ display: "block", font: "400 var(--text-caption-1-size) var(--font-family-mono)", color: "var(--color-text-status-logging-default)" }}>Check the receipt, then approve</span>
+          <span className="bq-frontdesk-payment-requests-payment-requests-card-meta">Check the receipt, then approve</span>
         </span>
         <Icon name="chevron-right" size={16} />
       </button>
       <Sheet open={open} onClose={() => setOpen(false)}>
         <div className="bq-label">INSTAPAY</div>
-        <div style={{ font: "800 var(--text-title-1-size)/1.2 var(--font-family-body)", letterSpacing: "-.02em", margin: "4px 0 14px" }}>Payments to approve</div>
-        {list.length === 0 && <div style={{ font: "400 var(--text-subheadline-size) var(--font-family-body)", color: "var(--color-text-secondary-default)", padding: "12px 0 8px" }}>All caught up.</div>}
-        <div style={{ display: "flex", flexDirection: "column", gap: 12, maxHeight: "60vh", overflowY: "auto" }}>
+        <div className="bq-frontdesk-payment-requests-payment-requests-card-title-2">Payments to approve</div>
+        {list.length === 0 && <div className="bq-frontdesk-payment-requests-payment-requests-card-text">All caught up.</div>}
+        <div className="bq-frontdesk-payment-requests-payment-requests-card-stack">
           {list.map((r) => (
             <RequestRow key={r.id} r={r} onDone={() => reqs.refetch()} />
           ))}
@@ -68,37 +68,37 @@ function RequestRow({ r, onDone }: { r: PaymentRequest; onDone: () => void }) {
     }
   };
   return (
-    <Card pad="none" style={{ padding: 14 }}>
-      <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
+    <Card className="bq-frontdesk-payment-requests-request-row-card" pad="none">
+      <div className="bq-flex bq-gap-3 bq-items-start">
         {r.proofUrl ? (
-          <a href={r.proofUrl} target="_blank" rel="noreferrer" aria-label={`Open ${r.clientName}'s receipt`} style={{ flex: "none" }}>
-            <img src={r.proofUrl} alt={`${r.clientName}'s receipt`} style={{ width: 72, height: 96, objectFit: "cover", borderRadius: "var(--radius-chip)", border: "1px solid var(--color-border-primary-default)", background: "var(--color-bg-surface-secondary-default)" }} />
+          <a className="bq-flex-none" href={r.proofUrl} target="_blank" rel="noreferrer" aria-label={`Open ${r.clientName}'s receipt`}>
+            <img className="bq-frontdesk-payment-requests-request-row-img" src={r.proofUrl} alt={`${r.clientName}'s receipt`} />
           </a>
         ) : (
-          <span style={{ width: 72, height: 96, flex: "none", borderRadius: "var(--radius-chip)", background: "var(--color-bg-surface-secondary-default)" }} />
+          <span className="bq-frontdesk-payment-requests-request-row-box" />
         )}
         <div className="bq-grow">
           <div className="bq-h3">{r.clientName}</div>
-          <div style={{ font: "400 var(--text-subheadline-size) var(--font-family-body)", marginTop: 2 }}>{r.name}</div>
-          <div style={{ font: "800 var(--text-title-2-size) var(--font-family-body)", marginTop: 4 }}>{egp(r.price)}</div>
-          <div style={{ font: "400 var(--text-caption-1-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)", marginTop: 2 }}>{when(r.createdAt)}</div>
+          <div className="bq-frontdesk-payment-requests-request-row-text">{r.name}</div>
+          <div className="bq-frontdesk-payment-requests-request-row-title">{egp(r.price)}</div>
+          <div className="bq-frontdesk-payment-requests-request-row-meta">{when(r.createdAt)}</div>
         </div>
       </div>
       {rejecting ? (
-        <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 8 }}>
+        <div className="bq-mt-3 bq-flex bq-col bq-gap-2">
           <TextField label="TELL THEM WHY (OPTIONAL)" value={note} onChange={(e) => setNote(e.target.value)} placeholder="Amount didn't match" />
-          <div style={{ display: "flex", gap: 8 }}>
-            <Button variant="danger" style={{ flex: 1 }} disabled={busy} onClick={() => run(() => api.rejectPayment(r.id, note))}>{busy ? "Sending…" : "Reject"}</Button>
+          <div className="bq-flex bq-gap-2">
+            <Button className="bq-flex-1" variant="danger" disabled={busy} onClick={() => run(() => api.rejectPayment(r.id, note))}>{busy ? "Sending…" : "Reject"}</Button>
             <Button variant="quiet" disabled={busy} onClick={() => setRejecting(false)}>Back</Button>
           </div>
         </div>
       ) : (
-        <div style={{ marginTop: 12, display: "flex", gap: 8 }}>
-          <Button style={{ flex: 1 }} disabled={busy} onClick={() => run(() => api.approvePayment(r.id))}>{busy ? "Approving…" : "Approve"}</Button>
+        <div className="bq-mt-3 bq-flex bq-gap-2">
+          <Button className="bq-flex-1" disabled={busy} onClick={() => run(() => api.approvePayment(r.id))}>{busy ? "Approving…" : "Approve"}</Button>
           <Button variant="quiet" disabled={busy} onClick={() => setRejecting(true)}>Reject</Button>
         </div>
       )}
-      {error && <div className="bq-rise" style={{ font: "600 var(--text-footnote-size)/1.5 var(--font-family-body)", color: "var(--color-text-status-danger-default)", background: "var(--color-bg-fill-status-danger-default)", borderRadius: "var(--radius-item)", padding: "10px 14px", marginTop: 10 }}>{error}</div>}
+      {error && <div className="bq-rise bq-frontdesk-payment-requests-request-row-text-2">{error}</div>}
     </Card>
   );
 }

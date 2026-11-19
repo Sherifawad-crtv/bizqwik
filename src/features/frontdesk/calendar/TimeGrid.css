@@ -1,0 +1,118 @@
+/* Styles for TimeGrid.tsx. Tokens only; see DESIGN_SYSTEM.md. */
+
+.bq-frontdesk-time-grid-size {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  position: relative;
+}
+
+.bq-frontdesk-time-grid-grid {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  display: grid;
+  background: var(--color-bg-surface-primary-default);
+  border-bottom: 1px solid var(--color-border-primary-default);
+}
+
+.bq-frontdesk-time-grid-btn {
+  border: 0;
+  background: none;
+  padding: 8px 4px;
+  text-align: center;
+  border-left: 1px solid var(--color-border-primary-default);
+}
+
+.bq-frontdesk-time-grid-label {
+  font: 700 var(--text-caption-2-size) var(--font-family-mono);
+  letter-spacing: .06em;
+}
+
+.bq-frontdesk-time-grid-title {
+  margin: 2px auto 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: 800 18px var(--font-family-body);
+}
+
+.bq-frontdesk-time-grid-meta {
+  position: absolute;
+  right: 8px;
+  font: 500 var(--text-caption-2-size) var(--font-family-mono);
+  color: var(--color-text-tertiary-default);
+}
+
+.bq-frontdesk-time-grid-part {
+  position: relative;
+  border-left: 1px solid var(--color-border-primary-default);
+  background-image: linear-gradient(var(--color-border-primary-default) 1px, transparent 1px);
+}
+
+.bq-frontdesk-time-grid-btn-2 {
+  position: absolute;
+  text-align: left;
+  border: 0;
+  border-left: 3px solid var(--color-bg-fill-primary-default);
+  border-radius: var(--radius-chip);
+  background: var(--color-bg-fill-accent-default);
+  color: var(--color-bg-fill-primary-active);
+  padding: 4px 6px;
+  cursor: pointer;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.bq-frontdesk-time-grid-title-2 {
+  font: 700 var(--text-footnote-size)/1.2 var(--font-family-body);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bq-frontdesk-time-grid-meta-2 {
+  font: 500 var(--text-caption-2-size) var(--font-family-mono);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bq-frontdesk-time-grid-layer {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 0;
+  border-top: 2px solid var(--color-text-status-danger-default);
+  z-index: 2;
+  pointer-events: none;
+}
+
+.bq-frontdesk-time-grid-layer-2 {
+  position: absolute;
+  left: -5px;
+  top: -6px;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--color-text-status-danger-default);
+}
+
+.bq-frontdesk-time-grid-text {
+  position: sticky;
+  bottom: 16px;
+  text-align: center;
+  pointer-events: none;
+  font: 600 var(--text-subheadline-size) var(--font-family-body);
+  color: var(--color-text-secondary-default);
+}
+
+.bq-frontdesk-time-grid-box {
+  background: var(--color-bg-surface-primary-default);
+  border: 1px solid var(--color-border-primary-default);
+  border-radius: 999px;
+  padding: 8px 16px;
+}

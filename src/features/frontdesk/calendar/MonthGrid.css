@@ -1,0 +1,75 @@
+/* Styles for MonthGrid.tsx. Tokens only; see DESIGN_SYSTEM.md. */
+
+.bq-frontdesk-month-grid-stack {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+}
+
+.bq-frontdesk-month-grid-grid {
+  flex: none;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  border-bottom: 1px solid var(--color-border-primary-default);
+}
+
+.bq-frontdesk-month-grid-label {
+  text-align: center;
+  font: 700 var(--text-caption-2-size) var(--font-family-mono);
+  letter-spacing: .06em;
+  color: var(--color-text-secondary-default);
+  padding: 8px 0;
+}
+
+.bq-frontdesk-month-grid-grid-2 {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.bq-frontdesk-month-grid-stack-2 {
+  min-width: 0;
+  padding: 4px;
+  cursor: pointer;
+  border-right: 1px solid var(--color-border-primary-default);
+  border-bottom: 1px solid var(--color-border-primary-default);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: hidden;
+}
+
+.bq-frontdesk-month-grid-title {
+  align-self: center;
+  min-width: 26px;
+  height: 26px;
+  padding: 0 4px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: 700 var(--text-footnote-size) var(--font-family-body);
+}
+
+.bq-frontdesk-month-grid-btn {
+  border: 0;
+  text-align: left;
+  cursor: pointer;
+  border-radius: var(--radius-chip);
+  background: var(--color-bg-fill-accent-default);
+  color: var(--color-bg-fill-primary-active);
+  padding: 2px 5px;
+  font: 700 var(--text-caption-2-size) var(--font-family-body);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.bq-frontdesk-month-grid-meta {
+  font: 700 var(--text-caption-2-size) var(--font-family-mono);
+  color: var(--color-text-secondary-default);
+  padding-left: 4px;
+}

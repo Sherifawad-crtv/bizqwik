@@ -1,0 +1,104 @@
+/* Styles for PaymentRequests.tsx. Tokens only; see DESIGN_SYSTEM.md. */
+
+.bq-frontdesk-payment-requests-payment-requests-card-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  margin-bottom: 10px;
+  text-align: left;
+  cursor: pointer;
+  background: var(--color-bg-fill-status-logging-default);
+  border-radius: var(--radius-card);
+  padding: 14px 18px;
+}
+
+.bq-frontdesk-payment-requests-payment-requests-card-row {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg-surface-primary-default);
+  color: var(--color-text-status-logging-default);
+}
+
+.bq-frontdesk-payment-requests-payment-requests-card-title {
+  display: block;
+  font: 700 var(--text-body-size) var(--font-family-body);
+  color: var(--color-text-status-logging-default);
+}
+
+.bq-frontdesk-payment-requests-payment-requests-card-meta {
+  display: block;
+  font: 400 var(--text-caption-1-size) var(--font-family-mono);
+  color: var(--color-text-status-logging-default);
+}
+
+.bq-frontdesk-payment-requests-payment-requests-card-title-2 {
+  font: 800 var(--text-title-1-size)/1.2 var(--font-family-body);
+  letter-spacing: -.02em;
+  margin: 4px 0 14px;
+}
+
+.bq-frontdesk-payment-requests-payment-requests-card-text {
+  font: 400 var(--text-subheadline-size) var(--font-family-body);
+  color: var(--color-text-secondary-default);
+  padding: 12px 0 8px;
+}
+
+.bq-frontdesk-payment-requests-payment-requests-card-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.bq-frontdesk-payment-requests-request-row-card {
+  padding: 14px;
+}
+
+.bq-frontdesk-payment-requests-request-row-img {
+  width: 72px;
+  height: 96px;
+  object-fit: cover;
+  border-radius: var(--radius-chip);
+  border: 1px solid var(--color-border-primary-default);
+  background: var(--color-bg-surface-secondary-default);
+}
+
+.bq-frontdesk-payment-requests-request-row-box {
+  width: 72px;
+  height: 96px;
+  flex: none;
+  border-radius: var(--radius-chip);
+  background: var(--color-bg-surface-secondary-default);
+}
+
+.bq-frontdesk-payment-requests-request-row-text {
+  font: 400 var(--text-subheadline-size) var(--font-family-body);
+  margin-top: 2px;
+}
+
+.bq-frontdesk-payment-requests-request-row-title {
+  font: 800 var(--text-title-2-size) var(--font-family-body);
+  margin-top: 4px;
+}
+
+.bq-frontdesk-payment-requests-request-row-meta {
+  font: 400 var(--text-caption-1-size) var(--font-family-mono);
+  color: var(--color-text-tertiary-default);
+  margin-top: 2px;
+}
+
+.bq-frontdesk-payment-requests-request-row-text-2 {
+  font: 600 var(--text-footnote-size)/1.5 var(--font-family-body);
+  color: var(--color-text-status-danger-default);
+  background: var(--color-bg-fill-status-danger-default);
+  border-radius: var(--radius-item);
+  padding: 10px 14px;
+  margin-top: 10px;
+}
