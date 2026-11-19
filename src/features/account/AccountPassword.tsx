@@ -75,7 +75,7 @@ export function AccountPassword() {
             {error}
           </div>
         )}
-        <Button fullWidth size="lg" style={{ marginTop: 16 }} disabled={busy} onClick={save}>
+        <Button className="bq-mt-4" fullWidth size="lg" disabled={busy} onClick={save}>
           {busy ? "Saving…" : "Save password"}
         </Button>
       </div>

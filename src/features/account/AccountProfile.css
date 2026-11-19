@@ -1,0 +1,92 @@
+/* Styles for AccountProfile.tsx. Tokens only; see DESIGN_SYSTEM.md. */
+
+.bq-account-account-profile-input {
+  display: none;
+}
+
+.bq-account-account-profile-btn {
+  position: relative;
+  border: 0;
+  background: none;
+  padding: 0;
+  border-radius: 999px;
+}
+
+.bq-account-account-profile-row {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  background: var(--color-bg-fill-primary-default);
+  color: var(--color-bg-surface-primary-default);
+  border: 2px solid var(--color-bg-surface-primary-default);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bq-account-account-profile-btn-2 {
+  border: 0;
+  background: none;
+  padding: 0;
+  font: 700 var(--text-footnote-size) var(--font-family-body);
+  color: var(--color-bg-fill-primary-active);
+}
+
+.bq-account-account-profile-btn-3 {
+  border: 0;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  font: 600 var(--text-footnote-size) var(--font-family-body);
+  color: var(--color-text-tertiary-default);
+}
+
+.bq-account-account-profile-text {
+  width: 100%;
+  font: 600 var(--text-footnote-size)/1.5 var(--font-family-body);
+  color: var(--color-text-status-danger-default);
+  background: var(--color-bg-fill-status-danger-default);
+  border-radius: var(--radius-item);
+  padding: 10px 14px;
+}
+
+.bq-account-account-profile-text-2 {
+  margin-top: 12px;
+  font: 600 var(--text-footnote-size)/1.5 var(--font-family-body);
+  color: var(--color-bg-fill-primary-active);
+  background: var(--color-bg-fill-accent-default);
+  border-radius: var(--radius-item);
+  padding: 10px 14px;
+}
+
+.bq-account-account-profile-spacing {
+  padding: 6px 4px;
+  margin-bottom: 12px;
+}
+
+.bq-account-account-profile-meta {
+  padding: 0 4px;
+  font: 400 var(--text-footnote-size)/1.5 var(--font-family-mono);
+  color: var(--color-text-tertiary-default);
+}
+
+.bq-account-account-profile-row-label {
+  font: 700 var(--text-caption-2-size) var(--font-family-mono);
+  letter-spacing: .08em;
+  color: var(--color-text-tertiary-default);
+  width: 90px;
+  flex: none;
+}
+
+.bq-account-account-profile-row-text {
+  font: 600 var(--text-body-size) var(--font-family-body);
+  color: var(--color-text-primary-default);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

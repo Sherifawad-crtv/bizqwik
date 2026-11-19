@@ -9,6 +9,7 @@ import { Button } from "../../design-system/components/Button";
 import { Icon } from "../../design-system/components/Icon";
 import { TextField } from "../../design-system/components/FormField";
 import { ROLE_LABELS, hasTier } from "../../shared/types";
+import "./AccountProfile.css";
 
 // Self-service photo upload/removal is turned off for the time being —
 // avatars are being set manually. Flip this back on to restore it.
@@ -98,54 +99,39 @@ export function AccountProfile() {
 
   return (
     <div>
-      <div className="bq-card bq-card--md" style={{ marginBottom: 16, display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
+      <div className="bq-card bq-card--md bq-mb-4 bq-flex bq-col bq-items-center bq-gap-10px">
         {PHOTO_EDIT_ENABLED ? (
           <>
-            <input ref={fileInput} type="file" accept="image/*" onChange={onPhotoSelected} style={{ display: "none" }} />
-            <button
+            <input className="bq-account-account-profile-input" ref={fileInput} type="file" accept="image/*" onChange={onPhotoSelected} />
+            <button className="bq-account-account-profile-btn"
               onClick={pickPhoto}
               disabled={photoBusy}
               aria-label="Change photo"
-              style={{ position: "relative", border: 0, background: "none", padding: 0, cursor: photoBusy ? "default" : "pointer", borderRadius: 999 }}
+              style={{ cursor: photoBusy ? "default" : "pointer" }}
             >
               <Avatar name={profile.name} size={84} src={profile.avatarUrl} />
-              <span
+              <span className="bq-account-account-profile-row"
                 aria-hidden
-                style={{
-                  position: "absolute",
-                  right: -2,
-                  bottom: -2,
-                  width: 30,
-                  height: 30,
-                  borderRadius: 999,
-                  background: "var(--color-bg-fill-primary-default)",
-                  color: "var(--color-bg-surface-primary-default)",
-                  border: "2px solid var(--color-bg-surface-primary-default)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
               >
                 <Icon name="pencil" size={14} />
               </span>
             </button>
-            <button
+            <button className="bq-account-account-profile-btn-2"
               onClick={pickPhoto}
               disabled={photoBusy}
-              style={{ border: 0, background: "none", padding: 0, cursor: photoBusy ? "default" : "pointer", font: "700 var(--text-footnote-size) var(--font-family-body)", color: "var(--color-bg-fill-primary-active)" }}
+              style={{ cursor: photoBusy ? "default" : "pointer" }}
             >
               {photoBusy ? "Uploading…" : "Change photo"}
             </button>
             {profile.avatarUrl && !photoBusy && (
-              <button
+              <button className="bq-account-account-profile-btn-3"
                 onClick={removePhoto}
-                style={{ border: 0, background: "none", padding: 0, cursor: "pointer", font: "600 var(--text-footnote-size) var(--font-family-body)", color: "var(--color-text-tertiary-default)" }}
               >
                 Remove photo
               </button>
             )}
             {photoError && (
-              <div className="bq-rise" style={{ width: "100%", font: "600 var(--text-footnote-size)/1.5 var(--font-family-body)", color: "var(--color-text-status-danger-default)", background: "var(--color-bg-fill-status-danger-default)", borderRadius: "var(--radius-item)", padding: "10px 14px" }}>
+              <div className="bq-rise bq-account-account-profile-text">
                 {photoError}
               </div>
             )}
@@ -155,7 +141,7 @@ export function AccountProfile() {
         )}
       </div>
 
-      <div className="bq-card bq-card--md" style={{ marginBottom: 16 }}>
+      <div className="bq-card bq-card--md bq-mb-4">
         <TextField
           label="NAME"
           value={name}
@@ -170,23 +156,23 @@ export function AccountProfile() {
           </div>
         )}
         {saved && !error && (
-          <div style={{ marginTop: 12, font: "600 var(--text-footnote-size)/1.5 var(--font-family-body)", color: "var(--color-bg-fill-primary-active)", background: "var(--color-bg-fill-accent-default)", borderRadius: "var(--radius-item)", padding: "10px 14px" }}>
+          <div className="bq-account-account-profile-text-2">
             Saved.
           </div>
         )}
-        <Button fullWidth size="lg" style={{ marginTop: 14 }} disabled={busy || !dirty} onClick={save}>
+        <Button className="bq-mt-14px" fullWidth size="lg" disabled={busy || !dirty} onClick={save}>
           {busy ? "Saving…" : "Save name"}
         </Button>
       </div>
 
-      <div className="bq-card" style={{ padding: "6px 4px", marginBottom: 12 }}>
+      <div className="bq-card bq-account-account-profile-spacing">
         <Row k="EMAIL" v={profile.email} />
         <Row k="ROLE" v={ROLE_LABELS[profile.role]} last={!hasTier(profile.role)} />
         {hasTier(profile.role) && (
           <Row k="TIER" v={tier ? `${tier.name} · ${tier.rate} EGP / session` : "Not assigned"} last />
         )}
       </div>
-      <div style={{ padding: "0 4px", font: "400 var(--text-footnote-size)/1.5 var(--font-family-mono)", color: "var(--color-text-tertiary-default)" }}>
+      <div className="bq-account-account-profile-meta">
         Email, role, and tier are managed by a department head.
       </div>
     </div>
@@ -196,8 +182,8 @@ export function AccountProfile() {
 function Row({ k, v, last }: { k: string; v: string; last?: boolean }) {
   return (
     <div className={`bq-listrow bq-listrow--compact ${!(last) ? "bq-listrow--divider" : ""}`}>
-      <span style={{ font: "700 var(--text-caption-2-size) var(--font-family-mono)", letterSpacing: ".08em", color: "var(--color-text-tertiary-default)", width: 90, flex: "none" }}>{k}</span>
-      <span style={{ font: "600 var(--text-body-size) var(--font-family-body)", color: "var(--color-text-primary-default)", flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{v}</span>
+      <span className="bq-account-account-profile-row-label">{k}</span>
+      <span className="bq-account-account-profile-row-text">{v}</span>
     </div>
   );
 }

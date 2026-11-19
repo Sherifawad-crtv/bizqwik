@@ -1,0 +1,81 @@
+/* Styles for Account.tsx. Tokens only; see DESIGN_SYSTEM.md. */
+
+.bq-account-account-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 24px 0 28px;
+}
+
+.bq-account-account-title {
+  font: 800 24px var(--font-family-body);
+  letter-spacing: -.01em;
+  margin-top: 12px;
+}
+
+.bq-account-account-text {
+  font: 600 var(--text-subheadline-size) var(--font-family-body);
+  color: var(--color-text-tertiary-default);
+}
+
+.bq-account-account-spacing {
+  padding: 6px 4px;
+  margin-bottom: 16px;
+}
+
+.bq-account-account-notifications-row-part {
+  border-bottom: 1px solid var(--color-border-primary-default);
+  padding: 14px 16px;
+}
+
+.bq-account-account-notifications-row-text {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font: 600 var(--text-body-size) var(--font-family-body);
+  color: var(--color-text-primary-default);
+}
+
+.bq-account-account-notifications-row-text-2 {
+  margin-top: 6px;
+  margin-left: 31px;
+  font: 500 var(--text-footnote-size)/1.5 var(--font-family-body);
+  color: var(--color-text-secondary-default);
+}
+
+.bq-account-account-notifications-row-part-2 {
+  border-bottom: 1px solid var(--color-border-primary-default);
+}
+
+.bq-account-account-notifications-row-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  padding: 14px 16px;
+  font: 600 var(--text-body-size) var(--font-family-body);
+  color: var(--color-text-primary-default);
+  text-align: left;
+}
+
+.bq-account-account-notifications-row-text-3 {
+  margin: 0 16px 12px;
+  font: 600 var(--text-caption-1-size)/1.4 var(--font-family-body);
+  color: var(--color-text-status-danger-default);
+  background: var(--color-bg-fill-status-danger-default);
+  border-radius: var(--radius-item);
+  padding: 8px 10px;
+}
+
+.bq-account-account-settings-row-btn {
+  width: 100%;
+  background: none;
+  cursor: pointer;
+  font: 600 var(--text-body-size) var(--font-family-body);
+  color: var(--color-text-primary-default);
+  text-align: left;
+}

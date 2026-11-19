@@ -1,3 +1,4 @@
+import { cx } from "../../design-system/cx";
 import { useEffect, useState } from "react";
 import { SwitchVisual } from "../../design-system/components/Switch";
 import { useNavigate } from "react-router-dom";
@@ -8,6 +9,7 @@ import { Button } from "../../design-system/components/Button";
 import { Icon, type IconName } from "../../design-system/components/Icon";
 import { ROLE_LABELS } from "../../shared/types";
 import { cachedPushOn, disablePush, enablePush, isIOS, isStandalone, primePushState, pushSupported, syncPushSubscriptionInBackground } from "../../shared/push";
+import "./Account.css";
 
 export function Account() {
   const { profile, logout } = useAuth();
@@ -24,19 +26,19 @@ export function Account() {
 
   return (
     <div>
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4, padding: "24px 0 28px" }}>
+      <div className="bq-account-account-stack">
         <Avatar name={profile.name} size={120} src={profile.avatarUrl} />
-        <div style={{ font: "800 24px var(--font-family-body)", letterSpacing: "-.01em", marginTop: 12 }}>{profile.name}</div>
-        <div style={{ font: "600 var(--text-subheadline-size) var(--font-family-body)", color: "var(--color-text-tertiary-default)" }}>{ROLE_LABELS[profile.role]}</div>
+        <div className="bq-account-account-title">{profile.name}</div>
+        <div className="bq-account-account-text">{ROLE_LABELS[profile.role]}</div>
       </div>
 
-      <div className="bq-card" style={{ padding: "6px 4px", marginBottom: 16 }}>
+      <div className="bq-card bq-account-account-spacing">
         <NotificationsRow />
         <SettingsRow icon="account" label="Account Settings" onClick={() => navigate("/account/profile")} />
         <SettingsRow icon="lock" label="Password Settings" onClick={() => navigate("/account/password")} last />
       </div>
 
-      <Button variant="danger" fullWidth size="lg" onClick={doLogout} style={{ gap: 10 }}>
+      <Button className="bq-gap-10px" variant="danger" fullWidth size="lg" onClick={doLogout}>
         <Icon name="logout" size={18} /> Sign out
       </Button>
     </div>
@@ -107,14 +109,14 @@ function NotificationsRow() {
 
   if (needsHomeScreenInstall || iosVersionTooOld) {
     return (
-      <div style={{ borderBottom: "1px solid var(--color-border-primary-default)", padding: "14px 16px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 12, font: "600 var(--text-body-size) var(--font-family-body)", color: "var(--color-text-primary-default)" }}>
-          <span style={{ flex: "none", display: "flex", color: "var(--color-text-secondary-default)" }}>
+      <div className="bq-account-account-notifications-row-part">
+        <div className="bq-account-account-notifications-row-text">
+          <span className="bq-flex-none bq-flex bq-fg-secondary">
             <Icon name="bell" size={19} />
           </span>
           Push Notifications
         </div>
-        <div style={{ marginTop: 6, marginLeft: 31, font: "500 var(--text-footnote-size)/1.5 var(--font-family-body)", color: "var(--color-text-secondary-default)" }}>
+        <div className="bq-account-account-notifications-row-text-2">
           {iosVersionTooOld
             ? "Notifications need iOS/iPadOS 16.4 or later — update to enable this."
             : "On iPhone/iPad, add Bizqwik to your Home Screen first (Share → Add to Home Screen), then open it from there to turn this on."}
@@ -126,33 +128,20 @@ function NotificationsRow() {
   if (!supported) return null;
 
   return (
-    <div style={{ borderBottom: "1px solid var(--color-border-primary-default)" }}>
-      <button
+    <div className="bq-account-account-notifications-row-part-2">
+      <button className="bq-account-account-notifications-row-btn"
         onClick={toggle}
         role="switch"
         aria-checked={on}
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 12,
-          width: "100%",
-          border: 0,
-          background: "none",
-          cursor: "pointer",
-          padding: "14px 16px",
-          font: "600 var(--text-body-size) var(--font-family-body)",
-          color: "var(--color-text-primary-default)",
-          textAlign: "left",
-        }}
       >
-        <span style={{ flex: "none", display: "flex", color: "var(--color-text-secondary-default)" }}>
+        <span className="bq-flex-none bq-flex bq-fg-secondary">
           <Icon name="bell" size={19} />
         </span>
-        <span style={{ flex: 1 }}>Push Notifications</span>
+        <span className="bq-flex-1">Push Notifications</span>
         <SwitchVisual checked={on} animate={ready} busy={busy} />
       </button>
       {error && (
-        <div style={{ margin: "0 16px 12px", font: "600 var(--text-caption-1-size)/1.4 var(--font-family-body)", color: "var(--color-text-status-danger-default)", background: "var(--color-bg-fill-status-danger-default)", borderRadius: "var(--radius-item)", padding: "8px 10px" }}>
+        <div className="bq-account-account-notifications-row-text-3">
           {error}
         </div>
       )}
@@ -164,9 +153,9 @@ function SettingsRow({ icon, label, onClick, last }: { icon: IconName; label: st
   return (
     <button
       onClick={onClick}
-      className={`bq-plain bq-listrow bq-listrow--compact ${!(last) ? "bq-listrow--divider" : ""}`} style={{ width: "100%", background: "none", cursor: "pointer", font: "600 var(--text-body-size) var(--font-family-body)", color: "var(--color-text-primary-default)", textAlign: "left" }}
+      className={cx(`bq-plain bq-listrow bq-listrow--compact ${!(last) ? "bq-listrow--divider" : ""}`, "bq-account-account-settings-row-btn")}
     >
-      <span style={{ flex: "none", display: "flex", color: "var(--color-text-secondary-default)" }}>
+      <span className="bq-flex-none bq-flex bq-fg-secondary">
         <Icon name={icon} size={19} />
       </span>
       {label}
