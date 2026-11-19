@@ -1,0 +1,52 @@
+/* Styles for RollupTable.tsx. Tokens only; see DESIGN_SYSTEM.md. */
+
+.bq-coaches-rollup-table-desktop-row-grid {
+  display: grid;
+  grid-template-columns: 2fr 1.3fr 1fr 1.1fr 20px;
+  gap: 12px;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--color-border-primary-default);
+  align-items: center;
+}
+
+.bq-coaches-rollup-table-desktop-row-text {
+  font: 600 var(--text-callout-size) var(--font-family-body);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bq-coaches-rollup-table-desktop-row-meta {
+  font: 400 var(--text-footnote-size) var(--font-family-mono);
+  color: var(--color-text-secondary-default);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bq-coaches-rollup-table-title {
+  font: 700 var(--text-callout-size) var(--font-family-body);
+  letter-spacing: -.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bq-coaches-rollup-table-meta {
+  font: 400 var(--text-footnote-size) var(--font-family-mono);
+  color: var(--color-text-secondary-default);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bq-coaches-rollup-table-label {
+  display: grid;
+  grid-template-columns: 2fr 1.3fr 1fr 1.1fr 20px;
+  gap: 12px;
+  padding: 10px 20px;
+  background: var(--color-bg-surface-secondary-default);
+  font: 700 var(--text-caption-2-size) var(--font-family-mono);
+  letter-spacing: .08em;
+  color: var(--color-text-secondary-default);
+}

@@ -1,3 +1,4 @@
+import { cx } from "../../design-system/cx";
 import { Avatar } from "../../design-system/components/Avatar";
 import { StatePill } from "../../shared/components/StatePill";
 import { Icon } from "../../design-system/components/Icon";
@@ -8,6 +9,7 @@ type EmptyProps = Partial<ComponentProps<typeof EmptyState>>;
 import { useIsMobile } from "../../design-system/hooks/useIsMobile";
 import type { State } from "../../shared/types";
 import { egp } from "../../shared/format";
+import "./RollupTable.css";
 
 export interface ListRow {
   id: string;
@@ -25,27 +27,19 @@ function DesktopRow({ r }: { r: ListRow }) {
   return (
     <div
       onClick={r.onClick}
-      className={r.onClick ? "bq-row" : undefined}
-      style={{
-        display: "grid",
-        gridTemplateColumns: "2fr 1.3fr 1fr 1.1fr 20px",
-        gap: 12,
-        padding: "14px 20px",
-        borderBottom: "1px solid var(--color-border-primary-default)",
-        alignItems: "center",
-      }}
+      className={cx(r.onClick ? "bq-row" : undefined, "bq-coaches-rollup-table-desktop-row-grid")}
     >
-      <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
+      <div className="bq-flex bq-items-center bq-gap-3 bq-min-w-0">
         <Avatar name={r.name} size={32} src={r.avatarUrl} />
-        <div style={{ minWidth: 0 }}>
-          <div style={{ font: "600 var(--text-callout-size) var(--font-family-body)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{r.title}</div>
+        <div className="bq-min-w-0">
+          <div className="bq-coaches-rollup-table-desktop-row-text">{r.title}</div>
           {r.sub && <div className="bq-meta">{r.sub}</div>}
         </div>
       </div>
-      <div style={{ font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-secondary-default)", minWidth: 0, overflow: "hidden", textOverflow: "ellipsis" }}>{r.meta}</div>
+      <div className="bq-coaches-rollup-table-desktop-row-meta">{r.meta}</div>
       <div>{r.state && <StatePill state={r.state} />}</div>
-      <div className="tabular bq-stat-sm" style={{ textAlign: "right" }}>{egp(r.amount)}</div>
-      <div style={{ display: "flex", justifyContent: "flex-end", color: "var(--color-text-tertiary-default)" }}>
+      <div className="tabular bq-stat-sm bq-text-right">{egp(r.amount)}</div>
+      <div className="bq-flex bq-justify-end bq-fg-tertiary">
         {r.onClick && <Icon name="chevron-right" size={16} />}
       </div>
     </div>
@@ -77,23 +71,23 @@ export function RollupTable({
           <div
             key={r.id}
             onClick={r.onClick}
-            className="bq-card bq-card--sm" style={{ display: "flex", gap: 14, alignItems: "center", cursor: r.onClick ? "pointer" : "default" }}
+            className="bq-card bq-card--sm bq-flex bq-gap-14px bq-items-center" style={{ cursor: r.onClick ? "pointer" : "default" }}
           >
             <Avatar name={r.name} size={38} src={r.avatarUrl} />
             <div className="bq-grow">
-              <div style={{ font: "700 var(--text-callout-size) var(--font-family-body)", letterSpacing: "-.01em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{r.title}</div>
-              <div style={{ font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-secondary-default)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{r.meta}</div>
-              <div style={{ marginTop: 8, display: "flex", gap: 8, alignItems: "center" }}>
+              <div className="bq-coaches-rollup-table-title">{r.title}</div>
+              <div className="bq-coaches-rollup-table-meta">{r.meta}</div>
+              <div className="bq-mt-2 bq-flex bq-gap-2 bq-items-center">
                 {r.state && <StatePill state={r.state} />}
                 {r.sub && <span className="bq-meta">{r.sub}</span>}
               </div>
             </div>
-            <div style={{ textAlign: "right", flex: "none" }}>
+            <div className="bq-text-right bq-flex-none">
               <div className="tabular bq-stat-sm" >{egp(r.amount).split(" ")[0]}</div>
               <div className="bq-label">EGP</div>
             </div>
             {r.onClick && (
-              <span style={{ flex: "none", color: "var(--color-text-tertiary-default)", display: "flex" }}>
+              <span className="bq-flex-none bq-fg-tertiary bq-flex">
                 <Icon name="chevron-right" size={16} />
               </span>
             )}
@@ -105,11 +99,11 @@ export function RollupTable({
 
   return (
     <div className="bq-panel">
-      <div style={{ display: "grid", gridTemplateColumns: "2fr 1.3fr 1fr 1.1fr 20px", gap: 12, padding: "10px 20px", background: "var(--color-bg-surface-secondary-default)", font: "700 var(--text-caption-2-size) var(--font-family-mono)", letterSpacing: ".08em", color: "var(--color-text-secondary-default)" }}>
+      <div className="bq-coaches-rollup-table-label">
         <span>{colA}</span>
         <span>{colB}</span>
         <span>STATUS</span>
-        <span style={{ textAlign: "right" }}>AMOUNT</span>
+        <span className="bq-text-right">AMOUNT</span>
         <span />
       </div>
       {rows.map((r) => (

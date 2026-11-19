@@ -16,6 +16,7 @@ import { Button } from "../../design-system/components/Button";
 import { ScanFlow } from "../../shared/components/ScanFlow";
 import { Spinner } from "../../design-system/components/Spinner";
 import { Num } from "../../design-system/components/Num";
+import "./CoachWallet.css";
 
 export function CoachWallet() {
   const { profile } = useAuth();
@@ -88,7 +89,7 @@ export function CoachWallet() {
       />
 
       {((editable && !isMobile) || isHead(profile.role)) && (
-        <div style={{ display: "flex", gap: 10, marginBottom: 18, flexWrap: "wrap" }}>
+        <div className="bq-flex bq-gap-10px bq-mb-18px bq-wrap">
           {isHead(profile.role) && row.state === "logging" && row.count > 0 && (
             <Button variant="secondary" disabled={busyAction} onClick={() => runAction(() => api.settle(profile.id, month))}>
               Settle my month
@@ -108,14 +109,14 @@ export function CoachWallet() {
         </div>
       )}
       {actionError && (
-        <div className="bq-rise" style={{ marginBottom: 14, font: "600 var(--text-footnote-size)/1.5 var(--font-family-body)", color: "var(--color-text-status-danger-default)", background: "var(--color-bg-fill-status-danger-default)", borderRadius: "var(--radius-item)", padding: "10px 14px" }}>
+        <div className="bq-rise bq-coaches-coach-wallet-text">
           {actionError}
         </div>
       )}
 
-      <div style={{ display: "flex", alignItems: "baseline", gap: 10, padding: "2px 2px 8px" }}>
+      <div className="bq-coaches-coach-wallet-row">
         <span className="bq-label">DAYS LOGGED</span>
-        <span style={{ marginLeft: "auto", font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)" }}>
+        <span className="bq-coaches-coach-wallet-meta">
           {new Set(sessions.map((s) => s.date)).size} {new Set(sessions.map((s) => s.date)).size === 1 ? "DAY" : "DAYS"}
         </span>
       </div>
@@ -128,7 +129,7 @@ export function CoachWallet() {
         emptyHint={editable ? "Tap + and scan the coaches' room QR when you arrive to log your first session." : "No sessions were logged this month."}
       />
 
-      <div style={{ padding: "22px 2px 0", font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)" }}>
+      <div className="bq-coaches-coach-wallet-meta-2">
         {editable
           ? profile.role === "coach"
             ? "Log attendance by scanning the coaches' room QR. Tap a day to remove a mistake."

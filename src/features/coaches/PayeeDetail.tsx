@@ -22,6 +22,7 @@ import type { PackageWithNames, Rollup, SettlementPayment } from "../../shared/t
 import { useBackAction } from "../../shared/screen/floatingActions";
 import { useIsMobile } from "../../design-system/hooks/useIsMobile";
 import { Num } from "../../design-system/components/Num";
+import "./PayeeDetail.css";
 
 const METHOD_LABELS: Record<string, string> = { cash: "Cash", bank: "Bank", instapay: "InstaPay", other: "Recorded earlier" };
 
@@ -75,13 +76,13 @@ function RecordPaymentSheet({ open, onClose, row, month }: { open: boolean; onCl
       ) : (
         <>
           <div className="bq-label">RECORD PAYMENT</div>
-          <div style={{ font: "800 var(--text-title-1-size)/1.2 var(--font-family-body)", letterSpacing: "-.02em", margin: "4px 0 4px" }}>Pay {row.name}</div>
-          <div style={{ font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-secondary-default)", marginBottom: 16 }}>
+          <div className="bq-coaches-payee-detail-record-payment-sheet-title">Pay {row.name}</div>
+          <div className="bq-coaches-payee-detail-record-payment-sheet-meta">
             {fmt(row.total)} EGP for {monthShort(month)} · {fmt(row.paidAmount)} paid · {fmt(row.remaining)} left
           </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <div className="bq-flex bq-col bq-gap-3">
             <TextField label="AMOUNT (EGP)" value={amount} onChange={(e) => setAmount(e.target.value)} inputMode="decimal" />
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <div className="bq-flex bq-gap-2 bq-wrap">
               {[
                 { label: `Group ${fmt(row.groupTotal)}`, value: row.groupTotal },
                 { label: `Private ${fmt(row.privateTotal)}`, value: row.privateTotal },
@@ -89,26 +90,26 @@ function RecordPaymentSheet({ open, onClose, row, month }: { open: boolean; onCl
               ]
                 .filter((q) => q.value > 0 && q.value <= row.remaining)
                 .map((q) => (
-                  <button key={q.label} type="button" className="bq-scale" onClick={() => setAmount(String(q.value))} style={{ border: "1px solid var(--color-border-primary-default)", background: "var(--color-bg-surface-secondary-default)", borderRadius: 999, padding: "8px 14px", font: "600 var(--text-footnote-size) var(--font-family-body)", color: "var(--color-text-primary-default)", cursor: "pointer" }}>
+                  <button key={q.label} type="button" className="bq-scale bq-coaches-payee-detail-record-payment-sheet-btn" onClick={() => setAmount(String(q.value))}>
                     {q.label}
                   </button>
                 ))}
             </div>
             <TextField label="DATE PAID" type="date" value={date} max={todayIso()} onChange={(e) => setDate(e.target.value)} />
             <div>
-              <div style={{ font: "700 var(--text-caption-2-size) var(--font-family-mono)", letterSpacing: ".08em", color: "var(--color-text-tertiary-default)", margin: "0 2px 6px" }}>METHOD</div>
+              <div className="bq-coaches-payee-detail-record-payment-sheet-label">METHOD</div>
               <Segmented value={method} onChange={(v) => setMethod(v as "cash" | "bank" | "instapay")} options={[{ value: "cash", label: "CASH" }, { value: "bank", label: "BANK" }, { value: "instapay", label: "INSTAPAY" }]} />
             </div>
             <TextField label="NOTE (OPTIONAL)" value={note} onChange={(e) => setNote(e.target.value)} placeholder="e.g. group sessions" />
           </div>
-          <div style={{ font: "400 var(--text-caption-1-size)/1.5 var(--font-family-mono)", color: "var(--color-text-tertiary-default)", margin: "10px 2px 0" }}>
+          <div className="bq-coaches-payee-detail-record-payment-sheet-meta-2">
             {Number.isFinite(leftAfter) && leftAfter > 0 ? `${fmt(leftAfter)} EGP will still be left to pay.` : leftAfter === 0 ? "This pays the month in full." : ""} The coach is notified.
           </div>
           {error && <div  className="bq-error bq-error--spaced bq-rise">{error}</div>}
-          <Button fullWidth size="lg" style={{ marginTop: 16 }} disabled={busy} onClick={submit}>
+          <Button className="bq-mt-4" fullWidth size="lg" disabled={busy} onClick={submit}>
             {busy ? "Working…" : `Record payment · ${Number.isFinite(amt) && amt > 0 ? fmt(amt) : "0"} EGP`}
           </Button>
-          <Button variant="quiet" fullWidth style={{ marginTop: 8 }} onClick={onClose} disabled={busy}>Cancel</Button>
+          <Button className="bq-mt-2" variant="quiet" fullWidth onClick={onClose} disabled={busy}>Cancel</Button>
         </>
       )}
     </Sheet>
@@ -117,15 +118,15 @@ function RecordPaymentSheet({ open, onClose, row, month }: { open: boolean; onCl
 
 function PackageRow({ pkg }: { pkg: PackageWithNames }) {
   return (
-    <div className="bq-card bq-card--sm" style={{ marginBottom: 10 }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 6 }}>
-        <span style={{ font: "700 var(--text-callout-size) var(--font-family-body)", letterSpacing: "-.01em" }}>{pkg.clientName}</span>
+    <div className="bq-card bq-card--sm bq-mb-10px">
+      <div className="bq-flex bq-items-center bq-justify-between bq-gap-10px bq-mb-6px">
+        <span className="bq-coaches-payee-detail-package-row-title">{pkg.clientName}</span>
         <PackageStatusPill status={pkg.status} />
       </div>
-      <div style={{ font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-secondary-default)" }}>
+      <div className="bq-coaches-payee-detail-package-row-meta">
         {pkg.bundleName} · Sold {dateLabel(pkg.purchaseDate)}
       </div>
-      <div style={{ font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)", marginTop: 4 }}>
+      <div className="bq-coaches-payee-detail-package-row-meta-2">
         {egp(pkg.priceAtSale)} paid · {egp(pkg.coachCutAtSale)} coach cut
       </div>
     </div>
@@ -158,18 +159,17 @@ export function PayeeDetail() {
   return (
     <div>
       {!isMobile && (
-      <button
+      <button className="bq-coaches-payee-detail-btn"
         onClick={() => navigate(backTo.path)}
-        style={{ display: "flex", alignItems: "center", gap: 4, border: 0, background: "none", cursor: "pointer", color: "var(--color-text-secondary-default)", font: "600 var(--text-footnote-size) var(--font-family-body)", padding: "0 0 14px" }}
       >
         <Icon name="chevron-left" size={16} /> {backTo.label}
       </button>
       )}
 
-      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 18 }}>
+      <div className="bq-flex bq-items-center bq-gap-3 bq-mb-18px">
         <Avatar name={row.name} size={44} src={row.avatarUrl} />
         <div>
-          <div style={{ font: "800 22px var(--font-family-body)", letterSpacing: "-.01em" }}>{row.name}</div>
+          <div className="bq-coaches-payee-detail-title">{row.name}</div>
           <div className="bq-meta">{row.tierName ?? "No tier"} · {row.email}</div>
         </div>
       </div>
@@ -184,23 +184,23 @@ export function PayeeDetail() {
         ]}
       />
 
-      <div className="bq-card" style={{ padding: "16px 18px", marginBottom: 18 }}>
+      <div className="bq-card bq-coaches-payee-detail-spacing">
         <div className="bq-label">WHERE IT'S COMING FROM</div>
-        <div style={{ marginTop: 12 }}>
-          <div style={{ font: "600 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-secondary-default)" }}>GROUP SESSIONS</div>
-          <div className="tabular" style={{ font: "700 var(--text-body-size) var(--font-family-body)", marginTop: 2 }}>
+        <div className="bq-mt-3">
+          <div className="bq-coaches-payee-detail-meta">GROUP SESSIONS</div>
+          <div className="tabular bq-coaches-payee-detail-title-2">
             {row.count} × {fmt(row.rate)} EGP = {egp(row.groupTotal)}
           </div>
         </div>
-        <div style={{ marginTop: 12 }}>
-          <div style={{ font: "600 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-secondary-default)" }}>PRIVATE TRAINING</div>
-          <div className="tabular" style={{ font: "700 var(--text-body-size) var(--font-family-body)", marginTop: 2 }}>
+        <div className="bq-mt-3">
+          <div className="bq-coaches-payee-detail-meta">PRIVATE TRAINING</div>
+          <div className="tabular bq-coaches-payee-detail-title-2">
             {row.packageCount} {row.packageCount === 1 ? "package" : "packages"} = {egp(row.privateTotal)}
           </div>
         </div>
       </div>
 
-      <div className="bq-card" style={{ padding: "16px 18px", marginBottom: 18 }}>
+      <div className="bq-card bq-coaches-payee-detail-spacing">
         <div className="bq-label">PAYMENT RECORD</div>
         {[
           ["Month", monthShort(month)],
@@ -208,21 +208,21 @@ export function PayeeDetail() {
           ["Paid", row.state === "paid" ? `${fmt(row.total)} EGP${row.paidAt ? ` · ${formatDateTime(row.paidAt)}` : ""}` : row.paidAmount > 0 ? `${fmt(row.paidAmount)} of ${fmt(row.total)} EGP` : "Not paid yet"],
           ...(row.state === "settled" ? [["Still to pay", `${fmt(row.remaining)} EGP`]] : []),
         ].map(([k, v]) => (
-          <div key={k} style={{ display: "flex", alignItems: "baseline", gap: 10, marginTop: 10 }}>
-            <span style={{ font: "600 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-secondary-default)" }}>{k}</span>
-            <span className="tabular" style={{ marginLeft: "auto", font: "700 var(--text-subheadline-size) var(--font-family-body)", textAlign: "right" }}>{v}</span>
+          <div className="bq-flex bq-items-baseline bq-gap-10px bq-mt-10px" key={k}>
+            <span className="bq-coaches-payee-detail-meta">{k}</span>
+            <span className="tabular bq-coaches-payee-detail-title-3">{v}</span>
           </div>
         ))}
         {payments.length > 0 && (
-          <div style={{ marginTop: 14, paddingTop: 12, borderTop: "1px solid var(--color-border-primary-default)" }}>
+          <div className="bq-coaches-payee-detail-part">
             <div className="bq-label">PAYMENTS</div>
             {payments.map((p) => (
-              <div key={p.id} style={{ display: "flex", alignItems: "baseline", gap: 10, marginTop: 10 }}>
-                <span style={{ minWidth: 0 }}>
-                  <span style={{ display: "block", font: "600 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-secondary-default)" }}>{dateLabel(p.paidOn)} · {METHOD_LABELS[p.method] ?? p.method}</span>
-                  {p.note && <span style={{ display: "block", font: "400 var(--text-caption-1-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)" }}>{p.note}</span>}
+              <div className="bq-flex bq-items-baseline bq-gap-10px bq-mt-10px" key={p.id}>
+                <span className="bq-min-w-0">
+                  <span className="bq-coaches-payee-detail-meta-2">{dateLabel(p.paidOn)} · {METHOD_LABELS[p.method] ?? p.method}</span>
+                  {p.note && <span className="bq-coaches-payee-detail-meta-3">{p.note}</span>}
                 </span>
-                <span className="tabular" style={{ marginLeft: "auto", font: "700 var(--text-subheadline-size) var(--font-family-body)", textAlign: "right" }}>{fmt(p.amount)} EGP</span>
+                <span className="tabular bq-coaches-payee-detail-title-3">{fmt(p.amount)} EGP</span>
               </div>
             ))}
           </div>
@@ -230,12 +230,12 @@ export function PayeeDetail() {
       </div>
 
       {row.state === "settled" && (
-        <Button fullWidth size="lg" style={{ marginBottom: 18 }} onClick={() => setPaying(true)}>
+        <Button className="bq-mb-18px" fullWidth size="lg" onClick={() => setPaying(true)}>
           {isPartPaid(row) ? "Record another payment" : "Record payment"}
         </Button>
       )}
 
-      <div style={{ display: "flex", alignItems: "baseline", gap: 10, padding: "2px 2px 8px" }}>
+      <div className="bq-coaches-payee-detail-row">
         <span className="bq-h2">Private training</span>
         <span className="bq-meta">{packages.length} sold this month</span>
       </div>

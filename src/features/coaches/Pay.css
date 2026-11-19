@@ -1,0 +1,37 @@
+/* Styles for Pay.tsx. Tokens only; see DESIGN_SYSTEM.md. */
+
+.bq-coaches-pay-month-status-spacing {
+  padding: 16px 18px;
+  margin-bottom: 18px;
+}
+
+.bq-coaches-pay-month-status-title {
+  margin-left: auto;
+  font: 800 var(--text-callout-size) var(--font-family-body);
+}
+
+.bq-coaches-pay-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 2px 2px 8px;
+}
+
+.bq-coaches-pay-row-2 {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 6px 2px 8px;
+}
+
+.bq-coaches-pay-meta {
+  margin-left: auto;
+  font: 700 var(--text-footnote-size) var(--font-family-mono);
+  color: var(--color-text-secondary-default);
+}
+
+.bq-coaches-pay-meta-2 {
+  padding: 0 4px;
+  font: 400 var(--text-footnote-size) var(--font-family-mono);
+  color: var(--color-text-tertiary-default);
+}

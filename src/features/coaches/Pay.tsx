@@ -12,6 +12,7 @@ import { Spinner } from "../../design-system/components/Spinner";
 import { StatePill } from "../../shared/components/StatePill";
 import type { Rollup } from "../../shared/types";
 import { Num } from "../../design-system/components/Num";
+import "./Pay.css";
 
 /** Where this month stands: paid out, still to pay, and still being logged. */
 function MonthStatus({ rows }: { rows: Rollup[] }) {
@@ -21,14 +22,14 @@ function MonthStatus({ rows }: { rows: Rollup[] }) {
     { state: "logging" as const, total: sumTotal(rows.filter((r) => r.state === "logging")), n: rows.filter((r) => r.state === "logging").length, label: "Still logging" },
   ];
   return (
-    <div className="bq-card" style={{ padding: "16px 18px", marginBottom: 18 }}>
+    <div className="bq-card bq-coaches-pay-month-status-spacing">
       <div className="bq-label">THIS MONTH · {monthLabel(MOCK.CURRENT_MONTH).toUpperCase()}</div>
-      <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 10 }}>
+      <div className="bq-mt-3 bq-flex bq-col bq-gap-10px">
         {parts.map((p) => (
-          <div key={p.state} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div className="bq-flex bq-items-center bq-gap-10px" key={p.state}>
             <StatePill state={p.state} label={p.label} />
             <span className="bq-meta">{p.n} {p.n === 1 ? "coach" : "coaches"}</span>
-            <span className="tabular" style={{ marginLeft: "auto", font: "800 var(--text-callout-size) var(--font-family-body)" }}>{fmt(p.total)} EGP</span>
+            <span className="tabular bq-coaches-pay-month-status-title">{fmt(p.total)} EGP</span>
           </div>
         ))}
       </div>
@@ -84,7 +85,7 @@ export function Pay() {
 
       <MonthStatus rows={thisMonth} />
 
-      <div style={{ display: "flex", alignItems: "baseline", gap: 10, padding: "2px 2px 8px" }}>
+      <div className="bq-coaches-pay-row">
         <span className="bq-h2">Payout queue</span>
         <span className="bq-meta">{dueRows.length} due</span>
       </div>
@@ -93,16 +94,16 @@ export function Pay() {
         <RollupTable colA="PAYEE" colB="METHOD" rows={[]} empty={{ icon: "topay", title: "Nothing to pay right now", body: "A coach appears here once a head settles their month. Paid months move to History." }} />
       ) : (
         due.map((m) => (
-          <div key={m.month} style={{ marginBottom: 18 }}>
-            <div style={{ display: "flex", alignItems: "baseline", gap: 10, padding: "6px 2px 8px" }}>
+          <div className="bq-mb-18px" key={m.month}>
+            <div className="bq-coaches-pay-row-2">
               <span className="bq-label">{monthLabel(m.month).toUpperCase()}</span>
-              <span className="tabular" style={{ marginLeft: "auto", font: "700 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-secondary-default)" }}>{fmt(sumRemaining(m.rows))} EGP</span>
+              <span className="tabular bq-coaches-pay-meta">{fmt(sumRemaining(m.rows))} EGP</span>
             </div>
             <RollupTable colA="PAYEE" colB="METHOD" rows={listRows(m.month, m.rows)} />
           </div>
         ))
       )}
-      <div style={{ padding: "0 4px", font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)" }}>
+      <div className="bq-coaches-pay-meta-2">
         {dueRows.length > 0 ? "Tap a payee to see the full breakdown before paying." : null}
       </div>
     </div>

@@ -1,0 +1,14 @@
+/* Styles for History.tsx. Tokens only; see DESIGN_SYSTEM.md. */
+
+.bq-coaches-history-personal-history-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 2px 2px 8px;
+}
+
+.bq-coaches-history-personal-history-meta {
+  margin-left: auto;
+  font: 400 var(--text-footnote-size) var(--font-family-mono);
+  color: var(--color-text-tertiary-default);
+}

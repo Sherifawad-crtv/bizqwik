@@ -1,0 +1,40 @@
+/* Styles for CoachDetail.tsx. Tokens only; see DESIGN_SYSTEM.md. */
+
+.bq-coaches-coach-detail-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  color: var(--color-text-secondary-default);
+  font: 600 var(--text-footnote-size) var(--font-family-body);
+  padding: 0 0 14px;
+}
+
+.bq-coaches-coach-detail-title {
+  font: 800 22px var(--font-family-body);
+  letter-spacing: -.01em;
+}
+
+.bq-coaches-coach-detail-text {
+  margin-bottom: 14px;
+  font: 600 var(--text-footnote-size)/1.5 var(--font-family-body);
+  color: var(--color-text-status-danger-default);
+  background: var(--color-bg-fill-status-danger-default);
+  border-radius: var(--radius-item);
+  padding: 10px 14px;
+}
+
+.bq-coaches-coach-detail-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 2px 2px 8px;
+}
+
+.bq-coaches-coach-detail-meta {
+  margin-left: auto;
+  font: 400 var(--text-footnote-size) var(--font-family-mono);
+  color: var(--color-text-tertiary-default);
+}

@@ -19,6 +19,7 @@ import { ActivityPanel } from "../../shared/components/ActivityPanel";
 import { canLog, isHead } from "../../shared/types";
 import type { Rollup, Session } from "../../shared/types";
 import { Num } from "../../design-system/components/Num";
+import "./History.css";
 
 interface PersonalData {
   kind: "personal";
@@ -53,9 +54,9 @@ function PersonalHistory({ row, sessions }: { row: Rollup | null; sessions: Sess
           ...(row.paidAmount > 0 && row.state !== "paid" ? [{ k: "RECEIVED", v: `${fmt(row.paidAmount)} of ${fmt(row.total)} EGP` }] : []),
         ]}
       />
-      <div style={{ display: "flex", alignItems: "baseline", gap: 10, padding: "2px 2px 8px" }}>
+      <div className="bq-coaches-history-personal-history-row">
         <span className="bq-label">DAYS LOGGED</span>
-        <span style={{ marginLeft: "auto", font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)" }}>
+        <span className="bq-coaches-history-personal-history-meta">
           {new Set(sessions.map((s) => s.date)).size} {new Set(sessions.map((s) => s.date)).size === 1 ? "DAY" : "DAYS"}
         </span>
       </div>
@@ -127,7 +128,7 @@ export function History() {
   if (profile?.role === "dept_head") {
     return (
       <div>
-        <div style={{ display: "flex", justifyContent: "center", marginBottom: 18 }}>
+        <div className="bq-flex bq-justify-center bq-mb-18px">
           <Segmented
             value={view}
             onChange={setView}

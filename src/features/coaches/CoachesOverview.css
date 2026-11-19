@@ -1,0 +1,42 @@
+/* Styles for CoachesOverview.tsx. Tokens only; see DESIGN_SYSTEM.md. */
+
+.bq-coaches-coaches-overview-btn {
+  width: 100%;
+  margin-bottom: 14px;
+  text-align: left;
+  padding: 14px 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.bq-coaches-coaches-overview-row {
+  color: var(--color-bg-fill-primary-active);
+  display: flex;
+}
+
+.bq-coaches-coaches-overview-title {
+  display: block;
+  font: 700 var(--text-body-size) var(--font-family-body);
+}
+
+.bq-coaches-coaches-overview-meta {
+  display: block;
+  font: 400 var(--text-caption-1-size) var(--font-family-mono);
+  color: var(--color-text-tertiary-default);
+  margin-top: 2px;
+}
+
+.bq-coaches-coaches-overview-row-2 {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 2px 2px 8px;
+}
+
+.bq-coaches-coaches-overview-meta-2 {
+  padding: 18px 4px 0;
+  font: 400 var(--text-footnote-size) var(--font-family-mono);
+  color: var(--color-text-tertiary-default);
+}

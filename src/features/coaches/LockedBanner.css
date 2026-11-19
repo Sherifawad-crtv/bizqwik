@@ -1,0 +1,29 @@
+/* Styles for LockedBanner.tsx. Tokens only; see DESIGN_SYSTEM.md. */
+
+.bq-coaches-locked-banner-row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  border-radius: var(--radius-item);
+  padding: 14px 16px;
+  margin-bottom: 14px;
+}
+
+.bq-coaches-locked-banner-box {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  flex: none;
+  margin-top: 6px;
+  display: block;
+}
+
+.bq-coaches-locked-banner-label {
+  font: 700 var(--text-caption-2-size) var(--font-family-mono);
+  letter-spacing: .08em;
+}
+
+.bq-coaches-locked-banner-text {
+  font: 500 var(--text-callout-size)/1.35 var(--font-family-body);
+  color: var(--color-text-primary-default);
+}

@@ -11,6 +11,7 @@ import { useAuth } from "../../shared/auth";
 import { Icon } from "../../design-system/components/Icon";
 import { InviteFlow } from "../../shared/components/InviteFlow";
 import { Num } from "../../design-system/components/Num";
+import "./CoachesOverview.css";
 
 export function CoachesOverview() {
   const month = MOCK.CURRENT_MONTH;
@@ -51,19 +52,19 @@ export function CoachesOverview() {
       {profile?.role === "dept_head" && (
         <button
           onClick={() => navigate("/manage")}
-          className="bq-card" style={{ width: "100%", marginBottom: 14, textAlign: "left", padding: "14px 18px", cursor: "pointer", display: "flex", alignItems: "center", gap: 12 }}
+          className="bq-card bq-coaches-coaches-overview-btn"
         >
-          <span style={{ color: "var(--color-bg-fill-primary-active)", display: "flex" }}>
+          <span className="bq-coaches-coaches-overview-row">
             <Icon name="settings" size={20} />
           </span>
           <span className="bq-grow">
-            <span style={{ display: "block", font: "700 var(--text-body-size) var(--font-family-body)" }}>Team & tiers</span>
-            <span style={{ display: "block", font: "400 var(--text-caption-1-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)", marginTop: 2 }}>Pay tiers, staff invites and people</span>
+            <span className="bq-coaches-coaches-overview-title">Team & tiers</span>
+            <span className="bq-coaches-coaches-overview-meta">Pay tiers, staff invites and people</span>
           </span>
           <Icon name="chevron-right" size={18} />
         </button>
       )}
-      <div style={{ display: "flex", alignItems: "baseline", gap: 10, padding: "2px 2px 8px" }}>
+      <div className="bq-coaches-coaches-overview-row-2">
         <span className="bq-h2">Roster</span>
         <span className="bq-meta">{rows.length} coaches</span>
       </div>
@@ -77,7 +78,7 @@ export function CoachesOverview() {
             : { title: "No coaches on the team yet", body: "The department head invites coaches. They show up here once they sign up." }
         }
       />
-      <div style={{ padding: "18px 4px 0", font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)" }}>
+      <div className="bq-coaches-coaches-overview-meta-2">
         {rows.length > 0 ? "Tap a coach to review their sessions and settle the month." : null}
       </div>
       <InviteFlow open={inviting} onClose={() => setInviting(false)} />

@@ -1,0 +1,115 @@
+/* Styles for PayeeDetail.tsx. Tokens only; see DESIGN_SYSTEM.md. */
+
+.bq-coaches-payee-detail-record-payment-sheet-title {
+  font: 800 var(--text-title-1-size)/1.2 var(--font-family-body);
+  letter-spacing: -.02em;
+  margin: 4px 0 4px;
+}
+
+.bq-coaches-payee-detail-record-payment-sheet-meta {
+  font: 400 var(--text-footnote-size) var(--font-family-mono);
+  color: var(--color-text-secondary-default);
+  margin-bottom: 16px;
+}
+
+.bq-coaches-payee-detail-record-payment-sheet-btn {
+  border: 1px solid var(--color-border-primary-default);
+  background: var(--color-bg-surface-secondary-default);
+  border-radius: 999px;
+  padding: 8px 14px;
+  font: 600 var(--text-footnote-size) var(--font-family-body);
+  color: var(--color-text-primary-default);
+  cursor: pointer;
+}
+
+.bq-coaches-payee-detail-record-payment-sheet-label {
+  font: 700 var(--text-caption-2-size) var(--font-family-mono);
+  letter-spacing: .08em;
+  color: var(--color-text-tertiary-default);
+  margin: 0 2px 6px;
+}
+
+.bq-coaches-payee-detail-record-payment-sheet-meta-2 {
+  font: 400 var(--text-caption-1-size)/1.5 var(--font-family-mono);
+  color: var(--color-text-tertiary-default);
+  margin: 10px 2px 0;
+}
+
+.bq-coaches-payee-detail-package-row-title {
+  font: 700 var(--text-callout-size) var(--font-family-body);
+  letter-spacing: -.01em;
+}
+
+.bq-coaches-payee-detail-package-row-meta {
+  font: 400 var(--text-footnote-size) var(--font-family-mono);
+  color: var(--color-text-secondary-default);
+}
+
+.bq-coaches-payee-detail-package-row-meta-2 {
+  font: 400 var(--text-footnote-size) var(--font-family-mono);
+  color: var(--color-text-tertiary-default);
+  margin-top: 4px;
+}
+
+.bq-coaches-payee-detail-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  color: var(--color-text-secondary-default);
+  font: 600 var(--text-footnote-size) var(--font-family-body);
+  padding: 0 0 14px;
+}
+
+.bq-coaches-payee-detail-title {
+  font: 800 22px var(--font-family-body);
+  letter-spacing: -.01em;
+}
+
+.bq-coaches-payee-detail-spacing {
+  padding: 16px 18px;
+  margin-bottom: 18px;
+}
+
+.bq-coaches-payee-detail-meta {
+  font: 600 var(--text-footnote-size) var(--font-family-mono);
+  color: var(--color-text-secondary-default);
+}
+
+.bq-coaches-payee-detail-title-2 {
+  font: 700 var(--text-body-size) var(--font-family-body);
+  margin-top: 2px;
+}
+
+.bq-coaches-payee-detail-title-3 {
+  margin-left: auto;
+  font: 700 var(--text-subheadline-size) var(--font-family-body);
+  text-align: right;
+}
+
+.bq-coaches-payee-detail-part {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-border-primary-default);
+}
+
+.bq-coaches-payee-detail-meta-2 {
+  display: block;
+  font: 600 var(--text-footnote-size) var(--font-family-mono);
+  color: var(--color-text-secondary-default);
+}
+
+.bq-coaches-payee-detail-meta-3 {
+  display: block;
+  font: 400 var(--text-caption-1-size) var(--font-family-mono);
+  color: var(--color-text-tertiary-default);
+}
+
+.bq-coaches-payee-detail-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 2px 2px 8px;
+}

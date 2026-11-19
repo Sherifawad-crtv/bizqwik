@@ -18,6 +18,7 @@ import { Button } from "../../design-system/components/Button";
 import { Icon } from "../../design-system/components/Icon";
 import { Spinner } from "../../design-system/components/Spinner";
 import { Num } from "../../design-system/components/Num";
+import "./CoachDetail.css";
 
 export function CoachDetail() {
   const { id } = useParams<{ id: string }>();
@@ -108,18 +109,17 @@ export function CoachDetail() {
   return (
     <div>
       {!isMobile && (
-      <button
+      <button className="bq-coaches-coach-detail-btn"
         onClick={goBack}
-        style={{ display: "flex", alignItems: "center", gap: 4, border: 0, background: "none", cursor: "pointer", color: "var(--color-text-secondary-default)", font: "600 var(--text-footnote-size) var(--font-family-body)", padding: "0 0 14px" }}
       >
         <Icon name="chevron-left" size={16} /> {from === "history" ? "History" : "Team"}
       </button>
       )}
 
-      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 18 }}>
+      <div className="bq-flex bq-items-center bq-gap-3 bq-mb-18px">
         <Avatar name={row.name} size={44} src={row.avatarUrl} />
         <div>
-          <div style={{ font: "800 22px var(--font-family-body)", letterSpacing: "-.01em" }}>{row.name}</div>
+          <div className="bq-coaches-coach-detail-title">{row.name}</div>
           <div className="bq-meta">{row.tierName ?? "No tier"} · {row.email}</div>
         </div>
       </div>
@@ -138,7 +138,7 @@ export function CoachDetail() {
       />
 
       {!isMobile && (
-      <div style={{ display: "flex", gap: 10, marginBottom: 18, flexWrap: "wrap" }}>
+      <div className="bq-flex bq-gap-10px bq-mb-18px bq-wrap">
         {editable && (
           <Button variant="secondary" onClick={() => setAddOpen(true)}>
             + Add session on their behalf
@@ -157,14 +157,14 @@ export function CoachDetail() {
       </div>
       )}
       {actionError && (
-        <div className="bq-rise" style={{ marginBottom: 14, font: "600 var(--text-footnote-size)/1.5 var(--font-family-body)", color: "var(--color-text-status-danger-default)", background: "var(--color-bg-fill-status-danger-default)", borderRadius: "var(--radius-item)", padding: "10px 14px" }}>
+        <div className="bq-rise bq-coaches-coach-detail-text">
           {actionError}
         </div>
       )}
 
-      <div style={{ display: "flex", alignItems: "baseline", gap: 10, padding: "2px 2px 8px" }}>
+      <div className="bq-coaches-coach-detail-row">
         <span className="bq-label">DAYS LOGGED</span>
-        <span style={{ marginLeft: "auto", font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)" }}>
+        <span className="bq-coaches-coach-detail-meta">
           {new Set(sessions.map((s) => s.date)).size} {new Set(sessions.map((s) => s.date)).size === 1 ? "DAY" : "DAYS"}
         </span>
       </div>
