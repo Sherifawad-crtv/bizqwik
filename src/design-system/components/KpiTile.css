@@ -1,0 +1,40 @@
+/* Styles for KpiTile.tsx. Tokens only; see DESIGN_SYSTEM.md. */
+
+.bq-kpi-tile-delta-label {
+  flex: none;
+  border-radius: 999px;
+  padding: 3px 9px;
+  font: 700 var(--text-caption-2-size) var(--font-family-mono);
+  letter-spacing: .02em;
+  white-space: nowrap;
+}
+
+.bq-kpi-tile-row {
+  width: 28px;
+  height: 28px;
+  flex: none;
+  border-radius: var(--radius-chip);
+  background: var(--color-bg-fill-accent-default);
+  color: var(--color-bg-fill-primary-active);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bq-kpi-tile-label {
+  font: 700 var(--text-caption-2-size) var(--font-family-mono);
+  letter-spacing: .08em;
+  color: var(--color-text-tertiary-default);
+  margin-top: 10px;
+}
+
+.bq-kpi-tile-part {
+  margin-top: 2px;
+  overflow-wrap: anywhere;
+}
+
+.bq-kpi-tile-meta {
+  font: 400 var(--text-caption-1-size)/1.4 var(--font-family-mono);
+  color: var(--color-text-tertiary-default);
+  margin-top: 4px;
+}

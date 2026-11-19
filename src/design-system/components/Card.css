@@ -4,3 +4,9 @@
 .bq-card--md { padding: var(--space-5); }
 .bq-card--lg { padding: 30px; }
 .bq-card--clip { overflow: hidden; }
+
+.bq-card-section-card-meta {
+  font: 400 var(--text-caption-1-size) var(--font-family-mono);
+  color: var(--color-text-tertiary-default);
+  margin-top: 2px;
+}

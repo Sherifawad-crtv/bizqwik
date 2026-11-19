@@ -1,0 +1,35 @@
+/* Styles for Spinner.tsx. Tokens only; see DESIGN_SYSTEM.md. */
+
+.bq-spinner-inline-spinner-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40svh;
+}
+
+.bq-spinner-inline-spinner-box {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  border: 3px solid var(--color-bg-fill-accent-default);
+  border-top-color: var(--color-bg-fill-primary-default);
+  animation: bqSpin .7s linear infinite;
+}
+
+.bq-spinner-block-box {
+  background: var(--color-border-primary-default);
+}
+
+.bq-spinner-stack {
+  padding: 8px 16px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bq-spinner-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+}

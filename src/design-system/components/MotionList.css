@@ -16,3 +16,8 @@
 @media (prefers-reduced-motion: reduce) {
   .bq-li[data-state="in"] { animation-name: bqFade; }
 }
+
+.bq-motion-list-size {
+  min-height: 0;
+  overflow: hidden;
+}

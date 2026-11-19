@@ -1,0 +1,53 @@
+/* Styles for TimeWheelField.tsx. Tokens only; see DESIGN_SYSTEM.md. */
+
+.bq-time-wheel-field-wheel-part {
+  flex: 1;
+  overflow-y: auto;
+  scroll-snap-type: y mandatory;
+  scrollbar-width: none;
+  overscroll-behavior: contain;
+  box-sizing: border-box;
+  position: relative;
+  z-index: 1;
+  -webkit-mask-image: linear-gradient(to bottom, transparent, var(--color-mask-default) 30%, var(--color-mask-default) 70%, transparent);
+  mask-image: linear-gradient(to bottom, transparent, var(--color-mask-default) 30%, var(--color-mask-default) 70%, transparent);
+}
+
+.bq-time-wheel-field-wheel-row {
+  scroll-snap-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
+}
+
+.bq-time-wheel-field-btn {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: var(--color-bg-surface-secondary-default);
+  border: 1px solid var(--color-border-primary-default);
+  border-radius: var(--radius-item);
+  padding: 10px 16px;
+  cursor: pointer;
+}
+
+.bq-time-wheel-field-text {
+  font: 600 var(--text-callout-size) var(--font-family-body);
+  color: var(--color-text-primary-default);
+}
+
+.bq-time-wheel-field-title {
+  font: 800 var(--text-title-1-size)/1.2 var(--font-family-body);
+  letter-spacing: -.02em;
+  margin: 4px 0 12px;
+}
+
+.bq-time-wheel-field-layer {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-radius: var(--radius-chip);
+  background: var(--color-bg-fill-accent-active);
+}

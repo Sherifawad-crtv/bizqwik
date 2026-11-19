@@ -7,25 +7,12 @@ import { CONTROL_MS, QUICK_MS, tr } from "../motion/motion";
  * no hole. */
 export function Reveal({ show, children, gap = 0 }: { show: boolean; children: ReactNode; gap?: number }) {
   return (
-    <div
+    <div className="bq-grid"
       aria-hidden={!show}
-      style={{
-        display: "grid",
-        gridTemplateRows: show ? "1fr" : "0fr",
-        opacity: show ? 1 : 0,
-        marginTop: show ? 0 : -gap,
-        transition: `${tr(["grid-template-rows", "margin-top"], CONTROL_MS)}, ${tr("opacity", QUICK_MS)}`,
-        pointerEvents: show ? undefined : "none",
-      }}
+      style={{ gridTemplateRows: show ? "1fr" : "0fr", opacity: show ? 1 : 0, marginTop: show ? 0 : -gap, transition: `${tr(["grid-template-rows", "margin-top"], CONTROL_MS)}, ${tr("opacity", QUICK_MS)}`, pointerEvents: show ? undefined : "none" }}
     >
-      <div
-        style={{
-          minHeight: 0,
-          overflow: "hidden",
-          // Out of sight and out of reach once it has finished closing.
-          visibility: show ? "visible" : "hidden",
-          transition: show ? "visibility 0s" : `visibility 0s linear ${CONTROL_MS}ms`,
-        }}
+      <div className="bq-reveal-size"
+        style={{ visibility: show ? "visible" : "hidden", transition: show ? "visibility 0s" : `visibility 0s linear ${CONTROL_MS}ms` }}
         inert={!show}
       >
         {children}

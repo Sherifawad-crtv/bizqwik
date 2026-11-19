@@ -21,25 +21,8 @@ export function YearMonthStrip({ months, value, onChange }: { months: string[]; 
   }, []);
 
   return (
-    <div
+    <div className="bq-year-month-strip-row"
       ref={trackRef}
-      style={{
-        position: "relative",
-        isolation: "isolate",
-        display: "flex",
-        gap: 6,
-        background: "var(--color-bg-surface-secondary-default)",
-        borderRadius: 999,
-        padding: 4,
-        width: "fit-content",
-        maxWidth: "100%",
-        overflowX: "auto",
-        // Sideways only: with overflow-x set, CSS would otherwise let the bigger
-        // invisible tap areas make it scroll up and down a few pixels too.
-        overflowY: "hidden",
-        overscrollBehaviorX: "contain",
-        marginBottom: 18,
-      }}
     >
       {thumb}
       {months.map((m) => {
@@ -51,35 +34,18 @@ export function YearMonthStrip({ months, value, onChange }: { months: string[]; 
             key={m}
             ref={on ? selectedRef : undefined}
             data-thumb-on={on ? "" : undefined}
-            className="bq-still"
+            className="bq-still bq-year-month-strip-btn"
             onClick={() => {
               if (future) return;
               setShown(m);
               startTransition(() => onChange(m));
             }}
             disabled={future}
-            style={{
-              border: 0,
-              cursor: future ? "default" : "pointer",
-              flex: "none",
-              position: "relative",
-              padding: "9px 14px",
-              borderRadius: 999,
-              background: "transparent",
-              transition: tr("color", QUICK_MS),
-              color: future ? "var(--color-text-tertiary-default)" : on ? "var(--color-text-primary-default)" : "var(--color-text-secondary-default)",
-              opacity: future ? 0.45 : 1,
-              font: "700 var(--text-caption-1-size) var(--font-family-mono)",
-              letterSpacing: ".06em",
-              whiteSpace: "nowrap",
-              display: "flex",
-              alignItems: "center",
-              gap: 5,
-            }}
+            style={{ cursor: future ? "default" : "pointer", transition: tr("color", QUICK_MS), color: future ? "var(--color-text-tertiary-default)" : on ? "var(--color-text-primary-default)" : "var(--color-text-secondary-default)", opacity: future ? 0.45 : 1 }}
           >
             {monthAbbr(m)}
             {isNow && (
-              <i style={{ width: 4, height: 4, borderRadius: 999, background: on ? "var(--color-bg-fill-primary-default)" : "var(--color-text-tertiary-default)", display: "block" }} />
+              <i className="bq-year-month-strip-box" style={{ background: on ? "var(--color-bg-fill-primary-default)" : "var(--color-text-tertiary-default)" }} />
             )}
           </button>
         );

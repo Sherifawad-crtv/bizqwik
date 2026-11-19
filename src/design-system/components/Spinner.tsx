@@ -5,23 +5,15 @@ import { STANDARD_MS } from "../motion/motion";
  * the shape of the screen instead. */
 export function InlineSpinner() {
   return (
-    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "40svh" }}>
-      <div
-        style={{
-          width: 28,
-          height: 28,
-          borderRadius: 999,
-          border: "3px solid var(--color-bg-fill-accent-default)",
-          borderTopColor: "var(--color-bg-fill-primary-default)",
-          animation: "bqSpin .7s linear infinite",
-        }}
+    <div className="bq-spinner-inline-spinner-row">
+      <div className="bq-spinner-inline-spinner-box"
       />
     </div>
   );
 }
 
 const block = (w: string | number, h: number, r = 999) => (
-  <div className="bq-skel" style={{ width: w, height: h, borderRadius: r, background: "var(--color-border-primary-default)" }} />
+  <div className="bq-skel bq-spinner-block-box" style={{ width: w, height: h, borderRadius: r }} />
 );
 
 /** What a whole screen shows while its data loads: the shape of a list, so the
@@ -42,12 +34,12 @@ export function Spinner() {
     };
   }, []);
   return (
-    <div ref={ref} role="status" aria-label="Loading" aria-busy="true" data-testid="skeleton" style={{ padding: "8px 16px 24px", display: "flex", flexDirection: "column", gap: 12 }}>
+    <div className="bq-spinner-stack" ref={ref} role="status" aria-label="Loading" aria-busy="true" data-testid="skeleton">
       {block("42%", 22, 999)}
       {[0, 1, 2, 3, 4].map((i) => (
-        <div key={i} className="bq-card" style={{ display: "flex", alignItems: "center", gap: 14, padding: 16 }}>
+        <div key={i} className="bq-card bq-spinner-row">
           {block(44, 44, 999)}
-          <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 8 }}>
+          <div className="bq-flex-1 bq-flex bq-col bq-gap-2">
             {block(i % 2 ? "55%" : "70%", 14, 999)}
             {block("38%", 12, 999)}
           </div>

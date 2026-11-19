@@ -6,27 +6,14 @@ export function Avatar({ name, size = 40, src }: { name: string; size?: number; 
   const showImage = !!src && src !== brokenSrc;
 
   return (
-    <div
-      style={{
-        width: size,
-        height: size,
-        borderRadius: 999,
-        background: "linear-gradient(135deg, var(--color-bg-avatar-start), var(--color-bg-avatar-end))",
-        color: "var(--color-bg-surface-primary-default)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        flex: "none",
-        font: `800 ${Math.round(size * 0.34)}px var(--font-family-body)`,
-        overflow: "hidden",
-      }}
+    <div className="bq-avatar-row"
+      style={{ width: size, height: size, font: `800 ${Math.round(size * 0.34)}px var(--font-family-body)` }}
     >
       {showImage ? (
-        <img
+        <img className="bq-avatar-img"
           src={src}
           alt=""
           onError={() => setBrokenSrc(src)}
-          style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
         />
       ) : (
         initialsOf(name)

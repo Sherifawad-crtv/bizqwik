@@ -1,0 +1,22 @@
+/* Styles for ConfirmSheet.tsx. Tokens only; see DESIGN_SYSTEM.md. */
+
+.bq-confirm-sheet-title {
+  font: 800 var(--text-title-1-size)/1.2 var(--font-family-body);
+  letter-spacing: -.02em;
+  margin: 4px 0 4px;
+}
+
+.bq-confirm-sheet-meta {
+  font: 400 var(--text-footnote-size) var(--font-family-mono);
+  color: var(--color-text-secondary-default);
+  margin-bottom: 16px;
+}
+
+.bq-confirm-sheet-text {
+  margin-bottom: 12px;
+  font: 600 var(--text-footnote-size)/1.5 var(--font-family-body);
+  color: var(--color-text-status-danger-default);
+  background: var(--color-bg-fill-status-danger-default);
+  border-radius: var(--radius-item);
+  padding: 10px 14px;
+}

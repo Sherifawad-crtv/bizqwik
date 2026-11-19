@@ -221,20 +221,20 @@ export function Sheet({ open, onClose, children, width = 460 }: SheetProps) {
   };
 
   const discardPrompt = asking && (
-    <div
+    <div className="bq-sheet-row"
       onClick={(e) => {
         e.stopPropagation();
         setAsking(false);
       }}
-      style={{ position: "absolute", inset: 0, zIndex: 2, background: "var(--color-bg-overlay-default)", display: "flex", alignItems: isMobile ? "flex-end" : "center", justifyContent: "center", padding: isMobile ? "0 8px calc(8px + var(--safe-bottom))" : 0, animation: `bqFade ${QUICK_MS}ms ${EASE}` }}
+      style={{ alignItems: isMobile ? "flex-end" : "center", padding: isMobile ? "0 8px calc(8px + var(--safe-bottom))" : 0, animation: `bqFade ${QUICK_MS}ms ${EASE}` }}
     >
-      <div role="alertdialog" aria-modal="true" aria-label="Discard changes?" onClick={stop} className="bq-card bq-card--md" style={{ width: "100%", maxWidth: 420, animation: `bqRise ${STANDARD_MS}ms ${EASE}` }}>
+      <div role="alertdialog" aria-modal="true" aria-label="Discard changes?" onClick={stop} className="bq-card bq-card--md bq-sheet-size" style={{ animation: `bqRise ${STANDARD_MS}ms ${EASE}` }}>
         <div className="bq-stat-sm">Discard changes?</div>
-        <div style={{ font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-secondary-default)", margin: "4px 0 16px" }}>What you've entered here won't be saved.</div>
+        <div className="bq-sheet-meta">What you've entered here won't be saved.</div>
         <Button variant="danger" fullWidth onClick={() => { dirty.current = false; setAsking(false); onClose(); }}>
           Discard changes
         </Button>
-        <Button variant="quiet" fullWidth style={{ marginTop: 8 }} onClick={() => setAsking(false)}>
+        <Button className="bq-mt-2" variant="quiet" fullWidth onClick={() => setAsking(false)}>
           Keep editing
         </Button>
       </div>
@@ -253,38 +253,16 @@ export function Sheet({ open, onClose, children, width = 460 }: SheetProps) {
     const backdropTransition = dragging || phase === "opening" ? "none" : `opacity ${phase === "closing" ? SHEET_OUT_MS : SHEET_IN_MS}ms ${EASE}`;
 
     return createPortal(
-      <div ref={rootRef} tabIndex={-1} role="dialog" aria-modal="true" onClick={requestDismiss} onInput={noteTyping} style={{ position: "fixed", inset: 0, zIndex: 200, outline: "none" }}>
-        <div data-testid="sheet-backdrop" aria-hidden style={{ position: "absolute", inset: 0, background: "var(--color-bg-overlay-default)", opacity: backdropOpacity, transition: backdropTransition, touchAction: "none" }} />
-        <div
+      <div className="bq-sheet-layer" ref={rootRef} tabIndex={-1} role="dialog" aria-modal="true" onClick={requestDismiss} onInput={noteTyping}>
+        <div className="bq-sheet-layer-2" data-testid="sheet-backdrop" aria-hidden style={{ opacity: backdropOpacity, transition: backdropTransition }} />
+        <div className="bq-sheet-stack"
           ref={panelRef}
           onClick={stop}
-          style={{
-            position: "absolute",
-            left: "calc(8px + var(--safe-left))",
-            right: "calc(8px + var(--safe-right))",
-            bottom: "8px",
-            maxHeight: "calc(88svh - 16px)",
-            display: "flex",
-            flexDirection: "column",
-            transform,
-            transition,
-            opacity: panelOpacity,
-            touchAction: "none",
-          }}
+          style={{ transform, transition, opacity: panelOpacity }}
         >
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              minHeight: 0,
-              background: "var(--color-bg-surface-primary-default)",
-              borderRadius: "var(--radius-sheet)",
-              border: "1px solid var(--color-border-primary-default)",
-              boxShadow: "var(--shadow-float)",
-              padding: "10px 20px 20px",
-            }}
+          <div className="bq-sheet-stack-2"
           >
-            <div
+            <div className="bq-sheet-part"
               data-testid="sheet-grabber"
               onPointerDown={(e) => {
                 (e.currentTarget as Element).setPointerCapture(e.pointerId);
@@ -293,11 +271,10 @@ export function Sheet({ open, onClose, children, width = 460 }: SheetProps) {
               onPointerMove={(e) => moveDrag(e.clientY)}
               onPointerUp={endDrag}
               onPointerCancel={endDrag}
-              style={{ padding: "8px 0 14px", cursor: "grab", touchAction: "none", flex: "none" }}
             >
-              <div style={{ width: 44, height: 5, borderRadius: 999, background: "var(--color-border-primary-default)", margin: "0 auto" }} />
+              <div className="bq-sheet-box" />
             </div>
-            <div ref={scrollRef} data-scroll style={{ overflowY: "auto", overscrollBehavior: "contain" }}>
+            <div className="bq-sheet-part-2" ref={scrollRef} data-scroll>
               {children}
             </div>
           </div>
@@ -309,28 +286,18 @@ export function Sheet({ open, onClose, children, width = 460 }: SheetProps) {
   }
 
   return createPortal(
-    <div
+    <div className="bq-sheet-row-2"
       ref={rootRef}
       tabIndex={-1}
       role="dialog"
       aria-modal="true"
       onClick={requestDismiss}
       onInput={noteTyping}
-      style={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 200,
-        background: "var(--color-bg-overlay-default)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        animation: `bqFade ${QUICK_MS}ms ${EASE}`,
-        outline: "none",
-      }}
+      style={{ animation: `bqFade ${QUICK_MS}ms ${EASE}` }}
     >
       <div
         onClick={stop}
-        className="bq-card" style={{ width: `min(${width}px, 90vw)`, maxHeight: "88vh", overflowY: "auto", padding: 26, animation: reduced ? `bqFade ${STANDARD_MS}ms ${EASE}` : `bqPop ${STANDARD_MS}ms ${SPRING}` }}
+        className="bq-card bq-sheet-part-3" style={{ width: `min(${width}px, 90vw)`, animation: reduced ? `bqFade ${STANDARD_MS}ms ${EASE}` : `bqPop ${STANDARD_MS}ms ${SPRING}` }}
       >
         {children}
       </div>

@@ -1,0 +1,45 @@
+/* Styles for DateField.tsx. Tokens only; see DESIGN_SYSTEM.md. */
+
+.bq-date-field-box {
+  position: relative;
+  width: 100%;
+  text-align: left;
+  background: var(--color-bg-surface-secondary-default);
+  border: 1px solid var(--color-border-primary-default);
+  border-radius: var(--radius-item);
+  padding: 12px 16px;
+  cursor: pointer;
+}
+
+.bq-date-field-text {
+  font: 600 var(--text-callout-size) var(--font-family-body);
+  color: var(--color-text-primary-default);
+}
+
+.bq-date-field-meta {
+  margin-left: auto;
+  font: 400 var(--text-footnote-size) var(--font-family-mono);
+  color: var(--color-text-tertiary-default);
+}
+
+.bq-date-field-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.bq-date-field-label {
+  text-align: center;
+  font: 700 var(--text-caption-2-size) var(--font-family-mono);
+  letter-spacing: .04em;
+  color: var(--color-text-tertiary-default);
+  padding: 4px 0;
+}
+
+.bq-date-field-btn {
+  aspect-ratio: 1;
+  border: 0;
+  border-radius: var(--radius-item);
+  font: 700 var(--text-body-size) var(--font-family-body);
+}

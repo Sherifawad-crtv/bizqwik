@@ -6,11 +6,10 @@ import { EmptyState } from "./EmptyState";
 
 export function TextField({ label, ...rest }: { label: string } & InputHTMLAttributes<HTMLInputElement>) {
   return (
-    <label style={{ display: "block", background: "var(--color-bg-surface-secondary-default)", border: "1px solid var(--color-border-primary-default)", borderRadius: "var(--radius-item)", padding: "10px 16px" }}>
+    <label className="bq-form-field-text-field-label">
       <span className="bq-label">{label}</span>
-      <input
+      <input className="bq-form-field-text-field-input"
         {...rest}
-        style={{ display: "block", width: "100%", border: 0, background: "none", outline: "none", font: "600 var(--text-callout-size) var(--font-family-body)", color: "var(--color-text-primary-default)", padding: "2px 0 0" }}
       />
     </label>
   );
@@ -40,28 +39,18 @@ export function SelectField({ label, value, options, onChange, placeholder, disa
 
   return (
     <>
-      <button
+      <button className="bq-form-field-select-field-btn"
         type="button"
         onClick={() => setOpen(true)}
         disabled={disabled}
-        style={{
-          display: "block",
-          width: "100%",
-          textAlign: "left",
-          background: "var(--color-bg-surface-secondary-default)",
-          border: "1px solid var(--color-border-primary-default)",
-          borderRadius: "var(--radius-item)",
-          padding: "10px 16px",
-          cursor: disabled ? "default" : "pointer",
-          opacity: disabled ? 0.6 : 1,
-        }}
+        style={{ cursor: disabled ? "default" : "pointer", opacity: disabled ? 0.6 : 1 }}
       >
         <span className="bq-label">{label}</span>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{ font: "600 var(--text-callout-size) var(--font-family-body)", color: selected ? "var(--color-text-primary-default)" : "var(--color-text-tertiary-default)" }}>
+        <div className="bq-flex bq-items-center bq-gap-2">
+          <span className="bq-form-field-select-field-text" style={{ color: selected ? "var(--color-text-primary-default)" : "var(--color-text-tertiary-default)" }}>
             {selected?.label ?? (options.length === 0 ? (empty?.title ?? "Nothing to choose yet") : (placeholder ?? "Select…"))}
           </span>
-          <span style={{ marginLeft: "auto", color: "var(--color-text-tertiary-default)", display: "flex" }}>
+          <span className="bq-ml-auto bq-fg-tertiary bq-flex">
             <Icon name="chevron-down" size={15} />
           </span>
         </div>
@@ -72,41 +61,29 @@ export function SelectField({ label, value, options, onChange, placeholder, disa
         {options.length === 0 ? (
           <>
             <EmptyState bare icon="inbox" title={empty?.title ?? "Nothing to choose yet"} body={empty?.body ?? "There are no options here yet."} />
-            <Button variant="secondary" fullWidth style={{ marginTop: 8 }} onClick={() => setOpen(false)}>
+            <Button className="bq-mt-2" variant="secondary" fullWidth onClick={() => setOpen(false)}>
               OK
             </Button>
           </>
         ) : (
           <div className="bq-title">Choose one</div>
         )}
-        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        <div className="bq-flex bq-col bq-gap-2">
           {options.map((o) => {
             const on = o.value === value;
             return (
-              <button
+              <button className="bq-form-field-select-field-btn-2"
                 key={o.value}
                 type="button"
                 onClick={() => {
                   onChange(o.value);
                   setOpen(false);
                 }}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 10,
-                  textAlign: "left",
-                  background: on ? "var(--color-bg-fill-accent-default)" : "var(--color-bg-surface-secondary-default)",
-                  border: "1px solid var(--color-border-primary-default)",
-                  borderRadius: "var(--radius-item)",
-                  padding: "14px 16px",
-                  cursor: "pointer",
-                  font: "700 var(--text-callout-size) var(--font-family-body)",
-                  color: on ? "var(--color-bg-fill-primary-active)" : "var(--color-text-primary-default)",
-                }}
+                style={{ background: on ? "var(--color-bg-fill-accent-default)" : "var(--color-bg-surface-secondary-default)", color: on ? "var(--color-bg-fill-primary-active)" : "var(--color-text-primary-default)" }}
               >
                 {o.label}
                 {on && (
-                  <span style={{ marginLeft: "auto", display: "flex" }}>
+                  <span className="bq-ml-auto bq-flex">
                     <Icon name="check" size={16} />
                   </span>
                 )}

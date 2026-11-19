@@ -1,0 +1,28 @@
+/* Styles for MoneyHero.tsx. Tokens only; see DESIGN_SYSTEM.md. */
+
+.bq-money-hero-spacing {
+  padding: 20px 20px 18px;
+  margin-bottom: 14px;
+}
+
+.bq-money-hero-spacing-2 {
+  margin: 6px 0 10px;
+}
+
+.bq-money-hero-meta {
+  font: 400 var(--text-footnote-size) var(--font-family-mono);
+  color: var(--color-text-secondary-default);
+}
+
+.bq-money-hero-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(220px,1fr));
+  gap: 14px;
+  margin-bottom: 22px;
+}
+
+.bq-money-hero-title {
+  font: 800 var(--text-large-title-size) var(--font-family-body);
+  letter-spacing: -.02em;
+  margin-top: 8px;
+}

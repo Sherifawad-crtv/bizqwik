@@ -11,5 +11,5 @@ export function Chip({ on, onClick, children, size, testId }: { on: boolean; onC
 
 /** Chips in a row that wraps. */
 export function ChipGroup({ children }: { children: ReactNode }) {
-  return <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--space-2)" }}>{children}</div>;
+  return <div className="bq-chip-chip-group-row">{children}</div>;
 }

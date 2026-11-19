@@ -21,32 +21,22 @@ export function DateField({ value, min, max, onChange }: DateFieldProps) {
 
   return (
     <>
-      <div
+      <div className="bq-date-field-box"
         onClick={() => setOpen(true)}
-        style={{
-          position: "relative",
-          width: "100%",
-          textAlign: "left",
-          background: "var(--color-bg-surface-secondary-default)",
-          border: "1px solid var(--color-border-primary-default)",
-          borderRadius: "var(--radius-item)",
-          padding: "12px 16px",
-          cursor: "pointer",
-        }}
       >
         <div className="bq-label">DATE</div>
-        <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-          <span style={{ font: "600 var(--text-callout-size) var(--font-family-body)", color: "var(--color-text-primary-default)" }}>{dateLabel(value)}</span>
-          <span style={{ marginLeft: "auto", font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)" }}>TAP TO CHANGE</span>
+        <div className="bq-flex bq-items-baseline bq-gap-2">
+          <span className="bq-date-field-text">{dateLabel(value)}</span>
+          <span className="bq-date-field-meta">TAP TO CHANGE</span>
         </div>
       </div>
 
       <Sheet open={open} onClose={() => setOpen(false)}>
         <div className="bq-label">DATE</div>
         <div className="bq-title">{monthLabel(month)}</div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 6, marginBottom: 4 }}>
+        <div className="bq-date-field-grid">
           {DOW.map((d, i) => (
-            <div key={i} style={{ textAlign: "center", font: "700 var(--text-caption-2-size) var(--font-family-mono)", letterSpacing: ".04em", color: "var(--color-text-tertiary-default)", padding: "4px 0" }}>
+            <div className="bq-date-field-label" key={i}>
               {d}
             </div>
           ))}
@@ -56,23 +46,14 @@ export function DateField({ value, min, max, onChange }: DateFieldProps) {
             const disabled = (min && iso < min) || (max && iso > max);
             const on = iso === value;
             return (
-              <button
+              <button className="bq-date-field-btn"
                 key={iso}
                 disabled={!!disabled}
                 onClick={() => {
                   onChange(iso);
                   setOpen(false);
                 }}
-                style={{
-                  aspectRatio: "1",
-                  border: 0,
-                  borderRadius: "var(--radius-item)",
-                  background: on ? "var(--color-bg-fill-primary-default)" : "var(--color-bg-surface-secondary-default)",
-                  color: disabled ? "var(--color-text-tertiary-default)" : on ? "var(--color-text-on-fill-default)" : "var(--color-text-primary-default)",
-                  opacity: disabled ? 0.4 : 1,
-                  font: "700 var(--text-body-size) var(--font-family-body)",
-                  cursor: disabled ? "not-allowed" : "pointer",
-                }}
+                style={{ background: on ? "var(--color-bg-fill-primary-default)" : "var(--color-bg-surface-secondary-default)", color: disabled ? "var(--color-text-tertiary-default)" : on ? "var(--color-text-on-fill-default)" : "var(--color-text-primary-default)", opacity: disabled ? 0.4 : 1, cursor: disabled ? "not-allowed" : "pointer" }}
               >
                 {day}
               </button>

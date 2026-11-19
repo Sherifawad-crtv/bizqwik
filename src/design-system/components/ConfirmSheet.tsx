@@ -45,17 +45,17 @@ export function ConfirmSheet({ open, onClose, kicker, title, sub, confirmLabel, 
       ) : (
         <>
           <div className="bq-label">{kicker}</div>
-          <div style={{ font: "800 var(--text-title-1-size)/1.2 var(--font-family-body)", letterSpacing: "-.02em", margin: "4px 0 4px" }}>{title}</div>
-          {sub && <div style={{ font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-secondary-default)", marginBottom: 16 }}>{sub}</div>}
+          <div className="bq-confirm-sheet-title">{title}</div>
+          {sub && <div className="bq-confirm-sheet-meta">{sub}</div>}
           {error && (
-            <div className="bq-rise" style={{ marginBottom: 12, font: "600 var(--text-footnote-size)/1.5 var(--font-family-body)", color: "var(--color-text-status-danger-default)", background: "var(--color-bg-fill-status-danger-default)", borderRadius: "var(--radius-item)", padding: "10px 14px" }}>
+            <div className="bq-rise bq-confirm-sheet-text">
               {error}
             </div>
           )}
           <Button variant={danger ? "danger" : "primary"} fullWidth size="lg" disabled={busy} onClick={go}>
             {busy ? "Working…" : confirmLabel}
           </Button>
-          <Button variant="quiet" fullWidth style={{ marginTop: 8 }} onClick={handleClose} disabled={busy}>
+          <Button className="bq-mt-2" variant="quiet" fullWidth onClick={handleClose} disabled={busy}>
             Cancel
           </Button>
         </>

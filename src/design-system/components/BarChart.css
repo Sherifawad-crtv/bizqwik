@@ -1,0 +1,47 @@
+/* Styles for BarChart.tsx. Tokens only; see DESIGN_SYSTEM.md. */
+
+.bq-bar-chart-part {
+  display: block;
+  overflow: visible;
+}
+
+.bq-bar-chart-text {
+  font: 500 var(--text-caption-2-size) var(--font-family-body);
+  fill: var(--color-text-tertiary-default);
+}
+
+.bq-bar-chart-text-2 {
+  font: 500 var(--text-caption-1-size) var(--font-family-body);
+  fill: var(--color-text-secondary-default);
+}
+
+.bq-bar-chart-text-3 {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font: 500 var(--text-caption-1-size) var(--font-family-body);
+  color: var(--color-text-secondary-default);
+}
+
+.bq-bar-chart-box {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  display: block;
+}
+
+.bq-bar-chart-meta {
+  position: absolute;
+  top: 6px;
+  width: 160px;
+  background: var(--color-text-primary-default);
+  color: var(--color-bg-surface-primary-default);
+  border-radius: var(--radius-chip);
+  padding: 8px 12px;
+  font: 600 var(--text-caption-1-size)/1.6 var(--font-family-mono);
+  pointer-events: none;
+}
+
+.bq-bar-chart-part-2 {
+  font-weight: 800;
+}

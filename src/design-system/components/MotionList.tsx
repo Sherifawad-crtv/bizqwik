@@ -47,7 +47,7 @@ export function MotionList({ children, gap = 0 }: { children: ReactNode; gap?: n
     <>
       {items.map((it, i) => (
         <div key={it.key} className="bq-li" data-state={it.state}>
-          <div style={{ minHeight: 0, overflow: "hidden" }}>
+          <div className="bq-motion-list-size">
             <div style={{ paddingTop: i > 0 ? gap : 0 }}>{it.state === "out" ? it.el : live.get(it.key) ?? it.el}</div>
           </div>
         </div>

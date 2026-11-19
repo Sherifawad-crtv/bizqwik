@@ -30,31 +30,18 @@ export function Segmented<T extends string>({
   // Sideways scrolling only (for long option lists): with overflow-x set, CSS
   // would otherwise let the bigger invisible tap areas scroll it up and down.
   return (
-    <div ref={ref} style={{ position: "relative", isolation: "isolate", display: "flex", gap: 6, background: "var(--color-bg-surface-secondary-default)", borderRadius: 999, padding: 4, width: "fit-content", maxWidth: "100%", overflowX: "auto", overflowY: "hidden", overscrollBehaviorX: "contain" }}>
+    <div className="bq-segmented-row" ref={ref}>
       {thumb}
       {options.map((o) => {
         const on = o.value === shown;
         return (
           <button
             key={o.value}
-            className="bq-hit bq-still"
+            className="bq-hit bq-still bq-segmented-btn"
             data-thumb-on={on ? "" : undefined}
             onClick={() => pick(o.value)}
             aria-pressed={on}
-            style={{
-              border: 0,
-              cursor: "pointer",
-              flex: "none",
-              position: "relative",
-              padding: "9px 14px",
-              borderRadius: 999,
-              background: "transparent",
-              color: on ? "var(--color-text-primary-default)" : "var(--color-text-secondary-default)",
-              transition: tr("color", QUICK_MS),
-              font: "700 var(--text-caption-1-size) var(--font-family-mono)",
-              letterSpacing: ".06em",
-              whiteSpace: "nowrap",
-            }}
+            style={{ color: on ? "var(--color-text-primary-default)" : "var(--color-text-secondary-default)", transition: tr("color", QUICK_MS) }}
           >
             {o.label}
           </button>

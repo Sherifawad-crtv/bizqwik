@@ -21,28 +21,18 @@ export function EmptyState({
   testId?: string;
 }) {
   return (
-    <div
+    <div className="bq-empty-state-stack"
 
       data-testid={testId ?? "empty-state"}
-      style={{
-        background: bare ? "transparent" : "var(--color-bg-surface-primary-default)",
-        border: 0,
-        borderRadius: "var(--radius-card)",
-        padding: bare ? "18px 8px" : "28px 20px",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        textAlign: "center",
-        gap: 6,
-      }}
+      style={{ background: bare ? "transparent" : "var(--color-bg-surface-primary-default)", padding: bare ? "18px 8px" : "28px 20px" }}
     >
-      <span style={{ width: 44, height: 44, borderRadius: "var(--radius-chip)", background: "var(--color-bg-fill-accent-default)", color: "var(--color-bg-fill-primary-active)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 4 }}>
+      <span className="bq-empty-state-row">
         <Icon name={icon} size={22} />
       </span>
-      <div style={{ font: "700 var(--text-callout-size)/1.3 var(--font-family-body)", color: "var(--color-text-primary-default)" }}>{title}</div>
-      {body && <div style={{ font: "500 var(--text-footnote-size)/1.5 var(--font-family-body)", color: "var(--color-text-secondary-default)", maxWidth: 340 }}>{body}</div>}
+      <div className="bq-empty-state-title">{title}</div>
+      {body && <div className="bq-empty-state-text">{body}</div>}
       {action && (
-        <Button variant="secondary" style={{ marginTop: 8 }} onClick={action.onClick}>
+        <Button className="bq-mt-2" variant="secondary" onClick={action.onClick}>
           {action.label}
         </Button>
       )}

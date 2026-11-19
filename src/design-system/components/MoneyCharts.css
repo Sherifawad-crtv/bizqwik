@@ -1,0 +1,34 @@
+/* Styles for MoneyCharts.tsx. Tokens only; see DESIGN_SYSTEM.md. */
+
+.bq-money-charts-share-bars-text {
+  flex: 1;
+  min-width: 0;
+  font: 600 var(--text-subheadline-size) var(--font-family-body);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bq-money-charts-share-bars-title {
+  font: 800 var(--text-subheadline-size) var(--font-family-body);
+}
+
+.bq-money-charts-share-bars-meta {
+  width: 40px;
+  text-align: right;
+  font: 600 var(--text-caption-1-size) var(--font-family-mono);
+  color: var(--color-text-tertiary-default);
+}
+
+.bq-money-charts-share-bars-box {
+  height: 8px;
+  background: var(--color-bg-surface-secondary-default);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.bq-money-charts-share-bars-box-2 {
+  height: 100%;
+  background: var(--color-bg-fill-primary-default);
+  border-radius: 0 4px 4px 0;
+}

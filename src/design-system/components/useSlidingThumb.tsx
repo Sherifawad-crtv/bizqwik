@@ -31,24 +31,9 @@ export function useSlidingThumb(value: string) {
   }, []);
 
   const thumb = box ? (
-    <span
+    <span className="bq-use-sliding-thumb-layer"
       aria-hidden
-      style={{
-        position: "absolute",
-        top: 4,
-        bottom: 4,
-        left: 0,
-        width: box.w,
-        transform: `translateX(${box.x}px)`,
-        borderRadius: 999,
-        background: "var(--color-bg-surface-primary-default)",
-        // Always underneath the labels: in an isolated stack, below everything
-        // in the control. (Without this Safari can paint the sliding pill over
-        // the text as it passes.)
-        zIndex: -1,
-        pointerEvents: "none",
-        transition: armed ? `transform ${THUMB_MS}ms ${EASE}, width ${THUMB_MS}ms ${EASE}` : "none",
-      }}
+      style={{ width: box.w, transform: `translateX(${box.x}px)`, transition: armed ? `transform ${THUMB_MS}ms ${EASE}, width ${THUMB_MS}ms ${EASE}` : "none" }}
     />
   ) : null;
   return { ref, thumb };

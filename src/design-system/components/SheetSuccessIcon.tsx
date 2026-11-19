@@ -10,21 +10,10 @@ const CHECK_LEN = 42; // length of the two-segment check path
  * the destructive/non-destructive distinction clear. */
 export function SheetSuccessIcon({ label, iconIn }: { label: string; iconIn: boolean }) {
   return (
-    <div data-sheet-clean style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "28px 4px 10px" }}>
-      <div
+    <div className="bq-sheet-success-icon-stack" data-sheet-clean>
+      <div className="bq-sheet-success-icon-row"
         aria-hidden
-        style={{
-          width: 84,
-          height: 84,
-          borderRadius: 999,
-          background: "var(--color-bg-fill-accent-default)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          transform: iconIn ? "scale(1)" : "scale(0.7)",
-          opacity: iconIn ? 1 : 0,
-          transition: `${tr("transform", SCREEN_MS, SPRING)}, ${tr("opacity", QUICK_MS)}`,
-        }}
+        style={{ transform: iconIn ? "scale(1)" : "scale(0.7)", opacity: iconIn ? 1 : 0, transition: `${tr("transform", SCREEN_MS, SPRING)}, ${tr("opacity", QUICK_MS)}` }}
       >
         <svg width={44} height={44} viewBox="0 0 64 64" fill="none">
           <circle
@@ -54,7 +43,7 @@ export function SheetSuccessIcon({ label, iconIn }: { label: string; iconIn: boo
           />
         </svg>
       </div>
-      <div style={{ marginTop: 16, font: "700 var(--text-callout-size) var(--font-family-body)", color: "var(--color-text-primary-default)" }}>{label}</div>
+      <div className="bq-sheet-success-icon-title">{label}</div>
     </div>
   );
 }

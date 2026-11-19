@@ -1,0 +1,6 @@
+/* Styles for Reveal.tsx. Tokens only; see DESIGN_SYSTEM.md. */
+
+.bq-reveal-size {
+  min-height: 0;
+  overflow: hidden;
+}

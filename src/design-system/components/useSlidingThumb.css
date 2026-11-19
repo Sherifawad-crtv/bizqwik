@@ -1,0 +1,12 @@
+/* Styles for useSlidingThumb.tsx. Tokens only; see DESIGN_SYSTEM.md. */
+
+.bq-use-sliding-thumb-layer {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 0;
+  border-radius: 999px;
+  background: var(--color-bg-surface-primary-default);
+  z-index: -1;
+  pointer-events: none;
+}

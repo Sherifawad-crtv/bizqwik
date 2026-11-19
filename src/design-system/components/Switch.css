@@ -1,0 +1,21 @@
+/* Styles for Switch.tsx. Tokens only; see DESIGN_SYSTEM.md. */
+
+.bq-switch-switch-visual-box {
+  flex: none;
+  display: block;
+  position: relative;
+  width: 44px;
+  height: 26px;
+  border-radius: 999px;
+}
+
+.bq-switch-switch-visual-layer {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 21px;
+  height: 21px;
+  border-radius: 999px;
+  background: var(--color-bg-surface-primary-default);
+  box-shadow: var(--shadow-thumb);
+}

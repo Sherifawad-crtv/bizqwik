@@ -64,12 +64,12 @@ export function BarChart({ data, aLabel, bLabel, ariaLabel }: { data: BarDatum[]
   };
 
   return (
-    <div ref={ref} style={{ width: "100%", position: "relative" }}>
-      <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={{ display: "block", overflow: "visible" }} role="img" aria-label={ariaLabel}>
+    <div className="bq-w-full bq-relative" ref={ref}>
+      <svg className="bq-bar-chart-part" width={W} height={H} viewBox={`0 0 ${W} ${H}`} role="img" aria-label={ariaLabel}>
         {ticks.map((t) => (
           <g key={t}>
             <line x1={padL} y1={y(t)} x2={W} y2={y(t)} stroke="var(--color-border-primary-default)" strokeWidth={1} />
-            <text x={0} y={y(t) + 4} style={{ font: "500 var(--text-caption-2-size) var(--font-family-body)", fill: "var(--color-text-tertiary-default)" }}>
+            <text className="bq-bar-chart-text" x={0} y={y(t) + 4}>
               {short(t)}
             </text>
           </g>
@@ -81,13 +81,12 @@ export function BarChart({ data, aLabel, bLabel, ariaLabel }: { data: BarDatum[]
           // The taller one goes behind, so the other always shows in front of it.
           const aBehind = (d.a ?? 0) >= (d.b ?? 0);
           return (
-            <g
+            <g className="bq-pointer"
               key={d.key}
               // A mouse shows figures on hover; a finger taps a bar to show them and taps it again to hide.
               onPointerEnter={(e) => e.pointerType === "mouse" && setPick(i)}
               onPointerLeave={(e) => e.pointerType === "mouse" && setPick(null)}
               onPointerUp={(e) => e.pointerType !== "mouse" && setPick(pick === i ? null : i)}
-              style={{ cursor: "pointer" }}
             >
               <rect x={padL + i * slot} y={0} width={slot} height={H} fill="transparent" />
               {aBehind ? (
@@ -101,39 +100,27 @@ export function BarChart({ data, aLabel, bLabel, ariaLabel }: { data: BarDatum[]
                   {aVal > 0.5 && bar(x, aVal, LIGHT, "a")}
                 </>
               )}
-              <text x={padL + i * slot + slot / 2} y={H - 8} textAnchor="middle" style={{ font: "500 var(--text-caption-1-size) var(--font-family-body)", fill: "var(--color-text-secondary-default)" }}>
+              <text className="bq-bar-chart-text-2" x={padL + i * slot + slot / 2} y={H - 8} textAnchor="middle">
                 {d.label}
               </text>
             </g>
           );
         })}
       </svg>
-      <div style={{ display: "flex", gap: 18, marginTop: 4 }}>
+      <div className="bq-flex bq-gap-18px bq-mt-1">
         {[[aLabel, LIGHT], ...(bLabel ? [[bLabel, DEEP]] : [])].map(([label, color]) => (
-          <span key={label} style={{ display: "flex", alignItems: "center", gap: 7, font: "500 var(--text-caption-1-size) var(--font-family-body)", color: "var(--color-text-secondary-default)" }}>
-            <i style={{ width: 10, height: 10, borderRadius: 999, background: color, display: "block" }} />
+          <span className="bq-bar-chart-text-3" key={label}>
+            <i className="bq-bar-chart-box" style={{ background: color }} />
             {label}
           </span>
         ))}
       </div>
       {pick !== null && (
-        <div
+        <div className="bq-bar-chart-meta"
           key={pick}
-          style={{
-            animation: `bqFade ${QUICK_MS}ms ${EASE} both`,
-            position: "absolute",
-            top: 6,
-            left: Math.min(Math.max(padL + (pick + 0.5) * slot - 80, 0), W - 160),
-            width: 160,
-            background: "var(--color-text-primary-default)",
-            color: "var(--color-bg-surface-primary-default)",
-            borderRadius: "var(--radius-chip)",
-            padding: "8px 12px",
-            font: "600 var(--text-caption-1-size)/1.6 var(--font-family-mono)",
-            pointerEvents: "none",
-          }}
+          style={{ animation: `bqFade ${QUICK_MS}ms ${EASE} both`, left: Math.min(Math.max(padL + (pick + 0.5) * slot - 80, 0), W - 160) }}
         >
-          <div style={{ fontWeight: 800 }}>{data[pick].tip.title}</div>
+          <div className="bq-bar-chart-part-2">{data[pick].tip.title}</div>
           {data[pick].tip.lines.map((l) => (
             <div key={l}>{l}</div>
           ))}

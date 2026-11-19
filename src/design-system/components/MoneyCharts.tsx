@@ -31,18 +31,18 @@ export function ShareBars({ slices }: { slices: RevenueSlice[] }) {
   const total = slices.reduce((s, x) => s + x.amount, 0);
   if (total <= 0) return <Empty text="No sales in this period yet." />;
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+    <div className="bq-flex bq-col bq-gap-3">
       {slices.map((s) => {
         const pct = (s.amount / total) * 100;
         return (
           <div key={s.key}>
-            <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 5 }}>
-              <span style={{ flex: 1, minWidth: 0, font: "600 var(--text-subheadline-size) var(--font-family-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s.label}</span>
-              <span className="tabular" style={{ font: "800 var(--text-subheadline-size) var(--font-family-body)" }}>{fmt(s.amount)}</span>
-              <span className="tabular" style={{ width: 40, textAlign: "right", font: "600 var(--text-caption-1-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)" }}>{Math.round(pct)}%</span>
+            <div className="bq-flex bq-items-baseline bq-gap-2 bq-mb-5px">
+              <span className="bq-money-charts-share-bars-text">{s.label}</span>
+              <span className="tabular bq-money-charts-share-bars-title">{fmt(s.amount)}</span>
+              <span className="tabular bq-money-charts-share-bars-meta">{Math.round(pct)}%</span>
             </div>
-            <div style={{ height: 8, background: "var(--color-bg-surface-secondary-default)", borderRadius: 999, overflow: "hidden" }}>
-              <div style={{ width: `${pct}%`, height: "100%", background: "var(--color-bg-fill-primary-default)", borderRadius: "0 4px 4px 0" }} />
+            <div className="bq-money-charts-share-bars-box">
+              <div className="bq-money-charts-share-bars-box-2" style={{ width: `${pct}%` }} />
             </div>
           </div>
         );

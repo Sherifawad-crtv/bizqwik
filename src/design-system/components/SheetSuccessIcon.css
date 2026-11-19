@@ -1,0 +1,24 @@
+/* Styles for SheetSuccessIcon.tsx. Tokens only; see DESIGN_SYSTEM.md. */
+
+.bq-sheet-success-icon-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 28px 4px 10px;
+}
+
+.bq-sheet-success-icon-row {
+  width: 84px;
+  height: 84px;
+  border-radius: 999px;
+  background: var(--color-bg-fill-accent-default);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bq-sheet-success-icon-title {
+  margin-top: 16px;
+  font: 700 var(--text-callout-size) var(--font-family-body);
+  color: var(--color-text-primary-default);
+}

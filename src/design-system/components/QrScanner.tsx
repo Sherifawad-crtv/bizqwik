@@ -140,41 +140,39 @@ export function QrScanner({ title, hint, onClose, onScan }: { title: string; hin
   };
 
   return createPortal(
-    <div
+    <div className="bq-qr-scanner-stack"
       role="dialog"
       aria-label={title}
-      style={{ position: "fixed", inset: 0, zIndex: 200, background: "var(--color-bg-media-default)", display: "flex", flexDirection: "column", color: "var(--color-text-on-media-default)" }}
     >
-      <div style={{ display: "flex", alignItems: "flex-start", gap: 12, padding: "calc(env(safe-area-inset-top) + 18px) 18px 12px" }}>
+      <div className="bq-qr-scanner-row">
         <div className="bq-grow">
-          <div style={{ font: "800 22px/1.2 var(--font-family-body)" }}>{title}</div>
-          <div style={{ font: "400 var(--text-footnote-size)/1.4 var(--font-family-mono)", color: "var(--color-text-on-media-secondary)", marginTop: 4 }}>{hint}</div>
+          <div className="bq-qr-scanner-title">{title}</div>
+          <div className="bq-qr-scanner-meta">{hint}</div>
         </div>
-        <button className="bq-hit"
+        <button className="bq-hit bq-qr-scanner-btn"
           onClick={onClose}
           aria-label="Close scanner"
-          style={{ width: 40, height: 40, flex: "none", borderRadius: 999, border: 0, background: "var(--color-bg-fill-on-media-default)", color: "var(--color-text-on-media-default)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}
         >
           <Icon name="close" size={20} />
         </button>
       </div>
-      <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
-        <div style={{ position: "relative", width: "100%", maxWidth: 420 }}>
-          <div id={REGION_ID} className="bq-qr-region" style={{ position: "relative", width: "100%", aspectRatio: "1 / 1", borderRadius: "var(--radius-card)", overflow: "hidden", background: "var(--color-bg-media-secondary)" }}>
+      <div className="bq-qr-scanner-row-2">
+        <div className="bq-qr-scanner-size">
+          <div id={REGION_ID} className="bq-qr-region bq-qr-scanner-box">
             <video ref={videoRef} playsInline muted autoPlay />
           </div>
           {!error && !stalled && (
-            <div aria-hidden style={{ position: "absolute", inset: "14%", border: "3px solid var(--color-bg-fill-primary-default)", borderRadius: "var(--radius-item)", pointerEvents: "none" }} />
+            <div className="bq-qr-scanner-layer" aria-hidden />
           )}
           {!error && !stalled && wide && (
-            <div role="group" aria-label="Camera lens" style={{ position: "absolute", left: "50%", top: "calc(100% + 16px)", transform: "translateX(-50%)", display: "flex", gap: 6, padding: 4, borderRadius: 999, background: "var(--color-bg-fill-on-media-secondary)" }}>
+            <div className="bq-qr-scanner-row-3" role="group" aria-label="Camera lens">
               {(["0.5", "1"] as Lens[]).map((l) => (
-                <button
+                <button className="bq-qr-scanner-btn-2"
                   key={l}
                   onClick={() => chooseLens(l)}
                   aria-pressed={lens === l}
                   aria-label={l === "0.5" ? "Wide lens 0.5×" : "Normal lens 1×"}
-                  style={{ minWidth: 44, height: 36, padding: "0 10px", borderRadius: 999, border: 0, cursor: "pointer", font: "700 var(--text-footnote-size) var(--font-family-mono)", background: lens === l ? "var(--color-bg-fill-on-media-selected)" : "transparent", color: lens === l ? "var(--color-text-on-media-selected)" : "var(--color-text-on-media-default)" }}
+                  style={{ background: lens === l ? "var(--color-bg-fill-on-media-selected)" : "transparent", color: lens === l ? "var(--color-text-on-media-selected)" : "var(--color-text-on-media-default)" }}
                 >
                   {l === "0.5" ? ".5×" : "1×"}
                 </button>
@@ -182,15 +180,15 @@ export function QrScanner({ title, hint, onClose, onScan }: { title: string; hin
             </div>
           )}
           {!error && stalled && (
-            <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
+            <div className="bq-qr-scanner-row-4">
               <Button onClick={startFromTap}>Tap to start the camera</Button>
             </div>
           )}
         </div>
       </div>
       {error && (
-        <div style={{ margin: "0 16px calc(env(safe-area-inset-bottom) + 18px)", background: "var(--color-bg-surface-primary-default)", color: "var(--color-text-primary-default)", borderRadius: "var(--radius-item)", padding: 16 }}>
-          <div style={{ font: "600 var(--text-subheadline-size)/1.5 var(--font-family-body)", marginBottom: 12 }}>{error}</div>
+        <div className="bq-qr-scanner-box-2">
+          <div className="bq-qr-scanner-text">{error}</div>
           <Button fullWidth onClick={() => { setError(null); setAttempt((n) => n + 1); }}>Try again</Button>
         </div>
       )}

@@ -1,0 +1,94 @@
+/* Styles for Sheet.tsx. Tokens only; see DESIGN_SYSTEM.md. */
+
+.bq-sheet-row {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: var(--color-bg-overlay-default);
+  display: flex;
+  justify-content: center;
+}
+
+.bq-sheet-size {
+  width: 100%;
+  max-width: 420px;
+}
+
+.bq-sheet-meta {
+  font: 400 var(--text-footnote-size) var(--font-family-mono);
+  color: var(--color-text-secondary-default);
+  margin: 4px 0 16px;
+}
+
+.bq-sheet-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  outline: none;
+}
+
+.bq-sheet-layer-2 {
+  position: absolute;
+  inset: 0;
+  background: var(--color-bg-overlay-default);
+  touch-action: none;
+}
+
+.bq-sheet-stack {
+  position: absolute;
+  left: calc(8px + var(--safe-left));
+  right: calc(8px + var(--safe-right));
+  bottom: 8px;
+  max-height: calc(88svh - 16px);
+  display: flex;
+  flex-direction: column;
+  touch-action: none;
+}
+
+.bq-sheet-stack-2 {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--color-bg-surface-primary-default);
+  border-radius: var(--radius-sheet);
+  border: 1px solid var(--color-border-primary-default);
+  box-shadow: var(--shadow-float);
+  padding: 10px 20px 20px;
+}
+
+.bq-sheet-part {
+  padding: 8px 0 14px;
+  cursor: grab;
+  touch-action: none;
+  flex: none;
+}
+
+.bq-sheet-box {
+  width: 44px;
+  height: 5px;
+  border-radius: 999px;
+  background: var(--color-border-primary-default);
+  margin: 0 auto;
+}
+
+.bq-sheet-part-2 {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.bq-sheet-row-2 {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: var(--color-bg-overlay-default);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  outline: none;
+}
+
+.bq-sheet-part-3 {
+  max-height: 88vh;
+  overflow-y: auto;
+  padding: 26px;
+}
