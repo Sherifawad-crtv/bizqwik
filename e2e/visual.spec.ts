@@ -139,7 +139,8 @@ async function snapshot(page: Page): Promise<string[]> {
 for (const vp of VIEWPORTS) {
   for (const s of SCREENS) {
     test(`looks unchanged: ${s.name} (${vp.name})`, async ({ page }) => {
-      await page.clock.setFixedTime(now);
+      await page.clock.install({ time: now });
+      await page.clock.resume();
       await page.emulateMedia({ reducedMotion: "reduce" });
       // Web fonts are left out on purpose: the snapshot is about our styles.
       await page.route(/fonts\.(googleapis|gstatic)\.com/, (r) => r.abort());
@@ -160,14 +161,22 @@ for (const vp of VIEWPORTS) {
       }
       await page.goto(s.path);
       await page.waitForLoadState("networkidle");
-      // Wait until nothing changes between two reads (skeletons gone, values settled).
+      // Wait until nothing is loading (no spinner or skeleton animating) and
+      // three reads in a row are identical (values settled).
+      const busy = () =>
+        page.evaluate(() =>
+          Array.from(document.querySelectorAll("body *")).some((el) => {
+            const a = getComputedStyle(el).animationName;
+            return (a.includes("bqSpin") || a.includes("bqSkel")) && el.getBoundingClientRect().width > 0;
+          }),
+        );
       let lines = await snapshot(page);
-      for (let i = 0; i < 20; i++) {
-        await page.waitForTimeout(400);
+      let same = 0;
+      for (let i = 0; i < 30 && same < 2; i++) {
+        await page.waitForTimeout(300);
         const next = await snapshot(page);
-        const same = next.join("\n") === lines.join("\n");
+        same = next.join("\n") === lines.join("\n") && !(await busy()) ? same + 1 : 0;
         lines = next;
-        if (same) break;
       }
       expect(lines.length).toBeGreaterThan(5);
 

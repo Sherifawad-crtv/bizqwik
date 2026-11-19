@@ -1,0 +1,62 @@
+/* Styles for Welcome.tsx. Tokens only; see DESIGN_SYSTEM.md. */
+
+.bq-auth-welcome-row {
+  min-height: 100svh;
+  background: var(--color-bg-canvas-default);
+  display: flex;
+  justify-content: center;
+}
+
+.bq-auth-welcome-stack {
+  position: relative;
+  width: 100%;
+  max-width: 460px;
+  min-height: 100svh;
+  background-repeat: no-repeat;
+  background-size: 100% auto;
+  background-position: top center;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.bq-auth-welcome-box {
+  padding: 90px 24px calc(20px + var(--safe-bottom));
+  background: linear-gradient(to bottom, var(--color-bg-canvas-fade-start) 0%, var(--color-bg-canvas-fade-middle) 38%, var(--color-bg-canvas-default) 62%);
+}
+
+.bq-auth-welcome-heading {
+  margin: 0;
+  font: 800 32px/1.1 var(--font-family-body);
+  letter-spacing: -.03em;
+  color: var(--color-text-primary-default);
+}
+
+.bq-auth-welcome-text {
+  margin: 8px 0 22px;
+  font: 400 var(--text-callout-size)/1.4 var(--font-family-body);
+  color: var(--color-text-secondary-default);
+}
+
+.bq-auth-welcome-btn {
+  width: 100%;
+  height: 60px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--color-bg-fill-primary-default);
+  color: var(--color-text-on-fill-default);
+  font: 700 19px var(--font-family-body);
+  cursor: pointer;
+}
+
+.bq-auth-welcome-btn-2 {
+  width: 100%;
+  height: 60px;
+  margin-top: 10px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--color-bg-fill-accent-default);
+  color: var(--color-bg-fill-primary-active);
+  font: 700 var(--text-title-2-size) var(--font-family-body);
+  cursor: pointer;
+}

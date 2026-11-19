@@ -3,6 +3,7 @@ import { useAuth } from "../../shared/auth";
 import { useIsMobile } from "../../design-system/hooks/useIsMobile";
 import { hasSeenWelcome, markWelcomed } from "../../shared/welcome";
 import hero from "../../assets/welcome.webp";
+import "./Welcome.css";
 
 /** First-time landing: shown once per device, then it's the normal sign-in. */
 export function Welcome() {
@@ -22,44 +23,26 @@ export function Welcome() {
   };
 
   return (
-    <div style={{ minHeight: "100svh", background: "var(--color-bg-canvas-default)", display: "flex", justifyContent: "center" }}>
-      <div
+    <div className="bq-auth-welcome-row">
+      <div className="bq-auth-welcome-stack"
         data-testid="welcome"
-        style={{
-          position: "relative",
-          width: "100%",
-          maxWidth: 460,
-          minHeight: "100svh",
-          backgroundImage: `url(${hero})`,
-          backgroundRepeat: "no-repeat",
-          backgroundSize: "100% auto",
-          backgroundPosition: "top center",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "flex-end",
-        }}
+        style={{ backgroundImage: `url(${hero})` }}
       >
-        <div
-          style={{
-            padding: "90px 24px calc(20px + var(--safe-bottom))",
-            background: "linear-gradient(to bottom, var(--color-bg-canvas-fade-start) 0%, var(--color-bg-canvas-fade-middle) 38%, var(--color-bg-canvas-default) 62%)",
-          }}
+        <div className="bq-auth-welcome-box"
         >
-          <h1 style={{ margin: 0, font: "800 32px/1.1 var(--font-family-body)", letterSpacing: "-.03em", color: "var(--color-text-primary-default)" }}>Welcome to Bizqwik!</h1>
-          <p style={{ margin: "8px 0 22px", font: "400 var(--text-callout-size)/1.4 var(--font-family-body)", color: "var(--color-text-secondary-default)" }}>
+          <h1 className="bq-auth-welcome-heading">Welcome to Bizqwik!</h1>
+          <p className="bq-auth-welcome-text">
             Easily manage your coaching operations, bookings, revenue, reward your clients and more.
           </p>
           <button
-            className="bq-scale"
+            className="bq-scale bq-auth-welcome-btn"
             onClick={() => go("/signup")}
-            style={{ width: "100%", height: 60, border: 0, borderRadius: 999, background: "var(--color-bg-fill-primary-default)", color: "var(--color-text-on-fill-default)", font: "700 19px var(--font-family-body)", cursor: "pointer" }}
           >
             Get Started
           </button>
           <button
-            className="bq-scale"
+            className="bq-scale bq-auth-welcome-btn-2"
             onClick={() => go("/login")}
-            style={{ width: "100%", height: 60, marginTop: 10, border: 0, borderRadius: 999, background: "var(--color-bg-fill-accent-default)", color: "var(--color-bg-fill-primary-active)", font: "700 var(--text-title-2-size) var(--font-family-body)", cursor: "pointer" }}
           >
             Login
           </button>

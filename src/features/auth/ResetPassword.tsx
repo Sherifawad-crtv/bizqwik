@@ -5,6 +5,7 @@ import { useKeyboardInset } from "../../design-system/hooks/useKeyboardInset";
 import { Button } from "../../design-system/components/Button";
 import { TextField } from "../../design-system/components/FormField";
 import { auth } from "../../shared/api/backend";
+import "./ResetPassword.css";
 
 const KEYBOARD_THRESHOLD = 80;
 
@@ -55,10 +56,10 @@ export function ResetPassword() {
         overflowY: isMobile ? "auto" : undefined,
       }}
     >
-      <img src="/wordmark.png" alt="Bizqwik" style={{ height: "clamp(34px, 8vw, 42px)", width: "auto", display: "block" }} />
-      <div className="bq-card bq-card--lg" style={{ width: "min(420px, 100%)" }}>
+      <img className="bq-auth-reset-password-img" src="/wordmark.png" alt="Bizqwik" />
+      <div className="bq-card bq-card--lg bq-auth-reset-password-size">
         <div className="bq-stat-lg">Set new password</div>
-        <div style={{ font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-secondary-default)", marginTop: 6, marginBottom: 22 }}>
+        <div className="bq-auth-reset-password-meta">
           CHOOSE A NEW PASSWORD
         </div>
 
@@ -86,7 +87,7 @@ export function ResetPassword() {
               {error.toLowerCase().includes("session") && (
                 <>
                   {" "}
-                  <Link to="/forgot-password" style={{ textDecoration: "underline" }}>
+                  <Link className="bq-auth-reset-password-part" to="/forgot-password">
                     Request a new link
                   </Link>
                   .
@@ -95,7 +96,7 @@ export function ResetPassword() {
             </div>
           )}
 
-          <Button type="submit" fullWidth size="lg" disabled={busy} style={{ marginTop: 4 }}>
+          <Button className="bq-mt-1" type="submit" fullWidth size="lg" disabled={busy}>
             {busy ? "Saving…" : "Save password"}
           </Button>
         </form>

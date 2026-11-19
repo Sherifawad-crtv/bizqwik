@@ -1,0 +1,17 @@
+/* Utilities: single-purpose layout, spacing and text-colour classes built on the
+   tokens. Loaded last so they win over component defaults. Off-scale spacing
+   (e.g. 10px, 14px) is kept exact for now and will be snapped to the scale. */
+.bq-block { display: block; }
+.bq-fg-primary { color: var(--color-text-primary-default); }
+.bq-fg-secondary { color: var(--color-text-secondary-default); }
+.bq-flex { display: flex; }
+.bq-gap-5 { gap: var(--space-5); }
+.bq-justify-center { justify-content: center; }
+.bq-mb-22px { margin-bottom: 22px; }
+.bq-min-w-0 { min-width: 0; }
+.bq-mt-1 { margin-top: var(--space-1); }
+.bq-mt-6px { margin-top: 6px; }
+.bq-mt-22px { margin-top: 22px; }
+.bq-overflow-hidden { overflow: hidden; }
+.bq-text-center { text-align: center; }
+.bq-text-right { text-align: right; }

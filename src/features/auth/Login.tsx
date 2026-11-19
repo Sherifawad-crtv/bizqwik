@@ -6,6 +6,7 @@ import { useIsMobile } from "../../design-system/hooks/useIsMobile";
 import { useKeyboardInset } from "../../design-system/hooks/useKeyboardInset";
 import { DesktopAuth } from "./DesktopAuth";
 import { Button } from "../../design-system/components/Button";
+import "./Login.css";
 
 const KEYBOARD_THRESHOLD = 80; // ignore small viewport jitter from browser chrome
 
@@ -48,38 +49,35 @@ export function Login() {
   const card = (
     <div className="bq-card" style={{ width: isMobile ? "min(420px, 100%)" : "min(580px, 100%)", padding: isMobile ? 30 : 48 }}>
         <div className="bq-stat-lg">Sign in</div>
-        <div style={{ font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-secondary-default)", marginTop: 6, marginBottom: 22 }}>
+        <div className="bq-auth-login-meta">
           ATTENDANCE &amp; PAYOUT PORTAL
         </div>
 
         <form onSubmit={submit} className="bq-stack">
-          <label style={{ display: "block", background: "var(--color-bg-surface-secondary-default)", border: "1px solid var(--color-border-primary-default)", borderRadius: "var(--radius-item)", padding: "10px 16px" }}>
+          <label className="bq-auth-login-label">
             <span className="bq-label">EMAIL</span>
-            <input
+            <input className="bq-auth-login-input"
               type="email"
               required
               autoComplete="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               onFocus={focusIntoView}
-              style={{ display: "block", width: "100%", border: 0, background: "none", outline: "none", font: "600 var(--text-callout-size) var(--font-family-body)", color: "var(--color-text-primary-default)", padding: "2px 0 0" }}
             />
           </label>
-          <label style={{ display: "block", background: "var(--color-bg-surface-secondary-default)", border: "1px solid var(--color-border-primary-default)", borderRadius: "var(--radius-item)", padding: "10px 16px" }}>
+          <label className="bq-auth-login-label">
             <span className="bq-label">PASSWORD</span>
-            <input
+            <input className="bq-auth-login-input"
               type="password"
               required
               autoComplete="current-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               onFocus={focusIntoView}
-              style={{ display: "block", width: "100%", border: 0, background: "none", outline: "none", font: "600 var(--text-callout-size) var(--font-family-body)", color: "var(--color-text-primary-default)", padding: "2px 0 0" }}
             />
           </label>
-          <Link
+          <Link className="bq-auth-login-title"
             to="/forgot-password"
-            style={{ textAlign: "right", font: "700 var(--text-footnote-size) var(--font-family-body)", color: "var(--color-text-secondary-default)" }}
           >
             Forgot password?
           </Link>
@@ -90,11 +88,11 @@ export function Login() {
             </div>
           )}
 
-          <Button type="submit" fullWidth size="lg" disabled={busy} style={{ marginTop: 4 }}>
+          <Button className="bq-mt-1" type="submit" fullWidth size="lg" disabled={busy}>
             {busy ? "Signing in…" : "Sign in"}
           </Button>
-          <Link to="/signup" style={{ textAlign: "center", font: "700 var(--text-footnote-size) var(--font-family-body)", color: "var(--color-text-secondary-default)" }}>
-            First time? <span style={{ color: "var(--color-bg-fill-primary-default)" }}>Create an account</span>
+          <Link className="bq-auth-login-title-2" to="/signup">
+            First time? <span className="bq-auth-login-part">Create an account</span>
           </Link>
         </form>
       </div>
@@ -117,7 +115,7 @@ export function Login() {
         overflowY: isMobile ? "auto" : undefined,
       }}
     >
-      <img src="/wordmark.png" alt="Bizqwik" style={{ height: "clamp(34px, 8vw, 42px)", width: "auto", display: "block" }} />
+      <img className="bq-auth-login-img" src="/wordmark.png" alt="Bizqwik" />
       {card}
     </div>
   );

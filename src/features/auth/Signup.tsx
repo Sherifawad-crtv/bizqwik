@@ -7,6 +7,7 @@ import { DesktopAuth } from "./DesktopAuth";
 import { Button } from "../../design-system/components/Button";
 import { TextField } from "../../design-system/components/FormField";
 import { api } from "../../shared/api/backend";
+import "./Signup.css";
 
 const KEYBOARD_THRESHOLD = 80; // ignore small viewport jitter from browser chrome
 
@@ -54,7 +55,7 @@ export function Signup() {
   const card = (
     <div className="bq-card" style={{ width: isMobile ? "min(420px, 100%)" : "min(580px, 100%)", padding: isMobile ? 30 : 48 }}>
         <div className="bq-stat-lg">Create account</div>
-        <div style={{ font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-secondary-default)", marginTop: 6, marginBottom: 22 }}>
+        <div className="bq-auth-signup-meta">
           USE THE EMAIL YOU WERE INVITED WITH
         </div>
 
@@ -78,11 +79,11 @@ export function Signup() {
             </div>
           )}
 
-          <Button type="submit" fullWidth size="lg" disabled={busy} style={{ marginTop: 4 }}>
+          <Button className="bq-mt-1" type="submit" fullWidth size="lg" disabled={busy}>
             {busy ? "Creating account…" : "Create account"}
           </Button>
-          <Link to="/login" style={{ textAlign: "center", font: "700 var(--text-footnote-size) var(--font-family-body)", color: "var(--color-text-secondary-default)", marginTop: 4 }}>
-            Already have an account? <span style={{ color: "var(--color-bg-fill-primary-default)" }}>Sign in</span>
+          <Link className="bq-auth-signup-title" to="/login">
+            Already have an account? <span className="bq-auth-signup-part">Sign in</span>
           </Link>
         </form>
       </div>
@@ -105,7 +106,7 @@ export function Signup() {
         overflowY: isMobile ? "auto" : undefined,
       }}
     >
-      <img src="/wordmark.png" alt="Bizqwik" style={{ height: "clamp(34px, 8vw, 42px)", width: "auto", display: "block" }} />
+      <img className="bq-auth-signup-img" src="/wordmark.png" alt="Bizqwik" />
       {card}
     </div>
   );

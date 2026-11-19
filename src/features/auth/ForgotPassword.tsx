@@ -5,6 +5,7 @@ import { useKeyboardInset } from "../../design-system/hooks/useKeyboardInset";
 import { Button } from "../../design-system/components/Button";
 import { TextField } from "../../design-system/components/FormField";
 import { auth } from "../../shared/api/backend";
+import "./ForgotPassword.css";
 
 const KEYBOARD_THRESHOLD = 80;
 
@@ -46,19 +47,19 @@ export function ForgotPassword() {
         overflowY: isMobile ? "auto" : undefined,
       }}
     >
-      <img src="/wordmark.png" alt="Bizqwik" style={{ height: "clamp(34px, 8vw, 42px)", width: "auto", display: "block" }} />
-      <div className="bq-card bq-card--lg" style={{ width: "min(420px, 100%)" }}>
+      <img className="bq-auth-forgot-password-img" src="/wordmark.png" alt="Bizqwik" />
+      <div className="bq-card bq-card--lg bq-auth-forgot-password-size">
         <div className="bq-stat-lg">Reset password</div>
-        <div style={{ font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-secondary-default)", marginTop: 6, marginBottom: 22 }}>
+        <div className="bq-auth-forgot-password-meta">
           {sent ? "CHECK YOUR EMAIL" : "WE'LL EMAIL YOU A RESET LINK"}
         </div>
 
         {sent ? (
           <>
-            <div style={{ font: "500 var(--text-body-size)/1.5 var(--font-family-body)", color: "var(--color-text-primary-default)" }}>
+            <div className="bq-auth-forgot-password-text">
               If an account exists for <strong>{email}</strong>, a password reset link is on its way.
             </div>
-            <Link to="/login" style={{ display: "block", marginTop: 22 }}>
+            <Link className="bq-block bq-mt-22px" to="/login">
               <Button fullWidth size="lg">
                 Back to sign in
               </Button>
@@ -81,12 +82,11 @@ export function ForgotPassword() {
               </div>
             )}
 
-            <Button type="submit" fullWidth size="lg" disabled={busy} style={{ marginTop: 4 }}>
+            <Button className="bq-mt-1" type="submit" fullWidth size="lg" disabled={busy}>
               {busy ? "Sending…" : "Send reset link"}
             </Button>
-            <Link
+            <Link className="bq-auth-forgot-password-title"
               to="/login"
-              style={{ textAlign: "center", font: "700 var(--text-footnote-size) var(--font-family-body)", color: "var(--color-text-secondary-default)", marginTop: 4 }}
             >
               Back to sign in
             </Link>
