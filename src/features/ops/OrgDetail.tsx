@@ -17,6 +17,7 @@ import { SectionHeader } from "../../design-system/components/SectionHeader";
 import { limitLabel } from "./format";
 import { DeleteOrgSheet } from "./orgdetail/DeleteOrgSheet";
 import { OrgAppConfig, UsageRow } from "./orgdetail/AppConfig";
+import "./OrgDetail.css";
 
 const STATUS_OPTIONS: { value: OrgStatus; label: string }[] = [
   { value: "trial", label: "TRIAL" },
@@ -85,41 +86,40 @@ export function OrgDetail() {
 
   return (
     <div>
-      <button
+      <button className="bq-ops-org-detail-btn"
         onClick={() => navigate("/bizqwik")}
-        style={{ display: "inline-flex", alignItems: "center", gap: 4, border: 0, background: "none", color: "var(--color-text-secondary-default)", cursor: "pointer", font: "700 var(--text-subheadline-size) var(--font-family-body)", marginBottom: 12, padding: 0 }}
       >
         <Icon name="chevron-left" size={16} /> Overview
       </button>
 
       <div className="bq-stat-lg">{org.name}</div>
-      <div style={{ font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)", marginTop: 6 }}>
+      <div className="bq-ops-org-detail-meta">
         /{org.slug} · Created {formatDateTime(org.createdAt)}
       </div>
 
       {error && <ErrorBanner text={error} />}
 
-      <div style={{ marginTop: 22, opacity: busy ? 0.6 : 1, pointerEvents: busy ? "none" : "auto" }}>
+      <div className="bq-mt-22px" style={{ opacity: busy ? 0.6 : 1, pointerEvents: busy ? "none" : "auto" }}>
         <SectionHeader>Status</SectionHeader>
         <Segmented value={org.status} options={STATUS_OPTIONS} onChange={setStatus} />
 
-        <div style={{ marginTop: 22 }}>
+        <div className="bq-mt-22px">
           <SectionHeader>App type</SectionHeader>
           <Segmented
             value={org.mode ?? "team"}
             options={[{ value: "team", label: "TEAM" }, { value: "solo", label: "SOLO" }]}
             onChange={setMode}
           />
-          <div style={{ font: "500 var(--text-caption-1-size)/1.6 var(--font-family-mono)", color: "var(--color-text-tertiary-default)", padding: "8px 2px 0" }}>
+          <div className="bq-ops-org-detail-meta-2">
             Solo: the owner runs everything herself (Today, Members, Schedule, Money). Team: coaches, tiers and payouts.
           </div>
         </div>
 
-        <div style={{ marginTop: 22 }}>
+        <div className="bq-mt-22px">
           <SectionHeader>Plan</SectionHeader>
           <SelectField label="SAAS PLAN" value={org.planId ?? ""} options={planOptions} onChange={setPlan} placeholder="No plan" />
           {activePlan && (
-            <div style={{ font: "500 var(--text-caption-1-size)/1.6 var(--font-family-mono)", color: "var(--color-text-tertiary-default)", padding: "8px 2px 0" }}>
+            <div className="bq-ops-org-detail-meta-2">
               {egp(activePlan.price)}/mo · up to {limitLabel(activePlan.teamSizeLimit)} staff · {limitLabel(activePlan.clientSizeLimit)} clients
             </div>
           )}
@@ -128,59 +128,59 @@ export function OrgDetail() {
 
       <OrgAppConfig id={id} />
 
-      <div style={{ marginTop: 26 }}>
+      <div className="bq-mt-26px">
         <SectionHeader>QR codes</SectionHeader>
-        <Card pad="none" style={{ padding: 18, display: "flex", alignItems: "center", gap: 14 }}>
+        <Card className="bq-ops-org-detail-card" pad="none">
           <div className="bq-grow">
-            <div style={{ font: "700 var(--text-body-size) var(--font-family-body)" }}>Lifetime check-in code</div>
-            <div style={{ font: "400 var(--text-footnote-size)/1.5 var(--font-family-mono)", color: "var(--color-text-tertiary-default)", marginTop: 2 }}>
+            <div className="bq-ops-org-detail-title">Lifetime check-in code</div>
+            <div className="bq-ops-org-detail-meta-3">
               Print it for {org.name}'s front desk — members scan it in the app to check in.
             </div>
           </div>
-          <Button variant="secondary" style={{ flex: "none" }} onClick={() => navigate(`/bizqwik/orgs/${id}/qr`)}>
+          <Button className="bq-flex-none" variant="secondary" onClick={() => navigate(`/bizqwik/orgs/${id}/qr`)}>
             Open
           </Button>
         </Card>
-        <Card pad="none" style={{ padding: 18, display: "flex", alignItems: "center", gap: 14, marginTop: 10 }}>
+        <Card className="bq-ops-org-detail-card-2" pad="none">
           <div className="bq-grow">
-            <div style={{ font: "700 var(--text-body-size) var(--font-family-body)" }}>Coaches' attendance code</div>
-            <div style={{ font: "400 var(--text-footnote-size)/1.5 var(--font-family-mono)", color: "var(--color-text-tertiary-default)", marginTop: 2 }}>
+            <div className="bq-ops-org-detail-title">Coaches' attendance code</div>
+            <div className="bq-ops-org-detail-meta-3">
               Print it for the coaches' room — coaches scan it with the + button to log their sessions.
             </div>
           </div>
-          <Button variant="secondary" style={{ flex: "none" }} onClick={() => navigate(`/bizqwik/orgs/${id}/qr?for=coaches`)}>
+          <Button className="bq-flex-none" variant="secondary" onClick={() => navigate(`/bizqwik/orgs/${id}/qr?for=coaches`)}>
             Open
           </Button>
         </Card>
       </div>
 
-      <div style={{ marginTop: 26 }}>
+      <div className="bq-mt-26px">
         <SectionHeader>Usage</SectionHeader>
-        <Card pad="none" style={{ overflow: "hidden" }}>
+        <Card className="bq-overflow-hidden" pad="none">
           <UsageRow label="GMV" value={egp(usage.gmv)} />
           <UsageRow label="Staff" value={String(usage.staffCount)} />
           <UsageRow label="Clients" value={String(usage.clientCount)} />
           <UsageRow label="Sessions logged" value={String(usage.sessionsLogged)} />
           <UsageRow label="Packages sold" value={String(usage.packagesSold)} />
           <UsageRow label="Memberships sold" value={String(usage.membershipsSold)} />
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 18px" }}>
-            <span style={{ font: "600 var(--text-body-size) var(--font-family-body)", color: "var(--color-text-secondary-default)" }}>Last activity</span>
-            <span style={{ font: "700 var(--text-body-size) var(--font-family-body)" }}>{usage.lastActivity ? formatDateTime(usage.lastActivity) : "—"}</span>
+          <div className="bq-ops-org-detail-row">
+            <span className="bq-ops-org-detail-text">Last activity</span>
+            <span className="bq-ops-org-detail-title">{usage.lastActivity ? formatDateTime(usage.lastActivity) : "—"}</span>
           </div>
         </Card>
       </div>
 
-      <div style={{ marginTop: 26 }}>
+      <div className="bq-mt-26px">
         <SectionHeader count={staff.length}>Staff</SectionHeader>
-        <Card pad="none" style={{ overflow: "hidden" }}>
+        <Card className="bq-overflow-hidden" pad="none">
           {staff.map((p, i) => (
             <div key={p.id} className={`bq-listrow bq-listrow--compact ${!(i === staff.length - 1) ? "bq-listrow--divider" : ""}`}>
               <Avatar name={p.name} size={34} src={p.avatarUrl} />
               <div className="bq-grow">
-                <div style={{ font: "700 var(--text-body-size) var(--font-family-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.name}</div>
-                <div style={{ font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.email}</div>
+                <div className="bq-ops-org-detail-title-2">{p.name}</div>
+                <div className="bq-ops-org-detail-meta-4">{p.email}</div>
               </div>
-              <span style={{ font: "700 var(--text-caption-2-size) var(--font-family-mono)", letterSpacing: ".06em", color: "var(--color-text-secondary-default)", flex: "none" }}>{ROLE_LABELS[p.role].toUpperCase()}</span>
+              <span className="bq-ops-org-detail-label">{ROLE_LABELS[p.role].toUpperCase()}</span>
             </div>
           ))}
           {staff.length === 0 && (
@@ -195,30 +195,30 @@ export function OrgDetail() {
       </div>
 
       {pendingInvites.length > 0 && (
-        <div style={{ marginTop: 26 }}>
+        <div className="bq-mt-26px">
           <SectionHeader count={pendingInvites.length}>Pending invites</SectionHeader>
-          <Card pad="none" style={{ overflow: "hidden" }}>
+          <Card className="bq-overflow-hidden" pad="none">
             {pendingInvites.map((inv, i) => (
               <div key={inv.email} className={`bq-listrow bq-listrow--compact ${!(i === pendingInvites.length - 1) ? "bq-listrow--divider" : ""}`}>
-                <span style={{ color: "var(--color-text-tertiary-default)", display: "flex" }}><Icon name="envelope" size={18} /></span>
-                <div style={{ font: "600 var(--text-body-size) var(--font-family-body)", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{inv.email}</div>
-                <span style={{ font: "700 var(--text-caption-2-size) var(--font-family-mono)", letterSpacing: ".06em", color: "var(--color-text-secondary-default)" }}>{ROLE_LABELS[inv.role].toUpperCase()}</span>
+                <span className="bq-fg-tertiary bq-flex"><Icon name="envelope" size={18} /></span>
+                <div className="bq-ops-org-detail-text-2">{inv.email}</div>
+                <span className="bq-ops-org-detail-label-2">{ROLE_LABELS[inv.role].toUpperCase()}</span>
               </div>
             ))}
           </Card>
         </div>
       )}
 
-      <div style={{ marginTop: 26 }}>
+      <div className="bq-mt-26px">
         <SectionHeader>Danger zone</SectionHeader>
-        <Card pad="none" style={{ padding: 18, display: "flex", alignItems: "center", gap: 14 }}>
+        <Card className="bq-ops-org-detail-card" pad="none">
           <div className="bq-grow">
-            <div style={{ font: "700 var(--text-body-size) var(--font-family-body)" }}>Delete organization</div>
-            <div style={{ font: "400 var(--text-footnote-size)/1.5 var(--font-family-mono)", color: "var(--color-text-tertiary-default)", marginTop: 2 }}>
+            <div className="bq-ops-org-detail-title">Delete organization</div>
+            <div className="bq-ops-org-detail-meta-3">
               Permanently removes {org.name} and all its staff, members, sales, sessions, wallets and points. This can't be undone.
             </div>
           </div>
-          <Button variant="danger" style={{ flex: "none" }} onClick={() => setDeleting(true)}>
+          <Button className="bq-flex-none" variant="danger" onClick={() => setDeleting(true)}>
             Delete
           </Button>
         </Card>

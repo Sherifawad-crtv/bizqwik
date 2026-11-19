@@ -1,0 +1,36 @@
+/* Styles for Overview.tsx. Tokens only; see DESIGN_SYSTEM.md. */
+
+.bq-ops-overview-stat-tile-card {
+  padding: 16px 18px;
+}
+
+.bq-ops-overview-stat-tile-title {
+  font: 800 var(--text-title-1-size)/1.1 var(--font-family-body);
+  letter-spacing: -.02em;
+  margin-top: 6px;
+}
+
+.bq-ops-overview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+  margin-bottom: 26px;
+}
+
+.bq-ops-overview-btn {
+  width: 100%;
+  background: none;
+  cursor: pointer;
+  text-align: left;
+}
+
+.bq-ops-overview-title {
+  font: 700 var(--text-callout-size) var(--font-family-body);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bq-ops-overview-title-2 {
+  font: 700 var(--text-body-size) var(--font-family-body);
+}

@@ -1,0 +1,99 @@
+/* Styles for OrgDetail.tsx. Tokens only; see DESIGN_SYSTEM.md. */
+
+.bq-ops-org-detail-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 0;
+  background: none;
+  color: var(--color-text-secondary-default);
+  cursor: pointer;
+  font: 700 var(--text-subheadline-size) var(--font-family-body);
+  margin-bottom: 12px;
+  padding: 0;
+}
+
+.bq-ops-org-detail-meta {
+  font: 400 var(--text-footnote-size) var(--font-family-mono);
+  color: var(--color-text-tertiary-default);
+  margin-top: 6px;
+}
+
+.bq-ops-org-detail-meta-2 {
+  font: 500 var(--text-caption-1-size)/1.6 var(--font-family-mono);
+  color: var(--color-text-tertiary-default);
+  padding: 8px 2px 0;
+}
+
+.bq-ops-org-detail-card {
+  padding: 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.bq-ops-org-detail-title {
+  font: 700 var(--text-body-size) var(--font-family-body);
+}
+
+.bq-ops-org-detail-meta-3 {
+  font: 400 var(--text-footnote-size)/1.5 var(--font-family-mono);
+  color: var(--color-text-tertiary-default);
+  margin-top: 2px;
+}
+
+.bq-ops-org-detail-card-2 {
+  padding: 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 10px;
+}
+
+.bq-ops-org-detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 18px;
+}
+
+.bq-ops-org-detail-text {
+  font: 600 var(--text-body-size) var(--font-family-body);
+  color: var(--color-text-secondary-default);
+}
+
+.bq-ops-org-detail-title-2 {
+  font: 700 var(--text-body-size) var(--font-family-body);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bq-ops-org-detail-meta-4 {
+  font: 400 var(--text-footnote-size) var(--font-family-mono);
+  color: var(--color-text-tertiary-default);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bq-ops-org-detail-label {
+  font: 700 var(--text-caption-2-size) var(--font-family-mono);
+  letter-spacing: .06em;
+  color: var(--color-text-secondary-default);
+  flex: none;
+}
+
+.bq-ops-org-detail-text-2 {
+  font: 600 var(--text-body-size) var(--font-family-body);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bq-ops-org-detail-label-2 {
+  font: 700 var(--text-caption-2-size) var(--font-family-mono);
+  letter-spacing: .06em;
+  color: var(--color-text-secondary-default);
+}

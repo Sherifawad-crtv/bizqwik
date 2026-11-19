@@ -1,0 +1,46 @@
+/* Styles for Plans.tsx. Tokens only; see DESIGN_SYSTEM.md. */
+
+.bq-ops-plans-card {
+  padding: 16px 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.bq-ops-plans-title {
+  font: 700 17px var(--font-family-body);
+}
+
+.bq-ops-plans-meta {
+  font: 400 var(--text-footnote-size) var(--font-family-mono);
+  color: var(--color-text-tertiary-default);
+  margin-top: 3px;
+}
+
+.bq-ops-plans-btn {
+  border: 0;
+  background: var(--color-bg-surface-secondary-default);
+  border-radius: 999px;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-secondary-default);
+  cursor: pointer;
+  flex: none;
+}
+
+.bq-ops-plans-btn-2 {
+  border: 0;
+  background: var(--color-bg-fill-status-danger-default);
+  border-radius: 999px;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-status-danger-default);
+  cursor: pointer;
+  flex: none;
+}

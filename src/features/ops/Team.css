@@ -1,0 +1,51 @@
+/* Styles for Team.tsx. Tokens only; see DESIGN_SYSTEM.md. */
+
+.bq-ops-team-invite-sheet-meta {
+  font: 500 var(--text-caption-1-size)/1.5 var(--font-family-mono);
+  color: var(--color-text-tertiary-default);
+  padding: 0 2px;
+}
+
+.bq-ops-team-title {
+  font: 700 var(--text-body-size) var(--font-family-body);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bq-ops-team-meta {
+  font: 400 var(--text-footnote-size) var(--font-family-mono);
+  color: var(--color-text-tertiary-default);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bq-ops-team-label {
+  font: 700 var(--text-caption-2-size) var(--font-family-mono);
+  letter-spacing: .06em;
+  color: var(--color-text-secondary-default);
+  flex: none;
+}
+
+.bq-ops-team-text {
+  font: 600 var(--text-body-size) var(--font-family-body);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bq-ops-team-meta-2 {
+  font: 400 var(--text-caption-1-size) var(--font-family-mono);
+  color: var(--color-text-tertiary-default);
+}
+
+.bq-ops-team-btn {
+  border: 0;
+  background: none;
+  color: var(--color-text-tertiary-default);
+  cursor: pointer;
+  display: flex;
+  flex: none;
+  padding: 4px;
+}

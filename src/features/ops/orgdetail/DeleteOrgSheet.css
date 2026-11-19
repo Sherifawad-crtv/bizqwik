@@ -1,0 +1,19 @@
+/* Styles for DeleteOrgSheet.tsx. Tokens only; see DESIGN_SYSTEM.md. */
+
+.bq-ops-delete-org-sheet-label {
+  font: 700 var(--text-caption-2-size) var(--font-family-mono);
+  letter-spacing: .08em;
+  color: var(--color-text-status-danger-default);
+}
+
+.bq-ops-delete-org-sheet-title {
+  font: 800 var(--text-title-1-size)/1.2 var(--font-family-body);
+  letter-spacing: -.02em;
+  margin: 4px 0 10px;
+}
+
+.bq-ops-delete-org-sheet-text {
+  font: 500 var(--text-subheadline-size)/1.5 var(--font-family-body);
+  color: var(--color-text-secondary-default);
+  margin-bottom: 14px;
+}

@@ -10,6 +10,7 @@ import { ErrorBanner } from "../../design-system/components/ErrorBanner";
 import { Card } from "../../design-system/components/Card";
 import { SectionHeader } from "../../design-system/components/SectionHeader";
 import { Segmented } from "../../design-system/components/Segmented";
+import "./OrgQr.css";
 
 // The lifetime check-in QR. It encodes the org's check-in token — its slug,
 // which is fixed for the org's life — matching the `/client/check-in` backend
@@ -98,14 +99,13 @@ export function OrgQr() {
 
   return (
     <div>
-      <button
+      <button className="bq-ops-org-qr-btn"
         onClick={() => navigate(`/bizqwik/orgs/${id}`)}
-        style={{ display: "inline-flex", alignItems: "center", gap: 4, border: 0, background: "none", color: "var(--color-text-secondary-default)", cursor: "pointer", font: "700 var(--text-subheadline-size) var(--font-family-body)", marginBottom: 12, padding: 0 }}
       >
         <Icon name="chevron-left" size={16} /> {org.name}
       </button>
 
-      <div style={{ marginBottom: 16 }}>
+      <div className="bq-mb-4">
         <Segmented
           value={forCoaches ? "coaches" : "members"}
           options={[{ value: "members", label: "MEMBERS" }, { value: "coaches", label: "COACHES" }]}
@@ -113,29 +113,29 @@ export function OrgQr() {
         />
       </div>
       <div className="bq-stat-lg">{copy.title}</div>
-      <div style={{ font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)", marginTop: 6 }}>{copy.intro}</div>
+      <div className="bq-ops-org-qr-meta">{copy.intro}</div>
 
-      <div style={{ marginTop: 22, maxWidth: 520 }}>
+      <div className="bq-ops-org-qr-size">
         <SectionHeader>Code</SectionHeader>
-        <Card pad="none" style={{ padding: 24, display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
+        <Card className="bq-ops-org-qr-card" pad="none">
           {qrError && <ErrorBanner text={qrError} />}
-          {!pngUrl && !qrError && <div style={{ padding: "40px 0", color: "var(--color-text-tertiary-default)", font: "500 var(--text-subheadline-size) var(--font-family-body)" }}>Rendering…</div>}
+          {!pngUrl && !qrError && <div className="bq-ops-org-qr-text">Rendering…</div>}
           {pngUrl && (
             <>
-              <img src={pngUrl} alt={`${org.name} ${copy.title}`} width={260} height={260} style={{ width: 260, height: 260, imageRendering: "pixelated" }} />
-              <div style={{ font: "700 18px var(--font-family-body)", marginTop: 14 }}>{org.name}</div>
-              <div style={{ font: "400 var(--text-footnote-size)/1.6 var(--font-family-mono)", color: "var(--color-text-tertiary-default)", marginTop: 4 }}>
+              <img className="bq-ops-org-qr-img" src={pngUrl} alt={`${org.name} ${copy.title}`} width={260} height={260} />
+              <div className="bq-ops-org-qr-title">{org.name}</div>
+              <div className="bq-ops-org-qr-meta-2">
                 {forCoaches ? copy.label : <>Encodes check-in code <b>{org.slug}</b></>}
               </div>
             </>
           )}
         </Card>
 
-        <div style={{ display: "flex", gap: 10, marginTop: 16 }}>
-          <Button onClick={printQr} disabled={!pngUrl} style={{ flex: 1 }}>
+        <div className="bq-flex bq-gap-10px bq-mt-4">
+          <Button className="bq-flex-1" onClick={printQr} disabled={!pngUrl}>
             Print / Save PDF
           </Button>
-          <Button variant="secondary" onClick={downloadPng} disabled={!pngUrl} style={{ flex: 1 }}>
+          <Button className="bq-flex-1" variant="secondary" onClick={downloadPng} disabled={!pngUrl}>
             Download PNG
           </Button>
         </div>

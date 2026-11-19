@@ -8,6 +8,7 @@ import { ErrorBanner } from "../../../design-system/components/ErrorBanner";
 import { Card } from "../../../design-system/components/Card";
 import { SectionHeader } from "../../../design-system/components/SectionHeader";
 import { ImageUploadField } from "./ImageUpload";
+import "./AppConfig.css";
 
 // Blank earn rate = points off. Defaults: 10 pts/EGP earned, 500 pts = 1 EGP
 // (2% back), 50 pts per check-in, 10,000 pts minimum, 12-month expiry.
@@ -24,9 +25,9 @@ function pointsPreview(earn: number, redeem: number, checkin: number, min: numbe
 
 export function UsageRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="bq-listrow bq-listrow--compact bq-listrow--divider" style={{ justifyContent: "space-between" }}>
-      <span style={{ font: "600 var(--text-body-size) var(--font-family-body)", color: "var(--color-text-secondary-default)" }}>{label}</span>
-      <span style={{ font: "700 var(--text-body-size) var(--font-family-body)" }} className="tabular">{value}</span>
+    <div className="bq-listrow bq-listrow--compact bq-listrow--divider bq-justify-between">
+      <span className="bq-ops-app-config-usage-row-text">{label}</span>
+      <span className="tabular bq-ops-app-config-usage-row-title">{value}</span>
     </div>
   );
 }
@@ -38,10 +39,10 @@ export function UsageRow({ label, value }: { label: string; value: string }) {
 export function OrgAppConfig({ id }: { id: string }) {
   const cfg = useAsync(() => api.ops.orgConfig(id), [id]);
   return (
-    <div style={{ marginTop: 26 }}>
+    <div className="bq-mt-26px">
       <SectionHeader>Member app</SectionHeader>
-      <Card pad="none" style={{ padding: 18 }}>
-        {cfg.loading && <div style={{ padding: "6px 0", color: "var(--color-text-tertiary-default)", font: "500 var(--text-subheadline-size) var(--font-family-body)" }}>Loading…</div>}
+      <Card className="bq-ops-app-config-org-app-config-card" pad="none">
+        {cfg.loading && <div className="bq-ops-app-config-org-app-config-text">Loading…</div>}
         {cfg.error && <ErrorBanner text={cfg.error} />}
         {cfg.data && <OrgAppConfigForm key={id} id={id} initial={cfg.data} onSaved={cfg.refetch} />}
       </Card>
@@ -118,8 +119,8 @@ function OrgAppConfigForm({ id, initial, onSaved }: { id: string; initial: OrgCo
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 12, opacity: busy ? 0.6 : 1, pointerEvents: busy ? "none" : "auto" }}>
-      <div style={{ font: "700 var(--text-caption-2-size) var(--font-family-mono)", letterSpacing: ".08em", color: "var(--color-text-tertiary-default)", margin: "2px 2px 0" }}>BRANDING</div>
+    <div className="bq-flex bq-col bq-gap-3" style={{ opacity: busy ? 0.6 : 1, pointerEvents: busy ? "none" : "auto" }}>
+      <div className="bq-ops-app-config-org-app-config-form-label">BRANDING</div>
       <TextField label="APP NAME" value={appName} onChange={(e) => setAppName(e.target.value)} placeholder="e.g. Revolt" />
       <ImageUploadField orgId={id} assetKey="logo" label="LOGO" value={logoUrl} onChange={setLogoUrl} hint="Shown on the sign-in screen. Square works best." />
       <ImageUploadField orgId={id} assetKey="icon" label="ICON" value={iconUrl} onChange={setIconUrl} hint="PWA / home-screen icon." />
@@ -128,22 +129,22 @@ function OrgAppConfigForm({ id, initial, onSaved }: { id: string; initial: OrgCo
       <ImageUploadField orgId={id} assetKey="art-1" label="ONBOARDING ART 2" value={asset1} onChange={setAsset1} hint="Shown full screen on phones. Use a tall (portrait) photo, at least 1080 px wide." />
       <ImageUploadField orgId={id} assetKey="art-2" label="ONBOARDING ART 3" value={asset2} onChange={setAsset2} hint="Shown full screen on phones. Use a tall (portrait) photo, at least 1080 px wide." />
 
-      <div style={{ font: "700 var(--text-caption-2-size) var(--font-family-mono)", letterSpacing: ".08em", color: "var(--color-text-tertiary-default)", margin: "10px 2px 0" }}>LOYALTY</div>
+      <div className="bq-ops-app-config-org-app-config-form-label-2">LOYALTY</div>
       <TextField label="POINTS EARNED PER 1 EGP" value={earn} onChange={(e) => setEarn(e.target.value)} inputMode="numeric" placeholder="Blank = points off" />
       <TextField label="POINTS PER 1 EGP OF WALLET CREDIT" value={redeem} onChange={(e) => setRedeem(e.target.value)} inputMode="numeric" placeholder="500" />
       <TextField label="POINTS PER CHECK-IN" value={checkin} onChange={(e) => setCheckin(e.target.value)} inputMode="numeric" placeholder="50" />
       <TextField label="MINIMUM POINTS TO REDEEM" value={minRedeem} onChange={(e) => setMinRedeem(e.target.value)} inputMode="numeric" placeholder="10000" />
       <TextField label="POINTS EXPIRE AFTER (MONTHS)" value={pointsTtl} onChange={(e) => setPointsTtl(e.target.value)} inputMode="numeric" placeholder="12" />
-      <div data-testid="points-preview" style={{ font: "500 var(--text-caption-1-size)/1.5 var(--font-family-mono)", color: "var(--color-text-secondary-default)", padding: "0 2px" }}>
+      <div className="bq-ops-app-config-org-app-config-form-meta" data-testid="points-preview">
         {pointsPreview(Number(earn) || 0, Number(redeem) || 0, Number(checkin) || 0, Number(minRedeem) || 0)} Only cash/card purchases earn; wallet-paid ones don't, and refunds take points back.
       </div>
       <TextField label="WALLET CREDIT EXPIRY (MONTHS)" value={ttlMonths} onChange={(e) => setTtlMonths(e.target.value)} inputMode="numeric" placeholder="12" />
 
       {error && <ErrorBanner text={error} />}
 
-      <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 4 }}>
+      <div className="bq-flex bq-items-center bq-gap-3 bq-mt-1">
         <Button onClick={save} disabled={busy}>{busy ? "Saving…" : "Save member app"}</Button>
-        {saved && !busy && <span style={{ font: "600 var(--text-footnote-size) var(--font-family-body)", color: "var(--color-text-status-paid-default)" }}>Saved.</span>}
+        {saved && !busy && <span className="bq-ops-app-config-org-app-config-form-text">Saved.</span>}
       </div>
     </div>
   );

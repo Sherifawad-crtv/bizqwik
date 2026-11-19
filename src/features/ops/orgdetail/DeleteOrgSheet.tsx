@@ -4,6 +4,7 @@ import { TextField } from "../../../design-system/components/FormField";
 import { Button } from "../../../design-system/components/Button";
 import { Sheet } from "../../../design-system/components/Sheet";
 import { ErrorBanner } from "../../../design-system/components/ErrorBanner";
+import "./DeleteOrgSheet.css";
 
 // Type-the-slug confirmation, GitHub style: the delete button only unlocks
 // once the org's slug is typed exactly.
@@ -46,9 +47,9 @@ export function DeleteOrgSheet({
 
   return (
     <Sheet open={open} onClose={close}>
-      <div style={{ font: "700 var(--text-caption-2-size) var(--font-family-mono)", letterSpacing: ".08em", color: "var(--color-text-status-danger-default)" }}>DELETE ORGANIZATION</div>
-      <div style={{ font: "800 var(--text-title-1-size)/1.2 var(--font-family-body)", letterSpacing: "-.02em", margin: "4px 0 10px" }}>Delete {org.name}?</div>
-      <div style={{ font: "500 var(--text-subheadline-size)/1.5 var(--font-family-body)", color: "var(--color-text-secondary-default)", marginBottom: 14 }}>
+      <div className="bq-ops-delete-org-sheet-label">DELETE ORGANIZATION</div>
+      <div className="bq-ops-delete-org-sheet-title">Delete {org.name}?</div>
+      <div className="bq-ops-delete-org-sheet-text">
         This permanently deletes {org.name}, its {usage.staffCount} staff and {usage.clientCount} members (and their app logins), every sale, session, wallet, points balance and its branding. It can't be undone.
       </div>
       <TextField
@@ -60,11 +61,11 @@ export function DeleteOrgSheet({
         autoCorrect="off"
         spellCheck={false}
       />
-      {error && <div style={{ marginTop: 10 }}><ErrorBanner text={error} /></div>}
-      <Button variant="danger" fullWidth size="lg" style={{ marginTop: 16 }} disabled={!matches || busy} onClick={confirm}>
+      {error && <div className="bq-mt-10px"><ErrorBanner text={error} /></div>}
+      <Button className="bq-mt-4" variant="danger" fullWidth size="lg" disabled={!matches || busy} onClick={confirm}>
         {busy ? "Deleting…" : "Delete permanently"}
       </Button>
-      <Button variant="secondary" fullWidth style={{ marginTop: 8 }} disabled={busy} onClick={close}>
+      <Button className="bq-mt-2" variant="secondary" fullWidth disabled={busy} onClick={close}>
         Cancel
       </Button>
     </Sheet>

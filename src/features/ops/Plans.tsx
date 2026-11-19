@@ -14,6 +14,7 @@ import { ErrorBanner } from "../../design-system/components/ErrorBanner";
 import { Card } from "../../design-system/components/Card";
 import { SectionHeader } from "../../design-system/components/SectionHeader";
 import { limitLabel } from "./format";
+import "./Plans.css";
 
 function PlanSheet({ open, onClose, plan, onDone }: { open: boolean; onClose: () => void; plan: PlanType | null; onDone: () => void }) {
   const [name, setName] = useState("");
@@ -72,7 +73,7 @@ function PlanSheet({ open, onClose, plan, onDone }: { open: boolean; onClose: ()
         <TextField label="TEAM LIMIT (BLANK = UNLIMITED)" type="number" inputMode="numeric" value={team} onChange={(e) => setTeam(e.target.value)} placeholder="Unlimited" />
         <TextField label="CLIENT LIMIT (BLANK = UNLIMITED)" type="number" inputMode="numeric" value={client} onChange={(e) => setClient(e.target.value)} placeholder="Unlimited" />
         {error && <ErrorBanner text={error} />}
-        <Button fullWidth size="lg" disabled={busy} onClick={submit} style={{ marginTop: 4 }}>
+        <Button className="bq-mt-1" fullWidth size="lg" disabled={busy} onClick={submit}>
           {busy ? "Saving…" : plan ? "Save changes" : "Create plan"}
         </Button>
       </div>
@@ -100,9 +101,9 @@ export function Plans() {
 
   return (
     <div>
-      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
+      <div className="bq-flex bq-items-center bq-gap-3 bq-mb-5">
         <div className="bq-stat-lg">Plans</div>
-        <Button onClick={openNew} style={{ marginLeft: "auto" }}>
+        <Button className="bq-ml-auto" onClick={openNew}>
           <Icon name="plus" size={18} /> New plan
         </Button>
       </div>
@@ -112,17 +113,17 @@ export function Plans() {
       <SectionHeader count={plans.length}>SaaS plans</SectionHeader>
       <div className="bq-stack">
         {plans.map((p) => (
-          <Card pad="none" key={p.id} style={{ padding: "16px 18px", display: "flex", alignItems: "center", gap: 12 }}>
+          <Card className="bq-ops-plans-card" pad="none" key={p.id}>
             <div className="bq-grow">
-              <div style={{ font: "700 17px var(--font-family-body)" }}>{p.name}</div>
-              <div style={{ font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)", marginTop: 3 }}>
+              <div className="bq-ops-plans-title">{p.name}</div>
+              <div className="bq-ops-plans-meta">
                 {egp(p.price)}/mo · {limitLabel(p.teamSizeLimit)} staff · {limitLabel(p.clientSizeLimit)} clients
               </div>
             </div>
-            <button className="bq-hit" onClick={() => openEdit(p)} aria-label={`Edit ${p.name}`} style={{ border: 0, background: "var(--color-bg-surface-secondary-default)", borderRadius: 999, width: 38, height: 38, display: "flex", alignItems: "center", justifyContent: "center", color: "var(--color-text-secondary-default)", cursor: "pointer", flex: "none" }}>
+            <button className="bq-hit bq-ops-plans-btn" onClick={() => openEdit(p)} aria-label={`Edit ${p.name}`}>
               <Icon name="pencil" size={17} />
             </button>
-            <button className="bq-hit" onClick={() => setDeleting(p)} aria-label={`Delete ${p.name}`} style={{ border: 0, background: "var(--color-bg-fill-status-danger-default)", borderRadius: 999, width: 38, height: 38, display: "flex", alignItems: "center", justifyContent: "center", color: "var(--color-text-status-danger-default)", cursor: "pointer", flex: "none" }}>
+            <button className="bq-hit bq-ops-plans-btn-2" onClick={() => setDeleting(p)} aria-label={`Delete ${p.name}`}>
               <Icon name="trash" size={17} />
             </button>
           </Card>

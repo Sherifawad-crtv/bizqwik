@@ -1,3 +1,4 @@
+import { cx } from "../../design-system/cx";
 import { EmptyState } from "../../design-system/components/EmptyState";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -11,12 +12,13 @@ import { StatusPill } from "./shared";
 import { Card } from "../../design-system/components/Card";
 import { SectionHeader } from "../../design-system/components/SectionHeader";
 import { CreateOrgSheet } from "./CreateOrgSheet";
+import "./Overview.css";
 
 function StatTile({ label, value }: { label: string; value: string }) {
   return (
-    <Card pad="none" style={{ padding: "16px 18px" }}>
+    <Card className="bq-ops-overview-stat-tile-card" pad="none">
       <div className="bq-label">{label}</div>
-      <div style={{ font: "800 var(--text-title-1-size)/1.1 var(--font-family-body)", letterSpacing: "-.02em", marginTop: 6 }} className="tabular">{value}</div>
+      <div className="tabular bq-ops-overview-stat-tile-title">{value}</div>
     </Card>
   );
 }
@@ -36,18 +38,18 @@ export function Overview() {
 
   return (
     <div>
-      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
+      <div className="bq-flex bq-items-center bq-gap-3 bq-mb-5">
         <div>
           <div className="bq-label">BIZQWIK OPS</div>
-          <div className="bq-stat-lg" style={{ marginTop: 4 }}>Overview</div>
+          <div className="bq-stat-lg bq-mt-1">Overview</div>
         </div>
-        <Button onClick={() => setSheetOpen(true)} style={{ marginLeft: "auto" }}>
+        <Button className="bq-ml-auto" onClick={() => setSheetOpen(true)}>
           <Icon name="plus" size={18} /> New org
         </Button>
       </div>
 
       {s && (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 10, marginBottom: 26 }}>
+        <div className="bq-ops-overview-grid">
           <StatTile label="ORGANIZATIONS" value={String(s.totalOrgs)} />
           <StatTile label="ACTIVE" value={String(s.activeOrgs)} />
           <StatTile label="TOTAL GMV" value={egp(s.totalGmv)} />
@@ -56,26 +58,26 @@ export function Overview() {
       )}
 
       <SectionHeader count={orgs.length}>Organizations</SectionHeader>
-      <Card pad="none" style={{ overflow: "hidden" }}>
+      <Card className="bq-overflow-hidden" pad="none">
         {orgs.map((o, i) => (
           <button
             key={o.id}
             onClick={() => navigate(`/bizqwik/orgs/${o.id}`)}
-            className={`bq-plain bq-listrow ${!(i === orgs.length - 1) ? "bq-listrow--divider" : ""}`} style={{ width: "100%", background: "none", cursor: "pointer", textAlign: "left" }}
+            className={cx(`bq-plain bq-listrow ${!(i === orgs.length - 1) ? "bq-listrow--divider" : ""}`, "bq-ops-overview-btn")}
           >
             <div className="bq-grow">
-              <div style={{ font: "700 var(--text-callout-size) var(--font-family-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{o.name}</div>
+              <div className="bq-ops-overview-title">{o.name}</div>
               <div className="bq-meta">
                 {o.planName ?? "No plan"} · {o.staffCount} staff · {o.clientCount} clients
               </div>
             </div>
-            <div style={{ textAlign: "right", flex: "none" }}>
-              <div style={{ font: "700 var(--text-body-size) var(--font-family-body)" }} className="tabular">{egp(o.gmv)}</div>
-              <div style={{ marginTop: 4 }}>
+            <div className="bq-text-right bq-flex-none">
+              <div className="tabular bq-ops-overview-title-2">{egp(o.gmv)}</div>
+              <div className="bq-mt-1">
                 <StatusPill status={o.status} />
               </div>
             </div>
-            <span style={{ color: "var(--color-text-tertiary-default)", display: "flex", flex: "none" }}>
+            <span className="bq-fg-tertiary bq-flex bq-flex-none">
               <Icon name="chevron-right" size={16} />
             </span>
           </button>

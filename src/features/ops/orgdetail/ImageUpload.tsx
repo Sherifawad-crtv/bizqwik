@@ -4,6 +4,7 @@ import { extOf, screenCrop, squareCrop } from "../../../shared/image";
 import { Icon } from "../../../design-system/components/Icon";
 import { TextField } from "../../../design-system/components/FormField";
 import { Button } from "../../../design-system/components/Button";
+import "./ImageUpload.css";
 
 const ORG_BRANDING_BUCKET = "org-branding";
 
@@ -64,48 +65,35 @@ export function ImageUploadField({
 
   return (
     <div>
-      <div style={{ font: "700 var(--text-caption-2-size) var(--font-family-mono)", letterSpacing: ".08em", color: "var(--color-text-tertiary-default)", margin: "0 2px 6px" }}>{label}</div>
-      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-        <div
-          style={{
-            width: 56,
-            height: 56,
-            flex: "none",
-            borderRadius: "var(--radius-item)",
-            background: "var(--color-bg-surface-secondary-default)",
-            border: "1px solid var(--color-border-primary-default)",
-            overflow: "hidden",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
+      <div className="bq-ops-image-upload-image-upload-field-label">{label}</div>
+      <div className="bq-flex bq-items-center bq-gap-3">
+        <div className="bq-ops-image-upload-image-upload-field-row"
         >
           {value ? (
-            <img src={value} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            <img className="bq-ops-image-upload-image-upload-field-img" src={value} alt="" />
           ) : (
             <Icon name="plus" size={18} style={{ color: "var(--color-text-tertiary-default)" }} />
           )}
         </div>
-        <input ref={fileInput} type="file" accept="image/*" onChange={onSelected} style={{ display: "none" }} />
+        <input className="bq-ops-image-upload-image-upload-field-input" ref={fileInput} type="file" accept="image/*" onChange={onSelected} />
         <Button variant="secondary" size="md" disabled={busy} onClick={() => fileInput.current?.click()}>
           {busy ? "Uploading…" : value ? "Replace" : "Upload"}
         </Button>
         {value && !busy && (
-          <button
+          <button className="bq-ops-image-upload-image-upload-field-btn"
             onClick={() => onChange("")}
-            style={{ border: 0, background: "none", padding: 0, cursor: "pointer", font: "600 var(--text-footnote-size) var(--font-family-body)", color: "var(--color-text-tertiary-default)" }}
           >
             Remove
           </button>
         )}
       </div>
-      {hint && <div style={{ font: "400 var(--text-caption-1-size)/1.5 var(--font-family-mono)", color: "var(--color-text-tertiary-default)", margin: "6px 2px 0" }}>{hint}</div>}
+      {hint && <div className="bq-ops-image-upload-image-upload-field-meta">{hint}</div>}
       {error && (
-        <div className="bq-rise" style={{ marginTop: 8, font: "600 var(--text-footnote-size)/1.5 var(--font-family-body)", color: "var(--color-text-status-danger-default)", background: "var(--color-bg-fill-status-danger-default)", borderRadius: "var(--radius-item)", padding: "10px 14px" }}>
+        <div className="bq-rise bq-ops-image-upload-image-upload-field-text">
           {error}
         </div>
       )}
-      <div style={{ marginTop: 8 }}>
+      <div className="bq-mt-2">
         <TextField label="OR PASTE A URL" value={value} onChange={(e) => onChange(e.target.value)} placeholder="https://…" />
       </div>
     </div>

@@ -12,6 +12,7 @@ import { TextField, SelectField } from "../../design-system/components/FormField
 import { ErrorBanner } from "../../design-system/components/ErrorBanner";
 import { Card } from "../../design-system/components/Card";
 import { SectionHeader } from "../../design-system/components/SectionHeader";
+import "./Team.css";
 
 const INVITE_ROLES: { value: BizqwikRole; label: string }[] = [
   { value: "ops_manager", label: BIZQWIK_ROLE_LABELS.ops_manager },
@@ -56,11 +57,11 @@ function InviteSheet({ open, onClose, onDone }: { open: boolean; onClose: () => 
         <TextField label="NAME" value={name} onChange={(e) => setName(e.target.value)} placeholder="Optional" />
         <TextField label="EMAIL" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="teammate@bizqwik.com" />
         <SelectField label="ROLE" value={role} options={INVITE_ROLES} onChange={(v) => setRole(v as BizqwikRole)} />
-        <div style={{ font: "500 var(--text-caption-1-size)/1.5 var(--font-family-mono)", color: "var(--color-text-tertiary-default)", padding: "0 2px" }}>
+        <div className="bq-ops-team-invite-sheet-meta">
           They'll sign up with this email to join the ops team.
         </div>
         {error && <ErrorBanner text={error} />}
-        <Button fullWidth size="lg" disabled={busy} onClick={submit} style={{ marginTop: 4 }}>
+        <Button className="bq-mt-1" fullWidth size="lg" disabled={busy} onClick={submit}>
           {busy ? "Sending…" : "Send invite"}
         </Button>
       </div>
@@ -90,9 +91,9 @@ export function Team() {
 
   return (
     <div>
-      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
+      <div className="bq-flex bq-items-center bq-gap-3 bq-mb-5">
         <div className="bq-stat-lg">Team</div>
-        <Button onClick={() => setSheetOpen(true)} style={{ marginLeft: "auto" }}>
+        <Button className="bq-ml-auto" onClick={() => setSheetOpen(true)}>
           <Icon name="user-plus" size={18} /> Invite
         </Button>
       </div>
@@ -100,15 +101,15 @@ export function Team() {
       {error && <ErrorBanner text={error} />}
 
       <SectionHeader count={members.length}>Members</SectionHeader>
-      <Card pad="none" style={{ overflow: "hidden" }}>
+      <Card className="bq-overflow-hidden" pad="none">
         {members.map((m, i) => (
           <div key={m.id} className={`bq-listrow bq-listrow--compact ${!(i === members.length - 1) ? "bq-listrow--divider" : ""}`}>
             <Avatar name={m.name} size={34} />
             <div className="bq-grow">
-              <div style={{ font: "700 var(--text-body-size) var(--font-family-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{m.name}</div>
-              <div style={{ font: "400 var(--text-footnote-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{m.email}</div>
+              <div className="bq-ops-team-title">{m.name}</div>
+              <div className="bq-ops-team-meta">{m.email}</div>
             </div>
-            <span style={{ font: "700 var(--text-caption-2-size) var(--font-family-mono)", letterSpacing: ".06em", color: "var(--color-text-secondary-default)", flex: "none" }}>{BIZQWIK_ROLE_LABELS[m.role].toUpperCase()}</span>
+            <span className="bq-ops-team-label">{BIZQWIK_ROLE_LABELS[m.role].toUpperCase()}</span>
           </div>
         ))}
         {members.length === 0 && (
@@ -117,20 +118,19 @@ export function Team() {
       </Card>
 
       {invites.length > 0 && (
-        <div style={{ marginTop: 26 }}>
+        <div className="bq-mt-26px">
           <SectionHeader count={invites.length}>Pending invites</SectionHeader>
-          <Card pad="none" style={{ overflow: "hidden" }}>
+          <Card className="bq-overflow-hidden" pad="none">
             {invites.map((inv, i) => (
               <div key={inv.email} className={`bq-listrow bq-listrow--compact ${!(i === invites.length - 1) ? "bq-listrow--divider" : ""}`}>
-                <span style={{ color: "var(--color-text-tertiary-default)", display: "flex" }}><Icon name="envelope" size={18} /></span>
+                <span className="bq-fg-tertiary bq-flex"><Icon name="envelope" size={18} /></span>
                 <div className="bq-grow">
-                  <div style={{ font: "600 var(--text-body-size) var(--font-family-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{inv.email}</div>
-                  <div style={{ font: "400 var(--text-caption-1-size) var(--font-family-mono)", color: "var(--color-text-tertiary-default)" }}>{BIZQWIK_ROLE_LABELS[inv.role]}</div>
+                  <div className="bq-ops-team-text">{inv.email}</div>
+                  <div className="bq-ops-team-meta-2">{BIZQWIK_ROLE_LABELS[inv.role]}</div>
                 </div>
-                <button
+                <button className="bq-ops-team-btn"
                   onClick={() => cancel(inv.email)}
                   aria-label={`Cancel invite for ${inv.email}`}
-                  style={{ border: 0, background: "none", color: "var(--color-text-tertiary-default)", cursor: "pointer", display: "flex", flex: "none", padding: 4 }}
                 >
                   <Icon name="close" size={18} />
                 </button>

@@ -6,6 +6,7 @@ import { TextField, SelectField } from "../../design-system/components/FormField
 import { api } from "../../shared/api/backend";
 import type { PlanType } from "../../shared/types";
 import { ErrorBanner } from "../../design-system/components/ErrorBanner";
+import "./CreateOrgSheet.css";
 
 function slugify(s: string): string {
   return s.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
@@ -65,16 +66,15 @@ export function CreateOrgSheet({ open, onClose, plans, onCreated }: { open: bool
   if (created) {
     return (
       <Sheet open={open} onClose={close}>
-        <div style={{ font: "700 var(--text-caption-2-size) var(--font-family-mono)", letterSpacing: ".08em", color: "var(--color-text-status-paid-default)" }}>ORGANIZATION CREATED</div>
-        <div style={{ font: "800 var(--text-title-1-size)/1.2 var(--font-family-body)", letterSpacing: "-.02em", margin: "4px 0 6px" }}>{created.name} is live</div>
-        <div style={{ font: "400 var(--text-footnote-size)/1.7 var(--font-family-mono)", color: "var(--color-text-secondary-default)", marginBottom: 18 }}>
+        <div className="bq-ops-create-org-sheet-label">ORGANIZATION CREATED</div>
+        <div className="bq-ops-create-org-sheet-title">{created.name} is live</div>
+        <div className="bq-ops-create-org-sheet-meta">
           Its department head signs up with <b>{created.deptHeadEmail}</b>. Two starter pay tiers were created. Next: print
           the front-desk check-in QR so members can start checking in.
         </div>
         {created.domain && !created.domain.connected && (
-          <div
+          <div className="bq-ops-create-org-sheet-text"
             data-testid="domain-warning"
-            style={{ font: "500 var(--text-footnote-size)/1.5 var(--font-family-body)", color: "var(--color-text-primary-default)", background: "var(--color-bg-fill-accent-default)", borderRadius: "var(--radius-item)", padding: "10px 12px", marginBottom: 18 }}
           >
             <b>{created.domain.name}</b> couldn't be connected automatically
             {created.domain.reason ? ` (${created.domain.reason})` : ""}, so its member app has no https yet and the camera
@@ -92,7 +92,7 @@ export function CreateOrgSheet({ open, onClose, plans, onCreated }: { open: bool
         >
           View &amp; print check-in QR
         </Button>
-        <Button variant="quiet" fullWidth style={{ marginTop: 8 }} onClick={close}>
+        <Button className="bq-mt-2" variant="quiet" fullWidth onClick={close}>
           Done
         </Button>
       </Sheet>
@@ -116,17 +116,17 @@ export function CreateOrgSheet({ open, onClose, plans, onCreated }: { open: bool
         />
         <SelectField label="PLAN" value={planId} options={planOptions} onChange={setPlanId} placeholder="No plan (assign later)" />
         {plans.length === 0 && (
-          <div style={{ font: "500 var(--text-caption-1-size)/1.5 var(--font-family-mono)", color: "var(--color-text-tertiary-default)", padding: "0 2px" }}>
+          <div className="bq-ops-create-org-sheet-meta-2">
             No SaaS plans yet — create them under Plans. You can assign one to this org later.
           </div>
         )}
         <TextField label="DEPARTMENT-HEAD NAME" value={headName} onChange={(e) => setHeadName(e.target.value)} placeholder="Optional" />
         <TextField label="DEPARTMENT-HEAD EMAIL" type="email" value={headEmail} onChange={(e) => setHeadEmail(e.target.value)} placeholder="head@gym.com" />
-        <div style={{ font: "500 var(--text-caption-1-size)/1.5 var(--font-family-mono)", color: "var(--color-text-tertiary-default)", padding: "0 2px" }}>
+        <div className="bq-ops-create-org-sheet-meta-2">
           They'll sign up with this email to claim the dept-head account. Two starter pay tiers are created automatically.
         </div>
         {error && <ErrorBanner text={error} />}
-        <Button fullWidth size="lg" disabled={busy} onClick={submit} style={{ marginTop: 4 }}>
+        <Button className="bq-mt-1" fullWidth size="lg" disabled={busy} onClick={submit}>
           {busy ? "Creating…" : "Create organization"}
         </Button>
       </div>
