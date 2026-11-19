@@ -126,26 +126,9 @@ Fix wallet/points races with transactional Postgres RPCs. Same JSON out of Edge 
 
 ## Phase 3 — Split Edge Function source (local)
 
-### Purpose
+**Detailed playbook:** [backend-phase-3.md](./backend-phase-3.md) (milestones M0–M10 with tasks + acceptance criteria).
 
-Target folder layout; **identical** routes and responses.
-
-### Work
-
-1. Create `routes/`, `services/`, `_shared/` as in [backend.md](./backend.md).  
-2. Move by vertical slice (`me`/health → desk → accounting → …).  
-3. `index.ts` only mounts routers.  
-4. After each slice: local functions serve + local UI smoke for that area.
-
-### Local verification
-
-- [ ] Contract fixtures still pass  
-- [ ] Manual click-through: desk, members, money, ops, account as applicable  
-- [ ] No path/JSON renames in the diff  
-
-### Production
-
-**No deploy.**
+Target folder layout (`routes/` + `services/` + `_shared/`); **identical** routes and responses. Move by vertical slice; thin `index.ts` mounts routers only. **No Production deploy.**
 
 ---
 
@@ -287,7 +270,7 @@ Then: run the phase’s tests + click the screens that use the routes you touche
 | 0 Contract + smoke | Done (dry-run; live smoke → Phase 1) | yes | n/a | 2026-11-17 |
 | 1 Local + baseline + seed | Done | yes | yes (login + smoke) | 2026-11-19 |
 | 2 Money RPCs | Done (RPC default on; tests/money green) | yes | yes (compensate + smoke) | 2026-11-19 |
-| 3 Split Edge source | Not started | | | |
+| 3 Split Edge source | Done (routes + thin index; context helpers) | yes | yes (smoke + compensate) | 2026-11-19 |
 | 4 Dedupe functions | Not started | | | |
 | 5 Validation + org helper | Not started | | | |
 | 6 Automation / CI config | Not started | | | |
@@ -311,4 +294,5 @@ Then: run the phase’s tests + click the screens that use the routes you touche
 - [backend-guidelines.md](./backend-guidelines.md) — day-to-day rules (local-first)  
 - [backend-phase-0-1.md](./backend-phase-0-1.md) — detailed Phase 0 & 1 playbook  
 - [backend-phase-2.md](./backend-phase-2.md) — detailed Phase 2 money RPC milestones  
+- [backend-phase-3.md](./backend-phase-3.md) — detailed Phase 3 Edge split milestones  
 - `docs/audit/frontend-issues.md` — separate front-end track  

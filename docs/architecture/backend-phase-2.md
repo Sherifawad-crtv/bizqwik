@@ -390,4 +390,4 @@ You are ready to split the Edge source tree when:
 2. Money helpers are RPC-backed and concurrency-proven locally.  
 3. Contract fixtures for wallet/points routes still match.
 
-Next: [backend-implementation-plan.md](./backend-implementation-plan.md) → **Phase 3 — Split Edge Function source**.
+Next: [backend-phase-3.md](./backend-phase-3.md) → **Phase 3 — Split Edge Function source** (milestones M0–M10).
