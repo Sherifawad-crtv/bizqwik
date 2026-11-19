@@ -9,17 +9,20 @@
 //   sheetOut  280  sheets closing (leaving is a touch quicker than arriving)
 //
 // One curve (the iOS standard: starts fast, settles gently) and one gentle
-// spring for confirmations. The same values live in index.css as --dur-* and
-// --ease-* so CSS and code agree.
-export const EASE = "cubic-bezier(.32,.72,0,1)";
-export const SPRING = "cubic-bezier(.34,1.36,.64,1)";
+// spring for confirmations. The values come from the design tokens
+// (src/design-system/tokens/tokens.json), the same ones CSS reads as
+// --duration-* and --ease-*, so CSS and code always agree.
+import { tokens } from "../design-system/tokens/tokens";
 
-export const QUICK_MS = 150;
-export const STANDARD_MS = 250;
-export const CONTROL_MS = 300;
-export const SCREEN_MS = 340;
-export const SHEET_OUT_MS = 280;
-export const MAX_MOTION_MS = 350;
+export const EASE: string = tokens.easeStandard;
+export const SPRING: string = tokens.easeSpring;
+
+export const QUICK_MS: number = tokens.durationQuick;
+export const STANDARD_MS: number = tokens.durationStandard;
+export const CONTROL_MS: number = tokens.durationControl;
+export const SCREEN_MS: number = tokens.durationScreen;
+export const SHEET_OUT_MS: number = tokens.durationSheetOut;
+export const MAX_MOTION_MS: number = tokens.durationMax;
 
 // Names used around the app.
 export const FADE_MS = QUICK_MS; // tab switches, content swaps
@@ -27,7 +30,7 @@ export const PUSH_MS = SCREEN_MS; // drilling into / backing out of a screen
 export const SHEET_IN_MS = SCREEN_MS;
 
 // Not a motion: how long a big confirmation stays on screen before closing.
-export const SUCCESS_HOLD_MS = 700;
+export const SUCCESS_HOLD_MS: number = tokens.durationSuccessHold;
 
 /** A CSS transition string from the scale, e.g. tr("opacity", QUICK_MS). */
 export const tr = (props: string | string[], ms: number, ease: string = EASE, delay = 0) =>

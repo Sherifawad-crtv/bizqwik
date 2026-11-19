@@ -12,7 +12,7 @@ import { readFileSync, readdirSync, statSync, writeFileSync, existsSync } from "
 import { join, relative } from "node:path";
 
 const walk = (d, out = []) => { for (const f of readdirSync(d)) { const p = join(d, f); statSync(p).isDirectory() ? walk(p, out) : /\.tsx?$/.test(f) && out.push(p); } return out; };
-const files = walk("src");
+const files = walk("src").filter((f) => !f.startsWith("src/design-system/tokens/")); // generated token files hold the raw values on purpose
 const read = (f) => readFileSync(f, "utf8");
 const errors = [];
 

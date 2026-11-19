@@ -22,11 +22,12 @@ for (const f of files) {
     }
   });
 }
-// Named motion constants must stay within the limit too.
-const motion = readFileSync("src/lib/motion.ts", "utf8");
-for (const m of motion.matchAll(/export const (\w+_MS) = (\d+);/g)) {
-  if (m[1] === "SUCCESS_HOLD_MS") continue; // a hold, not a motion
-  if (+m[2] > MAX) problems.push(`src/lib/motion.ts  ${m[1]} = ${m[2]}ms is over ${MAX}ms`);
+// The duration tokens (the motion scale itself) must stay within the limit too.
+const tokens = JSON.parse(readFileSync("src/design-system/tokens/tokens.json", "utf8"));
+for (const [name, t] of Object.entries(tokens.duration)) {
+  if (name.startsWith("$") || name === "success-hold") continue; // a hold, not a motion
+  const ms = parseFloat(t.$value) * (t.$value.endsWith("ms") ? 1 : 1000);
+  if (ms > MAX) problems.push(`tokens.json  duration.${name} = ${ms}ms is over ${MAX}ms`);
 }
 if (problems.length) {
   console.error(problems.join("\n"));

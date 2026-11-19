@@ -1,90 +1,59 @@
 :root {
-  /* ===== Bizqwik Foundation tokens ===== */
-  --paper: #f3f2ee;
-  --surface: #fbfaf7;
-  --sunken: #ecebe5;
-  --line: #e3e1da;
-  --ink: #1a1726;
-  --ink-muted: #6c687a;
-  --ink-faint: #9a96a6;
-  --primary: #5a41ff;
-  --primary-pressed: #4832d6;
-  --primary-tint: rgba(90, 65, 255, 0.1);
-  --primary-tint-strong: rgba(90, 65, 255, 0.12);
-  --avatar-grad: linear-gradient(135deg, #7b5cff, #4a2fe0);
+  /* Design tokens live in src/design-system/tokens/tokens.json (generated into
+     tokens.css). These old names are temporary aliases while screens move to
+     the new names; they are removed at the end of the clean-up. */
+  --paper: var(--color-bg-canvas-default);
+  --surface: var(--color-bg-surface-primary-default);
+  --sunken: var(--color-bg-surface-secondary-default);
+  --line: var(--color-border-primary-default);
+  --ink: var(--color-text-primary-default);
+  --ink-muted: var(--color-text-secondary-default);
+  --ink-faint: var(--color-text-tertiary-default);
+  --primary: var(--color-bg-fill-primary-default);
+  --primary-pressed: var(--color-bg-fill-primary-active);
+  --primary-tint: var(--color-bg-fill-accent-default);
+  --primary-tint-strong: var(--color-bg-fill-accent-selected);
+  --avatar-grad: linear-gradient(135deg, var(--color-bg-avatar-start), var(--color-bg-avatar-end));
+  --primary-light: var(--color-bg-fill-accent-strong);
+  --primary-dark: var(--color-text-accent-strong);
+  --accent: var(--color-bg-fill-accent-strong);
+  --accent-tint: var(--color-bg-fill-accent-active);
+  --accent-ink: var(--color-text-accent-strong);
+  --logging-fg: var(--color-text-status-logging-default);
+  --logging-bg: var(--color-bg-fill-status-logging-default);
+  --settled-fg: var(--color-text-status-settled-default);
+  --settled-bg: var(--color-bg-fill-status-settled-default);
+  --paid-fg: var(--color-text-status-paid-default);
+  --paid-bg: var(--color-bg-fill-status-paid-default);
+  --danger-fg: var(--color-text-status-danger-default);
+  --danger-bg: var(--color-bg-fill-status-danger-default);
+  --frozen-fg: var(--color-text-status-frozen-default);
+  --frozen-bg: var(--color-bg-fill-status-frozen-default);
+  --r-card: var(--radius-card);
+  --r-sheet: var(--radius-sheet);
+  --r-item: var(--radius-item);
+  --r-chip: var(--radius-chip);
+  --r-button: var(--radius-button);
+  --r-float: var(--radius-float);
+  --font-body: var(--font-family-body);
+  --font-mono: var(--font-family-mono);
+  --dur-quick: var(--duration-quick);
+  --dur-standard: var(--duration-standard);
+  --dur-control: var(--duration-control);
+  --dur-screen: var(--duration-screen);
+  --fs-caption: var(--text-caption-2-size);
+  --fs-small: var(--text-caption-1-size);
+  --fs-note: var(--text-footnote-size);
+  --fs-body-sm: var(--text-subheadline-size);
+  --fs-body: var(--text-body-size);
+  --fs-base: var(--text-callout-size);
+  --fs-title-sm: var(--text-title-2-size);
+  --fs-title: var(--text-title-1-size);
+  --fs-display: var(--text-large-title-size);
 
-  /* Lighter / darker shades of the primary violet. The secondary accent is
-     drawn from these (no second hue for now) — aesthetics only, never on CTAs
-     or status. Light enough that text on it uses --accent-ink. */
-  --primary-light: #a193ff;
-  --primary-dark: #2e1f99;
-  --accent: var(--primary-light);
-  --accent-tint: rgba(90, 65, 255, 0.16);
-  --accent-ink: var(--primary-dark);
-
-  --logging-fg: #946200;
-  --logging-bg: #f6e7c4;
-  --settled-fg: #4832d6;
-  --settled-bg: rgba(90, 65, 255, 0.12);
-  --paid-fg: #177a4b;
-  --paid-bg: #d8efe0;
-  --danger-fg: #b23a3a;
-  --danger-bg: #f6dedc;
-  --frozen-fg: #1f6a85;
-  --frozen-bg: #d8edf3;
-
-/* ── Corner radii: one value per KIND of thing, and nested shapes follow
-     outer = inner + padding. ──
-     card   28  every surface on a page: cards, tiles, charts, hero, list rows
-     sheet  40  bottom sheets; padding 20 inside, so what sits in them is:
-     item   20  fields, notices, inner cards, thumbnails (40 − 20)
-     chip    8  small tags, icon boxes in cards, calendar blocks (28 − 20)
-     button 24  buttons (a 48px button is a full pill)
-     float  32  the floating actions container (button 24 + padding 8)
-     999        pills, circles, avatars, switches, the tab bar (26 + 6 = 32) */
-  /* Spacing scale: every gap and padding comes from these steps. */
-  --space-1: 4px;
-  --space-2: 8px;
-  --space-3: 12px;
-  --space-4: 16px;
-  --space-5: 20px;
-  --space-6: 24px;
-  --space-8: 32px;
-
-  --r-card: 28px;
-  --r-sheet: 40px;
-  --r-item: 20px;
-  --r-chip: 8px;
-  --r-button: 24px;
-  --r-float: 32px;
-
-  --font-body: "Urbanist", system-ui, sans-serif;
-  --font-mono: "Space Mono", ui-monospace, monospace;
-
-  /* Motion: the same values as src/lib/motion.ts. */
-  --ease-standard: cubic-bezier(0.32, 0.72, 0, 1);
-  /* Motion scale (see src/lib/motion.ts): nothing over 350ms. */
-  --dur-quick: 150ms;
-  --dur-standard: 250ms;
-  --dur-control: 300ms;
-  --dur-screen: 340ms;
-  --ease-spring: cubic-bezier(0.34, 1.36, 0.64, 1);
-
-  --shadow-float: 0 14px 34px rgba(26, 23, 38, 0.18);
-  /* Type scale: the sizes that carry nearly every screen. */
-  --fs-caption: 11px;
-  --fs-small: 12px;
-  --fs-note: 13px;
-  --fs-body-sm: 14px;
-  --fs-body: 15px;
-  --fs-base: 16px;
-  --fs-title-sm: 20px;
-  --fs-title: 26px;
-  --fs-display: 30px;
+  /* Layout values that depend on the device (not design tokens). */
   /* Gap under the bottom bar: it sits just above the iOS home indicator. */
   --bar-bottom: max(8px, calc(var(--safe-bottom) - 8px));
-  --shadow-card: 0 24px 60px rgba(26, 23, 38, 0.1);
-
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --safe-left: env(safe-area-inset-left, 0px);
@@ -370,11 +339,25 @@ textarea {
 
 /* ───────────────────────────── Type helpers ─────────────────────────────
    The text styles screens repeat most, once. */
-.bq-label { font: 700 var(--fs-caption) var(--font-mono); letter-spacing: 0.08em; color: var(--ink-faint); }
-.bq-meta { font: 400 var(--fs-note) var(--font-mono); color: var(--ink-faint); }
-.bq-title { font: 800 var(--fs-title)/1.2 var(--font-body); letter-spacing: -0.02em; margin: 4px 0 16px; }
-.bq-h2 { font: 700 var(--fs-title-sm) var(--font-body); letter-spacing: -0.01em; }
-.bq-h3 { font: 700 var(--fs-base) var(--font-body); }
+.bq-label { font: var(--text-label-weight) var(--text-label-size) var(--font-family-mono); letter-spacing: 0.08em; color: var(--color-text-tertiary-default); }
+.bq-meta { font: var(--text-meta-weight) var(--text-meta-size) var(--font-family-mono); color: var(--color-text-tertiary-default); }
+.bq-title { font: var(--text-title-1-weight) var(--text-title-1-size)/1.2 var(--font-family-body); letter-spacing: -0.02em; margin: 4px 0 16px; }
+.bq-h2 { font: var(--text-title-2-weight) var(--text-title-2-size) var(--font-family-body); letter-spacing: -0.01em; }
+.bq-h3 { font: var(--text-headline-weight) var(--text-headline-size) var(--font-family-body); }
+
+/* Text styles: Apple's role names at Bizqwik's sizes (tokens.json → text.*).
+   Screens pick a role, never a pixel size. bq-title / bq-h2 / bq-h3 above are
+   the same roles with their spacing; they stay until the screens move over. */
+.bq-text-large-title { font: var(--text-large-title-weight) var(--text-large-title-size)/1.1 var(--font-family-body); letter-spacing: -0.02em; }
+.bq-text-title-1 { font: var(--text-title-1-weight) var(--text-title-1-size)/1.2 var(--font-family-body); letter-spacing: -0.02em; }
+.bq-text-title-2 { font: var(--text-title-2-weight) var(--text-title-2-size) var(--font-family-body); letter-spacing: -0.01em; }
+.bq-text-headline { font: var(--text-headline-weight) var(--text-headline-size) var(--font-family-body); }
+.bq-text-callout { font: var(--text-callout-weight) var(--text-callout-size) var(--font-family-body); }
+.bq-text-body { font: var(--text-body-weight) var(--text-body-size)/1.5 var(--font-family-body); }
+.bq-text-subheadline { font: var(--text-subheadline-weight) var(--text-subheadline-size) var(--font-family-body); }
+.bq-text-footnote { font: var(--text-footnote-weight) var(--text-footnote-size) var(--font-family-body); }
+.bq-text-caption-1 { font: var(--text-caption-1-weight) var(--text-caption-1-size) var(--font-family-body); }
+.bq-text-caption-2 { font: var(--text-caption-2-weight) var(--text-caption-2-size) var(--font-family-body); }
 /* A flexible child that is allowed to shrink (so long text truncates, not overflows). */
 .bq-grow { min-width: 0; flex: 1; }
 
@@ -532,7 +515,7 @@ textarea {
 .bq-chip--sm { height: 32px; font-size: var(--fs-small); }
 
 /* Stat: big numbers. */
-.bq-stat-xl { font: 800 56px/1 var(--font-body); letter-spacing: -0.03em; }
-.bq-stat-lg { font: 800 var(--fs-display)/1.1 var(--font-body); letter-spacing: -0.02em; }
-.bq-stat-md { font: 800 24px/1.15 var(--font-body); letter-spacing: -0.02em; }
-.bq-stat-sm { font: 800 var(--fs-title-sm) var(--font-body); letter-spacing: -0.01em; }
+.bq-stat-xl { font: var(--text-stat-xl-weight) var(--text-stat-xl-size)/1 var(--font-family-body); letter-spacing: -0.03em; }
+.bq-stat-lg { font: var(--text-stat-lg-weight) var(--text-stat-lg-size)/1.1 var(--font-family-body); letter-spacing: -0.02em; }
+.bq-stat-md { font: var(--text-stat-md-weight) var(--text-stat-md-size)/1.15 var(--font-family-body); letter-spacing: -0.02em; }
+.bq-stat-sm { font: var(--text-stat-sm-weight) var(--text-stat-sm-size) var(--font-family-body); letter-spacing: -0.01em; }

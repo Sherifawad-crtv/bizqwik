@@ -13,9 +13,12 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
+      - run: npm run tokens -- --check
       - run: npm run build
       - run: npm run lint
       - run: npm run size
+      - run: npm run motion
+      - run: npm run ds
   e2e:
     runs-on: ubuntu-latest
     steps:
