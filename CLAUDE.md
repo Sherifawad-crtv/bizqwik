@@ -20,6 +20,12 @@
   local copies, import rules, no new hand-built UI).
 
 ## Workflow
+- Commits are authored as the owner: `Sherifawad-crtv <sherif.awaadd@gmail.com>`
+  (`git config user.name/user.email`). Never add `Co-Authored-By: Claude`,
+  `Claude-Session:` or any other AI attribution to commits, pull requests,
+  branch names or anything pushed.
+- Backend functions are deployed only from a commit on `main`, after merging,
+  never from a feature branch.
 - Front-end work goes to the `dev` branch first, never straight to `main`. The
   owner checks the dev preview and says "ship it" before `dev` is merged to `main`.
 - Dev and production share **one database and backend**. Never change the
