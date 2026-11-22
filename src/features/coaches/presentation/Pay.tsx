@@ -1,29 +1,24 @@
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../shared/auth";
-import { useSetHeader } from "../../shared/screen/header";
-import { useAsync } from "../../shared/api/useAsync";
-import { MOCK } from "../../shared/api/backend";
-import { fmt, monthLabel } from "../../shared/format";
-import { isPartPaid, loadYearRollups, sumRemaining, sumTotal } from "./payables";
-import { HomeAvatar } from "../../shared/components/HomeAvatar";
-import { MoneyHero } from "../../design-system/components/MoneyHero";
+import { useAuth } from "../../../shared/auth";
+import { useSetHeader } from "../../../shared/screen/header";
+import { fmt, monthLabel } from "../../../shared/format";
+import { dueByMonth, isPartPaid, monthStatus, sumRemaining, sumSessions } from "../domain/payroll";
+import { CURRENT_MONTH, usePayableYear } from "./hooks/useCoaches";
+import { HomeAvatar } from "../../../shared/components/HomeAvatar";
+import { MoneyHero } from "../../../design-system/components/MoneyHero";
 import { RollupTable, type ListRow } from "./RollupTable";
-import { Spinner } from "../../design-system/components/Spinner";
-import { StatePill } from "../../shared/components/StatePill";
-import type { Rollup } from "../../shared/types";
-import { Num } from "../../design-system/components/Num";
+import { Spinner } from "../../../design-system/components/Spinner";
+import { StatePill } from "../../../shared/components/StatePill";
+import type { Rollup } from "../../../shared/types";
+import { Num } from "../../../design-system/components/Num";
 import "./Pay.css";
 
 /** Where this month stands: paid out, still to pay, and still being logged. */
 function MonthStatus({ rows }: { rows: Rollup[] }) {
-  const parts = [
-    { state: "paid" as const, total: rows.reduce((s, r) => s + r.paidAmount, 0), n: rows.filter((r) => r.paidAmount > 0).length, label: "Paid out" },
-    { state: "settled" as const, total: sumRemaining(rows), n: rows.filter((r) => r.state === "settled").length, label: "Still to pay" },
-    { state: "logging" as const, total: sumTotal(rows.filter((r) => r.state === "logging")), n: rows.filter((r) => r.state === "logging").length, label: "Still logging" },
-  ];
+  const parts = monthStatus(rows);
   return (
     <div className="bq-card bq-coaches-pay-month-status-spacing">
-      <div className="bq-label">THIS MONTH · {monthLabel(MOCK.CURRENT_MONTH).toUpperCase()}</div>
+      <div className="bq-label">THIS MONTH · {monthLabel(CURRENT_MONTH).toUpperCase()}</div>
       <div className="bq-mt-3 bq-flex bq-col bq-gap-2">
         {parts.map((p) => (
           <div className="bq-flex bq-items-center bq-gap-2" key={p.state}>
@@ -41,18 +36,17 @@ export function Pay() {
   const { profile } = useAuth();
   const navigate = useNavigate();
 
-  const { data } = useAsync(loadYearRollups, []);
+  const data = usePayableYear();
 
   useSetHeader({ kicker: "SETTLED · READY", title: "To Pay" }, []);
 
   if (!profile) return null;
   if (!data) return <Spinner />;
 
-  // Everything settled but not yet paid, in any month of the year — a month
-  // closing doesn't clear what is still owed from it. Oldest first.
-  const due = data.map((m) => ({ month: m.month, rows: m.rows.filter((r) => r.state === "settled") })).filter((m) => m.rows.length > 0);
+  // Everything settled but not yet paid, in any month of the year. Oldest first.
+  const due = dueByMonth(data);
   const dueRows = due.flatMap((m) => m.rows);
-  const thisMonth = data.find((m) => m.month === MOCK.CURRENT_MONTH)?.rows ?? [];
+  const thisMonth = data.find((m) => m.month === CURRENT_MONTH)?.rows ?? [];
 
   const listRows = (month: string, rows: Rollup[]): ListRow[] =>
     rows.map((r) => ({
@@ -78,7 +72,7 @@ export function Pay() {
         value={<Num value={sumRemaining(dueRows)} />}
         stats={[
           { k: "PAYEES", v: String(dueRows.length) },
-          { k: "SESSIONS", v: String(dueRows.reduce((s, r) => s + r.count, 0)) },
+          { k: "SESSIONS", v: String(sumSessions(dueRows)) },
           { k: "MONTHS", v: String(due.length) },
         ]}
       />

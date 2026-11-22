@@ -1,27 +1,26 @@
-import { EmptyState } from "../../design-system/components/EmptyState";
+import { EmptyState } from "../../../design-system/components/EmptyState";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { useSetHeader } from "../../shared/screen/header";
-import { useAsync } from "../../shared/api/useAsync";
-import { api, MOCK } from "../../shared/api/backend";
-import { dateLabel, egp, fmt, formatDateTime, monthShort, todayIso } from "../../shared/format";
-import { MoneyHero } from "../../design-system/components/MoneyHero";
-import { Avatar } from "../../design-system/components/Avatar";
-import { Button } from "../../design-system/components/Button";
-import { Icon } from "../../design-system/components/Icon";
-import { Spinner } from "../../design-system/components/Spinner";
-import { Sheet } from "../../design-system/components/Sheet";
-import { Segmented } from "../../design-system/components/Segmented";
-import { TextField } from "../../design-system/components/FormField";
-import { useSheetSuccess } from "../../design-system/components/useSheetSuccess";
-import { useMountedThroughExit } from "../../shared/useLatch";
-import { SheetSuccessIcon } from "../../design-system/components/SheetSuccessIcon";
-import { isPartPaid, stateLabel } from "./payables";
-import { PackageStatusPill } from "../../shared/components/PackageStatusPill";
-import type { PackageWithNames, Rollup, SettlementPayment } from "../../shared/types";
-import { useBackAction } from "../../shared/screen/floatingActions";
-import { useIsMobile } from "../../design-system/hooks/useIsMobile";
-import { Num } from "../../design-system/components/Num";
+import { useSetHeader } from "../../../shared/screen/header";
+import { dateLabel, egp, fmt, formatDateTime, monthShort, todayIso } from "../../../shared/format";
+import { MoneyHero } from "../../../design-system/components/MoneyHero";
+import { Avatar } from "../../../design-system/components/Avatar";
+import { Button } from "../../../design-system/components/Button";
+import { Icon } from "../../../design-system/components/Icon";
+import { Spinner } from "../../../design-system/components/Spinner";
+import { Sheet } from "../../../design-system/components/Sheet";
+import { Segmented } from "../../../design-system/components/Segmented";
+import { TextField } from "../../../design-system/components/FormField";
+import { useSheetSuccess } from "../../../design-system/components/useSheetSuccess";
+import { useMountedThroughExit } from "../../../shared/useLatch";
+import { SheetSuccessIcon } from "../../../design-system/components/SheetSuccessIcon";
+import { checkPayment, isPartPaid, leftAfter as leftAfterPaying, quickAmounts, stateLabel } from "../domain/payroll";
+import { CURRENT_MONTH, usePayeeMonth, usePayment } from "./hooks/useCoaches";
+import { PackageStatusPill } from "../../../shared/components/PackageStatusPill";
+import type { PackageWithNames, Rollup } from "../../../shared/types";
+import { useBackAction } from "../../../shared/screen/floatingActions";
+import { useIsMobile } from "../../../design-system/hooks/useIsMobile";
+import { Num } from "../../../design-system/components/Num";
 import "./PayeeDetail.css";
 
 const METHOD_LABELS: Record<string, string> = { cash: "Cash", bank: "Bank", instapay: "InstaPay", other: "Recorded earlier" };
@@ -33,8 +32,7 @@ function RecordPaymentSheet({ open, onClose, row, month }: { open: boolean; onCl
   const [date, setDate] = useState(todayIso());
   const [method, setMethod] = useState<"cash" | "bank" | "instapay">("cash");
   const [note, setNote] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { pay, busy, error, setError } = usePayment(row.coachId, month);
   const { confirmed, iconIn, showSuccess } = useSheetSuccess(open, onClose);
   const [doneLabel, setDoneLabel] = useState("Payment recorded");
 
@@ -51,22 +49,14 @@ function RecordPaymentSheet({ open, onClose, row, month }: { open: boolean; onCl
   if (!mounted) return null;
 
   const amt = Number(amount);
-  const leftAfter = Number.isFinite(amt) ? row.remaining - amt : row.remaining;
+  const leftAfter = leftAfterPaying(row.remaining, amount);
   const submit = async () => {
-    if (!Number.isFinite(amt) || amt <= 0) return setError("Enter the amount you paid.");
-    if (amt > row.remaining) return setError(`Only ${fmt(row.remaining)} EGP is left to pay.`);
-    if (!date || date > todayIso()) return setError("Choose today or an earlier date.");
-    setBusy(true);
-    setError(null);
-    try {
-      const r = await api.pay(row.coachId, month, { amount: amt, date, method, note: note.trim() || undefined });
-      setDoneLabel(r.remaining <= 0 ? "Fully paid" : `Paid · ${fmt(r.remaining)} EGP left`);
-      showSuccess();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong.");
-    } finally {
-      setBusy(false);
-    }
+    const checked = checkPayment(amount, date, row.remaining, todayIso());
+    if (!checked.ok) return setError(checked.error);
+    const remaining = await pay({ amount: checked.value.amount, date, method, note: note.trim() || undefined });
+    if (remaining === null) return;
+    setDoneLabel(remaining <= 0 ? "Fully paid" : `Paid · ${fmt(remaining)} EGP left`);
+    showSuccess();
   };
 
   return (
@@ -83,12 +73,8 @@ function RecordPaymentSheet({ open, onClose, row, month }: { open: boolean; onCl
           <div className="bq-flex bq-col bq-gap-3">
             <TextField label="AMOUNT (EGP)" value={amount} onChange={(e) => setAmount(e.target.value)} inputMode="decimal" />
             <div className="bq-flex bq-gap-2 bq-wrap">
-              {[
-                { label: `Group ${fmt(row.groupTotal)}`, value: row.groupTotal },
-                { label: `Private ${fmt(row.privateTotal)}`, value: row.privateTotal },
-                { label: `All ${fmt(row.remaining)}`, value: row.remaining },
-              ]
-                .filter((q) => q.value > 0 && q.value <= row.remaining)
+              {quickAmounts(row)
+                .map((q) => ({ label: `${q.kind} ${fmt(q.value)}`, value: q.value }))
                 .map((q) => (
                   <button key={q.label} type="button" className="bq-scale bq-coaches-payee-detail-record-payment-sheet-btn" onClick={() => setAmount(String(q.value))}>
                     {q.label}
@@ -138,17 +124,14 @@ export function PayeeDetail() {
   const location = useLocation();
   const navigate = useNavigate();
   const nav = (location.state as { month?: string; from?: "pay" | "history" } | null) ?? {};
-  const month = nav.month ?? MOCK.CURRENT_MONTH;
+  const month = nav.month ?? CURRENT_MONTH;
   const backTo = nav.from === "history" ? { path: "/history", label: "History" } : { path: "/pay", label: "To Pay" };
   useBackAction(() => navigate(backTo.path));
   const isMobile = useIsMobile();
   const [paying, setPaying] = useState(false);
   const id = coachId ?? "";
 
-  const { data } = useAsync(async () => {
-    const [monthRes, packagesRes, paymentsRes] = await Promise.all([api.month(month), api.packagesByCoach(id, month), api.payments(id, month)]);
-    return { row: monthRes.rows.find((r) => r.coachId === id) ?? null, packages: packagesRes.packages, payments: paymentsRes.payments as SettlementPayment[] };
-  }, [id, month]);
+  const data = usePayeeMonth(id, month);
 
   useSetHeader({ kicker: monthShort(month), title: data?.row?.name ?? "Payee" }, [month, data?.row?.name]);
 

@@ -1,4 +1,4 @@
-import type { State } from "../../shared/types";
+import type { State } from "../../../shared/types";
 import "./LockedBanner.css";
 
 const COPY: Partial<Record<State, { label: string; text: string; fg: string; bg: string }>> = {

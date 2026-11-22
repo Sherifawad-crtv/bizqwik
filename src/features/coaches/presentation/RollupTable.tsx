@@ -1,14 +1,14 @@
-import { cx } from "../../design-system/cx";
-import { Avatar } from "../../design-system/components/Avatar";
-import { StatePill } from "../../shared/components/StatePill";
-import { Icon } from "../../design-system/components/Icon";
-import { EmptyState } from "../../design-system/components/EmptyState";
+import { cx } from "../../../design-system/cx";
+import { Avatar } from "../../../design-system/components/Avatar";
+import { StatePill } from "../../../shared/components/StatePill";
+import { Icon } from "../../../design-system/components/Icon";
+import { EmptyState } from "../../../design-system/components/EmptyState";
 import type { ComponentProps } from "react";
 
 type EmptyProps = Partial<ComponentProps<typeof EmptyState>>;
-import { useIsMobile } from "../../design-system/hooks/useIsMobile";
-import type { State } from "../../shared/types";
-import { egp } from "../../shared/format";
+import { useIsMobile } from "../../../design-system/hooks/useIsMobile";
+import type { State } from "../../../shared/types";
+import { egp } from "../../../shared/format";
 import "./RollupTable.css";
 
 export interface ListRow {

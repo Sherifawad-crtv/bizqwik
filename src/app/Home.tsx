@@ -1,6 +1,6 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../shared/auth";
-import { CoachWallet } from "../features/coaches/CoachWallet";
+import { CoachWallet } from "../features/coaches";
 import { FrontDeskHome } from "../features/frontdesk/FrontDeskHome";
 import { SoloHome } from "../features/frontdesk/SoloHome";
 

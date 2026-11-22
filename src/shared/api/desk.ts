@@ -1,4 +1,4 @@
-import type { PaymentRequest, Client, ClientWithPackage, CoachOption, FrontDeskSummary, PackageInstance, PackageWithNames, PayMethod, Role, Rollup, SettlementPayment, Session, ScanResult, PtScanPreview } from "../types";
+import type { PaymentRequest, Client, ClientWithPackage, CoachOption, FrontDeskSummary, PackageInstance, PayMethod, Role, Rollup, Session, ScanResult, PtScanPreview } from "../types";
 import { callFn, SOLO_DESK, CLIENTS_LIST } from "./core";
 import type { DropInOption, NewClientFields } from "./inputs";
 
@@ -30,28 +30,17 @@ export const deskApi = {
     callFn<{ package: PackageInstance; preview: PtScanPreview }>("packages/deliver", { method: "POST", body: { packageId } }),
   // The FAB scanner: what did the coach just scan?
   scan: (token: string) => callFn<ScanResult>("scan", { method: "POST", body: { token } }),
-  // Coach payout drill-down (accountant/dept_head/head_coach): every private
-  // package a coach sold in a given month, with client/bundle names attached.
-  packagesByCoach: (coachId: string, month: string) => callFn<{ packages: PackageWithNames[] }>(`packages/by-coach/${coachId}/${month}`),
 
   createInvite: (email: string, role: Role, tierId: string | null) =>
     callFn<void>("invites", { method: "POST", body: { email, role, tierId } }),
 
   month: (month: string) => callFn<{ rows: Rollup[] }>(`month/${month}`),
-  sessions: (coachId: string, month: string) => callFn<{ sessions: Session[] }>(`sessions/${coachId}/${month}`),
   addSession: (coachId: string, month: string, date: string, scanToken?: string) =>
     callFn<{ session: Session }>("sessions/add", { method: "POST", body: { coachId, month, date, scanToken } }),
   editSession: (id: string, coachId: string, month: string, date: string) =>
     callFn<{ session: Session }>("sessions/edit", { method: "POST", body: { id, coachId, month, date } }),
   removeSession: (id: string, coachId: string, month: string) =>
     callFn<void>("sessions/remove", { method: "POST", body: { id, coachId, month } }),
-
-  settle: (coachId: string, month: string) => callFn<void>("settle", { method: "POST", body: { coachId, month } }),
-  reopen: (coachId: string, month: string) => callFn<void>("reopen", { method: "POST", body: { coachId, month } }),
-  // Pays all that's left when no amount is given; otherwise a part payment.
-  pay: (coachId: string, month: string, input?: { amount: number; date: string; method: "cash" | "bank" | "instapay"; note?: string }) =>
-    callFn<{ paidAmount: number; remaining: number }>("pay", { method: "POST", body: { coachId, month, ...input } }),
-  payments: (coachId: string, month: string) => callFn<{ payments: SettlementPayment[] }>(`pay/payments?coachId=${coachId}&month=${month}`),
 
   // Front desk. Coach names only — no payout data, unlike month().
   coaches: () => callFn<{ coaches: CoachOption[] }>("coaches"),

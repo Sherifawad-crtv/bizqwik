@@ -1,30 +1,28 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useSetHeader } from "../../shared/screen/header";
-import { useAsync } from "../../shared/api/useAsync";
-import { api, MOCK } from "../../shared/api/backend";
-import { MoneyHero } from "../../design-system/components/MoneyHero";
+import { useSetHeader } from "../../../shared/screen/header";
+import { MoneyHero } from "../../../design-system/components/MoneyHero";
 import { RollupTable, type ListRow } from "./RollupTable";
-import { Spinner } from "../../design-system/components/Spinner";
-import { canLog } from "../../shared/types";
-import { useAuth } from "../../shared/auth";
-import { Icon } from "../../design-system/components/Icon";
-import { InviteFlow } from "../../shared/components/InviteFlow";
-import { Num } from "../../design-system/components/Num";
+import { Spinner } from "../../../design-system/components/Spinner";
+import { useAuth } from "../../../shared/auth";
+import { Icon } from "../../../design-system/components/Icon";
+import { InviteFlow } from "../../../shared/components/InviteFlow";
+import { Num } from "../../../design-system/components/Num";
+import { stillLogging, sumSessions, sumTotal } from "../domain/payroll";
+import { CURRENT_MONTH, useTeamMonth } from "./hooks/useCoaches";
 import "./CoachesOverview.css";
 
 export function CoachesOverview() {
-  const month = MOCK.CURRENT_MONTH;
+  const month = CURRENT_MONTH;
   const navigate = useNavigate();
   const { profile } = useAuth();
   const [inviting, setInviting] = useState(false);
 
-  const { data } = useAsync(() => api.month(month), [month]);
+  const rows = useTeamMonth(month);
 
   useSetHeader({ kicker: "CALISTHENICS DEPT", title: "Team" }, []);
 
-  if (!data) return <Spinner />;
-  const rows = data.rows.filter((r) => canLog(r.role));
+  if (!rows) return <Spinner />;
 
   const rowItems: ListRow[] = rows.map((r) => ({
     id: r.coachId,
@@ -42,11 +40,11 @@ export function CoachesOverview() {
     <div>
       <MoneyHero
         label="MONTH TOTAL · EGP"
-        value={<Num value={rows.reduce((s, r) => s + r.total, 0)} />}
+        value={<Num value={sumTotal(rows)} />}
         stats={[
           { k: "COACHES", v: String(rows.length) },
-          { k: "SESSIONS", v: String(rows.reduce((s, r) => s + r.count, 0)) },
-          { k: "STILL LOGGING", v: String(rows.filter((r) => r.state === "logging").length) },
+          { k: "SESSIONS", v: String(sumSessions(rows)) },
+          { k: "STILL LOGGING", v: String(stillLogging(rows)) },
         ]}
       />
       {profile?.role === "dept_head" && (

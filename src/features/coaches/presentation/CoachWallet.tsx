@@ -1,21 +1,21 @@
 import { useState } from "react";
-import { useAuth } from "../../shared/auth";
-import { useOwnMonth } from "../../shared/ownMonth";
-import { useAsync } from "../../shared/api/useAsync";
-import { useIsMobile } from "../../design-system/hooks/useIsMobile";
-import { api } from "../../shared/api/backend";
-import { isHead, type Session } from "../../shared/types";
-import { fmt } from "../../shared/format";
-import { HomeAvatar } from "../../shared/components/HomeAvatar";
-import { MoneyHero } from "../../design-system/components/MoneyHero";
+import { useAuth } from "../../../shared/auth";
+import { useOwnMonth } from "../../../shared/ownMonth";
+import { useIsMobile } from "../../../design-system/hooks/useIsMobile";
+import { isHead } from "../../../shared/types";
+import { fmt } from "../../../shared/format";
+import { HomeAvatar } from "../../../shared/components/HomeAvatar";
+import { MoneyHero } from "../../../design-system/components/MoneyHero";
 import { LockedBanner } from "./LockedBanner";
-import { DayList } from "../../shared/components/DayList";
-import { DaySessionsSheet } from "../../shared/components/DaySessionsSheet";
-import { AddSessionSheet } from "../../shared/components/AddSessionSheet";
-import { Button } from "../../design-system/components/Button";
-import { ScanFlow } from "../../shared/components/ScanFlow";
-import { Spinner } from "../../design-system/components/Spinner";
-import { Num } from "../../design-system/components/Num";
+import { DayList } from "../../../shared/components/DayList";
+import { DaySessionsSheet } from "../../../shared/components/DaySessionsSheet";
+import { AddSessionSheet } from "../../../shared/components/AddSessionSheet";
+import { Button } from "../../../design-system/components/Button";
+import { ScanFlow } from "../../../shared/components/ScanFlow";
+import { Spinner } from "../../../design-system/components/Spinner";
+import { Num } from "../../../design-system/components/Num";
+import { daysLogged, sessionsOn, withAddedSessions } from "../domain/payroll";
+import { useCoachMonth, useMonthActions } from "./hooks/useCoaches";
 import "./CoachWallet.css";
 
 export function CoachWallet() {
@@ -24,51 +24,18 @@ export function CoachWallet() {
   const isMobile = useIsMobile();
   const [addOpen, setAddOpen] = useState(false);
   const [dayDate, setDayDate] = useState<string | null>(null);
-  const [busyAction, setBusyAction] = useState(false);
-  const [actionError, setActionError] = useState<string | null>(null);
-
-  const { data, mutate } = useAsync(async () => {
-    if (!profile) return null;
-    const [monthRes, sessionsRes] = await Promise.all([api.month(month), api.sessions(profile.id, month)]);
-    return { row: monthRes.rows.find((r) => r.coachId === profile.id) ?? null, sessions: sessionsRes.sessions };
-  }, [profile?.id, month]);
+  const { data, mutate } = useCoachMonth(profile?.id ?? null, month);
+  const { settle, reopen, busy: busyAction, error: actionError } = useMonthActions(profile?.id ?? "", month);
 
   if (!profile) return null;
   if (!data) return <Spinner />;
   if (!data.row) return null;
   const { row, sessions } = data;
   const editable = row.state === "logging";
-  const dayGroup = dayDate ? sessions.filter((s) => s.date === dayDate) : [];
-
-  const runAction = async (fn: () => Promise<void>) => {
-    setBusyAction(true);
-    setActionError(null);
-    try {
-      await fn();
-    } catch (err) {
-      setActionError(err instanceof Error ? err.message : "Something went wrong.");
-    } finally {
-      setBusyAction(false);
-    }
-  };
+  const dayGroup = sessionsOn(sessions, dayDate);
 
   const handleOptimisticAdd = (addedDate: string, qty: number) => {
-    mutate((prev) => {
-      if (!prev || !prev.row) return prev;
-      const now = Date.now();
-      const newSessions: Session[] = Array.from({ length: qty }, (_, i) => ({
-        id: `optimistic-${now}-${i}`,
-        coachId: profile.id,
-        month,
-        date: addedDate,
-        createdBy: profile.id,
-      }));
-      const addedAmount = qty * prev.row.rate;
-      return {
-        row: { ...prev.row, count: prev.row.count + qty, groupTotal: prev.row.groupTotal + addedAmount, total: prev.row.total + addedAmount },
-        sessions: [...prev.sessions, ...newSessions],
-      };
-    });
+    mutate((prev) => (prev && withAddedSessions(prev, profile.id, month, addedDate, qty, Date.now())) ?? prev);
   };
 
   return (
@@ -91,12 +58,12 @@ export function CoachWallet() {
       {((editable && !isMobile) || isHead(profile.role)) && (
         <div className="bq-flex bq-gap-2 bq-mb-4 bq-wrap">
           {isHead(profile.role) && row.state === "logging" && row.count > 0 && (
-            <Button variant="secondary" disabled={busyAction} onClick={() => runAction(() => api.settle(profile.id, month))}>
+            <Button variant="secondary" disabled={busyAction} onClick={settle}>
               Settle my month
             </Button>
           )}
           {isHead(profile.role) && row.state === "settled" && (
-            <Button variant="danger" disabled={busyAction} onClick={() => runAction(() => api.reopen(profile.id, month))}>
+            <Button variant="danger" disabled={busyAction} onClick={reopen}>
               Reopen
             </Button>
           )}
@@ -117,7 +84,7 @@ export function CoachWallet() {
       <div className="bq-coaches-coach-wallet-row">
         <span className="bq-label">DAYS LOGGED</span>
         <span className="bq-coaches-coach-wallet-meta">
-          {new Set(sessions.map((s) => s.date)).size} {new Set(sessions.map((s) => s.date)).size === 1 ? "DAY" : "DAYS"}
+          {daysLogged(sessions)} {daysLogged(sessions) === 1 ? "DAY" : "DAYS"}
         </span>
       </div>
 

@@ -14,10 +14,8 @@ import { Account } from "../features/account/Account";
 import { Activity, Money, Oversight, Transactions } from "../features/money";
 import { Catalog } from "../features/catalog/Catalog";
 import { Accounting } from "../features/accounting";
-import { Pay } from "../features/coaches/Pay";
-import { History } from "../features/coaches/History";
+import { CoachesOverview, History, Pay } from "../features/coaches";
 import { Clients } from "../features/clients";
-import { CoachesOverview } from "../features/coaches/CoachesOverview";
 import { Members } from "../features/frontdesk/Members";
 import { CheckIn } from "../features/frontdesk/CheckIn";
 import { DropIn } from "../features/frontdesk/DropIn";
@@ -45,9 +43,9 @@ function lazyNamed<T extends Record<string, unknown>>(load: () => Promise<T>, na
 const Welcome = lazyNamed(() => import("../features/auth/Welcome"), "Welcome");
 const ForgotPassword = lazyNamed(() => import("../features/auth/ForgotPassword"), "ForgotPassword");
 const ResetPassword = lazyNamed(() => import("../features/auth/ResetPassword"), "ResetPassword");
-const CoachDetail = lazyNamed(() => import("../features/coaches/CoachDetail"), "CoachDetail");
-const Manage = lazyNamed(() => import("../features/manage/route"), "Manage");
-const PayeeDetail = lazyNamed(() => import("../features/coaches/PayeeDetail"), "PayeeDetail");
+const CoachDetail = lazyNamed(() => import("../features/coaches/routes/CoachDetail"), "CoachDetail");
+const Manage = lazyNamed(() => import("../features/manage/routes/Manage"), "Manage");
+const PayeeDetail = lazyNamed(() => import("../features/coaches/routes/PayeeDetail"), "PayeeDetail");
 const DeskClasses = lazyNamed(() => import("../features/frontdesk/DeskClasses"), "DeskClasses");
 const AccountProfile = lazyNamed(() => import("../features/account/AccountProfile"), "AccountProfile");
 const AccountPassword = lazyNamed(() => import("../features/account/AccountPassword"), "AccountPassword");
@@ -70,7 +68,7 @@ function WarmScreens() {
     const w = window as Window & { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number };
     const run = () => {
       for (const load of [
-        () => import("../features/coaches/CoachDetail"), () => import("../features/coaches/PayeeDetail"), () => import("../features/manage/route"),
+        () => import("../features/coaches/routes/CoachDetail"), () => import("../features/coaches/routes/PayeeDetail"), () => import("../features/manage/routes/Manage"),
         () => import("../features/frontdesk/DeskClasses"),
         () => import("../features/account/AccountProfile"), () => import("../features/account/AccountPassword"),
       ]) load().catch(() => {});

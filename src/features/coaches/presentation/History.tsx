@@ -1,38 +1,23 @@
-import { EmptyState } from "../../design-system/components/EmptyState";
-import { useSticky } from "../../design-system/hooks/useSticky";
+import { EmptyState } from "../../../design-system/components/EmptyState";
+import { useSticky } from "../../../design-system/hooks/useSticky";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../shared/auth";
-import { useSetHeader } from "../../shared/screen/header";
-import { useAsync } from "../../shared/api/useAsync";
-import { api, MOCK } from "../../shared/api/backend";
-import { fmt, formatDateTime, monthLabel } from "../../shared/format";
-import { currentYearMonths } from "../../shared/months";
-import { loadYearRollups, stateLabel, sumTotal } from "./payables";
-import { MoneyHero } from "../../design-system/components/MoneyHero";
-import { YearMonthStrip } from "../../design-system/components/YearMonthStrip";
+import { useAuth } from "../../../shared/auth";
+import { useSetHeader } from "../../../shared/screen/header";
+import { fmt, formatDateTime, monthLabel } from "../../../shared/format";
+import { daysLogged, stateLabel, stillLogging, sumSessions, sumTotal } from "../domain/payroll";
+import { CURRENT_MONTH, useLedger, yearMonths } from "./hooks/useCoaches";
+import { MoneyHero } from "../../../design-system/components/MoneyHero";
+import { YearMonthStrip } from "../../../design-system/components/YearMonthStrip";
 import { RollupTable, type ListRow } from "./RollupTable";
-import { DayList } from "../../shared/components/DayList";
+import { DayList } from "../../../shared/components/DayList";
 import { LockedBanner } from "./LockedBanner";
-import { Spinner } from "../../design-system/components/Spinner";
-import { Segmented } from "../../design-system/components/Segmented";
-import { ActivityPanel } from "../../shared/components/ActivityPanel";
-import { canLog, isHead } from "../../shared/types";
-import type { Rollup, Session } from "../../shared/types";
-import { Num } from "../../design-system/components/Num";
+import { Spinner } from "../../../design-system/components/Spinner";
+import { Segmented } from "../../../design-system/components/Segmented";
+import { ActivityPanel } from "../../../shared/components/ActivityPanel";
+import { isHead } from "../../../shared/types";
+import type { Rollup, Session } from "../../../shared/types";
+import { Num } from "../../../design-system/components/Num";
 import "./History.css";
-
-interface PersonalData {
-  kind: "personal";
-  row: Rollup | null;
-  sessions: Session[];
-}
-
-interface RosterData {
-  kind: "roster";
-  rows: Rollup[];
-  /** Paid out so far this year (accountant view). */
-  ytdPaid?: number;
-}
 
 function PersonalHistory({ row, sessions }: { row: Rollup | null; sessions: Session[] }) {
   if (!row) {
@@ -57,7 +42,7 @@ function PersonalHistory({ row, sessions }: { row: Rollup | null; sessions: Sess
       <div className="bq-coaches-history-personal-history-row">
         <span className="bq-label">DAYS LOGGED</span>
         <span className="bq-coaches-history-personal-history-meta">
-          {new Set(sessions.map((s) => s.date)).size} {new Set(sessions.map((s) => s.date)).size === 1 ? "DAY" : "DAYS"}
+          {daysLogged(sessions)} {daysLogged(sessions) === 1 ? "DAY" : "DAYS"}
         </span>
       </div>
       <DayList sessions={sessions} rate={row.rate} state={row.state} onOpenDay={() => {}} emptyHint="No sessions were logged this month. Pick another month above to look back." />
@@ -90,18 +75,18 @@ function RosterHistory({ rows, month, paidOnly, ytdPaid, onOpenCoach }: { rows: 
     <>
       <MoneyHero
         label={`${paidOnly ? "PAID" : "MONTH TOTAL"} · EGP`}
-        value={<Num value={rows.reduce((s, r) => s + r.total, 0)} />}
+        value={<Num value={sumTotal(rows)} />}
         stats={
           paidOnly
             ? [
                 { k: "PAYEES", v: String(rows.length) },
-                { k: "SESSIONS", v: String(rows.reduce((s, r) => s + r.count, 0)) },
+                { k: "SESSIONS", v: String(sumSessions(rows)) },
                 { k: "YEAR TO DATE", v: `${fmt(ytdPaid ?? 0)} EGP` },
               ]
             : [
                 { k: "COACHES", v: String(rows.length) },
-                { k: "SESSIONS", v: String(rows.reduce((s, r) => s + r.count, 0)) },
-                { k: "STILL LOGGING", v: String(rows.filter((r) => r.state === "logging").length) },
+                { k: "SESSIONS", v: String(sumSessions(rows)) },
+                { k: "STILL LOGGING", v: String(stillLogging(rows)) },
               ]
         }
       />
@@ -150,27 +135,14 @@ export function History() {
 function LedgerHistory() {
   const { profile } = useAuth();
   const navigate = useNavigate();
-  const months = currentYearMonths();
-  const [month, setMonth] = useSticky("month", MOCK.CURRENT_MONTH, { url: true, valid: (v) => months.includes(v) });
+  const months = yearMonths();
+  const [month, setMonth] = useSticky("month", CURRENT_MONTH, { url: true, valid: (v) => months.includes(v) });
 
   const isDeptView = !!profile && isHead(profile.role);
   const isAccountant = profile?.role === "accountant";
   const isPersonal = !!profile && !isDeptView && !isAccountant;
 
-  const { data } = useAsync<PersonalData | RosterData | null>(async () => {
-    if (!profile) return null;
-    if (isPersonal) {
-      const [monthRes, sessionsRes] = await Promise.all([api.month(month), api.sessions(profile.id, month)]);
-      return { kind: "personal", row: monthRes.rows.find((r) => r.coachId === profile.id) ?? null, sessions: sessionsRes.sessions };
-    }
-    const monthRes = await api.month(month);
-    const rows = monthRes.rows.filter((r) => canLog(r.role) && (!isAccountant || r.state === "paid"));
-    if (isAccountant) {
-      const year = await loadYearRollups();
-      return { kind: "roster", rows, ytdPaid: sumTotal(year.flatMap((m) => m.rows.filter((r) => r.state === "paid"))) };
-    }
-    return { kind: "roster", rows };
-  }, [profile?.id, profile?.role, month]);
+  const data = useLedger(profile, month, { personal: isPersonal, accountant: isAccountant });
 
   if (!profile) return null;
 
