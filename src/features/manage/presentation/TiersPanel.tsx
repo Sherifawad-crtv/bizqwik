@@ -1,40 +1,41 @@
-import { useFrozen, useMountedThroughExit } from "../../shared/useLatch";
-import { EmptyState } from "../../design-system/components/EmptyState";
+import { useFrozen, useMountedThroughExit } from "../../../shared/useLatch";
+import { EmptyState } from "../../../design-system/components/EmptyState";
 import { useEffect, useState } from "react";
-import { useAsync } from "../../shared/api/useAsync";
-import { useLatch } from "../../shared/useLatch";
-import { api } from "../../shared/api/backend";
-import type { Tier } from "../../shared/types";
-import { ROLE_LABELS } from "../../shared/types";
-import { Button } from "../../design-system/components/Button";
-import { Sheet } from "../../design-system/components/Sheet";
-import { ConfirmSheet } from "../../design-system/components/ConfirmSheet";
-import { TextField } from "../../design-system/components/FormField";
-import { Spinner } from "../../design-system/components/Spinner";
-import { SheetSuccessIcon } from "../../design-system/components/SheetSuccessIcon";
-import { useSheetSuccess } from "../../design-system/components/useSheetSuccess";
-import { MotionList } from "../../design-system/components/MotionList";
-import { IconButton } from "../../design-system/components/IconButton";
+import { useLatch } from "../../../shared/useLatch";
+import type { Tier } from "../../../shared/types";
+import { ROLE_LABELS } from "../../../shared/types";
+import { Button } from "../../../design-system/components/Button";
+import { Sheet } from "../../../design-system/components/Sheet";
+import { ConfirmSheet } from "../../../design-system/components/ConfirmSheet";
+import { TextField } from "../../../design-system/components/FormField";
+import { Spinner } from "../../../design-system/components/Spinner";
+import { SheetSuccessIcon } from "../../../design-system/components/SheetSuccessIcon";
+import { useSheetSuccess } from "../../../design-system/components/useSheetSuccess";
+import { MotionList } from "../../../design-system/components/MotionList";
+import { IconButton } from "../../../design-system/components/IconButton";
+import { invitesToTier, peopleOnTier, tierInUse } from "../domain/team";
+import { useInvites, usePeople, useTierActions, useTiers } from "./hooks/useTeam";
 import "./TiersPanel.css";
 
 export function TiersPanel({ onOpenPeople, onOpenInvites }: { onOpenPeople: () => void; onOpenInvites: () => void }) {
-  const { data } = useAsync(() => api.tiers(), []);
+  const tiers = useTiers();
   // Who is on a tier decides whether it can be deleted, so know it up front.
-  const { data: peopleData } = useAsync(() => api.profiles(), []);
-  const { data: inviteData } = useAsync(() => api.invites(), []);
-  const onTier = (id?: string) => (peopleData?.profiles ?? []).filter((p) => !!id && p.tierId === id);
-  const invitedTo = (id?: string) => (inviteData?.invites ?? []).filter((i) => !!id && i.tierId === id);
+  const people = usePeople() ?? [];
+  const invites = useInvites() ?? [];
+  const onTier = (id?: string) => peopleOnTier(people, id);
+  const invitedTo = (id?: string) => invitesToTier(invites, id);
+  const { remove } = useTierActions();
   const [editing, setEditing] = useState<Tier | "new" | null>(null);
   const [deleting, setDeleting] = useState<Tier | null>(null);
   const shownDeleting = useLatch(deleting);
 
-  if (!data) return <Spinner />;
+  if (!tiers) return <Spinner />;
 
   return (
     <div>
       <div className="bq-flex bq-items-center bq-gap-2 bq-mb-4">
         <span className="bq-h2">Tiers</span>
-        <span className="bq-meta">{data.tiers.length}</span>
+        <span className="bq-meta">{tiers.length}</span>
         <Button className="bq-manage-tiers-panel-btn" size="md" onClick={() => setEditing("new")}>
           + New tier
         </Button>
@@ -42,8 +43,8 @@ export function TiersPanel({ onOpenPeople, onOpenInvites }: { onOpenPeople: () =
 
       <div className="bq-panel">
         <MotionList>
-{data.tiers.map((t, i) => (
-          <div key={t.id} className={`bq-listrow ${!(i === data.tiers.length - 1) ? "bq-listrow--divider" : ""}`}>
+{tiers.map((t, i) => (
+          <div key={t.id} className={`bq-listrow ${!(i === tiers.length - 1) ? "bq-listrow--divider" : ""}`}>
             <div className="bq-grow">
               <div className="bq-h3">{t.name}</div>
               <div className="bq-meta">{t.rate} EGP / session · {t.privateCutPct}% private cut</div>
@@ -53,13 +54,13 @@ export function TiersPanel({ onOpenPeople, onOpenInvites }: { onOpenPeople: () =
           </div>
         ))}
 </MotionList>
-        {data.tiers.length === 0 && (
+        {tiers.length === 0 && (
           <EmptyState bare icon="tag" title="No pay tiers yet" body="A tier sets what a coach earns per group session and their cut of PT sales. Create one, then assign it to coaches in People." action={{ label: "+ New tier", onClick: () => setEditing("new") }} />
         )}
       </div>
 
       <TierSheet open={editing !== null} tier={editing === "new" ? null : editing} onClose={() => setEditing(null)} />
-      {shownDeleting && (onTier(shownDeleting.id).length > 0 || invitedTo(shownDeleting.id).length > 0) ? (
+      {shownDeleting && tierInUse(people, invites, shownDeleting.id) ? (
         <Sheet open={!!deleting} onClose={() => setDeleting(null)}>
           <div className="bq-label">DELETE TIER</div>
           <div className="bq-manage-tiers-panel-title">{shownDeleting.name} is still in use</div>
@@ -104,7 +105,7 @@ export function TiersPanel({ onOpenPeople, onOpenInvites }: { onOpenPeople: () =
           confirmLabel="Delete tier"
           danger
           onConfirm={async () => {
-            await api.deleteTier(shownDeleting.id);
+            await remove(shownDeleting.id);
           }}
         />
       ) : null}
@@ -118,8 +119,7 @@ export function TierSheet({ open, tier: tierProp, onClose }: { open: boolean; ti
   const [name, setName] = useState(tier?.name ?? "");
   const [rate, setRate] = useState(String(tier?.rate ?? ""));
   const [privateCutPct, setPrivateCutPct] = useState(String(tier?.privateCutPct ?? ""));
-  const [error, setError] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
+  const { save: saveTier, busy, error, setError } = useTierActions();
   const { confirmed, iconIn, showSuccess } = useSheetSuccess(open, onClose, { quiet: true });
 
   useEffect(() => {
@@ -136,27 +136,7 @@ export function TierSheet({ open, tier: tierProp, onClose }: { open: boolean; ti
   if (!mounted) return null;
 
   const save = async () => {
-    const rateNum = Number(rate);
-    const cutNum = privateCutPct === "" ? 0 : Number(privateCutPct);
-    if (!name.trim() || !Number.isFinite(rateNum) || rateNum <= 0) {
-      setError("Enter a name and a rate greater than 0.");
-      return;
-    }
-    if (!Number.isFinite(cutNum) || cutNum < 0 || cutNum > 100) {
-      setError("Private cut % must be between 0 and 100.");
-      return;
-    }
-    setBusy(true);
-    setError(null);
-    try {
-      if (tier) await api.updateTier(tier.id, name.trim(), rateNum, cutNum);
-      else await api.createTier(name.trim(), rateNum, cutNum);
-      showSuccess();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong.");
-    } finally {
-      setBusy(false);
-    }
+    if (await saveTier(tier, name, rate, privateCutPct)) showSuccess();
   };
 
   return (

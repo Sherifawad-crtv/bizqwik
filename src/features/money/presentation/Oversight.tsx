@@ -1,20 +1,20 @@
-import { EmptyState } from "../../design-system/components/EmptyState";
-import { useSticky } from "../../design-system/hooks/useSticky";
+import { EmptyState } from "../../../design-system/components/EmptyState";
+import { useSticky } from "../../../design-system/hooks/useSticky";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../shared/auth";
-import { useSetHeader } from "../../shared/screen/header";
-import { useAsync } from "../../shared/api/useAsync";
-import { api } from "../../shared/api/backend";
-import { fmt } from "../../shared/format";
-import { HomeAvatar } from "../../shared/components/HomeAvatar";
-import { Icon } from "../../design-system/components/Icon";
-import { Segmented } from "../../design-system/components/Segmented";
-import { Spinner } from "../../design-system/components/Spinner";
-import { caption, pctChange } from "../../design-system/components/chartHelpers";
-import { RevenueChart, ShareBars } from "../../design-system/components/MoneyCharts";
-import { Delta, KpiTile } from "../../design-system/components/KpiTile";
-import { SectionCard } from "../../design-system/components/Card";
-import { Num } from "../../design-system/components/Num";
+import { useAuth } from "../../../shared/auth";
+import { useSetHeader } from "../../../shared/screen/header";
+import { fmt } from "../../../shared/format";
+import { HomeAvatar } from "../../../shared/components/HomeAvatar";
+import { Icon } from "../../../design-system/components/Icon";
+import { Segmented } from "../../../design-system/components/Segmented";
+import { Spinner } from "../../../design-system/components/Spinner";
+import { caption, pctChange } from "../../../design-system/components/chartHelpers";
+import { RevenueChart, ShareBars } from "../../../design-system/components/MoneyCharts";
+import { Delta, KpiTile } from "../../../design-system/components/KpiTile";
+import { SectionCard } from "../../../design-system/components/Card";
+import { Num } from "../../../design-system/components/Num";
+import { rangeCoverage } from "../domain/money";
+import { useRevenueOverview } from "./hooks/useMoney";
 import "./Oversight.css";
 
 type Range = "1" | "3" | "6" | "12";
@@ -39,22 +39,7 @@ export function Oversight() {
   const navigate = useNavigate();
   const [range, setRange] = useSticky<Range>("range", "1", { valid: (v) => ["1","3","6","12"].includes(v) });
   const [breakdown, setBreakdown] = useSticky<Breakdown>("breakdown", "service", { valid: (v) => v === "service" || v === "type" });
-  const { data, error } = useAsync(async () => {
-    const n = Number(range);
-    // The report for the range, plus a window twice as long: its older half is
-    // the period before, which the comparisons and the "how much history do we
-    // have" note come from.
-    const now = await api.revenue(n, 24);
-    const rows = now.history ?? now.months;
-    const first = rows.findIndex((m) => m.revenue > 0 || m.payouts > 0);
-    const before = rows.slice(Math.max(0, rows.length - 2 * n), rows.length - n);
-    const sum = (k: "revenue" | "payouts") => before.reduce((a, m) => a + m[k], 0);
-    const previous = { revenue: sum("revenue"), payouts: sum("payouts"), profit: sum("revenue") - sum("payouts") };
-    // The month-by-month chart is the business's whole story so far (up to a
-    // year), whatever range the numbers above are showing.
-    const trend = first < 0 ? rows.slice(-1) : rows.slice(Math.max(first, rows.length - 12));
-    return { report: now, previous, trend, monthsOfData: first < 0 ? 0 : rows.length - first };
-  }, [range]);
+  const { data, error } = useRevenueOverview(Number(range));
   useSetHeader({ kicker: "BUSINESS", title: "Overview" }, []);
 
   if (!profile) return null;
@@ -63,10 +48,7 @@ export function Oversight() {
   const report = data?.report;
   const subs = report?.activeSubscribers;
   // How much history the business really has, and so how much of this view can be real.
-  const depth = data ? Math.max(1, data.monthsOfData) : n;
-  const shown = report ? report.months.slice(-Math.min(n, depth)) : [];
-  const short = data ? depth < n : false;
-  const compare = data && depth > n ? data.previous : null;
+  const { depth, shown, short, compare } = rangeCoverage(data ?? null, n);
   const prevLabel = n === 1 ? "last month" : `the ${n} months before`;
 
   return (

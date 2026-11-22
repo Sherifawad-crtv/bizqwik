@@ -1,16 +1,14 @@
 import { useState } from "react";
-import { useSetHeader } from "../../shared/screen/header";
-import { Segmented } from "../../design-system/components/Segmented";
+import { useSetHeader } from "../../../shared/screen/header";
+import { Segmented } from "../../../design-system/components/Segmented";
 import { TiersPanel } from "./TiersPanel";
 import { InvitesPanel } from "./Invites";
 import { PeoplePanel } from "./People";
-
-type Tab = "tiers" | "invites" | "people";
+import { tabFromQuery, type ManageTab } from "../domain/team";
 
 export function Manage() {
   // Empty states elsewhere deep-link straight to a tab (?tab=invites).
-  const initialTab = new URLSearchParams(window.location.search).get("tab");
-  const [tab, setTab] = useState<Tab>(initialTab === "invites" || initialTab === "people" ? initialTab : "tiers");
+  const [tab, setTab] = useState<ManageTab>(() => tabFromQuery(window.location.search));
 
   useSetHeader({ kicker: "MANAGE", title: "Team & Tiers" }, []);
 

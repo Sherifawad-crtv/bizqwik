@@ -1,17 +1,17 @@
-import { EmptyState } from "../../design-system/components/EmptyState";
-import { useSticky } from "../../design-system/hooks/useSticky";
+import { EmptyState } from "../../../design-system/components/EmptyState";
+import { useSticky } from "../../../design-system/hooks/useSticky";
 import { useNavigate } from "react-router-dom";
-import { api } from "../../shared/api/backend";
-import { useAsync } from "../../shared/api/useAsync";
-import { useAuth } from "../../shared/auth";
-import { useSetHeader } from "../../shared/screen/header";
-import { egp } from "../../shared/format";
-import { InlineSpinner } from "../../design-system/components/Spinner";
-import { Icon } from "../../design-system/components/Icon";
-import { Segmented } from "../../design-system/components/Segmented";
-import { useBackAction } from "../../shared/screen/floatingActions";
-import { useIsMobile } from "../../design-system/hooks/useIsMobile";
-import { ActivityPanel, Feed } from "../../shared/components/ActivityPanel";
+import { useAuth } from "../../../shared/auth";
+import { useSetHeader } from "../../../shared/screen/header";
+import { egp } from "../../../shared/format";
+import { InlineSpinner } from "../../../design-system/components/Spinner";
+import { Icon } from "../../../design-system/components/Icon";
+import { Segmented } from "../../../design-system/components/Segmented";
+import { useBackAction } from "../../../shared/screen/floatingActions";
+import { useIsMobile } from "../../../design-system/hooks/useIsMobile";
+import { ActivityPanel, Feed } from "../../../shared/components/ActivityPanel";
+import type { MoneyKind } from "../domain/money";
+import { ACTIVITY_LIMIT, useTransactions } from "./hooks/useMoney";
 import "./Activity.css";
 
 
@@ -41,31 +41,20 @@ export function Activity() {
   );
 }
 
-/** Anything that moves money: sales, desk refunds and collections, wallet changes. */
-const isMoney = (type: string) => type.startsWith("sale_") || type.startsWith("wallet_") || type === "refund_desk" || type === "class_collected";
-
-type Kind = "all" | "sales" | "refunds" | "wallet";
-
-const kindOf = (type: string): Exclude<Kind, "all"> =>
-  type.startsWith("sale_") || type === "class_collected" ? "sales" : type === "refund_desk" || type === "wallet_refund" ? "refunds" : "wallet";
-
 /** Every transaction on the money side, newest first, with what it adds up to. */
 export function Transactions() {
   useSetHeader({ kicker: "MONEY", title: "Transactions" }, []);
-  const { data, loading, error } = useAsync(() => api.activity(300), []);
-  const [kind, setKind] = useSticky<Kind>("moneyKind", "all", { valid: (v) => ["all","sales","refunds","wallet"].includes(v) });
-  const all = (data?.activity ?? []).filter((e) => isMoney(e.type) && e.amount != null);
-  const shown = kind === "all" ? all : all.filter((e) => kindOf(e.type) === kind);
-  const sum = (k: Exclude<Kind, "all">) => all.filter((e) => kindOf(e.type) === k && e.type !== "wallet_expired").reduce((s, e) => s + Math.abs(e.amount ?? 0), 0);
+  const [kind, setKind] = useSticky<MoneyKind>("moneyKind", "all", { valid: (v) => ["all","sales","refunds","wallet"].includes(v) });
+  const { loading, error, all, shown, totals } = useTransactions(kind);
 
   return (
     <div>
       <div className="bq-money-activity-transactions-grid">
         {(
           [
-            ["SALES", sum("sales"), "Cash, card and wallet sales"],
-            ["REFUNDS", sum("refunds"), "Given back to clients"],
-            ["WALLET CHANGES", sum("wallet"), "Credits, rewards, expiries"],
+            ["SALES", totals.sales, "Cash, card and wallet sales"],
+            ["REFUNDS", totals.refunds, "Given back to clients"],
+            ["WALLET CHANGES", totals.wallet, "Credits, rewards, expiries"],
           ] as const
         ).map(([label, value, hint]) => (
           <div key={label} className="bq-card bq-card--sm">
@@ -91,7 +80,7 @@ export function Transactions() {
       {error && <div  className="bq-error bq-rise">{error}</div>}
       {!loading && shown.length === 0 && <EmptyState icon="history" title="No transactions yet" body="Sales, refunds and wallet changes are listed here, newest first, as they happen." />}
       {shown.length > 0 && <Feed entries={shown} />}
-      {all.length >= 300 && <div className="bq-money-activity-transactions-meta-2">Showing the latest 300 transactions.</div>}
+      {all.length >= ACTIVITY_LIMIT && <div className="bq-money-activity-transactions-meta-2">Showing the latest {ACTIVITY_LIMIT} transactions.</div>}
     </div>
   );
 }

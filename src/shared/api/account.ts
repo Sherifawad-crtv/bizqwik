@@ -17,11 +17,6 @@ export const accountApi = {
   updateAvatar: (avatarUrl: string | null) => callFn<{ profile: Profile }>("me/update", { method: "POST", body: { avatarUrl } }),
 
   tiers: () => callFn<{ tiers: Tier[] }>("tiers"),
-  createTier: (name: string, rate: number, privateCutPct: number) =>
-    callFn<{ tier: Tier }>("tiers", { method: "POST", body: { name, rate, privateCutPct } }),
-  updateTier: (id: string, name: string, rate: number, privateCutPct: number) =>
-    callFn<void>("tiers/update", { method: "POST", body: { id, name, rate, privateCutPct } }),
-  deleteTier: (id: string) => callFn<void>("tiers/delete", { method: "POST", body: { id } }),
 
   bundleTypes: () => callFn<{ bundleTypes: BundleType[] }>("bundle-types"),
   createBundleType: (name: string, price: number, sessionsIncluded: number, expiryDays: number, locationId?: string | null) =>

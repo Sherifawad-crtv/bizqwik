@@ -1,4 +1,4 @@
-import type { PaymentRequest, Client, ClientWithPackage, CoachOption, FrontDeskSummary, Invite, PackageInstance, PackageWithNames, PayMethod, Profile, Role, Rollup, SettlementPayment, Session, ScanResult, PtScanPreview } from "../types";
+import type { PaymentRequest, Client, ClientWithPackage, CoachOption, FrontDeskSummary, PackageInstance, PackageWithNames, PayMethod, Role, Rollup, SettlementPayment, Session, ScanResult, PtScanPreview } from "../types";
 import { callFn, SOLO_DESK, CLIENTS_LIST } from "./core";
 import type { DropInOption, NewClientFields } from "./inputs";
 
@@ -34,14 +34,8 @@ export const deskApi = {
   // package a coach sold in a given month, with client/bundle names attached.
   packagesByCoach: (coachId: string, month: string) => callFn<{ packages: PackageWithNames[] }>(`packages/by-coach/${coachId}/${month}`),
 
-  invites: () => callFn<{ invites: Invite[] }>("invites"),
   createInvite: (email: string, role: Role, tierId: string | null) =>
     callFn<void>("invites", { method: "POST", body: { email, role, tierId } }),
-  deleteInvite: (email: string) => callFn<void>("invites/delete", { method: "POST", body: { email } }),
-
-  profiles: () => callFn<{ profiles: Profile[] }>("profiles"),
-  assignTier: (id: string, tierId: string | null) => callFn<void>("profiles/assign-tier", { method: "POST", body: { id, tierId } }),
-  removeProfile: (id: string) => callFn<void>("profiles/remove", { method: "POST", body: { id } }),
 
   month: (month: string) => callFn<{ rows: Rollup[] }>(`month/${month}`),
   sessions: (coachId: string, month: string) => callFn<{ sessions: Session[] }>(`sessions/${coachId}/${month}`),

@@ -1,49 +1,22 @@
-import { cx } from "../../design-system/cx";
-import { api } from "../../shared/api/backend";
-import { useAsync } from "../../shared/api/useAsync";
-import { useSetHeader } from "../../shared/screen/header";
-import { useSticky } from "../../design-system/hooks/useSticky";
-import { fmt, formatDateTime } from "../../shared/format";
-import { Segmented } from "../../design-system/components/Segmented";
-import { Spinner } from "../../design-system/components/Spinner";
-import { EmptyState } from "../../design-system/components/EmptyState";
+import { cx } from "../../../design-system/cx";
+import { useSetHeader } from "../../../shared/screen/header";
+import { useSticky } from "../../../design-system/hooks/useSticky";
+import { fmt, formatDateTime } from "../../../shared/format";
+import { Segmented } from "../../../design-system/components/Segmented";
+import { Spinner } from "../../../design-system/components/Spinner";
+import { EmptyState } from "../../../design-system/components/EmptyState";
 import { useState } from "react";
-import { useLatch } from "../../shared/useLatch";
-import { LocationSwitcher, useCurrentLocation } from "../../shared/locations";
-import type { ActivityEntry, ClientWithPackage } from "../../shared/types";
-import { Sheet } from "../../design-system/components/Sheet";
-import { Button } from "../../design-system/components/Button";
-import { Icon } from "../../design-system/components/Icon";
-import { Card } from "../../design-system/components/Card";
-import { SectionHeader } from "../../design-system/components/SectionHeader";
-import { Tag } from "../../design-system/components/Tag";
+import { useLatch } from "../../../shared/useLatch";
+import { LocationSwitcher, useCurrentLocation } from "../../../shared/locations";
+import { Sheet } from "../../../design-system/components/Sheet";
+import { Button } from "../../../design-system/components/Button";
+import { Icon } from "../../../design-system/components/Icon";
+import { Card } from "../../../design-system/components/Card";
+import { SectionHeader } from "../../../design-system/components/SectionHeader";
+import { Tag } from "../../../design-system/components/Tag";
+import { clientOf, paymentCount, txnNote, txnReference, type Txn } from "../domain/money";
+import { useClientsWhile, useMoney } from "./hooks/useMoney";
 import "./Money.css";
-
-interface Txn { id: string; at: string; clientName: string | null; amount: number; what: string; method: string; refund: boolean; entry: ActivityEntry }
-
-const METHOD_LABEL: Record<string, string> = { cash: "Cash", card: "Card", instapay: "InstaPay", wallet: "Wallet" };
-
-/** Every sale and refund in the range, newest first, each tagged with how it was paid. */
-function toTransactions(list: ActivityEntry[], months: number): Txn[] {
-  const now = new Date();
-  const since = new Date(now.getFullYear(), now.getMonth() - (months - 1), 1).getTime();
-  const out: Txn[] = [];
-  for (const a of list) {
-    if (Date.parse(a.at) < since) continue;
-    const m = (a.meta ?? {}) as Record<string, unknown>;
-    const amount = Number(a.amount ?? 0);
-    if (a.type.startsWith("sale_") || a.type === "class_collected") {
-      const name = (m.name ?? m.title) as string | undefined;
-      out.push({ id: a.id, at: a.at, clientName: a.clientName ?? (a.type === "sale_dropin" ? "Drop-in guest" : null), amount, what: name ?? (a.type === "sale_package" ? "PT package" : a.type === "class_collected" ? "Class" : a.type === "sale_dropin" ? "Drop-in" : "Sale"), method: METHOD_LABEL[String(m.payMethod ?? "")] ?? "Not recorded", refund: false, entry: a });
-    } else if (a.type === "refund_desk") {
-      const note = String(m.note ?? "");
-      out.push({ id: a.id, at: a.at, clientName: a.clientName, amount, what: "Refund", method: /^instapay/i.test(note) ? "InstaPay" : "Cash", refund: true, entry: a });
-    } else if (a.type === "wallet_refund") {
-      out.push({ id: a.id, at: a.at, clientName: a.clientName, amount, what: "Refund", method: "Wallet", refund: true, entry: a });
-    }
-  }
-  return out;
-}
 
 type Range = "1" | "3" | "12";
 const RANGES: { value: Range; label: string }[] = [
@@ -63,12 +36,7 @@ export function Money() {
   const { locations, current, ready: locsReady } = useCurrentLocation();
   const [allLocations, setAllLocations] = useState(false);
   const here = locations.length > 1 && !allLocations ? (current?.id ?? null) : null;
-  const { data, error } = useAsync(async () => {
-    if (!locsReady) return null;
-    const [rev, pay, act] = await Promise.all([api.revenue(n), api.paymentsSummary(n, here), api.activity(300)]);
-    const txns = toTransactions(act.activity ?? [], n).filter((t) => !here || (t.entry.meta as Record<string, unknown> | null)?.locationId === here);
-    return { rev, pay, txns };
-  }, [range, here, locsReady]);
+  const { data, error } = useMoney(n, here, locsReady);
 
   if (error) return <EmptyState icon="inbox" title="Couldn't load your money" body="Check your connection and try again." />;
 
@@ -87,7 +55,7 @@ export function Money() {
             <div className="bq-money-title">{fmt(here ? data.pay.total : data.rev.totals.revenue)}</div>
             <div className="bq-money-meta">
               {here
-                ? `${data.pay.byMethod.reduce((a, m) => a + m.count, 0)} payment${data.pay.byMethod.reduce((a, m) => a + m.count, 0) === 1 ? "" : "s"} at ${current?.name ?? "this location"}`
+                ? `${paymentCount(data.pay)} payment${paymentCount(data.pay) === 1 ? "" : "s"} at ${current?.name ?? "this location"}`
                 : `${data.rev.activeSubscribers.total} active member${data.rev.activeSubscribers.total === 1 ? "" : "s"}`}
             </div>
             {data.pay.byMethod.length > 0 && (
@@ -142,13 +110,10 @@ function Row({ k, v }: { k: string; v: string | null | undefined }) {
 function TxnSheet({ txn, onClose }: { txn: Txn | null; onClose: () => void }) {
   const t = useLatch(txn);
   // The client list is only needed once a transaction is opened.
-  const list = useAsync(() => (txn ? api.clients() : Promise.resolve({ clients: [] as ClientWithPackage[] })), [txn !== null]);
-  const clients = list.data?.clients ?? [];
+  const clients = useClientsWhile(txn !== null);
   if (!t) return null;
-  const m = (t.entry.meta ?? {}) as Record<string, unknown>;
-  const matches = clients.filter((c) => c.name === t.clientName);
-  const client = matches.length === 1 ? matches[0] : null;
-  const note = String(m.note ?? "").replace(/^InstaPay\s*·?\s*/i, "");
+  const client = clientOf(t, clients);
+  const note = txnNote(t);
   return (
     <Sheet open={txn !== null} onClose={onClose}>
       <div className="bq-label">{t.refund ? "REFUND" : "PAYMENT"} · {t.method.toUpperCase()}</div>
@@ -161,7 +126,7 @@ function TxnSheet({ txn, onClose }: { txn: Txn | null; onClose: () => void }) {
       <Row k="DATE & TIME" v={formatDateTime(t.at)} />
       <Row k="RECORDED BY" v={t.entry.actorName} />
       <Row k="NOTE" v={note} />
-      <Row k="REFERENCE" v={t.id.slice(0, 8).toUpperCase()} />
+      <Row k="REFERENCE" v={txnReference(t)} />
 
       <div className="bq-money-txn-sheet-label-2">CLIENT</div>
       <Row k="NAME" v={t.clientName ?? "Unknown"} />

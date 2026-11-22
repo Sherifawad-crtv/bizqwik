@@ -1,56 +1,56 @@
-import { cx } from "../../design-system/cx";
-import { EmptyState } from "../../design-system/components/EmptyState";
+import { cx } from "../../../design-system/cx";
+import { EmptyState } from "../../../design-system/components/EmptyState";
 import { useEffect, useState } from "react";
-import { useAsync } from "../../shared/api/useAsync";
-import { useLatch } from "../../shared/useLatch";
-import { api } from "../../shared/api/backend";
-import type { Profile, Tier } from "../../shared/types";
-import { ROLE_LABELS, hasTier } from "../../shared/types";
-import { Button } from "../../design-system/components/Button";
-import { Icon } from "../../design-system/components/Icon";
-import { Sheet } from "../../design-system/components/Sheet";
-import { ConfirmSheet } from "../../design-system/components/ConfirmSheet";
-import { SelectField } from "../../design-system/components/FormField";
-import { Avatar } from "../../design-system/components/Avatar";
-import { Spinner } from "../../design-system/components/Spinner";
-import { useAuth } from "../../shared/auth";
+import { useLatch } from "../../../shared/useLatch";
+import type { Profile, Tier } from "../../../shared/types";
+import { ROLE_LABELS, hasTier } from "../../../shared/types";
+import { Button } from "../../../design-system/components/Button";
+import { Icon } from "../../../design-system/components/Icon";
+import { Sheet } from "../../../design-system/components/Sheet";
+import { ConfirmSheet } from "../../../design-system/components/ConfirmSheet";
+import { SelectField } from "../../../design-system/components/FormField";
+import { Avatar } from "../../../design-system/components/Avatar";
+import { Spinner } from "../../../design-system/components/Spinner";
+import { useAuth } from "../../../shared/auth";
+import { tierName } from "../domain/team";
+import { usePeople, usePersonActions, useTiers } from "./hooks/useTeam";
 import "./People.css";
 
 export function PeoplePanel() {
   const { profile: me } = useAuth();
-  const { data } = useAsync(() => api.profiles(), []);
-  const { data: tierData } = useAsync(() => api.tiers(), []);
+  const people = usePeople();
+  const tierList = useTiers();
   const [editing, setEditing] = useState<Profile | null>(null);
 
-  if (!data) return <Spinner />;
-  const tiers = tierData?.tiers ?? [];
+  if (!people) return <Spinner />;
+  const tiers = tierList ?? [];
 
   return (
     <div>
       <div className="bq-flex bq-items-center bq-gap-2 bq-mb-4">
         <span className="bq-h2">People</span>
-        <span className="bq-meta">{data.profiles.length}</span>
+        <span className="bq-meta">{people.length}</span>
       </div>
 
       <div className="bq-panel">
-        {data.profiles.map((p, i) => (
+        {people.map((p, i) => (
           <button
             key={p.id}
             onClick={() => setEditing(p)}
-            className={cx(`bq-plain bq-listrow ${!(i === data.profiles.length - 1) ? "bq-listrow--divider" : ""}`, "bq-manage-people-panel-btn")}
+            className={cx(`bq-plain bq-listrow ${!(i === people.length - 1) ? "bq-listrow--divider" : ""}`, "bq-manage-people-panel-btn")}
         >
             <Avatar name={p.name} size={36} src={p.avatarUrl} />
             <div className="bq-grow">
               <div className="bq-h3">{p.name}</div>
               <div className="bq-meta">
                 {ROLE_LABELS[p.role].toUpperCase()}
-                {p.tierId ? ` · ${tiers.find((t) => t.id === p.tierId)?.name ?? ""}` : ""}
+                {p.tierId ? ` · ${tierName(tiers, p.tierId)}` : ""}
               </div>
             </div>
             <Icon name="chevron-right" size={16} />
           </button>
         ))}
-        {data.profiles.length === 0 && (
+        {people.length === 0 && (
           <EmptyState bare icon="coaches" title="No one has joined yet" body="People appear here once they accept an invite and sign up. Send invites from the Invites tab." />
         )}
       </div>
@@ -76,8 +76,7 @@ function PersonSheet({
   const shown = useLatch(profile);
   const [tierId, setTierId] = useState(profile?.tierId ?? "");
   const [confirmRemove, setConfirmRemove] = useState(false);
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { assignTier, remove, busy, error, setError } = usePersonActions();
 
   useEffect(() => {
     if (open && profile) {
@@ -96,15 +95,7 @@ function PersonSheet({
 
   const saveTier = async (value: string) => {
     setTierId(value);
-    setBusy(true);
-    setError(null);
-    try {
-      await api.assignTier(shown.id, value || null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong.");
-    } finally {
-      setBusy(false);
-    }
+    await assignTier(shown.id, value || null);
   };
 
   return (
@@ -164,7 +155,7 @@ function PersonSheet({
         confirmLabel="Remove profile"
         danger
         onConfirm={async () => {
-          await api.removeProfile(shown.id);
+          await remove(shown.id);
           onClose();
         }}
       />

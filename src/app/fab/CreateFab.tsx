@@ -6,7 +6,7 @@ import { SeriesSheet } from "../../shared/components/SeriesSheet";
 import { PlanTypeSheet } from "../../features/catalog/Plans";
 import { BundleSheet } from "../../features/catalog/BundlesPanel";
 import { InviteFlow } from "../../shared/components/InviteFlow";
-import { TierSheet } from "../../features/manage/TiersPanel";
+import { TierSheet } from "../../features/manage";
 import { FabButton } from "./FabButton";
 import "./CreateFab.css";
 
