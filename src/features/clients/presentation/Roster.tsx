@@ -1,15 +1,17 @@
-import { EmptyState } from "../../design-system/components/EmptyState";
+import { EmptyState } from "../../../design-system/components/EmptyState";
 import { useState, type ReactNode } from "react";
-import { useIsMobile } from "../../design-system/hooks/useIsMobile";
-import { dateLabel, egp } from "../../shared/format";
-import type { ClientWithPackage } from "../../shared/types";
-import { Icon } from "../../design-system/components/Icon";
-import { Avatar } from "../../design-system/components/Avatar";
-import { PlanPill } from "../../shared/components/PlanPill";
-import { PackageStatusPill } from "../../shared/components/PackageStatusPill";
-import { countdownText, groupPlanLine, packageMetaText, rosterGrid } from "./helpers";
-import { QUICK_MS, tr } from "../../design-system/motion/motion";
+import { useIsMobile } from "../../../design-system/hooks/useIsMobile";
+import { dateLabel, egp } from "../../../shared/format";
+import type { ClientWithPackage } from "../../../shared/types";
+import { Icon } from "../../../design-system/components/Icon";
+import { Avatar } from "../../../design-system/components/Avatar";
+import { PlanPill } from "../../../shared/components/PlanPill";
+import { PackageStatusPill } from "../../../shared/components/PackageStatusPill";
+import { countdownText, groupPlanLine, packageMetaText } from "../domain/clientText";
+import { QUICK_MS, tr } from "../../../design-system/motion/motion";
 import "./Roster.css";
+
+const rosterGrid = (canManage: boolean) => `2fr 1.3fr 1fr 1.1fr ${canManage ? "84px" : "20px"}`;
 
 /** Small round icon button used for the roster's quick actions — stops the
  * click from bubbling to the row, which opens the detail sheet. */

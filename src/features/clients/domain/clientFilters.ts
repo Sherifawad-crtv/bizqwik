@@ -1,4 +1,4 @@
-import type { ClientWithPackage } from "../../shared/types";
+import type { ClientWithPackage } from "../../../shared/types";
 
 // Filtering and sorting for the founder's client roster. Everything here is a
 // pure function of the client list, so what a filter means is in one place.

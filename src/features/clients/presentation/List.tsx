@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { useLatch } from "../../shared/useLatch";
-import { useIsMobile } from "../../design-system/hooks/useIsMobile";
-import { api } from "../../shared/api/backend";
-import type { ClientWithPackage, Role } from "../../shared/types";
-import { ConfirmSheet } from "../../design-system/components/ConfirmSheet";
-import { NO_FILTERS, filterClients, isFiltering, type ClientFilters } from "./clientFilters";
+import { useLatch } from "../../../shared/useLatch";
+import { useIsMobile } from "../../../design-system/hooks/useIsMobile";
+import type { ClientWithPackage, Role } from "../../../shared/types";
+import { ConfirmSheet } from "../../../design-system/components/ConfirmSheet";
+import { NO_FILTERS, filterClients, isFiltering, type ClientFilters } from "../domain/clientFilters";
+import { coachChoices as coachesIn } from "../domain/roster";
+import { deleteClient } from "./hooks/useClientActions";
 import { OverviewCards } from "./Overview";
 import { ClientFilterBar } from "./Filters";
 import { ClientRoster } from "./Roster";
@@ -39,11 +40,7 @@ export function ClientList({
 
   const shown = filterClients(clients, filters);
   const filtering = isFiltering(filters);
-  const coachChoices = showAssignedCoach
-    ? [...new Set(clients.map((c) => c.assignedCoachId).filter((id): id is string => !!id))]
-        .map((id) => ({ id, name: coachName(id) ?? "—" }))
-        .sort((a, b) => a.name.localeCompare(b.name))
-    : null;
+  const coachChoices = showAssignedCoach ? coachesIn(clients, coachName) : null;
 
   return (
     <div>
@@ -123,7 +120,7 @@ export function ClientList({
           confirmLabel="Delete client"
           danger
           onConfirm={async () => {
-            await api.deleteClient(shownDeleting.id);
+            await deleteClient(shownDeleting.id);
           }}
         />
       )}

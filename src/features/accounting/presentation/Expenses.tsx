@@ -1,17 +1,16 @@
-import { cx } from "../../design-system/cx";
-import { EmptyState } from "../../design-system/components/EmptyState";
+import { cx } from "../../../design-system/cx";
+import { EmptyState } from "../../../design-system/components/EmptyState";
 import { useEffect, useState } from "react";
-import { useAsync } from "../../shared/api/useAsync";
-import { api } from "../../shared/api/backend";
-import { fmt, monthAbbr } from "../../shared/format";
-import type { Expense, ExpenseCategory } from "../../shared/types";
-import { Button } from "../../design-system/components/Button";
-import { Icon } from "../../design-system/components/Icon";
-import { Card } from "../../design-system/components/Card";
-import { SectionHeader } from "../../design-system/components/SectionHeader";
+import { fmt, monthAbbr } from "../../../shared/format";
+import type { Expense, ExpenseCategory } from "../../../shared/types";
+import { Button } from "../../../design-system/components/Button";
+import { Icon } from "../../../design-system/components/Icon";
+import { Card } from "../../../design-system/components/Card";
+import { SectionHeader } from "../../../design-system/components/SectionHeader";
 import { CategoriesSheet, ExpenseSheet } from "./ExpenseSheet";
-import { MotionList } from "../../design-system/components/MotionList";
-import { Chip } from "../../design-system/components/Chip";
+import { MotionList } from "../../../design-system/components/MotionList";
+import { Chip } from "../../../design-system/components/Chip";
+import { useExpenses } from "./hooks/useAccounting";
 import "./Expenses.css";
 
 function ReceiptIcon({ has }: { has: boolean }) {
@@ -42,9 +41,9 @@ export function ExpensesPanel({
   onChanged: () => void;
   onCategoriesChanged: () => void;
 }) {
-  const { data, refetch } = useAsync(() => api.expenses(month), [month]);
   const [query, setQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
+  const { loaded, expenses, total, refetch } = useExpenses(month, categoryFilter, query);
   const [sheetMode, setSheetMode] = useState<"add" | Expense | null>(null);
   const [managingCats, setManagingCats] = useState(false);
 
@@ -54,11 +53,6 @@ export function ExpensesPanel({
       onAddHandled();
     }
   }, [openAdd, onAddHandled]);
-
-  const expenses = (data?.expenses ?? []).filter(
-    (e) => (!categoryFilter || e.categoryId === categoryFilter) && (!query.trim() || (e.note ?? "").toLowerCase().includes(query.trim().toLowerCase())),
-  );
-  const total = expenses.reduce((a, e) => a + e.amount, 0);
 
   return (
     <div>
@@ -113,7 +107,7 @@ export function ExpensesPanel({
         ))}
 </MotionList>
         {expenses.length === 0 && coachPayouts === 0 && (
-          <EmptyState bare icon="cash" title={data ? "No expenses this month" : "Loading…"} body="Rent, salaries, utilities — whatever the business spent on. Add the first one below." />
+          <EmptyState bare icon="cash" title={loaded ? "No expenses this month" : "Loading…"} body="Rent, salaries, utilities — whatever the business spent on. Add the first one below." />
         )}
       </Card>
 

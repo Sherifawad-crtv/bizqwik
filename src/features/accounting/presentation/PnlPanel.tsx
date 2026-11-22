@@ -1,19 +1,20 @@
-import { EmptyState } from "../../design-system/components/EmptyState";
-import { fmt, monthAbbr, monthLabel } from "../../shared/format";
-import type { PnlReport } from "../../shared/types";
-import { Button } from "../../design-system/components/Button";
-import { Icon } from "../../design-system/components/Icon";
-import { Spinner } from "../../design-system/components/Spinner";
-import { KpiTile, Delta } from "../../design-system/components/KpiTile";
-import { SectionCard } from "../../design-system/components/Card";
-import { pctChange, caption } from "../../design-system/components/chartHelpers";
-import { BarChart } from "../../design-system/components/BarChart";
-import { ShareBars } from "../../design-system/components/MoneyCharts";
-import { Num } from "../../design-system/components/Num";
+import { EmptyState } from "../../../design-system/components/EmptyState";
+import { fmt, monthAbbr, monthLabel } from "../../../shared/format";
+import type { PnlReport } from "../../../shared/types";
+import { Button } from "../../../design-system/components/Button";
+import { Icon } from "../../../design-system/components/Icon";
+import { Spinner } from "../../../design-system/components/Spinner";
+import { KpiTile, Delta } from "../../../design-system/components/KpiTile";
+import { SectionCard } from "../../../design-system/components/Card";
+import { pctChange, caption } from "../../../design-system/components/chartHelpers";
+import { BarChart } from "../../../design-system/components/BarChart";
+import { ShareBars } from "../../../design-system/components/MoneyCharts";
+import { Num } from "../../../design-system/components/Num";
+import { hasNoActivity, isEmptyReport, previousMonth, profitMargin, stillOwed } from "../domain/accounting";
 import "./PnlPanel.css";
 
 function PnlChart({ trend }: { trend: PnlReport["trend"] }) {
-  if (trend.every((m) => m.netRevenue === 0 && m.totalExpenses === 0)) {
+  if (hasNoActivity(trend)) {
     return <EmptyState bare icon="insights" title="No activity yet" body="Once there's revenue or an expense logged, this fills in month by month." />;
   }
   return (
@@ -34,7 +35,7 @@ function PnlChart({ trend }: { trend: PnlReport["trend"] }) {
 
 export function PnlPanel({ report, loading, onAddExpense, onCoachPayouts }: { report: PnlReport | null; loading: boolean; onAddExpense: () => void; onCoachPayouts: () => void }) {
   if (loading || !report) return <Spinner />;
-  if (!report.hasPastExpenses && report.current.grossRevenue === 0) {
+  if (isEmptyReport(report)) {
     return (
       <EmptyState
         icon="cash"
@@ -45,8 +46,8 @@ export function PnlPanel({ report, loading, onAddExpense, onCoachPayouts }: { re
     );
   }
   const { current } = report;
-  const prev = report.trend.length >= 2 ? report.trend[report.trend.length - 2] : null;
-  const margin = current.netRevenue > 0 ? (current.profit / current.netRevenue) * 100 : null;
+  const prev = previousMonth(report);
+  const margin = profitMargin(current);
 
   return (
     <>
@@ -102,7 +103,7 @@ export function PnlPanel({ report, loading, onAddExpense, onCoachPayouts }: { re
                   <div className="bq-accounting-pnl-panel-text-2">{s.label}</div>
                   {s.key === "coach_payouts" && (
                     <div className="bq-accounting-pnl-panel-meta-2">
-                      {s.paid !== undefined ? `${fmt(s.paid)} paid · ${fmt(Math.max(0, s.amount - s.paid))} still owed · ` : ""}Locked · settled only
+                      {s.paid !== undefined ? `${fmt(s.paid)} paid · ${fmt(stillOwed(s.amount, s.paid))} still owed · ` : ""}Locked · settled only
                     </div>
                   )}
                 </span>

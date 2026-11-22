@@ -1,19 +1,21 @@
-import { SwitchVisual } from "../../design-system/components/Switch";
-import { Reveal } from "../../design-system/components/Reveal";
+import { SwitchVisual } from "../../../design-system/components/Switch";
+import { Reveal } from "../../../design-system/components/Reveal";
 import { useEffect, useRef, useState } from "react";
-import { useLatch } from "../../shared/useLatch";
-import { useSheetSuccess } from "../../design-system/components/useSheetSuccess";
-import { api, MOCK } from "../../shared/api/backend";
-import { receiptDataUrl } from "../../shared/image";
-import type { Expense, ExpenseCategory } from "../../shared/types";
-import { Button } from "../../design-system/components/Button";
-import { Icon } from "../../design-system/components/Icon";
-import { Sheet } from "../../design-system/components/Sheet";
-import { ConfirmSheet } from "../../design-system/components/ConfirmSheet";
-import { TextField, SelectField } from "../../design-system/components/FormField";
-import { DateField } from "../../design-system/components/DateField";
-import { SheetSuccessIcon } from "../../design-system/components/SheetSuccessIcon";
+import { useLatch } from "../../../shared/useLatch";
+import { useSheetSuccess } from "../../../design-system/components/useSheetSuccess";
+import { receiptDataUrl } from "../../../shared/image";
+import type { Expense, ExpenseCategory } from "../../../shared/types";
+import { Button } from "../../../design-system/components/Button";
+import { Icon } from "../../../design-system/components/Icon";
+import { Sheet } from "../../../design-system/components/Sheet";
+import { ConfirmSheet } from "../../../design-system/components/ConfirmSheet";
+import { TextField, SelectField } from "../../../design-system/components/FormField";
+import { DateField } from "../../../design-system/components/DateField";
+import { SheetSuccessIcon } from "../../../design-system/components/SheetSuccessIcon";
 import { catOptions } from "./options";
+import { defaultCategoryId, defaultDayOfMonth } from "../domain/accounting";
+import { CURRENT_MONTH } from "./hooks/useAccounting";
+import { useCategoryActions, useExpenseActions } from "./hooks/useAccountingActions";
 import "./ExpenseSheet.css";
 
 /** Add or edit one expense: amount, category, date (today by default), note,
@@ -37,13 +39,12 @@ export function ExpenseSheet({
   const open = mode !== null;
   const [amount, setAmount] = useState("");
   const [categoryId, setCategoryId] = useState("");
-  const [date, setDate] = useState(MOCK.CURRENT_MONTH + "-01");
+  const [date, setDate] = useState(CURRENT_MONTH + "-01");
   const [note, setNote] = useState("");
   const [receipt, setReceipt] = useState<string | null>(null);
   const [repeat, setRepeat] = useState(false);
   const [dayOfMonth, setDayOfMonth] = useState("1");
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { save: saveExpense, busy, error, setError } = useExpenseActions();
   const amountInput = useRef<HTMLInputElement>(null);
   const fileInput = useRef<HTMLInputElement>(null);
   const { confirmed, iconIn, showSuccess } = useSheetSuccess(open, onClose);
@@ -58,11 +59,11 @@ export function ExpenseSheet({
       setNote(editing.note ?? "");
     } else {
       setAmount("");
-      setCategoryId(categories.find((c) => !c.archived)?.id ?? "");
+      setCategoryId(defaultCategoryId(categories));
       setDate(todayIso);
       setNote("");
       setRepeat(false);
-      setDayOfMonth(String(Math.min(28, new Date().getDate())));
+      setDayOfMonth(String(defaultDayOfMonth(new Date())));
     }
     setReceipt(null);
     setError(null);
@@ -85,25 +86,9 @@ export function ExpenseSheet({
   };
 
   const save = async () => {
-    const amt = Number(amount);
-    if (!Number.isFinite(amt) || amt <= 0) return setError("Enter an amount.");
-    if (!categoryId) return setError("Choose a category.");
-    setBusy(true);
-    setError(null);
-    try {
-      if (editing) {
-        await api.updateExpense(editing.id, { categoryId, amount: amt, date, note: note.trim() });
-      } else if (repeat) {
-        await api.createRecurringExpense(categoryId, amt, Number(dayOfMonth), note.trim() || undefined);
-      } else {
-        await api.addExpense(categoryId, amt, date, note.trim() || undefined, receipt ?? undefined);
-      }
+    if (await saveExpense(editing, { amount, categoryId, date, note, receipt, repeat, dayOfMonth })) {
       onSaved();
       showSuccess();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong.");
-    } finally {
-      setBusy(false);
     }
   };
 
@@ -181,6 +166,7 @@ export function ExpenseSheet({
 
 function DeleteExpenseButton({ id, onDeleted }: { id: string; onDeleted: () => void }) {
   const [confirming, setConfirming] = useState(false);
+  const { remove } = useExpenseActions();
   return (
     <>
       <Button className="bq-mt-2" variant="danger" fullWidth onClick={() => setConfirming(true)}>
@@ -195,7 +181,7 @@ function DeleteExpenseButton({ id, onDeleted }: { id: string; onDeleted: () => v
         confirmLabel="Delete"
         danger
         onConfirm={async () => {
-          await api.deleteExpense(id);
+          await remove(id);
           onDeleted();
         }}
       />
@@ -206,23 +192,15 @@ function DeleteExpenseButton({ id, onDeleted }: { id: string; onDeleted: () => v
 export function CategoriesSheet({ open, categories, onClose, onChanged }: { open: boolean; categories: ExpenseCategory[]; onClose: () => void; onChanged: () => void }) {
   const [adding, setAdding] = useState(false);
   const [name, setName] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { add: addCategory, archive, busy, error } = useCategoryActions();
 
   const add = async () => {
     const n = name.trim();
     if (!n) return;
-    setBusy(true);
-    setError(null);
-    try {
-      await api.createExpenseCategory(n);
+    if (await addCategory(n)) {
       setName("");
       setAdding(false);
       onChanged();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong.");
-    } finally {
-      setBusy(false);
     }
   };
 
@@ -235,7 +213,7 @@ export function CategoriesSheet({ open, categories, onClose, onChanged }: { open
             <span className="bq-accounting-expense-sheet-categories-sheet-text">{c.name}</span>
             {!c.isDefault && (
               <button className="bq-accounting-expense-sheet-categories-sheet-btn"
-                onClick={() => api.setExpenseCategoryArchived(c.id, true).then(onChanged)}
+                onClick={() => archive(c.id).then(onChanged)}
               >
                 ARCHIVE
               </button>

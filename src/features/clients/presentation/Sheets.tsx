@@ -1,16 +1,17 @@
-import { useMountedThroughExit } from "../../shared/useLatch";
+import { useMountedThroughExit } from "../../../shared/useLatch";
 import { useEffect, useState } from "react";
-import { api } from "../../shared/api/backend";
-import { egp } from "../../shared/format";
-import type { ClientWithPackage, Role } from "../../shared/types";
-import { Button } from "../../design-system/components/Button";
-import { Avatar } from "../../design-system/components/Avatar";
-import { Sheet } from "../../design-system/components/Sheet";
-import { TextField } from "../../design-system/components/FormField";
-import { PackageStatusPill } from "../../shared/components/PackageStatusPill";
-import { SheetSuccessIcon } from "../../design-system/components/SheetSuccessIcon";
-import { useSheetSuccess } from "../../design-system/components/useSheetSuccess";
-import { daysLeft, groupPlanLine } from "./helpers";
+import { egp } from "../../../shared/format";
+import type { ClientWithPackage, Role } from "../../../shared/types";
+import { Button } from "../../../design-system/components/Button";
+import { Avatar } from "../../../design-system/components/Avatar";
+import { Sheet } from "../../../design-system/components/Sheet";
+import { TextField } from "../../../design-system/components/FormField";
+import { PackageStatusPill } from "../../../shared/components/PackageStatusPill";
+import { SheetSuccessIcon } from "../../../design-system/components/SheetSuccessIcon";
+import { useSheetSuccess } from "../../../design-system/components/useSheetSuccess";
+import { daysLeft, groupPlanLine } from "../domain/clientText";
+import { canLogSession } from "../domain/roster";
+import { useCompensateClient, useEditClient } from "./hooks/useClientActions";
 import "./Sheets.css";
 
 export function ClientDetailSheet({
@@ -31,8 +32,7 @@ export function ClientDetailSheet({
   const [mode, setMode] = useState<"view" | "compensate">("view");
   const [compAmount, setCompAmount] = useState("");
   const [compNote, setCompNote] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { compensate: credit, busy, error, setError } = useCompensateClient(client.id);
   const [successLabel, setSuccessLabel] = useState("");
   const { confirmed, iconIn, showSuccess } = useSheetSuccess(open, onClose);
 
@@ -48,24 +48,12 @@ export function ClientDetailSheet({
   }, [open, client.id]);
 
   const pkg = client.currentPackage;
-  const canDeliver = role !== "accountant" && client.assignedCoachId === myId && !!pkg && pkg.status === "active";
+  const canDeliver = canLogSession(client, role, myId);
 
   const compensate = async () => {
-    const amt = Number(compAmount);
-    if (!Number.isFinite(amt) || amt <= 0) {
-      setError("Enter an amount.");
-      return;
-    }
-    setBusy(true);
-    setError(null);
-    try {
-      await api.compensateClient(client.id, amt, compNote.trim() || undefined);
+    if (await credit(compAmount, compNote)) {
       setSuccessLabel("Wallet credited");
       showSuccess();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong.");
-    } finally {
-      setBusy(false);
     }
   };
 
@@ -223,8 +211,7 @@ export function ClientEditSheet({ open, client, onClose }: { open: boolean; clie
   const [name, setName] = useState(client.name);
   const [age, setAge] = useState(client.age != null ? String(client.age) : "");
   const [conditions, setConditions] = useState(client.conditions ?? "");
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { save: saveClient, busy, error, setError } = useEditClient(client.id);
   const { confirmed, iconIn, showSuccess } = useSheetSuccess(open, onClose, { quiet: true });
 
   useEffect(() => {
@@ -234,25 +221,12 @@ export function ClientEditSheet({ open, client, onClose }: { open: boolean; clie
       setConditions(client.conditions ?? "");
       setError(null);
     }
-  }, [open, client]);
+  }, [open, client, setError]);
 
   if (!mounted) return null;
 
   const save = async () => {
-    if (!name.trim()) {
-      setError("Enter a name.");
-      return;
-    }
-    setBusy(true);
-    setError(null);
-    try {
-      await api.updateClient(client.id, name.trim(), age.trim() ? Number(age) : null, conditions.trim() || null);
-      showSuccess();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong.");
-    } finally {
-      setBusy(false);
-    }
+    if (await saveClient(name, age, conditions)) showSuccess();
   };
 
   return (

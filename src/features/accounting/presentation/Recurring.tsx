@@ -1,45 +1,30 @@
-import { cx } from "../../design-system/cx";
-import { EmptyState } from "../../design-system/components/EmptyState";
+import { cx } from "../../../design-system/cx";
+import { EmptyState } from "../../../design-system/components/EmptyState";
 import { useEffect, useState } from "react";
-import { useAsync } from "../../shared/api/useAsync";
-import { useLatch } from "../../shared/useLatch";
-import { useSheetSuccess } from "../../design-system/components/useSheetSuccess";
-import { api, MOCK } from "../../shared/api/backend";
-import { fmt, monthAbbr } from "../../shared/format";
-import type { ExpenseCategory, RecurringExpense } from "../../shared/types";
-import { Button } from "../../design-system/components/Button";
-import { Icon } from "../../design-system/components/Icon";
-import { Sheet } from "../../design-system/components/Sheet";
-import { ConfirmSheet } from "../../design-system/components/ConfirmSheet";
-import { TextField, SelectField } from "../../design-system/components/FormField";
-import { SheetSuccessIcon } from "../../design-system/components/SheetSuccessIcon";
-import { Card } from "../../design-system/components/Card";
-import { SectionHeader } from "../../design-system/components/SectionHeader";
+import { useLatch } from "../../../shared/useLatch";
+import { useSheetSuccess } from "../../../design-system/components/useSheetSuccess";
+import { fmt, monthAbbr } from "../../../shared/format";
+import type { ExpenseCategory, RecurringExpense } from "../../../shared/types";
+import { Button } from "../../../design-system/components/Button";
+import { Icon } from "../../../design-system/components/Icon";
+import { Sheet } from "../../../design-system/components/Sheet";
+import { ConfirmSheet } from "../../../design-system/components/ConfirmSheet";
+import { TextField, SelectField } from "../../../design-system/components/FormField";
+import { SheetSuccessIcon } from "../../../design-system/components/SheetSuccessIcon";
+import { Card } from "../../../design-system/components/Card";
+import { SectionHeader } from "../../../design-system/components/SectionHeader";
 import { CategoriesSheet } from "./ExpenseSheet";
 import { catOptions } from "./options";
-import { MotionList } from "../../design-system/components/MotionList";
+import { MotionList } from "../../../design-system/components/MotionList";
+import { newRecurringTemplate, nextOccurrence } from "../domain/accounting";
+import { CURRENT_MONTH, useRecurring } from "./hooks/useAccounting";
+import { useRecurringActions } from "./hooks/useAccountingActions";
 import "./Recurring.css";
 
-function nextOccurrence(r: RecurringExpense): string | null {
-  if (!r.active) return null;
-  const today = new Date();
-  const todayIso = today.toISOString().slice(0, 10);
-  for (let i = 0; i < 24; i++) {
-    const d = new Date(today.getFullYear(), today.getMonth() + i, r.dayOfMonth);
-    const month = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-    if (month < r.startMonth) continue;
-    if (r.endMonth && month > r.endMonth) return null;
-    const iso = d.toISOString().slice(0, 10);
-    if (iso >= todayIso) return iso;
-  }
-  return null;
-}
-
 export function RecurringPanel({ categories, onChanged, onCategoriesChanged }: { categories: ExpenseCategory[]; onChanged: () => void; onCategoriesChanged: () => void }) {
-  const { data, refetch } = useAsync(() => api.recurringExpenses(), []);
+  const { loaded, recurring, refetch } = useRecurring();
   const [editing, setEditing] = useState<RecurringExpense | null>(null);
   const [managingCats, setManagingCats] = useState(false);
-  const recurring = data?.recurring ?? [];
 
   return (
     <div>
@@ -65,10 +50,10 @@ export function RecurringPanel({ categories, onChanged, onCategoriesChanged }: {
         })}
 </MotionList>
         {recurring.length === 0 && (
-          <EmptyState bare icon="cash" title={data ? "No repeating expenses" : "Loading…"} body="Rent, salaries and anything else that happens every month — set it up once." />
+          <EmptyState bare icon="cash" title={loaded ? "No repeating expenses" : "Loading…"} body="Rent, salaries and anything else that happens every month — set it up once." />
         )}
       </Card>
-      <Button className="bq-mb-4" fullWidth size="lg" onClick={() => setEditing({ id: "", categoryId: categories.find((c) => !c.archived)?.id ?? "", categoryName: "", amount: 0, note: null, dayOfMonth: new Date().getDate() > 28 ? 28 : new Date().getDate(), startMonth: MOCK.CURRENT_MONTH, endMonth: null, active: true })}>
+      <Button className="bq-mb-4" fullWidth size="lg" onClick={() => setEditing(newRecurringTemplate(categories, CURRENT_MONTH))}>
         Add a repeating expense
       </Button>
       <RecurringSheet
@@ -94,8 +79,7 @@ function RecurringSheet({ template, categories, onClose, onSaved }: { template: 
   const [note, setNote] = useState("");
   const [dayOfMonth, setDayOfMonth] = useState("1");
   const [endMonth, setEndMonth] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { save: saveTemplate, togglePause: pauseOrResume, remove, busy, error, setError } = useRecurringActions();
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const { confirmed, iconIn, showSuccess } = useSheetSuccess(open, onClose);
 
@@ -114,36 +98,15 @@ function RecurringSheet({ template, categories, onClose, onSaved }: { template: 
   if (!shown) return null;
 
   const save = async () => {
-    const amt = Number(amount);
-    if (!Number.isFinite(amt) || amt <= 0) return setError("Enter an amount.");
-    if (!categoryId) return setError("Choose a category.");
-    const day = Number(dayOfMonth);
-    if (!Number.isInteger(day) || day < 1 || day > 28) return setError("Pick a day between 1 and 28.");
-    setBusy(true);
-    setError(null);
-    try {
-      if (isNew) {
-        await api.createRecurringExpense(categoryId, amt, day, note.trim() || undefined, endMonth || undefined);
-      } else {
-        await api.updateRecurringExpense(shown.id, { amount: amt, categoryId, note: note.trim(), dayOfMonth: day, endMonth: endMonth || null });
-      }
+    if (await saveTemplate(shown, { amount, categoryId, note, dayOfMonth, endMonth })) {
       onSaved();
       showSuccess();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong.");
-    } finally {
-      setBusy(false);
     }
   };
   const togglePause = async () => {
-    setBusy(true);
-    try {
-      await api.updateRecurringExpense(shown.id, { active: !shown.active });
-      onSaved();
-      onClose();
-    } finally {
-      setBusy(false);
-    }
+    await pauseOrResume(shown);
+    onSaved();
+    onClose();
   };
 
   return (
@@ -185,7 +148,7 @@ function RecurringSheet({ template, categories, onClose, onSaved }: { template: 
                 confirmLabel="Delete"
                 danger
                 onConfirm={async () => {
-                  await api.deleteRecurringExpense(shown.id);
+                  await remove(shown.id);
                   onSaved();
                   onClose();
                 }}

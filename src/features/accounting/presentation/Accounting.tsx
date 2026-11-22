@@ -1,12 +1,11 @@
 import { useMemo, useState } from "react";
-import { useSetHeader } from "../../shared/screen/header";
-import { useSticky } from "../../design-system/hooks/useSticky";
-import { useAsync } from "../../shared/api/useAsync";
-import { api, MOCK } from "../../shared/api/backend";
-import { Segmented } from "../../design-system/components/Segmented";
-import { YearMonthStrip } from "../../design-system/components/YearMonthStrip";
+import { useSetHeader } from "../../../shared/screen/header";
+import { useSticky } from "../../../design-system/hooks/useSticky";
+import { Segmented } from "../../../design-system/components/Segmented";
+import { YearMonthStrip } from "../../../design-system/components/YearMonthStrip";
 import { useNavigate } from "react-router-dom";
-import { monthsBackList, useAsyncBump } from "./helpers";
+import { isMonth, monthsBack } from "../domain/accounting";
+import { CURRENT_MONTH, useAccounting } from "./hooks/useAccounting";
 import { PnlPanel } from "./PnlPanel";
 import { ExpensesPanel } from "./Expenses";
 import { RecurringPanel } from "./Recurring";
@@ -19,15 +18,12 @@ type Tab = "pnl" | "expenses" | "recurring";
 export function Accounting() {
   const navigate = useNavigate();
   const [tab, setTab] = useSticky<Tab>("accountingTab", "pnl", { valid: (v) => ["pnl", "expenses", "recurring"].includes(v) });
-  const [month, setMonth] = useSticky<string>("accountingMonth", MOCK.CURRENT_MONTH, { valid: (v) => /^\d{4}-\d{2}$/.test(v) });
+  const [month, setMonth] = useSticky<string>("accountingMonth", CURRENT_MONTH, { valid: isMonth });
   const [addingExpense, setAddingExpense] = useState(false);
   useSetHeader({ kicker: "BUSINESS", title: "Accounting" }, []);
 
-  const cats = useAsync(() => api.expenseCategories(), []);
-  const bump = useAsyncBump();
-  const pnl = useAsync(() => api.pnl(month), [month, bump.key]);
-
-  const months = useMemo(() => monthsBackList(24), []);
+  const { categories, refetchCategories, pnl, expensesChanged } = useAccounting(month);
+  const months = useMemo(() => monthsBack(24, CURRENT_MONTH), []);
 
   return (
     <div>
@@ -48,8 +44,8 @@ export function Accounting() {
       <div key={tab} className="bq-rise">
         {tab === "pnl" && (
           <PnlPanel
-            report={pnl.data ?? null}
-            loading={!pnl.data}
+            report={pnl}
+            loading={!pnl}
             onAddExpense={() => {
               setTab("expenses");
               window.setTimeout(() => setAddingExpense(true), 280);
@@ -60,17 +56,17 @@ export function Accounting() {
         {tab === "expenses" && (
           <ExpensesPanel
             month={month}
-            categories={cats.data?.categories ?? []}
-            coachPayouts={pnl.data?.current.coachPayouts ?? 0}
+            categories={categories}
+            coachPayouts={pnl?.current.coachPayouts ?? 0}
             openAdd={addingExpense}
             onAddHandled={() => setAddingExpense(false)}
             onCoachPayouts={() => navigate("/pay")}
-            onChanged={bump.bump}
-            onCategoriesChanged={cats.refetch}
+            onChanged={expensesChanged}
+            onCategoriesChanged={refetchCategories}
           />
         )}
         {tab === "recurring" && (
-          <RecurringPanel categories={cats.data?.categories ?? []} onChanged={bump.bump} onCategoriesChanged={cats.refetch} />
+          <RecurringPanel categories={categories} onChanged={expensesChanged} onCategoriesChanged={refetchCategories} />
         )}
       </div>
     </div>

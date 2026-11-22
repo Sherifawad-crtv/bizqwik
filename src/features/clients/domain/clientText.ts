@@ -1,11 +1,9 @@
-import { dateLabel } from "../../shared/format";
-import type { ClientWithPackage, GroupPlan } from "../../shared/types";
-import { GROUP_PLAN_KIND_LABELS } from "../../shared/types";
+import { dateLabel } from "../../../shared/format";
+import type { ClientWithPackage, GroupPlan } from "../../../shared/types";
+import { GROUP_PLAN_KIND_LABELS } from "../../../shared/types";
 
-export interface CoachOption {
-  id: string;
-  name: string;
-}
+// How a client's plan and package read in the roster and sheets. Pure text,
+// no React.
 
 export function daysLeft(expiryDate: string): number {
   return Math.max(0, Math.ceil((Date.parse(expiryDate) - Date.now()) / 86400000));
@@ -40,8 +38,4 @@ export function plusDays(iso: string, days: number): string {
   const d = new Date(`${iso}T00:00:00Z`);
   d.setUTCDate(d.getUTCDate() + days);
   return d.toISOString().slice(0, 10);
-}
-
-export function rosterGrid(canManage: boolean): string {
-  return `2fr 1.3fr 1fr 1.1fr ${canManage ? "84px" : "20px"}`;
 }

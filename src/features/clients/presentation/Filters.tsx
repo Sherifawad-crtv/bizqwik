@@ -1,14 +1,14 @@
 import { useState, type ReactNode } from "react";
-import { todayIso } from "../../shared/format";
-import type { ClientWithPackage } from "../../shared/types";
-import { Button } from "../../design-system/components/Button";
-import { Icon } from "../../design-system/components/Icon";
-import { Sheet } from "../../design-system/components/Sheet";
-import { DateField } from "../../design-system/components/DateField";
-import { NO_FILTERS, filterClients, planOptions, type ClientFilters, type ExpiryFilter, type SortKey, type StatusFilter } from "./clientFilters";
-import { plusDays } from "./helpers";
-import { useNow } from "../../shared/useNow";
-import { Chip } from "../../design-system/components/Chip";
+import { todayIso } from "../../../shared/format";
+import type { ClientWithPackage } from "../../../shared/types";
+import { Button } from "../../../design-system/components/Button";
+import { Icon } from "../../../design-system/components/Icon";
+import { Sheet } from "../../../design-system/components/Sheet";
+import { DateField } from "../../../design-system/components/DateField";
+import { NO_FILTERS, filterClients, planOptions, type ClientFilters, type ExpiryFilter, type SortKey, type StatusFilter } from "../domain/clientFilters";
+import { plusDays } from "../domain/clientText";
+import { useNow } from "../../../shared/useNow";
+import { Chip } from "../../../design-system/components/Chip";
 import "./Filters.css";
 
 const STATUS_CHIPS: { value: StatusFilter; label: string }[] = [
