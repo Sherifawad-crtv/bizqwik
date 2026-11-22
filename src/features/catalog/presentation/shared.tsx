@@ -1,4 +1,4 @@
-import { EmptyState } from "../../design-system/components/EmptyState";
+import { EmptyState } from "../../../design-system/components/EmptyState";
 
 
 export function EmptyRow({ text, action }: { text: string; action?: { label: string; onClick: () => void } }) {

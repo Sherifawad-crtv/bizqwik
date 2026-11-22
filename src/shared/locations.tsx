@@ -106,7 +106,4 @@ export function LocationSwitcher({ all, onAll, isAll = false }: { all?: boolean;
   );
 }
 
-/** Does this item belong at `locationId`? Untied items (made before locations
- * existed) show everywhere so nothing goes missing. */
-export const atLocation = (itemLocationId: string | null | undefined, locationId: string | null | undefined) =>
-  !locationId || !itemLocationId || itemLocationId === locationId;
+export { atLocation } from "./locationRules";

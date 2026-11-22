@@ -12,7 +12,7 @@ import { Signup } from "../features/auth/Signup";
 import { Home } from "./Home";
 import { Account } from "../features/account/Account";
 import { Activity, Money, Oversight, Transactions } from "../features/money";
-import { Catalog } from "../features/catalog/Catalog";
+import { Catalog } from "../features/catalog";
 import { Accounting } from "../features/accounting";
 import { CoachesOverview, History, Pay } from "../features/coaches";
 import { Clients } from "../features/clients";

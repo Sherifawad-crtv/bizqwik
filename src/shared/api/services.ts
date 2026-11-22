@@ -1,6 +1,6 @@
 import type { ClassSeries, ClientWithPackage, GroupPlan, GroupPlanType, PayMethod, RevenueReport } from "../types";
 import { callFn } from "./core";
-import type { SeriesInput, PlanTypeInput, SalePartner, NewClientFields } from "./inputs";
+import type { SeriesInput, SalePartner, NewClientFields } from "./inputs";
 
 export const servicesApi = {
   // ===== Services: recurring classes, group plan catalog, plan sales, revenue =====
@@ -11,10 +11,6 @@ export const servicesApi = {
   endClassSeries: (id: string) => callFn<{ ok: true; keptBookedSessions: number }>("class-series/end", { method: "POST", body: { id } }),
 
   planTypes: () => callFn<{ planTypes: GroupPlanType[] }>("plan-types"),
-  createPlanType: (p: PlanTypeInput) => callFn<{ planType: GroupPlanType }>("plan-types", { method: "POST", body: { ...p } }),
-  updatePlanType: (id: string, p: PlanTypeInput & { active?: boolean }) =>
-    callFn<{ planType: GroupPlanType }>("plan-types/update", { method: "POST", body: { id, ...p } }),
-  deletePlanType: (id: string) => callFn<{ ok: true }>("plan-types/delete", { method: "POST", body: { id } }),
 
   // Front desk: sell a group plan to an existing member or a brand-new one.
   // `offer` is a catalog plan or a class series (that class's monthly).

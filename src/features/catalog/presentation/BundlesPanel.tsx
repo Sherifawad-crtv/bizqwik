@@ -1,38 +1,38 @@
-import { CategoryPill } from "../../shared/category";
-import { useFrozen, useMountedThroughExit } from "../../shared/useLatch";
-import { LocationField, LocationPill, atLocation, useCurrentLocation, useLocations } from "../../shared/locations";
-import { EmptyState } from "../../design-system/components/EmptyState";
+import { CategoryPill } from "../../../shared/category";
+import { useFrozen, useMountedThroughExit } from "../../../shared/useLatch";
+import { LocationField, LocationPill, useCurrentLocation, useLocations } from "../../../shared/locations";
+import { EmptyState } from "../../../design-system/components/EmptyState";
 import { useEffect, useState } from "react";
-import { useAsync } from "../../shared/api/useAsync";
-import { useLatch } from "../../shared/useLatch";
-import { api } from "../../shared/api/backend";
-import type { BundleType } from "../../shared/types";
-import { Segmented } from "../../design-system/components/Segmented";
-import { Button } from "../../design-system/components/Button";
-import { Sheet } from "../../design-system/components/Sheet";
-import { ConfirmSheet } from "../../design-system/components/ConfirmSheet";
-import { TextField } from "../../design-system/components/FormField";
-import { Spinner } from "../../design-system/components/Spinner";
-import { SheetSuccessIcon } from "../../design-system/components/SheetSuccessIcon";
-import { useSheetSuccess } from "../../design-system/components/useSheetSuccess";
-import { useAuth } from "../../shared/auth";
-import { MotionList } from "../../design-system/components/MotionList";
-import { IconButton } from "../../design-system/components/IconButton";
+import { useLatch } from "../../../shared/useLatch";
+import type { BundleType } from "../../../shared/types";
+import { Segmented } from "../../../design-system/components/Segmented";
+import { Button } from "../../../design-system/components/Button";
+import { Sheet } from "../../../design-system/components/Sheet";
+import { ConfirmSheet } from "../../../design-system/components/ConfirmSheet";
+import { TextField } from "../../../design-system/components/FormField";
+import { Spinner } from "../../../design-system/components/Spinner";
+import { SheetSuccessIcon } from "../../../design-system/components/SheetSuccessIcon";
+import { useSheetSuccess } from "../../../design-system/components/useSheetSuccess";
+import { useAuth } from "../../../shared/auth";
+import { MotionList } from "../../../design-system/components/MotionList";
+import { IconButton } from "../../../design-system/components/IconButton";
+import { NO_EXPIRY_DAYS, bundlesOnSale, expiryText } from "../domain/catalog";
+import { useBundleActions, useBundleTypes, useCatalogHere } from "./hooks/useCatalog";
 import "./BundlesPanel.css";
 
 export function BundlesPanel() {
-  const { data: raw } = useAsync(() => api.bundleTypes(), []);
+  const bundleTypes = useBundleTypes();
   const locations = useLocations();
-  const { current: bundlesHere } = useCurrentLocation();
   // With 2+ locations: only the selected location's PT bundles.
-  const data = raw ? { bundleTypes: raw.bundleTypes.filter((b) => atLocation(b.locationId, locations.length > 1 ? (bundlesHere?.id ?? null) : null)) } : null;
+  const here = useCatalogHere();
+  const { remove } = useBundleActions();
   const [editing, setEditing] = useState<BundleType | "new" | null>(null);
   const [deleting, setDeleting] = useState<BundleType | null>(null);
   const shownDeleting = useLatch(deleting);
 
-  if (!data) return <Spinner />;
+  if (!bundleTypes) return <Spinner />;
   // Packages taken off sale are gone from the list; people who hold one keep it.
-  const rows = data.bundleTypes.filter((b) => b.active !== false);
+  const rows = bundlesOnSale(bundleTypes, here);
 
   return (
     <div>
@@ -79,16 +79,13 @@ export function BundlesPanel() {
           confirmLabel="Delete bundle"
           danger
           onConfirm={async () => {
-            await api.deleteBundleType(shownDeleting.id);
+            await remove(shownDeleting.id);
           }}
         />
       )}
     </div>
   );
 }
-
-// A PT bundle with no stated validity has no expiry: stored as ten years.
-export const NO_EXPIRY_DAYS = 3650;
 
 export function BundleSheet({ open, bundleType: bundleTypeProp, onClose }: { open: boolean; bundleType: BundleType | null; onClose: () => void }) {
   const mounted = useMountedThroughExit(open);
@@ -103,8 +100,7 @@ export function BundleSheet({ open, bundleType: bundleTypeProp, onClose }: { ope
   const bundleSolo = bundleMode === "solo";
   const locations = useLocations();
   const { current } = useCurrentLocation();
-  const [error, setError] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
+  const { save: saveBundle, busy, error, setError } = useBundleActions();
   const { confirmed, iconIn, showSuccess } = useSheetSuccess(open, onClose, { quiet: true });
 
   useEffect(() => {
@@ -112,7 +108,7 @@ export function BundleSheet({ open, bundleType: bundleTypeProp, onClose }: { ope
       setName(bundleType?.name ?? "");
       setPrice(String(bundleType?.price ?? ""));
       setSessionsIncluded(String(bundleType?.sessionsIncluded ?? ""));
-      setExpiryDays(bundleType && bundleType.expiryDays < NO_EXPIRY_DAYS ? String(bundleType.expiryDays) : "");
+      setExpiryDays(expiryText(bundleType));
       setLocationId(bundleType ? (bundleType.locationId ?? null) : (current?.id ?? null));
       setOnSale(bundleType && bundleType.active === false ? "off" : "on");
       setError(null);
@@ -124,31 +120,9 @@ export function BundleSheet({ open, bundleType: bundleTypeProp, onClose }: { ope
   if (!mounted) return null;
 
   const save = async () => {
-    const priceNum = Number(price);
-    const sessionsNum = Number(sessionsIncluded);
     // Solo: leave the expiry blank when the package has none.
-    const noExpiry = bundleSolo && expiryDays.trim() === "";
-    const expiryNum = noExpiry ? NO_EXPIRY_DAYS : Number(expiryDays);
-    if (!name.trim() || !Number.isFinite(priceNum) || priceNum <= 0 || !Number.isInteger(sessionsNum) || sessionsNum <= 0 || !Number.isInteger(expiryNum) || expiryNum <= 0) {
-      setError(bundleSolo ? "Enter a name, a price and whole-number sessions (and whole-number days if it expires)." : "Enter a name, a price, whole-number sessions, and whole-number expiry days — all greater than 0.");
-      return;
-    }
-    if (locations.length > 0 && !locationId) {
-      setError("Choose the location it's for.");
-      return;
-    }
-    const loc = locations.length > 0 ? locationId : undefined;
-    setBusy(true);
-    setError(null);
-    try {
-      if (bundleType) await api.updateBundleType(bundleType.id, name.trim(), priceNum, sessionsNum, expiryNum, loc, onSale === "on");
-      else await api.createBundleType(name.trim(), priceNum, sessionsNum, expiryNum, loc);
-      showSuccess();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong.");
-    } finally {
-      setBusy(false);
-    }
+    const fields = { name, price, sessions: sessionsIncluded, expiryDays, locationId, onSale: onSale === "on" };
+    if (await saveBundle(bundleType, fields, { solo: bundleSolo, hasLocations: locations.length > 0 })) showSuccess();
   };
 
   return (

@@ -60,7 +60,6 @@ export const deskApi = {
     return { dropInPrice: r.dropInPrice ?? null, dropInPrices: r.dropInPrices ?? {}, dropInOptions: r.dropInOptions ?? {}, instapayQr: r.instapayQr ?? null, instapayAddress: r.instapayAddress ?? null };
   },
   // With `locationId`, sets that location's own drop-in price.
-  saveOrgSettings: (patch: { dropInPrice?: number | null; instapayQr?: string | null; instapayAddress?: string | null; locationId?: string; dropInOptions?: DropInOption[] }) => callFn<{ ok: true }>("org-settings", { method: "POST", body: patch }, SOLO_DESK),
   // Members who paid by InstaPay and uploaded the receipt, waiting for her to approve.
   paymentRequests: () => callFn<{ requests: PaymentRequest[] }>("payment-requests"),
   approvePayment: (id: string) => callFn<{ ok: true }>(`payment-requests/${id}/approve`, { method: "POST" }),

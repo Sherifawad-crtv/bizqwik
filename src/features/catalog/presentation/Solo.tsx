@@ -1,15 +1,14 @@
 import { useState } from "react";
-import { useAsync } from "../../shared/api/useAsync";
-import { api } from "../../shared/api/backend";
-import { fmt } from "../../shared/format";
-import { useCurrentLocation } from "../../shared/locations";
-import { Button } from "../../design-system/components/Button";
-import { Icon } from "../../design-system/components/Icon";
-import { Sheet } from "../../design-system/components/Sheet";
-import { TextField } from "../../design-system/components/FormField";
-import { canvasToDataUrl } from "../../shared/image";
-import { useCatalogHere } from "./helpers";
-import { IconButton } from "../../design-system/components/IconButton";
+import { fmt } from "../../../shared/format";
+import { useCurrentLocation } from "../../../shared/locations";
+import { Button } from "../../../design-system/components/Button";
+import { Icon } from "../../../design-system/components/Icon";
+import { Sheet } from "../../../design-system/components/Sheet";
+import { TextField } from "../../../design-system/components/FormField";
+import { canvasToDataUrl } from "../../../shared/image";
+import { IconButton } from "../../../design-system/components/IconButton";
+import { dropInDraft } from "../domain/catalog";
+import { useCatalogHere, useLocationActions, useLocationList, useOrgSettings, useSoloSettingsActions } from "./hooks/useCatalog";
 import "./Solo.css";
 
 /** Resize a picked image to at most 700px and return it as a WebP data URL. */
@@ -33,29 +32,22 @@ function readQr(file: File): Promise<string> {
 
 /** The solo owner's one-off drop-in price and her InstaPay QR. */
 export function SoloOffer() {
-  const settings = useAsync(() => api.orgSettings(), []);
+  const settings = useOrgSettings();
   const catalogHere = useCatalogHere();
+  const actions = useSoloSettingsActions(catalogHere);
+  const { busy, error, setError } = actions;
   const { current: catalogCurrent } = useCurrentLocation();
   const [editing, setEditing] = useState(false);
   const [price, setPrice] = useState("");
   // With locations: the list of drop-ins (e.g. Kids / Adults) being edited.
   const [rows, setRows] = useState<{ label: string; price: string }[]>([]);
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [address, setAddress] = useState<string | null>(null);
   if (!settings.data) return null;
   const { instapayQr, instapayAddress } = settings.data;
   const saveAddress = async () => {
-    setBusy(true);
-    setError(null);
-    try {
-      await api.saveOrgSettings({ instapayAddress: (address ?? "").trim() || null });
+    if (await actions.saveAddress(address ?? "")) {
       setAddress(null);
       settings.refetch();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Couldn't save.");
-    } finally {
-      setBusy(false);
     }
   };
   // With locations, each has its own drop-in price.
@@ -63,41 +55,14 @@ export function SoloOffer() {
   const dropInList = catalogHere ? (settings.data.dropInOptions[catalogHere] ?? []) : [];
 
   const saveList = async () => {
-    const clean = rows.map((r) => ({ label: r.label.trim(), price: Number(r.price) }));
-    if (clean.some((r) => !r.label || r.price < 0 || !Number.isFinite(r.price))) return setError("Each drop-in needs a name and a price.");
-    setBusy(true);
-    setError(null);
-    try {
-      await api.saveOrgSettings({ locationId: catalogHere!, dropInOptions: clean });
-      setEditing(false);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Couldn't save.");
-    } finally {
-      setBusy(false);
-    }
+    if (await actions.saveDropIns(rows)) setEditing(false);
   };
   const savePrice = async () => {
-    const n = Number(price);
-    if (price.trim() === "" || !Number.isFinite(n) || n < 0) return setError("Enter the drop-in price.");
-    setBusy(true);
-    setError(null);
-    try {
-      await api.saveOrgSettings(catalogHere ? { dropInPrice: n, locationId: catalogHere } : { dropInPrice: n });
-      setEditing(false);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Couldn't save.");
-    } finally {
-      setBusy(false);
-    }
+    if (await actions.saveDropInPrice(price)) setEditing(false);
   };
   const pickQr = async (file: File | undefined) => {
     if (!file) return;
-    setError(null);
-    try {
-      await api.saveOrgSettings({ instapayQr: await readQr(file) });
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Couldn't save the QR.");
-    }
+    await actions.saveQr(() => readQr(file));
   };
 
   const card: React.CSSProperties = { background: "var(--color-bg-surface-primary-default)", border: "1px solid var(--color-border-primary-default)", borderRadius: "var(--radius-card)", padding: "16px 20px", marginBottom: 12 };
@@ -112,7 +77,7 @@ export function SoloOffer() {
             </div>
           </div>
           <Button className="bq-catalog-solo-offer-btn" size="md" variant="secondary" onClick={() => {
-            if (catalogHere) setRows(dropInList.length ? dropInList.map((o) => ({ label: o.label, price: String(o.price) })) : [{ label: "Kids", price: "" }, { label: "Adults", price: "" }]);
+            if (catalogHere) setRows(dropInDraft(dropInList));
             else setPrice(dropInPrice === null ? "" : String(dropInPrice));
             setError(null);
             setEditing(true);
@@ -189,28 +154,15 @@ export function SoloOffer() {
 
 /** The places she works. Every session, plan and PT bundle belongs to one. */
 export function LocationsCard() {
-  const { data } = useAsync(() => api.locations(), []);
+  const locationList = useLocationList();
   const [editing, setEditing] = useState<{ id: string | null; name: string } | null>(null);
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  if (!data) return null;
-  const list = data.locations ?? [];
+  const { save: saveLocation, busy, error, setError } = useLocationActions();
+  if (!locationList) return null;
+  const list = locationList;
 
   const save = async () => {
     if (!editing) return;
-    const name = editing.name.trim();
-    if (!name) return setError("Give the location a name.");
-    setBusy(true);
-    setError(null);
-    try {
-      if (editing.id) await api.renameLocation(editing.id, name);
-      else await api.createLocation(name);
-      setEditing(null);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Couldn't save.");
-    } finally {
-      setBusy(false);
-    }
+    if (await saveLocation(editing.id, editing.name)) setEditing(null);
   };
 
   return (

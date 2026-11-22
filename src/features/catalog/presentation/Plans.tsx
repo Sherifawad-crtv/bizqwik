@@ -1,42 +1,42 @@
-import { useFrozen, useMountedThroughExit } from "../../shared/useLatch";
+import { useFrozen, useMountedThroughExit } from "../../../shared/useLatch";
 import { useEffect, useState } from "react";
-import { useAsync } from "../../shared/api/useAsync";
-import { useLatch } from "../../shared/useLatch";
-import { useSheetSuccess } from "../../design-system/components/useSheetSuccess";
-import { api } from "../../shared/api/backend";
-import { fmt } from "../../shared/format";
-import type { GroupPlanType, GroupPlanTypeKind } from "../../shared/types";
-import { CategoryPill } from "../../shared/category";
-import { LocationField, LocationPill, atLocation, useCurrentLocation, useLocations } from "../../shared/locations";
-import { Segmented } from "../../design-system/components/Segmented";
-import { Button } from "../../design-system/components/Button";
-import { Sheet } from "../../design-system/components/Sheet";
-import { ConfirmSheet } from "../../design-system/components/ConfirmSheet";
-import { TextField, SelectField } from "../../design-system/components/FormField";
-import { Spinner } from "../../design-system/components/Spinner";
-import { SheetSuccessIcon } from "../../design-system/components/SheetSuccessIcon";
-import { useAuth } from "../../shared/auth";
+import { useLatch } from "../../../shared/useLatch";
+import { useSheetSuccess } from "../../../design-system/components/useSheetSuccess";
+import { fmt } from "../../../shared/format";
+import type { GroupPlanType, GroupPlanTypeKind } from "../../../shared/types";
+import { CategoryPill } from "../../../shared/category";
+import { LocationField, LocationPill, useCurrentLocation, useLocations } from "../../../shared/locations";
+import { Segmented } from "../../../design-system/components/Segmented";
+import { Button } from "../../../design-system/components/Button";
+import { Sheet } from "../../../design-system/components/Sheet";
+import { ConfirmSheet } from "../../../design-system/components/ConfirmSheet";
+import { TextField, SelectField } from "../../../design-system/components/FormField";
+import { Spinner } from "../../../design-system/components/Spinner";
+import { SheetSuccessIcon } from "../../../design-system/components/SheetSuccessIcon";
+import { useAuth } from "../../../shared/auth";
 import { EmptyRow } from "./shared";
-import { SectionHeader } from "../../design-system/components/SectionHeader";
-import { useCatalogHere } from "./helpers";
-import { MotionList } from "../../design-system/components/MotionList";
-import { Tag } from "../../design-system/components/Tag";
-import { IconButton } from "../../design-system/components/IconButton";
+import { SectionHeader } from "../../../design-system/components/SectionHeader";
+import { MotionList } from "../../../design-system/components/MotionList";
+import { Tag } from "../../../design-system/components/Tag";
+import { IconButton } from "../../../design-system/components/IconButton";
+import { plansOnSale, sharedSplit } from "../domain/catalog";
+import { useCatalogHere, usePlanActions, usePlanTypes } from "./hooks/useCatalog";
 import "./Plans.css";
 
 export function PlansPanel({ solo }: { solo?: boolean }) {
-  const { data } = useAsync(() => api.planTypes(), []);
+  const planTypes = usePlanTypes();
+  const { remove } = usePlanActions();
   const locations = useLocations();
   const catalogHere = useCatalogHere();
   const [editing, setEditing] = useState<{ kind: GroupPlanTypeKind; planType: GroupPlanType | null } | null>(null);
   const [deleting, setDeleting] = useState<GroupPlanType | null>(null);
   const shownDeleting = useLatch(deleting);
 
-  if (!data) return <Spinner />;
+  if (!planTypes) return <Spinner />;
 
   const section = (kind: GroupPlanTypeKind, title: string, empty: string) => {
     // Plans taken off sale are gone from the list; people who hold one keep it.
-    const rows = data.planTypes.filter((p) => p.kind === kind && p.active && atLocation(p.locationId, catalogHere));
+    const rows = plansOnSale(planTypes, kind, catalogHere);
     return (
       <div className="bq-mb-6">
         <SectionHeader
@@ -97,7 +97,7 @@ export function PlansPanel({ solo }: { solo?: boolean }) {
           confirmLabel="Delete plan"
           danger
           onConfirm={async () => {
-            await api.deletePlanType(shownDeleting.id);
+            await remove(shownDeleting.id);
           }}
         />
       )}
@@ -129,8 +129,7 @@ export function PlanTypeSheet({ open, kind: kindProp, planType: planTypeProp, on
   const [locationId, setLocationId] = useState<string | null>(null);
   const locations = useLocations();
   const { current } = useCurrentLocation();
-  const [error, setError] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
+  const { save: savePlan, busy, error, setError } = usePlanActions();
   const { confirmed, iconIn, showSuccess } = useSheetSuccess(open, onClose, { quiet: true });
   const isBundle = kind === "bundle";
 
@@ -153,31 +152,12 @@ export function PlanTypeSheet({ open, kind: kindProp, planType: planTypeProp, on
   if (!mounted) return null;
 
   const save = async () => {
-    const priceNum = Number(price);
-    const creditsNum = Number(credits);
-    const invitesNum = invitations === "" ? 0 : Number(invitations);
-    if (!name.trim()) return setError("Give it a name.");
-    if (price === "" || !Number.isFinite(priceNum) || priceNum < 0) return setError("Enter a price.");
-    if (isBundle && (!Number.isInteger(creditsNum) || creditsNum < 1)) return setError("Enter how many classes the bundle includes.");
-    if (!Number.isInteger(invitesNum) || invitesNum < 0) return setError("Guest passes must be a whole number, 0 or more.");
-    if (locations.length > 0 && !locationId) return setError("Choose the location it's for.");
-    const seats = isBundle ? Number(shared) : 1;
-    if (seats > 1 && creditsNum % seats !== 0) return setError(`${creditsNum} classes can't be split evenly between ${seats} people.`);
-    const input = { kind, name: name.trim(), price: priceNum, durationMonths: Number(months), credits: isBundle ? creditsNum : null, invitationsAllowance: invitesNum, sharedSeats: seats > 1 ? seats : null, ...(locations.length > 0 ? { locationId } : {}) };
-    setBusy(true);
-    setError(null);
-    try {
-      if (planType) await api.updatePlanType(planType.id, { ...input, active: onSale === "on" });
-      else await api.createPlanType(input);
-      showSuccess();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong.");
-    } finally {
-      setBusy(false);
-    }
+    const form = { kind, name, price, months, credits, invitations, shared, locationId };
+    if (await savePlan(planType, form, locations.length > 0, onSale === "on")) showSuccess();
   };
 
   const noun = isBundle ? "bundle" : "membership";
+  const split = sharedSplit(credits, price, shared);
   return (
     <Sheet open={open} onClose={busy ? () => {} : onClose}>
       {confirmed ? (
@@ -196,7 +176,7 @@ export function PlanTypeSheet({ open, kind: kindProp, planType: planTypeProp, on
             )}
             {isBundle && Number(shared) > 1 && (
               <div className="bq-catalog-plans-plan-type-sheet-meta">
-                {Number(credits) > 0 && Number(credits) % Number(shared) === 0 ? `Each person gets ${Number(credits) / Number(shared)} classes and ${fmt(Number(price) / Number(shared))} EGP of the price, valid for the months below.` : "Classes and price are split evenly. Classes must divide evenly."} Sold at the desk to everyone at once.
+                {split ? `Each person gets ${split.classes} classes and ${fmt(split.price)} EGP of the price, valid for the months below.` : "Classes and price are split evenly. Classes must divide evenly."} Sold at the desk to everyone at once.
               </div>
             )}
             <SelectField label={isBundle ? "VALID FOR" : "LENGTH"} value={months} options={sheetSolo ? SOLO_MONTH_OPTIONS : MONTH_OPTIONS} onChange={setMonths} />

@@ -1,32 +1,31 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAsync } from "../../shared/api/useAsync";
-import { api } from "../../shared/api/backend";
-import { egp } from "../../shared/format";
-import { timeLabel, weekdaysLabel } from "../../shared/classTime";
-import type { ClassSeries, Location } from "../../shared/types";
-import { LocationPill, atLocation, useLocations } from "../../shared/locations";
-import { Button } from "../../design-system/components/Button";
-import { Icon } from "../../design-system/components/Icon";
-import { Spinner } from "../../design-system/components/Spinner";
+import { egp } from "../../../shared/format";
+import { timeLabel, weekdaysLabel } from "../../../shared/classTime";
+import type { ClassSeries, Location } from "../../../shared/types";
+import { LocationPill, useLocations } from "../../../shared/locations";
+import { Button } from "../../../design-system/components/Button";
+import { Icon } from "../../../design-system/components/Icon";
+import { Spinner } from "../../../design-system/components/Spinner";
 import { EmptyRow } from "./shared";
-import { SectionHeader } from "../../design-system/components/SectionHeader";
-import { useCatalogHere } from "./helpers";
-import { MotionList } from "../../design-system/components/MotionList";
-import { IconButton } from "../../design-system/components/IconButton";
-import { SeriesSheet } from "../../shared/components/SeriesSheet";
+import { SectionHeader } from "../../../design-system/components/SectionHeader";
+import { MotionList } from "../../../design-system/components/MotionList";
+import { IconButton } from "../../../design-system/components/IconButton";
+import { SeriesSheet } from "../../../shared/components/SeriesSheet";
+import { activeClasses, endedClasses } from "../domain/catalog";
+import { useCatalogHere, useClassSeries } from "./hooks/useCatalog";
 import "./Classes.css";
 
 export function ClassesPanel({ solo }: { solo?: boolean }) {
   const navigate = useNavigate();
-  const { data } = useAsync(() => api.classSeries(), []);
+  const series = useClassSeries();
   const locations = useLocations();
   const catalogHere = useCatalogHere();
   const [editing, setEditing] = useState<ClassSeries | "new" | null>(null);
 
-  if (!data) return <Spinner />;
-  const active = data.series.filter((s) => s.status === "active" && atLocation(s.locationId, catalogHere));
-  const ended = data.series.filter((s) => s.status === "ended");
+  if (!series) return <Spinner />;
+  const active = activeClasses(series, catalogHere);
+  const ended = endedClasses(series);
 
   return (
     <div>
