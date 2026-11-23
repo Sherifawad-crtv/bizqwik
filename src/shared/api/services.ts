@@ -1,6 +1,6 @@
-import type { ClassSeries, ClientWithPackage, GroupPlan, GroupPlanType, PayMethod, RevenueReport } from "../types";
+import type { ClassSeries, GroupPlanType, RevenueReport } from "../types";
 import { callFn } from "./core";
-import type { SeriesInput, SalePartner, NewClientFields } from "./inputs";
+import type { SeriesInput } from "./inputs";
 
 export const servicesApi = {
   // ===== Services: recurring classes, group plan catalog, plan sales, revenue =====
@@ -12,12 +12,6 @@ export const servicesApi = {
 
   planTypes: () => callFn<{ planTypes: GroupPlanType[] }>("plan-types"),
 
-  // Front desk: sell a group plan to an existing member or a brand-new one.
-  // `offer` is a catalog plan or a class series (that class's monthly).
-  // `partners` are the other clients of a shared bundle (existing clients).
-  sellGroupPlan: (target: { clientId: string } | NewClientFields, offer: { planTypeId: string } | { seriesId: string }, payMethod: PayMethod, partners?: SalePartner[]) =>
-    callFn<{ client: ClientWithPackage; plan: GroupPlan; sharedWith?: { id: string; name: string }[] }>("group-plans/sell", { method: "POST", body: { ...target, ...offer, payMethod, ...(partners?.length ? { partners } : {}) } }),
-  clientPlans: (clientId: string) => callFn<{ activePlan: GroupPlan | null; plans: GroupPlan[] }>(`group-plans/client/${clientId}`),
 
   // `history` also returns the month-by-month series for that many months in the same call.
   revenue: (months = 6, history?: number) => callFn<RevenueReport>(`revenue?months=${months}${history ? `&history=${history}` : ""}`),

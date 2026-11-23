@@ -6,7 +6,7 @@ import { isChunkLoadError } from "../src/app/chunkReload";
 // longer exists, and the server answers with the home page (text/html). The app
 // should reload once and carry on — and never loop.
 
-const WELCOME_FILE = "**/features/auth/Welcome.tsx*";
+const WELCOME_FILE = "**/features/auth/presentation/Welcome.tsx*";
 
 async function freshVisitor(page: Page) {
   await mockBackend(page, "dept_head", {}, false);

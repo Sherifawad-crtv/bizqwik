@@ -7,21 +7,16 @@ import { FloatingActionsProvider, BackActionProvider } from "../shared/screen/fl
 import { RequireAuth, RequireRole, RequireBizqwikTeam, RequireDesk, RequireTeam } from "./guards";
 import { Spinner } from "../design-system/components/Spinner";
 import { Shell } from "./Shell";
-import { Login } from "../features/auth/Login";
-import { Signup } from "../features/auth/Signup";
+import { Login, Signup } from "../features/auth";
 import { Home } from "./Home";
-import { Account } from "../features/account/Account";
+import { Account } from "../features/account";
 import { Activity, Money, Oversight, Transactions } from "../features/money";
 import { Catalog } from "../features/catalog";
 import { Accounting } from "../features/accounting";
 import { CoachesOverview, History, Pay } from "../features/coaches";
+import { Bookings, CheckIn, DropIn, Invitations, Members } from "../features/frontdesk";
 import { Clients } from "../features/clients";
-import { Members } from "../features/frontdesk/Members";
-import { CheckIn } from "../features/frontdesk/CheckIn";
-import { DropIn } from "../features/frontdesk/DropIn";
-import { Bookings } from "../features/frontdesk/Bookings";
-import { Invitations } from "../features/frontdesk/Invitations";
-import { ClassesManage } from "../features/classes/ClassesManage";
+import { ClassesManage } from "../features/classes";
 import { isChunkLoadError, reloadForUpdate } from "./chunkReload";
 
 import { LaunchGate } from "./Splash";
@@ -40,15 +35,15 @@ function lazyNamed<T extends Record<string, unknown>>(load: () => Promise<T>, na
     }
   });
 }
-const Welcome = lazyNamed(() => import("../features/auth/Welcome"), "Welcome");
-const ForgotPassword = lazyNamed(() => import("../features/auth/ForgotPassword"), "ForgotPassword");
-const ResetPassword = lazyNamed(() => import("../features/auth/ResetPassword"), "ResetPassword");
+const Welcome = lazyNamed(() => import("../features/auth/routes/Welcome"), "Welcome");
+const ForgotPassword = lazyNamed(() => import("../features/auth/routes/ForgotPassword"), "ForgotPassword");
+const ResetPassword = lazyNamed(() => import("../features/auth/routes/ResetPassword"), "ResetPassword");
 const CoachDetail = lazyNamed(() => import("../features/coaches/routes/CoachDetail"), "CoachDetail");
 const Manage = lazyNamed(() => import("../features/manage/routes/Manage"), "Manage");
 const PayeeDetail = lazyNamed(() => import("../features/coaches/routes/PayeeDetail"), "PayeeDetail");
-const DeskClasses = lazyNamed(() => import("../features/frontdesk/DeskClasses"), "DeskClasses");
-const AccountProfile = lazyNamed(() => import("../features/account/AccountProfile"), "AccountProfile");
-const AccountPassword = lazyNamed(() => import("../features/account/AccountPassword"), "AccountPassword");
+const DeskClasses = lazyNamed(() => import("../features/frontdesk/routes/DeskClasses"), "DeskClasses");
+const AccountProfile = lazyNamed(() => import("../features/account/routes/AccountProfile"), "AccountProfile");
+const AccountPassword = lazyNamed(() => import("../features/account/routes/AccountPassword"), "AccountPassword");
 const OpsShell = lazyNamed(() => import("../features/ops/routes/OpsShell"), "OpsShell");
 const OpsOverview = lazyNamed(() => import("../features/ops/routes/Overview"), "Overview");
 const OpsOrgDetail = lazyNamed(() => import("../features/ops/routes/OrgDetail"), "OrgDetail");
@@ -69,8 +64,8 @@ function WarmScreens() {
     const run = () => {
       for (const load of [
         () => import("../features/coaches/routes/CoachDetail"), () => import("../features/coaches/routes/PayeeDetail"), () => import("../features/manage/routes/Manage"),
-        () => import("../features/frontdesk/DeskClasses"),
-        () => import("../features/account/AccountProfile"), () => import("../features/account/AccountPassword"),
+        () => import("../features/frontdesk/routes/DeskClasses"),
+        () => import("../features/account/routes/AccountProfile"), () => import("../features/account/routes/AccountPassword"),
       ]) load().catch(() => {});
     };
     if (w.requestIdleCallback) w.requestIdleCallback(run, { timeout: 6000 });

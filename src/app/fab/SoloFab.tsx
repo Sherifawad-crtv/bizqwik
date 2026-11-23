@@ -2,12 +2,9 @@ import { useRef, useState } from "react";
 import { Icon } from "../../design-system/components/Icon";
 import { Sheet } from "../../design-system/components/Sheet";
 import { Button } from "../../design-system/components/Button";
-import { NewClientModal } from "../../features/frontdesk/NewClientModal";
-import { SoloDropIn } from "../../features/frontdesk/SoloDropIn";
-import { CheckInList } from "../../features/frontdesk/CheckInList";
-import { SheetHeading } from "../../features/frontdesk/shared";
 import { FabButton } from "./FabButton";
 import { ScanFlow } from "../../shared/components/ScanFlow";
+import { CheckInList, NewClientModal, SheetHeading, SoloDropIn } from "../../features/frontdesk";
 import "./SoloFab.css";
 
 type SoloAction = "new" | "dropin" | "checkin" | "scan";

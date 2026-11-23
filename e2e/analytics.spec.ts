@@ -43,8 +43,8 @@ test("analytics: a refused action is recorded by endpoint and reason, without th
   await expect(page.getByTestId("splash")).toHaveCount(0);
   // Fire the same call the check-in screen makes.
   await page.evaluate(async () => {
-    const mod = await import("/src/shared/api/backend.ts");
-    await mod.api.checkIn("11111111-2222-3333-4444-555555555555", "manual").catch(() => {});
+    const mod = await import("/src/features/frontdesk/data/frontdeskRepository.ts");
+    await mod.frontdeskRepository.checkIn("11111111-2222-3333-4444-555555555555", "manual").catch(() => {});
   });
   const ev = await events(page);
   const err = ev.find((e) => e.name === "api_error" && e.props.path === "check-ins");
