@@ -10,7 +10,6 @@ import { servicesApi } from "./services";
 import { classesApi } from "./classes";
 import { rosterApi } from "./roster";
 import { activityApi } from "./activity";
-import { opsApi } from "./ops";
 export { ApiError } from "./core";
 export type { DropInOption, SeriesInput, PlanTypeInput, SalePartner, NewClientFields } from "./inputs";
 
@@ -42,7 +41,6 @@ export const api = {
   ...classesApi,
   ...rosterApi,
   ...activityApi,
-  ...opsApi,
 };
 
 function monthKey(d: Date): string {

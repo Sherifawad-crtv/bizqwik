@@ -1,15 +1,15 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import QRCode from "qrcode";
-import { api } from "../../shared/api/backend";
-import { useAsync } from "../../shared/api/useAsync";
-import { Spinner } from "../../design-system/components/Spinner";
-import { Icon } from "../../design-system/components/Icon";
-import { Button } from "../../design-system/components/Button";
-import { ErrorBanner } from "../../design-system/components/ErrorBanner";
-import { Card } from "../../design-system/components/Card";
-import { SectionHeader } from "../../design-system/components/SectionHeader";
-import { Segmented } from "../../design-system/components/Segmented";
+import { Spinner } from "../../../design-system/components/Spinner";
+import { Icon } from "../../../design-system/components/Icon";
+import { Button } from "../../../design-system/components/Button";
+import { ErrorBanner } from "../../../design-system/components/ErrorBanner";
+import { Card } from "../../../design-system/components/Card";
+import { SectionHeader } from "../../../design-system/components/SectionHeader";
+import { Segmented } from "../../../design-system/components/Segmented";
+import { qrToken } from "../domain/ops";
+import { useOrg } from "./hooks/useOps";
 import "./OrgQr.css";
 
 // The lifetime check-in QR. It encodes the org's check-in token — its slug,
@@ -21,14 +21,12 @@ export function OrgQr() {
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
   const forCoaches = params.get("for") === "coaches";
-  const detail = useAsync(() => api.ops.org(id), [id]);
+  const detail = useOrg(id);
   const [pngUrl, setPngUrl] = useState<string | null>(null);
   const [qrError, setQrError] = useState<string | null>(null);
 
   const org = detail.data?.org ?? null;
-  // Members' check-in code = the org slug; the coaches' room code is a
-  // separate secret token so members can't log staff attendance (or vice versa).
-  const token = (forCoaches ? org?.coachQrToken : org?.slug) ?? "";
+  const token = qrToken(org, forCoaches);
 
   useEffect(() => {
     if (!token) return;

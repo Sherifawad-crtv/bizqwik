@@ -1,6 +1,6 @@
-import type { OrgStatus } from "../../shared/types";
-import { ORG_STATUS_LABELS } from "../../shared/types";
-import { StatusBadge, type Tone } from "../../design-system/components/Tag";
+import type { OrgStatus } from "../../../shared/types";
+import { ORG_STATUS_LABELS } from "../../../shared/types";
+import { StatusBadge, type Tone } from "../../../design-system/components/Tag";
 
 
 

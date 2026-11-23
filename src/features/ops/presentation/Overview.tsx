@@ -1,17 +1,16 @@
-import { cx } from "../../design-system/cx";
-import { EmptyState } from "../../design-system/components/EmptyState";
+import { cx } from "../../../design-system/cx";
+import { EmptyState } from "../../../design-system/components/EmptyState";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { api } from "../../shared/api/backend";
-import { useAsync } from "../../shared/api/useAsync";
-import { egp } from "../../shared/format";
-import { Spinner } from "../../design-system/components/Spinner";
-import { Button } from "../../design-system/components/Button";
-import { Icon } from "../../design-system/components/Icon";
+import { egp } from "../../../shared/format";
+import { Spinner } from "../../../design-system/components/Spinner";
+import { Button } from "../../../design-system/components/Button";
+import { Icon } from "../../../design-system/components/Icon";
 import { StatusPill } from "./shared";
-import { Card } from "../../design-system/components/Card";
-import { SectionHeader } from "../../design-system/components/SectionHeader";
+import { Card } from "../../../design-system/components/Card";
+import { SectionHeader } from "../../../design-system/components/SectionHeader";
 import { CreateOrgSheet } from "./CreateOrgSheet";
+import { useOpsSummary, useOrgs, useSaasPlans } from "./hooks/useOps";
 import "./Overview.css";
 
 function StatTile({ label, value }: { label: string; value: string }) {
@@ -26,9 +25,9 @@ function StatTile({ label, value }: { label: string; value: string }) {
 export function Overview() {
   const navigate = useNavigate();
   const [sheetOpen, setSheetOpen] = useState(false);
-  const summary = useAsync(() => api.ops.summary(), []);
-  const orgsRes = useAsync(() => api.ops.orgs(), []);
-  const plansRes = useAsync(() => api.ops.plans(), []);
+  const summary = useOpsSummary();
+  const orgsRes = useOrgs();
+  const plansRes = useSaasPlans();
 
   if (summary.loading || orgsRes.loading) return <Spinner />;
 

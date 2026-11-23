@@ -1,20 +1,19 @@
-import { EmptyState } from "../../design-system/components/EmptyState";
+import { EmptyState } from "../../../design-system/components/EmptyState";
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { api } from "../../shared/api/backend";
-import { useAsync } from "../../shared/api/useAsync";
-import { egp, formatDateTime } from "../../shared/format";
-import { ROLE_LABELS, type OrgStatus } from "../../shared/types";
-import { Spinner } from "../../design-system/components/Spinner";
-import { Icon } from "../../design-system/components/Icon";
-import { Segmented } from "../../design-system/components/Segmented";
-import { SelectField } from "../../design-system/components/FormField";
-import { Button } from "../../design-system/components/Button";
-import { Avatar } from "../../design-system/components/Avatar";
-import { ErrorBanner } from "../../design-system/components/ErrorBanner";
-import { Card } from "../../design-system/components/Card";
-import { SectionHeader } from "../../design-system/components/SectionHeader";
-import { limitLabel } from "./format";
+import { egp, formatDateTime } from "../../../shared/format";
+import { ROLE_LABELS, type OrgStatus } from "../../../shared/types";
+import { Spinner } from "../../../design-system/components/Spinner";
+import { Icon } from "../../../design-system/components/Icon";
+import { Segmented } from "../../../design-system/components/Segmented";
+import { SelectField } from "../../../design-system/components/FormField";
+import { Button } from "../../../design-system/components/Button";
+import { Avatar } from "../../../design-system/components/Avatar";
+import { ErrorBanner } from "../../../design-system/components/ErrorBanner";
+import { Card } from "../../../design-system/components/Card";
+import { SectionHeader } from "../../../design-system/components/SectionHeader";
+import { limitLabel } from "../domain/ops";
+import { useOrg, useOrgActions, useSaasPlans } from "./hooks/useOps";
 import { DeleteOrgSheet } from "./orgdetail/DeleteOrgSheet";
 import { OrgAppConfig, UsageRow } from "./orgdetail/AppConfig";
 import "./OrgDetail.css";
@@ -28,10 +27,10 @@ const STATUS_OPTIONS: { value: OrgStatus; label: string }[] = [
 export function OrgDetail() {
   const { id = "" } = useParams();
   const navigate = useNavigate();
-  const detail = useAsync(() => api.ops.org(id), [id]);
-  const plansRes = useAsync(() => api.ops.plans(), []);
-  const [error, setError] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
+  const detail = useOrg(id);
+  const plansRes = useSaasPlans();
+  const actions = useOrgActions(id, detail.data?.org ?? null);
+  const { busy, error } = actions;
   const [deleting, setDeleting] = useState(false);
 
   if (detail.loading) return <Spinner />;
@@ -41,44 +40,13 @@ export function OrgDetail() {
   const plans = plansRes.data?.plans ?? [];
 
   const setStatus = async (status: OrgStatus) => {
-    if (status === org.status) return;
-    setError(null);
-    setBusy(true);
-    try {
-      await api.ops.setOrgStatus(id, status);
-      detail.refetch();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Couldn't update status.");
-    } finally {
-      setBusy(false);
-    }
+    if (await actions.setStatus(status)) detail.refetch();
   };
-
   const setMode = async (mode: "solo" | "team") => {
-    if (mode === (org.mode ?? "team")) return;
-    setError(null);
-    setBusy(true);
-    try {
-      await api.ops.setOrgMode(id, mode);
-      detail.refetch();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Couldn't update the app type.");
-    } finally {
-      setBusy(false);
-    }
+    if (await actions.setMode(mode)) detail.refetch();
   };
-
   const setPlan = async (planId: string) => {
-    setError(null);
-    setBusy(true);
-    try {
-      await api.ops.setOrgPlan(id, planId || null);
-      detail.refetch();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Couldn't update plan.");
-    } finally {
-      setBusy(false);
-    }
+    if (await actions.setPlan(planId)) detail.refetch();
   };
 
   const planOptions = [{ value: "", label: "No plan" }, ...plans.map((p) => ({ value: p.id, label: p.name }))];

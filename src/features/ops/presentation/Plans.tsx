@@ -1,19 +1,18 @@
-import { EmptyState } from "../../design-system/components/EmptyState";
+import { EmptyState } from "../../../design-system/components/EmptyState";
 import { useState } from "react";
-import { api } from "../../shared/api/backend";
-import { useAsync } from "../../shared/api/useAsync";
-import { egp } from "../../shared/format";
-import type { PlanType } from "../../shared/types";
-import { Spinner } from "../../design-system/components/Spinner";
-import { Button } from "../../design-system/components/Button";
-import { Icon } from "../../design-system/components/Icon";
-import { Sheet } from "../../design-system/components/Sheet";
-import { TextField } from "../../design-system/components/FormField";
-import { ConfirmSheet } from "../../design-system/components/ConfirmSheet";
-import { ErrorBanner } from "../../design-system/components/ErrorBanner";
-import { Card } from "../../design-system/components/Card";
-import { SectionHeader } from "../../design-system/components/SectionHeader";
-import { limitLabel } from "./format";
+import { egp } from "../../../shared/format";
+import type { PlanType } from "../../../shared/types";
+import { Spinner } from "../../../design-system/components/Spinner";
+import { Button } from "../../../design-system/components/Button";
+import { Icon } from "../../../design-system/components/Icon";
+import { Sheet } from "../../../design-system/components/Sheet";
+import { TextField } from "../../../design-system/components/FormField";
+import { ConfirmSheet } from "../../../design-system/components/ConfirmSheet";
+import { ErrorBanner } from "../../../design-system/components/ErrorBanner";
+import { Card } from "../../../design-system/components/Card";
+import { SectionHeader } from "../../../design-system/components/SectionHeader";
+import { limitLabel } from "../domain/ops";
+import { useSaasPlanActions, useSaasPlans } from "./hooks/useOps";
 import "./Plans.css";
 
 function PlanSheet({ open, onClose, plan, onDone }: { open: boolean; onClose: () => void; plan: PlanType | null; onDone: () => void }) {
@@ -21,8 +20,7 @@ function PlanSheet({ open, onClose, plan, onDone }: { open: boolean; onClose: ()
   const [price, setPrice] = useState("");
   const [team, setTeam] = useState("");
   const [client, setClient] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
+  const { save, busy, error, setError } = useSaasPlanActions();
   const [seeded, setSeeded] = useState<string | null>(null);
 
   // Seed the fields from the plan being edited, once per open.
@@ -42,24 +40,9 @@ function PlanSheet({ open, onClose, plan, onDone }: { open: boolean; onClose: ()
   };
 
   const submit = async () => {
-    setError(null);
-    const priceNum = Number(price);
-    if (!name.trim()) return setError("Name is required.");
-    if (!Number.isFinite(priceNum) || priceNum < 0) return setError("Price must be zero or more.");
-    const teamLimit = team.trim() === "" ? null : Number(team);
-    const clientLimit = client.trim() === "" ? null : Number(client);
-    if (teamLimit !== null && (!Number.isInteger(teamLimit) || teamLimit < 1)) return setError("Team limit must be a whole number of 1 or more, or blank for unlimited.");
-    if (clientLimit !== null && (!Number.isInteger(clientLimit) || clientLimit < 1)) return setError("Client limit must be a whole number of 1 or more, or blank for unlimited.");
-    setBusy(true);
-    try {
-      if (plan) await api.ops.updatePlan(plan.id, name.trim(), priceNum, teamLimit, clientLimit);
-      else await api.ops.createPlan(name.trim(), priceNum, teamLimit, clientLimit);
+    if (await save(plan, name, price, team, client)) {
       close();
       onDone();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong.");
-    } finally {
-      setBusy(false);
     }
   };
 
@@ -82,7 +65,8 @@ function PlanSheet({ open, onClose, plan, onDone }: { open: boolean; onClose: ()
 }
 
 export function Plans() {
-  const plansRes = useAsync(() => api.ops.plans(), []);
+  const plansRes = useSaasPlans();
+  const { remove } = useSaasPlanActions();
   const [editing, setEditing] = useState<PlanType | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [deleting, setDeleting] = useState<PlanType | null>(null);
@@ -143,7 +127,7 @@ export function Plans() {
         confirmLabel="Delete plan"
         danger
         onConfirm={async () => {
-          if (deleting) await api.ops.deletePlan(deleting.id);
+          if (deleting) await remove(deleting.id);
           plansRes.refetch();
         }}
       />

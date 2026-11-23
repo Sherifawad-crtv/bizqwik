@@ -1,16 +1,13 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Sheet } from "../../design-system/components/Sheet";
-import { Button } from "../../design-system/components/Button";
-import { TextField, SelectField } from "../../design-system/components/FormField";
-import { api } from "../../shared/api/backend";
-import type { PlanType } from "../../shared/types";
-import { ErrorBanner } from "../../design-system/components/ErrorBanner";
+import { Sheet } from "../../../design-system/components/Sheet";
+import { Button } from "../../../design-system/components/Button";
+import { TextField, SelectField } from "../../../design-system/components/FormField";
+import { slugify } from "../domain/ops";
+import { useCreateOrg } from "./hooks/useOps";
+import type { PlanType } from "../../../shared/types";
+import { ErrorBanner } from "../../../design-system/components/ErrorBanner";
 import "./CreateOrgSheet.css";
-
-function slugify(s: string): string {
-  return s.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
-}
 
 export function CreateOrgSheet({ open, onClose, plans, onCreated }: { open: boolean; onClose: () => void; plans: PlanType[]; onCreated: () => void }) {
   const navigate = useNavigate();
@@ -20,8 +17,7 @@ export function CreateOrgSheet({ open, onClose, plans, onCreated }: { open: bool
   const [headName, setHeadName] = useState("");
   const [headEmail, setHeadEmail] = useState("");
   const [planId, setPlanId] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
+  const { create, busy, error, setError } = useCreateOrg();
   const [created, setCreated] = useState<{ id: string; name: string; slug: string; deptHeadEmail: string; domain: { name: string; connected: boolean; reason: string | null } | null } | null>(null);
 
   const reset = () => {
@@ -43,22 +39,12 @@ export function CreateOrgSheet({ open, onClose, plans, onCreated }: { open: bool
   const effectiveSlug = slugTouched ? slug : slugify(name);
 
   const submit = async () => {
-    setError(null);
-    if (!name.trim()) return setError("Organization name is required.");
-    if (!effectiveSlug) return setError("A URL slug is required.");
-    if (!headEmail.trim()) return setError("A department-head email is required.");
-    setBusy(true);
-    try {
-      const res = await api.ops.createOrg(name.trim(), effectiveSlug, headName.trim(), headEmail.trim(), planId || null);
-      // Keep the sheet open on a success step so the operator can jump straight
-      // to the printable check-in QR; the list refreshes underneath.
-      onCreated();
-      setCreated({ id: res.org.id, name: res.org.name, slug: res.org.slug, deptHeadEmail: res.deptHeadEmail, domain: res.domain ?? null });
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong.");
-    } finally {
-      setBusy(false);
-    }
+    const res = await create(name, effectiveSlug, headName, headEmail, planId);
+    if (!res) return;
+    // Keep the sheet open on a success step so the operator can jump straight
+    // to the printable check-in QR; the list refreshes underneath.
+    onCreated();
+    setCreated({ id: res.org.id, name: res.org.name, slug: res.org.slug, deptHeadEmail: res.deptHeadEmail, domain: res.domain ?? null });
   };
 
   const planOptions = [{ value: "", label: "No plan (assign later)" }, ...plans.map((p) => ({ value: p.id, label: p.name }))];

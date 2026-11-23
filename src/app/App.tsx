@@ -49,12 +49,12 @@ const PayeeDetail = lazyNamed(() => import("../features/coaches/routes/PayeeDeta
 const DeskClasses = lazyNamed(() => import("../features/frontdesk/DeskClasses"), "DeskClasses");
 const AccountProfile = lazyNamed(() => import("../features/account/AccountProfile"), "AccountProfile");
 const AccountPassword = lazyNamed(() => import("../features/account/AccountPassword"), "AccountPassword");
-const OpsShell = lazyNamed(() => import("../features/ops/OpsShell"), "OpsShell");
-const OpsOverview = lazyNamed(() => import("../features/ops/Overview"), "Overview");
-const OpsOrgDetail = lazyNamed(() => import("../features/ops/OrgDetail"), "OrgDetail");
-const OpsOrgQr = lazyNamed(() => import("../features/ops/OrgQr"), "OrgQr");
-const OpsTeam = lazyNamed(() => import("../features/ops/Team"), "Team");
-const OpsPlans = lazyNamed(() => import("../features/ops/Plans"), "Plans");
+const OpsShell = lazyNamed(() => import("../features/ops/routes/OpsShell"), "OpsShell");
+const OpsOverview = lazyNamed(() => import("../features/ops/routes/Overview"), "Overview");
+const OpsOrgDetail = lazyNamed(() => import("../features/ops/routes/OrgDetail"), "OrgDetail");
+const OpsOrgQr = lazyNamed(() => import("../features/ops/routes/OrgQr"), "OrgQr");
+const OpsTeam = lazyNamed(() => import("../features/ops/routes/Team"), "Team");
+const OpsPlans = lazyNamed(() => import("../features/ops/routes/Plans"), "Plans");
 
 // Every screen in a tab bar loads up front, so a tab tap never waits on a
 // download. The rest (detail pages, settings, sign-up) load on demand; once

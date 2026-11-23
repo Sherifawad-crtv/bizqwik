@@ -1,26 +1,10 @@
-import { useRef, useState } from "react";
-import { supabase } from "../../../shared/api/supabaseClient";
-import { extOf, screenCrop, squareCrop } from "../../../shared/image";
-import { Icon } from "../../../design-system/components/Icon";
-import { TextField } from "../../../design-system/components/FormField";
-import { Button } from "../../../design-system/components/Button";
+import { useRef } from "react";
+import { screenCrop, squareCrop } from "../../../../shared/image";
+import { useAssetUpload } from "../hooks/useOps";
+import { Icon } from "../../../../design-system/components/Icon";
+import { TextField } from "../../../../design-system/components/FormField";
+import { Button } from "../../../../design-system/components/Button";
 import "./ImageUpload.css";
-
-const ORG_BRANDING_BUCKET = "org-branding";
-
-async function uploadOrgAsset(orgId: string, assetKey: string, blob: Blob): Promise<string> {
-  const path = `${orgId}/${assetKey}.${extOf(blob)}`;
-  const { error } = await supabase.storage.from(ORG_BRANDING_BUCKET).upload(path, blob, {
-    upsert: true,
-    contentType: blob.type,
-    cacheControl: "3600",
-  });
-  if (error) throw new Error(error.message);
-  const { data } = supabase.storage.from(ORG_BRANDING_BUCKET).getPublicUrl(path);
-  // Cache-bust — re-uploading keeps the same path, so without this a browser
-  // that already cached the old image at that URL would keep showing it.
-  return `${data.publicUrl}?t=${Date.now()}`;
-}
 
 /** Image upload field for org branding: a preview tile + Upload/Replace
  * button, with a URL field underneath for pasting an existing asset's link
@@ -41,26 +25,16 @@ export function ImageUploadField({
   onChange: (v: string) => void;
   hint?: string;
 }) {
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { upload, busy, error } = useAssetUpload(orgId, assetKey);
   const fileInput = useRef<HTMLInputElement>(null);
 
   const onSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     e.target.value = "";
     if (!file) return;
-    setBusy(true);
-    setError(null);
-    try {
-      // Onboarding art is full screen: keep it tall and sharp. Logos and icons stay square.
-      const blob = assetKey.startsWith("art-") ? await screenCrop(file) : await squareCrop(file);
-      const url = await uploadOrgAsset(orgId, assetKey, blob);
-      onChange(url);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Couldn't upload that image.");
-    } finally {
-      setBusy(false);
-    }
+    // Onboarding art is full screen: keep it tall and sharp. Logos and icons stay square.
+    const url = await upload(() => (assetKey.startsWith("art-") ? screenCrop(file) : squareCrop(file)));
+    if (url) onChange(url);
   };
 
   return (

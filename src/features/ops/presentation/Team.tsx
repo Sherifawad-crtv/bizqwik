@@ -1,17 +1,16 @@
-import { EmptyState } from "../../design-system/components/EmptyState";
+import { EmptyState } from "../../../design-system/components/EmptyState";
 import { useState } from "react";
-import { api } from "../../shared/api/backend";
-import { useAsync } from "../../shared/api/useAsync";
-import { BIZQWIK_ROLE_LABELS, type BizqwikRole } from "../../shared/types";
-import { Spinner } from "../../design-system/components/Spinner";
-import { Button } from "../../design-system/components/Button";
-import { Icon } from "../../design-system/components/Icon";
-import { Avatar } from "../../design-system/components/Avatar";
-import { Sheet } from "../../design-system/components/Sheet";
-import { TextField, SelectField } from "../../design-system/components/FormField";
-import { ErrorBanner } from "../../design-system/components/ErrorBanner";
-import { Card } from "../../design-system/components/Card";
-import { SectionHeader } from "../../design-system/components/SectionHeader";
+import { BIZQWIK_ROLE_LABELS, type BizqwikRole } from "../../../shared/types";
+import { Spinner } from "../../../design-system/components/Spinner";
+import { Button } from "../../../design-system/components/Button";
+import { Icon } from "../../../design-system/components/Icon";
+import { Avatar } from "../../../design-system/components/Avatar";
+import { Sheet } from "../../../design-system/components/Sheet";
+import { TextField, SelectField } from "../../../design-system/components/FormField";
+import { ErrorBanner } from "../../../design-system/components/ErrorBanner";
+import { Card } from "../../../design-system/components/Card";
+import { SectionHeader } from "../../../design-system/components/SectionHeader";
+import { cancelTeamInvite, useOpsTeam, useTeamActions } from "./hooks/useOps";
 import "./Team.css";
 
 const INVITE_ROLES: { value: BizqwikRole; label: string }[] = [
@@ -23,8 +22,7 @@ function InviteSheet({ open, onClose, onDone }: { open: boolean; onClose: () => 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<BizqwikRole>("teammate");
-  const [error, setError] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
+  const { invite, busy, error, setError } = useTeamActions();
 
   const close = () => {
     setName("");
@@ -35,17 +33,9 @@ function InviteSheet({ open, onClose, onDone }: { open: boolean; onClose: () => 
   };
 
   const submit = async () => {
-    setError(null);
-    if (!email.trim()) return setError("A valid email is required.");
-    setBusy(true);
-    try {
-      await api.ops.inviteTeam(name.trim(), email.trim(), role);
+    if (await invite(name, email, role)) {
       close();
       onDone();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong.");
-    } finally {
-      setBusy(false);
     }
   };
 
@@ -70,7 +60,7 @@ function InviteSheet({ open, onClose, onDone }: { open: boolean; onClose: () => 
 }
 
 export function Team() {
-  const team = useAsync(() => api.ops.team(), []);
+  const team = useOpsTeam();
   const [sheetOpen, setSheetOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -81,12 +71,9 @@ export function Team() {
 
   const cancel = async (email: string) => {
     setError(null);
-    try {
-      await api.ops.cancelTeamInvite(email);
-      team.refetch();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Couldn't cancel invite.");
-    }
+    const failed = await cancelTeamInvite(email);
+    if (failed) setError(failed);
+    else team.refetch();
   };
 
   return (

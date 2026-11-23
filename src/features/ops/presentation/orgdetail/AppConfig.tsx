@@ -1,27 +1,15 @@
 import { useState } from "react";
-import { api } from "../../../shared/api/backend";
-import { useAsync } from "../../../shared/api/useAsync";
-import { type OrgConfig } from "../../../shared/types";
-import { TextField } from "../../../design-system/components/FormField";
-import { Button } from "../../../design-system/components/Button";
-import { ErrorBanner } from "../../../design-system/components/ErrorBanner";
-import { Card } from "../../../design-system/components/Card";
-import { SectionHeader } from "../../../design-system/components/SectionHeader";
+import { type OrgConfig } from "../../../../shared/types";
+import { TextField } from "../../../../design-system/components/FormField";
+import { Button } from "../../../../design-system/components/Button";
+import { ErrorBanner } from "../../../../design-system/components/ErrorBanner";
+import { Card } from "../../../../design-system/components/Card";
+import { SectionHeader } from "../../../../design-system/components/SectionHeader";
 import { ImageUploadField } from "./ImageUpload";
+import { POINTS_DEFAULTS, pointsPreview } from "../../domain/ops";
+import { useOrgConfig, useSaveAppConfig } from "../hooks/useOps";
 import "./AppConfig.css";
 
-// Blank earn rate = points off. Defaults: 10 pts/EGP earned, 500 pts = 1 EGP
-// (2% back), 50 pts per check-in, 10,000 pts minimum, 12-month expiry.
-const POINTS_DEFAULTS = { earn: "10", redeem: "500", checkin: "50", min: "10000", ttl: "12" };
-
-const fmtNum = (n: number) => n.toLocaleString("en-US", { maximumFractionDigits: 2 });
-
-function pointsPreview(earn: number, redeem: number, checkin: number, min: number): string {
-  if (!earn) return "Points are off for this gym.";
-  if (!redeem) return "";
-  const back = (earn / redeem) * 100;
-  return `≈ ${fmtNum(back)}% back on cash/card spend · a check-in is worth ${fmtNum(checkin / redeem)} EGP · members can redeem from ${fmtNum(min / redeem)} EGP (${fmtNum(min)} pts).`;
-}
 
 export function UsageRow({ label, value }: { label: string; value: string }) {
   return (
@@ -37,7 +25,7 @@ export function UsageRow({ label, value }: { label: string; value: string }) {
 // wallet-credit expiry). Loads config, then hands a fresh, seeded form to
 // OrgAppConfigForm — keyed by org id so switching orgs re-seeds cleanly.
 export function OrgAppConfig({ id }: { id: string }) {
-  const cfg = useAsync(() => api.ops.orgConfig(id), [id]);
+  const cfg = useOrgConfig(id);
   return (
     <div className="bq-mt-6">
       <SectionHeader>Member app</SectionHeader>
@@ -67,54 +55,15 @@ function OrgAppConfigForm({ id, initial, onSaved }: { id: string; initial: OrgCo
   const [pointsTtl, setPointsTtl] = useState(String(s?.pointsTtlMonths ?? POINTS_DEFAULTS.ttl));
   const [ttlMonths, setTtlMonths] = useState(String(s?.walletCreditTtlMonths ?? 12));
 
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { save: saveConfig, busy, error } = useSaveAppConfig(id);
   const [saved, setSaved] = useState(false);
 
   const save = async () => {
-    setError(null);
     setSaved(false);
-    const months = Number(ttlMonths);
-    if (!Number.isInteger(months) || months < 1) {
-      setError("Wallet credit expiry must be at least 1 month.");
-      return;
-    }
-    const whole = (v: string) => Number.isInteger(Number(v)) && Number(v) >= 0 && v.trim() !== "";
-    if (earn.trim() !== "" && (!whole(earn) || Number(earn) < 1)) {
-      setError("Points earned per EGP must be a whole number of 1 or more — or blank to turn points off.");
-      return;
-    }
-    if (!whole(redeem) || Number(redeem) < 1 || !whole(checkin) || !whole(minRedeem) || !whole(pointsTtl) || Number(pointsTtl) < 1) {
-      setError("Points settings must be whole numbers (redeem rate and expiry at least 1).");
-      return;
-    }
-    setBusy(true);
-    try {
-      // Keep each image on its own slide: an empty slot stays "" (the member app
-      // shows the default photo there); only trailing empties are dropped.
-      const onboardingAssets = [asset0, asset1, asset2].map((a) => a.trim());
-      while (onboardingAssets.length && !onboardingAssets[onboardingAssets.length - 1]) onboardingAssets.pop();
-      await api.ops.setOrgBranding(id, {
-        appName: appName.trim() || null,
-        logoUrl: logoUrl.trim() || null,
-        iconUrl: iconUrl.trim() || null,
-        primaryColor: primaryColor.trim() || null,
-        onboardingAssets,
-      });
-      await api.ops.setOrgSettings(id, {
-        pointsEarnPerEgp: earn.trim() === "" ? null : Number(earn),
-        pointsRedeemPerEgp: Number(redeem),
-        pointsCheckin: Number(checkin),
-        pointsMinRedeem: Number(minRedeem),
-        pointsTtlMonths: Number(pointsTtl),
-        walletCreditTtlMonths: months,
-      });
+    const form = { appName, logoUrl, iconUrl, primaryColor, assets: [asset0, asset1, asset2], earn, redeem, checkin, minRedeem, pointsTtl, ttlMonths };
+    if (await saveConfig(form)) {
       setSaved(true);
       onSaved();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Couldn't save member-app config.");
-    } finally {
-      setBusy(false);
     }
   };
 

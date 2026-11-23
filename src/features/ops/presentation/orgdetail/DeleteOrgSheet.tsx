@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { api } from "../../../shared/api/backend";
-import { TextField } from "../../../design-system/components/FormField";
-import { Button } from "../../../design-system/components/Button";
-import { Sheet } from "../../../design-system/components/Sheet";
-import { ErrorBanner } from "../../../design-system/components/ErrorBanner";
+import { slugConfirmed } from "../../domain/ops";
+import { useDeleteOrg } from "../hooks/useOps";
+import { TextField } from "../../../../design-system/components/FormField";
+import { Button } from "../../../../design-system/components/Button";
+import { Sheet } from "../../../../design-system/components/Sheet";
+import { ErrorBanner } from "../../../../design-system/components/ErrorBanner";
 import "./DeleteOrgSheet.css";
 
 // Type-the-slug confirmation, GitHub style: the delete button only unlocks
@@ -22,9 +23,8 @@ export function DeleteOrgSheet({
   onDeleted: () => void;
 }) {
   const [typed, setTyped] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const matches = typed.trim().toLowerCase() === org.slug;
+  const { remove, busy, error, setError } = useDeleteOrg();
+  const matches = slugConfirmed(typed, org.slug);
 
   const close = () => {
     if (busy) return;
@@ -34,15 +34,7 @@ export function DeleteOrgSheet({
   };
 
   const confirm = async () => {
-    setBusy(true);
-    setError(null);
-    try {
-      await api.ops.deleteOrg(org.id, typed.trim());
-      onDeleted();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Couldn't delete this organization.");
-      setBusy(false);
-    }
+    if (await remove(org.id, typed)) onDeleted();
   };
 
   return (
