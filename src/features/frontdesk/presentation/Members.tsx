@@ -18,7 +18,7 @@ import { SectionHeader } from "../../../design-system/components/SectionHeader";
 import { endingSoon, matchesClient, planSummary } from "../../../shared/deskStatus";
 import { ConfirmCheckInSheet } from "./CheckIn";
 import { DropIn } from "./DropIn";
-import { useFrontDeskCatalog, useSellableCoaches } from "./members/offers";
+import { useFrontDeskCatalog, useSellableCoaches } from "./hooks/useMembers";
 import { CreateClientSheet } from "./members/CreateClientSheet";
 import { ClientSheet } from "./members/ClientSheet";
 import "./Members.css";

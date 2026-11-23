@@ -1,7 +1,6 @@
 import { useState } from "react";
-import { desk } from "./hooks/useDesk";
+import { usePaymentDecision, usePaymentRequests } from "./hooks/useSchedule";
 import type { PaymentRequest } from "../../../shared/types";
-import { useAsync } from "../../../shared/api/useAsync";
 import { egp } from "../../../shared/format";
 import { Button } from "../../../design-system/components/Button";
 import { Icon } from "../../../design-system/components/Icon";
@@ -15,7 +14,7 @@ const when = (iso: string) => new Date(iso).toLocaleString(undefined, { day: "nu
 /** Members who paid by InstaPay and uploaded the receipt. Nothing is granted
  * until she approves; she checks the screenshot against her InstaPay app. */
 export function PaymentRequestsCard() {
-  const reqs = useAsync(() => desk.paymentRequests(), []);
+  const reqs = usePaymentRequests();
   const [open, setOpen] = useState(false);
   const list = reqs.data?.requests ?? [];
   if (list.length === 0 && !open) return null;
@@ -51,22 +50,9 @@ export function PaymentRequestsCard() {
 }
 
 function RequestRow({ r, onDone }: { r: PaymentRequest; onDone: () => void }) {
-  const [busy, setBusy] = useState(false);
+  const { busy, error, approve, reject } = usePaymentDecision(r.id, onDone);
   const [rejecting, setRejecting] = useState(false);
   const [note, setNote] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const run = async (fn: () => Promise<unknown>) => {
-    setBusy(true);
-    setError(null);
-    try {
-      await fn();
-      onDone();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Something went wrong.");
-    } finally {
-      setBusy(false);
-    }
-  };
   return (
     <Card className="bq-frontdesk-payment-requests-request-row-card" pad="none">
       <div className="bq-flex bq-gap-3 bq-items-start">
@@ -88,13 +74,13 @@ function RequestRow({ r, onDone }: { r: PaymentRequest; onDone: () => void }) {
         <div className="bq-mt-3 bq-flex bq-col bq-gap-2">
           <TextField label="TELL THEM WHY (OPTIONAL)" value={note} onChange={(e) => setNote(e.target.value)} placeholder="Amount didn't match" />
           <div className="bq-flex bq-gap-2">
-            <Button className="bq-flex-1" variant="danger" disabled={busy} onClick={() => run(() => desk.rejectPayment(r.id, note))}>{busy ? "Sending…" : "Reject"}</Button>
+            <Button className="bq-flex-1" variant="danger" disabled={busy} onClick={() => reject(note)}>{busy ? "Sending…" : "Reject"}</Button>
             <Button variant="quiet" disabled={busy} onClick={() => setRejecting(false)}>Back</Button>
           </div>
         </div>
       ) : (
         <div className="bq-mt-3 bq-flex bq-gap-2">
-          <Button className="bq-flex-1" disabled={busy} onClick={() => run(() => desk.approvePayment(r.id))}>{busy ? "Approving…" : "Approve"}</Button>
+          <Button className="bq-flex-1" disabled={busy} onClick={approve}>{busy ? "Approving…" : "Approve"}</Button>
           <Button variant="quiet" disabled={busy} onClick={() => setRejecting(true)}>Reject</Button>
         </div>
       )}

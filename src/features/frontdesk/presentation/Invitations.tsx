@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useSetHeader } from "../../../shared/screen/header";
-import { desk, useDeskClients } from "./hooks/useDesk";
+import { useDeskClients } from "./hooks/useDesk";
+import { useInviteGuest } from "./hooks/useSchedule";
 import { dateLabel, todayIso } from "../../../shared/format";
 import { Button } from "../../../design-system/components/Button";
 import { TextField } from "../../../design-system/components/FormField";
@@ -11,7 +12,7 @@ import { ErrorBanner } from "../../../design-system/components/ErrorBanner";
 import { Card } from "../../../design-system/components/Card";
 import { SectionHeader } from "../../../design-system/components/SectionHeader";
 import { useNewClient } from "./NewClientModal";
-import { useFrontDeskCatalog } from "./members/offers";
+import { useFrontDeskCatalog } from "./hooks/useMembers";
 import "./Invitations.css";
 
 export function Invitations({ embedded = false, onCreateClient }: { embedded?: boolean; onCreateClient?: () => void } = {}) {
@@ -23,8 +24,7 @@ export function Invitations({ embedded = false, onCreateClient }: { embedded?: b
   const [guestName, setGuestName] = useState("");
   const [guestPhone, setGuestPhone] = useState("");
   const [visitDate, setVisitDate] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { busy, error, setError, invite } = useInviteGuest();
   const [done, setDone] = useState<string | null>(null);
 
   if (!data) return <Spinner />;
@@ -35,27 +35,12 @@ export function Invitations({ embedded = false, onCreateClient }: { embedded?: b
 
   const submit = async () => {
     if (!member) return;
-    if (!guestName.trim() || !guestPhone.trim() || !visitDate) {
-      setError("Guest name, phone and visit date are all required.");
-      return;
-    }
-    if (visitDate < todayIso()) {
-      setError("The visit date can't be in the past.");
-      return;
-    }
-    setBusy(true);
-    setError(null);
-    try {
-      const res = await desk.invite(member.id, guestName.trim(), guestPhone.trim(), visitDate);
-      setDone(`${guestName.trim()} is invited for ${dateLabel(visitDate)} · ${res.invitationsRemaining} left for ${member.name}`);
-      setGuestName("");
-      setGuestPhone("");
-      setVisitDate("");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong.");
-    } finally {
-      setBusy(false);
-    }
+    const remaining = await invite(member.id, guestName, guestPhone, visitDate);
+    if (remaining === null) return;
+    setDone(`${guestName.trim()} is invited for ${dateLabel(visitDate)} · ${remaining} left for ${member.name}`);
+    setGuestName("");
+    setGuestPhone("");
+    setVisitDate("");
   };
 
   return (

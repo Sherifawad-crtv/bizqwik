@@ -2,8 +2,8 @@ import { Reveal } from "../../../../design-system/components/Reveal";
 import { useEffect, useState } from "react";
 import { useLatch } from "../../../../shared/useLatch";
 import { useSheetSuccess } from "../../../../design-system/components/useSheetSuccess";
-import { type SalePartner } from "../../../../shared/api/backend";
-import { desk } from "../hooks/useDesk";
+import type { SalePartner } from "../../../../shared/api/backend";
+import { useClientSheetActions, useRefundable } from "../hooks/useMembers";
 import { fmt, dateLabel } from "../../../../shared/format";
 import type { BundleType, ClassSeries, ClientWithPackage, CoachOption, GroupPlanType } from "../../../../shared/types";
 import { LocationField, locationName, useCurrentLocation, useLocations } from "../../../../shared/locations";
@@ -20,9 +20,9 @@ import { SheetHeading } from "../shared";
 import { PlanPill } from "../../../../shared/components/PlanPill";
 import { ErrorBanner } from "../../../../design-system/components/ErrorBanner";
 import { endingSoon, planSummary, renewalMessage, whatsappUrl } from "../../../../shared/deskStatus";
-import { bundleOptions, coachOptions, offerOf } from "./offers";
+import { bundleOptions, coachOptions } from "./offers";
+import { isSoloOwner, renewalPick, sharedTypeOf } from "../../domain/members";
 import { GroupOfferSelect, PartnerPicker } from "./partners";
-import { inviteNewPartners } from "./invitePartners";
 import "./ClientSheet.css";
 
 type Mode = "view" | "sell-plan" | "renew-package" | "assign" | "invite" | "refund" | "pt-log" | "location";
@@ -52,7 +52,7 @@ export function ClientSheet({
 }) {
   const shown = useLatch(client);
   const { profile: me, orgMode: om } = useAuth();
-  const solo = me?.role === "dept_head" && om === "solo";
+  const solo = isSoloOwner(me?.role, om);
   const sheetLocations = useLocations();
   const { current: sheetHere } = useCurrentLocation();
   const [locPick, setLocPick] = useState<string | null>(null);
@@ -63,31 +63,30 @@ export function ClientSheet({
   const [refundAmount, setRefundAmount] = useState("");
   const [refundDest, setRefundDest] = useState<"wallet" | "desk">("wallet");
   const [refundNote, setRefundNote] = useState("");
-  // What they've paid less what's already been refunded: the most this refund can be.
-  const [refundable, setRefundable] = useState<{ paid: number; refunded: number; refundable: number } | null>(null);
   const [payMethod, setPayMethod] = useState<PayMethod>("cash");
   const [partners, setPartners] = useState<SalePartner[]>([]);
-  const [busy, setBusy] = useState(false);
   const [showMore, setShowMore] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const open = !!client;
   const { confirmed, iconIn, showSuccess } = useSheetSuccess(open, onClose);
+  // What they've paid less what's already been refunded: the most this refund can be.
+  const refundable = useRefundable(client?.id, mode === "refund");
+  const act = useClientSheetActions(shown, () => {
+    if (mode === "sell-plan" || mode === "renew-package") onSold?.();
+    showSuccess();
+  });
+  const { busy, error, setError } = act;
 
   useEffect(() => {
     if (client) {
       setMode(startIn ?? "view");
       setShowMore(false);
       // Renewing starts from what they had last, still sellable now: one tap to renew, changeable.
-      const lastPlan = client.lastGroupPlan;
-      const lastOffer = lastPlan?.planTypeId && planTypes.some((t) => t.id === lastPlan.planTypeId) ? `pt:${lastPlan.planTypeId}` : lastPlan?.seriesId && series.some((x) => x.id === lastPlan.seriesId) ? `cs:${lastPlan.seriesId}` : "";
-      const lastBundle = client.currentPackage && bundleTypes.some((b) => b.id === client.currentPackage!.bundleTypeId) ? client.currentPackage.bundleTypeId : "";
-      setPickId(startIn === "sell-plan" ? lastOffer : startIn === "renew-package" ? lastBundle : "");
+      setPickId(renewalPick(client, startIn, planTypes, series, bundleTypes));
       setCoachId(client.assignedCoachId ?? "");
       setEmail(client.email ?? "");
       setRefundAmount("");
       setRefundDest("wallet");
       setRefundNote("");
-      setRefundable(null);
       setPayMethod("cash");
       setPartners([]);
       setLocPick(client.homeLocationId ?? null);
@@ -97,17 +96,6 @@ export function ClientSheet({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [client?.id]);
 
-  useEffect(() => {
-    if (mode !== "refund" || !client) return;
-    let alive = true;
-    desk.refundable(client.id).then((r) => alive && setRefundable(r)).catch(() => undefined);
-    return () => {
-      alive = false;
-    };
-    // Deliberate: fetch when the mode or the person changes, not on every edit of the client.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mode, client?.id]);
-
   if (!shown) return null;
 
   const plan = shown.groupPlan ?? null;
@@ -115,56 +103,16 @@ export function ClientSheet({
   const packageActive = pkg?.status === "active";
   const bType = pkg ? bundleTypes.find((b) => b.id === pkg.bundleTypeId) : undefined;
   const summary = planSummary(shown, bundleTypes);
-  const sharedType = mode === "sell-plan" && pickId.startsWith("pt:") ? planTypes.find((t) => t.id === pickId.slice(3) && t.sharedSeats) ?? null : null;
+  const sharedType = mode === "sell-plan" ? sharedTypeOf(pickId, planTypes) : null;
   const coachName = coaches.find((c) => c.id === shown.assignedCoachId)?.name ?? null;
 
-  const run = async (action: () => Promise<unknown>) => {
-    setBusy(true);
-    setError(null);
-    try {
-      await action();
-      if (mode === "sell-plan" || mode === "renew-package") onSold?.();
-      showSuccess();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong.");
-    } finally {
-      setBusy(false);
-    }
-  };
-
   const confirmMode = () => {
-    if (mode === "sell-plan") {
-      if (!pickId) return setError("Choose a plan.");
-      if (sharedType && partners.length < sharedType.sharedSeats! - 1) return setError(`Choose who ${shown.name} shares this with.`);
-      return run(async () => {
-        const res = await desk.sellGroupPlan({ clientId: shown.id }, offerOf(pickId), payMethod, sharedType ? partners : undefined);
-        await inviteNewPartners(res.sharedWith, partners);
-      });
-    }
-    if (mode === "renew-package") {
-      const trainer = solo && me ? me.id : coachId;
-      if (!pickId || !trainer) return setError(solo ? "Choose a package." : "Choose a package and a coach.");
-      return run(() => desk.sellPackage(shown.id, pickId, trainer, payMethod));
-    }
-    if (mode === "location") {
-      return run(() => desk.setClientLocation(shown.id, locPick));
-    }
-    if (mode === "assign") {
-      if (!coachId) return setError("Choose a coach.");
-      return run(() => desk.assignCoach(shown.id, coachId));
-    }
-    if (mode === "invite") {
-      const e = email.trim();
-      if (!/^\S+@\S+\.\S+$/.test(e)) return setError("Enter a valid email.");
-      return run(() => desk.inviteClient(shown.id, e));
-    }
-    if (mode === "refund") {
-      const amt = Number(refundAmount);
-      if (!Number.isFinite(amt) || amt <= 0) return setError("Enter a refund amount.");
-      if (refundable && amt > refundable.refundable) return setError(refundable.refundable > 0 ? `The most you can refund ${shown.name} is ${fmt(refundable.refundable)} EGP.` : `${shown.name} has nothing left to refund.`);
-      const note = [solo && refundDest === "desk" ? "InstaPay" : "", refundNote.trim()].filter(Boolean).join(" · ");
-      return run(() => desk.refundClient(shown.id, amt, refundDest, note || undefined));
-    }
+    if (mode === "sell-plan") return act.sellPlan(pickId, payMethod, sharedType, partners);
+    if (mode === "renew-package") return act.sellPackage(pickId, solo && me ? me.id : coachId, solo, payMethod);
+    if (mode === "location") return act.setLocation(locPick);
+    if (mode === "assign") return act.assignCoach(coachId);
+    if (mode === "invite") return act.invite(email);
+    if (mode === "refund") return act.refund(refundAmount, refundable, solo, refundDest, refundNote);
   };
 
   const successLabel =
@@ -216,17 +164,7 @@ export function ClientSheet({
                 disabled={busy}
                 onClick={async () => {
                   setMode("pt-log");
-                  setBusy(true);
-                  setError(null);
-                  try {
-                    await desk.logPtSession(pkg.id);
-                    showSuccess();
-                  } catch (err) {
-                    setMode("view");
-                    setError(err instanceof Error ? err.message : "Couldn't log the session.");
-                  } finally {
-                    setBusy(false);
-                  }
+                  if (!(await act.logPtSession(pkg.id))) setMode("view");
                 }}
               >
                 Log today's PT session · {pkg.sessionsRemaining} left

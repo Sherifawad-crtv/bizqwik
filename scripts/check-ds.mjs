@@ -7,6 +7,7 @@
 // 3. Import boundaries: features use design-system and shared, never another
 //    feature or the app frame; shared never reaches into features or app; the
 //    design system never reaches into features, app or shared components.
+//    Inside a feature, the layers keep their direction (see 3b below).
 // 4. Hand-built versions of things the library covers (a row divider, a styled
 //    <button>, a big number) and values a token should cover (raw colours, font
 //    sizes, corner radii, off-scale spacing) and static inline styles may not
@@ -53,6 +54,29 @@ for (const f of files) {
     if (from.top === "shared" && (to.top === "features" || to.top === "app")) bad = "shared code may not use features or the app frame";
     if (from.top === "design-system" && (to.top === "features" || to.top === "app" || to.comp)) bad = "the design system may not use features, the app frame or shared components";
     if (bad) errors.push(`${f}: imports ${m[1]} (${bad})`);
+  }
+}
+
+// 3b. layers inside a feature: presentation → domain ← data.
+//     domain/ is pure rules: no React, no server calls (type-only imports are fine),
+//     nothing from presentation/ or data/. data/ never uses presentation/.
+//     Screens reach data/ only through their feature's presentation/hooks/.
+const layer = (p) => /^src\/features\/[^/]+\/(data|domain|presentation)\//.exec(p)?.[1] ?? null;
+for (const f of files.filter((f) => f.startsWith("src/features/"))) {
+  const from = layer(f);
+  if (!from) continue;
+  const isHook = /\/presentation\/hooks\//.test(f);
+  for (const m of read(f).matchAll(/import\s+(type\s+)?[^"';]*?from\s*["']([^"']+)["']|import\s*\(\s*["']([^"']+)["']/g)) {
+    const typeOnly = !!m[1];
+    const spec = m[2] ?? m[3];
+    const target = spec.startsWith(".") ? join(f, "..", spec).replace(/\\/g, "/") : spec;
+    const to = layer(target);
+    let bad = null;
+    if (from === "domain" && !typeOnly && (/^react(-dom)?$/.test(spec) || /^src\/shared\/api\//.test(target))) bad = "domain/ holds pure rules: no React and no server calls";
+    if (from === "domain" && (to === "presentation" || to === "data")) bad = "domain/ may not use presentation/ or data/";
+    if (from === "data" && to === "presentation") bad = "data/ may not use presentation/";
+    if (from === "presentation" && !isHook && (to === "data" || (!typeOnly && /^src\/shared\/api\//.test(target)))) bad = "screens reach data/ only through presentation/hooks/";
+    if (bad) errors.push(`${f}: imports ${spec} (${bad})`);
   }
 }
 

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
-import { desk } from "./hooks/useDesk";
-import { useAsync } from "../../../shared/api/useAsync";
+import { useClassesSince } from "./hooks/useSchedule";
+import { classesByDay } from "../domain/schedule";
 import { useIsMobile } from "../../../design-system/hooks/useIsMobile";
 import type { GymClass } from "../../../shared/types";
 import { Segmented } from "../../../design-system/components/Segmented";
@@ -25,7 +25,7 @@ export function ClassCalendarScreen({ onClose }: { onClose: () => void }) {
   const [roster, setRoster] = useState<GymClass | null>(null);
   // Classes load from two weeks back; going further back loads more.
   const [since, setSince] = useState(() => addDays(startOfDay(new Date()), -14));
-  const classes = useAsync(() => desk.classes(since.toISOString()), [since.getTime()]);
+  const classes = useClassesSince(since);
   const [now, setNow] = useState(() => new Date());
 
   useEffect(() => {
@@ -43,15 +43,7 @@ export function ClassCalendarScreen({ onClose }: { onClose: () => void }) {
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose, roster]);
 
-  const byDay = useMemo(() => {
-    const m = new Map<string, GymClass[]>();
-    for (const c of classes.data?.classes ?? []) {
-      if (c.status !== "active") continue;
-      const k = dayKey(new Date(c.startsAt));
-      m.set(k, [...(m.get(k) ?? []), c].sort((a, b) => Date.parse(a.startsAt) - Date.parse(b.startsAt)));
-    }
-    return m;
-  }, [classes.data]);
+  const byDay = useMemo(() => classesByDay(classes.data?.classes ?? [], dayKey), [classes.data]);
   const on = (d: Date) => byDay.get(dayKey(d)) ?? [];
 
   const today = startOfDay(now);

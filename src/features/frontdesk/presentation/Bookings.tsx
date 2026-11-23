@@ -1,7 +1,9 @@
 import { useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { useIsMobile } from "../../../design-system/hooks/useIsMobile";
-import { desk } from "./hooks/useDesk";
+import { cancelClass, useTodaysClasses } from "./hooks/useSchedule";
+import { bookingsView, dayHeading, isHappening, type Range } from "../domain/schedule";
+import { startOfDay } from "../domain/calendar";
 import { useAuth } from "../../../shared/auth";
 import { LocationSwitcher, useCurrentLocation } from "../../../shared/locations";
 import { isSoloOwner } from "../../../shared/screen/nav";
@@ -9,7 +11,6 @@ import { ConfirmSheet } from "../../../design-system/components/ConfirmSheet";
 import { ClassSheet } from "../../../shared/components/ClassSheet";
 import { emptyForm, formOf, type FormState } from "../../../shared/classForm";
 import { SeriesSheet } from "../../../shared/components/SeriesSheet";
-import { useAsync } from "../../../shared/api/useAsync";
 import { useSetHeader } from "../../../shared/screen/header";
 import { timeLabel, pad } from "../../../shared/classTime";
 import type { GymClass } from "../../../shared/types";
@@ -24,21 +25,10 @@ import { ClassCalendarScreen } from "./ClassCalendar";
 import { useNow } from "../../../shared/useNow";
 import "./Bookings.css";
 
-type Range = "today" | "tomorrow" | "week" | "all";
-
-const startOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
-const addDays = (d: Date, n: number) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
 const clock = (iso: string) => {
   const d = new Date(iso);
   return timeLabel(`${pad(d.getHours())}:${pad(d.getMinutes())}`);
 };
-const dayHeading = (d: Date, today: Date) => {
-  const diff = Math.round((startOfDay(d).getTime() - today.getTime()) / 86400000);
-  if (diff === 0) return "Today";
-  if (diff === 1) return "Tomorrow";
-  return d.toLocaleDateString(undefined, { weekday: "long", month: "short", day: "numeric" });
-};
-
 /** What's booked, in the order the desk needs it: what's on now and next first,
  * with the rest of today's finished classes tucked away. */
 export function Bookings() {
@@ -57,40 +47,10 @@ export function Bookings() {
   const [open, setOpen] = useState<GymClass | null>(null);
   const [showEarlier, setShowEarlier] = useState(false);
   const [month, setMonth] = useState(false);
-  const classes = useAsync(() => desk.classes(startOfDay(new Date()).toISOString()), []);
+  const classes = useTodaysClasses();
   const nowMs = useNow();
 
-  const { groups, earlier, ahead } = useMemo(() => {
-    const now = nowMs;
-    const today = startOfDay(new Date(nowMs));
-    const last = range === "today" ? 1 : range === "tomorrow" ? 2 : range === "week" ? 7 : 366;
-    const first = range === "tomorrow" ? 1 : 0;
-    const from = addDays(today, first).getTime();
-    const to = addDays(today, last).getTime();
-    const live = (classes.data?.classes ?? []).filter((c) => c.status !== "cancelled" && Date.parse(c.startsAt) >= from && Date.parse(c.startsAt) < to && (place === "all" || !c.locationId || c.locationId === place));
-    const isPast = (c: GymClass) => Date.parse(c.startsAt) + 60 * 60000 < now;
-    const upcoming = live.filter((c) => !isPast(c));
-    const map = new Map<string, { day: Date; items: GymClass[] }>();
-    for (const c of upcoming) {
-      const d = startOfDay(new Date(c.startsAt));
-      const k = d.toISOString();
-      if (!map.has(k)) map.set(k, { day: d, items: [] });
-      map.get(k)!.items.push(c);
-    }
-    // Today is over: show the next day that has classes, so the desk sees
-    // what's coming instead of an empty page.
-    let ahead: { day: Date; items: GymClass[] } | null = null;
-    if (range === "today" && upcoming.length === 0) {
-      const later = (classes.data?.classes ?? [])
-        .filter((c) => c.status !== "cancelled" && Date.parse(c.startsAt) >= to && (place === "all" || !c.locationId || c.locationId === place))
-        .sort((a, b) => Date.parse(a.startsAt) - Date.parse(b.startsAt));
-      if (later.length) {
-        const day = startOfDay(new Date(later[0].startsAt));
-        ahead = { day, items: later.filter((c) => startOfDay(new Date(c.startsAt)).getTime() === day.getTime()) };
-      }
-    }
-    return { groups: [...map.values()], earlier: live.filter(isPast), ahead };
-  }, [classes.data, range, place, nowMs]);
+  const { groups, earlier, ahead } = useMemo(() => bookingsView(classes.data?.classes ?? [], range, place, nowMs), [classes.data, range, place, nowMs]);
 
   if (month) return <ClassCalendarScreen onClose={() => setMonth(false)} />;
   if (!locsReady || !classes.data) return <Spinner />;
@@ -99,8 +59,7 @@ export function Bookings() {
   const nextId = groups[0]?.items.find((c) => Date.parse(c.startsAt) + 60 * 60000 >= nowMs)?.id;
 
   const row = (c: GymClass, muted = false) => {
-    const start = Date.parse(c.startsAt);
-    const happening = start <= nowMs && nowMs < start + 60 * 60000;
+    const happening = isHappening(c, nowMs);
     const booked = c.bookedCount ?? 0;
     return (
       <div className="bq-frontdesk-bookings-row" key={c.id} style={{ opacity: muted ? 0.65 : 1 }}>
@@ -207,7 +166,7 @@ export function Bookings() {
             confirmLabel="Cancel session"
             danger
             onConfirm={async () => {
-              if (cancelling) await desk.cancelClass(cancelling.id);
+              if (cancelling) await cancelClass(cancelling.id);
               setCancelling(null);
               classes.refetch();
             }}

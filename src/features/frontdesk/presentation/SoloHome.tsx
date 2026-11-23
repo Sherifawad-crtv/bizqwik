@@ -3,9 +3,10 @@ import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../shared/auth";
 import { useSetHeader } from "../../../shared/screen/header";
-import { useAsync } from "../../../shared/api/useAsync";
 import { setSticky } from "../../../design-system/hooks/useSticky";
-import { desk, useDeskClients } from "./hooks/useDesk";
+import { useDeskClients } from "./hooks/useDesk";
+import { useBundleTypes, useLocationRevenue, useRevenue, useSoloClasses } from "./hooks/useSchedule";
+import { memberCounts, revenueMonths, revenueTrend, soloNextUp } from "../domain/schedule";
 import { fmt } from "../../../shared/format";
 import { timeLabel, pad } from "../../../shared/classTime";
 import { HomeAvatar } from "../../../shared/components/HomeAvatar";
@@ -13,7 +14,7 @@ import { EmptyState } from "../../../design-system/components/EmptyState";
 import { Icon, type IconName } from "../../../design-system/components/Icon";
 import { Spinner } from "../../../design-system/components/Spinner";
 import { RevenueChart } from "../../../design-system/components/MoneyCharts";
-import { LocationSwitcher, atLocation, useCurrentLocation } from "../../../shared/locations";
+import { LocationSwitcher, useCurrentLocation } from "../../../shared/locations";
 import { PaymentRequestsCard } from "./PaymentRequests";
 import { SectionLink } from "./shared";
 import { Card } from "../../../design-system/components/Card";
@@ -68,45 +69,26 @@ export function SoloHome() {
   const navigate = useNavigate();
   useSetHeader({ kicker: "TODAY", title: "Today" }, []);
   const clients = useDeskClients();
-  const revenue = useAsync(() => desk.revenue(12), []);
-  const classes = useAsync(() => desk.classes(new Date(Date.now() - 2 * 3600000).toISOString()), []);
-  const bundles = useAsync(() => desk.bundleTypes(), []);
+  const revenue = useRevenue();
+  const classes = useSoloClasses();
+  const bundles = useBundleTypes();
   const bundleTypes = useMemo(() => bundles.data?.bundleTypes ?? [], [bundles.data]);
   const { locations, current, ready: locsReady } = useCurrentLocation();
   // Two or more locations: everything on Today is the selected location's.
   const here = locations.length > 1 ? (current?.id ?? null) : null;
-  const locRevenue = useAsync(() => (here ? desk.paymentsSummary(12, here) : Promise.resolve(null)), [here]);
+  const locRevenue = useLocationRevenue(here);
 
-  const stats = useMemo(() => {
-    const list = (clients.data?.clients ?? []).filter((c) => atLocation(c.homeLocationId, here));
-    return {
-      total: list.length,
-      active: list.filter((c) => planSummary(c, bundleTypes).tone === "active").length,
-      soon: list.filter((c) => endingSoon(c) !== null).length,
-    };
-  }, [clients.data, bundleTypes, here]);
-
-  const months = useMemo(
-    () => (here ? (locRevenue.data?.byMonth ?? []).map((m) => ({ month: m.month, revenue: m.revenue, payouts: 0, profit: m.revenue })) : (revenue.data?.months ?? [])),
-    [here, locRevenue.data, revenue.data],
+  const stats = useMemo(
+    () => memberCounts(clients.data?.clients ?? [], here, (c) => planSummary(c, bundleTypes).tone === "active", (c) => endingSoon(c) !== null),
+    [clients.data, bundleTypes, here],
   );
-  const trend = useMemo(() => {
-    const rows = months;
-    const first = rows.findIndex((m) => m.revenue > 0);
-    return first < 0 ? rows.slice(-1) : rows.slice(Math.max(first, rows.length - 12));
-  }, [months]);
-  const thisMonth = months.at(-1)?.revenue ?? 0;
-  const lastMonth = months.at(-2)?.revenue ?? 0;
-  const delta = lastMonth > 0 ? Math.round(((thisMonth - lastMonth) / lastMonth) * 100) : null;
+
+  const months = useMemo(() => revenueMonths(here, locRevenue.data?.byMonth, revenue.data?.months), [here, locRevenue.data, revenue.data]);
+  const { trend, thisMonth, delta } = useMemo(() => revenueTrend(months), [months]);
 
   const now = useNow();
-  const nextUp = useMemo(() => {
-    // Only what's on at the location she's working at (plus anything untied).
-    return (classes.data?.classes ?? [])
-      .filter((c) => c.status !== "cancelled" && Date.parse(c.startsAt) + 3600000 >= now)
-      .filter((c) => atLocation(c.locationId, here))
-      .slice(0, 5);
-  }, [classes.data, here, now]);
+  // Only what's on at the location she's working at (plus anything untied).
+  const nextUp = useMemo(() => soloNextUp(classes.data?.classes ?? [], here, now), [classes.data, here, now]);
 
   const nextUpId = nextUp[0]?.id;
   const goMembers = (filter: string) => {

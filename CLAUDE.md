@@ -7,6 +7,13 @@
 - Code lives in `src/app/` (frame), `src/design-system/` (tokens + library),
   `src/shared/` (cross-feature code and business components) and
   `src/features/<area>/`. A feature never imports another feature or `app/`.
+- Each feature has three layers: `data/` (its server calls, `<area>Repository.ts`),
+  `domain/` (pure rules and form checks: no React, no server calls) and
+  `presentation/` (screens, CSS and `hooks/`), plus `index.ts` for what the app
+  uses and `routes/` for lazy-loaded screens. Screens get data and actions only
+  from their feature's `presentation/hooks/`, never from `data/` or `shared/api`
+  directly; a rule (what's valid, what's shown, what's allowed) goes in `domain/`.
+  `npm run ds` enforces the direction.
 - If the library doesn't have what you need: likely reused → build it in
   `src/design-system/components/` (generic) or `src/shared/components/`
   (business), using only tokens, and **add it to the directory in

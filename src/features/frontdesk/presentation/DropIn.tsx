@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useSetHeader } from "../../../shared/screen/header";
-import { useAsync } from "../../../shared/api/useAsync";
-import { ApiError } from "../../../shared/api/backend";
-import { desk } from "./hooks/useDesk";
+import { useDropIn, useDropInClasses, usePickableClients } from "./hooks/useDropIn";
+import { dropInAmount, dropInSessions, effectivePay as payableWith, isNewMember, nextSessionId as firstSessionId, tenderLabel, type DropInMode, type DropInSale } from "../domain/dropIn";
 import { fmt } from "../../../shared/format";
 import { whenLabel } from "../../../shared/classTime";
 import type { ClientWithPackage } from "../../../shared/types";
@@ -18,12 +17,12 @@ import { ClientPicker } from "./shared";
 import { ErrorBanner } from "../../../design-system/components/ErrorBanner";
 import { Card } from "../../../design-system/components/Card";
 import { useNewClient } from "./NewClientModal";
-import { useFrontDeskCatalog } from "./members/offers";
+import { useFrontDeskCatalog } from "./hooks/useMembers";
 import type { PayMethod } from "../../../shared/types";
 import { useNow } from "../../../shared/useNow";
 import "./DropIn.css";
 
-type Mode = "class" | "walkin";
+type Mode = DropInMode;
 
 /** Pay-per-visit at the desk. "Class" puts a member into one class session at
  * its drop-in price (they land on the roster); "Walk-in" is a free-form entry
@@ -54,30 +53,27 @@ export function DropIn({ embedded = false, initialClient = null }: { embedded?: 
   const [newPhone, setNewPhone] = useState("");
   const [newEmail, setNewEmail] = useState("");
   const [payMethod, setPayMethod] = useState<PayMethod>("cash");
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<string | null>(null);
-  const [confirmPlan, setConfirmPlan] = useState<string | null>(null);
+  const { busy, error, setError, confirmPlan, closeConfirm, submit: charge, chargeAnyway } = useDropIn();
 
-  const classes = useAsync(() => desk.classes(), []);
+  const classes = useDropInClasses();
   const now = useNow();
-  const sessions = (classes.data?.classes ?? []).filter(
-    (c) => c.status === "active" && Date.parse(c.startsAt) >= now - 2 * 60 * 60 * 1000 && Date.parse(c.startsAt) <= now + 7 * 86400000,
-  );
+  const sessions = dropInSessions(classes.data?.classes ?? [], now);
   const session = sessions.find((c) => c.id === classId) ?? null;
   // Start on the next class (the one most drop-ins are for); the desk can change it.
-  const nextSessionId = sessions.find((c) => Date.parse(c.startsAt) + 60 * 60 * 1000 >= now)?.id ?? "";
+  const nextSessionId = firstSessionId(sessions, now);
   useEffect(() => {
     if (!classId && nextSessionId) setClassId(nextSessionId);
   }, [nextSessionId, classId]);
 
   // Wallet is only payable for a linked member; a brand-new one has no wallet.
-  const effectivePay: PayMethod = !client && payMethod === "wallet" ? "cash" : payMethod;
-  const newMember = mode === "walkin" && !client && adding;
+  const effectivePay: PayMethod = payableWith(payMethod, !!client);
+  const sale: DropInSale = { mode, client, session, adding, newName, newPhone, newEmail, category, price, pay: payMethod };
+  const newMember = isNewMember(sale);
 
   // The amount on the button, like a till: what is about to be charged, and how.
-  const amount = mode === "class" ? (session ? session.price : null) : price !== "" && Number.isFinite(Number(price)) && Number(price) >= 0 ? Number(price) : null;
-  const tender = { cash: "cash", card: "card", instapay: "InstaPay", wallet: "wallet" }[effectivePay] ?? effectivePay;
+  const amount = dropInAmount(sale);
+  const tender = tenderLabel(effectivePay);
 
   const reset = () => {
     setCategory("");
@@ -91,48 +87,11 @@ export function DropIn({ embedded = false, initialClient = null }: { embedded?: 
     setNewEmail("");
   };
 
-  // Records the sale; throws on failure. `confirmed` re-sends after the desk
-  // has acknowledged the member's running plan.
-  const perform = async (confirmed: boolean) => {
-    if (mode === "class" && client && session) {
-      await desk.classDropIn(client.id, session.id, effectivePay, confirmed);
-      setDone(`${client.name} · ${session.title} · ${fmt(session.price)} EGP`);
-    } else {
-      const member = client ? { clientId: client.id } : { newClient: { name: newName.trim(), phone: newPhone.trim(), email: newEmail.trim().toLowerCase() } };
-      await desk.dropIn(member, category.trim(), Number(price), effectivePay, confirmed);
-      setDone(`${client ? client.name : `${newName.trim()} (new member · app invite ready)`} · ${category.trim()} · ${fmt(Number(price))} EGP`);
-    }
+  const recorded = (label: string) => {
+    setDone(label);
     reset();
   };
-
-  const submit = async () => {
-    setError(null);
-    if (mode === "class") {
-      if (!client) return setError("Link the member first — a class drop-in puts them on the roster.");
-      if (!session) return setError("Choose the class session.");
-    } else {
-      if (!client && !adding) return setError("Link the member or add their details — every walk-in is recorded against a member.");
-      if (newMember) {
-        if (!newName.trim() || !newPhone.trim()) return setError("Enter the member's name and phone number.");
-        if (!/^\S+@\S+\.\S+$/.test(newEmail.trim())) return setError("Enter the member's email — they sign in to the app with it.");
-      }
-      if (!category.trim()) return setError("Enter what the drop-in is for.");
-      const amount = Number(price);
-      if (price === "" || !Number.isFinite(amount) || amount < 0) return setError("Enter the price paid.");
-    }
-    setBusy(true);
-    try {
-      await perform(false);
-    } catch (err) {
-      if (err instanceof ApiError && err.code === "active_plan_confirm") {
-        setConfirmPlan(err.message);
-      } else {
-        setError(err instanceof Error ? err.message : "Something went wrong.");
-      }
-    } finally {
-      setBusy(false);
-    }
-  };
+  const submit = () => charge(sale, recorded);
 
   return (
     <div>
@@ -266,12 +225,12 @@ export function DropIn({ embedded = false, initialClient = null }: { embedded?: 
 
       <ConfirmSheet
         open={confirmPlan !== null}
-        onClose={() => setConfirmPlan(null)}
+        onClose={closeConfirm}
         kicker="PLAN STILL RUNNING"
         title="Charge a drop-in anyway?"
         sub={confirmPlan ?? ""}
         confirmLabel="Yes, charge the drop-in"
-        onConfirm={() => perform(true)}
+        onConfirm={() => chargeAnyway(sale, recorded)}
       />
     </div>
   );
@@ -279,7 +238,7 @@ export function DropIn({ embedded = false, initialClient = null }: { embedded?: 
 
 function PickClientSheet({ open, onClose, onPick }: { open: boolean; onClose: () => void; onPick: (c: ClientWithPackage) => void }) {
   const newClient = useNewClient();
-  const { data } = useAsync(() => (open ? desk.clients() : Promise.resolve(null)), [open]);
+  const { data } = usePickableClients(open);
   const { bundleTypes } = useFrontDeskCatalog();
   return (
     <Sheet open={open} onClose={onClose}>

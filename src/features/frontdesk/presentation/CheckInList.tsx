@@ -1,7 +1,7 @@
 import { atLocation, useCurrentLocation } from "../../../shared/locations";
 import { useMemo, useState } from "react";
-import { desk, useDeskClients } from "./hooks/useDesk";
-import type { ClientWithPackage } from "../../../shared/types";
+import { useDeskClients } from "./hooks/useDesk";
+import { useQuickCheckIn } from "./hooks/useCheckIn";
 import { Icon } from "../../../design-system/components/Icon";
 import { Spinner } from "../../../design-system/components/Spinner";
 import { EmptyState } from "../../../design-system/components/EmptyState";
@@ -9,10 +9,8 @@ import { SearchField } from "./shared";
 import { PlanPill } from "../../../shared/components/PlanPill";
 import { Card } from "../../../design-system/components/Card";
 import { matchesClient, planSummary } from "../../../shared/deskStatus";
-import { useFrontDeskCatalog } from "./members/offers";
+import { useFrontDeskCatalog } from "./hooks/useMembers";
 import "./CheckInList.css";
-
-type Result = { state: "busy" } | { state: "done"; note: string } | { state: "error"; text: string };
 
 /** Everyone, searchable, each with a Check in button — for the person who
  * walked in without scanning. Each row answers for itself. */
@@ -22,23 +20,11 @@ export function CheckInList() {
   const { data } = useDeskClients();
   const { bundleTypes } = useFrontDeskCatalog();
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<Record<string, Result>>({});
+  const { results, checkIn } = useQuickCheckIn(here?.id, (left) => (left ? `${left.left} of ${left.total} sessions left` : "Checked in"));
   // Only clients of the location she's working at.
   const { locations } = useCurrentLocation();
   const at = locations.length > 1 ? (here?.id ?? null) : null;
   const shown = useMemo(() => (data?.clients ?? []).filter((c) => atLocation(c.homeLocationId, at) && matchesClient(c, query)).slice(0, 40), [data, query, at]);
-
-  const checkIn = async (c: ClientWithPackage) => {
-    setResults((r) => ({ ...r, [c.id]: { state: "busy" } }));
-    try {
-      const res = await desk.checkIn(c.id, "manual", here?.id);
-      const p = res.plan;
-      const note = res.deducted && p ? `${p.creditsRemaining} of ${p.creditsTotal} sessions left` : "Checked in";
-      setResults((r) => ({ ...r, [c.id]: { state: "done", note } }));
-    } catch (err) {
-      setResults((r) => ({ ...r, [c.id]: { state: "error", text: err instanceof Error ? err.message : "Couldn't check in." } }));
-    }
-  };
 
   if (!data) return <Spinner />;
 

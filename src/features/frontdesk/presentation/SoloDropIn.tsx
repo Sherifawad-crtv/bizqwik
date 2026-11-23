@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { desk } from "./hooks/useDesk";
-import { useAsync } from "../../../shared/api/useAsync";
+import { useOrgSettings, useSoloDropIn } from "./hooks/useDropIn";
+import { soloDropInPrice } from "../domain/dropIn";
 import { useCurrentLocation } from "../../../shared/locations";
 import { fmt } from "../../../shared/format";
 import { Button } from "../../../design-system/components/Button";
@@ -17,21 +17,18 @@ type Method = "cash" | "instapay";
  * let in straight away. */
 export function SoloDropIn({ onDone }: { onDone: () => void }) {
   const navigate = useNavigate();
-  const settings = useAsync(() => desk.orgSettings(), []);
+  const settings = useOrgSettings();
   // With 2+ locations, the price (and the sale) is the current location's.
   const { locations, current } = useCurrentLocation();
   const here = locations.length > 1 ? (current?.id ?? null) : null;
   const [method, setMethod] = useState<Method | null>(null);
   // A location can sell several drop-ins (Kids / Adults): which one.
   const [kind, setKind] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { busy, error, record } = useSoloDropIn();
   const [done, setDone] = useState<Method | null>(null);
 
   if (!settings.data) return <Spinner />;
-  const options = here ? (settings.data.dropInOptions[here] ?? []) : [];
-  const chosen = options.find((o) => o.label === kind) ?? null;
-  const price = options.length > 0 ? (chosen?.price ?? null) : here ? (settings.data.dropInPrices[here] ?? null) : settings.data.dropInPrice;
+  const { options, chosen, price } = soloDropInPrice(settings.data, here, kind);
   const qr = settings.data.instapayQr;
 
   // Kids / Adults: pick which drop-in first.
@@ -63,16 +60,7 @@ export function SoloDropIn({ onDone }: { onDone: () => void }) {
 
   const confirm = async () => {
     if (!method) return;
-    setBusy(true);
-    setError(null);
-    try {
-      await desk.soloDropIn(method, here, chosen?.label);
-      setDone(method);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Couldn't record the drop-in.");
-    } finally {
-      setBusy(false);
-    }
+    if (await record(method, here, chosen?.label)) setDone(method);
   };
 
   if (done) {

@@ -4,8 +4,9 @@ import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../shared/auth";
 import { useSetHeader } from "../../../shared/screen/header";
-import { useAsync } from "../../../shared/api/useAsync";
-import { desk, useDeskClients } from "./hooks/useDesk";
+import { useDeskClients } from "./hooks/useDesk";
+import { useFrontDeskSummary, useQuickCheckIn, useUpcomingClasses } from "./hooks/useCheckIn";
+import { nextClasses, timeAgo } from "../domain/checkIn";
 import { HomeAvatar } from "../../../shared/components/HomeAvatar";
 import { Icon, type IconName } from "../../../design-system/components/Icon";
 import { Spinner } from "../../../design-system/components/Spinner";
@@ -21,7 +22,7 @@ import { CheckIn } from "./CheckIn";
 import { DropIn } from "./DropIn";
 import { Invitations } from "./Invitations";
 import { ConfirmCheckInSheet } from "./CheckIn";
-import { useFrontDeskCatalog } from "./members/offers";
+import { useFrontDeskCatalog } from "./hooks/useMembers";
 import { ClassRosterSheet } from "../../../shared/components/ClassRosterSheet";
 import { timeLabel, pad } from "../../../shared/classTime";
 import type { ClientWithPackage, GymClass } from "../../../shared/types";
@@ -37,14 +38,6 @@ const ACTIONS: { key: Modal; label: string; icon: IconName; primary?: boolean }[
   { key: "invite", label: "Guest invitation", icon: "gift" },
 ];
 
-function timeAgo(iso: string): string {
-  const mins = Math.max(0, Math.round((Date.now() - Date.parse(iso)) / 60000));
-  if (mins < 1) return "just now";
-  if (mins < 60) return `${mins} min ago`;
-  const hrs = Math.round(mins / 60);
-  return `${hrs} hr${hrs === 1 ? "" : "s"} ago`;
-}
-
 const clockOf = (iso: string) => {
   const d = new Date(iso);
   return timeLabel(`${pad(d.getHours())}:${pad(d.getMinutes())}`);
@@ -53,44 +46,21 @@ const clockOf = (iso: string) => {
 export function FrontDeskHome() {
   const { profile } = useAuth();
   const navigate = useNavigate();
-  const { data } = useAsync(() => desk.frontDeskSummary(), []);
+  const { data } = useFrontDeskSummary();
   const [modal, setModal] = useState<Modal | null>(null);
   const [query, setQuery] = useState("");
   const [picked, setPicked] = useState<ClientWithPackage | null>(null);
   const [roster, setRoster] = useState<GymClass | null>(null);
   const clients = useDeskClients();
-  const classes = useAsync(() => desk.classes(new Date(Date.now() - 2 * 3600000).toISOString()), []);
+  const classes = useUpcomingClasses();
   const { bundleTypes } = useFrontDeskCatalog();
   const { current: here } = useCurrentLocation();
   // Check-ins made straight from the search results (one tap, no sheet).
-  const [quick, setQuick] = useState<Record<string, { state: "busy" } | { state: "done"; note: string } | { state: "error"; text: string }>>({});
-  const quickCheckIn = async (c: ClientWithPackage) => {
-    setQuick((q) => ({ ...q, [c.id]: { state: "busy" } }));
-    try {
-      const res = await desk.checkIn(c.id, "manual", here?.id);
-      const p = res.plan;
-      setQuick((q) => ({ ...q, [c.id]: { state: "done", note: res.deducted && p ? `Checked in · ${p.creditsRemaining} of ${p.creditsTotal} left` : "Checked in" } }));
-    } catch (err) {
-      setQuick((q) => ({ ...q, [c.id]: { state: "error", text: err instanceof Error ? err.message : "Couldn't check in." } }));
-    }
-  };
+  const { results: quick, checkIn: quickCheckIn } = useQuickCheckIn(here?.id, (left) => (left ? `Checked in · ${left.left} of ${left.total} left` : "Checked in"));
   const matches = useMemo(() => (clients.data?.clients ?? []).filter((c) => matchesClient(c, query)).slice(0, 6), [clients.data, query]);
   // Today's next classes; once today is over, the next day that has any.
   const now = useNow();
-  const { nextUp, nextDay } = useMemo(() => {
-    const end = new Date(now);
-    end.setHours(23, 59, 59, 999);
-    const live = (classes.data?.classes ?? []).filter((c) => c.status !== "cancelled").sort((a, b) => Date.parse(a.startsAt) - Date.parse(b.startsAt));
-    const today = live.filter((c) => Date.parse(c.startsAt) + 3600000 >= now && Date.parse(c.startsAt) <= end.getTime());
-    if (today.length) return { nextUp: today.slice(0, 3), nextDay: null as string | null };
-    const later = live.filter((c) => Date.parse(c.startsAt) > end.getTime());
-    if (!later.length) return { nextUp: [], nextDay: null as string | null };
-    const first = new Date(later[0].startsAt);
-    const sameDay = (iso: string) => new Date(iso).toDateString() === first.toDateString();
-    const tomorrow = new Date(end.getTime() + 1);
-    const label = first.toDateString() === tomorrow.toDateString() ? "Tomorrow" : first.toLocaleDateString(undefined, { weekday: "long" });
-    return { nextUp: later.filter((c) => sameDay(c.startsAt)).slice(0, 3), nextDay: label };
-  }, [classes.data, now]);
+  const { nextUp, nextDay } = useMemo(() => nextClasses(classes.data?.classes ?? [], now), [classes.data, now]);
   // A check-in that turns out to need a drop-in hands the client over to it.
   const [dropInFor, setDropInFor] = useState<{ id: string; name: string } | null>(null);
   const close = () => {
@@ -231,7 +201,7 @@ export function FrontDeskHome() {
               <div className="bq-frontdesk-front-desk-home-title-4">{r.name}</div>
               <div className="bq-meta">{r.detail}</div>
             </div>
-            <span className="bq-frontdesk-front-desk-home-meta-6">{timeAgo(r.at)}</span>
+            <span className="bq-frontdesk-front-desk-home-meta-6">{timeAgo(r.at, now)}</span>
           </div>
         ))}
         {data.recent.length === 0 && (

@@ -1,10 +1,11 @@
 import { useCurrentLocation } from "../../../shared/locations";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useSetHeader } from "../../../shared/screen/header";
 import { useSheetSuccess } from "../../../design-system/components/useSheetSuccess";
 import { useLatch } from "../../../shared/useLatch";
-import { ApiError } from "../../../shared/api/backend";
-import { desk, useDeskClients } from "./hooks/useDesk";
+import { useDeskClients } from "./hooks/useDesk";
+import { useConfirmCheckIn } from "./hooks/useCheckIn";
+import { checkInState } from "../domain/checkIn";
 import type { ClientWithPackage } from "../../../shared/types";
 import { Button } from "../../../design-system/components/Button";
 import { Sheet } from "../../../design-system/components/Sheet";
@@ -15,17 +16,13 @@ import { PlanPill } from "../../../shared/components/PlanPill";
 import { ErrorBanner } from "../../../design-system/components/ErrorBanner";
 import { planSummary } from "../../../shared/deskStatus";
 import { ClientSheet } from "./members/ClientSheet";
-import { useFrontDeskCatalog, useSellableCoaches } from "./members/offers";
+import { useFrontDeskCatalog, useSellableCoaches } from "./hooks/useMembers";
 import { useNewClient } from "./NewClientModal";
 import { DropIn } from "./DropIn";
 import { SheetHeading } from "./shared";
 import { dateLabel } from "../../../shared/format";
 import { useNow } from "../../../shared/useNow";
 import "./CheckIn.css";
-
-const hasActivePlan = (c: ClientWithPackage) => !!c.groupPlan || c.currentPackage?.status === "active";
-// A class bundle with nothing left can't be checked in on (unless PT covers them).
-const bundleEmpty = (c: ClientWithPackage) => c.groupPlan?.kind === "bundle" && (c.groupPlan.creditsRemaining ?? 0) <= 0;
 
 // Clients normally check themselves in by scanning the desk's QR code in the
 // client app; this is the desk's manual fallback.
@@ -66,9 +63,7 @@ export function ConfirmCheckInSheet({ client, onClose, onDropIn }: { client: Cli
   const shown = useLatch(client);
   const open = !!client;
   const now = useNow();
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [noSessions, setNoSessions] = useState<string | null>(null);
+  const { busy, error, usedUp: noSessions, clearUsedUp, confirm: checkIn } = useConfirmCheckIn(client, here?.id);
   const [doneLabel, setDoneLabel] = useState("");
   const { planTypes, series, bundleTypes } = useFrontDeskCatalog();
   const coaches = useSellableCoaches();
@@ -84,53 +79,21 @@ export function ConfirmCheckInSheet({ client, onClose, onDropIn }: { client: Cli
     window.setTimeout(() => setSellOpen(true), 260);
   };
   const endSell = () => {
-    setNoSessions(null);
+    clearUsedUp();
     setSellOpen(false);
     window.setTimeout(() => setSell(null), 260);
   };
 
-  useEffect(() => {
-    if (!client) return;
-    setError(null);
-    setNoSessions(null);
-    // A bundle that ran out is no longer "active", so look at their latest
-    // plan to say exactly why they can't check in.
-    if (hasActivePlan(client)) return;
-    let alive = true;
-    desk.clientPlans(client.id).then((r) => {
-      const last = r.plans[0];
-      if (alive && last && last.kind === "bundle" && (last.creditsRemaining ?? 0) <= 0 && Date.parse(last.expiresAt) > Date.now()) {
-        setNoSessions(`${client.name} has used all ${last.creditsTotal} sessions of ${last.name}.`);
-      }
-    }).catch(() => undefined);
-    return () => {
-      alive = false;
-    };
-  }, [client]);
-
   if (!shown) return null;
   const current = fresh ?? shown;
   const plan = planSummary(current, bundleTypes);
-  const bundle = current.groupPlan?.kind === "bundle" ? current.groupPlan : null;
-  const empty = bundleEmpty(current) && current.currentPackage?.status !== "active";
-  // A frozen plan can't be checked in on until it restarts (a PT package still can).
-  const frozenUntil = current.groupPlan?.frozenUntil && Date.parse(current.groupPlan.frozenUntil) > now && current.currentPackage?.status !== "active" ? current.groupPlan.frozenUntil : null;
-  const eligible = hasActivePlan(current) && !empty && !noSessions && !frozenUntil;
+  const { bundle, empty, frozenUntil, eligible } = checkInState(current, noSessions, now);
 
   const confirm = async () => {
-    setBusy(true);
-    setError(null);
-    try {
-      const res = await desk.checkIn(shown.id, "manual", here?.id);
-      const p = res.plan;
-      setDoneLabel(res.deducted && p ? `${shown.name} checked in · ${p.creditsRemaining} of ${p.creditsTotal} sessions left` : `${shown.name} checked in`);
-      showSuccess();
-    } catch (err) {
-      if (err instanceof ApiError && err.code === "no_sessions") setNoSessions(err.message);
-      else setError(err instanceof Error ? err.message : "Something went wrong.");
-    } finally {
-      setBusy(false);
-    }
+    const left = await checkIn(shown.id);
+    if (left === false) return;
+    setDoneLabel(left ? `${shown.name} checked in · ${left.left} of ${left.total} sessions left` : `${shown.name} checked in`);
+    showSuccess();
   };
 
   return (

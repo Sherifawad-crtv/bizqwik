@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from "react";
 import { useDeskClients } from "./hooks/useDesk";
 import { CreateClientSheet } from "./members/CreateClientSheet";
-import { useFrontDeskCatalog, useSellableCoaches } from "./members/offers";
+import { useFrontDeskCatalog, useSellableCoaches } from "./hooks/useMembers";
 
 /** The new-client flow, with what it needs loaded only while it's open. */
 export function NewClientModal({ onClose }: { onClose: () => void }) {

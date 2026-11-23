@@ -1,8 +1,8 @@
 import { useMountedThroughExit } from "../../../../shared/useLatch";
 import { useEffect, useState } from "react";
 import { useSheetSuccess } from "../../../../design-system/components/useSheetSuccess";
-import { type SalePartner } from "../../../../shared/api/backend";
-import { desk } from "../hooks/useDesk";
+import type { SalePartner } from "../../../../shared/api/backend";
+import { useCreateClient } from "../hooks/useMembers";
 import { fmt } from "../../../../shared/format";
 import type { BundleType, ClassSeries, CoachOption, GroupPlanType } from "../../../../shared/types";
 import { useCurrentLocation, useLocations } from "../../../../shared/locations";
@@ -17,11 +17,10 @@ import { useAuth } from "../../../../shared/auth";
 import { SheetHeading } from "../shared";
 import { ErrorBanner } from "../../../../design-system/components/ErrorBanner";
 import { Card } from "../../../../design-system/components/Card";
-import { type PlanKind, bundleOptions, coachOptions, offerOf } from "./offers";
+import { bundleOptions, coachOptions } from "./offers";
+import { NEW_CLIENT_STEPS as CREATE_STEPS, chosenOffer, isSoloOwner, newClientProblem, normalEmail, sharedTypeOf, type PlanKind } from "../../domain/members";
 import { GroupOfferSelect, PartnerPicker } from "./partners";
 import "./CreateClientSheet.css";
-
-const CREATE_STEPS = ["Client info", "Package", "Payment", "Summary"] as const;
 
 /** New client, one thing at a time: who they are, what they're buying, how
  * they pay, then a summary to check before anything is created. */
@@ -54,28 +53,22 @@ export function CreateClientSheet({
   const [coachId, setCoachId] = useState("");
   const [payMethod, setPayMethod] = useState<PayMethod>("cash");
   const [partners, setPartners] = useState<SalePartner[]>([]);
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const createLocations = useLocations();
   const { current: createCurrent } = useCurrentLocation();
   const createHere = createLocations.length > 1 ? (createCurrent?.id ?? null) : null;
   // A solo owner is the trainer on every PT package she sells.
-  const soloTrainer = profile?.role === "dept_head" && orgMode === "solo" ? (coaches[0]?.id ?? "") : "";
+  const soloTrainer = isSoloOwner(profile?.role, orgMode) ? (coaches[0]?.id ?? "") : "";
   useEffect(() => {
     if (soloTrainer && coachId !== soloTrainer) setCoachId(soloTrainer);
   }, [soloTrainer, coachId]);
-  // Set once the client exists, so a retry after a failed invite only re-sends the invite.
-  const [createdId, setCreatedId] = useState<string | null>(null);
-  // New partners of a shared sale still to be invited (a failed invite is retried on resubmit).
-  const [pendingInvites, setPendingInvites] = useState<{ id: string; email: string }[]>([]);
   const { confirmed, iconIn, showSuccess } = useSheetSuccess(open, onClose);
+  const { busy, error, setError, created, reset, submit: create } = useCreateClient(showSuccess);
 
   useEffect(() => {
     if (open) {
       setStep(0);
-      setCreatedId(null);
+      reset();
       setPartners([]);
-      setPendingInvites([]);
       setKind("plan");
       setName("");
       setPhone("");
@@ -84,30 +77,15 @@ export function CreateClientSheet({
       setBundleTypeId("");
       setCoachId("");
       setPayMethod("cash");
-      setError(null);
     }
-  }, [open]);
+  }, [open, reset]);
 
   if (!mounted) return null;
 
-  const mail = email.trim().toLowerCase();
-  const sharedType = kind === "plan" && offer.startsWith("pt:") ? (planTypes.find((t) => t.id === offer.slice(3) && t.sharedSeats) ?? null) : null;
-
-  // What's wrong with a step, if anything. Email is how the client signs in
-  // to the member app, so it's required.
-  const problem = (s: number): string | null => {
-    if (s === 0) {
-      if (!name.trim() || !phone.trim()) return "Name and phone number are required.";
-      if (!/^\S+@\S+\.\S+$/.test(mail)) return "Enter the client's email — they sign in to the app with it.";
-      if (!createdId && takenEmails.some((e) => e.trim().toLowerCase() === mail)) return "Another client already uses this email.";
-    }
-    if (s === 1) {
-      if (kind === "plan" && !offer) return "Choose a plan.";
-      if (sharedType && partners.length < sharedType.sharedSeats! - 1) return "Choose who this client shares the plan with.";
-      if (kind === "service" && (!bundleTypeId || !coachId)) return "Choose a package and a coach.";
-    }
-    return null;
-  };
+  const mail = normalEmail(email);
+  const sharedType = kind === "plan" ? sharedTypeOf(offer, planTypes) : null;
+  const form = { name, phone, email, kind, offer, bundleTypeId, coachId };
+  const problem = (s: number) => newClientProblem(s, form, { sharedType, partners: partners.length, created, takenEmails });
 
   const next = () => {
     const msg = problem(step);
@@ -120,66 +98,9 @@ export function CreateClientSheet({
     setStep(step - 1);
   };
 
-  const submit = async () => {
-    const msg = problem(0) ?? problem(1);
-    if (msg) return setError(msg);
-    const fields = { name: name.trim(), phone: phone.trim(), email: mail };
-    setBusy(true);
-    setError(null);
-    try {
-      let clientId = createdId;
-      let invites = pendingInvites;
-      if (!clientId) {
-        const res = kind === "plan" ? await desk.sellGroupPlan(fields, offerOf(offer), payMethod, sharedType ? partners : undefined) : await desk.createServiceClient(fields, bundleTypeId, coachId, payMethod);
-        clientId = res.client.id;
-        setCreatedId(clientId);
-        const shared = "sharedWith" in res ? res.sharedWith : undefined;
-        invites = partners.flatMap((p, i) => ("email" in p && shared?.[i] ? [{ id: shared[i].id, email: p.email }] : []));
-        setPendingInvites(invites);
-        // A new client belongs to the location she's working at.
-        if (createHere) await desk.setClientLocation(clientId, createHere).catch(() => undefined);
-      }
-      // Register the app invite so the client can sign up with this email.
-      try {
-        await desk.inviteClient(clientId, mail);
-      } catch (err) {
-        setError(`Client created, but the app invite failed: ${err instanceof Error ? err.message : "try again"}. Submitting again only re-sends the invite.`);
-        return;
-      }
-      // The shared bundle's new partners need theirs too.
-      for (const inv of invites) {
-        try {
-          await desk.inviteClient(inv.id, inv.email);
-        } catch (err) {
-          setError(`Sold, but an app invite failed: ${err instanceof Error ? err.message : "try again"}. Submitting again only re-sends the invites.`);
-          return;
-        }
-        invites = invites.filter((x) => x.id !== inv.id);
-        setPendingInvites(invites);
-      }
-      showSuccess();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong.");
-    } finally {
-      setBusy(false);
-    }
-  };
+  const submit = () => create(form, { sharedType, partners, payMethod, here: createHere, takenEmails });
 
-  // The chosen package as the summary describes it.
-  const chosen = (() => {
-    if (kind === "plan") {
-      if (offer.startsWith("cs:")) {
-        const x = series.find((r) => r.id === offer.slice(3));
-        return x ? { title: `${x.title} monthly`, detail: "1 month", price: x.monthlyPrice } : null;
-      }
-      const t = planTypes.find((r) => r.id === offer.slice(3));
-      if (!t) return null;
-      const months = `${t.durationMonths} month${t.durationMonths === 1 ? "" : "s"}`;
-      return { title: t.name, detail: t.kind === "bundle" ? `${t.sharedSeats ? `${t.credits! / t.sharedSeats} classes each` : `${t.credits} classes`} · ${months}` : `All classes · ${months}`, price: t.price };
-    }
-    const b = bundleTypes.find((r) => r.id === bundleTypeId);
-    return b ? { title: b.name, detail: `${b.sessionsIncluded} PT sessions`, price: b.price } : null;
-  })();
+  const chosen = chosenOffer(form, planTypes, series, bundleTypes);
   const coachName = coaches.find((c) => c.id === coachId)?.name ?? null;
 
   return (

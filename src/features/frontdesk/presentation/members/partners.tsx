@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { type SalePartner } from "../../../../shared/api/backend";
+import type { SalePartner } from "../../../../shared/api/backend";
 import { useDeskClients } from "../hooks/useDesk";
 import { fmt } from "../../../../shared/format";
 import type { ClassSeries, GroupPlanType } from "../../../../shared/types";
