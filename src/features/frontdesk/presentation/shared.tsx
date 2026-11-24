@@ -10,15 +10,6 @@ import "./shared.css";
 
 
 
-export function SheetHeading({ kicker, title }: { kicker: string; title: string }) {
-  return (
-    <>
-      <div className="bq-label">{kicker}</div>
-      <div className="bq-title bq-rise">{title}</div>
-    </>
-  );
-}
-
 /** The "see everything" link that belongs opposite a section's title (the
  * `right` of SectionHeader), never stranded under its list. */
 export function SectionLink({ children, onClick }: { children: ReactNode; onClick: () => void }) {

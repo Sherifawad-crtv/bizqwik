@@ -16,7 +16,7 @@ import { PaymentSelect } from "../../../../shared/components/PaymentSelect";
 import { Icon } from "../../../../design-system/components/Icon";
 import type { PayMethod } from "../../../../shared/types";
 import { useAuth } from "../../../../shared/auth";
-import { SheetHeading } from "../shared";
+import { SheetHeading } from "../../../../design-system/components/SheetHeading";
 import { PlanPill } from "../../../../shared/components/PlanPill";
 import { ErrorBanner } from "../../../../design-system/components/ErrorBanner";
 import { endingSoon, planSummary, renewalMessage, whatsappUrl } from "../../../../shared/deskStatus";

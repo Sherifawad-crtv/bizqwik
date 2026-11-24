@@ -19,7 +19,7 @@ import { ClientSheet } from "./members/ClientSheet";
 import { useFrontDeskCatalog, useSellableCoaches } from "./hooks/useMembers";
 import { useNewClient } from "./NewClientModal";
 import { DropIn } from "./DropIn";
-import { SheetHeading } from "./shared";
+import { SheetHeading } from "../../../design-system/components/SheetHeading";
 import { dateLabel } from "../../../shared/format";
 import { useNow } from "../../../shared/useNow";
 import "./CheckIn.css";

@@ -4,7 +4,8 @@ import { Sheet } from "../../design-system/components/Sheet";
 import { Button } from "../../design-system/components/Button";
 import { FabButton } from "./FabButton";
 import { ScanFlow } from "../../shared/components/ScanFlow";
-import { CheckInList, NewClientModal, SheetHeading, SoloDropIn } from "../../features/frontdesk";
+import { CheckInList, NewClientModal, SoloDropIn } from "../../features/frontdesk";
+import { SheetHeading } from "../../design-system/components/SheetHeading";
 import "./SoloFab.css";
 
 type SoloAction = "new" | "dropin" | "checkin" | "scan";

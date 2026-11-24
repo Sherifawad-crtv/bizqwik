@@ -14,7 +14,7 @@ import { TextField, SelectField } from "../../../../design-system/components/For
 import { PaymentCards } from "../../../../shared/components/PaymentCards";
 import type { PayMethod } from "../../../../shared/types";
 import { useAuth } from "../../../../shared/auth";
-import { SheetHeading } from "../shared";
+import { SheetHeading } from "../../../../design-system/components/SheetHeading";
 import { ErrorBanner } from "../../../../design-system/components/ErrorBanner";
 import { Card } from "../../../../design-system/components/Card";
 import { bundleOptions, coachOptions } from "./offers";

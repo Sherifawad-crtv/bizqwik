@@ -8,6 +8,5 @@ export { FrontDeskHome } from "./presentation/FrontDeskHome";
 export { Invitations } from "./presentation/Invitations";
 export { Members } from "./presentation/Members";
 export { NewClientModal } from "./presentation/NewClientModal";
-export { SheetHeading } from "./presentation/shared";
 export { SoloDropIn } from "./presentation/SoloDropIn";
 export { SoloHome } from "./presentation/SoloHome";

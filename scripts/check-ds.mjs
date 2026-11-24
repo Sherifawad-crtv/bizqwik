@@ -7,7 +7,8 @@
 // 3. Import boundaries: features use design-system and shared, never another
 //    feature or the app frame; shared never reaches into features or app; the
 //    design system never reaches into features, app or shared components.
-//    Inside a feature, the layers keep their direction (see 3b below).
+//    Inside a feature, the layers keep their direction (see 3b below); from
+//    outside, a feature is used only through its index.ts or routes/ (3c).
 // 4. Hand-built versions of things the library covers (a row divider, a styled
 //    <button>, a big number) and values a token should cover (raw colours, font
 //    sizes, corner radii, off-scale spacing) and static inline styles may not
@@ -32,7 +33,7 @@ for (const f of LIB_DIRS.flatMap((d) => readdirSync(d).filter((f) => f.endsWith(
 }
 
 // 2. no local copies of library components outside the library
-const LIB = ["Card", "SectionCard", "ListRow", "SectionHeader", "SectionTitle", "Chip", "ChipGroup", "Tag", "StatusBadge", "IconButton", "ErrorBanner", "Button", "Sheet", "EmptyState"];
+const LIB = ["Card", "SectionCard", "ListRow", "SectionHeader", "SectionTitle", "Chip", "ChipGroup", "Tag", "StatusBadge", "IconButton", "ErrorBanner", "Button", "Sheet", "SheetHeading", "EmptyState"];
 for (const f of files.filter((f) => !LIB_DIRS.some((d) => f.startsWith(d)))) {
   for (const m of read(f).matchAll(/(?:^|\n)\s*(?:export )?function ([A-Z]\w*)\b/g)) {
     if (LIB.includes(m[1])) errors.push(`${f}: defines its own ${m[1]}; use the one in src/design-system/components (see DESIGN_SYSTEM.md)`);
@@ -77,6 +78,20 @@ for (const f of files.filter((f) => f.startsWith("src/features/"))) {
     if (from === "data" && to === "presentation") bad = "data/ may not use presentation/";
     if (from === "presentation" && !isHook && (to === "data" || (!typeOnly && /^src\/shared\/api\//.test(target)))) bad = "screens reach data/ only through presentation/hooks/";
     if (bad) errors.push(`${f}: imports ${spec} (${bad})`);
+  }
+}
+
+// 3c. a feature's public entry points: code outside features/<x>/ imports it
+//     only through features/<x> (its index.ts) or features/<x>/routes/<Screen>
+//     (lazy-loaded screens, one file each so each gets its own chunk).
+for (const f of files) {
+  for (const m of read(f).matchAll(/(?:from|import)\s*\(?\s*["'](\.{1,2}\/[^"']+)["']/g)) {
+    const target = join(f, "..", m[1]).replace(/\\/g, "/");
+    const hit = /^src\/features\/([^/]+)(?:\/(.*))?$/.exec(target);
+    if (!hit || f.startsWith(`src/features/${hit[1]}/`)) continue;
+    const rest = hit[2] ?? "";
+    if (rest === "" || rest === "index" || rest === "index.ts" || /^routes\/[^/]+$/.test(rest)) continue;
+    errors.push(`${f}: imports ${m[1]} (use features/${hit[1]} — its index.ts — or features/${hit[1]}/routes/*, not a file inside the feature)`);
   }
 }
 

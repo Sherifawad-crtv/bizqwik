@@ -232,6 +232,7 @@ Cards don't have shadows.
 |---|---|---|
 | A bottom sheet (dialog on desktop) | `Sheet` | drag to dismiss, "Discard changes?" built in |
 | "Are you sure?" | `ConfirmSheet` | |
+| A sheet's heading (kicker over title) | `SheetHeading` | |
 | A done tick at the end of a save | `SheetSuccessIcon` + `useSheetSuccess` (`quiet` for routine edits) | |
 
 ### Data display
