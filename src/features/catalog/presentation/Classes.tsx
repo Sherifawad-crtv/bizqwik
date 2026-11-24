@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { egp } from "../../../shared/format";
-import { timeLabel, weekdaysLabel } from "../../../shared/classTime";
+import { timeLabel, weekdaysLabel } from "../../../shared/domain/classTime";
 import type { ClassSeries, Location } from "../../../shared/types";
-import { LocationPill, useLocations } from "../../../shared/locations";
+import { LocationPill, useLocations } from "../../../shared/session/locations";
 import { Button } from "../../../design-system/components/Button";
 import { Icon } from "../../../design-system/components/Icon";
 import { Spinner } from "../../../design-system/components/Spinner";

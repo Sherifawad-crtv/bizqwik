@@ -1,5 +1,5 @@
 import { useSave } from "../../../../shared/api/useSave";
-import { checkNewPassword, checkPasswordLength } from "../../../../shared/passwordRules";
+import { checkNewPassword, checkPasswordLength } from "../../../../shared/domain/passwordRules";
 import { authRepository as repo } from "../../data/authRepository";
 
 /** Create an account, then sign in with it (sign-up doesn't start a session). */

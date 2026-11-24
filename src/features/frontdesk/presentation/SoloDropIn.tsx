@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useOrgSettings, useSoloDropIn } from "./hooks/useDropIn";
 import { soloDropInPrice } from "../domain/dropIn";
-import { useCurrentLocation } from "../../../shared/locations";
+import { useCurrentLocation } from "../../../shared/session/locations";
 import { fmt } from "../../../shared/format";
 import { Button } from "../../../design-system/components/Button";
 import { Icon } from "../../../design-system/components/Icon";

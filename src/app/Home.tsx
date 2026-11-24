@@ -1,5 +1,5 @@
 import { Navigate } from "react-router-dom";
-import { useAuth } from "../shared/auth";
+import { useAuth } from "../shared/session/auth";
 import { CoachWallet } from "../features/coaches";
 import { FrontDeskHome, SoloHome } from "../features/frontdesk";
 

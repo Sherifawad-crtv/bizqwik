@@ -1,18 +1,18 @@
-import { useFrozen, useMountedThroughExit } from "../useLatch";
+import { useFrozen, useMountedThroughExit } from "../hooks/useLatch";
 import { useEffect, useState } from "react";
 import { useSheetSuccess } from "../../design-system/components/useSheetSuccess";
 import { api } from "../api/backend";
-import { WEEKDAY_ORDER, WEEKDAY_SHORT } from "../classTime";
+import { WEEKDAY_ORDER, WEEKDAY_SHORT } from "../domain/classTime";
 import { TimeWheelField } from "../../design-system/components/TimeWheelField";
 import { ClassPhotoField } from "./ClassPhotoField";
 import type { ClassSeries } from "../types";
-import { LocationField, useCurrentLocation, useLocations } from "../locations";
+import { LocationField, useCurrentLocation, useLocations } from "../session/locations";
 import { Button } from "../../design-system/components/Button";
 import { Sheet } from "../../design-system/components/Sheet";
 import { ConfirmSheet } from "../../design-system/components/ConfirmSheet";
 import { TextField, SelectField } from "../../design-system/components/FormField";
 import { SheetSuccessIcon } from "../../design-system/components/SheetSuccessIcon";
-import { useAuth } from "../auth";
+import { useAuth } from "../session/auth";
 import "./SeriesSheet.css";
 
 function WeekdayPicker({ value, onChange }: { value: number[]; onChange: (v: number[]) => void }) {

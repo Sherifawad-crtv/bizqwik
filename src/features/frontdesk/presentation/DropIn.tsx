@@ -4,7 +4,7 @@ import { useSetHeader } from "../../../shared/screen/header";
 import { useDropIn, useDropInClasses, usePickableClients } from "./hooks/useDropIn";
 import { dropInAmount, dropInSessions, effectivePay as payableWith, isNewMember, nextSessionId as firstSessionId, tenderLabel, type DropInMode, type DropInSale } from "../domain/dropIn";
 import { fmt } from "../../../shared/format";
-import { whenLabel } from "../../../shared/classTime";
+import { whenLabel } from "../../../shared/domain/classTime";
 import type { ClientWithPackage } from "../../../shared/types";
 import { Button } from "../../../design-system/components/Button";
 import { Sheet } from "../../../design-system/components/Sheet";
@@ -19,7 +19,7 @@ import { Card } from "../../../design-system/components/Card";
 import { useNewClient } from "./NewClientModal";
 import { useFrontDeskCatalog } from "./hooks/useMembers";
 import type { PayMethod } from "../../../shared/types";
-import { useNow } from "../../../shared/useNow";
+import { useNow } from "../../../shared/hooks/useNow";
 import "./DropIn.css";
 
 type Mode = DropInMode;

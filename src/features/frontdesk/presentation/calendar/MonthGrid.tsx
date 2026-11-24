@@ -1,4 +1,4 @@
-import { WEEKDAY_ORDER, WEEKDAY_SHORT } from "../../../../shared/classTime";
+import { WEEKDAY_ORDER, WEEKDAY_SHORT } from "../../../../shared/domain/classTime";
 import type { GymClass } from "../../../../shared/types";
 import { addDays, clock, dayKey } from "../../domain/calendar";
 import "./MonthGrid.css";

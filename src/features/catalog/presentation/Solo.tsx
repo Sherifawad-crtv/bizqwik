@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { fmt } from "../../../shared/format";
-import { useCurrentLocation } from "../../../shared/locations";
+import { useCurrentLocation } from "../../../shared/session/locations";
 import { Button } from "../../../design-system/components/Button";
 import { Icon } from "../../../design-system/components/Icon";
 import { Sheet } from "../../../design-system/components/Sheet";
 import { TextField } from "../../../design-system/components/FormField";
-import { canvasToDataUrl } from "../../../shared/image";
+import { canvasToDataUrl } from "../../../shared/platform/image";
 import { IconButton } from "../../../design-system/components/IconButton";
 import { dropInDraft } from "../domain/catalog";
 import { useCatalogHere, useLocationActions, useLocationList, useOrgSettings, useSoloSettingsActions } from "./hooks/useCatalog";

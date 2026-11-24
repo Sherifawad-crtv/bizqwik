@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { useAuth } from "../../../shared/auth";
-import { useOwnMonth } from "../../../shared/ownMonth";
+import { useAuth } from "../../../shared/session/auth";
+import { useOwnMonth } from "../../../shared/session/ownMonth";
 import { useIsMobile } from "../../../design-system/hooks/useIsMobile";
 import { isHead } from "../../../shared/types";
 import { fmt } from "../../../shared/format";

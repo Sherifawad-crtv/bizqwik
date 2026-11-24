@@ -2,13 +2,13 @@ import { cx } from "../../../design-system/cx";
 import { useEffect, useState } from "react";
 import { SwitchVisual } from "../../../design-system/components/Switch";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../../shared/auth";
+import { useAuth } from "../../../shared/session/auth";
 import { useSetHeader } from "../../../shared/screen/header";
 import { Avatar } from "../../../design-system/components/Avatar";
 import { Button } from "../../../design-system/components/Button";
 import { Icon, type IconName } from "../../../design-system/components/Icon";
 import { ROLE_LABELS } from "../../../shared/types";
-import { cachedPushOn, disablePush, enablePush, isIOS, isStandalone, primePushState, pushSupported, syncPushSubscriptionInBackground } from "../../../shared/push";
+import { cachedPushOn, disablePush, enablePush, isIOS, isStandalone, primePushState, pushSupported, syncPushSubscriptionInBackground } from "../../../shared/platform/push";
 import "./Account.css";
 
 export function Account() {

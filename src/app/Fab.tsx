@@ -1,4 +1,4 @@
-import { useAuth } from "../shared/auth";
+import { useAuth } from "../shared/session/auth";
 import { isSoloOwner } from "../shared/screen/nav";
 import { FabButton } from "./fab/FabButton";
 import { CreateFab } from "./fab/CreateFab";

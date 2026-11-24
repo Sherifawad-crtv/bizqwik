@@ -1,4 +1,4 @@
-import { useAuth } from "../../../shared/auth";
+import { useAuth } from "../../../shared/session/auth";
 import { useSetHeader } from "../../../shared/screen/header";
 import { Spinner } from "../../../design-system/components/Spinner";
 import { useClients } from "./hooks/useClients";

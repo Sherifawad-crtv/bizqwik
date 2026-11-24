@@ -2,7 +2,7 @@ import { useCallback, useState, type ReactNode } from "react";
 import { AddSessionSheet } from "./AddSessionSheet";
 import { Sheet } from "../../design-system/components/Sheet";
 import { Button } from "../../design-system/components/Button";
-import { useAuth } from "../auth";
+import { useAuth } from "../session/auth";
 import { useAsync } from "../api/useAsync";
 import { api } from "../api/backend";
 import { QrScanner } from "../../design-system/components/QrScanner";

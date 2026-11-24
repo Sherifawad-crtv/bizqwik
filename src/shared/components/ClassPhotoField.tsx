@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { supabase } from "../api/supabaseClient";
-import { classCardCrop, extOf } from "../image";
-import { useAuth } from "../auth";
+import { classCardCrop, extOf } from "../platform/image";
+import { useAuth } from "../session/auth";
 import { Icon } from "../../design-system/components/Icon";
 import { Button } from "../../design-system/components/Button";
 import "./ClassPhotoField.css";

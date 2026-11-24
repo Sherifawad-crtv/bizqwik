@@ -7,7 +7,7 @@ import { Sheet } from "../../../design-system/components/Sheet";
 import { DateField } from "../../../design-system/components/DateField";
 import { NO_FILTERS, filterClients, planOptions, type ClientFilters, type ExpiryFilter, type SortKey, type StatusFilter } from "../domain/clientFilters";
 import { plusDays } from "../domain/clientText";
-import { useNow } from "../../../shared/useNow";
+import { useNow } from "../../../shared/hooks/useNow";
 import { Chip } from "../../../design-system/components/Chip";
 import "./Filters.css";
 

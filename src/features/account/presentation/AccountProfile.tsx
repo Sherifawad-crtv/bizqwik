@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
-import { useAuth } from "../../../shared/auth";
+import { useAuth } from "../../../shared/session/auth";
 import { useSetHeader } from "../../../shared/screen/header";
-import { squareCrop } from "../../../shared/image";
+import { squareCrop } from "../../../shared/platform/image";
 import { checkName, nameChanged } from "../domain/profile";
 import { usePhoto, useRename } from "./hooks/useAccountActions";
 import { Avatar } from "../../../design-system/components/Avatar";

@@ -1,7 +1,7 @@
 import { auth } from "../../../shared/api/backend";
 import { callFn } from "../../../shared/api/core";
 import { supabase } from "../../../shared/api/supabaseClient";
-import { extOf } from "../../../shared/image";
+import { extOf } from "../../../shared/platform/image";
 import type { Profile } from "../../../shared/types";
 
 // Data layer: the server calls the account screens make. Profile updates and

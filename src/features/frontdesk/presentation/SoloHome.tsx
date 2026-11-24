@@ -1,26 +1,26 @@
 import { cx } from "../../../design-system/cx";
 import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../../shared/auth";
+import { useAuth } from "../../../shared/session/auth";
 import { useSetHeader } from "../../../shared/screen/header";
 import { setSticky } from "../../../design-system/hooks/useSticky";
 import { useDeskClients } from "./hooks/useDesk";
 import { useBundleTypes, useLocationRevenue, useRevenue, useSoloClasses } from "./hooks/useSchedule";
 import { memberCounts, revenueMonths, revenueTrend, soloNextUp } from "../domain/schedule";
 import { fmt } from "../../../shared/format";
-import { timeLabel, pad } from "../../../shared/classTime";
+import { timeLabel, pad } from "../../../shared/domain/classTime";
 import { HomeAvatar } from "../../../shared/components/HomeAvatar";
 import { EmptyState } from "../../../design-system/components/EmptyState";
 import { Icon, type IconName } from "../../../design-system/components/Icon";
 import { Spinner } from "../../../design-system/components/Spinner";
 import { RevenueChart } from "../../../shared/components/MoneyCharts";
-import { LocationSwitcher, useCurrentLocation } from "../../../shared/locations";
+import { LocationSwitcher, useCurrentLocation } from "../../../shared/session/locations";
 import { PaymentRequestsCard } from "./PaymentRequests";
 import { SectionLink } from "./shared";
 import { Card } from "../../../design-system/components/Card";
 import { SectionHeader } from "../../../design-system/components/SectionHeader";
-import { endingSoon, planSummary } from "../../../shared/deskStatus";
-import { useNow } from "../../../shared/useNow";
+import { endingSoon, planSummary } from "../../../shared/domain/deskStatus";
+import { useNow } from "../../../shared/hooks/useNow";
 import "./SoloHome.css";
 
 const clockOf = (iso: string) => {

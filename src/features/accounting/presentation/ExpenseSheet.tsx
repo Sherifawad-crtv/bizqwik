@@ -1,9 +1,9 @@
 import { SwitchVisual } from "../../../design-system/components/Switch";
 import { Reveal } from "../../../design-system/components/Reveal";
 import { useEffect, useRef, useState } from "react";
-import { useLatch } from "../../../shared/useLatch";
+import { useLatch } from "../../../shared/hooks/useLatch";
 import { useSheetSuccess } from "../../../design-system/components/useSheetSuccess";
-import { receiptDataUrl } from "../../../shared/image";
+import { receiptDataUrl } from "../../../shared/platform/image";
 import type { Expense, ExpenseCategory } from "../domain/types";
 import { Button } from "../../../design-system/components/Button";
 import { Icon } from "../../../design-system/components/Icon";

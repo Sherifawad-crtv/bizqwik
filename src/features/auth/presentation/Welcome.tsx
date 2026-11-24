@@ -1,7 +1,7 @@
 import { Navigate, useNavigate } from "react-router-dom";
-import { useAuth } from "../../../shared/auth";
+import { useAuth } from "../../../shared/session/auth";
 import { useIsMobile } from "../../../design-system/hooks/useIsMobile";
-import { hasSeenWelcome, markWelcomed } from "../../../shared/welcome";
+import { hasSeenWelcome, markWelcomed } from "../../../shared/session/welcome";
 import hero from "../../../assets/welcome.webp";
 import "./Welcome.css";
 

@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react";
-import { useAuth } from "../shared/auth";
+import { useAuth } from "../shared/session/auth";
 import { waitForFirstScreen } from "../shared/api/useAsync";
-import { track } from "../shared/analytics";
+import { track } from "../shared/platform/analytics";
 import "./Splash.css";
 
 /** The launch screen: the full Bizqwik logo with a small spinner under it.

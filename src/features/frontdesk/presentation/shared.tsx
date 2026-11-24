@@ -3,7 +3,7 @@ import { useMemo, useState, type ReactNode } from "react";
 import { Icon } from "../../../design-system/components/Icon";
 import { EmptyState } from "../../../design-system/components/EmptyState";
 import type { BundleType, ClientWithPackage } from "../../../shared/types";
-import { planSummary, matchesClient } from "../../../shared/deskStatus";
+import { planSummary, matchesClient } from "../../../shared/domain/deskStatus";
 import { Card } from "../../../design-system/components/Card";
 import { PlanPill } from "../../../shared/components/PlanPill";
 import "./shared.css";

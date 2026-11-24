@@ -1,5 +1,5 @@
 import { useSave } from "../../../../shared/api/useSave";
-import { checkNewPassword } from "../../../../shared/passwordRules";
+import { checkNewPassword } from "../../../../shared/domain/passwordRules";
 import { accountRepository as repo } from "../../data/accountRepository";
 import { checkName } from "../../domain/profile";
 

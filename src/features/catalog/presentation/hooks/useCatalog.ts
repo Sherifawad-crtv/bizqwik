@@ -1,6 +1,6 @@
 import { useAsync } from "../../../../shared/api/useAsync";
 import { useSave } from "../../../../shared/api/useSave";
-import { useCurrentLocation } from "../../../../shared/locations";
+import { useCurrentLocation } from "../../../../shared/session/locations";
 import type { BundleType, GroupPlanType } from "../../../../shared/types";
 import { catalogRepository as repo } from "../../data/catalogRepository";
 import { catalogLocation, checkBundle, checkDropInPrice, checkDropIns, checkLocationName, checkPlan, type DropInRow, type PlanForm } from "../../domain/catalog";

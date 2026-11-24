@@ -5,8 +5,8 @@ import './design-system/styles.css'
 import './app/app.css'
 import App from './app/App.tsx'
 import { startAutoUpdate } from './app/autoUpdate'
-import { installNativeFeel } from './shared/native'
-import { startAnalytics } from './shared/analytics'
+import { installNativeFeel } from './shared/platform/native'
+import { startAnalytics } from './shared/platform/analytics'
 
 // The camera (coach QR scanning) only works on a secure, top-level page. If the
 // app is ever reached over plain http, or framed by another site (e.g. a domain

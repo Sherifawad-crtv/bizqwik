@@ -1,8 +1,8 @@
 import { Suspense, lazy, useEffect, type ComponentType } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider, useAuth } from "../shared/auth";
+import { AuthProvider, useAuth } from "../shared/session/auth";
 import { HeaderProvider } from "../shared/screen/header";
-import { OwnMonthProvider } from "../shared/ownMonth";
+import { OwnMonthProvider } from "../shared/session/ownMonth";
 import { FloatingActionsProvider, BackActionProvider } from "../shared/screen/floatingActions";
 import { RequireAuth, RequireRole, RequireBizqwikTeam, RequireDesk, RequireTeam } from "./guards";
 import { Spinner } from "../design-system/components/Spinner";

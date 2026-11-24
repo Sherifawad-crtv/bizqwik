@@ -1,5 +1,5 @@
 import { Segmented } from "../../design-system/components/Segmented";
-import { useAuth } from "../auth";
+import { useAuth } from "../session/auth";
 import { isSoloOwner } from "../screen/nav";
 import type { PayMethod } from "../types";
 import "./PaymentSelect.css";

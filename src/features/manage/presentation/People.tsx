@@ -1,7 +1,7 @@
 import { cx } from "../../../design-system/cx";
 import { EmptyState } from "../../../design-system/components/EmptyState";
 import { useEffect, useState } from "react";
-import { useLatch } from "../../../shared/useLatch";
+import { useLatch } from "../../../shared/hooks/useLatch";
 import type { Profile, Tier } from "../../../shared/types";
 import { ROLE_LABELS, hasTier } from "../../../shared/types";
 import { Button } from "../../../design-system/components/Button";
@@ -11,7 +11,7 @@ import { ConfirmSheet } from "../../../design-system/components/ConfirmSheet";
 import { SelectField } from "../../../design-system/components/FormField";
 import { Avatar } from "../../../design-system/components/Avatar";
 import { Spinner } from "../../../design-system/components/Spinner";
-import { useAuth } from "../../../shared/auth";
+import { useAuth } from "../../../shared/session/auth";
 import { tierName } from "../domain/team";
 import { usePeople, usePersonActions, useTiers } from "./hooks/useTeam";
 import "./People.css";

@@ -1,7 +1,7 @@
-import { useFrozen, useMountedThroughExit } from "../../../shared/useLatch";
+import { useFrozen, useMountedThroughExit } from "../../../shared/hooks/useLatch";
 import { EmptyState } from "../../../design-system/components/EmptyState";
 import { useEffect, useState } from "react";
-import { useLatch } from "../../../shared/useLatch";
+import { useLatch } from "../../../shared/hooks/useLatch";
 import type { Tier } from "../../../shared/types";
 import { ROLE_LABELS } from "../../../shared/types";
 import { Button } from "../../../design-system/components/Button";

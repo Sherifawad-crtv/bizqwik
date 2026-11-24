@@ -1,6 +1,6 @@
 import { FN_SLUG, supabase } from "./supabaseClient";
 import { bump } from "./bus";
-import { cleanPath, reportError, track } from "../analytics";
+import { cleanPath, reportError, track } from "../platform/analytics";
 
 export type Method = "GET" | "POST";
 

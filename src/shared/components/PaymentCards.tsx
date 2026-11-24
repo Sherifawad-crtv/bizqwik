@@ -1,5 +1,5 @@
 import { Icon } from "../../design-system/components/Icon";
-import { useAuth } from "../auth";
+import { useAuth } from "../session/auth";
 import { isSoloOwner } from "../screen/nav";
 import type { PayMethod } from "../types";
 import "./PaymentCards.css";

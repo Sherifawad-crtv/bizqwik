@@ -1,4 +1,4 @@
-import { atLocation } from "../../../shared/locationRules";
+import { atLocation } from "../../../shared/domain/locationRules";
 import type { BundleType, ClassSeries, GroupPlanType, GroupPlanTypeKind, Location } from "../../../shared/types";
 
 // Catalog rules: what's on sale where, and checking the plan, bundle,

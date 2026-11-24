@@ -1,7 +1,7 @@
 import { cx } from "../../../design-system/cx";
 import { EmptyState } from "../../../design-system/components/EmptyState";
 import { useEffect, useState } from "react";
-import { useLatch } from "../../../shared/useLatch";
+import { useLatch } from "../../../shared/hooks/useLatch";
 import { useSheetSuccess } from "../../../design-system/components/useSheetSuccess";
 import { fmt, monthAbbr } from "../../../shared/format";
 import type { ExpenseCategory, RecurringExpense } from "../domain/types";

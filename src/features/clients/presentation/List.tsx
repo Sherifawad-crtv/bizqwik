@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useLatch } from "../../../shared/useLatch";
+import { useLatch } from "../../../shared/hooks/useLatch";
 import { useIsMobile } from "../../../design-system/hooks/useIsMobile";
 import type { ClientWithPackage, Role } from "../../../shared/types";
 import { ConfirmSheet } from "../../../design-system/components/ConfirmSheet";

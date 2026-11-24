@@ -4,7 +4,7 @@ import { useSetHeader } from "../../../shared/screen/header";
 import { MoneyHero } from "../../../design-system/components/MoneyHero";
 import { RollupTable, type ListRow } from "./RollupTable";
 import { Spinner } from "../../../design-system/components/Spinner";
-import { useAuth } from "../../../shared/auth";
+import { useAuth } from "../../../shared/session/auth";
 import { Icon } from "../../../design-system/components/Icon";
 import { InviteFlow } from "../../../shared/components/InviteFlow";
 import { Num } from "../../../design-system/components/Num";

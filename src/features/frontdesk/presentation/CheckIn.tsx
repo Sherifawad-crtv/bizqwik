@@ -1,8 +1,8 @@
-import { useCurrentLocation } from "../../../shared/locations";
+import { useCurrentLocation } from "../../../shared/session/locations";
 import { useState } from "react";
 import { useSetHeader } from "../../../shared/screen/header";
 import { useSheetSuccess } from "../../../design-system/components/useSheetSuccess";
-import { useLatch } from "../../../shared/useLatch";
+import { useLatch } from "../../../shared/hooks/useLatch";
 import { useDeskClients } from "./hooks/useDesk";
 import { useConfirmCheckIn } from "./hooks/useCheckIn";
 import { checkInState } from "../domain/checkIn";
@@ -14,14 +14,14 @@ import { Spinner } from "../../../design-system/components/Spinner";
 import { ClientPicker } from "./shared";
 import { PlanPill } from "../../../shared/components/PlanPill";
 import { ErrorBanner } from "../../../design-system/components/ErrorBanner";
-import { planSummary } from "../../../shared/deskStatus";
+import { planSummary } from "../../../shared/domain/deskStatus";
 import { ClientSheet } from "./members/ClientSheet";
 import { useFrontDeskCatalog, useSellableCoaches } from "./hooks/useMembers";
 import { useNewClient } from "./NewClientModal";
 import { DropIn } from "./DropIn";
 import { SheetHeading } from "../../../design-system/components/SheetHeading";
 import { dateLabel } from "../../../shared/format";
-import { useNow } from "../../../shared/useNow";
+import { useNow } from "../../../shared/hooks/useNow";
 import "./CheckIn.css";
 
 // Clients normally check themselves in by scanning the desk's QR code in the

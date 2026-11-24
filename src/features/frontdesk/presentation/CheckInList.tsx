@@ -1,4 +1,4 @@
-import { atLocation, useCurrentLocation } from "../../../shared/locations";
+import { atLocation, useCurrentLocation } from "../../../shared/session/locations";
 import { useMemo, useState } from "react";
 import { useDeskClients } from "./hooks/useDesk";
 import { useQuickCheckIn } from "./hooks/useCheckIn";
@@ -8,7 +8,7 @@ import { EmptyState } from "../../../design-system/components/EmptyState";
 import { SearchField } from "./shared";
 import { PlanPill } from "../../../shared/components/PlanPill";
 import { Card } from "../../../design-system/components/Card";
-import { matchesClient, planSummary } from "../../../shared/deskStatus";
+import { matchesClient, planSummary } from "../../../shared/domain/deskStatus";
 import { useFrontDeskCatalog } from "./hooks/useMembers";
 import "./CheckInList.css";
 

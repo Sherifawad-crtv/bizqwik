@@ -1,5 +1,5 @@
 import type { ClientWithPackage } from "../types";
-import { deskStatus } from "../deskStatus";
+import { deskStatus } from "../domain/deskStatus";
 import { StatusBadge, type Tone } from "../../design-system/components/Tag";
 
 export type StatusTone = "good" | "warn" | "frozen" | "pt" | "bad" | "none";

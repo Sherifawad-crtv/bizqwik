@@ -3,13 +3,13 @@ import type { SalePartner } from "../../../../shared/api/backend";
 import { useDeskClients } from "../hooks/useDesk";
 import { fmt } from "../../../../shared/format";
 import type { ClassSeries, GroupPlanType } from "../../../../shared/types";
-import { atLocation, useCurrentLocation } from "../../../../shared/locations";
+import { atLocation, useCurrentLocation } from "../../../../shared/session/locations";
 import { Button } from "../../../../design-system/components/Button";
 import { TextField, SelectField } from "../../../../design-system/components/FormField";
-import { useAuth } from "../../../../shared/auth";
+import { useAuth } from "../../../../shared/session/auth";
 import { SearchField } from "../shared";
 import { ErrorBanner } from "../../../../design-system/components/ErrorBanner";
-import { matchesClient } from "../../../../shared/deskStatus";
+import { matchesClient } from "../../../../shared/domain/deskStatus";
 import { groupOfferOptions } from "./offers";
 import "./partners.css";
 

@@ -1,6 +1,6 @@
 import { EmptyState } from "../../../design-system/components/EmptyState";
 import { useState } from "react";
-import { useLatch } from "../../../shared/useLatch";
+import { useLatch } from "../../../shared/hooks/useLatch";
 import type { Invite } from "../domain/types";
 import { ROLE_LABELS } from "../../../shared/types";
 import { Button } from "../../../design-system/components/Button";

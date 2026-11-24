@@ -5,7 +5,7 @@ import { test, expect } from "@playwright/test";
 test("onboarding art keeps a tall, sharp 1080×2160; a small photo is never upscaled", async ({ page }) => {
   await page.goto("/");
   const r = await page.evaluate(async () => {
-    const { screenCrop, squareCrop, classCardCrop, extOf, canvasToDataUrl } = await import("/src/shared/image.ts");
+    const { screenCrop, squareCrop, classCardCrop, extOf, canvasToDataUrl } = await import("/src/shared/platform/image.ts");
     const make = async (w: number, h: number) => {
       const c = document.createElement("canvas");
       c.width = w; c.height = h;
@@ -45,7 +45,7 @@ test("onboarding art keeps a tall, sharp 1080×2160; a small photo is never upsc
 test("every upload is turned into WebP", async ({ page }) => {
   await page.goto("/");
   const r = await page.evaluate(async () => {
-    const { squareCrop, classCardCrop, screenCrop, extOf, canvasToDataUrl } = await import("/src/shared/image.ts");
+    const { squareCrop, classCardCrop, screenCrop, extOf, canvasToDataUrl } = await import("/src/shared/platform/image.ts");
     const c = document.createElement("canvas");
     c.width = 900; c.height = 1200;
     const ctx = c.getContext("2d")!; ctx.fillStyle = "#4a6"; ctx.fillRect(0, 0, 900, 1200);

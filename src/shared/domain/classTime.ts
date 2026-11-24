@@ -1,8 +1,8 @@
 // Shared time/weekday helpers for class scheduling screens.
 
-import { pad, timeLabel } from "../design-system/format";
+import { pad, timeLabel } from "../../design-system/format";
 
-export { pad, timeLabel } from "../design-system/format";
+export { pad, timeLabel } from "../../design-system/format";
 
 export function whenLabel(iso: string): string {
   const d = new Date(iso);

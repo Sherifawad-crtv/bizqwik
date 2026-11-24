@@ -3,14 +3,14 @@ import { useLocation, useOutlet } from "react-router-dom";
 import { Suspense } from "react";
 import { Spinner } from "../design-system/components/Spinner";
 import { matchTabIndex, headerMode, type NavItem, type OrgMode } from "../shared/screen/nav";
-import { isStandalone } from "../shared/push";
+import { isStandalone } from "../shared/platform/push";
 import type { Role } from "../shared/types";
 import { EASE, FADE_MS, PUSH_MS } from "../design-system/motion/motion";
 import { sinceTabTap } from "../shared/screen/tabTap";
 import { ScreenActive, ScreenPath } from "../shared/screen/screenActive";
 import { useReducedMotion } from "../design-system/motion/useReducedMotion";
 import { waitForFirstScreen } from "../shared/api/useAsync";
-import { reportScreenReady } from "../shared/vitals";
+import { reportScreenReady } from "../shared/platform/vitals";
 import "./RouteTransition.css";
 
 /** How the app moves between screens, the way iOS does it:

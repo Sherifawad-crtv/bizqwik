@@ -7,17 +7,17 @@ import { PullToRefresh } from "./PullToRefresh";
 import { Sidebar } from "./Sidebar";
 import { Fab } from "./Fab";
 import { Icon } from "../design-system/components/Icon";
-import { useAuth } from "../shared/auth";
+import { useAuth } from "../shared/session/auth";
 import { useHeader } from "../shared/screen/header";
 import { useIsMobile, useIsNarrowPhone } from "../design-system/hooks/useIsMobile";
-import { LocationsProvider } from "../shared/locations";
+import { LocationsProvider } from "../shared/session/locations";
 import { EASE, FADE_MS, QUICK_MS, tr } from "../design-system/motion/motion";
 import { navFor, headerMode, accountBackTarget, isSoloOwner, isSubPage, homePathForRole } from "../shared/screen/nav";
 
 // The Back button and the empty slot opposite it are the same width, so the title stays centred.
 const BACK_W = 84;
 import { usePublishedActions, usePublishedBack } from "../shared/screen/floatingActions";
-import { useLatch } from "../shared/useLatch";
+import { useLatch } from "../shared/hooks/useLatch";
 import "./Shell.css";
 
 /** The top pill with the screen's title. When the title changes, the old words

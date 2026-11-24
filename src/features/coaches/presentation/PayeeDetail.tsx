@@ -12,7 +12,7 @@ import { Sheet } from "../../../design-system/components/Sheet";
 import { Segmented } from "../../../design-system/components/Segmented";
 import { TextField } from "../../../design-system/components/FormField";
 import { useSheetSuccess } from "../../../design-system/components/useSheetSuccess";
-import { useMountedThroughExit } from "../../../shared/useLatch";
+import { useMountedThroughExit } from "../../../shared/hooks/useLatch";
 import { SheetSuccessIcon } from "../../../design-system/components/SheetSuccessIcon";
 import { checkPayment, isPartPaid, leftAfter as leftAfterPaying, quickAmounts, stateLabel } from "../domain/payroll";
 import { CURRENT_MONTH, usePayeeMonth, usePayment } from "./hooks/useCoaches";

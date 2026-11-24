@@ -1,7 +1,7 @@
 import { EmptyState } from "../../../design-system/components/EmptyState";
 import { useSticky } from "../../../design-system/hooks/useSticky";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../../shared/auth";
+import { useAuth } from "../../../shared/session/auth";
 import { useSetHeader } from "../../../shared/screen/header";
 import { egp } from "../../../shared/format";
 import { InlineSpinner } from "../../../design-system/components/Spinner";

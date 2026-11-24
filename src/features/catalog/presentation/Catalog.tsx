@@ -1,10 +1,10 @@
 import { useSticky } from "../../../design-system/hooks/useSticky";
 import { useSetHeader } from "../../../shared/screen/header";
-import { LocationSwitcher, useCurrentLocation } from "../../../shared/locations";
+import { LocationSwitcher, useCurrentLocation } from "../../../shared/session/locations";
 import { Segmented } from "../../../design-system/components/Segmented";
 import { Spinner } from "../../../design-system/components/Spinner";
 import { BundlesPanel } from "./BundlesPanel";
-import { useAuth } from "../../../shared/auth";
+import { useAuth } from "../../../shared/session/auth";
 import { ClassesPanel } from "./Classes";
 import { PlansPanel } from "./Plans";
 import { LocationsCard, SoloOffer } from "./Solo";

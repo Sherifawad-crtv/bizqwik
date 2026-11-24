@@ -1,4 +1,4 @@
-import { useMountedThroughExit } from "../../../shared/useLatch";
+import { useMountedThroughExit } from "../../../shared/hooks/useLatch";
 import { useEffect, useState } from "react";
 import { egp } from "../../../shared/format";
 import type { ClientWithPackage, Role } from "../../../shared/types";

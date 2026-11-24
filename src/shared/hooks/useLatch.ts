@@ -2,7 +2,7 @@
    rendering. Callers pass a fresh object on every render, so keeping it in state would re-render
    forever (this was tried: "Too many re-renders"). */
 import { useEffect, useRef, useState } from "react";
-import { SHEET_OUT_MS } from "../design-system/motion/motion";
+import { SHEET_OUT_MS } from "../../design-system/motion/motion";
 
 // Keeps returning the last non-null value even after `value` itself goes
 // null — so a closing sheet's title/body (built from that value) don't go

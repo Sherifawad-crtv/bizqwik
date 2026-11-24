@@ -8,8 +8,8 @@ import { TextField } from "../../design-system/components/FormField";
 import { DateField } from "../../design-system/components/DateField";
 import { TimeWheelField } from "../../design-system/components/TimeWheelField";
 import { ClassPhotoField } from "./ClassPhotoField";
-import { LocationField, useLocations } from "../locations";
-import { type FormState, emptyForm } from "../classForm";
+import { LocationField, useLocations } from "../session/locations";
+import { type FormState, emptyForm } from "../domain/classForm";
 import "./ClassSheet.css";
 
 export function ClassSheet({

@@ -3,7 +3,7 @@ import { EmptyState } from "../../design-system/components/EmptyState";
 import { useState } from "react";
 import { api } from "../api/backend";
 import { useAsync } from "../api/useAsync";
-import { useAuth } from "../auth";
+import { useAuth } from "../session/auth";
 import { isSoloOwner } from "../screen/nav";
 import { egp } from "../format";
 import { PAY_METHOD_LABELS, type ClassBooking, type PayMethod, type BookingAttendance } from "../types";

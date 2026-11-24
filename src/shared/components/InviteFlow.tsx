@@ -1,4 +1,4 @@
-import { useFrozen, useMountedThroughExit } from "../useLatch";
+import { useFrozen, useMountedThroughExit } from "../hooks/useLatch";
 import { useEffect, useState } from "react";
 import { useAsync } from "../api/useAsync";
 import { api } from "../api/backend";

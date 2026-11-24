@@ -6,9 +6,6 @@ export const activityApi = {
   activity: (limit = 100) => callFn<{ activity: ActivityEntry[] }>(`activity?limit=${limit}`),
 
 
-  compensateClient: (clientId: string, amount: number, note?: string) =>
-    callFn<{ ok: true; walletBalance?: number }>("clients/compensate", { method: "POST", body: { clientId, amount, note: note ?? null } }),
-
   pushVapidPublicKey: () => callFn<{ publicKey: string }>("push/vapid-public-key"),
   pushSubscribe: (sub: PushSubscriptionJSON, deviceId: string) =>
     callFn<void>("push/subscribe", { method: "POST", body: { ...sub, deviceId } as Record<string, unknown>, quiet: true }),

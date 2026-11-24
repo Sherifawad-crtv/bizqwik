@@ -1,10 +1,10 @@
-import { clearAsyncCache } from "./api/useAsync";
+import { clearAsyncCache } from "../api/useAsync";
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { markWelcomed } from "./welcome";
-import { api, auth as authApi, type ApiError } from "./api/backend";
-import { autoEnablePushIfPossible } from "./push";
-import { identify, resetAnalytics } from "./analytics";
-import type { BizqwikTeam, Profile, Tier } from "./types";
+import { api, auth as authApi, type ApiError } from "../api/backend";
+import { autoEnablePushIfPossible } from "../platform/push";
+import { identify, resetAnalytics } from "../platform/analytics";
+import type { BizqwikTeam, Profile, Tier } from "../types";
 
 interface AuthState {
   profile: Profile | null;

@@ -1,4 +1,4 @@
-import { useMountedThroughExit } from "../../../../shared/useLatch";
+import { useMountedThroughExit } from "../../../../shared/hooks/useLatch";
 import { useEffect, useState } from "react";
 import { useSheetSuccess } from "../../../../design-system/components/useSheetSuccess";
 import type { SalePartner } from "../../../../shared/api/backend";
@@ -6,7 +6,7 @@ import { useCreateClient } from "../hooks/useMembers";
 import { fmt } from "../../../../shared/format";
 import type { BundleType, ClassSeries, GroupPlanType } from "../../../../shared/types";
 import type { CoachOption } from "../../domain/types";
-import { useCurrentLocation, useLocations } from "../../../../shared/locations";
+import { useCurrentLocation, useLocations } from "../../../../shared/session/locations";
 import { Button } from "../../../../design-system/components/Button";
 import { Sheet } from "../../../../design-system/components/Sheet";
 import { Segmented } from "../../../../design-system/components/Segmented";
@@ -14,7 +14,7 @@ import { SheetSuccessIcon } from "../../../../design-system/components/SheetSucc
 import { TextField, SelectField } from "../../../../design-system/components/FormField";
 import { PaymentCards } from "../../../../shared/components/PaymentCards";
 import type { PayMethod } from "../../../../shared/types";
-import { useAuth } from "../../../../shared/auth";
+import { useAuth } from "../../../../shared/session/auth";
 import { SheetHeading } from "../../../../design-system/components/SheetHeading";
 import { ErrorBanner } from "../../../../design-system/components/ErrorBanner";
 import { Card } from "../../../../design-system/components/Card";

@@ -1,7 +1,7 @@
 import { EmptyState } from "../../../design-system/components/EmptyState";
 import { useSticky } from "../../../design-system/hooks/useSticky";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../../shared/auth";
+import { useAuth } from "../../../shared/session/auth";
 import { useSetHeader } from "../../../shared/screen/header";
 import { fmt } from "../../../shared/format";
 import { HomeAvatar } from "../../../shared/components/HomeAvatar";

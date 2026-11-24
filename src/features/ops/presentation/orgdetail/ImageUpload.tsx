@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { screenCrop, squareCrop } from "../../../../shared/image";
+import { screenCrop, squareCrop } from "../../../../shared/platform/image";
 import { useAssetUpload } from "../hooks/useOps";
 import { Icon } from "../../../../design-system/components/Icon";
 import { TextField } from "../../../../design-system/components/FormField";

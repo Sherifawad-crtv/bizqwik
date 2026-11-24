@@ -1,10 +1,10 @@
 import { createContext, useContext, useSyncExternalStore, type ReactNode } from "react";
-import { api } from "./api/backend";
-import { useAsync } from "./api/useAsync";
-import type { Location } from "./types";
-import { SelectField } from "../design-system/components/FormField";
-import { Segmented } from "../design-system/components/Segmented";
-import { Tag } from "../design-system/components/Tag";
+import { api } from "../api/backend";
+import { useAsync } from "../api/useAsync";
+import type { Location } from "../types";
+import { SelectField } from "../../design-system/components/FormField";
+import { Segmented } from "../../design-system/components/Segmented";
+import { Tag } from "../../design-system/components/Tag";
 import "./locations.css";
 
 // Where the owner is working right now (this phone). Remembered per device, so
@@ -106,4 +106,4 @@ export function LocationSwitcher({ all, onAll, isAll = false }: { all?: boolean;
   );
 }
 
-export { atLocation } from "./locationRules";
+export { atLocation } from "../domain/locationRules";

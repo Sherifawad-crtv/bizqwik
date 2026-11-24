@@ -17,9 +17,6 @@ export const deskApi = {
   // never exists without an assigned coach (no orphaned/unassigned clients).
   createClient: (name: string, age: number | null, conditions: string | null, bundleTypeId: string, coachId: string) =>
     callFn<{ client: Client; package: PackageInstance }>("clients", { method: "POST", body: { name, age, conditions, bundleTypeId, coachId } }),
-  updateClient: (id: string, name: string, age: number | null, conditions: string | null) =>
-    callFn<{ client: Client }>("clients/update", { method: "POST", body: { id, name, age, conditions } }),
-  deleteClient: (id: string) => callFn<void>("clients/delete", { method: "POST", body: { id } }),
   // PT sessions are deducted only by scanning the member's per-bundle code.
   deliverSession: (qrToken: string) =>
     callFn<{ package: PackageInstance; preview: PtScanPreview }>("packages/deliver", { method: "POST", body: { qrToken } }),

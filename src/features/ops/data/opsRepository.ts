@@ -2,7 +2,7 @@ import type { BizqwikRole, BizqwikTeam } from "../../../shared/types";
 import type { BizqwikTeamInvite, OpsSummary, OrgBrandingConfig, OrgConfig, OrgPointsSettings, OrgDetail, OrgStatus, OrgSummary, PlanType } from "../domain/types";
 import { callFn } from "../../../shared/api/core";
 import { supabase } from "../../../shared/api/supabaseClient";
-import { extOf } from "../../../shared/image";
+import { extOf } from "../../../shared/platform/image";
 
 const ORG_BRANDING_BUCKET = "org-branding";
 

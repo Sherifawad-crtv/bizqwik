@@ -2,7 +2,7 @@ import { useState } from "react";
 import { NavLink } from "react-router-dom";
 import { Avatar } from "../design-system/components/Avatar";
 import { Icon } from "../design-system/components/Icon";
-import { useAuth } from "../shared/auth";
+import { useAuth } from "../shared/session/auth";
 import { navFor, type NavItem } from "../shared/screen/nav";
 import { ROLE_LABELS } from "../shared/types";
 import { QUICK_MS, tr } from "../design-system/motion/motion";

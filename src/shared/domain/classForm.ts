@@ -1,5 +1,5 @@
-import { todayIso } from "./format";
-import type { GymClass } from "./types";
+import { todayIso } from "../format";
+import type { GymClass } from "../types";
 import { pad } from "./classTime";
 
 export interface FormState {

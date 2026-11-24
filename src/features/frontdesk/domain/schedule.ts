@@ -1,4 +1,4 @@
-import { atLocation } from "../../../shared/locationRules";
+import { atLocation } from "../../../shared/domain/locationRules";
 import type { ClientWithPackage, GymClass } from "../../../shared/types";
 import { addDays, startOfDay } from "./calendar";
 

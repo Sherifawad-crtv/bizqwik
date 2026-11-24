@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, type ReactNode } from "react";
-import { MOCK } from "./api/backend";
+import { MOCK } from "../api/backend";
 
 interface OwnMonthState {
   month: string;

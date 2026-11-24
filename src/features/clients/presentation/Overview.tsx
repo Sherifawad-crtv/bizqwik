@@ -1,7 +1,7 @@
 import type { ClientWithPackage } from "../../../shared/types";
 import { NO_FILTERS, type ClientFilters } from "../domain/clientFilters";
 import { rosterCounts } from "../domain/roster";
-import { useNow } from "../../../shared/useNow";
+import { useNow } from "../../../shared/hooks/useNow";
 import "./Overview.css";
 
 export function OverviewCards({ clients, showGroupPlans, onPick }: { clients: ClientWithPackage[]; showGroupPlans: boolean; onPick: (patch: Partial<ClientFilters>) => void }) {

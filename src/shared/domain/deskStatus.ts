@@ -1,6 +1,6 @@
-import type { BundleType, ClientWithPackage } from "./types";
-import { dateLabel } from "./format";
-import type { StatusTone } from "./components/PlanPill";
+import type { BundleType, ClientWithPackage } from "../types";
+import { dateLabel } from "../format";
+import type { StatusTone } from "../components/PlanPill";
 
 export type PlanTone = "active" | "expired" | "none";
 

@@ -1,5 +1,5 @@
 import { NavLink, Outlet } from "react-router-dom";
-import { useAuth } from "../../../shared/auth";
+import { useAuth } from "../../../shared/session/auth";
 import { useIsMobile } from "../../../design-system/hooks/useIsMobile";
 import { Icon, type IconName } from "../../../design-system/components/Icon";
 import { Avatar } from "../../../design-system/components/Avatar";

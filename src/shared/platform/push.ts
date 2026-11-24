@@ -1,4 +1,4 @@
-import { api } from "./api/backend";
+import { api } from "../api/backend";
 
 export function pushSupported(): boolean {
   return typeof window !== "undefined" && "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;

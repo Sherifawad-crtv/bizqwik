@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, Navigate } from "react-router-dom";
-import { useAuth } from "../../../shared/auth";
-import { hasSeenWelcome } from "../../../shared/welcome";
+import { useAuth } from "../../../shared/session/auth";
+import { hasSeenWelcome } from "../../../shared/session/welcome";
 import { useIsMobile } from "../../../design-system/hooks/useIsMobile";
 import { useKeyboardInset } from "../../../design-system/hooks/useKeyboardInset";
 import { DesktopAuth } from "./DesktopAuth";

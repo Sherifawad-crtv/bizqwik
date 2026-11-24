@@ -267,7 +267,7 @@ Used by two or more features. Not generic enough for the library.
 | The home greeting with avatar | `HomeAvatar` |
 | A payment method choice | `PaymentSelect` / `PaymentCards` |
 | A class photo picker | `ClassPhotoField` |
-| Create / edit a class | `ClassSheet` (form helpers in `shared/classForm.ts`) |
+| Create / edit a class | `ClassSheet` (form helpers in `shared/domain/classForm.ts`) |
 | Create / edit a weekly class series | `SeriesSheet` |
 | A class roster | `ClassRosterSheet` |
 | Add a session / a day's sessions | `AddSessionSheet`, `DaySessionsSheet`, `DayList` |

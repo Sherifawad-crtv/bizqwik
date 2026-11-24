@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../../shared/auth";
+import { useAuth } from "../../../shared/session/auth";
 import { useSetHeader } from "../../../shared/screen/header";
 import { fmt, monthLabel } from "../../../shared/format";
 import { dueByMonth, isPartPaid, monthStatus, sumRemaining, sumSessions } from "../domain/payroll";

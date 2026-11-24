@@ -4,15 +4,15 @@ import { useIsMobile } from "../../../design-system/hooks/useIsMobile";
 import { cancelClass, useTodaysClasses } from "./hooks/useSchedule";
 import { bookingsView, dayHeading, isHappening, type Range } from "../domain/schedule";
 import { startOfDay } from "../domain/calendar";
-import { useAuth } from "../../../shared/auth";
-import { LocationSwitcher, useCurrentLocation } from "../../../shared/locations";
+import { useAuth } from "../../../shared/session/auth";
+import { LocationSwitcher, useCurrentLocation } from "../../../shared/session/locations";
 import { isSoloOwner } from "../../../shared/screen/nav";
 import { ConfirmSheet } from "../../../design-system/components/ConfirmSheet";
 import { ClassSheet } from "../../../shared/components/ClassSheet";
-import { emptyForm, formOf, type FormState } from "../../../shared/classForm";
+import { emptyForm, formOf, type FormState } from "../../../shared/domain/classForm";
 import { SeriesSheet } from "../../../shared/components/SeriesSheet";
 import { useSetHeader } from "../../../shared/screen/header";
-import { timeLabel, pad } from "../../../shared/classTime";
+import { timeLabel, pad } from "../../../shared/domain/classTime";
 import type { GymClass } from "../../../shared/types";
 import { Segmented } from "../../../design-system/components/Segmented";
 import { Spinner } from "../../../design-system/components/Spinner";
@@ -22,7 +22,7 @@ import { ClassRosterSheet } from "../../../shared/components/ClassRosterSheet";
 import { SectionLink } from "./shared";
 import { Card } from "../../../design-system/components/Card";
 import { ClassCalendarScreen } from "./ClassCalendar";
-import { useNow } from "../../../shared/useNow";
+import { useNow } from "../../../shared/hooks/useNow";
 import "./Bookings.css";
 
 const clock = (iso: string) => {

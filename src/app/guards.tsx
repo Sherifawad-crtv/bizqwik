@@ -1,5 +1,5 @@
 import { Navigate, Outlet } from "react-router-dom";
-import { useAuth } from "../shared/auth";
+import { useAuth } from "../shared/session/auth";
 import type { Role } from "../shared/types";
 
 export function RequireAuth() {
