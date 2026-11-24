@@ -1,6 +1,6 @@
 import { callFn } from "../../../shared/api/core";
 import { MOCK } from "../../../shared/api/backend";
-import type { Expense, ExpenseCategory, PnlReport, RecurringExpense } from "../../../shared/types";
+import type { Expense, ExpenseCategory, PnlReport, RecurringExpense } from "../domain/types";
 
 // Data layer: every server call the accounting feature makes. Only accounting
 // uses these endpoints, so they live here rather than in shared/api.

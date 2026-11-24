@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useLatch } from "../../../shared/useLatch";
 import { useSheetSuccess } from "../../../design-system/components/useSheetSuccess";
 import { receiptDataUrl } from "../../../shared/image";
-import type { Expense, ExpenseCategory } from "../../../shared/types";
+import type { Expense, ExpenseCategory } from "../domain/types";
 import { Button } from "../../../design-system/components/Button";
 import { Icon } from "../../../design-system/components/Icon";
 import { Sheet } from "../../../design-system/components/Sheet";

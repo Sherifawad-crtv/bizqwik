@@ -1,6 +1,6 @@
 import { EmptyState } from "../../../design-system/components/EmptyState";
 import { fmt, monthAbbr, monthLabel } from "../../../shared/format";
-import type { PnlReport } from "../../../shared/types";
+import type { PnlReport } from "../domain/types";
 import { Button } from "../../../design-system/components/Button";
 import { Icon } from "../../../design-system/components/Icon";
 import { Spinner } from "../../../design-system/components/Spinner";

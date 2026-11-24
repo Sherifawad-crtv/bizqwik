@@ -1,6 +1,7 @@
 import { api } from "../../../shared/api/backend";
 import { callFn } from "../../../shared/api/core";
-import type { Invite, Profile, Tier } from "../../../shared/types";
+import type { Profile, Tier } from "../../../shared/types";
+import type { Invite } from "../domain/types";
 
 // Data layer: every server call the manage feature makes. Only `tiers` is
 // shared with other code (the invite flow), so it's wrapped; the rest are

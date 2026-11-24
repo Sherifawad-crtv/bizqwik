@@ -5,7 +5,7 @@ import { Button } from "../../../design-system/components/Button";
 import { TextField, SelectField } from "../../../design-system/components/FormField";
 import { slugify } from "../domain/ops";
 import { useCreateOrg } from "./hooks/useOps";
-import type { PlanType } from "../../../shared/types";
+import type { PlanType } from "../domain/types";
 import { ErrorBanner } from "../../../design-system/components/ErrorBanner";
 import "./CreateOrgSheet.css";
 

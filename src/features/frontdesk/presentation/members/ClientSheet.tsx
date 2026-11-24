@@ -5,7 +5,8 @@ import { useSheetSuccess } from "../../../../design-system/components/useSheetSu
 import type { SalePartner } from "../../../../shared/api/backend";
 import { useClientSheetActions, useRefundable } from "../hooks/useMembers";
 import { fmt, dateLabel } from "../../../../shared/format";
-import type { BundleType, ClassSeries, ClientWithPackage, CoachOption, GroupPlanType } from "../../../../shared/types";
+import type { BundleType, ClassSeries, ClientWithPackage, GroupPlanType } from "../../../../shared/types";
+import type { CoachOption } from "../../domain/types";
 import { LocationField, locationName, useCurrentLocation, useLocations } from "../../../../shared/locations";
 import { Button } from "../../../../design-system/components/Button";
 import { Sheet } from "../../../../design-system/components/Sheet";

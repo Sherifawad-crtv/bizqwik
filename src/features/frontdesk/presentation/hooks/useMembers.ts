@@ -3,7 +3,8 @@ import { useAsync } from "../../../../shared/api/useAsync";
 import { useSave } from "../../../../shared/api/useSave";
 import type { SalePartner } from "../../../../shared/api/backend";
 import { useAuth } from "../../../../shared/auth";
-import type { CoachOption, GroupPlanType, PayMethod } from "../../../../shared/types";
+import type { GroupPlanType, PayMethod } from "../../../../shared/types";
+import type { CoachOption } from "../../domain/types";
 import { frontdeskRepository as repo } from "../../data/frontdeskRepository";
 import {
   checkAssign,

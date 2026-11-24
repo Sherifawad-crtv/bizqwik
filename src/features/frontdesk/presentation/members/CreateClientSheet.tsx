@@ -4,7 +4,8 @@ import { useSheetSuccess } from "../../../../design-system/components/useSheetSu
 import type { SalePartner } from "../../../../shared/api/backend";
 import { useCreateClient } from "../hooks/useMembers";
 import { fmt } from "../../../../shared/format";
-import type { BundleType, ClassSeries, CoachOption, GroupPlanType } from "../../../../shared/types";
+import type { BundleType, ClassSeries, GroupPlanType } from "../../../../shared/types";
+import type { CoachOption } from "../../domain/types";
 import { useCurrentLocation, useLocations } from "../../../../shared/locations";
 import { Button } from "../../../../design-system/components/Button";
 import { Sheet } from "../../../../design-system/components/Sheet";

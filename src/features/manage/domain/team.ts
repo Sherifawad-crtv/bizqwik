@@ -1,4 +1,5 @@
-import type { Invite, Profile, Tier } from "../../../shared/types";
+import type { Profile, Tier } from "../../../shared/types";
+import type { Invite } from "./types";
 
 // Team rules: pay tiers, who is on them, and the manage screen's tabs.
 // Pure functions: no React, no server calls.

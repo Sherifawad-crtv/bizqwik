@@ -1,5 +1,5 @@
 import { useSave } from "../../../../shared/api/useSave";
-import type { Expense, RecurringExpense } from "../../../../shared/types";
+import type { Expense, RecurringExpense } from "../../domain/types";
 import { accountingRepository as repo } from "../../data/accountingRepository";
 import { checkExpense, checkRecurring } from "../../domain/accounting";
 

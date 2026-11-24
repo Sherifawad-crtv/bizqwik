@@ -1,7 +1,7 @@
 import { EmptyState } from "../../../design-system/components/EmptyState";
 import { useState } from "react";
 import { egp } from "../../../shared/format";
-import type { PlanType } from "../../../shared/types";
+import type { PlanType } from "../domain/types";
 import { Spinner } from "../../../design-system/components/Spinner";
 import { Button } from "../../../design-system/components/Button";
 import { Icon } from "../../../design-system/components/Icon";

@@ -1,7 +1,7 @@
 import { EmptyState } from "../../../design-system/components/EmptyState";
 import { useState } from "react";
 import { useLatch } from "../../../shared/useLatch";
-import type { Invite } from "../../../shared/types";
+import type { Invite } from "../domain/types";
 import { ROLE_LABELS } from "../../../shared/types";
 import { Button } from "../../../design-system/components/Button";
 import { ConfirmSheet } from "../../../design-system/components/ConfirmSheet";

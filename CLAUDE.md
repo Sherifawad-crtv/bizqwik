@@ -14,6 +14,11 @@
   from their feature's `presentation/hooks/`, never from `data/` or `shared/api`
   directly; a rule (what's valid, what's shown, what's allowed) goes in `domain/`.
   `npm run ds` enforces the direction.
+- Data types belong to the architecture too: a type only one feature uses lives
+  in that feature's `domain/types.ts` (its models; `data/` and `presentation/`
+  import them from there). `src/shared/types.ts` holds only types several
+  features or `shared/` itself use. A new type starts in its feature and moves
+  to shared only when a second feature needs it.
 - If the library doesn't have what you need: likely reused → build it in
   `src/design-system/components/` (generic) or `src/shared/components/`
   (business), using only tokens, and **add it to the directory in

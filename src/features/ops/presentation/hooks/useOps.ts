@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useAsync } from "../../../../shared/api/useAsync";
 import { useSave } from "../../../../shared/api/useSave";
-import type { BizqwikRole, OrgDetail, OrgStatus, PlanType } from "../../../../shared/types";
+import type { BizqwikRole } from "../../../../shared/types";
+import type { OrgDetail, OrgStatus, PlanType } from "../../domain/types";
 import { opsRepository as repo } from "../../data/opsRepository";
 import { checkAppConfig, checkNewOrg, checkSaasPlan, type AppConfigForm } from "../../domain/ops";
 

@@ -1,7 +1,8 @@
 import { api, MOCK } from "../../../shared/api/backend";
 import { callFn } from "../../../shared/api/core";
 import { currentYearMonths } from "../../../shared/months";
-import type { PackageWithNames, Session, SettlementPayment } from "../../../shared/types";
+import type { Session } from "../../../shared/types";
+import type { PackageWithNames, SettlementPayment } from "../domain/types";
 import type { MonthRollups } from "../domain/payroll";
 
 export type PayMethod = "cash" | "bank" | "instapay";

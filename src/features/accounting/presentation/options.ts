@@ -1,4 +1,4 @@
-import type { ExpenseCategory } from "../../../shared/types";
+import type { ExpenseCategory } from "../domain/types";
 
 import { activeCategories } from "../domain/accounting";
 

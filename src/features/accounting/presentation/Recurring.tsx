@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useLatch } from "../../../shared/useLatch";
 import { useSheetSuccess } from "../../../design-system/components/useSheetSuccess";
 import { fmt, monthAbbr } from "../../../shared/format";
-import type { ExpenseCategory, RecurringExpense } from "../../../shared/types";
+import type { ExpenseCategory, RecurringExpense } from "../domain/types";
 import { Button } from "../../../design-system/components/Button";
 import { Icon } from "../../../design-system/components/Icon";
 import { Sheet } from "../../../design-system/components/Sheet";

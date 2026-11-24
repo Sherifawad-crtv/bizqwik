@@ -1,5 +1,6 @@
 import { fmt } from "../../../../shared/format";
-import type { BundleType, ClassSeries, CoachOption, GroupPlanType, Location } from "../../../../shared/types";
+import type { BundleType, ClassSeries, GroupPlanType, Location } from "../../../../shared/types";
+import type { CoachOption } from "../../domain/types";
 import { atLocation, locationName } from "../../../../shared/locations";
 
 /** Everything the desk can sell as a group plan: catalog memberships and

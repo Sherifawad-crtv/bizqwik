@@ -17,7 +17,8 @@ import { SheetSuccessIcon } from "../../../design-system/components/SheetSuccess
 import { checkPayment, isPartPaid, leftAfter as leftAfterPaying, quickAmounts, stateLabel } from "../domain/payroll";
 import { CURRENT_MONTH, usePayeeMonth, usePayment } from "./hooks/useCoaches";
 import { PackageStatusPill } from "../../../shared/components/PackageStatusPill";
-import type { PackageWithNames, Rollup } from "../../../shared/types";
+import type { Rollup } from "../../../shared/types";
+import type { PackageWithNames } from "../domain/types";
 import { useBackAction } from "../../../shared/screen/floatingActions";
 import { useIsMobile } from "../../../design-system/hooks/useIsMobile";
 import { Num } from "../../../design-system/components/Num";

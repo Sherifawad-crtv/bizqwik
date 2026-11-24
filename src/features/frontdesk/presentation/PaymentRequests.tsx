@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { usePaymentDecision, usePaymentRequests } from "./hooks/useSchedule";
-import type { PaymentRequest } from "../../../shared/types";
+import type { PaymentRequest } from "../domain/types";
 import { egp } from "../../../shared/format";
 import { Button } from "../../../design-system/components/Button";
 import { Icon } from "../../../design-system/components/Icon";

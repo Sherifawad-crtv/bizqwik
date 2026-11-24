@@ -1,4 +1,4 @@
-import type { OrgBrandingConfig, OrgDetail, OrgPointsSettings } from "../../../shared/types";
+import type { OrgBrandingConfig, OrgDetail, OrgPointsSettings } from "./types";
 
 // Ops rules: org slugs, SaaS plan limits, the member-app config and the
 // check-in QR. Pure functions: no React, no server calls.

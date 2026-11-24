@@ -1,7 +1,8 @@
 import { api } from "../../../shared/api/backend";
 import { callFn, SOLO_DESK } from "../../../shared/api/core";
 import type { NewClientFields, SalePartner } from "../../../shared/api/inputs";
-import type { Client, ClientWithPackage, CoachOption, FrontDeskSummary, GroupPlan, PackageInstance, PayMethod, PaymentRequest, PtScanPreview } from "../../../shared/types";
+import type { Client, ClientWithPackage, GroupPlan, PackageInstance, PayMethod, PtScanPreview } from "../../../shared/types";
+import type { CoachOption, FrontDeskSummary, PaymentRequest } from "../domain/types";
 
 // Data layer: every server call the front desk (and the solo owner's desk)
 // makes. Calls only the desk uses live here; lists other features also read

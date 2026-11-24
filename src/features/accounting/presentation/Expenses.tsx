@@ -2,7 +2,7 @@ import { cx } from "../../../design-system/cx";
 import { EmptyState } from "../../../design-system/components/EmptyState";
 import { useEffect, useState } from "react";
 import { fmt, monthAbbr } from "../../../shared/format";
-import type { Expense, ExpenseCategory } from "../../../shared/types";
+import type { Expense, ExpenseCategory } from "../domain/types";
 import { Button } from "../../../design-system/components/Button";
 import { Icon } from "../../../design-system/components/Icon";
 import { Card } from "../../../design-system/components/Card";

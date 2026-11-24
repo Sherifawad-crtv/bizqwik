@@ -42,13 +42,6 @@ export type ScanResult =
   | { kind: "attendance"; date: string; month: string }
   | { kind: "pt"; package: PtScanPreview };
 
-export interface Invite {
-  email: string;
-  role: Role;
-  tierId: string | null;
-  invitedBy: string;
-}
-
 export interface Rollup {
   coachId: string;
   name: string;
@@ -69,76 +62,6 @@ export interface Rollup {
   /** Paid out of a settled month so far (all of it once paid), and what's left to pay. */
   paidAmount: number;
   remaining: number;
-}
-export type PayMethodOut = "cash" | "bank" | "instapay" | "other";
-/** One payment made against a settled month. */
-export interface SettlementPayment {
-  id: string;
-  amount: number;
-  paidOn: string;
-  method: PayMethodOut;
-  note: string | null;
-  paidBy: string | null;
-  createdAt: string;
-}
-
-// ---- accounting: expenses & profit and loss ----
-export interface ExpenseCategory {
-  id: string;
-  name: string;
-  sortOrder: number;
-  isDefault: boolean;
-  archived: boolean;
-}
-export interface Expense {
-  id: string;
-  categoryId: string;
-  categoryName: string;
-  amount: number;
-  date: string; // yyyy-mm-dd
-  note: string | null;
-  hasReceipt: boolean;
-  receiptUrl: string | null; // short-lived; re-fetch the list to refresh
-  recurringId: string | null;
-  createdBy: string;
-  editedAfterMonthEnd: boolean;
-}
-export interface RecurringExpense {
-  id: string;
-  categoryId: string;
-  categoryName: string;
-  amount: number;
-  note: string | null;
-  dayOfMonth: number;
-  startMonth: string;
-  endMonth: string | null;
-  active: boolean;
-}
-export interface MoneySlice {
-  key: string;
-  label: string;
-  amount: number;
-  /** Coach payouts only: how much of it has actually been paid out. */
-  paid?: number;
-}
-export interface PnlMonth {
-  month: string;
-  grossRevenue: number;
-  refunds: number;
-  netRevenue: number;
-  coachPayouts: number;
-  otherExpenses: number;
-  totalExpenses: number;
-  profit: number;
-}
-export interface PnlReport {
-  month: string;
-  current: PnlMonth;
-  trend: PnlMonth[];
-  revenueBySource: MoneySlice[];
-  expensesBySource: MoneySlice[];
-  hasPastExpenses: boolean;
-  unsettledNote: { count: number } | null;
 }
 
 export interface BundleType {
@@ -170,14 +93,6 @@ export interface Client {
   homeLocationId?: string | null;
 }
 
-export interface MembershipType {
-  id: string;
-  name: string;
-  durationDays: number;
-  price: number;
-  invitationsAllowance: number;
-}
-
 export type MembershipStatus = "active" | "expired";
 
 export interface MembershipInstance {
@@ -188,27 +103,6 @@ export interface MembershipInstance {
   expiryDate: string;
   status: MembershipStatus;
   invitationsRemaining: number;
-}
-
-export interface CoachOption {
-  id: string;
-  name: string;
-  avatarUrl: string | null;
-}
-
-export interface FrontDeskActivity {
-  id: string;
-  kind: "check_in" | "drop_in";
-  name: string;
-  detail: string;
-  at: string;
-}
-
-export interface FrontDeskSummary {
-  todayCheckIns: number;
-  todayDropIns: number;
-  activeNow: number;
-  recent: FrontDeskActivity[];
 }
 
 export type PackageStatus = "active" | "exhausted" | "expired";
@@ -236,21 +130,6 @@ export interface ClientWithPackage extends Client {
   groupPlan?: GroupPlan | null;
   // When there's no active plan: the one that ended most recently (last 90 days).
   lastGroupPlan?: GroupPlan | null;
-}
-
-// Coach payout drill-down row — a package plus the names needed to show it
-// without a second lookup. Deliberately excludes Client.conditions: this is
-// a finance view (accountant module), not a client-management one.
-export interface PackageWithNames extends PackageInstance {
-  clientName: string;
-  bundleName: string;
-}
-
-export interface DeliveryLog {
-  id: string;
-  packageInstanceId: string;
-  date: string;
-  loggedBy: string;
 }
 
 export const PACKAGE_STATUS_LABELS: Record<PackageStatus, string> = {
@@ -294,83 +173,10 @@ export interface BizqwikTeam {
   role: BizqwikRole;
 }
 
-export type OrgStatus = "trial" | "active" | "paused";
-
-export interface PlanType {
-  id: string;
-  name: string;
-  price: number;
-  // null = unlimited
-  teamSizeLimit: number | null;
-  clientSizeLimit: number | null;
-}
-
-export interface OpsSummary {
-  totalOrgs: number;
-  activeOrgs: number;
-  totalGmv: number;
-  bizqwikRevenue: number;
-}
-
-export interface OrgSummary {
-  id: string;
-  name: string;
-  slug: string;
-  status: OrgStatus;
-  mode?: "solo" | "team";
-  planId: string | null;
-  planName: string | null;
-  staffCount: number;
-  clientCount: number;
-  gmv: number;
-}
-
-export interface OrgUsage {
-  staffCount: number;
-  clientCount: number;
-  sessionsLogged: number;
-  packagesSold: number;
-  membershipsSold: number;
-  dropInsSold: number;
-  gmv: number;
-  lastActivity: string | null;
-}
-
-export interface OrgDetail {
-  org: {
-    id: string;
-    name: string;
-    slug: string;
-    /** Printed in the coaches' room; coaches scan it to log attendance. */
-    coachQrToken: string;
-    status: OrgStatus;
-    mode?: "solo" | "team";
-    planId: string | null;
-    planName: string | null;
-    createdAt: string;
-  };
-  plan: PlanType | null;
-  staff: Profile[];
-  pendingInvites: { email: string; role: Role }[];
-  usage: OrgUsage;
-}
-
-export interface BizqwikTeamInvite {
-  email: string;
-  name: string | null;
-  role: BizqwikRole;
-}
-
 export const BIZQWIK_ROLE_LABELS: Record<BizqwikRole, string> = {
   founder: "Founder",
   ops_manager: "Ops Manager",
   teammate: "Teammate",
-};
-
-export const ORG_STATUS_LABELS: Record<OrgStatus, string> = {
-  trial: "Trial",
-  active: "Active",
-  paused: "Paused",
 };
 
 // How a desk sale is paid. cash/card are external (recorded only); wallet spends
@@ -426,28 +232,6 @@ export interface ActivityEntry {
   actorName?: string | null;
   meta: Record<string, unknown> | null;
   at: string;
-}
-
-// Per-org member-app configuration (set by ops at onboarding).
-export interface OrgBrandingConfig {
-  appName: string | null;
-  logoUrl: string | null;
-  iconUrl: string | null;
-  primaryColor: string | null;
-  onboardingAssets: string[];
-}
-// Loyalty economy. pointsEarnPerEgp null = points off for the org.
-export interface OrgPointsSettings {
-  pointsEarnPerEgp: number | null;
-  pointsRedeemPerEgp: number;
-  pointsCheckin: number;
-  pointsMinRedeem: number;
-  pointsTtlMonths: number;
-  walletCreditTtlMonths: number;
-}
-export interface OrgConfig {
-  branding: OrgBrandingConfig | null;
-  settings: OrgPointsSettings | null;
 }
 
 // ===== Services model: recurring classes + group plans =====
@@ -542,7 +326,3 @@ export interface PaymentsSummary {
   // Revenue per month across the range (oldest first).
   byMonth?: { month: string; revenue: number }[];
 }
-
-
-/** A member's InstaPay receipt waiting for the front desk to approve. */
-export interface PaymentRequest { id: string; clientId: string; clientName: string; clientPhone: string | null; name: string; price: number; offerType: "plan_type" | "bundle_type"; createdAt: string; proofUrl: string | null }

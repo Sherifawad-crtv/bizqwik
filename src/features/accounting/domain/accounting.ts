@@ -1,4 +1,4 @@
-import type { Expense, ExpenseCategory, PnlReport, RecurringExpense } from "../../../shared/types";
+import type { Expense, ExpenseCategory, PnlReport, RecurringExpense } from "./types";
 
 // Accounting rules: months, categories, expenses, recurring templates and P&L.
 // Pure functions: no React, no server calls.

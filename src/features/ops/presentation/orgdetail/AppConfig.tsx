@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { type OrgConfig } from "../../../../shared/types";
+import { type OrgConfig } from "../../domain/types";
 import { TextField } from "../../../../design-system/components/FormField";
 import { Button } from "../../../../design-system/components/Button";
 import { ErrorBanner } from "../../../../design-system/components/ErrorBanner";
