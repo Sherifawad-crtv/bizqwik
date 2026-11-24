@@ -13,7 +13,7 @@ import { HomeAvatar } from "../../../shared/components/HomeAvatar";
 import { EmptyState } from "../../../design-system/components/EmptyState";
 import { Icon, type IconName } from "../../../design-system/components/Icon";
 import { Spinner } from "../../../design-system/components/Spinner";
-import { RevenueChart } from "../../../design-system/components/MoneyCharts";
+import { RevenueChart } from "../../../shared/components/MoneyCharts";
 import { LocationSwitcher, useCurrentLocation } from "../../../shared/locations";
 import { PaymentRequestsCard } from "./PaymentRequests";
 import { SectionLink } from "./shared";

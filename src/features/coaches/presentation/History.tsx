@@ -148,7 +148,7 @@ function LedgerHistory() {
 
   return (
     <div>
-      <YearMonthStrip months={months} value={month} onChange={setMonth} />
+      <YearMonthStrip months={months} value={month} onChange={setMonth} currentMonth={CURRENT_MONTH} />
       {!data ? (
         <Spinner />
       ) : data.kind === "personal" ? (

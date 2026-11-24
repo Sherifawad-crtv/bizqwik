@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { initialsOf } from "../../shared/format";
+import { initialsOf } from "../format";
 
 export function Avatar({ name, size = 40, src }: { name: string; size?: number; src?: string | null }) {
   const [brokenSrc, setBrokenSrc] = useState<string | null>(null);

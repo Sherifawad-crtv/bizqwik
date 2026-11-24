@@ -9,7 +9,7 @@ import { Icon } from "../../../design-system/components/Icon";
 import { Segmented } from "../../../design-system/components/Segmented";
 import { Spinner } from "../../../design-system/components/Spinner";
 import { caption, pctChange } from "../../../design-system/components/chartHelpers";
-import { RevenueChart, ShareBars } from "../../../design-system/components/MoneyCharts";
+import { RevenueChart, ShareBars } from "../../../shared/components/MoneyCharts";
 import { Delta, KpiTile } from "../../../design-system/components/KpiTile";
 import { SectionCard } from "../../../design-system/components/Card";
 import { Num } from "../../../design-system/components/Num";

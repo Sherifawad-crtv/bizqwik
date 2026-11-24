@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { fmt } from "../../shared/format";
+import { fmt } from "../format";
 import { useMeasuredWidth } from "./chartHelpers";
 import { useTween } from "../motion/useTween";
 import { EASE, QUICK_MS } from "../motion/motion";

@@ -1,4 +1,4 @@
-import { fmt } from "../../shared/format";
+import { fmt } from "../format";
 import { useTween } from "../motion/useTween";
 import { CONTROL_MS } from "../motion/motion";
 

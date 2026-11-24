@@ -6,7 +6,7 @@
 // 2. Screens must not re-define library components (a local Card, Chip, Tag…).
 // 3. Import boundaries: features use design-system and shared, never another
 //    feature or the app frame; shared never reaches into features or app; the
-//    design system never reaches into features, app or shared components.
+//    design system never reaches into features, app or shared/.
 //    Inside a feature, the layers keep their direction (see 3b below); from
 //    outside, a feature is used only through its index.ts or routes/ (3c).
 // 4. Hand-built versions of things the library covers (a row divider, a styled
@@ -53,7 +53,7 @@ for (const f of files) {
     let bad = null;
     if (from.top === "features" && (to.top === "app" || (to.top === "features" && to.sub !== from.sub))) bad = "a feature may only use design-system, shared and its own folder";
     if (from.top === "shared" && (to.top === "features" || to.top === "app")) bad = "shared code may not use features or the app frame";
-    if (from.top === "design-system" && (to.top === "features" || to.top === "app" || to.comp)) bad = "the design system may not use features, the app frame or shared components";
+    if (from.top === "design-system" && (to.top === "features" || to.top === "app" || to.top === "shared")) bad = "the design system stands alone: it may not use features, the app frame or shared/";
     if (bad) errors.push(`${f}: imports ${m[1]} (${bad})`);
   }
 }

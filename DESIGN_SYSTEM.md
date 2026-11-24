@@ -36,7 +36,9 @@ src/
 - A feature uses `design-system/` and `shared/`, and its own folder. Never another
   feature, never `app/`.
 - `shared/` never uses `features/` or `app/`.
-- `design-system/` never uses `features/`, `app/` or `shared/components/`.
+- `design-system/` stands alone: it never uses `features/`, `app/` or `shared/`.
+  Its components take plain props (no API types, no business wording), and
+  the display helpers they need live in `design-system/format.ts`.
 - `app/` may use anything (it puts the screens together).
 
 **Where a new piece goes:**
@@ -242,9 +244,7 @@ Cards don't have shadows.
 | A big money figure that changes | `Num` (inside a `bq-stat-*`) | glides to new values |
 | The main figure + stats of a screen | `MoneyHero` | |
 | A KPI tile (icon · label · number · change) | `KpiTile` + `Delta` | |
-| A bar chart | `BarChart`; money over months: `RevenueChart` | `RevenueChart` / `ShareBars` in `MoneyCharts.tsx` |
-| Share of a total as bars | `ShareBars` | |
-| A chart's "no data yet" | `Empty` | in `KpiTile.tsx` |
+| A bar chart | `BarChart`; money over months: `RevenueChart` (shared, below) | |
 | A small square label | `Tag` (`tone`) | Kids, location, OFF SALE |
 | A state with a dot | `StatusBadge` (`tone`) | ready-made ones in shared (below) |
 | A person | `Avatar` | |
@@ -258,6 +258,9 @@ Used by two or more features. Not generic enough for the library.
 
 | I need | Use |
 |---|---|
+| Revenue vs payouts over months | `RevenueChart` (in `MoneyCharts.tsx`) |
+| Share of a total as bars | `ShareBars` (in `MoneyCharts.tsx`) |
+| A money chart's "no data yet" | `Empty` (in `MoneyCharts.tsx`) |
 | A coach month's state | `StatePill` |
 | A PT package's state | `PackageStatusPill` |
 | A client's plan status (front desk / clients) | `PlanPill` |

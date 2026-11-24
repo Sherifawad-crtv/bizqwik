@@ -1,13 +1,8 @@
 // Shared time/weekday helpers for class scheduling screens.
 
-export const pad = (n: number) => String(n).padStart(2, "0");
+import { pad, timeLabel } from "../design-system/format";
 
-export function timeLabel(hhmm: string): string {
-  const [h, m] = hhmm.split(":").map(Number);
-  const am = h < 12;
-  const h12 = ((h + 11) % 12) + 1;
-  return `${h12}:${pad(m)} ${am ? "AM" : "PM"}`;
-}
+export { pad, timeLabel } from "../design-system/format";
 
 export function whenLabel(iso: string): string {
   const d = new Date(iso);

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { playSuccessChime } from "../../shared/sound";
+import { playSuccessChime } from "../sound";
 import { SUCCESS_HOLD_MS } from "../motion/motion";
 
 /** Shared "show a big checkmark inside this sheet, then auto-close" behavior

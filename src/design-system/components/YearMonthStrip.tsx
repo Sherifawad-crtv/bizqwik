@@ -1,10 +1,10 @@
 import { startTransition, useEffect, useRef, useState } from "react";
 import { useSlidingThumb } from "./useSlidingThumb";
-import { monthAbbr } from "../../shared/format";
-import { MOCK } from "../../shared/api/backend";
+import { monthAbbr } from "../format";
 import { QUICK_MS, tr } from "../motion/motion";
 
-export function YearMonthStrip({ months, value, onChange }: { months: string[]; value: string; onChange: (m: string) => void }) {
+/** `currentMonth` ("2026-11") is marked as now; months after it show as future. */
+export function YearMonthStrip({ months, value, onChange, currentMonth }: { months: string[]; value: string; onChange: (m: string) => void; currentMonth: string }) {
   const [shown, setShown] = useState(value);
   const [seen, setSeen] = useState(value);
   if (value !== seen) {
@@ -27,8 +27,8 @@ export function YearMonthStrip({ months, value, onChange }: { months: string[]; 
       {thumb}
       {months.map((m) => {
         const on = m === shown;
-        const isNow = m === MOCK.CURRENT_MONTH;
-        const future = m > MOCK.CURRENT_MONTH;
+        const isNow = m === currentMonth;
+        const future = m > currentMonth;
         return (
           <button
             key={m}

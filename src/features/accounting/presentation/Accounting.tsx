@@ -39,7 +39,7 @@ export function Accounting() {
         />
       </div>
 
-      {tab !== "recurring" && <YearMonthStrip months={months} value={month} onChange={setMonth} />}
+      {tab !== "recurring" && <YearMonthStrip months={months} value={month} onChange={setMonth} currentMonth={CURRENT_MONTH} />}
 
       <div key={tab} className="bq-rise">
         {tab === "pnl" && (

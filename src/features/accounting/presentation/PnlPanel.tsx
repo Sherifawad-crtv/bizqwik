@@ -8,7 +8,7 @@ import { KpiTile, Delta } from "../../../design-system/components/KpiTile";
 import { SectionCard } from "../../../design-system/components/Card";
 import { pctChange, caption } from "../../../design-system/components/chartHelpers";
 import { BarChart } from "../../../design-system/components/BarChart";
-import { ShareBars } from "../../../design-system/components/MoneyCharts";
+import { ShareBars } from "../../../shared/components/MoneyCharts";
 import { Num } from "../../../design-system/components/Num";
 import { hasNoActivity, isEmptyReport, previousMonth, profitMargin, stillOwed } from "../domain/accounting";
 import "./PnlPanel.css";

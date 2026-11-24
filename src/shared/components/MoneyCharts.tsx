@@ -1,8 +1,13 @@
-import { EmptyState } from "./EmptyState";
-import { fmt, monthAbbr } from "../../shared/format";
-import type { RevenueReport, RevenueSlice } from "../../shared/types";
-import { BarChart } from "./BarChart";
-import { Empty } from "./KpiTile";
+import { EmptyState } from "../../design-system/components/EmptyState";
+import { fmt, monthAbbr } from "../format";
+import type { RevenueReport, RevenueSlice } from "../types";
+import { BarChart } from "../../design-system/components/BarChart";
+import "./MoneyCharts.css";
+
+/** A money chart's "no data yet". */
+export function Empty({ text }: { text: string }) {
+  return <EmptyState bare icon="insights" title={text} body="This fills in automatically as the front desk sells plans, packages and drop-ins." />;
+}
 
 /** Revenue vs coach payouts per month, as one soft bar chart (see BarChart). */
 export function RevenueChart({ months, revenueOnly = false }: { months: RevenueReport["months"]; revenueOnly?: boolean }) {

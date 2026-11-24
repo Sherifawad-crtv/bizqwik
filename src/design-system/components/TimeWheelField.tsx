@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Sheet } from "./Sheet";
 import { Button } from "./Button";
 import { Icon } from "./Icon";
-import { pad, timeLabel } from "../../shared/classTime";
+import { pad, timeLabel } from "../format";
 
 const ITEM_H = 44;
 const VISIBLE = 5; // rows shown; the middle one is the selection

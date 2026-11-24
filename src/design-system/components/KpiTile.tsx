@@ -1,11 +1,6 @@
-import { EmptyState } from "./EmptyState";
 import type { ReactNode } from "react";
 import { Icon, type IconName } from "./Icon";
 
-
-export function Empty({ text }: { text: string }) {
-  return <EmptyState bare icon="insights" title={text} body="This fills in automatically as the front desk sells plans, packages and drop-ins." />;
-}
 
 /** Change vs the previous equal period. `tone` says how to colour it: revenue
  * and profit going up is good, payouts going up is just information. */

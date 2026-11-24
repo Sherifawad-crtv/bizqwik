@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Sheet } from "./Sheet";
-import { dateLabel, daysInMonth, isoDate, monthLabel, weekdayOf } from "../../shared/format";
+import { dateLabel, daysInMonth, isoDate, monthLabel, weekdayOf } from "../format";
 
 interface DateFieldProps {
   value: string; // ISO yyyy-mm-dd
