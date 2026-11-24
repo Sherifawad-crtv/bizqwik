@@ -1,5 +1,5 @@
 // Accounting's data types: the shapes its server calls return and its
-// screens show. Types several features use stay in shared/types.ts.
+// screens show. Types several features use stay in shared/types/.
 
 // ---- accounting: expenses & profit and loss ----
 export interface ExpenseCategory {

@@ -1,5 +1,5 @@
 // Coaches' data types: the shapes its server calls return and its
-// screens show. Types several features use stay in shared/types.ts.
+// screens show. Types several features use stay in shared/types/.
 import type { PackageInstance } from "../../../shared/types";
 
 export type PayMethodOut = "cash" | "bank" | "instapay" | "other";
