@@ -355,4 +355,4 @@ You are ready for local automation / CI config when:
 2. Money/desk POSTs validate; org helpers used on those paths.  
 3. Smoke + tenant proof + money concurrency are green locally.
 
-Next: [backend-implementation-plan.md](./backend-implementation-plan.md) → **Phase 6 — Local automation / CI config**.
+Next: [backend-phase-6.md](./backend-phase-6.md) → **Phase 6 — Local automation / CI config** (milestones M0–M4).

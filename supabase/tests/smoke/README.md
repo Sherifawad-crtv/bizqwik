@@ -1,5 +1,16 @@
 # API smoke
 
+## One command (Phase 6)
+
+From the repo root:
+
+```bash
+npm run backend:verify              # fixture dry-run
+npm run backend:verify:live         # needs supabase start + functions serve
+```
+
+See `scripts/backend-verify.sh` and `docs/architecture/backend-phase-6.md`.
+
 ## Phase 0 (no server)
 
 Validates that contract fixtures exist, parse as JSON, and contain the required keys:

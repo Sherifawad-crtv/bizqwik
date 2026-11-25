@@ -2,6 +2,18 @@
 
 Requires local Supabase (`supabase start` / after `db reset`).
 
+## One command (Phase 6)
+
+Live verify includes the parallel concurrency check:
+
+```bash
+npm run backend:verify:live
+# or full reset + serve + suite:
+npm run backend:verify:ci
+```
+
+See `scripts/backend-verify.sh` and `docs/architecture/backend-phase-6.md`.
+
 ## Flag
 
 Edge reads `MONEY_RPC`:

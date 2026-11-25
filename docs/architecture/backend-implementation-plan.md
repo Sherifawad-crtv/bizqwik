@@ -150,15 +150,9 @@ Validate money/desk POSTs (Zod in `_shared/validate.ts`); shared `org.ts` scopin
 
 ## Phase 6 — Local automation / CI config
 
-### Work
+**Detailed playbook:** [backend-phase-6.md](./backend-phase-6.md) (milestones M0–M4 with tasks + acceptance criteria).
 
-1. Scripts you already run locally (smoke, contract, money concurrency) documented and one-command where possible.  
-2. Optional: GitHub Action that runs the same on PRs using local Supabase in CI — still not a Production deploy.  
-3. Do not put Production secrets in the plan’s day-to-day loop.
-
-### Production
-
-**No deploy.**
+One-command `scripts/backend-verify.sh` (dry / live / ci); npm scripts; optional PR workflow with **local** Supabase only. **No Production secrets. No Production deploy.**
 
 ---
 
@@ -263,7 +257,7 @@ Then: run the phase’s tests + click the screens that use the routes you touche
 | 3 Split Edge source | Done (routes + thin index; context helpers) | yes | yes (smoke + compensate) | 2026-11-19 |
 | 4 Dedupe functions | Done (_shared auth/mappers; solo-desk + clients-list wired) | yes | yes (smoke + clients-list + solo-desk) | 2026-11-19 |
 | 5 Validation + org helper | Done (Zod money/desk + org helpers; focused tenant 404) | yes | yes (smoke + compensate/drop-in) | 2026-11-25 |
-| 6 Automation / CI config | Not started | | | |
+| 6 Automation / CI config | Done (backend-verify + GH local Supabase workflow) | yes | yes (dry + live verify) | 2026-11-25 |
 | GATE full local acceptance | Not started | | | |
 | CUTOVER Production | Not started | | | |
 
@@ -287,4 +281,5 @@ Then: run the phase’s tests + click the screens that use the routes you touche
 - [backend-phase-3.md](./backend-phase-3.md) — detailed Phase 3 Edge split milestones  
 - [backend-phase-4.md](./backend-phase-4.md) — detailed Phase 4 dedupe milestones  
 - [backend-phase-5.md](./backend-phase-5.md) — detailed Phase 5 validation + org milestones  
+- [backend-phase-6.md](./backend-phase-6.md) — detailed Phase 6 automation / CI milestones  
 - `docs/audit/frontend-issues.md` — separate front-end track  
