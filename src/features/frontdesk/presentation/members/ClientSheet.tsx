@@ -13,7 +13,7 @@ import { Sheet } from "../../../../design-system/components/Sheet";
 import { Segmented } from "../../../../design-system/components/Segmented";
 import { SheetSuccessIcon } from "../../../../design-system/components/SheetSuccessIcon";
 import { TextField, SelectField } from "../../../../design-system/components/FormField";
-import { PaymentSelect } from "../../../../shared/components/PaymentSelect";
+import { PaymentSelect } from "../PaymentSelect";
 import { Icon } from "../../../../design-system/components/Icon";
 import type { PayMethod } from "../../../../shared/types";
 import { useAuth } from "../../../../shared/session/auth";

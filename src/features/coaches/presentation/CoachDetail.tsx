@@ -8,8 +8,8 @@ import { daysLogged, sessionsOn, stateLabel, withAddedSessions } from "../domain
 import { CURRENT_MONTH, useCoachMonth, useMonthActions } from "./hooks/useCoaches";
 import { MoneyHero } from "../../../design-system/components/MoneyHero";
 import { LockedBanner } from "./LockedBanner";
-import { DayList } from "../../../shared/components/DayList";
-import { DaySessionsSheet } from "../../../shared/components/DaySessionsSheet";
+import { DayList } from "./DayList";
+import { DaySessionsSheet } from "./DaySessionsSheet";
 import { AddSessionSheet } from "../../../shared/components/AddSessionSheet";
 import { Avatar } from "../../../design-system/components/Avatar";
 import { Button } from "../../../design-system/components/Button";

@@ -14,6 +14,12 @@
   from their feature's `presentation/hooks/`, never from `data/` or `shared/api`
   directly; a rule (what's valid, what's shown, what's allowed) goes in `domain/`.
   `npm run ds` enforces the direction.
+- Features follow the app's tabs (`frontdesk`, `catalog`, `coaches`…). Code only
+  one tab uses stays in that tab. A business thing several tabs use gets its own
+  `shared/<thing>/` folder (e.g. `shared/classes/`: its sheets and rules) instead
+  of being scattered over `shared/components`, `shared/domain`… Server calls stay
+  in `shared/api/` and types in `shared/types/`. A piece moves to shared only
+  when a second tab needs it.
 - Data types belong to the architecture too: a type only one feature uses lives
   in that feature's `domain/types.ts` (its models; `data/` and `presentation/`
   import them from there). `src/shared/types/` (one file per topic) holds only types several

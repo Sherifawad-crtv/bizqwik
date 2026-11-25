@@ -1,7 +1,7 @@
-import { Segmented } from "../../design-system/components/Segmented";
-import { useAuth } from "../session/auth";
-import { isSoloOwner } from "../screen/nav";
-import type { PayMethod } from "../types";
+import { Segmented } from "../../../design-system/components/Segmented";
+import { useAuth } from "../../../shared/session/auth";
+import { isSoloOwner } from "../../../shared/screen/nav";
+import type { PayMethod } from "../../../shared/types";
 import "./PaymentSelect.css";
 
 /** Cash / card / InstaPay / wallet picker for a desk sale. `wallet` is only offered when a

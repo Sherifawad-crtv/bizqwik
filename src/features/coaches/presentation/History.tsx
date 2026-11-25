@@ -9,7 +9,7 @@ import { CURRENT_MONTH, useLedger, yearMonths } from "./hooks/useCoaches";
 import { MoneyHero } from "../../../design-system/components/MoneyHero";
 import { YearMonthStrip } from "../../../design-system/components/YearMonthStrip";
 import { RollupTable, type ListRow } from "./RollupTable";
-import { DayList } from "../../../shared/components/DayList";
+import { DayList } from "./DayList";
 import { LockedBanner } from "./LockedBanner";
 import { Spinner } from "../../../design-system/components/Spinner";
 import { Segmented } from "../../../design-system/components/Segmented";

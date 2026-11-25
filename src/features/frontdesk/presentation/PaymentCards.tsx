@@ -1,7 +1,7 @@
-import { Icon } from "../../design-system/components/Icon";
-import { useAuth } from "../session/auth";
-import { isSoloOwner } from "../screen/nav";
-import type { PayMethod } from "../types";
+import { Icon } from "../../../design-system/components/Icon";
+import { useAuth } from "../../../shared/session/auth";
+import { isSoloOwner } from "../../../shared/screen/nav";
+import type { PayMethod } from "../../../shared/types";
 import "./PaymentCards.css";
 
 const OPTIONS: { value: PayMethod; label: string; icon: "cash" | "card" | "wallet"; note: string }[] = [

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { egp } from "../../../shared/format";
-import { timeLabel, weekdaysLabel } from "../../../shared/domain/classTime";
+import { timeLabel, weekdaysLabel } from "../../../shared/classes/classTime";
 import type { ClassSeries, Location } from "../../../shared/types";
 import { LocationPill, useLocations } from "../../../shared/session/locations";
 import { Button } from "../../../design-system/components/Button";
@@ -11,7 +11,7 @@ import { EmptyRow } from "./shared";
 import { SectionHeader } from "../../../design-system/components/SectionHeader";
 import { MotionList } from "../../../design-system/components/MotionList";
 import { IconButton } from "../../../design-system/components/IconButton";
-import { SeriesSheet } from "../../../shared/components/SeriesSheet";
+import { SeriesSheet } from "../../../shared/classes/SeriesSheet";
 import { activeClasses, endedClasses } from "../domain/catalog";
 import { useCatalogHere, useClassSeries } from "./hooks/useCatalog";
 import "./Classes.css";

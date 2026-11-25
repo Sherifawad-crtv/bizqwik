@@ -8,7 +8,7 @@ import { Segmented } from "../../../design-system/components/Segmented";
 import { Button } from "../../../design-system/components/Button";
 import { Icon } from "../../../design-system/components/Icon";
 import { InlineSpinner } from "../../../design-system/components/Spinner";
-import { ClassRosterSheet } from "../../../shared/components/ClassRosterSheet";
+import { ClassRosterSheet } from "../../../shared/classes/ClassRosterSheet";
 import { type View, addDays, dayKey, startOfDay, startOfWeek, title } from "../domain/calendar";
 import { TimeGrid } from "./calendar/TimeGrid";
 import { MonthGrid } from "./calendar/MonthGrid";

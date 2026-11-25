@@ -2,7 +2,7 @@ import { useFrozen, useMountedThroughExit } from "../hooks/useLatch";
 import { useEffect, useState } from "react";
 import { useSheetSuccess } from "../../design-system/components/useSheetSuccess";
 import { api } from "../api/backend";
-import { WEEKDAY_ORDER, WEEKDAY_SHORT } from "../domain/classTime";
+import { WEEKDAY_ORDER, WEEKDAY_SHORT } from "./classTime";
 import { TimeWheelField } from "../../design-system/components/TimeWheelField";
 import { ClassPhotoField } from "./ClassPhotoField";
 import type { ClassSeries } from "../types";

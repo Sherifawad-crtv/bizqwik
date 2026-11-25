@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef } from "react";
-import { WEEKDAY_SHORT } from "../../../../shared/domain/classTime";
+import { WEEKDAY_SHORT } from "../../../../shared/classes/classTime";
 import type { GymClass } from "../../../../shared/types";
 import { GUTTER, clock, dayKey, hourLabel, layoutDay, minutesOf } from "../../domain/calendar";
 import "./TimeGrid.css";

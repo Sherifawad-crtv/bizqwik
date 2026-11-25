@@ -1,4 +1,4 @@
-import { pad, timeLabel } from "../../../shared/domain/classTime";
+import { pad, timeLabel } from "../../../shared/classes/classTime";
 import type { GymClass } from "../../../shared/types";
 
 export type View = "day" | "week" | "month";

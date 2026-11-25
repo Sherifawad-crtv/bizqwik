@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Icon } from "../../design-system/components/Icon";
 import { Sheet } from "../../design-system/components/Sheet";
 import { Button } from "../../design-system/components/Button";
-import { SeriesSheet } from "../../shared/components/SeriesSheet";
+import { SeriesSheet } from "../../shared/classes/SeriesSheet";
 import { BundleSheet, PlanTypeSheet } from "../../features/catalog";
 import { InviteFlow } from "../../shared/components/InviteFlow";
 import { TierSheet } from "../../features/manage";

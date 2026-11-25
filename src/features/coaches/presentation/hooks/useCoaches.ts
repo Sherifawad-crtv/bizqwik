@@ -7,6 +7,9 @@ import { ledgerRows, paidThisYear, payableYear, payees, rowFor, type CoachMonth 
 export const CURRENT_MONTH = repo.currentMonth;
 export const yearMonths = repo.yearMonths;
 
+/** Add, move or remove one of a coach's sessions (the day sheet). */
+export const daySessionCalls = { add: repo.addSession, move: repo.editSession, remove: repo.removeSession };
+
 /** Every payee's rollup for one month (the Team screen). */
 export function useTeamMonth(month: string) {
   const { data } = useAsync(() => repo.month(month), [month]);

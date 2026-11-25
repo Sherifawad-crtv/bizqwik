@@ -1,7 +1,7 @@
 // Keeps the design system honest. Run: npm run ds   (part of npm run check)
 //
 // 1. Every component in the library (src/design-system/components/) and in
-//    the shared business components (src/shared/components/) must be listed in
+//    the shared business components (src/shared/components/, src/shared/classes/) must be listed in
 //    DESIGN_SYSTEM.md, so a new component is always added to the directory.
 // 2. Screens must not re-define library components (a local Card, Chip, Tag…).
 // 3. Import boundaries: features use design-system and shared, never another
@@ -25,7 +25,7 @@ const errors = [];
 
 // 1. directory completeness
 const doc = read("DESIGN_SYSTEM.md");
-const LIB_DIRS = ["src/design-system/components", "src/shared/components"];
+const LIB_DIRS = ["src/design-system/components", "src/shared/components", "src/shared/classes"];
 for (const f of LIB_DIRS.flatMap((d) => readdirSync(d).filter((f) => f.endsWith(".tsx")).map((f) => join(d, f)))) {
   for (const m of read(f).matchAll(/export function ([A-Z]\w*)/g)) {
     if (!new RegExp("`" + m[1] + "`").test(doc)) errors.push(`${f}: component ${m[1]} is not listed in DESIGN_SYSTEM.md (add it to the directory)`);

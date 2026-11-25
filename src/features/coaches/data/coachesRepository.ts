@@ -24,6 +24,10 @@ export const coachesRepository = {
     return months.map((month, i) => ({ month, rows: all[i].rows }));
   },
   sessions: (coachId: string, month: string) => callFn<{ sessions: Session[] }>(`sessions/${coachId}/${month}`),
+  // A day's sessions, edited from the coach's month (the calls are shared with the scan flow).
+  addSession: (coachId: string, month: string, date: string) => api.addSession(coachId, month, date),
+  editSession: (id: string, coachId: string, month: string, date: string) => api.editSession(id, coachId, month, date),
+  removeSession: (id: string, coachId: string, month: string) => api.removeSession(id, coachId, month),
 
   // Month lifecycle: logging → settled → paid
   settle: (coachId: string, month: string) => callFn<void>("settle", { method: "POST", body: { coachId, month } }),

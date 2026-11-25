@@ -1,13 +1,13 @@
 import { useState } from "react";
-import { Sheet } from "../../design-system/components/Sheet";
-import { Button } from "../../design-system/components/Button";
-import { DateField } from "../../design-system/components/DateField";
-import { ConfirmSheet } from "../../design-system/components/ConfirmSheet";
-import { useLatch } from "../hooks/useLatch";
-import { api } from "../api/backend";
-import type { Session } from "../types";
-import { dateLabelFull, daysInMonth, egp, isoDate, sessionStamp } from "../format";
-import { IconButton } from "../../design-system/components/IconButton";
+import { Sheet } from "../../../design-system/components/Sheet";
+import { Button } from "../../../design-system/components/Button";
+import { DateField } from "../../../design-system/components/DateField";
+import { ConfirmSheet } from "../../../design-system/components/ConfirmSheet";
+import { useLatch } from "../../../shared/hooks/useLatch";
+import { daySessionCalls } from "./hooks/useCoaches";
+import type { Session } from "../../../shared/types";
+import { dateLabelFull, daysInMonth, egp, isoDate, sessionStamp } from "../../../shared/format";
+import { IconButton } from "../../../design-system/components/IconButton";
 import "./DaySessionsSheet.css";
 
 interface DaySessionsSheetProps {
@@ -45,7 +45,7 @@ export function DaySessionsSheet({ open, onClose, coachId, month, date, sessions
     setBusyId(id);
     setError(null);
     try {
-      await api.editSession(id, coachId, month, newDate);
+      await daySessionCalls.move(id, coachId, month, newDate);
       setMovingId(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Couldn't move that session.");
@@ -58,7 +58,7 @@ export function DaySessionsSheet({ open, onClose, coachId, month, date, sessions
     setError(null);
     onOptimisticAdd?.(date);
     try {
-      await api.addSession(coachId, month, date);
+      await daySessionCalls.add(coachId, month, date);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Couldn't add a session.");
     }
@@ -135,7 +135,7 @@ export function DaySessionsSheet({ open, onClose, coachId, month, date, sessions
         danger
         onConfirm={async () => {
           if (!removingId) return;
-          await api.removeSession(removingId, coachId, month);
+          await daySessionCalls.remove(removingId, coachId, month);
         }}
       />
     </>

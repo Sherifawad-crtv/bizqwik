@@ -1,9 +1,9 @@
-import type { Session } from "../types";
-import { StatePill } from "./StatePill";
-import { EmptyState } from "../../design-system/components/EmptyState";
-import { dateLabel, egp, sessionStamp } from "../format";
-import type { State } from "../types";
-import { MotionList } from "../../design-system/components/MotionList";
+import type { Session } from "../../../shared/types";
+import { StatePill } from "../../../shared/components/StatePill";
+import { EmptyState } from "../../../design-system/components/EmptyState";
+import { dateLabel, egp, sessionStamp } from "../../../shared/format";
+import type { State } from "../../../shared/types";
+import { MotionList } from "../../../design-system/components/MotionList";
 import "./DayList.css";
 
 interface DayGroup {

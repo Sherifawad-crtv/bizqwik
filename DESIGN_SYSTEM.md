@@ -265,17 +265,26 @@ Used by two or more features. Not generic enough for the library.
 | A PT package's state | `PackageStatusPill` |
 | A client's plan status (front desk / clients) | `PlanPill` |
 | The home greeting with avatar | `HomeAvatar` |
-| A payment method choice | `PaymentSelect` / `PaymentCards` |
-| A class photo picker | `ClassPhotoField` |
-| Create / edit a class | `ClassSheet` (form helpers in `shared/domain/classForm.ts`) |
-| Create / edit a weekly class series | `SeriesSheet` |
-| A class roster | `ClassRosterSheet` |
-| Add a session / a day's sessions | `AddSessionSheet`, `DaySessionsSheet`, `DayList` |
+| Add a session (coach scan / coach month) | `AddSessionSheet` |
 | Invite a team member | `InviteFlow`, `InviteSheet` |
 | Scan a member's QR (coach) | `ScanFlow` |
 | The activity feed / logs | `ActivityPanel`, `Feed` |
 
-Feature-only pieces (e.g. `LockedBanner`, `RollupTable` in `features/coaches/`)
+### Classes (`src/shared/classes/`)
+
+Everything about classes that several tabs use, in one folder: the sheets
+below plus their rules (`classForm.ts`, `classTime.ts`). The server calls stay
+in `shared/api/` and the types in `shared/types/classes.ts`.
+
+| I need | Use |
+|---|---|
+| A class photo picker | `ClassPhotoField` |
+| Create / edit a class | `ClassSheet` (form helpers in `shared/classes/classForm.ts`) |
+| Create / edit a weekly class series | `SeriesSheet` |
+| A class roster | `ClassRosterSheet` |
+
+Feature-only pieces (e.g. `LockedBanner`, `RollupTable`, `DayList`, `DaySessionsSheet` in
+`features/coaches/`; `PaymentSelect`, `PaymentCards` in `features/frontdesk/`)
 stay in their feature until a second feature needs them.
 
 ### App frame (used by `app/`, not by screens)

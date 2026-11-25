@@ -8,7 +8,7 @@ import { useDeskClients } from "./hooks/useDesk";
 import { useBundleTypes, useLocationRevenue, useRevenue, useSoloClasses } from "./hooks/useSchedule";
 import { memberCounts, revenueMonths, revenueTrend, soloNextUp } from "../domain/schedule";
 import { fmt } from "../../../shared/format";
-import { timeLabel, pad } from "../../../shared/domain/classTime";
+import { timeLabel, pad } from "../../../shared/classes/classTime";
 import { HomeAvatar } from "../../../shared/components/HomeAvatar";
 import { EmptyState } from "../../../design-system/components/EmptyState";
 import { Icon, type IconName } from "../../../design-system/components/Icon";
