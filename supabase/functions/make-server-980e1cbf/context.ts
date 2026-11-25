@@ -27,6 +27,7 @@ import {
   toMembershipInstance,
   toPackageInstance,
 } from "../_shared/mappers.ts";
+import { staffInOrg as staffInOrgShared } from "../_shared/org.ts";
 export {
   fetchRetryingClockSkew,
   SUPABASE_URL,
@@ -1391,9 +1392,8 @@ export function canMutateSessions(me: any, coachId: string) {
 // The staff member a session or settlement is for must work at the caller's
 // gym. Profile ids come from the request, so never trust them on their own.
 export async function staffInMyOrg(me: any, profileId: string) {
-  if (!profileId) return null;
-  const { data } = await admin().from("profiles").select("*").eq("id", profileId).eq("org_id", me.org_id).maybeSingle();
-  return data;
+  if (!me?.org_id || !profileId) return null;
+  return await staffInOrgShared(me.org_id, profileId);
 }
 
 

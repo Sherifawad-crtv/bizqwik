@@ -142,15 +142,9 @@ Make `_shared` real (no facades into main context); point `solo-desk` / `clients
 
 ## Phase 5 — Validation + org helper (local)
 
-### Work
+**Detailed playbook:** [backend-phase-5.md](./backend-phase-5.md) (milestones M0–M6 with tasks + acceptance criteria).
 
-1. Validate money/desk POSTs (must allow today’s real bodies).  
-2. Shared org scoping helper.  
-3. Prove with local UI + contract fixtures + tenant check.
-
-### Production
-
-**No deploy.**
+Validate money/desk POSTs (Zod in `_shared/validate.ts`); shared `org.ts` scoping; prove with contract fixtures + tenant check. Same JSON/codes. **No Production deploy.**
 
 ---
 
@@ -268,7 +262,7 @@ Then: run the phase’s tests + click the screens that use the routes you touche
 | 2 Money RPCs | Done (RPC default on; tests/money green) | yes | yes (compensate + smoke) | 2026-11-19 |
 | 3 Split Edge source | Done (routes + thin index; context helpers) | yes | yes (smoke + compensate) | 2026-11-19 |
 | 4 Dedupe functions | Done (_shared auth/mappers; solo-desk + clients-list wired) | yes | yes (smoke + clients-list + solo-desk) | 2026-11-19 |
-| 5 Validation + org helper | Not started | | | |
+| 5 Validation + org helper | Done (Zod money/desk + org helpers; focused tenant 404) | yes | yes (smoke + compensate/drop-in) | 2026-11-25 |
 | 6 Automation / CI config | Not started | | | |
 | GATE full local acceptance | Not started | | | |
 | CUTOVER Production | Not started | | | |
@@ -292,4 +286,5 @@ Then: run the phase’s tests + click the screens that use the routes you touche
 - [backend-phase-2.md](./backend-phase-2.md) — detailed Phase 2 money RPC milestones  
 - [backend-phase-3.md](./backend-phase-3.md) — detailed Phase 3 Edge split milestones  
 - [backend-phase-4.md](./backend-phase-4.md) — detailed Phase 4 dedupe milestones  
+- [backend-phase-5.md](./backend-phase-5.md) — detailed Phase 5 validation + org milestones  
 - `docs/audit/frontend-issues.md` — separate front-end track  

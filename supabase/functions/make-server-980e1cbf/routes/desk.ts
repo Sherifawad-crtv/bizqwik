@@ -158,6 +158,17 @@ import type {
   CheckInResult,
   Sale
 } from "../context.ts";
+import { clientInOrg, rowInOrg } from "../../_shared/org.ts";
+import {
+  BookingCollectBody,
+  CheckInBody,
+  ClientCompensateBody,
+  ClientRefundBody,
+  DropInBody,
+  GroupPlanSellBody,
+  PackageSaleBody,
+  parseBody,
+} from "../../_shared/validate.ts";
 
 // Phase 3 slice: desk
 export function register(app: Hono) {
@@ -314,9 +325,10 @@ export function register(app: Hono) {
     const user = await requireUser(c);
     const me = user && (await profileOf(user.id));
     if (me?.role !== "dept_head" && me?.role !== "front_desk") return c.json({ error: "Forbidden" }, 403);
-    const body = await c.req.json();
-    const { clientId, bundleTypeId, coachId } = body;
-    const payMethod = normPayMethod(body.payMethod);
+    const parsed = await parseBody(c, PackageSaleBody);
+    if (!parsed.ok) return parsed.response;
+    const { clientId, bundleTypeId, coachId } = parsed.data;
+    const payMethod = normPayMethod(parsed.data.payMethod);
     const result = await sellPackageTo(clientId, bundleTypeId, coachId, me, payMethod);
     if ("error" in result) return c.json({ error: result.error }, result.status);
     const price = Number(result.package.price_at_sale);
@@ -376,9 +388,11 @@ export function register(app: Hono) {
     const user = await requireUser(c);
     const me = user && (await profileOf(user.id));
     if (!(await isDeskStaff(me))) return c.json({ error: "Forbidden" }, 403);
-    const { clientId, source, locationId } = await c.req.json();
+    const parsed = await parseBody(c, CheckInBody);
+    if (!parsed.ok) return parsed.response;
+    const { clientId, source, locationId } = parsed.data;
     if (source !== "qr" && source !== "manual") return c.json({ error: "Invalid check-in source." }, 400);
-    const { data: client } = await admin().from("clients").select("id, name").eq("id", clientId).eq("org_id", me.org_id).maybeSingle();
+    const client = await clientInOrg(me.org_id, clientId);
     if (!client) return c.json({ error: "No such client" }, 404);
     const loc = await locationField(me.org_id, locationId);
     if ("error" in loc) return c.json({ error: loc.error }, 400);
@@ -392,7 +406,9 @@ export function register(app: Hono) {
     const user = await requireUser(c);
     const me = user && (await profileOf(user.id));
     if (!(await isDeskStaff(me))) return c.json({ error: "Forbidden" }, 403);
-    const body = await c.req.json();
+    const parsed = await parseBody(c, DropInBody);
+    if (!parsed.ok) return parsed.response;
+    const body = parsed.data;
     const { classId } = body;
     let clientId: string | null = body.clientId || null;
     const payMethod = normPayMethod(body.payMethod);
@@ -410,8 +426,8 @@ export function register(app: Hono) {
     let amount: number;
     if (classId) {
       if (!clientId) return c.json({ error: "Pick the member for this class drop-in." }, 400);
-      const { data } = await admin().from("classes").select("*").eq("id", classId).eq("org_id", me.org_id).eq("status", "active").maybeSingle();
-      if (!data) return c.json({ error: "That class isn't available." }, 404);
+      const data = await rowInOrg<any>("classes", me.org_id, classId);
+      if (!data || data.status !== "active") return c.json({ error: "That class isn't available." }, 404);
       cls = data;
       cat = cls.title;
       amount = Number(cls.price_egp);
@@ -446,7 +462,7 @@ export function register(app: Hono) {
     };
 
     if (clientId && !createdClientId) {
-      const { data: client } = await admin().from("clients").select("id, name").eq("id", clientId).eq("org_id", me.org_id).maybeSingle();
+      const client = await clientInOrg(me.org_id, clientId);
       if (!client) return c.json({ error: "No such client" }, 404);
       if (cls) {
         const { data: seat } = await admin().from("class_bookings").select("id, attendance").eq("class_id", cls.id).eq("client_id", clientId).maybeSingle();
@@ -692,7 +708,9 @@ export function register(app: Hono) {
     const user = await requireUser(c);
     const me = user && (await profileOf(user.id));
     if (!(await isDeskStaff(me))) return c.json({ error: "Forbidden" }, 403);
-    const body = await c.req.json();
+    const parsed = await parseBody(c, GroupPlanSellBody);
+    if (!parsed.ok) return parsed.response;
+    const body = parsed.data;
     const { clientId, name, age, phone, email, planTypeId, seriesId } = body;
     const payMethod = normPayMethod(body.payMethod);
     if (payMethod === "wallet" && !clientId) return c.json({ error: "A brand-new client has no wallet balance yet — take cash or card." }, 400);
@@ -702,7 +720,7 @@ export function register(app: Hono) {
     const made: string[] = [];
     const resolveClient = async (spec: { clientId?: string; name?: string; age?: unknown; phone?: unknown; email?: unknown }) => {
       if (spec.clientId) {
-        const { data } = await admin().from("clients").select("*").eq("id", spec.clientId).eq("org_id", me.org_id).maybeSingle();
+        const data = await clientInOrg(me.org_id, spec.clientId);
         return data ? { client: data } : { error: "No such client", status: 404 };
       }
       if (!spec.name || !String(spec.name).trim()) return { error: "Name is required.", status: 400 };
@@ -721,7 +739,7 @@ export function register(app: Hono) {
     // A shared bundle goes to several clients at once, one plan each.
     let sharedType: any = null;
     if (planTypeId) {
-      const { data: t } = await admin().from("group_plan_types").select("*").eq("id", planTypeId).eq("org_id", me.org_id).maybeSingle();
+      const t = await rowInOrg<any>("group_plan_types", me.org_id, planTypeId);
       if (t?.shared_seats) sharedType = t;
     }
     if (sharedType) {
@@ -925,10 +943,12 @@ export function register(app: Hono) {
     const user = await requireUser(c);
     const me = user && (await profileOf(user.id));
     if (me?.role !== "dept_head" && me?.role !== "front_desk") return c.json({ error: "Forbidden" }, 403);
-    const body = await c.req.json();
+    const parsed = await parseBody(c, BookingCollectBody);
+    if (!parsed.ok) return parsed.response;
+    const body = parsed.data;
     const { bookingId } = body;
     const payMethod = normPayMethod(body.payMethod);
-    const { data: b } = await admin().from("class_bookings").select("*").eq("id", bookingId).eq("org_id", me.org_id).maybeSingle();
+    const b = await rowInOrg<any>("class_bookings", me.org_id, bookingId);
     if (!b) return c.json({ error: "No such booking" }, 404);
     if (b.pay_status === "paid") return c.json({ error: "Already paid." }, 400);
     if (b.attendance === "cancelled") return c.json({ error: "That booking was cancelled." }, 400);
@@ -950,11 +970,13 @@ export function register(app: Hono) {
     const user = await requireUser(c);
     const me = user && (await profileOf(user.id));
     if (me?.role !== "dept_head" && me?.role !== "front_desk") return c.json({ error: "Forbidden" }, 403);
-    const { clientId, amount, destination, note } = await c.req.json();
+    const parsed = await parseBody(c, ClientRefundBody);
+    if (!parsed.ok) return parsed.response;
+    const { clientId, amount, destination, note } = parsed.data;
     const amt = Math.round(Number(amount) * 100) / 100;
     if (!Number.isFinite(amt) || amt <= 0) return c.json({ error: "Enter a refund amount." }, 400);
     if (destination !== "wallet" && destination !== "desk") return c.json({ error: "Choose where the refund goes." }, 400);
-    const { data: client } = await admin().from("clients").select("id, name, home_location_id").eq("id", clientId).eq("org_id", me.org_id).maybeSingle();
+    const client = await clientInOrg(me.org_id, clientId);
     if (!client) return c.json({ error: "No such client" }, 404);
     const { paid, refunded, refundable } = await refundableFor(clientId, me.org_id);
     if (amt > refundable) {
@@ -992,10 +1014,12 @@ export function register(app: Hono) {
     const user = await requireUser(c);
     const me = user && (await profileOf(user.id));
     if (me?.role !== "dept_head") return c.json({ error: "Forbidden" }, 403);
-    const { clientId, amount, note } = await c.req.json();
+    const parsed = await parseBody(c, ClientCompensateBody);
+    if (!parsed.ok) return parsed.response;
+    const { clientId, amount, note } = parsed.data;
     const amt = Number(amount);
     if (!Number.isFinite(amt) || amt <= 0) return c.json({ error: "Enter an amount." }, 400);
-    const { data: client } = await admin().from("clients").select("id").eq("id", clientId).eq("org_id", me.org_id).maybeSingle();
+    const client = await clientInOrg(me.org_id, clientId);
     if (!client) return c.json({ error: "No such client" }, 404);
     const balance = await creditWallet(clientId, me.org_id, amt, "compensation", note ? String(note) : "Compensation credit", me.id);
     await notifyClient(me.org_id, clientId, "wallet_credit", { title: `${amt} EGP added to your wallet`, body: note ? String(note) : "A little something from the gym.", push: true });

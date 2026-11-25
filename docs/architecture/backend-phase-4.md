@@ -346,4 +346,4 @@ You are ready for validation + org helper when:
 2. All three Edge slugs use shared db/auth without copied helpers.  
 3. Smoke (main) + clients-list + solo-desk checks are green locally.
 
-Next: [backend-implementation-plan.md](./backend-implementation-plan.md) → **Phase 5 — Validation + org helper**.
+Next: [backend-phase-5.md](./backend-phase-5.md) → **Phase 5 — Validation + org helper** (milestones M0–M6).
