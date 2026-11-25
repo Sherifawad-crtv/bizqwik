@@ -9,6 +9,7 @@ import { Card } from "../../../design-system/components/Card";
 import { SectionHeader } from "../../../design-system/components/SectionHeader";
 import { Segmented } from "../../../design-system/components/Segmented";
 import { qrToken } from "../domain/ops";
+import { tokens } from "../../../design-system/tokens/tokens";
 import { useOrg } from "./hooks/useOps";
 import "./OrgQr.css";
 
@@ -70,18 +71,18 @@ export function OrgQr() {
     const w = window.open("", "_blank", "width=800,height=1000");
     if (!w) return;
     // A printable poster in its own window: the app's CSS variables don't exist
-    // there, so it carries its own small print palette (exempt from tokens).
+    // there, so it takes the token values directly (tokens.ts) instead.
     w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${escapeHtml(appName)} — ${copy.title}</title>
 <style>
   @page { margin: 24mm; }
   html,body { height: 100%; margin: 0; }
-  body { font-family: -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; color: #16130f;
+  body { font-family: -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; color: ${tokens.colorTextPrimaryDefault};
     display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 32px; }
   .name { font-size: 34px; font-weight: 800; letter-spacing: -.02em; margin: 0 0 6px; }
-  .sub { font-size: 15px; color: #6b6459; margin: 0 0 28px; }
+  .sub { font-size: 15px; color: ${tokens.colorTextSecondaryDefault}; margin: 0 0 28px; }
   img { width: 62vmin; max-width: 460px; height: auto; }
-  .steps { font-size: 16px; color: #16130f; margin-top: 28px; line-height: 1.7; }
-  .code { font-family: ui-monospace, Menlo, monospace; font-size: 13px; color: #9a9186; margin-top: 18px; letter-spacing: .04em; }
+  .steps { font-size: 16px; color: ${tokens.colorTextPrimaryDefault}; margin-top: 28px; line-height: 1.7; }
+  .code { font-family: ui-monospace, Menlo, monospace; font-size: 13px; color: ${tokens.colorTextTertiaryDefault}; margin-top: 18px; letter-spacing: .04em; }
 </style></head><body>
   <h1 class="name">${escapeHtml(appName)}</h1>
   <p class="sub">${copy.sub}</p>

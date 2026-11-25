@@ -147,7 +147,7 @@ for (const [rule, { tsx, css }] of Object.entries(RULES)) {
       if (n) { counts[rule] += n; where[rule].push(`${relative(".", f)} (${n})`); }
     }
   };
-  scan(files.filter((f) => f.endsWith(".tsx") && f !== "src/features/ops/OrgQr.tsx"), tsx, LIBRARY_FILES);
+  scan(files.filter((f) => f.endsWith(".tsx")), tsx, LIBRARY_FILES);
   scan(cssFiles, css, rule.startsWith("raw") || rule.startsWith("off-scale") ? new Set() : LIBRARY_CSS);
 }
 const BASE = "scripts/ds-baseline.json";
