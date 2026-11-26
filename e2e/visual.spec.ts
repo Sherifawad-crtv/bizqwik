@@ -7,7 +7,7 @@ import type { Role } from "../src/shared/types";
 
 // "Nothing moved" guard for the architecture clean-up. Each main screen, per
 // role, on phone and desktop, is reduced to the computed styles of every
-// visible element (colours, type, spacing, radius, shadows, layout). Those are
+// visible element (colours, type, spacing, radius, shadows, sizes, layout). Those are
 // compared with the committed baseline in e2e/visual-baseline/. Computed
 // styles don't depend on which fonts the machine has, so the same baseline
 // holds locally and in CI.
@@ -27,7 +27,7 @@ const PROPS = [
   "border-top-right-radius", "border-bottom-left-radius", "border-bottom-right-radius", "background-color",
   "background-image", "color", "font-family", "font-size", "font-weight", "line-height", "letter-spacing",
   "text-transform", "text-align", "white-space", "opacity", "box-shadow", "overflow-x", "overflow-y",
-  "min-height", "max-width", "z-index", "text-decoration-line", "font-variant-numeric",
+  "min-height", "max-width", "height", "width", "z-index", "text-decoration-line", "font-variant-numeric",
 ];
 
 const now = new Date("2026-10-15T10:00:00");
@@ -134,7 +134,12 @@ async function snapshot(page: Page): Promise<string[]> {
       // "auto", grid columns stay "1fr 90px"), so the snapshot doesn't depend
       // on how wide the machine's fonts render text.
       const map = el.computedStyleMap();
+      // Two parts size themselves by measuring their text (the page-title pill
+      // and a segmented control's sliding thumb), so their width differs
+      // between machines' fonts: left out. Every other size is checked.
+      const measured = el.matches(".bq-shell-title-pill, .bq-use-sliding-thumb-layer");
       const val = (p: string) => {
+        if ((p === "width" || p === "height") && measured) return "measured";
         try {
           return String(map.get(p) ?? cs.getPropertyValue(p));
         } catch {
