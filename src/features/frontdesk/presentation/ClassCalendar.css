@@ -20,8 +20,8 @@
 }
 
 .bq-frontdesk-class-calendar-screen-btn {
-  width: 44px;
-  height: 44px;
+  width: var(--size-touch);
+  height: var(--size-touch);
   padding: 0;
 }
 
@@ -30,7 +30,7 @@
 }
 
 .bq-frontdesk-class-calendar-screen-btn-2 {
-  height: 44px;
+  height: var(--size-touch);
   padding: 0 var(--space-4);
   font: 700 var(--text-caption-1-size) var(--font-family-mono);
   letter-spacing: .06em;

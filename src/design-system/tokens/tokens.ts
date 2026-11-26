@@ -85,6 +85,7 @@ export const tokens = {
   sizeColumn: 420,
   sizeControl: 48,
   sizeControlSm: 36,
+  sizeTouch: 44,
   borderDivider: {"color":"#e3e1da","width":"1px","style":"solid"},
   borderOutline: {"color":"#e3e1da","width":"1px","style":"solid"},
   fontFamilyBody: "Urbanist, system-ui, sans-serif",

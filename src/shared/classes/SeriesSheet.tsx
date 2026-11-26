@@ -29,7 +29,7 @@ function WeekdayPicker({ value, onChange }: { value: number[]; onChange: (v: num
               aria-pressed={on}
               onClick={() => onChange(on ? value.filter((x) => x !== d) : [...value, d])}
               style={{
-                height: 44,
+                height: "var(--size-touch)",
                 borderRadius: "var(--radius-button)",
                 border: on ? "0" : "1px solid var(--color-border-primary-default)",
                 background: on ? "var(--color-bg-fill-accent-strong)" : "var(--color-bg-surface-secondary-default)",

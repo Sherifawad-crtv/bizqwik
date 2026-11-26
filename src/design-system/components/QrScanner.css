@@ -92,7 +92,7 @@
 }
 
 .bq-qr-scanner-btn-2 {
-  min-width: 44px;
+  min-width: var(--size-touch);
   height: var(--size-control-sm);
   padding: 0 var(--space-2);
   border-radius: var(--radius-full);

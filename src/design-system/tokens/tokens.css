@@ -73,6 +73,7 @@
   --size-column: 420px; /** max width of one-column content: sheets, the QR scanner, phone sign-in cards, the floating bookings bar */
   --size-control: 48px; /** height of a standard button, and of controls that sit beside one */
   --size-control-sm: 36px; /** height of compact controls: chips, icon buttons, small pill buttons */
+  --size-touch: 44px; /** smallest size of anything tappable (Apple's minimum tap target) */
   --font-family-body: Urbanist, system-ui, sans-serif;
   --font-family-mono: 'Space Mono', ui-monospace, monospace;
   --font-size-11: 11px;

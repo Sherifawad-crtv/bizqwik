@@ -32,7 +32,7 @@
 
 .bq-frontdesk-partners-partner-picker-btn-2 {
   text-align: left;
-  min-height: 44px;
+  min-height: var(--size-touch);
   border: 0;
   background: none;
   cursor: pointer;
