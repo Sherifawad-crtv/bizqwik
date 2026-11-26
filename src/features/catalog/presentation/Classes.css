@@ -1,7 +1,7 @@
 /* Styles for Classes.tsx. Tokens only; see DESIGN_SYSTEM.md. */
 
 .bq-catalog-classes-panel-btn {
-  height: 40px;
+  height: var(--size-control-md);
   padding: 0 var(--space-4);
 }
 

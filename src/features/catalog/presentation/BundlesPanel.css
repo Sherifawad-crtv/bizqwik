@@ -2,6 +2,6 @@
 
 .bq-catalog-bundles-panel-btn {
   margin-left: auto;
-  height: 40px;
+  height: var(--size-control-md);
   padding: 0 var(--space-4);
 }

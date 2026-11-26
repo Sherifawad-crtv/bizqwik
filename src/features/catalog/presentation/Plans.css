@@ -1,7 +1,7 @@
 /* Styles for Plans.tsx. Tokens only; see DESIGN_SYSTEM.md. */
 
 .bq-catalog-plans-section-btn {
-  height: 40px;
+  height: var(--size-control-md);
   padding: 0 var(--space-4);
 }
 

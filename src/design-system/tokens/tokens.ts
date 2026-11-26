@@ -84,6 +84,7 @@ export const tokens = {
   radiusFull: 999,
   sizeColumn: 420,
   sizeControl: 48,
+  sizeControlMd: 40,
   sizeControlSm: 36,
   sizeTouch: 44,
   borderDivider: {"color":"#e3e1da","width":"1px","style":"solid"},
