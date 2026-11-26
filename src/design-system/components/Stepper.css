@@ -8,8 +8,8 @@
 }
 
 .bq-stepper-btn {
-  width: 48px;
-  height: 48px;
+  width: var(--size-control);
+  height: var(--size-control);
   border-radius: var(--radius-full);
   border: var(--border-outline);
   background: var(--color-bg-surface-primary-default);
@@ -27,8 +27,8 @@
 }
 
 .bq-stepper-btn-2 {
-  width: 48px;
-  height: 48px;
+  width: var(--size-control);
+  height: var(--size-control);
   border-radius: var(--radius-full);
   border: 0;
   background: var(--color-bg-fill-accent-default);
