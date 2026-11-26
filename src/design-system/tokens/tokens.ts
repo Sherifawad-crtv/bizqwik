@@ -83,6 +83,8 @@ export const tokens = {
   radiusFloat: 32,
   radiusFull: 999,
   sizeColumn: 420,
+  sizeLogoAuthMin: 34,
+  sizeLogoAuthMax: 42,
   sizeControl: 48,
   sizeControlMd: 40,
   sizeControlSm: 36,
