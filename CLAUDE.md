@@ -34,8 +34,14 @@
   (`supabase/`, GATE checklist) may be applied to production from `main` with a
   co-founder's explicit go-ahead, after the live edge functions are backed up and
   the rollback steps are written down. Apply only the new migration files, never
-  the baseline. Ad-hoc SQL, data edits, seeding or deletes on production stay
-  forbidden, from scripts, the CLI or the Supabase dashboard.
+  the baseline.
+- **Direct SQL on production is allowed only with the owner's permission, asked
+  every time.** This covers ad-hoc SQL, data edits, imports, seeding and deletes,
+  whether run from scripts, the CLI, the Supabase tools or the dashboard. Before
+  running any, say exactly what it will change (tables, row counts, amounts) and
+  what the undo is, then wait for an explicit yes for that statement. Approval
+  for one statement does not carry over to the next. Schema changes still go
+  only through migrations as described above.
 - Never change edge functions, Supabase/Vercel settings, secrets, or anything that
   sends to or charges real people without the owner's explicit confirmation.
 - Test saves on the dev preview only in the Demo Fitness Club org.
