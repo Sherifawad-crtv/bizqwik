@@ -11,7 +11,7 @@
 
 .bq-sheet-size {
   width: 100%;
-  max-width: 420px;
+  max-width: var(--size-column);
 }
 
 .bq-sheet-meta {

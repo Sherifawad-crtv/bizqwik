@@ -59,7 +59,7 @@
 .bq-qr-scanner-size {
   position: relative;
   width: 100%;
-  max-width: 420px;
+  max-width: var(--size-column);
 }
 
 .bq-qr-scanner-box {

@@ -194,7 +194,7 @@ function AddClassPills({ floating, hidden, onOne, onRecurring }: { floating: boo
         background: "var(--color-bg-surface-primary-default)",
         border: "1px solid var(--color-border-primary-default)",
         boxShadow: floating ? "var(--shadow-lifted)" : "none",
-        ...(floating ? { width: "min(100% - 32px, 420px)", pointerEvents: "auto" as const } : { marginBottom: 14 }),
+        ...(floating ? { width: "min(100% - 32px, var(--size-column))", pointerEvents: "auto" as const } : { marginBottom: 14 }),
       }}
     >
       <button className="bq-scale" onClick={onOne} style={{ ...pill, background: "var(--color-bg-fill-accent-default)", color: "var(--color-bg-fill-primary-active)" }}>One Class</button>

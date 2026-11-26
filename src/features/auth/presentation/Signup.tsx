@@ -36,7 +36,7 @@ export function Signup() {
   };
 
   const card = (
-    <div className="bq-card" style={{ width: isMobile ? "min(420px, 100%)" : "min(580px, 100%)", padding: isMobile ? 30 : 48 }}>
+    <div className="bq-card" style={{ width: isMobile ? "min(var(--size-column), 100%)" : "min(580px, 100%)", padding: isMobile ? 30 : 48 }}>
         <div className="bq-stat-lg">Create account</div>
         <div className="bq-auth-signup-meta">
           USE THE EMAIL YOU WERE INVITED WITH
