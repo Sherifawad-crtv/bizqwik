@@ -46,7 +46,7 @@
 }
 
 .bq-frontdesk-drop-in-btn {
-  height: 36px;
+  height: var(--size-control-sm);
   padding: 0 var(--space-3);
 }
 

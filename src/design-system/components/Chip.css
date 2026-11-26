@@ -1,7 +1,7 @@
 /* Chip: a selectable filter or choice. */
 .bq-chip {
   flex: none;
-  height: 36px;
+  height: var(--size-control-sm);
   padding: 0 var(--space-3);
   border-radius: var(--radius-full);
   border: var(--border-outline);

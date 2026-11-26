@@ -1,7 +1,7 @@
 /* IconButton: a round button with only an icon (edit, delete, remove). */
 .bq-iconbtn {
-  width: 36px;
-  height: 36px;
+  width: var(--size-control-sm);
+  height: var(--size-control-sm);
   flex: none;
   border: 0;
   border-radius: var(--radius-full);
