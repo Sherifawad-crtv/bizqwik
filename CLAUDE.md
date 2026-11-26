@@ -28,8 +28,15 @@
   never from a feature branch.
 - Front-end work goes to the `dev` branch first, never straight to `main`. The
   owner checks the dev preview and says "ship it" before `dev` is merged to `main`.
-- Dev and production share **one database and backend**. Never change the
-  database, edge functions, Supabase/Vercel settings, secrets, or anything that
+- Dev and production share **one database and backend**: local and dev work is
+  linked to **production**. **Production database changes go only through
+  migrations**: a migration file merged to `main` and tested on the local stack
+  (`supabase/`, GATE checklist) may be applied to production from `main` with a
+  co-founder's explicit go-ahead, after the live edge functions are backed up and
+  the rollback steps are written down. Apply only the new migration files, never
+  the baseline. Ad-hoc SQL, data edits, seeding or deletes on production stay
+  forbidden, from scripts, the CLI or the Supabase dashboard.
+- Never change edge functions, Supabase/Vercel settings, secrets, or anything that
   sends to or charges real people without the owner's explicit confirmation.
 - Test saves on the dev preview only in the Demo Fitness Club org.
 - Tests: `npm run test:e2e` (Playwright, mocked backend). `e2e/visual.spec.ts`
