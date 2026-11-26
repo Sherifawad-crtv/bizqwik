@@ -1,0 +1,12 @@
+# Supabase
+.branches
+.temp
+
+# Secrets — never commit
+.env
+.env.keys
+.env.local
+.env.*.local
+
+# Local split backups
+*.godbackup

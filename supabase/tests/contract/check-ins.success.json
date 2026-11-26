@@ -1,0 +1,22 @@
+{
+  "_meta": {
+    "method": "POST",
+    "path": "check-ins",
+    "status": 200,
+    "capturedFrom": "edge-source+types",
+    "requestBody": {
+      "clientId": "00000000-0000-4000-8000-000000000020",
+      "source": "manual",
+      "locationId": null
+    },
+    "notes": "Desk staff only. deducted/plan vary by membership; keys must remain."
+  },
+  "checkIn": {
+    "id": "00000000-0000-4000-8000-000000000030",
+    "clientId": "00000000-0000-4000-8000-000000000020",
+    "source": "manual",
+    "checkedInAt": "2026-11-17T12:00:00.000Z"
+  },
+  "deducted": false,
+  "plan": null
+}

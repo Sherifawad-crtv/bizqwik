@@ -1,0 +1,26 @@
+{
+  "_meta": {
+    "method": "GET",
+    "path": "me",
+    "status": 200,
+    "capturedFrom": "edge-source+types",
+    "notes": "Staff example. PII redacted. client may be null for staff; bizqwikTeam null for org staff."
+  },
+  "profile": {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "email": "desk@example.test",
+    "name": "Redacted Desk",
+    "role": "front_desk",
+    "tierId": null,
+    "avatarUrl": null
+  },
+  "orgMode": "team",
+  "org": {
+    "id": "00000000-0000-4000-8000-000000000010",
+    "name": "Example Gym",
+    "slug": "example-gym"
+  },
+  "tier": null,
+  "bizqwikTeam": null,
+  "client": null
+}

@@ -29,6 +29,30 @@ npm install
 npm run dev
 ```
 
+To point the Vite app at a **local** Supabase stack (Phase 1+ of the backend plan), create
+`.env.local` (gitignored via `*.local`):
+
+```bash
+VITE_SUPABASE_URL=http://127.0.0.1:54321
+VITE_SUPABASE_ANON_KEY=<anon key from `supabase status`>
+```
+
+Restart `npm run dev` after changing env. Without these vars, the app falls back to the
+cloud project baked into `src/lib/supabaseClient.ts`.
+
+### API contract + smoke (Phase 0)
+
+Frozen Edge route/JSON fixtures live under `supabase/tests/contract/`. Validate them:
+
+```bash
+./supabase/tests/smoke/smoke.sh
+```
+
+After local Edge is up: `./supabase/tests/smoke/smoke.sh --live` (see `supabase/tests/smoke/README.md`).
+
+Backend architecture / local-first plan: `docs/architecture/backend.md` and
+`docs/architecture/backend-phase-0-1.md`.
+
 ## Backend
 
 All data access goes through `src/lib/backend.ts`, which targets the Supabase project

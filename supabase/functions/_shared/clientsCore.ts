@@ -4,6 +4,8 @@
 // instead of 2–3 queries per client. Output is identical to the original
 // /clients endpoint in make-server-980e1cbf.
 
+import { toClient, toGroupPlan, toMembershipInstance, toPackageInstance } from "./mappers.ts";
+
 const PAGE = 1000; // PostgREST returns at most 1000 rows per request
 
 // Reads every row of a query, a page at a time, so nothing is silently cut off.
@@ -18,58 +20,6 @@ async function fetchAll(build: () => any): Promise<any[]> {
 }
 
 const todayIso = () => new Date().toISOString().slice(0, 10);
-
-function toPackageInstance(row: any) {
-  return {
-    id: row.id,
-    clientId: row.client_id,
-    bundleTypeId: row.bundle_type_id,
-    coachId: row.coach_id,
-    purchaseDate: String(row.purchased_at).slice(0, 10),
-    expiryDate: String(row.expires_at).slice(0, 10),
-    sessionsIncluded: row.sessions_included,
-    sessionsRemaining: row.sessions_remaining,
-    priceAtSale: Number(row.price_at_sale),
-    coachCutAtSale: Number(row.coach_cut_at_sale),
-    status: row.status,
-    createdBy: row.created_by,
-    locationId: row.location_id ?? null,
-  };
-}
-function toMembershipInstance(row: any) {
-  return {
-    id: row.id,
-    clientId: row.client_id,
-    membershipTypeId: row.membership_type_id,
-    startDate: String(row.starts_at).slice(0, 10),
-    expiryDate: String(row.expires_at).slice(0, 10),
-    status: row.status,
-    invitationsRemaining: row.invitations_remaining,
-  };
-}
-function toGroupPlan(row: any) {
-  return {
-    id: row.id, clientId: row.client_id, kind: row.kind, planTypeId: row.plan_type_id ?? null, seriesId: row.series_id ?? null,
-    name: row.name, priceAtSale: Number(row.price_at_sale), payMethod: row.pay_method,
-    creditsTotal: row.credits_total ?? null, creditsRemaining: row.credits_remaining ?? null,
-    invitationsRemaining: row.invitations_remaining, startsAt: row.starts_at, expiresAt: row.expires_at,
-    status: row.status, createdAt: row.created_at, locationId: row.location_id ?? null,
-  };
-}
-function toClient(row: any, conditions: string | null, currentPackage: any, currentMembership: any = null) {
-  return {
-    id: row.id,
-    name: row.name,
-    age: row.age,
-    phone: row.phone ?? null,
-    email: row.email ?? null,
-    conditions,
-    assignedCoachId: row.assigned_coach_id,
-    currentPackage,
-    currentMembership,
-    homeLocationId: row.home_location_id ?? null,
-  };
-}
 
 // Same lazy expiry as the main backend: an active package/membership past its
 // end date is flipped to expired the moment it's read, and that sticks.

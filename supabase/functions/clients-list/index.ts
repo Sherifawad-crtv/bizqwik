@@ -1,28 +1,13 @@
 import { Hono } from "npm:hono";
 import { cors } from "npm:hono/cors";
-import { createClient } from "npm:@supabase/supabase-js@2";
+import { adminClient } from "../_shared/db.ts";
+import { requireUser } from "../_shared/auth.ts";
 import { loadClients } from "../_shared/clientsCore.ts";
 
 // The staff client list, batched (see _shared/clientsCore.ts). Same access
 // rules and the same response as GET /clients on make-server-980e1cbf.
-const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {
-  auth: { autoRefreshToken: false, persistSession: false },
-});
+const admin = adminClient;
 const P = "/clients-list";
-
-async function requireUser(c: any): Promise<{ id: string } | null> {
-  const token = (c.req.header("Authorization") || "").replace("Bearer ", "");
-  if (!token) return null;
-  try {
-    const { data, error } = await admin.auth.getClaims(token);
-    if (!error && data?.claims) {
-      const { sub, role } = data.claims as { sub?: string; role?: string };
-      return sub && role === "authenticated" ? { id: sub } : null;
-    }
-  } catch { /* fall through */ }
-  const { data, error } = await admin.auth.getUser(token);
-  return error || !data?.user ? null : { id: data.user.id };
-}
 
 const app = new Hono();
 app.use("*", cors({ origin: "*", allowHeaders: ["authorization", "x-client-info", "apikey", "content-type"], allowMethods: ["GET", "OPTIONS"] }));

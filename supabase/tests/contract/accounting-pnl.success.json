@@ -1,0 +1,93 @@
+{
+  "_meta": {
+    "method": "GET",
+    "path": "accounting/pnl",
+    "status": 200,
+    "capturedFrom": "edge-source+types",
+    "query": { "month": "2026-11" },
+    "notes": "Matches PnlReport in src/lib/types.ts. trend is 6 months ending at month."
+  },
+  "month": "2026-11",
+  "current": {
+    "month": "2026-11",
+    "grossRevenue": 10000,
+    "refunds": 200,
+    "netRevenue": 9800,
+    "coachPayouts": 3000,
+    "otherExpenses": 500,
+    "totalExpenses": 3500,
+    "profit": 6300
+  },
+  "trend": [
+    {
+      "month": "2026-06",
+      "grossRevenue": 0,
+      "refunds": 0,
+      "netRevenue": 0,
+      "coachPayouts": 0,
+      "otherExpenses": 0,
+      "totalExpenses": 0,
+      "profit": 0
+    },
+    {
+      "month": "2026-07",
+      "grossRevenue": 0,
+      "refunds": 0,
+      "netRevenue": 0,
+      "coachPayouts": 0,
+      "otherExpenses": 0,
+      "totalExpenses": 0,
+      "profit": 0
+    },
+    {
+      "month": "2026-08",
+      "grossRevenue": 0,
+      "refunds": 0,
+      "netRevenue": 0,
+      "coachPayouts": 0,
+      "otherExpenses": 0,
+      "totalExpenses": 0,
+      "profit": 0
+    },
+    {
+      "month": "2026-09",
+      "grossRevenue": 0,
+      "refunds": 0,
+      "netRevenue": 0,
+      "coachPayouts": 0,
+      "otherExpenses": 0,
+      "totalExpenses": 0,
+      "profit": 0
+    },
+    {
+      "month": "2026-10",
+      "grossRevenue": 0,
+      "refunds": 0,
+      "netRevenue": 0,
+      "coachPayouts": 0,
+      "otherExpenses": 0,
+      "totalExpenses": 0,
+      "profit": 0
+    },
+    {
+      "month": "2026-11",
+      "grossRevenue": 10000,
+      "refunds": 200,
+      "netRevenue": 9800,
+      "coachPayouts": 3000,
+      "otherExpenses": 500,
+      "totalExpenses": 3500,
+      "profit": 6300
+    }
+  ],
+  "revenueBySource": [
+    { "key": "group", "label": "Group training", "amount": 7000 },
+    { "key": "private", "label": "Private training", "amount": 3000 }
+  ],
+  "expensesBySource": [
+    { "key": "coach_payouts", "label": "Coach payouts", "amount": 3000, "paid": 1500 },
+    { "key": "00000000-0000-4000-8000-000000000080", "label": "Rent", "amount": 500 }
+  ],
+  "hasPastExpenses": true,
+  "unsettledNote": null
+}
