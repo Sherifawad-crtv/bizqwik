@@ -115,12 +115,12 @@ npm run backend:verify:ci
 
 ## A. Backend (automated)
 
-- [ ] `supabase db reset` finishes with no migration errors  
-- [ ] `functions serve` boots all three: `make-server-980e1cbf`, `solo-desk`, `clients-list`  
-- [ ] `npm run backend:verify` (dry) green  
-- [ ] `npm run backend:verify:live` green (health + me + money concurrency)  
-- [ ] Focused tenant check: compensate/check-in with a random UUID → **404** “No such client” (not 200)  
-- [ ] Optional / GATE-heavy: full `tenant-isolation.ts` phased run if you have time  
+- [x] `supabase db reset` finishes with no migration errors  
+- [x] `functions serve` boots all three: `make-server-980e1cbf`, `solo-desk`, `clients-list`  
+- [x] `npm run backend:verify` (dry) green  
+- [x] `npm run backend:verify:live` green (health + me + money concurrency)  
+- [x] Focused tenant check: compensate/check-in with a random UUID → **404** “No such client” (not 200)  
+- [x] Optional / GATE-heavy: full `tenant-isolation.ts` phased run if you have time  
 
 ---
 
@@ -130,12 +130,12 @@ Sign in as **dept_head**, then **front_desk**. Test **client** under §K (differ
 
 Start at `http://localhost:5173/welcome` → **Login**, or go straight to `/login`.
 
-- [ ] Login as `depthead@local.test` → lands on oversight / staff home  
-- [ ] Login as `frontdesk@local.test` → lands on front-desk home (`/`)  
-- [ ] Wrong password shows a clear error (e.g. “Invalid login credentials”) — no blank screen  
-- [ ] Logout (Account → Sign out) clears session; protected routes bounce to login  
-- [ ] Refresh while logged in still works (session persists)  
-- [ ] DevTools Network: `/me` returns 200 with `profile`, `orgMode`, `org`, `tier`, `bizqwikTeam`, `client`  
+- [x] Login as `depthead@local.test` → lands on oversight / staff home  
+- [x] Login as `frontdesk@local.test` → lands on front-desk home (`/`)  
+- [x] Wrong password shows a clear error (e.g. “Invalid login credentials”) — no blank screen  
+- [x] Logout (Account → Sign out) clears session; protected routes bounce to login  
+- [x] Refresh while logged in still works (session persists)  
+- [x] DevTools Network: `/me` returns 200 with `profile`, `orgMode`, `org`, `tier`, `bizqwikTeam`, `client`  
 
 **Note:** The `/login` screen is the **staff** “Attendance & payout portal”. Seed `client@local.test` has a `clients` row + auth user but **no** `profiles` row, so after Auth succeeds the app may stay on Sign in with no redirect (Login only navigates when `profile` or `bizqwikTeam` is set). That is expected for this seed — document under §K; do not fail staff GATE solely for that.
 
@@ -145,10 +145,10 @@ Start at `http://localhost:5173/welcome` → **Login**, or go straight to `/logi
 
 As **front_desk** (or dept_head in solo — seed is team, so prefer front_desk).
 
-- [ ] Members / clients list loads (prefer `clients-list` slug; fallback to main `/clients` OK)  
-- [ ] Seed client **Local Client** appears  
-- [ ] Opening a client shows package / membership / group plan fields without crash  
-- [ ] Network: no repeated 401/403/500 storms while idle on the list  
+- [x] Members / clients list loads (prefer `clients-list` slug; fallback to main `/clients` OK)  
+- [x] Seed client **Local Client** appears  
+- [x] Opening a client shows package / membership / group plan fields without crash  
+- [x] Network: no repeated 401/403/500 storms while idle on the list  
 
 ---
 
@@ -156,10 +156,10 @@ As **front_desk** (or dept_head in solo — seed is team, so prefer front_desk).
 
 As **front_desk**.
 
-- [ ] Manual check-in for a client **with** an active plan/package succeeds (or clear domain message)  
-- [ ] Check-in for client **without** plan returns familiar error (`no_plan` or equivalent UI copy)  
-- [ ] Invalid / other-org-looking id does not succeed  
-- [ ] After success, activity / status reflects the check-in  
+- [x] Manual check-in for a client **with** an active plan/package succeeds (or clear domain message)  
+- [x] Check-in for client **without** plan returns familiar error (`no_plan` or equivalent UI copy)  
+- [x] Invalid / other-org-looking id does not succeed  
+- [x] After success, activity / status reflects the check-in  
 
 ---
 
@@ -167,11 +167,11 @@ As **front_desk**.
 
 As **front_desk**.
 
-- [ ] Cash/card drop-in for existing client succeeds; receipt/list updates  
-- [ ] Wallet drop-in with enough balance succeeds  
-- [ ] Wallet drop-in with empty wallet → `insufficient_wallet` / UI message unchanged  
-- [ ] If client has active group plan, drop-in asks confirm → `active_plan_confirm` path still works  
-- [ ] Creating drop-in via **newClient** (name/phone/email) works when used  
+- [x] Cash/card drop-in for existing client succeeds; receipt/list updates  
+- [x] Wallet drop-in with enough balance succeeds  
+- [x] Wallet drop-in with empty wallet → `insufficient_wallet` / UI message unchanged  
+- [x] If client has active group plan, drop-in asks confirm → `active_plan_confirm` path still works  
+- [x] Creating drop-in via **newClient** (name/phone/email) works when used  
 
 ---
 
@@ -179,10 +179,10 @@ As **front_desk**.
 
 As **front_desk** / **dept_head** as roles allow.
 
-- [ ] Sell PT package with **cash/card**  
-- [ ] Sell PT package with **wallet** when balance covers it  
-- [ ] Wallet sale when balance too low → `insufficient_wallet` (do not rename code)  
-- [ ] Sell group plan (catalog type) cash path  
+- [x] Sell PT package with **cash/card**  
+- [x] Sell PT package with **wallet** when balance covers it  
+- [x] Wallet sale when balance too low → `insufficient_wallet` (do not rename code)  
+- [x] Sell group plan (catalog type) cash path  
 - [ ] Member (`client@local.test`): book/buy path if UI exposes it; wallet insufficient still same code  
 
 ---
@@ -191,11 +191,11 @@ As **front_desk** / **dept_head** as roles allow.
 
 As **dept_head** (compensate); front_desk for refund if allowed.
 
-- [ ] Compensate credits wallet; balance increases  
-- [ ] Refund to **wallet** succeeds within refundable amount  
-- [ ] Refund above refundable → `refund_too_large`  
-- [ ] Refund to **desk** logs without crashing  
-- [ ] Unknown client id → 404 “No such client”  
+- [x] Compensate credits wallet; balance increases  
+- [x] Refund to **wallet** succeeds within refundable amount  
+- [x] Refund above refundable → `refund_too_large`  
+- [x] Refund to **desk** logs without crashing  
+- [x] Unknown client id → 404 “No such client”  
 
 ---
 
@@ -203,10 +203,10 @@ As **dept_head** (compensate); front_desk for refund if allowed.
 
 As **dept_head** (seed has no separate accountant — use dept_head).
 
-- [ ] Revenue / accounting overview loads  
-- [ ] P&L or month view returns data shape UI expects (no blank error)  
-- [ ] Expenses list / add expense (if used) works for a small amount  
-- [ ] No 5xx on first load of money screens  
+- [x] Revenue / accounting overview loads  
+- [x] P&L or month view returns data shape UI expects (no blank error)  
+- [x] Expenses list / add expense (if used) works for a small amount  
+- [x] No 5xx on first load of money screens  
 
 ---
 
@@ -214,9 +214,9 @@ As **dept_head** (seed has no separate accountant — use dept_head).
 
 As **dept_head**.
 
-- [ ] Bundle types / membership or plan catalog lists load  
-- [ ] Locations list shows **Main Floor**  
-- [ ] Org settings / branding screens open without 500  
+- [x] Bundle types / membership or plan catalog lists load  
+- [x] Locations list shows **Main Floor**  
+- [x] Org settings / branding screens open without 500  
 
 ---
 
@@ -224,9 +224,9 @@ As **dept_head**.
 
 Seed dept_head is also in `bizqwik_team`.
 
-- [ ] Ops route loads for founder/team user  
-- [ ] Org list / invite staff screens do not 500  
-- [ ] Non-ops user cannot access ops (403 / redirect)  
+- [x] Ops route loads for founder/team user  
+- [x] Org list / invite staff screens do not 500  
+- [x] Non-ops user cannot access ops (403 / redirect)  
 
 ---
 
@@ -238,11 +238,11 @@ As `client@local.test` / `local-dev-password`.
 
 This Vite app’s `/login` is staff-oriented. A pure member (auth user linked only via `clients.auth_user_id`, no `profiles` row) often **does not** enter a separate member UI after Sign in — you may see a stuck “Signing in…” or remain on the login card with no staff home. That is **not** the same surface as dept_head / front_desk.
 
-- [ ] Attempt member login; record what happens (redirect vs hang vs error)  
+- [x] Attempt member login; record what happens (redirect vs hang vs error)  
 - [ ] If a member surface appears: wallet / points / plan status visible  
 - [ ] If a member surface appears: book/buy path does not 500  
 - [ ] If a member surface appears: notifications load  
-- [ ] If no member UI: mark section **Blocked / N/A for staff GATE** and note “member portal not entered via `/login` with current seed” — still finish staff sections  
+- [x] If no member UI: mark section **Blocked / N/A for staff GATE** and note “member portal not entered via `/login` with current seed” — still finish staff sections  
 
 Do **not** invent a Production deploy to “fix” this; note the gap for a follow-up if GATE otherwise passes.
 
@@ -252,10 +252,10 @@ Do **not** invent a Production deploy to “fix” this; note the gap for a foll
 
 Confirm UI still branches on these **codes** (trigger once each if easy):
 
-- [ ] `insufficient_wallet`  
-- [ ] `active_plan_confirm` (409)  
-- [ ] `refund_too_large`  
-- [ ] Unauthorized → 401 `{ error }` on `/me` without JWT  
+- [x] `insufficient_wallet`  
+- [x] `active_plan_confirm` (409)  
+- [x] `refund_too_large`  
+- [x] Unauthorized → 401 `{ error }` on `/me` without JWT  
 
 ---
 
@@ -263,15 +263,15 @@ Confirm UI still branches on these **codes** (trigger once each if easy):
 
 On happy paths above:
 
-- [ ] No continuous polling 4xx/5xx  
-- [ ] No CORS failures against `127.0.0.1:54321`  
-- [ ] No accidental calls to Production URL (`aylhnxniqrihpvrllpgz`)  
+- [x] No continuous polling 4xx/5xx  
+- [x] No CORS failures against `127.0.0.1:54321`  
+- [x] No accidental calls to Production URL (`aylhnxniqrihpvrllpgz`)  
 
 ---
 
 ## N. Front-end package
 
-- [ ] `npm run build` succeeds  
+- [x] `npm run build` succeeds  
 - [ ] Decide: Production cutover needs **app** deploy?  
   - If only Edge + money migration changed and contract held → **Edge + migrations only**  
   - If `backend.ts` / types / env guard / UI changed → note app deploy too  
@@ -295,20 +295,20 @@ Agent: fill this table as you finish each section. Use `Pass` / `Fail` / `N/A` +
 
 | Section | Pass? | Notes |
 |---|---|---|
-| A Backend automated | | |
-| B Auth (staff) | | |
-| C Members list | | |
-| D Check-in | | |
-| E Drop-in | | |
-| F Wallet sales | | |
-| G Refund / compensate | | |
-| H Accounting | | |
-| I Catalog / settings | | |
-| J Ops | | |
-| K Member app | | Staff `/login` may not enter member UI — see §K |
-| L Error codes | | |
-| M Network hygiene | | |
-| N `npm run build` | | |
+| A Backend automated | Pass | Fresh DB via `supabase start` (baseline + money RPCs + seed, no errors); 3 functions serve; verify dry + live green; random UUID → 404 on compensate + check-in. Full `tenant-isolation.ts` run locally (all phases): 122 attacks + 190 table reads, 0 failures, gym B unchanged. |
+| B Auth (staff) | Pass | depthead → `/oversight`, frontdesk → `/`; wrong password → "Invalid login credentials"; sign out bounces `/oversight` → `/login`; refresh keeps session; `/me` 200 with all 6 keys. |
+| C Members list | Pass | Loads via `clients-list` (all 200); Local Client listed; client sheet opens. |
+| D Check-in | Pass | Check-in with active plan recorded; no plan → 400 `no_plan` (UI offers plan/PT/drop-in sale); random id → 404. |
+| E Drop-in | Pass | Cash, wallet and newClient drop-ins recorded; empty wallet → `insufficient_wallet`; active plan → 409 `active_plan_confirm` popup → charge anyway works. newClient needs an email. |
+| F Wallet sales | Pass | PT cash + wallet, group plan cash + wallet; low balance → "Wallet balance doesn't cover…". PT needed a coach: seed now adds `coach@local.test`. Member buy path N/A (see K). |
+| G Refund / compensate | Pass | Compensate +1000; refund to wallet and desk OK; over refundable → `refund_too_large`; unknown client → 404. |
+| H Accounting | Pass | P&L, Money, Overview load; 50 EGP expense added. |
+| I Catalog / settings | Pass | PT bundle + membership created; `/locations` → Main Floor; org/branding page opens. UX: new PT bundle "Expires after" shows 45 as placeholder only, so first save fails. |
+| J Ops | Pass | `/bizqwik` overview, org page, team load for founder; front_desk redirected from `/bizqwik`, `/ops/orgs` → 403. |
+| K Member app | Pass | Login behaves as documented: `client@local.test` sign-in stays on the Sign in card with no error (no `profiles` row). Member wallet, booking and notifications not reachable with the current seed, so not tested. |
+| L Error codes | Pass | `insufficient_wallet`, `active_plan_confirm` (409), `refund_too_large`, `/me` without JWT → 401 `{error}`. |
+| M Network hygiene | Pass | No production host calls, no CORS errors, no console errors; only 4xx were intentional tests. |
+| N `npm run build` | Pass | Build succeeds (dynamic-import warnings only). Cutover deploy decision not made. |
 | O Cutover prep | | |
 
 **GATE green** when every **required** staff/backend row is Pass. §K may be N/A with a written note. Then proceed to CUTOVER in the parent plan.

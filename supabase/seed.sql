@@ -7,12 +7,14 @@ create extension if not exists pgcrypto with schema extensions;
 -- dept_head / founder
 -- front_desk
 -- client auth user
+-- coach (so PT packages can be sold locally)
 
 do $$
 declare
   v_head uuid := '11111111-1111-1111-1111-111111111111';
   v_desk uuid := '22222222-2222-2222-2222-222222222222';
   v_client_user uuid := '33333333-3333-3333-3333-333333333333';
+  v_coach uuid := '44444444-4444-4444-4444-444444444444';
   v_org uuid := 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
   v_client uuid := 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
   v_loc uuid := 'cccccccc-cccc-cccc-cccc-cccccccccccc';
@@ -35,6 +37,10 @@ begin
     ('00000000-0000-0000-0000-000000000000', v_client_user, 'authenticated', 'authenticated',
      'client@local.test', v_pw, now(),
      '{"provider":"email","providers":["email"]}'::jsonb, '{}'::jsonb, now(), now(),
+     '', '', '', ''),
+    ('00000000-0000-0000-0000-000000000000', v_coach, 'authenticated', 'authenticated',
+     'coach@local.test', v_pw, now(),
+     '{"provider":"email","providers":["email"]}'::jsonb, '{}'::jsonb, now(), now(),
      '', '', '', '')
   on conflict (id) do nothing;
 
@@ -49,7 +55,10 @@ begin
      'email', v_desk::text, now(), now(), now()),
     (v_client_user, v_client_user,
      jsonb_build_object('sub', v_client_user::text, 'email', 'client@local.test'),
-     'email', v_client_user::text, now(), now(), now())
+     'email', v_client_user::text, now(), now(), now()),
+    (v_coach, v_coach,
+     jsonb_build_object('sub', v_coach::text, 'email', 'coach@local.test'),
+     'email', v_coach::text, now(), now(), now())
   on conflict do nothing;
 
   insert into public.bizqwik_team (id, name, email, role)
@@ -65,7 +74,8 @@ begin
 
   insert into public.profiles (id, org_id, role, name, email) values
     (v_head, v_org, 'dept_head', 'Local Dept Head', 'depthead@local.test'),
-    (v_desk, v_org, 'front_desk', 'Local Front Desk', 'frontdesk@local.test')
+    (v_desk, v_org, 'front_desk', 'Local Front Desk', 'frontdesk@local.test'),
+    (v_coach, v_org, 'coach', 'Local Coach', 'coach@local.test')
   on conflict (id) do nothing;
 
   insert into public.locations (id, org_id, name, sort)
