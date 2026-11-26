@@ -158,6 +158,8 @@ One-command `scripts/backend-verify.sh` (dry / live / ci); npm scripts; optional
 
 ## GATE — Full local acceptance (required before cutover)
 
+**Detailed walkthrough checklist:** [backend-gate-checklist.md](./backend-gate-checklist.md) (per-section UI + automated tests).
+
 Run this only when Phases 0–6 are complete. **Do not cut over if any box fails.**
 
 ### Backend
